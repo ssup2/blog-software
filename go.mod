@@ -1,4 +1,4 @@
-module ssup2/ssup2.github.io
+module ssup2/docs-software
 
 go 1.21.1
 
