@@ -44,7 +44,7 @@ params:
       index: content
 
   editURL:
-    base: "https://github.com/ssup2/docs-software/edit/main"
+    base: https://github.com/ssup2/docs-software/edit/main
 
   comments:
     enable: true
@@ -67,7 +67,7 @@ menu:
       type: search
   - name: GitHub
     weight: 3
-    url: "https://github.com/ssup2/docs-software"
+    url: https://github.com/ssup2/docs-software
     params:
       icon: github
 
