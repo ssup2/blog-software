@@ -74,7 +74,7 @@ params:
 
     giscus:
       repo: ssup2/docs-software
-      repoId: R_kgDOK
+      repoId: R_kgDOK-OhAA
       category: General
       categoryId: DIC_kwDOK-OhAM4CcDhM
       mapping: pathname
