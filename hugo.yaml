@@ -51,6 +51,17 @@ params:
     # full (100%), wide (90rem), normal (1280px)
     width: full
 
+  navbar:
+    displayTitle: true
+    displayLogo: true
+    logo:
+      path: images/logo.svg
+      dark: images/logo-dark.svg
+      # width: 40
+      # height: 20
+      # link: /
+    width: full
+
   search:
     enable: true
     type: flexsearch
@@ -66,7 +77,7 @@ params:
     enable: true
     displayCopyright: true
     displayPoweredBy: true
-    width: normal
+    width: full
 
   comments:
     enable: true
