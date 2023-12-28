@@ -43,6 +43,16 @@ params:
       # index page by: content | summary | heading | title
       index: content
 
+  comments:
+    enable: true
+    type: giscus
+
+    giscus:
+      repo: ssup2/docs-software
+      repoId: R_kgDOK
+      category: General
+      categoryId: DIC_kwDOK-OhAM4CcDhM
+
 menu:
   main:
   - name: Docs
