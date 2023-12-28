@@ -64,7 +64,7 @@ menu:
       type: search
   - name: GitHub
     weight: 3
-    url: "https://github.com/imfing/hextra"
+    url: "https://github.com/ssup2/docs-software"
     params:
       icon: github
 
