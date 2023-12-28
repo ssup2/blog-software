@@ -8,7 +8,7 @@ process별 Resource 사용량을 출력하는 pidstat의 사용법을 정리한�
 
 ### 1.1. pidstat (-u)
 
-{% highlight console %}
+```shell
 # pidstat
 Linux 4.15.0-60-generic (node09)        10/02/19        _x86_64_        (2 CPU)
 
@@ -20,7 +20,7 @@ Linux 4.15.0-60-generic (node09)        10/02/19        _x86_64_        (2 CPU)
 15:23:24        0        10    0.00    0.00    0.00    0.00    0.00     0  migration/0
 15:23:24        0        11    0.00    0.00    0.00    0.00    0.00     0  watchdog/0
 15:23:24        0        14    0.00    0.00    0.00    0.00    0.00     1  watchdog/1
-{% endhighlight %}
+```
 <figure>
 <figcaption class="caption">[Shell 1] pidstat</figcaption>
 </figure>
@@ -36,7 +36,7 @@ Process별 CPU 사용량을 출력한다. [Shell 1]은 "pidstat"을 이용하여
 
 ### 1.2. pidstat -t
 
-{% highlight console %}
+```shell
 # pidstat -t
 Linux 4.15.0-60-generic (node09)        10/02/19        _x86_64_        (2 CPU)
 
@@ -54,7 +54,7 @@ Linux 4.15.0-60-generic (node09)        10/02/19        _x86_64_        (2 CPU)
 15:12:35        0         -      3381    0.00    0.00    0.00    0.00    0.00     0  |__containerd-shim
 15:12:35        0         -      3431    0.00    0.00    0.00    0.00    0.00     1  |__containerd-shim
 15:12:35        0         -      4355    0.00    0.00    0.00    0.00    0.00     0  |__containerd-shim 
-{% endhighlight %}
+```
 <figure>
 <figcaption class="caption">[Shell 2] pidstat -t</figcaption>
 </figure>
@@ -71,7 +71,7 @@ Interval 간격으로 [PID] Process의 CPU 사용량을 출력한다.
 
 ### 1.5. pidstat -d
 
-{% highlight console %}
+```shell
 # pidstat -d
 Linux 4.15.0-60-generic (node09)        10/02/19        _x86_64_        (2 CPU)
 
@@ -81,7 +81,7 @@ Linux 4.15.0-60-generic (node09)        10/02/19        _x86_64_        (2 CPU)
 15:43:32        0       355      0.00     26.71      0.00 7489695  jbd2/sda2-8
 15:43:32        0       436      0.00      0.00      0.00      28  lvmetad
 15:43:32        0       522      0.07      0.00      0.00     452  loop0
-{% endhighlight %}
+```
 <figure>
 <figcaption class="caption">[Shell 3] pidstat -d</figcaption>
 </figure>
@@ -95,7 +95,7 @@ Process별 Disk I/O 사용량을 출력한다. [Shell 3]은 "pidstat -d"를 이�
 
 ### 1.6. pidstat -r
 
-{% highlight console %}
+```shell
 # pidstat -r
 Linux 4.15.0-60-generic (node09)        10/02/19        _x86_64_        (2 CPU)
 
@@ -105,7 +105,7 @@ Linux 4.15.0-60-generic (node09)        10/02/19        _x86_64_        (2 CPU)
 15:44:13        0       925      0.02      0.00   30028    3268   0.04  cron
 15:44:13        0       934      0.00      0.00   62132    5540   0.07  systemd-logind
 15:44:13        0       960      0.00      0.00  310152    2720   0.03  lxcfs 
-{% endhighlight %}
+```
 <figure>
 <figcaption class="caption">[Shell 4] pidstat -r</figcaption>
 </figure>
@@ -119,7 +119,7 @@ Process별 Memory 사용량을 출력한다. [Shell 4]는 "pidstat -r"을 이용
 
 ### 1.7. pidstat -s
 
-{% highlight console %}
+```shell
 # pidstat -s
 Linux 4.15.0-60-generic (node09)        10/02/19        _x86_64_        (2 CPU)
 
@@ -129,7 +129,7 @@ Linux 4.15.0-60-generic (node09)        10/02/19        _x86_64_        (2 CPU)
 15:45:02        0       925     132      28  cron
 15:45:02        0       934     132      16  systemd-logind
 15:45:02        0       960     132      24  lxcfs 
-{% endhighlight %}
+```
 <figure>
 <figcaption class="caption">[Shell 5] pidstat -s</figcaption>
 </figure>
@@ -141,7 +141,7 @@ Process별 Stack 사용량을 출력한다. [Shell 5]는 "pidstat -s"을 이용�
 
 ### 1.8. pidstat -v
 
-{% highlight console %}
+```shell
 # pidstat -v
 Linux 4.15.0-60-generic (node09)        10/02/19        _x86_64_        (2 CPU)
 
@@ -151,7 +151,7 @@ Linux 4.15.0-60-generic (node09)        10/02/19        _x86_64_        (2 CPU)
 15:45:34        0         4       1       0  kworker/0:0H
 15:45:34        0         6       1       0  mm_percpu_wq
 15:45:34        0         7       1       0  ksoftirqd/0 
-{% endhighlight %}
+```
 <figure>
 <figcaption class="caption">[Shell 6] pidstat -v</figcaption>
 </figure>
@@ -163,7 +163,7 @@ Process별 Thread Count, FD (File Descriptor) Count 정보를 출력한다. [She
 
 ### 1.9. pidstat -w
 
-{% highlight console %}
+```shell
 # pidstat -w
 Linux 4.15.0-60-generic (node09)        10/02/19        _x86_64_        (2 CPU)
 
@@ -173,7 +173,7 @@ Linux 4.15.0-60-generic (node09)        10/02/19        _x86_64_        (2 CPU)
 15:47:23        0         4      0.00      0.00  kworker/0:0H
 15:47:23        0         6      0.00      0.00  mm_percpu_wq
 15:47:23        0         7      5.16      1.68  ksoftirqd/0 
-{% endhighlight %}
+```
 <figure>
 <figcaption class="caption">[Shell 7] pidstat -w</figcaption>
 </figure>
