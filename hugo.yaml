@@ -57,3 +57,7 @@ menu:
     url: "https://github.com/imfing/hextra"
     params:
       icon: github
+
+services:
+  googleAnalytics:
+    ID: G-F0EX552YXB
