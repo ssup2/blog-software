@@ -24,5 +24,5 @@ title: ssup2
 * Kakao ifKakao : [Programming K8s Controller](https://tv.kakao.com/channel/3693125/cliplink/414072325)
 
 ### Open Source
-* [network-node-manager](https://github.com/kakao/network-node-manager)
-* [kpexec](https://github.com/ssup2/kpexec)
+* K8s Controller : [network-node-manager](https://github.com/kakao/network-node-manager)
+* kubectl Plugin : [kpexec](https://github.com/ssup2/kpexec)
