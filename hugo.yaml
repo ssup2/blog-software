@@ -44,7 +44,7 @@ menu:
 params:
   theme:
     # light | dark | system
-    default: light
+    default: dark
     displayToggle: true
 
   page:
