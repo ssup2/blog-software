@@ -20,7 +20,7 @@ Service를 재시작한다.
 
 ### 1.4. systemctl status [Service]
 
-```shell
+```shell {caption="[Shell 1] systemctl status"}
 # systemctl status sshd
 ● ssh.service - OpenBSD Secure Shell server
    Loaded: loaded (/lib/systemd/system/ssh.service; enabled; vendor preset: enabled)
@@ -48,8 +48,5 @@ Aug 16 14:21:33 node09 sshd[23397]: Server listening on 0.0.0.0 port 22.
 Aug 16 14:21:33 node09 sshd[23397]: Server listening on :: port 22.
 Aug 16 14:21:33 node09 systemd[1]: Started OpenBSD Secure Shell server.
 ```
-<figure>
-<figcaption class="caption">[Shell 1] systemctl status</figcaption>
-</figure>
 
 Service의 상태를 출력한다. [Shell 1]은 sshd Service의 상태를 출력하는 모습을 나타내고 있다.

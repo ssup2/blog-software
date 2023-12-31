@@ -8,7 +8,7 @@ Linux Kernel의 다양한 동작들을 출력하고, 성능 측정도 할 수 �
 
 #### 1.1. sysdig
 
-```shell
+```shell {caption="[Shell 1] sysdig"}
 8464 01:23:53.859656137 1 sshd (30637) < read res=2 data=..
 8465 01:23:53.859656937 1 sshd (30637) > getpid
 8466 01:23:53.859657037 1 sshd (30637) < getpid
@@ -31,15 +31,12 @@ Linux Kernel의 다양한 동작들을 출력하고, 성능 측정도 할 수 �
 8483 01:23:53.859664737 1 sshd (30637) > select
 8484 01:23:53.859665937 1 sshd (30637) > switch next=3591(sysdig) pgft_maj=3 pgft_min=452 vm_size=72356 vm_rss=6396 vm_swap=0
 ```
-<figure>
-<figcaption class="caption">[Shell 1] sysdig</figcaption>
-</figure>
 
-sysdig가 감지할 수 있는 Kernel의 모든 동작을 출력한다. [Shell 1]은 "sysdig"를 이용하여 Kernel의 동작을 출력하는 Shell의 모습을 나타내고 있다.
+sysdig가 감지할 수 있는 Kernel의 모든 동작을 출력한다. [Shell 1]은 `sysdig`를 이용하여 Kernel의 동작을 출력하는 Shell의 모습을 나타내고 있다.
 
 ### 1.2. sysdig -c topprocs_cpu
 
-```shell
+```shell {caption="[Shell 2] sysdig -c topprocs_cpu"}
 CPU%                Process             PID
 --------------------------------------------------------------------------------
 5.03%               cadvisor            2521
@@ -48,15 +45,12 @@ CPU%                Process             PID
 0.00%               dbus-daemon         920
 0.00%               grafana-server      2398
 ```
-<figure>
-<figcaption class="caption">[Shell 2] sysdig -c topprocs_cpu</figcaption>
-</figure>
 
-CPU 사용률 높은 Process들을 순서대로 출력한다. [Shell 2]는 "sysdig -c topprocs_cpu"를 이용하여 CPU 사용률이 높은 Process들을 출력하는 Shell의 모습을 나타내고 있다.
+CPU 사용률 높은 Process들을 순서대로 출력한다. [Shell 2]는 `sysdig -c topprocs_cpu`를 이용하여 CPU 사용률이 높은 Process들을 출력하는 Shell의 모습을 나타내고 있다.
 
 ### 1.3. sysdig -c topprocs_net
 
-```shell
+```shell {caption="[Shell 3] sysdig -c topprocs_net"}
 Bytes               Process             PID
 --------------------------------------------------------------------------------
 1.70KB              openstack-expor     3228
@@ -65,15 +59,12 @@ Bytes               Process             PID
 212B                dbus-daemon         920
 124%                grafana-server      2398                       
 ```
-<figure>
-<figcaption class="caption">[Shell 3] sysdig -c topprocs_net</figcaption>
-</figure>
 
-Network Bandwidth 사용률 높은 Process들을 순서대로 출력한다. [Shell 3]는 "sysdig -c topprocs_net"를 이용하여 Network Bandwidth 사용률이 높은 Process들을 출력하는 Shell의 모습을 나타내고 있다.
+Network Bandwidth 사용률 높은 Process들을 순서대로 출력한다. [Shell 3]는 `sysdig -c topprocs_net`를 이용하여 Network Bandwidth 사용률이 높은 Process들을 출력하는 Shell의 모습을 나타내고 있다.
 
 ### 1.4. sysdig -c topprocs_file
 
-```shell
+```shell {caption="[Shell 4] sysdig -c topprocs_file"}
 Bytes               Process             PID
 --------------------------------------------------------------------------------
 38.40M              prometheus          2574
@@ -81,15 +72,12 @@ Bytes               Process             PID
 292B                sshd                2135
 254B                chronyd             2540
 ```
-<figure>
-<figcaption class="caption">[Shell 4] sysdig -c topprocs_file</figcaption>
-</figure>
 
-Disk Bandwidth 사용률 높은 Process들을 순서대로 출력한다. [Shell 4]는 "sysdig -c topprocs_net"를 이용하여 Disk Bandwidth 사용률이 높은 Process들을 출력하는 Shell의 모습을 나타내고 있다.
+Disk Bandwidth 사용률 높은 Process들을 순서대로 출력한다. [Shell 4]는 `sysdig -c topprocs_net`를 이용하여 Disk Bandwidth 사용률이 높은 Process들을 출력하는 Shell의 모습을 나타내고 있다.
 
 ### 1.5. sysdig -c topfiles_bytes
 
-```shell
+```shell {caption="[Shell 5] sysdig -c topprocs_bytes"}
 Bytes               Filename
 --------------------------------------------------------------------------------
 1.12KB              /proc/stat
@@ -102,11 +90,8 @@ Bytes               Filename
 832B                /lib/x86_64-linux-gnu/libc.so.6
 497B                /etc/nsswitch.conf
 ```
-<figure>
-<figcaption class="caption">[Shell 5] sysdig -c topfiles_bytes</figcaption>
-</figure>
 
-Disk Bandwidth 사용률 높은 File들을 순서대로 출력한다. [Shell 4]는 "sysdig -c topfiles_bytes"를 이용하여 Disk Bandwidth 사용률이 높은 File들을 출력하는 Shell의 모습을 나타내고 있다.
+Disk Bandwidth 사용률 높은 File들을 순서대로 출력한다. [Shell 4]는 `sysdig -c topfiles_bytes`를 이용하여 Disk Bandwidth 사용률이 높은 File들을 출력하는 Shell의 모습을 나타내고 있다.
 
 ## 2. 참조
 

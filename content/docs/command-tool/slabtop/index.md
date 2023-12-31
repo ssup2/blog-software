@@ -8,7 +8,7 @@ Slab 사용량을 출력하는 slabtop의 사용법을 정리한다.
 
 ### 1.1. slabtop (-s o)
 
-```shell
+```shell {caption="[Shell 1] slabtop"}
  Active / Total Objects (% used)    : 3108938 / 3354154 (92.7%)
  Active / Total Slabs (% used)      : 118963 / 118963 (100.0%)
  Active / Total Caches (% used)     : 86 / 124 (69.4%)
@@ -37,20 +37,17 @@ Slab 사용량을 출력하는 slabtop의 사용법을 정리한다.
   8740   8740 100%    0.81K    460       19      7360K fuse_inode
   8192   8192 100%    0.01K     16      512        64K kmalloc-8
 ```
-<figure>
-<figcaption class="caption">[Shell 1] slabtop</figcaption>
-</figure>
 
-Slab Object가 많은 순서대로 Slab 사용량을 출력한다. [Shell 1]은 "slabtop"을 이용하여 Slab Object가 많은 순서대로 Slab 사용량을 출력한다. [Shell 1]에서 각 열을 아래의 의미를 나타낸다.
+Slab Object가 많은 순서대로 Slab 사용량을 출력한다. [Shell 1]은 `slabtop`을 이용하여 Slab Object가 많은 순서대로 Slab 사용량을 출력한다. [Shell 1]에서 각 열을 아래의 의미를 나타낸다.
 
-* OBJS : 전체 Slab Object의 개수를 나타낸다.
-* ACTIVE : Active 상태의 Slab Object의 개수를 나타낸다.
-* USE : Cache 이용률을 나타낸다.
-* OBJ SIZE : Slab Object의 개수를 나타낸다.
-* SLABS : Slab의 개수를 나타낸다.
-* OBJ/SLAB : Slab당 Slab Object의 개수를 나타낸다.
-* CACHE SIZE : Cache의 크기를 나타낸다.
-* NAME : Cache의 이름을 나타낸다.
+* `OBJS` : 전체 Slab Object의 개수를 나타낸다.
+* `ACTIVE` : Active 상태의 Slab Object의 개수를 나타낸다.
+* `USE` : Cache 이용률을 나타낸다.
+* `OBJ SIZE` : Slab Object의 개수를 나타낸다.
+* `SLABS` : Slab의 개수를 나타낸다.
+* `OBJ/SLAB` : Slab당 Slab Object의 개수를 나타낸다.
+* `CACHE SIZE` : Cache의 크기를 나타낸다.
+* `NAME` : Cache의 이름을 나타낸다.
 
 Cache는 다수의 Slab의 집합으로 구성되고, 각 Slab은 Slab Object의 집합으로 구성된다. 각 Slab은 Page Size 크기를 갖는다. 일반적으로 Page Size는 4KB이기 때문에 아래와 같은 공식이 성립한다.
 
@@ -60,15 +57,16 @@ Cache는 다수의 Slab의 집합으로 구성되고, 각 Slab은 Slab Object의
 ### 1.2. slabtop [-s a|b|c|l|v|n|p|s|u ]
 
 특정 기준에 맞게 정렬하여 Slab 사용량을 출력한다. 기준은 아래와 같다.
-* a : ACTIVE
-* b : OBJ/SLAB
-* c : CACHE SIZE
-* l : SLABS
-* v : Active Slab의 개수
-* n : NAME
-* p : Page당 Slab의 개수
-* s : OBJ SIZE
-* u : USE
+
+* `a` : ACTIVE
+* `b` : OBJ/SLAB
+* `c` : CACHE SIZE
+* `l` : SLABS
+* `v` : Active Slab의 개수
+* `n` : NAME
+* `p` : Page당 Slab의 개수
+* `s` : OBJ SIZE
+* `u` : USE
 
 ## 2. 참고
 
