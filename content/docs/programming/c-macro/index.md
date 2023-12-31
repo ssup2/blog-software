@@ -6,7 +6,7 @@ C언어의 Macro 문법을 정리한다.
 
 ## 1. 문자열화 연산자 (#) 
 
-```c {linenos=table}
+```c {caption="[Code 1] # Macro 예제", linenos=table}
 #include <stdio.h>
 #define PRINT(s)    printf(#s)
 
@@ -16,22 +16,16 @@ int main()
     return 0;
 }
 ```
-<figure>
-<figcaption class="caption">[Code 1] # Macro 예제</figcaption>
-</figure>
 
-```shell
+```shell {caption="[Shell 1] # Macro 예제의 출력"}
 THIS IS TEST CODE
 ```
-<figure>
-<figcaption class="caption">[Shell 1] # Macro 예제의 출력</figcaption>
-</figure>
 
 문자열화 연산자 (#)는 Macro Parameter를 문자열로 변경한다. `" "`를 붙이는 효과와 동일하다. [Code 1]은 `THIS IS TEST CODE` Macro Parameter가 `printf()` 함수의 문자열로 넘어가는 예제를 보여주고 있다.
 
 ## 2. Token 붙여넣기 연산자 (##) 
 
-```c {linenos=table}
+```c {caption="[Code 2] ## Macro 예제", linenos=table}
 #include <stdio.h>
 
 #define INT_i(n)        int i##n = n;
@@ -45,34 +39,22 @@ int main()
     return 0;
 }
 ```
-<figure>
-<figcaption class="caption">[Code 2] ## Macro 예제</figcaption>
-</figure>
 
-```shell
+```shell {caption="[Shell 2] ## Macro 예제의 출력"}
 i0 = 0
 ```
-<figure>
-<figcaption class="caption">[Shell 2] ## Macro 예제의 출력</figcaption>
-</figure>
 
 Token 붙여넣기 연산자 (`##`)는 분리된 Token을 하나로 합친다. [Code 2]에서 `INT_i()` Macro 함수는 `int i0 = 0`으로 치환되고, `PRINT()` Macro 함수는 `printf("i%d = %d\n", 0, i0)`으로 치환된다.
 
 ## 3. 가변 인자 Macro
 
-```c {linenos=table}
+```c {caption="[Code 3] 1999년 표준의 가변 인자 Macro", linenos=table}
 #define debug(format, ...) fprintf (stderr, format, __VA_ARGS__)
 ```
-<figure>
-<figcaption class="caption">[Code 3] 1999년 표준의 가변 인자 Macro</figcaption>
-</figure>
 
-```c {linenos=table}
+```c {caption="[Code 4] GCC 가변 인자 Macro", linenos=table}
 #define debug(format, args...) fprintf (stderr, format, args)
 ```
-<figure>
-<figcaption class="caption">[Code 4] GCC 가변 인자 Macro</figcaption>
-</figure>
 
 1999년 C 표준에서는 `...`와 `__VA_ARGS__`을 이용하여 가변 인자를 나타낸다. [Code 3]은 1999년 C 표준 문법의 가변 인자 Macro의 사용법을 나타내고 있다. GCC에서는 `[name]...`와 `[name]`을 이용하여 가변 인자를 나타낸다. [Code 4]는 GCC 가변 인자 Macro의 사용법을 나타내고 있다.
 
