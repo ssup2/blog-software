@@ -8,33 +8,27 @@ Linux에서 성능 측정시 이용되는 Tool들을 정리한다.
 
 ### 1.1. uptime
 
-```shell
+```shell {caption="[Shell 1] uptime"}
 # uptime
 10:00:00 up  8:04,  1 user,  load average: 3.37, 3.37, 3.45
 ```
-<figure>
-<figcaption class="caption">[Shell 1] uptime</figcaption>
-</figure>
 
-uptime은 Linux의 구동 시간 및 평균 CPU 부하를 보여주는 Tool이다. [Shell 1]은 uptime Tool을 통해서 확인할 수 있는 Shell의 모습을 나타내고 있다. 현재 시각 / Linux 구동 시간 / 현재 Login 상태의 User 수 / 1분, 5분, 15분 동안의 평균 Load를 나타낸다. Load는 대기 상태로 존재하는 Process의 개수를 의미한다.
+uptime은 Linux의 구동 시간 및 평균 CPU 부하를 보여주는 Tool이다. [Shell 1]은 `uptime`을 통해서 확인할 수 있는 Shell의 모습을 나타내고 있다. 현재 시각 / Linux 구동 시간 / 현재 Login 상태의 User 수 / 1분, 5분, 15분 동안의 평균 Load를 나타낸다. Load는 대기 상태로 존재하는 Process의 개수를 의미한다.
 
 ### 1.2. free
 
-```shell
+```shell {caption="[Shell 2] free"}
 # free -m
               total        used        free      shared  buff/cache   available
 Mem:           7977        1185        2710           1        4081        6490
 Swap:          4095           0        4095
 ```
-<figure>
-<figcaption class="caption">[Shell 2] free</figcaption>
-</figure>
 
-free는 Memory 및 Swap 사용량을 출력하는 Tool이다. [Shell 2]는 Memory 사용량 및 Swap 사용량을 MB 단위로 출력하는 Shell의 모습을 나타내고 있다.
+free는 Memory 및 Swap 사용량을 출력하는 Tool이다. [Shell 2]는 `free -m`을 통해서 Memory 사용량 및 Swap 사용량을 MB 단위로 출력하는 Shell의 모습을 나타내고 있다.
 
 ### 1.3. vmstat
 
-```shell
+```shell {caption="[Shell 3] vmstat"}
 # vmstat 1
 procs -----------memory---------- ---swap-- -----io---- -system-- ------cpu-----
  r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa st
@@ -44,15 +38,12 @@ procs -----------memory---------- ---swap-- -----io---- -system-- ------cpu-----
  0  1      0 2675900 815740 3455176    0    0    28 10324  521 2906 13  3 66 19  0
  2  3      0 2661392 815768 3469476    0    0    28 13628  347 3175 14  2 44 40  0
 ```
-<figure>
-<figcaption class="caption">[Shell 3] vmstat</figcaption>
-</figure>
 
-vmstat은 CPU, Memory, Disk등 System의 전반적인 사용량을 출력하는 Tool이다. [Shell 3]은 vmstat을 이용하여 1초 간격으로 System의 전반적인 사용량를 출력하는 Shell의 모습을 나타내고 있다.
+vmstat은 CPU, Memory, Disk등 System의 전반적인 사용량을 출력하는 Tool이다. [Shell 3]은 `vmstat 1`을 이용하여 1초 간격으로 System의 전반적인 사용량를 출력하는 Shell의 모습을 나타내고 있다.
 
 ### 1.4. pidstat
 
-```shell
+```shell {caption="[Shell 4] pidstat"}
 # pidstat 1
 Linux 4.15.0-60-generic (node09)        09/22/19        _x86_64_        (2 CPU)
 
@@ -63,15 +54,12 @@ Average:    42472      3361    0.00    0.99    0.00    0.00    0.99     -  alert
 Average:        0      3968    0.00    0.99    0.00    0.00    0.99     -  kworker/1:2
 Average:        0      7361    0.00    0.99    0.00    0.00    0.99     -  pidstat
 ```
-<figure>
-<figcaption class="caption">[Shell 4] pidstat</figcaption>
-</figure>
 
-pidstat은 process별 Resource 사용량을 출력하는 Tool이다. [Shell 4]는 pidstat을 이용하여 1초 간격으로 각 Process의 CPU 사용량을 출력하는 Shell의 모습을 나타내고 있다. pidstat은 CPU 사용량뿐만 아니라 Memory, Stack, Block I/O, Kernel 사용량 정보도 출력할 수 있다.
+pidstat은 process별 Resource 사용량을 출력하는 Tool이다. [Shell 4]는 `pidstat 1`을 이용하여 1초 간격으로 각 Process의 CPU 사용량을 출력하는 Shell의 모습을 나타내고 있다. pidstat은 CPU 사용량뿐만 아니라 Memory, Stack, Block I/O, Kernel 사용량 정보도 출력할 수 있다.
 
 ### 1.5. mpstat
 
-```shell
+```shell {caption="[Shell 5] mpstat"}
 # mpstat -P ALL 1
 Linux 4.15.0-60-generic (node09)        09/22/19        _x86_64_        (2 CPU)
 
@@ -80,15 +68,12 @@ Linux 4.15.0-60-generic (node09)        09/22/19        _x86_64_        (2 CPU)
 11:25:07       0    7.00    0.00    3.00   29.00    0.00    0.00    0.00    0.00    0.00   61.00
 11:25:07       1    3.06    0.00    2.04   48.98    0.00    0.00    0.00    0.00    0.00   45.92
 ```
-<figure>
-<figcaption class="caption">[Shell 5] mpstat</figcaption>
-</figure>
 
-mpstat은 CPU Core별 사용량을 출력하는 Tool이다. [Shell 5]는 mpstat을 이용하여 1초 간격으로 모든 CPU Core의 CPU 사용량을 출력하는 Shell의 모습을 나타내고 있다.
+mpstat은 CPU Core별 사용량을 출력하는 Tool이다. [Shell 5]는 `mpstat -P ALL 1`을 이용하여 1초 간격으로 모든 CPU Core의 CPU 사용량을 출력하는 Shell의 모습을 나타내고 있다.
 
 ### 1.6. iostat
 
-```shell
+```shell {caption="[Shell 6] iostat"}
 # iostat -x 1
 Linux 4.15.0-60-generic (node09)        09/22/19        _x86_64_        (2 CPU)
 
@@ -104,15 +89,12 @@ fd0              0.00    0.00      0.00      0.00     0.00     0.00   0.00   0.0
 sda              8.65   53.40     80.75  15987.95     0.90   101.52   9.43  65.53   27.56   83.86   4.72     9.34   299.42  15.18  94.18
 sdb              0.03    0.00      0.75      0.00     0.00     0.00   0.00   0.00   22.65    0.00   0.00    28.86     0.00  16.74   0.04
 ```
-<figure>
-<figcaption class="caption">[Shell 6] iostat</figcaption>
-</figure>
 
-iostat은 Block Device별 사용량을 출력하는 Tool이다. [Shell 6]는 iostat을 이용하여 1초 간격으로 모든 Block Device의 사용량을 출력하는 Shell의 모습을 나타내고 있다. iostat은 평균 CPU 사용률도 출력한다.
+iostat은 Block Device별 사용량을 출력하는 Tool이다. [Shell 6]는 `iostat -x 1`을 이용하여 1초 간격으로 모든 Block Device의 사용량을 출력하는 Shell의 모습을 나타내고 있다. iostat은 평균 CPU 사용률도 출력한다.
 
 ### 1.7. netstat
 
-```shell
+```shell {caption="[Shell 7] uptime"}
 # netstat -i
 Kernel Interface table
 Iface      MTU    RX-OK RX-ERR RX-DRP RX-OVR    TX-OK TX-ERR TX-DRP TX-OVR Flg
@@ -122,15 +104,12 @@ eth1      1500  1017307      0      0 0        386209      0      0      0 BMRU
 lo       65536   196363      0      0 0        196363      0      0      0 LRU
 vetheeab  1500        0      0      0 0            74      0      0      0 BMRU
 ```
-<figure>
-<figcaption class="caption">[Shell 7] uptime</figcaption>
-</figure>
 
-netstat은 Linux Kernel이 갖고있는 대부분의 Network 정보를 출력하는 Tool이다. netstat은 Network 성능을 측정하는데도 이용할수 있다. [Shell 7]은 netstat을 이용하여 모든 Network Interface의 성능을 측정하는 Shell의 모습을 나타내고 있다.
+netstat은 Linux Kernel이 갖고있는 대부분의 Network 정보를 출력하는 Tool이다. netstat은 Network 성능을 측정하는데도 이용할수 있다. [Shell 7]은 `netstat -i`을 이용하여 모든 Network Interface의 성능을 측정하는 Shell의 모습을 나타내고 있다.
 
 ### 1.8. nicstat
 
-```shell
+```shell {caption="[Shell 8] nicstat"}
 # nicstat 1
     Time      Int   rKB/s   wKB/s   rPk/s   wPk/s    rAvs    wAvs %Util    Sat
 15:41:38  docker0    0.00    0.00    0.00    0.00    0.00   73.56  0.00   0.00
@@ -139,15 +118,12 @@ netstat은 Linux Kernel이 갖고있는 대부분의 Network 정보를 출력하
 15:41:38 veth3673f81    0.00    0.00    0.00    0.00    0.00   73.62  0.00   0.00
 15:41:38     eth1    7.32    0.55   12.19    5.00   614.8   111.7  0.01   0.00
 ```
-<figure>
-<figcaption class="caption">[Shell 8] nicstat</figcaption>
-</figure>
 
-nicstat은 Network Interface별 성능을 출력하는 Tool이다. [Shell 8]은 nicstat을 이용하여 1초 간격으로 모든 Network Interface의 성능을 출력하는 Shell의 모습을 나타내고 있다.
+nicstat은 Network Interface별 성능을 출력하는 Tool이다. [Shell 8]은 `nicstat 1`을 이용하여 1초 간격으로 모든 Network Interface의 성능을 출력하는 Shell의 모습을 나타내고 있다.
 
 ### 1.9. top
 
-```shell
+```shell {caption="[Shell 9] top"}
 # top
 top - 12:32:20 up  9:49,  1 user,  load average: 3.02, 2.97, 3.10
 Tasks: 132 total,   1 running,  85 sleeping,   0 stopped,   0 zombie
@@ -161,15 +137,12 @@ KiB Swap:  4194300 total,  4194300 free,        0 used.  6637292 avail Mem
  3335 root      20   0 1352800  91740  17476 S   3.0  1.1  19:55.28 cadvisor
  1529 root      20   0 1290564  82076  37524 S   1.0  1.0   1:55.27 dockerd
 ```
-<figure>
-<figcaption class="caption">[Shell 9] top</figcaption>
-</figure>
 
-top은 CPU 사용률 또는 Memory 사용률이 높은 순서대로 Process 또는 Thread를 보여주는 Tool이다. [Shell 9]는 top을 이용하여 Process의 CPU 사용률을 출력하는 Shell의 모습을 나타내고 있다.
+top은 CPU 사용률 또는 Memory 사용률이 높은 순서대로 Process 또는 Thread를 보여주는 Tool이다. [Shell 9]는 `top`을 이용하여 Process의 CPU 사용률을 출력하는 Shell의 모습을 나타내고 있다.
 
 ### 1.10. slabtop
 
-```shell
+```shell {caption="[Shell 10] slabtop"}
 # slabtop
  Active / Total Objects (% used)    : 2581763 / 2731476 (94.5%)
  Active / Total Slabs (% used)      : 101112 / 101112 (100.0%)
@@ -185,15 +158,12 @@ top은 CPU 사용률 또는 Memory 사용률이 높은 순서대로 Process 또�
 252246 252246 100%    0.04K   2473      102      9892K ext4_extent_status
 123776 122174   0%    0.06K   1934       64      7736K kmalloc-64
 ```
-<figure>
-<figcaption class="caption">[Shell 10] slabtop</figcaption>
-</figure>
 
-slabtop은 Kernel이 이용하는 Slab Memory 사용량을 출력하는 Tool이다. [Shell 10]은 slabtop을 이용하여 Slab Memory 사용량을 출력하는 Shell의 모습을 나타내고 있다. 사용량 정렬 기준은 다양한 옵션을 통해서 변경이 가능하다.
+slabtop은 Kernel이 이용하는 Slab Memory 사용량을 출력하는 Tool이다. [Shell 10]은 `slabtop`을 이용하여 Slab Memory 사용량을 출력하는 Shell의 모습을 나타내고 있다. 사용량 정렬 기준은 다양한 옵션을 통해서 변경이 가능하다.
 
 ### 1.11. iotop
 
-```shell
+```shell {caption="[Shell 11] iotop"}
 # iotop
 Total DISK READ :      46.79 K/s | Total DISK WRITE :       5.48 M/s
 Actual DISK READ:      46.79 K/s | Actual DISK WRITE:       5.52 M/s
@@ -207,15 +177,12 @@ Actual DISK READ:      46.79 K/s | Actual DISK WRITE:       5.52 M/s
     1 be/4 root        0.00 B/s    0.00 B/s  0.00 %  0.00 % systemd --system --deserialize 40
     2 be/4 root        0.00 B/s    0.00 B/s  0.00 %  0.00 % [kthreadd]            
 ```
-<figure>
-<figcaption class="caption">[Shell 11] iotop</figcaption>
-</figure>
 
-iotop은 Block I/O 사용률이 높은 순서대로 Process 또는 Thread를 출력하는 Tool이다. [Shell 11]은 iotop을 이용하여 Block I/O 사용률을 출력하는 Shell의 모습을 나타내고 있다.
+iotop은 Block I/O 사용률이 높은 순서대로 Process 또는 Thread를 출력하는 Tool이다. [Shell 11]은 `iotop`을 이용하여 Block I/O 사용률을 출력하는 Shell의 모습을 나타내고 있다.
 
 ### 1.12. iftop
 
-```shell
+```shell {caption="[Shell 12] iftop"}
 # iftop
  Press H or ? for help            25.0Kb            37.5Kb           50.0Kb      62.5Kb
 └─┴─┴─┴─┴──
@@ -239,15 +206,12 @@ TX:             cum:   11.2KB   peak:   19.1Kb         rates:    672b   1.11Kb  
 RX:                    23.8KB           67.5Kb                   672b   1.00Kb  4.46Kb
 TOTAL:                 35.0KB           86.6Kb                  1.31Kb  2.11Kb  6.48Kb 
 ```
-<figure>
-<figcaption class="caption">[Shell 12] iftop</figcaption>
-</figure>
 
-iftop은 특정 Interface의 Network Bandwidth 사용량을 Src IP/Dst IP로 분류한 다음, 샤용량이 높은 순서에 따라서 출력하는 Tool이다. [Shell 12]는 iftop을 이용하여 Network Bandwidth 사용량을 출력하는 Shell의 모습을 나타내고 있다.
+iftop은 특정 Interface의 Network Bandwidth 사용량을 Src IP/Dst IP로 분류한 다음, 샤용량이 높은 순서에 따라서 출력하는 Tool이다. [Shell 12]는 `iftop`을 이용하여 Network Bandwidth 사용량을 출력하는 Shell의 모습을 나타내고 있다.
 
 ### 1.13. nethogs
 
-```shell
+```shell {caption="[Shell 13] nethogs"}
 # nethogs
 NetHogs version 0.8.5-2
 
@@ -263,11 +227,8 @@ NetHogs version 0.8.5-2
 
   TOTAL 0.000 0.000 KB/sec                                     0.500       0.371
 ```
-<figure>
-<figcaption class="caption">[Shell 13] nethogs</figcaption>
-</figure>
 
-nethogs는 Network Bandwidth 사용률이 높은 순서대로 Process를 출력하는 Tool이다. [Shell 13]은 nethogs를 이용하여 Network Bandwidth 사용량을 출력하는 Shell의 모습을 나타내고 있다.
+nethogs는 Network Bandwidth 사용률이 높은 순서대로 Process를 출력하는 Tool이다. [Shell 13]은 `nethogs`를 이용하여 Network Bandwidth 사용량을 출력하는 Shell의 모습을 나타내고 있다.
 
 ## 2. 참조
 

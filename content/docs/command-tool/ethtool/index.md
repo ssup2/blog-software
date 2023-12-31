@@ -8,7 +8,7 @@ NIC을 제어하는 ethtool 사용법을 정리한다.
 
 ### 1.1. ethtool [Interface]
 
-```shell
+```shell {caption="[Shell 1] ethtool eth0"}
 # ethtool eth0
 Settings for eth0:
         Supported ports: [ ]
@@ -28,11 +28,8 @@ Settings for eth0:
         Auto-negotiation: off
         Link detected: yes
 ```
-<figure>
-<figcaption class="caption">[Shell 1] ethtool eth0</figcaption>
-</figure>
 
-[Interface] NIC 정보를 출력한다. [Shell 1]은 ethtool을 이용하여 eth0 Interface 정보를 출력하는 Shell의 모습을 나타내고 있다. [Shell 1]에서 eth0의 Bandwidth(Speed)와 Duplex Mode를 확인할 수 있다.
+[Interface] NIC 정보를 출력한다. [Shell 1]은 `ethtool eth0`을 이용하여 eth0 Interface 정보를 출력하는 Shell의 모습을 나타내고 있다. [Shell 1]에서 eth0의 Bandwidth(Speed)와 Duplex Mode를 확인할 수 있다.
 
 ### 1.2. ethtool [Interface] [speed 10|100|1000] [duplex half|full]
 

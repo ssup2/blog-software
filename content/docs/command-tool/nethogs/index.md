@@ -8,7 +8,7 @@ Process들을 Network Bandwidth 사용량이 높은 순서대로 출력하는 ne
 
 ### 1.1. # nethogs
 
-```shell
+```shell {caption="[Shell 1] nethogs"}
 NetHogs version 0.8.5-2
 
     PID USER     PROGRAM DEV SENT      RECEIVED
@@ -24,11 +24,8 @@ NetHogs version 0.8.5-2
 
   TOTAL 0.000 0.000 KB/sec                                                  0.337       0.329
 ```
-<figure>
-<figcaption class="caption">[Shell 1] nethogs</figcaption>
-</figure>
 
-Process들을 Network Bandwidth 사용량이 높은 순서대로 출력한다. [Shell 1]은 nethogs를 이용하여 Process별 Network Bandwidth 사용량을 출력하는 Shell의 모습을 나타내고 있다. PID가 "?"이고 DEV에 Interface가 공백인 경우는 User Level에서 알 수 없는 Kernel Thread에서 Packet을 처리하기 때문이다.
+Process들을 Network Bandwidth 사용량이 높은 순서대로 출력한다. [Shell 1]은 `nethogs`를 이용하여 Process별 Network Bandwidth 사용량을 출력하는 Shell의 모습을 나타내고 있다. PID가 "?"이고 DEV에 Interface가 공백인 경우는 User Level에서 알 수 없는 Kernel Thread에서 Packet을 처리하기 때문이다.
 
 ### 1.2. nethogs [Interface]
 

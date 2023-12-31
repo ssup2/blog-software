@@ -8,7 +8,7 @@ Block Device I/O 통계 정보와 CPU 통계 정보를 보여주는 iostat 사�
 
 ### 1.1. iostat
 
-```shell
+```shell {caption="[Shell 1] iostat"}
 # iostat
 Linux 4.15.0-60-generic (node09)        09/28/19        _x86_64_        (2 CPU)
 
@@ -21,11 +21,8 @@ loop1             0.00         0.01         0.00       1076          0
 sda              40.71        43.81      7572.20    3903569  674772928
 sdb               0.01         0.29         0.00      25400          0
 ```
-<figure>
-<figcaption class="caption">[Shell 1] iostat</figcaption>
-</figure>
 
-Block Device의 I/O 통계 정보와 CPU 통계 정보를 출력한다. [Shell 1]은 "iostat"을 이용하여 Block Device의 I/O 통계 정보와 CPU 통계 정보를 출력하는 Shell의 모습을 나타내고 있다. 윗부분에는 CPU 통계 정보가 출력된다. 출력 내용은 아래와 같다.
+Block Device의 I/O 통계 정보와 CPU 통계 정보를 출력한다. [Shell 1]은 `iostat`을 이용하여 Block Device의 I/O 통계 정보와 CPU 통계 정보를 출력하는 Shell의 모습을 나타내고 있다. 윗부분에는 CPU 통계 정보가 출력된다. 출력 내용은 아래와 같다.
 
 * user : nice 값이 적용되지 않은 Process들의 User Level 사용률을 나타낸다.
 * nice : nice 값이 적용된 Process들의 User Level 사용률을 나타낸다.
@@ -44,7 +41,7 @@ Block Device의 I/O 통계 정보와 CPU 통계 정보를 출력한다. [Shell 1
 
 ### 1.2. iostat -x
 
-```shell
+```shell {caption="[Shell 2] iostat -x"}
 # iostat -x
 Linux 4.15.0-60-generic (node09)        09/28/19        _x86_64_        (2 CPU)
 
@@ -58,9 +55,6 @@ loop2            0.12    0.00      0.13      0.00     0.00     0.00   0.00   0.0
 sda              4.83   35.87     43.79   7568.11     0.49    64.44   9.14  64.24   24.46   72.31   2.71     9.06   211.00  16.16  65.76
 sdb              0.01    0.00      0.28      0.00     0.00     0.00   0.00   0.00   22.65    0.00   0.00    28.86     0.00  16.74   0.02
 ```
-<figure>
-<figcaption class="caption">[Shell 2] iostat -x</figcaption>
-</figure>
 
 확장된 Block Device의 I/O 통계 정보와 CPU 통계 정보를 출력한다. [Shell 2]는 "iostat -x"을 이용하여 확장된 Block Device의 I/O 통계 정보와 CPU 통계 정보를 출력하는 Shell의 모습을 나타내고 있다. CPU 통계 정보는 [Shell 1]과 동일하며 Block Device의 I/O 통계 정보는 아래와 같다.
 

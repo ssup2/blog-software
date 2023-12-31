@@ -8,7 +8,7 @@ Network 통계 정보를 보여주는 netstat 사용법을 정리한다.
 
 ### 1.1. netstat
 
-```shell
+```shell {caption="[Shell 1] netstat"}
 # netstat 
 Active Internet connections (w/o servers)
 Proto Recv-Q Send-Q Local Address           Foreign Address         State
@@ -36,15 +36,12 @@ unix  3      [ ]         STREAM     CONNECTED     27046
 unix  3      [ ]         STREAM     CONNECTED     31101    /run/systemd/journal/stdout
 unix  2      [ ]         DGRAM                    21526
 ```
-<figure>
-<figcaption class="caption">[Shell 1] netstat</figcaption>
-</figure>
 
-현재 Open되어 있는 모든 Socket의 정보를 출력한다. [Shell 1]은 "netstat"을 이용하여 Open되어 있는 모든 Socket 정보를 출력하고 있는 Shell의 모습을 나타내고 있다. IPv4 Socket 정보와 Unix Domain Socket 정보를 확인할 수 있다.
+현재 Open되어 있는 모든 Socket의 정보를 출력한다. [Shell 1]은 `netstat`을 이용하여 Open되어 있는 모든 Socket 정보를 출력하고 있는 Shell의 모습을 나타내고 있다. IPv4 Socket 정보와 Unix Domain Socket 정보를 확인할 수 있다.
 
 ### 1.2. netstat -i
 
-```shell
+```shell {caption="[Shell 2] netstat -i"}
 # netstat -i
 Kernel Interface table
 Iface      MTU    RX-OK RX-ERR RX-DRP RX-OVR    TX-OK TX-ERR TX-DRP TX-OVR Flg
@@ -52,23 +49,21 @@ docker0   1500        0      0      0 0            52      0      0      0 BMRU
 eth0      1500   312536      0      0 0        127530      0      0      0 BMRU
 lo       65536   126777      0      0 0        126777      0      0      0 LRU
 ```
-<figure>
-<figcaption class="caption">[Shell 2] netstat -i</figcaption>
-</figure>
 
-각 Network Interface가 주고받은 Packet 정보를 출력한다. [Shell 2]는 "netstat -i"를 이용하여 각 Network Interface가 주고받은 Packet 정보를 출력하는 Shell의 모습을 나타내고 있다. 각 열의 의미는 다음과 같다.
-* RX-OK : 올바르게 수신된 Packet의 개수 
-* RX-ERR : 수신에는 성공하였지만 Error가 발생하여 처리하지 않은 수신 Packet의 개수
-* RX-DRP : 수신 Buffer가 가득차 Drop된 수신 Packet의 개수
-* RX-OVR : Kernel이 너무 바빠서 수신에 실패한 Packet의 개수
-* TX-OK : 올바르게 송신한 Packet의 개수
-* TX-ERR : 송신전에 Error가 발생하여 송신하지 않은 Packet의 개수
-* TX-DRP : 송신 Buffer가 가득차 Drop된 송신 Packet의 개수
-* TX-OVR : Kernel이 너무 바빠서 송신에 실패한 Packet의 개수
+각 Network Interface가 주고받은 Packet 정보를 출력한다. [Shell 2]는 `netstat -i`를 이용하여 각 Network Interface가 주고받은 Packet 정보를 출력하는 Shell의 모습을 나타내고 있다. 각 열의 의미는 다음과 같다.
+
+* `RX-OK` : 올바르게 수신된 Packet의 개수 
+* `RX-ERR` : 수신에는 성공하였지만 Error가 발생하여 처리하지 않은 수신 Packet의 개수
+* `RX-DRP` : 수신 Buffer가 가득차 Drop된 수신 Packet의 개수
+* `RX-OVR` : Kernel이 너무 바빠서 수신에 실패한 Packet의 개수
+* `TX-OK` : 올바르게 송신한 Packet의 개수
+* `TX-ERR` : 송신전에 Error가 발생하여 송신하지 않은 Packet의 개수
+* `TX-DRP` : 송신 Buffer가 가득차 Drop된 송신 Packet의 개수
+* `TX-OVR` : Kernel이 너무 바빠서 송신에 실패한 Packet의 개수
 
 ### 1.3. netstat -nr
 
-```shell
+```shell {caption="[Shell 3] netstat -nr"}
 # netstat -nr
 Kernel IP routing table
 Destination     Gateway         Genmask         Flags   MSS Window  irtt Iface
@@ -76,15 +71,12 @@ Destination     Gateway         Genmask         Flags   MSS Window  irtt Iface
 10.0.0.0        0.0.0.0         255.255.255.0   U         0 0          0 eth1
 172.17.0.0      0.0.0.0         255.255.0.0     U         0 0          0 docker0
 ```
-<figure>
-<figcaption class="caption">[Shell 3] netstat -nr</figcaption>
-</figure>
 
-Routing Table 정보를 출력한다. [Shell 3]은 "netstat -nr"을 이용하여 Routing Table을 출력하는 Shell의 모습을 나타내고 있다.
+Routing Table 정보를 출력한다. [Shell 3]은 `netstat -nr`을 이용하여 Routing Table을 출력하는 Shell의 모습을 나타내고 있다.
 
 ### 1.4. netstat -plnt
 
-```shell
+```shell {caption="[Shell 4] netstat -pln"}
 # netstat -plnt
 Active Internet connections (only servers)
 Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name
@@ -100,11 +92,8 @@ tcp6       0      0 :::18080                :::*                    LISTEN      
 tcp6       0      0 :::9094                 :::*                    LISTEN      3361/alertmanager
 tcp6       0      0 :::5000                 :::*                    LISTEN      3057/docker-proxy
 ```
-<figure>
-<figcaption class="caption">[Shell 4] netstat -plnt</figcaption>
-</figure>
 
-Listen 상태의 Port 및 Process 정보를 출력한다. [Shell 4]는 "netstat -plnt"을 이용하여 Listen 상태의 Port 및 Process 정보를 출력하는 Shell의 모습을 나타내고 있다.
+Listen 상태의 Port 및 Process 정보를 출력한다. [Shell 4]는 `netstat -plnt`을 이용하여 Listen 상태의 Port 및 Process 정보를 출력하는 Shell의 모습을 나타내고 있다.
 
 ## 2. 참조
 
