@@ -13,7 +13,7 @@ title: LeetCode / To Lower Case
 
 ## Solution 1
 
-```java {linenos=table}
+```java {caption="Solution 1", linenos=table}
 class Solution {
     public String toLowerCase(String str) {
         char[] charArry = str.toCharArray();
@@ -36,10 +36,6 @@ class Solution {
     }
 }
 ```
-
-<figure>
-<figcaption class="caption">Solution 1</figcaption>
-</figure>
 
 * Description
   * 문자열의 앞부터 하나씩 소문자인지 확인 후, 소문자인 경우 대문자로 변경

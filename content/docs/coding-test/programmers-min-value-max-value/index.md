@@ -13,7 +13,7 @@ title: Programmers / 최댓값과 최소값
 
 ## Solution 1
 
-```java {linenos=table}
+```java {caption="Solution 1", linenos=table}
 class Solution {
     public String solution(String s) {
         // Convert string to int
@@ -43,9 +43,6 @@ class Solution {
     }
 }
 ```
-<figure>
-<figcaption class="caption">Solution 1</figcaption>
-</figure>
 
 * Description
   * 문자열을 공백으로 분리후 정수로 변환

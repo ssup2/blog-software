@@ -13,7 +13,7 @@ title: Programmers / 게임 맵 최단거리
 
 ## Solution 1
 
-```java {linenos=table}
+```java {caption="Solution 1", linenos=table}
 import java.util.LinkedList;
 
 class Solution {
@@ -90,9 +90,6 @@ class Position {
     }
 }
 ```
-<figure>
-<figcaption class="caption">Solution 1</figcaption>
-</figure>
 
 * Description
   * BFS를 이용하여 탐색

@@ -13,7 +13,7 @@ title: Programmers / 다음 큰 숫자
 
 ## Solution 1
 
-```java {linenos=table}
+```java {caption="Solution 1", linenos=table}
 class Solution {
     public int solution(int n) {
         // Get n's one count
@@ -42,9 +42,6 @@ class Solution {
     }
 }
 ```
-<figure>
-<figcaption class="caption">Solution 1</figcaption>
-</figure>
 
 * Description
   * n을 2진수로 변환한 후에 1의 개수를 구함

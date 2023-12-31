@@ -13,7 +13,7 @@ title: Programmers / 피보나치 수
 
 ## Solution 1
 
-```java {linenos=table}
+```java {caption="Solution 1", linenos=table}
 class Solution {
     private static final int[] sumArray = new int[100000 + 1];
     
@@ -36,9 +36,6 @@ class Solution {
     }
 }
 ```
-<figure>
-<figcaption class="caption">Solution 1</figcaption>
-</figure>
 
 * Description
 * Time Complexity

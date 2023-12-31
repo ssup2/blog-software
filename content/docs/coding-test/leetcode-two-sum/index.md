@@ -13,8 +13,7 @@ title: LeetCode / Two Sum
 
 ## Solution 1
 
-```java {linenos=table}
-{% highlight java linenos %}
+```java {caption="Solution 1", linenos=table}
 class Solution {
     public int[] twoSum(int[] nums, int target) {
         int i = 0, j = 0;
@@ -31,11 +30,7 @@ class Solution {
         return new int[] {i, j};
     }
 }
-{% endhighlight %}
 ```
-<figure>
-<figcaption class="caption">Solution 1</figcaption>
-</figure>
 
 * Description
   * 중복 없이 완전 탐색 수행

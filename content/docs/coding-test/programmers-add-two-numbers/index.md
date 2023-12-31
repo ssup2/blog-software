@@ -13,7 +13,7 @@ title: Programmers / 두 개 뽑아서 더하기
 
 ## Solution 1
 
-```java {linenos=table}
+```java {caption="Solution 1", linenos=table}
 import java.util.TreeSet;
 import java.util.Iterator;
 
@@ -40,9 +40,6 @@ class Solution {
     }
 }
 ```
-<figure>
-<figcaption class="caption">Solution 1</figcaption>
-</figure>
 
 * Description
   * TreeSet을 활용한 중복 제거 및 정렬 기능 활용

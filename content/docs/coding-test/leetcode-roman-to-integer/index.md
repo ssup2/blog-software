@@ -13,7 +13,7 @@ title: LeetCode / Roman to Integer
 
 ## Solution 1
 
-```java {linenos=table}
+```java {caption="Solution 1", linenos=table}
 class Solution {
     public int romanToInt(String s) {
         int result = 0;
@@ -65,9 +65,6 @@ class Solution {
     }
 }
 ```
-<figure>
-<figcaption class="caption">Solution 1</figcaption>
-</figure>
 
 * Description
   * M/1000, CM/900, D/500, CD/400, C/100, XC/90, L/50, XL/40, X/10, IX/9, V/5, IV/4, I/1 순서대로 문자열이 일치하는 검사
@@ -81,7 +78,7 @@ class Solution {
 
 ## Solution 2
 
-```java {linenos=table}
+```java {caption="Solution 2", linenos=table}
 class Solution {
     private class RomanInt {
         public String roman;
@@ -124,9 +121,6 @@ class Solution {
     }
 }
 ```
-<figure>
-<figcaption class="caption">Solution 2</figcaption>
-</figure>
 
 * Description
   * "Solution 1"과 동일한 방식이지만 Mapping Array를 이용

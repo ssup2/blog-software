@@ -13,7 +13,7 @@ title: Programmers / 제일 작은 수 제거하기
 
 ## Solution 1
 
-```java {linenos=table}
+```java {caption="Solution 1", linenos=table}
 class Solution {
     public int[] solution(int[] arr) {
         // Check array size and return -1
@@ -43,9 +43,6 @@ class Solution {
     }
 }
 ```
-<figure>
-<figcaption class="caption">Solution 1</figcaption>
-</figure>
 
 * Description
   * 가장 작은 값을 먼저 찾은 후에, 배열에서 제거

@@ -13,7 +13,7 @@ title: Programmers / 소수 찾기
 
 ## Solution 1
 
-```java {linenos=table}
+```java {caption="Solution 1", linenos=table}
 import java.util.ArrayList;
 
 class Solution {
@@ -41,9 +41,6 @@ class Solution {
     }
 }
 ```
-<figure>
-<figcaption class="caption">Solution 1</figcaption>
-</figure>
 
 * Description
 * Time Complexity
@@ -51,7 +48,7 @@ class Solution {
 
 ## Solution 2
 
-```java {linenos=table}
+```java {caption="Solution 1", linenos=table}
 import java.util.Arrays;
 
 class Solution {
@@ -82,9 +79,6 @@ class Solution {
     }
 }
 ```
-<figure>
-<figcaption class="caption">Solution 2</figcaption>
-</figure>
 
 * Description
 * Time Complexity
