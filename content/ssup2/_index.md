@@ -5,9 +5,9 @@ comments: false
 
 ## Profile
 
-* Name - Shin, Jungsub
-* Skills - Cloud, Container, VM, Embedded System
-* Role - AWS Solutions Architect, Software Engineer
+* Name : Shin, Jungsub
+* Skills : Cloud, Container, VM, Embedded System
+* Role : AWS Solutions Architect, Software Engineer
 * External Links
   * [LinkedIn](https://kr.linkedin.com/in/jungsub-shin-933b82119)
   * [Github](https://github.com/ssup2)
