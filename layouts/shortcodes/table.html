@@ -1,0 +1,9 @@
+{{ $caption := .Get "caption" }}
+
+{{ $htmlTable := .Inner | markdownify }}
+{{ $htmlTable | safeHTML }}
+{{ if $caption }}
+<figure>
+    <figcaption class="caption">{{ $caption }}</figcaption>
+</figure>
+{{ end }}

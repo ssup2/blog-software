@@ -14,6 +14,7 @@ CRUSH는 Object들을 각 Storage Device의 Weight에 비례하여 각 Storage D
 
 Cluster Map은 논리적인 Storage Device의 **계층**을 표현하는 지도이다. Storage Server실이 있다면 Storage Server실에는 여러개의 Server 캐비넷이 있고, 각 Server 캐비넷에는 Disk 선반이 있고, 각 Disk 선반에는 Disk 선반에는 여러개의 Disk가 존재할 것이다. 이러한 물리적인 Storage Device의 구조를 논리적으로 표현한 것이 Cluster Map이다.
 
+{{< table caption="[표 1] Clush Map 예제" >}}
 | Action | Resulting |
 |---|---|
 | take(root) | root |
@@ -21,10 +22,7 @@ Cluster Map은 논리적인 Storage Device의 **계층**을 표현하는 지도�
 | select(3, cabinet) | cab21 cab23 cab24 |
 | select(1, disk) | disk2107 disk2313 disk2437 |
 | emit |  |
-
-<figure>
-<figcaption class="caption">[표 1] Clush Map 예제</figcaption>
-</figure>
+{{< /table >}}
 
 Cluster Map의 계층 정보를 바탕으로 CEPH 관리자는 Replica의 배치를 자유롭게 설정할 수 있다. Replica를 같은 Disk 선반에 위치 시킬 수도 있고, 다른 Disk 선반에 위치 시킬 수도 있고, 다른 Server 캐비넷에 위치 시킬 수도 있다. 이러한 Replica 배치 설정은 좀더 물리적으로 Replica를 안전하게 보관할 수 있게 한다. Replica를 같은 전원을 이용하는 Disk 선반에 위치시키는 것 보다는, 다른 전원을 이용하는 Server 캐비넷에 위치시키는 것이 좀더 안전하게 Replica를 보존 할 수 있을것이다. [표 1]은 CRUSH이 Server 캐비넷 단위로 3개의 Replica를 선택하는 과정을 나타내고 있다.
 
