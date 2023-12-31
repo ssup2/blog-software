@@ -1,8 +1,4 @@
 ---
-title: ssup2 Docs
+title: ssup2 Docs / Software
 layout: hextra-home
 ---
-
-{{< hextra/hero-headline >}}
-ssup2 Docs / Software
-{{< /hextra/hero-headline >}}

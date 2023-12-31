@@ -31,7 +31,7 @@ menu:
   - name: Docs
     pageRef: /docs
     weight: 1
-  - name: ssup2
+  - name: Me
     pageRef: /ssup2
     weight: 2
   - name: Search

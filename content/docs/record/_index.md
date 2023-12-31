@@ -4,4 +4,4 @@ weight: 6
 comments: false
 ---
 
-설치/설정 및 Test 기록 정리
+설정, 구축 및 Test 관련 기록 정리
