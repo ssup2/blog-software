@@ -18,7 +18,7 @@ Client가 Server로부터 Sequence Number 100번 Packet의 ACK를 받았다는 �
 
 Container안의 Client가 전송한 Packet이 SNAT를 통해서 Host 외부의 Server와 TCP Connection을 맺는 경우, Server가 Client에게 전송하는 Packet은 DNAT되어 Client에게 전송되야 한다. 문제는 이 경우 Server가 전송한 ACK에게 Out of Order Delivery 현상이 발생하면, 해당 ACK는 Linux의 conntrack Module의 Bug로 인해서 Invalid Packet으로 분류된다. conntrack Module에 의해서 Invalid 상태가된 ACK는 DNAT되지 않기 때문에 Container가 아닌 Host로 전달된다. ACK를 받은 Host는 Host가 모르는 Connection으로부터 Packet을 수신하기 때문에 TCP Reset Flag를 통해서 Server와의 Connection을 강제로 종료한다.
 
-```shell
+```shell {caption="[Shell 1] Host Network Interface Packet Dump with tshark"}
 ...
 117893 291.390819085 192.168.0.100 → 10.205.13.199 TCP 66 80 → 56284 [ACK] Seq=26 Ack=10069055 Win=173056 Len=0 TSval=3479336939 TSecr=499458820
 117894 291.390838911 10.205.13.199 → 192.168.0.100 TCP 19790 56284 → 80 [ACK] Seq=10194987 Ack=26 Win=43008 Len=19724 TSval=499458821 TSecr=3479336939 [TCP segment of a reassembled PDU]
@@ -44,9 +44,6 @@ Container안의 Client가 전송한 Packet이 SNAT를 통해서 Host 외부의 S
 117914 291.392879867 192.168.0.100 → 10.205.13.199 TCP 54 80 → 56284 [RST] Seq=26 Win=8397824 Len=0
 ...
 ```
-<figure>
-<figcaption class="caption">[Shell 1] Host Network Interface Packet Dump with tshark</figcaption>
-</figure>
 
 [Shell 1]은 Docker Container의 Connection Reset이 발생하였을때의 tshark를 이용하여 Host Interface의 Packet을 Dump한 결과이다. 10.205.13.199은 Docker Container의 Client IP이고, 192.168.0.100은 Host 외부의 Server이다. Docker Container의 Client가 Host 외부의 Server에게 TCP Connection을 맺고 Data를 전송하다가 Connection Reset 현상이 발생한 모습이다.
 
@@ -54,7 +51,7 @@ Container안의 Client가 전송한 Packet이 SNAT를 통해서 Host 외부의 S
 
 따라서 Sequence Number 10110467번의 Packet의 Ack는 Host로 전달된다. Host는 Sequence Number 10110467번의 Packet의 Ack는 자신이 전송한 Packet의 ACK도 아니고, conntrack의 Connection 정보를 통해서 Host 자신과 연결되어 있는 TCP Connection으로 부터온 Packet도 아니란걸 파악한다. 따라서 Host는 TCP Reset Flag를 통해서 Server와의 Connection을 강제로 종료한다. [Shell 1]의 8번째 줄에서 Host가 Server에게 전송하는 TCP Reset Packet을 확인할 수 있다. Server는 Host의 TCP Reset Packet을 전달받은 다음, TCP Protocol에 따라서 Pod에게 TCP Reset Packet을 전송한다.
 
-```shell
+```shell {caption="[Shell 2] Docker Container Network Interface Packet Dump with tshark"}
 ...
 348997 1199.001039577 192.168.0.100 → 10.251.0.1   TCP 66 80 → 56284 [ACK] Seq=26 Ack=10069055 Win=173056 Len=0 TSval=3479336939 TSecr=499458820
 348998 1199.001044501   10.251.0.1 → 192.168.0.100 TCP 19790 56284 → 80 [ACK] Seq=10194987 Ack=26 Win=43008 Len=19724 TSval=499458821 TSecr=3479336939 [TCP segment of a reassembled PDU]
@@ -77,10 +74,6 @@ Container안의 Client가 전송한 Packet이 SNAT를 통해서 Host 외부의 S
 349015 1199.003094968 192.168.0.100 → 10.251.0.1   TCP 54 80 → 56284 [RST] Seq=26 Win=8397824 Len=0
 349016 1199.003098534 192.168.0.100 → 10.251.0.1   TCP 54 80 → 56284 [RST] Seq=26 Win=8397824 Len=0
 ```
-{% endhighlight %}
-<figure>
-<figcaption class="caption">[Shell 2] Docker Container Network Interface Packet Dump with tshark</figcaption>
-</figure>
 
 [Shell 2]는 [Shell 1]의 Connection Reset 현상이 발생하였을때 tshark를 이용하여 Docker Container 내부에서 Docker Container Interface의 Packet을 Dump한 결과이다. [Shell 1]과 대부분 동일하지만 Sequence Number 10110467번 Packet의 ACK가 존재하지 않는걸 확인할 수 있다. Sequence Number 10110467번 Packet의 ACK는 Host에서 conntrack Module의 Bug로 인해서 Invalid Packet을 간주되어 DNAT 되지 않았기 때문에, Docker Container로 전달되지 않았기 때문이다.
 
