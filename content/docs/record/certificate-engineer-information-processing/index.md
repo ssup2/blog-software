@@ -18,7 +18,6 @@ title: 자격증 정보처리기사 이론 정리
     * ex) DROP TABLE Persons; 
   * TRUNCATE : Table의 모든 내용을 삭제한다.
     * ex) TRUNCATE TABLE Persons;
-
 * DML (Data Manipulation Language)
   * SELECT : Table에서 Data를 읽는다.
     * ex) SELECT PersonID, LastName FROM Persons WHERE PersonID = 1;
@@ -31,7 +30,6 @@ title: 자격증 정보처리기사 이론 정리
     * ex) UPDATE Persons SET PersonID = 10 WHERE LastName = 'ssup2';
   * DELETE : Table의 Data를 삭제한다.
     * ex) DELETE FROM Persons WHERE PersonID = 1;
-
 * DCL (Data Control Language)
   * COMMIT : 변경내용을 반영한다.
   * ROLLBACK : 변경내용을 반영하지 않고 되돌린다.
@@ -42,7 +40,6 @@ title: 자격증 정보처리기사 이론 정리
 
 * Degree : Row (Attributes, Tuble, Record) 개수
 * Cardinality : Colunm 개수
-
 * 슈퍼키 (Super Key): 각 행을 유일하게 식별할 수 있는 하나 또는 그 이상의 속성들의 집합을 의미한다.
 * 후보키 (Candidate Key) : 각 행을 유일하게 식별할 수 있는 최소한의 속성들의 집합을 의미한다.
 * 기본키 (Primary Key) : 후보키들 중에서 하나를 선택한 키를 의미한다.
@@ -59,7 +56,6 @@ title: 자격증 정보처리기사 이론 정리
 * 완전 함수적 종속성 : 하나의 속성이 모든 기본키에 종속하는 경우를 의미한다.
 * 부분 함수적 종속성 : 하나의 속성이 일부 기본키에 종속하는 경우를 의미한다.
 * 이행적 함수 종속성 : X->Y, Y->Z 일때 X->Z의 관계를 갖는 경우를 의미한다.
-
 * 1NF : 하나의 속성이 단일값을 갖도록 변경하는 과정을 의미한다.
 * 2NF : 1NF 조건을 만족시키면서 완전 함수적 종속성을 만족시키도록 변경하는 과정을 의미한다.
 * 3NF : 2NF 조건을 만족시키면서 이행적 함수 종속성을 제거하는 과정을 의미한다.

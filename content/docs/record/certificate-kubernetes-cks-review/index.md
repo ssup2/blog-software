@@ -6,7 +6,6 @@ title: 자격증 CKS 시험 정리/후기
 
 * 시간
   * 2시간 16문제
-
 * 참고 가능한 Site
   * Kubernetes
     * https://kubernetes.io/docs/home/
@@ -20,7 +19,6 @@ title: 자격증 CKS 시험 정리/후기
     * https://gitlab.com/apparmor/apparmor/-/wikis/Documentation
   * CKA, CKAD와 다르게 Kubernetes외의 별도의 Tool도 이용하기 때문에 위의 Site들을 Bookmark에 미리 등록하는것이 좋음
   * 나머지 Site 참고 불가능
-
 * 시험 환경
   * Kuberntes v1.21
 
@@ -33,7 +31,6 @@ title: 자격증 CKS 시험 정리/후기
   * Webcam
   * Microphone
   * 여권
-
 * 시험 환경 Check
   * https://www.examslocal.com/ScheduleExam/Home/CompatibilityCheck
 
@@ -41,7 +38,6 @@ title: 자격증 CKS 시험 정리/후기
 
 * kubectl bash autocompletion 동작 확인
   * https://kubernetes.io/docs/reference/kubectl/cheatsheet/
-
 * tmux 동작 확인
   * https://linuxize.com/post/getting-started-with-tmux/
 
@@ -51,22 +47,17 @@ title: 자격증 CKS 시험 정리/후기
   * ctrl + insert
 * Windows Paste
   * shift + insert
-
 * kubectl
   * Resoruce API Version 확인 : kubectl api-resources
   * Resource Spec/Status 확인 : kubectl explain --recursive {resource}
-
 * AppArmor
   * Profile 적용 : apparmor_parser {profile_path}
   * Profile 확인 : aa-status \| grep {profile_name}
-
 * kubesec
   * Resource 검사 : kubesec scan {resource}
-
 * Trivy
   * Image 검사 : trivy image --severity {UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL} {image_name}
   * Tar Image 검사 : trivy image --severity {UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL} --input {image_tar}
-  
 * Falco
   * Falco 시작 : systemctl start falco
   * Falco Config 설정 변경 : vim /etc/falco/falco.yaml

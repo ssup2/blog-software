@@ -6,13 +6,11 @@ title: 자격증 CKAD 시험 정리/후기
 
 * 시간
   * 2시간 16문제
-
 * 참고 가능한 Site
   * https://kubernetes.io/docs/home/
   * https://github.com/kubernetes/
   * https://kubernetes.io/blog/
   * 나머지 Site 참고 불가능
-
 * 시험 환경
   * Kuberntes v1.21
 
@@ -23,7 +21,6 @@ title: 자격증 CKAD 시험 정리/후기
   * Webcam
   * Microphone
   * 여권
-
 * 시험 환경 Check
   * https://www.examslocal.com/ScheduleExam/Home/CompatibilityCheck
 
@@ -31,7 +28,6 @@ title: 자격증 CKAD 시험 정리/후기
 
 * kubectl bash autocompletion 동작 확인
   * https://kubernetes.io/docs/reference/kubectl/cheatsheet/
-
 * tmux 동작 확인
   * https://linuxize.com/post/getting-started-with-tmux/
 
