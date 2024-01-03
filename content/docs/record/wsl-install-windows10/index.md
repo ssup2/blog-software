@@ -46,7 +46,6 @@ WSL Ubuntu가 Default 계정으로 root를 이용하도록 설정한다. WSL Ubu
 위의 링크에서 Installer를 받아 설치한다.
 
 ``` {caption="[파일 1] WSLtty grubbox Theme", linenos=table}
-{% highlight text %}
 ForegroundColour=235,219,178
 BackgroundColour=29,32,33
 CursorColour=253,157,79
