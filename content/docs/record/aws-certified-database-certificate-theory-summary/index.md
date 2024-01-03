@@ -83,6 +83,25 @@ title: AWS Certified Database 자격증 이론 정리
   * Inter-AZ Traffic 비용
   * VPC Outbound Traffic 비용
 
+### 3.2. Parameter Group
+
+* DB Engine별 Default Parameter Group 존재
+* Default Parameter Group을 상속하여 Custom Parameter Group 생성 가능
+* 동일 Region의 DB Instance에 Parameter Group 적용 가능
+* Parameter Examples
+  * autocommit
+  * time_zone
+  * force_ssl
+  * default_storage_engine
+  * max_connections
+* Parameter 변경
+  * Dynamic Parameter의 경우 변경시 곧바로 적용
+  * Static Parameter의 경우 DB Reboot 필요
+    * Static Parameter의 경우 변경 시 DB Reboot 전에는 pending-reboot 상태를 유지
+    * 재부팅 이후에는 in-sync 상태로 변경
+
+### 3.3. Option Group
+
 ## 4. 참고
 
 * [https://www.udemy.com/course/aws-certified-database-specialty-dbs/](https://www.udemy.com/course/aws-certified-database-specialty-dbs/)]
