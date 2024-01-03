@@ -1,5 +1,5 @@
 ---
-title: 자격증 AWS Certified Database 이론 정리
+title: AWS Certified Database 자격증 이론 정리
 ---
 
 ## 1. Base

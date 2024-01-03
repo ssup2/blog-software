@@ -1,5 +1,5 @@
 ---
-title: 자격증 AWS Solutions Architect Associate 이론 정리
+title: AWS Solutions Architect Associate 자격증 이론 정리
 ---
 
 ## 1. Region, Availability Zone

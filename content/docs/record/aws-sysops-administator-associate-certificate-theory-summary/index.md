@@ -1,5 +1,5 @@
 ---
-title: 자격증 AWS SysOps Administrator Associate 시험 정리
+title: AWS SysOps Administrator Associate 자격증 시험 정리
 ---
 
 ## 1. Base

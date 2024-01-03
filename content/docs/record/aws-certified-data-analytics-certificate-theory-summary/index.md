@@ -1,5 +1,5 @@
 ---
-title: 자격증 AWS Certified Data Analytics 이론 정리
+title: AWS Certified Data Analytics 자격증 이론 정리
 ---
 
 ## 1. Base
