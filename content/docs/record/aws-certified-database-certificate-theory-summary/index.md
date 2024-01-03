@@ -50,6 +50,39 @@ title: AWS Certified Database 자격증 이론 정리
 
 ### 2.3. Non-relational Database
 
-## 3. 참고
+* NoSQL
+* Semi-structured, Unstructured Data에 적합
+* 정규화되지 않는 형태로 Data 저장
+* Big Data에 적합
+  * High Volume, High Velocity, High Variety
+* Low-latency Application에 적합
+* 유연한 Data Model
+* OLAP Workload에 부적합
+
+## 3. Amazon RDS
+
+* Relational Database Service
+* VPC 내부에 Cluster 생성
+* EBS를 Volume Storage로 이용하며 Volume Size Auto-scailing 기능 제공
+* Backup 기능 제공
+* Snapsho 기능 제공, Cross AZ 가능
+* CloudWatch를 통한 Monitoring 기능 제공
+* RDS Event를 통한 Event Notificate 제공
+
+### 3.1. 비용
+
+* Instance Type
+  * On-demand
+  * Reserved
+* Storage
+  * Data 저장 용량
+  * Backup 용량
+  * Snapshot 용량
+  * I/O Request 횟수
+* Data Transter
+  * Inter-AZ Traffic 비용
+  * VPC Outbound Traffic 비용
+
+## 4. 참고
 
 * [https://www.udemy.com/course/aws-certified-database-specialty-dbs/](https://www.udemy.com/course/aws-certified-database-specialty-dbs/)]
