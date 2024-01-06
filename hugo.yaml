@@ -32,7 +32,7 @@ menu:
     pageRef: /docs
     weight: 1
   - name: Me
-    pageRef: /ssup2
+    pageRef: /me
     weight: 2
   - name: Search
     weight: 3
@@ -58,8 +58,8 @@ params:
     displayTitle: true
     displayLogo: true
     logo:
-      path: images/logo.svg
-      dark: images/logo-dark.svg
+      path: images/logo/logo-black.png
+      dark: images/logo/logo-white.png
       # width: 40
       # height: 20
       # link: /
