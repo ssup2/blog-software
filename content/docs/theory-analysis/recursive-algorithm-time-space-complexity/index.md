@@ -1,16 +1,16 @@
 ---
-title: Algorithm 재귀 알고리즘 시간 복잡도, 공간 복잡도
+title: 재귀 알고리즘 시간/공간 복잡도
 ---
 
 재귀 알고리즘의 시간복잡도, 공간복잡도 계산법을 정리한다.
 
-## 1. 재귀 알고리즘 시간 복잡도, 공간 복잡도
+## 1. 재귀 알고리즘 시간 복잡도/공간 복잡도
 
 ### 1.1. Factorial
 
 ``` {caption="[Function 1] Factorial"}
 f(0) = 1
-f(n) = n * f(n - 1) 
+f(n) = n * f(n - 1)
 ```
 
 ``` {caption="[Explanation 1] Factorial 시간 복잡도"}
