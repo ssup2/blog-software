@@ -8,17 +8,17 @@ Golang을 활용하여 Google OIDC 기반의 Token을 획득하고 분석한다.
 
 Google Cloud Platform에서 OIDC 기반의 ID Token, OAuth 기반의 Access Token을 얻기 위해서는 설정이 필요하다.
 
-![[그림 1] Project 생성](images/project-create.png){: width="800px"}
+{{< figure caption="[Figure 1] Project 생성" src="images/project-create.png" width="700px" >}}
 
-[그림 1]과 같이 [https://console.developers.google.com](https://console.developers.google.com/)에 접근하여 Project를 생성한다.
+[Figure 1]과 같이 [https://console.developers.google.com](https://console.developers.google.com/)에 접근하여 Project를 생성한다.
 
-![[그림 2] OAuth 추가](images/oauth-add.png){: width="800px"}
+{{< figure caption="[Figure 2] OAuth 추가" src="images/oauth-add.png" width="900px" >}}
 
-[그림 2]와 같이 "API 및 서비스" 항목으로 들어가 "OAuth 클라이언트 ID" 추가를 선택하여 OAuth 인증 방식을 추가한다.
+[Figure 2]와 같이 "API 및 서비스" 항목으로 들어가 "OAuth 클라이언트 ID" 추가를 선택하여 OAuth 인증 방식을 추가한다.
 
-![[그림 3] OAuth Client ID 생성](images/oauth-clientid-create.png){: width="800px"}
+{{< figure caption="[Figure 3] OAuth Client ID 생성" src="images/oauth-clientid-create.png" width="800px" >}}
 
-[그림 3]과 같이 "웹 애플리케이션" 유형의 Client ID를 생성한다. "이름"은 임의로 지정하면 된다. "리다이렉션 URI"의 경우에는 예제 Code에서 처리할 경로인 "/auth/google/callback"을 명시한다. 생성이 완료되면 **Client ID**와 **Client Secret**을 확인한다.
+[Figure 3]과 같이 "웹 애플리케이션" 유형의 Client ID를 생성한다. "이름"은 임의로 지정하면 된다. "리다이렉션 URI"의 경우에는 예제 Code에서 처리할 경로인 "/auth/google/callback"을 명시한다. 생성이 완료되면 **Client ID**와 **Client Secret**을 확인한다.
 
 ## 2. App Code
 
@@ -156,7 +156,7 @@ func main() {
 
 ## 3. Google 인증/인가
 
-![[그림 4] Google 인증](images/google-authn.png){: width="600px"}
+{{< figure caption="[Figure 4] Google 인증" src="images/google-authn.png" width="600px" >}}
 
 ```text {caption="[Text 1] Google 인증 URL"}
 https://accounts.google.com/o/oauth2/v2/auth/identifier?
