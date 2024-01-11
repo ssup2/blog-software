@@ -1,4 +1,4 @@
-module ssup2/docs-software
+module ssup2/blog-software
 
 go 1.21.1
 

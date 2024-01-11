@@ -40,7 +40,7 @@ menu:
       type: search
   - name: GitHub
     weight: 4
-    url: https://github.com/ssup2/docs-software
+    url: https://github.com/ssup2/blog-software
     params:
       icon: github
 
