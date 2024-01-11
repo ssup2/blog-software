@@ -1394,11 +1394,64 @@ $ aws emr-containers start-job-run \
 
 StartJobRun API를 통해서도 spark-submit CLI에서 설정 가능한 다양한 설정들을 동일하게 설정이 가능하다. [Shell 3]은 Promethues로 Monitoring 수행을 위한 예제를 나타내고 있다.
 
-## 3. ACK Controller
+### 2.1. with ACK EMR Container Controller
 
 {{< figure caption="[Figure 2] Spark on AWS EKS Architecture with ACK EMR Container Controller" src="images/spark-aws-eks-architecture-ack-emr-container-controller.png" width="1000px" >}}
 
-## 4. 참조
+AWS에서는 StartJobRun API를 기반으로 Spark Job을 제출하는 방식을 Kubernetes의 Object를 활용할 수 있도록 ACK EMR Container Controller를 제공하고 있다. [Figure 2]는 ACK EMR Container Controller를 기반으로 StartJobRun API를 통해서 Spark Job을 제출하는 과정을 나타내고 있다.
+
+ACK EMR Container Controller를 AWS EKS Cluster에 설치하면 `Virtual Cluster`와 `Job Run` 두 가지 Custom Resource 이용이 가능해진다. `Virtual Cluster`는 ACK EMR Container Controller가 설치된 AWS EKS Cluster의 특정 Namespace를 대상으로 EMR on EKS의 Virtual Cluster를 설정하는데 이용하는 Custome Resource이며, `Job Run`은 StartJobRun API를 통해서 Spark Job을 제출하는 경우 이용하는 Custom Resource이다.
+
+```yaml {caption="[File 7] JobRun Example", linenos=table}
+apiVersion: emrcontainers.services.k8s.aws/v1alpha1
+kind: JobRun
+metadata:
+  name: pi
+  namespace: emr-ack
+spec:
+  name: pi
+  virtualClusterID: kkm9hr2cypco1341w5b0iwuaj
+  executionRoleARN: "arn:aws:iam::[account-id]:role/ts-eks-emr-eks-emr-ack"
+  releaseLabel: "emr-6.7.0-latest"
+  jobDriver:
+    sparkSubmitJobDriver:
+      entryPoint: "local:///usr/lib/spark/examples/src/main/python/pi.py"
+      entryPointArguments:
+      sparkSubmitParameters: "--conf spark.executor.instances=2 --conf spark.executor.memory=2G --conf spark.executor.cores=1 --conf spark.driver.cores=1"
+  configurationOverrides: |
+    ApplicationConfiguration: null
+    MonitoringConfiguration: null
+```
+
+```yaml {caption="[File 8] JobRun Example with Logging", linenos=table}
+apiVersion: emrcontainers.services.k8s.aws/v1alpha1
+kind: JobRun
+metadata:
+  name: pi-logs
+  namespace: emr-ack
+spec:
+  name: pi-logs
+  virtualClusterID: kkm9hr2cypco1341w5b0iwuaj
+  executionRoleARN: "arn:aws:iam::[account-id]:role/ts-eks-emr-eks-emr-ack"
+  releaseLabel: "emr-6.8.0-latest"
+  jobDriver:
+    sparkSubmitJobDriver:
+      entryPoint: "local:///usr/lib/spark/examples/src/main/python/pi.py"
+      entryPointArguments:
+      sparkSubmitParameters: "--conf spark.driver.cores=1 --conf spark.driver.memory=512M --conf spark.executor.instances=1 --conf spark.executor.cores=1 --conf spark.executor.memory=512M"
+  configurationOverrides: |
+    MonitoringConfiguration:
+      PersistentAppUI: "ENABLED"
+      CloudWatchMonitoringConfiguration:
+        LogGroupName: "spark-startjobrun"
+        LogStreamNamePrefix: "pi-logs"
+      S3MonitoringConfiguration:
+        LogUri: "s3://ssup2-spark/startjobrun/"
+```
+
+[File 7]은 단순한 Job Run의 예제를 나타내고 있으며, [File 8]은 Logging 설정이 적용된 Job Run의 예제를 나타내고 있다. 설정 값들을 살펴보면 aws CLI를 통해서 설정하는 옵션들을 동일하게 Job Run에 설장할 수 있는것을 확인할 수 있다.
+
+## 3. 참조
 
 * EMR on EKS Container Image : [https://gallery.ecr.aws/emr-on-eks](https://gallery.ecr.aws/emr-on-eks)
 * StartJobRun Parameter : [https://docs.aws.amazon.com/emr/latest/EMR-on-EKS-DevelopmentGuide/emr-eks-jobs-CLI.html#emr-eks-jobs-parameters](https://docs.aws.amazon.com/emr/latest/EMR-on-EKS-DevelopmentGuide/emr-eks-jobs-CLI.html#emr-eks-jobs-parameters)
