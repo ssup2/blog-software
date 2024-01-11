@@ -1,5 +1,5 @@
 baseURL: https://ssup2.github.io/docs-software
-title: ssup2 Docs / Software
+title: ssup2 Blog / Software
 
 # Import hextra as module
 module:
@@ -74,7 +74,7 @@ params:
 
   editURL:
     enable: true
-    base: https://github.com/ssup2/docs-software/edit/main/content
+    base: https://github.com/ssup2/blog-software/edit/main/content
 
   footer:
     enable: true
@@ -87,7 +87,7 @@ params:
     type: giscus
 
     giscus:
-      repo: ssup2/docs-software
+      repo: ssup2/blog-software
       repoId: R_kgDOK-OhAA
       category: General
       categoryId: DIC_kwDOK-OhAM4CcDhM
