@@ -12,7 +12,7 @@ Kubebuilder는 Kubernetes Controller 개발을 도와주는 SDK이다. 사용자
 
 ### 1.1. Controller Manager Archiecture
 
-{{< figure caption="[Figure 1] Controller Manager Architecture" src="images/controller-manager-architecture.png" width="1000px" >}}
+{{< figure caption="[Figure 1] Controller Manager Architecture" src="images/controller-manager-architecture.png" width="800px" >}}
 
 [Figure 1]은 Kubebuilder로 구현한 Controller Manager의 Architecture를 나타내고 있다. Controller Manager는 Kubernetes Cache, Kubernetes Client, WorkQueue, Controller로 구성되어 있다. **Kubernetes Cache**는 Kubernetes API Server의 부하를 줄이기 위해 Kubernetes API Server로부터 가져온 정보를 Caching하는 역할을 수행한다. Kubernetes Cache 내부에는 Informer가 존재한다. **Informer**는 Controller가 관리해야하는 Object (Resource)를 Watch하여 Object의 생성/삭제/변경 Event를 전달받는 역할을 수행한다. Informer가 수신한 Object Evnet 정보는 Object의 Name 및 Object가 위치한 Namespace 정보만 추출되어 Work Queue에 Enqueue된다.
 
