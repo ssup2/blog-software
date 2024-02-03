@@ -20,18 +20,15 @@ public class MyComponentB {
 
 ## 2. @Configuration
 
-{% highlight java linenos %}
+```java {caption="[Code 2] @Configuration 예제 1", linenos=table}
 package com.ssup2;
 
 @Component
 public class MyBeanB {
 }
-{% endhighlight %}
-<figure>
-<figcaption class="caption">[Code 2] @Configuration 예제 1</figcaption>
-</figure>
+```
 
-{% highlight java linenos %}
+```java {caption="[Code 3] @Configuration 예제 2", linenos=table}
 @Configuration
 @ComponentScan("com.ssup2")
 public class MyConfig {
@@ -41,16 +38,13 @@ public class MyConfig {
         return new myBeanA();
     }
 }
-{% endhighlight %}
-<figure>
-<figcaption class="caption">[Code 3] @Configuration 예제 2</figcaption>
-</figure>
+```
 
 `@Configuration`은 Spring에게 **Bean Method**를 포함하고 있는 Class라는걸 알려주기 위한 Annotation이다. 또한 `@Configuration`은 Spring의 Component Scanner에게 Component의 Package를 알려주어, Component Scanner가 Component를 발견 할 수 있도록 도와준다. [Code 2], [Code 3]에서 `@Bean`을 이용하여 `myBeanA`이라는 Bean Method를 정의하고 있다. 또한 `@ComponentScan`을 이용하여 Component Scanner에게 `MyBeanB`가 있는 Package를 알려주고 있다. Configuration은 `@Component`를 상속하고 있다. 따라서 `@Configuration`이 붙은 Class의 Instance 역시 Spring의 Bean으로 관리된다.
 
 ### 2.1. @Bean
 
-{% highlight java linenos %}
+```java {caption="[Code 4] @Bean 예제", linenos=table}
 public class MyBeanA {
 }
 
@@ -70,16 +64,13 @@ public class MyConfig {
         return new myBeanB();
     }
 }
-{% endhighlight %}
-<figure>
-<figcaption class="caption">[Code 4] @Bean 예제</figcaption>
-</figure>
+```
 
 `@Bean`은 Bean Method에 붙여 해당 Method가 Bean Method인 것을 Spring에게 알리는 역할을 수행한다. Bean Method는 반드시 Instance를 반환한다. Bean Method를 통해 생성되는 Bean의 Default 이름은 Method 이름이 된다. [Code 4]의 `myBeanA()` Method를 통해 생성되는 Bean의 이름은 `myBeanA`가 된다. 또한 `@Bean`의 Value를 통해서 Bean Method를 통해 생성되는 Bean의 이름을 지정할 수 있다. [Code 4]의 `myBeanB()` Method를 통해 생성되는 Bean의 이름은 `@Bean`의 Value인 `myBeanC`가 된다.
 
 ## 3. @Service, @Controller, @Repository
 
-{% highlight java linenos %}
+```java {caption="[Code 5] @Service, @Controller, @Repository 예제", linenos=table}
 @Service
 public class MyService {
 }
@@ -91,10 +82,7 @@ public class MyController {
 @Repository
 public class MyRepository {
 }
-{% endhighlight %}
-<figure>
-<figcaption class="caption">[Code 5] @Service, @Controller, @Repository 예제</figcaption>
-</figure>
+```
 
 `@Service`는 Business Logic을 담고있는 Class에 붙인다. `@Controller`는 MVC Pattern의 Controller를 담당하는 Class에 붙인다. `@Repository`는 Data Access를 담당하는 Class에 붙인다. `@Service`, `@Controller`, `@Repository` 모두 `@Component`를 상속하고 있다. 따라서 앞의 3개의 Annotation이 붙은 Class의 Instance는 Spring의 Bean으로 관리된다.
 
