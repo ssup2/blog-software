@@ -14,7 +14,7 @@ Java의 모든 Instance(Object)는 하나의 Monitor를 소유하고 있다. 각
 
 ### 2.1. synchronized
 
-Java의 synchronized Keyword는 Thread 사이의 동기화를 맞추는 기법중 하나이다. synchronized Keywork는 각 일반 Instance안에 존재하는 Monitor를 이용하여 Thread 사이의 동기화를 수행한다.
+Java의 `synchronized` Keyword는 Thread 사이의 동기화를 맞추는 기법중 하나이다. `synchronized` Keyword는 각 일반 Instance안에 존재하는 Monitor를 이용하여 Thread 사이의 동기화를 수행한다.
 
 ```java {caption="[Code 1] synchronized Method", linenos=table}
 public class TwoMap {
@@ -37,7 +37,7 @@ public class TwoMap {
 }
 ```
 
-synchronized Keyword는 일반적으로 Method와 많이 이용된다. [Code 1]은 synchronized Method 이용 예제이다. synchronized Keyword가 Method에 붙으면 Thread는 Method를 호출하는 Instance의 Monitor의 Lock을 획득해야 실행이 가능하다. 따라서 TwoMap이라는 Instance를 하나를 만들고 다수의 Thread들이 동시에 TwoMap Instance의 Method들을 호출해도, 동시에 오직 하나의 Method만 실행된다.
+`synchronized` Keyword는 일반적으로 Method와 많이 이용된다. [Code 1]은 `synchronized` Method 이용 예제이다. `synchronized` Keyword가 Method에 붙으면 Thread는 Method를 호출하는 Instance의 Monitor의 Lock을 획득해야 실행이 가능하다. 따라서 `TwoMap` 이라는 Instance를 하나를 만들고 다수의 Thread들이 동시에 `TwoMap` Instance의 Method들을 호출해도, 동시에 오직 하나의 Method만 실행된다.
 
 ```java {caption="[Code 2] synchronized Instance", linenos=table}
 public class TwoMap {
@@ -70,7 +70,7 @@ public class TwoMap {
 }
 ```
 
-synchronized Keyword는 일반 Instance와 같이 이용될 수 있다. [Code 2]는 synchronized Keyword에 Instance를 이용하는 예제이다. 이 경우 Thread가 synchronized Keyword의 괄호안에 명시된 Instance의 Monitor의 Lock을 획득해야 synchronized Keyword Block 내부의 Code들을 실행할 수 있다. 따라서 [Code 2]에서 put1(), get1() Method는 syncObj1의 Monitor를 이용하기 때문에 put1(), get1() Method는 동시에 실행되지 않는다. 반면에 syncObj2의 Monitor를 이용하는 put2() Method는 put1() Method와 동시에 실행 될 수 있다.
+`synchronized` Keyword는 일반 Instance와 같이 이용될 수 있다. [Code 2]는 `synchronized` Keyword에 Instance를 이용하는 예제이다. 이 경우 Thread가 `synchronized` Keyword의 괄호안에 명시된 Instance의 Monitor의 Lock을 획득해야 `synchronized` Keyword Block 내부의 Code들을 실행할 수 있다. 따라서 [Code 2]에서 `put1()`, `get1()` Method는 `syncObj1`의 Monitor를 이용하기 때문에 `put1()`, `get1()` Method는 동시에 실행되지 않는다. 반면에 `syncObj2`의 Monitor를 이용하는 `put2()` Method는 `put1()` Method와 동시에 실행 될 수 있다.
 
 ```java {caption="[Code 3] wait(), notifyAll()", linenos=table}
 public class Channel {
@@ -109,9 +109,9 @@ public class Channel {
 }
 ```
 
-Thread가 Instance의 Monitor의 Lock을 가지고 Code를 실행하다가 Lock을 다른 Thread에게 양도한 이후에 대기해야할 경우 wait() 함수를 이용하면 된다. wait() 함수는 Instance의 Monitor의 Condition Variable을 이용하여 구현되었다. Condition Variable에서 대기중인 Thread는 notify(), notifyAll() 함수를 통해서 깨울수 있다. notify() 함수는 Condition Variable에서 대기중인 임의의 하나의 Thread만을 깨우는 동작을 수행한다. notifyAll() 함수는 Condition Variable에서 대기중인 모든 Thread를 깨운다. 모든 Thread가 깨어나도 하나의 Thread만 Lock을 획득하고 나머지 Thread들은 다시 대기한다.
+Thread가 Instance의 Monitor의 Lock을 가지고 Code를 실행하다가 Lock을 다른 Thread에게 양도한 이후에 대기해야할 경우 `wait()` 함수를 이용하면 된다. `wait()` 함수는 Instance의 Monitor의 Condition Variable을 이용하여 구현되었다. Condition Variable에서 대기중인 Thread는 `notify()`, `notifyAll()` 함수를 통해서 깨울수 있다. `notify()` 함수는 Condition Variable에서 대기중인 임의의 하나의 Thread만을 깨우는 동작을 수행한다. `notifyAll()` 함수는 Condition Variable에서 대기중인 모든 Thread를 깨운다. 모든 Thread가 깨어나도 하나의 Thread만 Lock을 획득하고 나머지 Thread들은 다시 대기한다.
 
-[Code 3]은 wait(), notifyAll() 함수를 이용하는 예제를 나타내고 있다. send() 함수는 Channel에 Packet이 존재할 경우 wait() 함수를 통해서 대기한다. 이후에 receive() 함수가 호출이 되어 Channel의 Packet이 제거되고 notifyAll() 함수가 호출되면 깨어나 Packet을 Channel에 저장한다. 반대로 receive() 함수는 Channel에 Packet이 존재하지 않을 경우 wait() 함수를 통해서 대기한다. 이후에 send() 함수가 호출이 되어 Channel에 Packet이 저장되고 notifyAll() 함수가 호출되면 깨어나 Packet을 Channel에서 제거한다.
+[Code 3]은 `wait()`, `notifyAll()` 함수를 이용하는 예제를 나타내고 있다. `send()` 함수는 Channel에 Packet이 존재할 경우 `wait()` 함수를 통해서 대기한다. 이후에 `receive()` 함수가 호출이 되어 Channel의 Packet이 제거되고 `notifyAll()` 함수가 호출되면 깨어나 Packet을 Channel에 저장한다. 반대로 `receive()` 함수는 Channel에 Packet이 존재하지 않을 경우 `wait()` 함수를 통해서 대기한다. 이후에 `send()` 함수가 호출이 되어 Channel에 Packet이 저장되고 `notifyAll()` 함수가 호출되면 깨어나 Packet을 Channel에서 제거한다.
 
 ## 2. 참조
 

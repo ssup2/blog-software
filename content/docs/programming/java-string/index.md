@@ -48,7 +48,7 @@ public final class String
     }
 ```
 
-Java에서는 문자열 처리를 위한 String Class를 제공한다. [Code 1]은 Java의 String Class의 일부를 나타내고 있다. String Class의 Member 변수를 살펴보면 모두 **final**이 붙어 있는것을 확인할 수 있다. 즉 String Instance에 한번 저장된 문자열은 변경할 수 없다는 것을 의미한다. 따라서 String Class의 "+" 연산자를 이용하여 문자열을 결합하는 경우 새로운 String Instance가 생성된다. 이러한 특징 때문에 Java Code에서 "+" 연산자를 이용하여 문자열 결합을 많이 수행할 경우, String Instance가 Heap Memory 영역을 점령하여 Heap Memory 공간이 부족할 수 있다.
+Java에서는 문자열 처리를 위한 `String` Class를 제공한다. [Code 1]은 Java의 `String` Class의 일부를 나타내고 있다. `String` Class의 Member 변수를 살펴보면 모두 `final`이 붙어 있는것을 확인할 수 있다. 즉 `String` Instance에 한번 저장된 문자열은 변경할 수 없다는 것을 의미한다. 따라서 `String` Class의 `+` 연산자를 이용하여 문자열을 결합하는 경우 새로운 `String` Instance가 생성된다. 이러한 특징 때문에 Java Code에서 `+` 연산자를 이용하여 문자열 결합을 많이 수행할 경우, `String` Instance가 Heap Memory 영역을 점령하여 Heap Memory 공간이 부족할 수 있다.
 
 ### 1.1. StringBuilder, StringBuffer
 
@@ -181,16 +181,15 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
     }
 ```
 
-Java에서는 문자열 변경이 자주 발생하는 경우에는 String Class를 이용하는것 보다는 StringBuilder Class나 StringBuffer Class를 이용하는 것을 권장한다. [Code 2]는 StringBuilder class를 나타내고 있고, [Code 3]은 StringBuilder Class의 부모 Class인 AbstractStringBuilder Class를 나타내고 있다. AbstractStringBuilder Class의 Member Variable을 보면 final이 붙지 않은 Character Array가 존재하는 것을 확인할 수 있다.
+Java에서는 문자열 변경이 자주 발생하는 경우에는 `String` Class를 이용하는것 보다는 `StringBuilder` Class나 `StringBuffer` Class를 이용하는 것을 권장한다. [Code 2]는 `StringBuilder` class를 나타내고 있고, [Code 3]은 `StringBuilder` Class의 부모 Class인 `AbstractStringBuilder` Class를 나타내고 있다. `AbstractStringBuilder` Class의 Member Variable을 보면 final이 붙지 않은 Character Array가 존재하는 것을 확인할 수 있다.
 
-AbstractStringBuilder Class의 Method를 살펴보면 Character Array를 **Memory Pool**로 이용하고 있으며, 문자열 조작시 Character Array의 내용을 직접 변경하는 것을 확인할 수 있다. 따라서 StringBuilder Instance를 이용하여 문자열을 조작할 경우 불필요한 Heap Memory 이용을 방지할 수 있다.
+`AbstractStringBuilder` Class의 Method를 살펴보면 Character Array를 **Memory Pool**로 이용하고 있으며, 문자열 조작시 Character Array의 내용을 직접 변경하는 것을 확인할 수 있다. 따라서 `StringBuilder` Instance를 이용하여 문자열을 조작할 경우 불필요한 Heap Memory 이용을 방지할 수 있다.
 
-StringBuffer Class는 StringBuilder Class와 동일한 역활을 수행하지만 Method에 synchronized가 붙어 있어 다수 Thread 환경에서도 Thread-safe하게 이용할수 있다는 특징을 가지고 있다. 반면 단일 Thread 환경에서는 StringBuilder Class에 비해서 낮은 성능을 갖고 있다. 따라서 단일 Thread 환경에서는 StringBuilder Class를 이용하고 다수 Thread 환경에서는 StringBuilder Class를 이용하면 된다.
+`StringBuffer` Class는 `StringBuilder` Class와 동일한 역활을 수행하지만 Method에 `synchronized`가 붙어 있어 다수 Thread 환경에서도 Thread-safe하게 이용할수 있다는 특징을 가지고 있다. 반면 단일 Thread 환경에서는 `StringBuilder` Class에 비해서 낮은 성능을 갖고 있다. 따라서 단일 Thread 환경에서는 `StringBuilder` Class를 이용하고 다수 Thread 환경에서는 `StringBuilder` Class를 이용하면 된다.
 
 ### 1.2. String Literal
 
 ```java {caption="[Code 4] String Literal", linenos=table}
-{% highlight java linenos %}
 // main
 public class main {
     public static void main(String[] args) {
@@ -209,9 +208,9 @@ public class main {
 }
 ```
 
-String Instance를 초기화 하는 방법은 Constructor를 이용하는 방식과, String Literal을 이용하는 방식 2가지가 존재한다. [Code 4]의 4,5 Line은 Constructor를 이용하는 방식을 나타내고 있고, [Code 4]의 7,8 Line은 String Literal을 이용하는 방식을 나타내고 있다. 모든 String Instance가 "ssup2" 문자열을 가지고 있기 때문에 equal() Method를 통한 비교 수행시 문자열이 동일하다는 결과가 나오지만 "==" 연산자로 비교시 서로 다른 결과를 보이는것을 확인할 수 있다.
+`String` Instance를 초기화 하는 방법은 Constructor를 이용하는 방식과, String Literal을 이용하는 방식 2가지가 존재한다. [Code 4]의 4,5 Line은 Constructor를 이용하는 방식을 나타내고 있고, [Code 4]의 7,8 Line은 String Literal을 이용하는 방식을 나타내고 있다. 모든 `String` Instance가 "ssup2" 문자열을 가지고 있기 때문에 `equal()` Method를 통한 비교 수행시 문자열이 동일하다는 결과가 나오지만 "==" 연산자로 비교시 서로 다른 결과를 보이는것을 확인할 수 있다.
 
-Constructor로 String Instance를 초기화를 수행하는 경우 String Instance는 Heap 영역에 새로 할당된다. 따라서 strConstuctor1의 주소와 strConstuctor2의 주소는 서로 다르다. 반면에 String Literal을 이용하여 초기화를 수행하는 경우에는 문자열이 동일하다면 동일한 String Literal을 공유한다. 따라서 strLiteral1의 주소와 strLiteral2의 주소는 동일하다.
+Constructor로 `String` Instance를 초기화를 수행하는 경우 String Instance는 Heap 영역에 새로 할당된다. 따라서 `strConstuctor1`의 주소와 `strConstuctor2`의 주소는 서로 다르다. 반면에 String Literal을 이용하여 초기화를 수행하는 경우에는 문자열이 동일하다면 동일한 String Literal을 공유한다. 따라서 `strLiteral1`의 주소와 `strLiteral2`의 주소는 동일하다.
 
 String Literal은 **Constant String Pool**에 위치한다. Constant String Pool은 Java 6 Version 이하에서는 Heap의 "Permanent Generation" 영역에 위치하고 있고, Java 7 Version 이후에서는 Heap의 "Young/Old Generation"에 위치하여 Garbage Collection의 대상이 된다.
 

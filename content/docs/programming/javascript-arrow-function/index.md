@@ -53,9 +53,9 @@ arrowObject.callFunction()
 // Print arrow ojbect
 ```
 
-일반 함수안에서의 this와 Arrow 함수안에서의 this는 다른 값을 의미한다. [Code 2]는 일반 함수에서의 this와 Arrow 함수에서의 this를 출력하여, this가 어떤 값을 나타내는지를 알아보는 Code이다. regularObject의 callFunction() 함수 내부에서는 일반 함수를 이용하여 this의 정보를 출력하고 있다. arrowObject의 callFunction() 함수 내부에서는 Arrow 함수를 이용하여 this의 정보를 출력하고 있다.
+일반 함수안에서의 `this`와 Arrow 함수안에서의 `this`는 다른 값을 의미한다. [Code 2]는 일반 함수에서의 `this`와 Arrow 함수에서의 `this`를 출력하여, `this`가 어떤 값을 나타내는지를 알아보는 Code이다. regularObject의 `callFunction()` 함수 내부에서는 일반 함수를 이용하여 `this`의 정보를 출력하고 있다. arrowObject의 `callFunction()` 함수 내부에서는 Arrow 함수를 이용하여 `this`의 정보를 출력하고 있다.
 
-일반 함수에서의 this는 함수를 호출한 Object의 정보를 저장하고 있다. 따라서 regularObject의 callFuncton() 함수를 통해서 출력하는 this는 callFuncton() 함수를 호출하는 Window Object의 정보를 출력한다. 반면 Arrow 함수에서 this는 함수를 소유하고 있는 Object의 정보를 저장하고 있다. 따라서 arrowObject의 callFuncton() 함수를 통해서 출력하는 this는 callFuncton() 함수를 소유하고 있는 arrowObject의 정보를 출력한다.
+일반 함수에서의 `this`는 함수를 호출한 Object의 정보를 저장하고 있다. 따라서 regularObject의 `callFuncton()` 함수를 통해서 출력하는 `this`는 `callFuncton()` 함수를 호출하는 Window Object의 정보를 출력한다. 반면 Arrow 함수에서 `this`는 함수를 소유하고 있는 Object의 정보를 저장하고 있다. 따라서 arrowObject의 `callFuncton()` 함수를 통해서 출력하는 this는 `callFuncton()` 함수를 소유하고 있는 arrowObject의 정보를 출력한다.
 
 ## 2. 참고
 

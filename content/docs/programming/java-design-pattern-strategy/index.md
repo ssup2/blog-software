@@ -53,7 +53,7 @@ public class Main {
 }
 ```
 
-[Code 1]은 Java로 구현한 간단한 Strategy Pattern을 나타내고 있다. OperationAdd, OperationSub Class는 Operation Interface를 구현하는 구상 Class이며, 서로 다른 알고리즘(Strategy)을 갖고 있는 Class이다. Operator Class는 알고리즘을 가지고 있는 Operation Class를 Parameter로 받아서 이용하고 있는것을 확인할 수 있다.
+[Code 1]은 Java로 구현한 간단한 Strategy Pattern을 나타내고 있다. `OperationAdd`, `OperationSub` Class는 `Operation` Interface를 구현하는 구상 Class이며, 서로 다른 알고리즘(Strategy)을 갖고 있는 Class이다. `Operator` Class는 알고리즘을 가지고 있는 `Operation` Class를 Parameter로 받아서 이용하고 있는것을 확인할 수 있다.
 
 ## 2. 참조
 

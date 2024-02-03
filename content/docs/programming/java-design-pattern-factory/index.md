@@ -41,7 +41,7 @@ public class Phone extends Product {
 }
 ```
 
-[Code 1]은 Factory Pattern 소개를 위해서 예시로 이용하는 Product Class를 나타내고 있다. Product Class는 Abstract Class 역활을 수행하며, Book, Phone Class는 Product Class를 상속하여 구현한다.
+[Code 1]은 Factory Pattern 소개를 위해서 예시로 이용하는 `Product` Class를 나타내고 있다. `Product` Class는 Abstract Class 역활을 수행하며, `Book`, `Phone` Class는 `Product` Class를 상속하여 구현한다.
 
 ### 1.1. Simple Factory Pattern
 
@@ -97,7 +97,7 @@ public class main {
 }
 ```
 
-Simple Factory Pattern은 의미 그대로 간단하게 구현 가능한 Factory Pattern을 의미한다. [Code 2]는 SimpleProductFactory Class를 통해서 Simple Factory Pattern의 예제를 나타내고 있다. SimpleProductFactory의 getProduct() Method는 type에 따라서 다른 Product 객체를 생성하는 것을 확인할 수 있다. 간단한 구현이 가장 큰 장점이지만, Product의 종류가 추가될때 마다 SimpleProductFactory Class의 Code도 변경되어야 한다는 단점을 갖고 있다. 
+Simple Factory Pattern은 의미 그대로 간단하게 구현 가능한 Factory Pattern을 의미한다. [Code 2]는 `SimpleProductFactory` Class를 통해서 Simple Factory Pattern의 예제를 나타내고 있다. `SimpleProductFactory`의 `getProduct()` Method는 type에 따라서 다른 Product 객체를 생성하는 것을 확인할 수 있다. 간단한 구현이 가장 큰 장점이지만, Product의 종류가 추가될때 마다 `SimpleProductFactory` Class의 Code도 변경되어야 한다는 단점을 갖고 있다.
 
 ### 1.2. Factory Method Pattern
 
@@ -134,7 +134,7 @@ public class main {
 }
 ```
 
-Factory Method Pattern은 Simple Factory의 단점을 보완하는 Pattern이다. Factory Class를 상속하여 단일 Type의 객체를 생성하는 전용 Factory를 만드는 Pattern이다. [Code 3]은 Factory Method Pattern을 나타내고 있다. ProductFactory Class를 상속하여 Book 객체만을 생성하는 BookFactory Factory Class와 Phone 객체만을 생성하는 PhoneFactory Factory Class를 확인할 수 있다. Product의 종류가 추가되더라도 기존의 Factory 관련 Code를 수정할 필요가 없다는 장점을 갖고 있다.
+Factory Method Pattern은 Simple Factory의 단점을 보완하는 Pattern이다. Factory Class를 상속하여 단일 Type의 객체를 생성하는 전용 Factory를 만드는 Pattern이다. [Code 3]은 Factory Method Pattern을 나타내고 있다. `ProductFactory` Class를 상속하여 Book 객체만을 생성하는 `BookFactory` Factory Class와 Phone 객체만을 생성하는 `PhoneFactory` Factory Class를 확인할 수 있다. Product의 종류가 추가되더라도 기존의 Factory 관련 Code를 수정할 필요가 없다는 장점을 갖고 있다.
 
 ### 1.3. Abstract Factory Pattern
 
@@ -182,7 +182,7 @@ public class Main {
 }
 ```
 
-Abstract Factory Pattern은 주입되는 Factory 객체에 따라서 다양한 Type의 객체를 생성할 수 있는 Pattern이다. [Code 4]는 Abstract Factory Pattern를 나타내고 있다. AbstractProductFactory Class에 주입하는 Factory Class에 따라서 다양한 Type의 Product를 생성할 수 있는것을 확인할 수 있다.
+Abstract Factory Pattern은 주입되는 Factory 객체에 따라서 다양한 Type의 객체를 생성할 수 있는 Pattern이다. [Code 4]는 Abstract Factory Pattern를 나타내고 있다. `AbstractProductFactory` Class에 주입하는 Factory Class에 따라서 다양한 Type의 Product를 생성할 수 있는것을 확인할 수 있다.
 
 ## 2. 참조
 

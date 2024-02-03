@@ -89,7 +89,7 @@ public class Main{
 }
 ```
 
-[Code 1]은 Java로 구현한 Command Pattern을 나타내고 있다. Light Class는 Recevier, TurnOnLightCommand/TurnOffLightCommand Class는 Command, Switch Class는 Invoker 역활을 수행한다. main() 함수에서 Switch Instance를 통해서 Light On/Off 동작을 수행하는 것을 확인 할 수 있다.
+[Code 1]은 Java로 구현한 Command Pattern을 나타내고 있다. `Light` Class는 Recevier, `TurnOnLightCommand`/`TurnOffLightCommand` Class는 Command, `Switch` Class는 Invoker 역활을 수행한다. `main()` 함수에서 `Switch` Instance를 통해서 Light On/Off 동작을 수행하는 것을 확인 할 수 있다.
 
 ## 2. 참조
 
