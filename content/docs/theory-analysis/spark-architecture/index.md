@@ -12,7 +12,7 @@ Spark Architecture를 분석한다.
 
 ### 1.1. Spark Core
 
-Spark Core는 Data를 Task 단위로 분산하여 처리하는 역할을 수행한다. Task는 Spark에서 데이터 분산 처리를 위해 고안한 데이터 집합인 **RDD (Resillient Distributed Data)**의 일부로 구성된다. 따라서 RDD 구성 및 처리가 Spark Core의 핵심 역할이다.
+Spark Core는 Data를 Task 단위로 분산하여 처리하는 역할을 수행한다. Task는 Spark에서 데이터 분산 처리를 위해 고안한 데이터 집합인 **RDD** (Resillient Distributed Data)의 일부로 구성된다. 따라서 RDD 구성 및 처리가 Spark Core의 핵심 역할이다.
 
 Cluster Manager는 Task를 수행하는 역할을 수행하며, Spark만을 이용하여 구성하는 Spark Standalone 부터 Hadoop YARN, Mesos, Kubernetes와 같은 별도의 Cluster Manager 이용도 가능하다. Storage는 Data가 저장되는 공간을 의미하며 HDFS, Gluster FS, Amazon S3등을 지원한다. Spark Core는 Java, Scala, Python, R 언어로 API를 제공한다.
 
