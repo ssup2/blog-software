@@ -8,7 +8,7 @@ AWS EKS Cluster에서 Spark Application 동작을 분석한다. AWS EKS Cluster�
 
 AWS EKS에서도 일반적인 Kubernetes Cluster처럼 spark-submit CLI 및 Spark Operator를 이용하여 Spark Application을 동작시킬 수 있다. 이 경우 Architecture 및 동작 방식은 다음의 [Link](https://ssup2.github.io/blog-software/docs/theory-analysis/spark-on-kubernetes/)의 내용처럼 일반적인 Kubernetes Cluster에서 spark-submit CLI 및 Spark Operator를 이용하는 방식과 동일하다.
 
-다만 AWS EKS에서는 Driver, Executor Pod의 Container Image를 **EMR on EKS Spark Container Image**로 이용하는 것을 권장한다. EMR on EKS Spark Container Image에는 아래에 명시된 AWS와 Spark와 연관된 Library 및 Spark Connector가 포함되어 있기 때문이다.
+다만 AWS EKS에서는 Driver, Executor Pod의 Container Image를 **EMR on EKS Spark Container Image**로 이용하는 것을 권장한다. EMR on EKS Spark Container Image에는 EKS 환경에 최적화된 Optimized Spark가 내장되어 있어 Open Source Spark 대비 더 빠른 성능을 보이며, 아래에 명시된 AWS와 연관된 Library 및 Spark Connector가 포함되어 있기 때문이다.
 
 * EMRFS S3-optimized comitter
 * AWS Redshift용 Spark Connector : Spark Application에서 AWS Redshift 접근시 이용
