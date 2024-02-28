@@ -23,7 +23,7 @@ title: Kubernetes 설치 / ClusterAPI, External Cloud Provider 이용 / Ubuntu 1
 
 OpenStack 구성에 맞게 OpenRC 파일을 작성한다.
 
-```text {caption="[Text 1] admin-openrc.sh"}
+```text {caption="[Text 1] admin-openrc.sh", linenos=table}
 export OS_PROJECT_DOMAIN_NAME=default
 export OS_USER_DOMAIN_NAME=default
 export OS_PROJECT_NAME=admin
@@ -171,7 +171,7 @@ OpenStack Cloud Controller Manager에서 이용할 application credential을 생
 
 ## 8. Kubernetes Cluster 생성
 
-```yaml {caption="[Text 2] clouds.yaml"}
+```yaml {caption="[Text 2] clouds.yaml", linenos=table}
 clouds:
   openstack:
     insecure: true
@@ -189,7 +189,7 @@ clouds:
 
 clusterctl에서 이용할 [Text 2]의 내용을 갖고 있는 clouds.yaml 파일을 생성한다.
 
-```yaml {caption="[Text 3] template.yaml"}
+```yaml {caption="[Text 3] template.yaml", linenos=table}
 ---
 apiVersion: cluster.x-k8s.io/v1alpha3
 kind: Cluster
@@ -379,14 +379,13 @@ Kubernetes Cluster를 생성하면 Control Plain (Master Node) VM이 하나만 �
 
 clusterctl 파일을 이용하여 생성한 Kubernetes Cluster의 kubeconfig 파일을 생성한다.
 
-```
+```shell
 (Local)$ kubectl --kubeconfig='/root/.kube/ssup2.kubeconfig' create -f https://raw.githubusercontent.com/cilium/cilium/1.7.11/install/kubernetes/quick-install.yaml
 ```
 
 OpenStack External Cloud Provider 설치전에 Cilium CNI Plugin을 설치하여, OpenStack External Cloud Provider가 설치 될수 있도록 만든다.
 
-```yaml {caption="[Text 4] cloud.conf"}
-{% highlight text %}
+```text {caption="[Text 4] cloud.conf", linenos=table}
 [Global]
 auth-url="http://192.168.0.40:5000/v3"
 application-credential-id="96e2f01837884a59b5d70fa8a6960c9a"
@@ -420,7 +419,7 @@ OpenStack External Cloud Provider를 배포된 이후에 나머지 Control Plain
 
 ## 10. Kubernetes Cluster 동작 확인
 
-```
+```shell
 (Local)$ kubectl get cluster
 NAME    PHASE
 ssup2   Provisioned

@@ -158,7 +158,7 @@ func main() {
 
 {{< figure caption="[Figure 4] Google 인증" src="images/google-authn.png" width="600px" >}}
 
-```text {caption="[Text 1] Google 인증 URL"}
+```text {caption="[Text 1] Google 인증 URL", linenos=table}
 https://accounts.google.com/o/oauth2/v2/auth/identifier?
 client_id=554362356429-cu4gcpn45gb3incmm2v32sofslliffg2.apps.googleusercontent.com&
 nonce=at7kn_XhHFySNbXRelfLwQ&
@@ -172,7 +172,7 @@ state=usovevjnYZYpCTOaalbSWw&flowName=GeneralOAuthFlow
 
 ## 4. ID Token, Access Token
 
-```text {caption="[Text 2] Callback URL"}
+```text {caption="[Text 2] Callback URL", linenos=table}
 http://127.0.0.1:3000/auth/google/callback?state=usovevjnYZYpCTOaalbSWw&
 code=4%2F0AX4XfWgoC8l0tmZ9anfZVb9mgtiYquLKZekXouqAoFKSN4-BZimF7m8wa5nDUElbBD8Jhg&
 scope=email+profile+openid+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email&
@@ -182,7 +182,7 @@ prompt=consent
 
 [Text 2]은 Redirect URL의 예제를 나타내고 있다. "code" Query에는 Authorization Code, "scope" Query에는 Scope 정보등이 포함되어 있는것을 확인할 수 있다.
 
-```json {caption="[Text 3] Callback Result - Access Token, ID Token"}
+```json {caption="[Text 3] Callback Result - Access Token, ID Token", linenos=table}
 {
     "OAuth2Token": {
         "access_token": "ya29.A0ARrdaM8GQORQw-hKwlyNHfVB1cyGkmwRmWZiYOC_AEj8xV8QMEs35nfmVXtGDNrORxvcm9WCSBbujzEX2P-EeTeYmzJyrufai9QttcHQAgq1hfkGjQv7Gd3ZI4aZNl6GiY6fBSToILzPgF1dB-iXwymDVk3F",

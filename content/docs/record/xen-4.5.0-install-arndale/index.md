@@ -19,12 +19,12 @@ title: Xen 4.5.0 설치 / Arndale 환경
 Cross Compiler를 설치한다.
 * Download : https://releases.linaro.org/15.02/components/toolchain/binaries/arm-linux-gnueabihf/gcc-linaro-4.9-2015.02-3-x86_64_arm-linux-gnueabihf.tar.xz
 
-```shell {caption="[파일 1] ~/.bashrc", linenos=table}
+```shell {caption="[File 1] ~/.bashrc", linenos=table}
 ...
 PATH=$PATH:/usr/local/gcc-linaro-arm-linux-gnueabihf-4.8/bin
 ```
 
-/usr/local Directory에 압축을 풀고 ~/.bashrc 파일에 [파일 1]의 내용을 추가하여 어떤 Directory에서라도 Compiler를 실행 할 수 있도록 만든다.
+/usr/local Directory에 압축을 풀고 ~/.bashrc 파일에 [File 1]의 내용을 추가하여 어떤 Directory에서라도 Compiler를 실행 할 수 있도록 만든다.
 
 ## 3. uSD Card Partiton 구성
 
@@ -140,7 +140,7 @@ $ apt-get install xinetd tftp tftpd
 
 tftp Ubuntu Package 설치한다.
 
-``` {caption="[파일 2] /etc/xinetd.d/tftp", linenos=table}
+``` {caption="[File 2] /etc/xinetd.d/tftp", linenos=table}
 service tftp
 {
     socket_type     = dgram
@@ -156,7 +156,7 @@ service tftp
 }
 ```
 
-/etc/xinetd.d/tftp 파일을 [파일 2]의 내용으로 생성한다.
+/etc/xinetd.d/tftp 파일을 [File 2]의 내용으로 생성한다.
 
 ```shell
 $ mkdir /tftpboot
@@ -234,7 +234,7 @@ ext2load mmc 0:1 $dtb_addr_r /exynos5250-arndale.dtb
 ...
 {% endhighlight %}
 <figure>
-<figcaption class="caption">[파일 3] /etc/xinetd.d/tftp</figcaption>
+<figcaption class="caption">[File 3] /etc/xinetd.d/tftp</figcaption>
 </figure>
 
 load-xen-tftp.scr.txt 파일을 통해서 load-xen-uSD.scr.txt 파일을 생성한다.
@@ -291,10 +291,10 @@ description=Debian trusty/armhf crossbuilder
 ...
 {% endhighlight %}
 <figure>
-<figcaption class="caption">[파일 4] /etc/schroot/chroot.d/trusty-armhf-cross</figcaption>
+<figcaption class="caption">[File 4] /etc/schroot/chroot.d/trusty-armhf-cross</figcaption>
 </figure>
 
-/etc/schroot/chroot.d/trusty-armhf-cross 파일을 [파일 4]와 같이 수정한다.
+/etc/schroot/chroot.d/trusty-armhf-cross 파일을 [File 4]와 같이 수정한다.
 
 ```shell
 $ schroot -c trusty-armhf-cross
@@ -353,10 +353,10 @@ auto eth0
 iface eth0 inet dhcp
 {% endhighlight %}
 <figure>
-<figcaption class="caption">[파일 5] 기본 Root Filesystem Image의 /etc/network/interfaces</figcaption>
+<figcaption class="caption">[File 5] 기본 Root Filesystem Image의 /etc/network/interfaces</figcaption>
 </figure>
 
-/etc/network/interfaces를 [파일 5]의 내용으로 설정한다.
+/etc/network/interfaces를 [File 5]의 내용으로 설정한다.
 
 ```shell
 (chroot)$ echo deb http://ports.ubuntu.com/ trusty main >> /etc/apt/sources.list
@@ -374,10 +374,10 @@ respawn
 exec exec /sbin/getty -8 115200 hvc0
 {% endhighlight %}
 <figure>
-<figcaption class="caption">[파일 6] 기본 Root Filesystem Image의 /etc/init/xvc0.conf</figcaption>
+<figcaption class="caption">[File 6] 기본 Root Filesystem Image의 /etc/init/xvc0.conf</figcaption>
 </figure>
 
-/etc/init/xvc0.conf 파일을 [파일 6]의 내용으로 생성하여 getty를 설정한다.
+/etc/init/xvc0.conf 파일을 [File 6]의 내용으로 생성하여 getty를 설정한다.
 
 ```shell
 (chroot) $ echo 'xenfs   /proc/xen    xenfs    defaults   0   0' >> /etc/fstab
@@ -540,10 +540,10 @@ vif = ['bridge=xenbr0']
 extra = "earlyprintk=xenboot console=hvc0 rw rootwait root=/dev/xvda"
 {% endhighlight %}
 <figure>
-<figcaption class="caption">[파일 7] 기본 Root Filesystem Image의 DomU_01.cfg</figcaption>
+<figcaption class="caption">[File 7] 기본 Root Filesystem Image의 DomU_01.cfg</figcaption>
 </figure>
 
-[파일 7]의 내용으로 DomU_01.cfg 파일을 생성한다.
+[File 7]의 내용으로 DomU_01.cfg 파일을 생성한다.
 
 {% highlight text %}
 kernel = "/root/Xen_Guest/DomU_zImage"
@@ -555,10 +555,10 @@ vif = ['bridge=xenbr0']
 extra = "earlyprintk=xenboot console=hvc0 rw rootwait root=/dev/xvda"
 {% endhighlight %}
 <figure>
-<figcaption class="caption">[파일 8] 기본 Root Filesystem Image의 DomU_02.cfg</figcaption>
+<figcaption class="caption">[File 8] 기본 Root Filesystem Image의 DomU_02.cfg</figcaption>
 </figure>
 
-[파일 8]의 내용으로 DomU_02.cfg 파일을 생성한다.
+[File 8]의 내용으로 DomU_02.cfg 파일을 생성한다.
 
 ## 17. DomU 구동
 

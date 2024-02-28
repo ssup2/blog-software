@@ -6,7 +6,7 @@ C언어의 Macro 문법을 정리한다.
 
 ## 1. 문자열화 연산자 (#) 
 
-```c {caption="[Code 1] # Macro 예제", linenos=table}
+```c {caption="[Code 1] # Macro 예제"}
 #include <stdio.h>
 #define PRINT(s)    printf(#s)
 

@@ -45,7 +45,7 @@ cephnode User를 생성한다.
 
 ### 2.2. Deploy Node
 
-```text {caption="[Text 1] Deploy Node - /etc/hosts"}
+```text {caption="[Text 1] Deploy Node - /etc/hosts", linenos=table}
 ...
 10.0.0.11 node01
 10.0.0.12 node02
@@ -96,7 +96,7 @@ Enter same passphrase again:
 SSH Key를 생성 및 복사한다.
 * passphrases는 Empty 상태로 유지한다.
 
-```text {caption="[Text 2] Deploy Node - /home/cephdeploy/.ssh/config"}
+```text {caption="[Text 2] Deploy Node - /home/cephdeploy/.ssh/config", linenos=table}
 Host node01
    Hostname node01
    User cephnode
