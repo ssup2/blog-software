@@ -223,7 +223,7 @@ $ wget http://xenbits.xen.org/people/julieng/load-xen-tftp.scr.txt
 $ mv load-xen-tftp.scr.txt load-xen-uSD.scr.txt
 ```
 
-{% highlight text %}
+```text {caption="[File 3] /etc/xinetd.d/tftp", linenos=table}
 ...
 # Load Linux in memory
 ext2load mmc 0:1 $kernel_addr_r /linux-zImage
@@ -232,10 +232,7 @@ ext2load mmc 0:1 $xen_addr_r /xen-uImage
 # Load the device tree in memory
 ext2load mmc 0:1 $dtb_addr_r /exynos5250-arndale.dtb
 ...
-{% endhighlight %}
-<figure>
-<figcaption class="caption">[File 3] /etc/xinetd.d/tftp</figcaption>
-</figure>
+```
 
 load-xen-tftp.scr.txt 파일을 통해서 load-xen-uSD.scr.txt 파일을 생성한다.
 
@@ -283,16 +280,13 @@ $ mv /etc/schroot/chroot.d/trusty-amd64-sbuild-*(random suffix) /etc/schroot/chr
 
 root를 구성한다.
 
-{% highlight text %}
+```text {caption="[File 4] /etc/schroot/chroot.d/trusty-armhf-cross", linenos=table}
 ...
 [trusty-armhf-cross]
 ...
 description=Debian trusty/armhf crossbuilder
 ...
-{% endhighlight %}
-<figure>
-<figcaption class="caption">[File 4] /etc/schroot/chroot.d/trusty-armhf-cross</figcaption>
-</figure>
+```
 
 /etc/schroot/chroot.d/trusty-armhf-cross 파일을 [File 4]와 같이 수정한다.
 
@@ -348,13 +342,10 @@ Root Filesystem을 구성한다.
 
 root password를 설정한다. 
 
-{% highlight text %}
+```text {caption="[File 5] 기본 Root Filesystem Image의 /etc/network/interfaces", linenos=table}
 auto eth0
 iface eth0 inet dhcp
-{% endhighlight %}
-<figure>
-<figcaption class="caption">[File 5] 기본 Root Filesystem Image의 /etc/network/interfaces</figcaption>
-</figure>
+```
 
 /etc/network/interfaces를 [File 5]의 내용으로 설정한다.
 
@@ -368,14 +359,11 @@ Repository를 설정한다.
 (chroot)$ cp /etc/init/tty1.conf /etc/init/xvc0.conf
 ```
 
-{% highlight text %}
+```text {caption="[File 6] 기본 Root Filesystem Image의 /etc/init/xvc0.conf", linenos=table}
 ...
 respawn
 exec exec /sbin/getty -8 115200 hvc0
-{% endhighlight %}
-<figure>
-<figcaption class="caption">[File 6] 기본 Root Filesystem Image의 /etc/init/xvc0.conf</figcaption>
-</figure>
+```
 
 /etc/init/xvc0.conf 파일을 [File 6]의 내용으로 생성하여 getty를 설정한다.
 
@@ -530,7 +518,7 @@ uSD Card를 Arndale Board에 넣고 Booting하여 Dom0에 진입후 아래의 �
 
 ## 16. DomU Config 파일 생성
 
-{% highlight text %}
+```text {caption="[File 7] 기본 Root Filesystem Image의 DomU_01.cfg", linenos=table}
 kernel = "/root/Xen_Guest/DomU_zImage"
 name = "DomU_01"
 memory = 128
@@ -538,14 +526,11 @@ vcpus = 1
 disk = [ 'phy:/dev/loop0,xvda,w' ]
 vif = ['bridge=xenbr0']
 extra = "earlyprintk=xenboot console=hvc0 rw rootwait root=/dev/xvda"
-{% endhighlight %}
-<figure>
-<figcaption class="caption">[File 7] 기본 Root Filesystem Image의 DomU_01.cfg</figcaption>
-</figure>
+```
 
 [File 7]의 내용으로 DomU_01.cfg 파일을 생성한다.
 
-{% highlight text %}
+```text {caption="[File 8] 기본 Root Filesystem Image의 DomU_02.cfg", linenos=table}
 kernel = "/root/Xen_Guest/DomU_zImage"
 name = "DomU_02"
 memory = 128
@@ -553,10 +538,7 @@ vcpus = 1
 disk = [ 'phy:/dev/loop1,xvda,w' ]
 vif = ['bridge=xenbr0']
 extra = "earlyprintk=xenboot console=hvc0 rw rootwait root=/dev/xvda"
-{% endhighlight %}
-<figure>
-<figcaption class="caption">[File 8] 기본 Root Filesystem Image의 DomU_02.cfg</figcaption>
-</figure>
+```
 
 [File 8]의 내용으로 DomU_02.cfg 파일을 생성한다.
 

@@ -25,6 +25,7 @@ Added user root.
 
 WSL2 VM 내부에서 Samba Server를 설치하고, Samba Server를 위한 root User를 추가한다.
 
+```text {caption="[File 1] /etc/samba/smb.conf", linenos=table}
 {% highlight text %}
 [homes]
   comment = home directories
@@ -32,11 +33,9 @@ WSL2 VM 내부에서 Samba Server를 설치하고, Samba Server를 위한 root U
   browseable = no
   read only = no
 {% endhighlight %}
-<figure>
-<figcaption class="caption">[파일 1] /etc/samba/smb.conf</figcaption>
-</figure>
+```
 
-/etc/samba/smb.conf 파일에 [파일 1]의 내용을 추가한다.
+/etc/samba/smb.conf 파일에 [File 1]의 내용을 추가한다.
 
 ```shell
 (WSL2 Ubuntu)# service smbd restart
@@ -48,13 +47,13 @@ Samba Server를 재시작합니다.
 
 WSL2 VM은 재부팅을 수행할때마다 IP가 변경된다. 따라서 Windows OS에 Port Forwarding Rule을 설정하여 Local Host로 Samba Connection 발생시 WSL2 VM으로 Connection이 전달되도록 설정한다.
 
-```shell {caption="[파일 1] C:\route_ssh_to_wsl.ps1", linenos=table}
+```shell {caption="[File 2] C:\route_ssh_to_wsl.ps1", linenos=table}
 wsl -d ubuntu -u root service smbd restart
 wsl -d ubuntu -u root ip addr add 192.168.10.100/24 broadcast 192.168.10.255 dev eth0 label eth0:1
 netsh interface ip add address "vEthernet (WSL)" 192.168.10.50 255.255.255.0
 ```
 
-[파일 1]의 Script를 작성한다. Script는 192.168.10.100으로 접속시 Samba Server로 접속하게 만든다.
+[File 2]의 Script를 작성한다. Script는 192.168.10.100으로 접속시 Samba Server로 접속하게 만든다.
 
 ## 5. Script를 시작 Script로 등록
 
