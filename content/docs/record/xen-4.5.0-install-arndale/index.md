@@ -19,7 +19,7 @@ title: Xen 4.5.0 설치 / Arndale 환경
 Cross Compiler를 설치한다.
 * Download : https://releases.linaro.org/15.02/components/toolchain/binaries/arm-linux-gnueabihf/gcc-linaro-4.9-2015.02-3-x86_64_arm-linux-gnueabihf.tar.xz
 
-```shell {caption="[File 1] ~/.bashrc", linenos=table}
+```shell {caption="[File 1] ~/.bashrc"}
 ...
 PATH=$PATH:/usr/local/gcc-linaro-arm-linux-gnueabihf-4.8/bin
 ```

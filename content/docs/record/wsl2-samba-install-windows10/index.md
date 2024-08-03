@@ -47,7 +47,7 @@ Samba Server를 재시작합니다.
 
 WSL2 VM은 재부팅을 수행할때마다 IP가 변경된다. 따라서 Windows OS에 Port Forwarding Rule을 설정하여 Local Host로 Samba Connection 발생시 WSL2 VM으로 Connection이 전달되도록 설정한다.
 
-```shell {caption="[File 2] C:\route_ssh_to_wsl.ps1", linenos=table}
+```shell {caption="[File 2] C:\route_ssh_to_wsl.ps1"}
 wsl -d ubuntu -u root service smbd restart
 wsl -d ubuntu -u root ip addr add 192.168.10.100/24 broadcast 192.168.10.255 dev eth0 label eth0:1
 netsh interface ip add address "vEthernet (WSL)" 192.168.10.50 255.255.255.0

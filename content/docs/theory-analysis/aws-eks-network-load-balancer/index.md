@@ -22,7 +22,7 @@ EKS Cluster 외부에 존재하는 App Service Client가 EKS Cluster 내부에 �
 
 [Figure 2]는 EKS Cluster 내부에 존재하는 Pod의 Network를 나타내고 있다. EKS Clsuter 구성시 기본적으로 설치되는 **AWS VPC CNI**는 Pod를 위한 Overlay Network를 구성하지 않고 Node가 소속되어 있는 Subnet을 같이 이용한다. 따라서 Pod의 IP는 Pod가 위치하는 Node의 Subnet에 소속된다. [Figure 2]에서 Node A는 "192.168.0.0/24" Subnet에 소속되어 있기 때문에 Node A에 존재하는 Pod도 "192.168.0.0/24" Subnet에 소속되어 있는것을 확인할 수 있다.
 
-```shell {caption="[Shell 1] Node, Pod Address", linenos=table}
+```shell {caption="[Shell 1] Node, Pod Address"}
 $ kubectl get node
 NAME                                                STATUS   ROLES    AGE     VERSION              INTERNAL-IP      EXTERNAL-IP     OS-IMAGE         KERNEL-VERSION                  CONTAINER-RUNTIME
 ip-192-168-46-6.ap-northeast-2.compute.internal     Ready    <none>   2d21h   v1.18.9-eks-d1db3c   192.168.46.6     52.79.236.233   Amazon Linux 2   4.14.225-169.362.amzn2.x86_64   docker://19.3.13

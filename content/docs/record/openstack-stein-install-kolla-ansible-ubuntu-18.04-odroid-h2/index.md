@@ -680,7 +680,7 @@ OpenStack을 배포하여 OpenStack을 구동한다.
 
 OpenStack 초기화를 수행한다. 초기화가 완료되면 Network, Image, Flavor 등의 Service들이 초기화된다.
 
-```shell {caption="[Shell 1] Deploy Node - /etc/kolla/admin-openrc.sh", linenos=table}
+```shell {caption="[Shell 1] Deploy Node - /etc/kolla/admin-openrc.sh"}
 export OS_PROJECT_DOMAIN_NAME=default
 export OS_USER_DOMAIN_NAME=default
 export OS_PROJECT_NAME=admin

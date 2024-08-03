@@ -41,7 +41,7 @@ Plugin은 Conf 파일에 설정된 Network과 연결되어 있는 Network Interf
 * CNI_NETNS : Target Container의 Network Namespace File의 위치
 * CNI_IFNAME : Network Interface 이름
 
-```shell {caption="[Shell 1] mynet.conf 적용", linenos=table}
+```shell {caption="[Shell 1] mynet.conf 적용"}
 $ export CNI_COMMAND=ADD; export CNI_CONTAINERID=...
 $ /opt/cni/bin/bridge < ~/test_cni/mynet.conf
 {
