@@ -31,4 +31,4 @@ class Solution {
   * 언제나 동일한 연산 수행
 * Space Complexity
   * O(1)
-  * 언제나 동일한 메모리 이용
+  * 함수의 Paramater 및 지역 변수
