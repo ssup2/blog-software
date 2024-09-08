@@ -317,6 +317,7 @@ Golang의 Standard Package를 활용하여 Error Wrapping을 수행할 경우 �
 
 ## 2. 참조
 
+* [https://adrianlarion.com/golang-error-handling-demystified-errors-is-errors-as-errors-unwrap-custom-errors-and-more/](https://adrianlarion.com/golang-error-handling-demystified-errors-is-errors-as-errors-unwrap-custom-errors-and-more/)
 * [https://earthly.dev/blog/golang-errors/](https://earthly.dev/blog/golang-errors/)
 * [https://gosamples.dev/check-error-type/](https://gosamples.dev/check-error-type/)
 * [https://stackoverflow.com/questions/39121172/how-to-compare-go-errors](https://stackoverflow.com/questions/39121172/how-to-compare-go-errors)
