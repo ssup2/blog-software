@@ -18,18 +18,17 @@ def solution(numbers, target):
     return addsub(numbers, 0, 0, target)
 
 def addsub(numbers, depth, sum, target):
+    # Check depth
+    if depth == len(numbers):
+        if target == sum: 
+            return 1
+        else:
+            return 0
+        
+    # Check sum
     number = numbers[depth]
     result = 0
     
-    # Check depth
-    if depth == len(numbers) - 1:
-        if target == sum + number:
-            result += 1
-        if target == sum - number:
-            result += 1
-        return result
-    
-    # Check sum
     result = addsub(numbers, depth + 1, sum + number, target)
     result += addsub(numbers, depth + 1, sum - number, target)
     return result
