@@ -5,15 +5,23 @@ JEKYLL_MARKDOWN_FILE=$1
 JEKYLL_IMAGE_DIR=$2
 HUGO_BLOG_DIR=$3
 
-HUGO_CONTENT_DIRNAME=$(basename "$JEKYLL_MARKDOWN_FILE" | tr 'A-Z' 'a-z' | tr '_' '-')
+HUGO_CONTENT_DIRNAME=$(basename "$JEKYLL_MARKDOWN_FILE" | tr 'A-Z' 'a-z' | tr '_' '-' | sed 's/...$//')
 HUGO_CONTENT_PARENT_DIR="$HUGO_BLOG_DIR"
 HUGO_CONTENT_ROOT_DIR="$HUGO_CONTENT_PARENT_DIR/$HUGO_CONTENT_DIRNAME"
 HUGO_CONTENT_IMAGE_DIR="$HUGO_CONTENT_ROOT_DIR/images"
 
 # Copy the Jekyll markdown file (remove lines 3-7, replace "### " with "## ", and replace "[그림 " with "[Figure ")
 echo "Processing markdown file $JEKYLL_MARKDOWN_FILE to Hugo..."
-mkdir -p "$HUGO_CONTENT_IMAGE_DIR"
-awk 'NR < 3 || NR > 7' "$JEKYLL_MARKDOWN_FILE" | sed 's/^### /## /g' | sed 's/\[그림 /\[Figure /g' > "$HUGO_CONTENT_ROOT_DIR/index.md"
+mkdir -p "$HUGO_CONTENT_ROOT_DIR"
+
+cat "$JEKYLL_MARKDOWN_FILE" \
+    | sed '3,7d' \
+    | sed 's/^### /## /g' \
+    | sed 's/\[그림 /\[Figure /g' \
+    | sed 's/{% highlight \(.*\) %}/```\1 {caption="", linenos=table}/g' \
+    | sed 's/{% endhighlight %}/```/g' \
+    | gsed -E 's/!\[(.*)\]\(.*\/(.*)\.PNG\).*width="([^"]*)".*/{{< figure caption="\1" src="images\/\L\2.png" width="\3" >}}/; s/_/-/g;' \
+    > "$HUGO_CONTENT_ROOT_DIR/index.md"
 
 # Copy Jekyll image files (only if the image directory is not empty)
 if [ -n "$JEKYLL_IMAGE_DIR" ]; then
