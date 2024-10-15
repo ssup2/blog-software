@@ -1,6 +1,5 @@
 ---
 title: 금융 IT 시스템
-draft: true
 ---
 
 ## 1. 금융 IT 시스템
