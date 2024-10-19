@@ -8,7 +8,7 @@ HTTP2를 분석한다.
 
 HTTP/2는 기존 HTTP/1의 느린 성능 개선을 목적으로 탄생하게된 Protocol이다. HTTP/2가 HTTP/1에 비해서 개선된 점들은 다음과 같다.
 
-#### 1.1. Header 압축
+### 1.1. Header 압축
 
 {{< figure caption="[Figure 1] HTTP/2 Header 압축" src="images/http2-header-compression.png" width="900px" >}}
 
@@ -22,7 +22,7 @@ Static Table을 이용하여 변경되지 않은 나머지 Key-value들은 각�
 
 Static Table은 61번 Index까지 갖고 있기 때문에 Dynamic Table의 Index는 62번부터 시작한다. Dynamic Table은 FIFO 형태로 동작한다. 즉 Dynamic Table이 가득차 새로운 Key-value를 저장할 공간이 부족할 경우, 가장 오랜 기간 저장된 Key-value를 제거하고 새로운 Key-value를 저장한다.
 
-#### 1.2. Stream, Multiplexing
+### 1.2. Stream, Multiplexing
 
 {{< figure caption="[Figure 2] HTTP/2 Components" src="images/http2-components.png" width="900px" >}}
 
@@ -36,7 +36,7 @@ HTTP/2에서 Stream이라는 개념이 탄생한 이유는 Server와 Client의 �
 
 [Figure 4]는 HTTP/2에서 Stream을 통해서 실제 어떻게 Multiplexing을 구현하는지를 나타내고 있다. Stream의 구현은 Frame Interleaving을 통해서 구현된다. 각 Stream에 소속되어 있는 Frame들은 시분활을 통해 동시에 전송된다. 목적지에 도착한 Frame들은 Frame Header에 포함된 Stream Number 정보를 통해서 재조합되어 Server 또는 Client에게 전달된다. Frame Header에는 Frame의 Type을 나타내는 정보도 포함되어 있으며 대표적인 Type에는 HTTP/2의 Header가 포함되어 있는 HEADER Type과 HTTP/2의 Body가 포함되어 있는 DATA Type이 존재한다.
 
-#### 1.3. Stream Priority
+### 1.3. Stream Priority
 
 {{< figure caption="[Figure 5] HTTP/2 Stream Priority" src="images/http2-stream-priority.png" width="200px" >}}
 
@@ -44,7 +44,7 @@ HTTP/2의 Stream은 Weight 기반 Priority 기능을 제공한다. Stream Priori
 
 [Figure 5]에서 Stream A의 Weight는 12, Stream B에는 4의 Weight가 설정되어 있기 때문에, Stream A와 Stream B의 Resource 비율은 3:1이 된다. Stream B의 하위 Stream은 Stream C 밖에 없기 때문에 Stream B와 Stream C의 Resource 비율은 1:1이 된다. Stream C의 하위 Stream은 Weight가 8인 Stream D와 Weight가 4인 Stream E가 존재하기 때문에 Stream D는 Stream C가 이용할 수 있는 Resource의 2/3만큼 쓸수 있고, Stream C는 Stream D가 이용할 수 있는 Resource의 1/3만큼 쓸수 있다. 따라서 Stream C, D, E의 비율은 3:2:1이 된다. 종합하면 Stream A, B, C, D, E의 Resource 비율은 9:3:3:2:1이 된다.
 
-#### 1.4. Server Push
+### 1.4. Server Push
 
 {{< figure caption="[Figure 6] HTTP/2 Server Push" src="images/http2-server-push.png" width="450px" >}}
 

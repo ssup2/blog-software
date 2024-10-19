@@ -10,7 +10,7 @@ Kubernetes Architecture를 분석한다.
 
 [Figure 1]은 Kubernetes Architecture를 나타내고 있다. Kubernetes는 Kubernetes를 관리하는 Master Node와 배포된 Application이 동작하는 Worker Node로 구성되어 있다. Kubernetes의 설정에 따라서 Master Node는 Worker Node의 역할도 수행할 수 있다.
 
-#### 1.1. All Node
+### 1.1. All Node
 
 kubelet은 Systemd의 Service와 같은 Node의 Daemon으로 동작하며, Kuberntes Cluster를 구성하는 모든 Node에서 동작한다. kube-proxy, Network Daemon 둘다 Daemonset의 Pod로 동작하며, kubelet처럼 Kubernetes Cluster를 구성하는 모든 Node에서 동작한다.
 
@@ -20,7 +20,7 @@ kubelet은 Systemd의 Service와 같은 Node의 Daemon으로 동작하며, Kuber
 
 * Network Daemon : kube-apiserver로부터 정보를 얻어와 Pod 사이에 통신이 가능하도록 Node (Host)의 Network를 설정한다. Network Daemon은 Host Network Namespace에서 동작하고 Network 설정을 변경할 수 있는 권한을 갖고 있기 때문에 Node의 Network 설정을 자유롭게 변경할 수 있다. 어떠한 CNI Plugin을 이용하냐에 따라서 Network Daemon이 결정된다. flannel의 flanneld, calico의 calio-felix, cilium의 cilium-agent가 Network Daemon이라고 볼수 있다.
 
-#### 1.2. Master Node
+### 1.2. Master Node
 
 Master Node는 Kubernetes Cluster를 관리하는 Node이다. HA (High Availability)를 위해서 일반적으로 다수의 홀수개의 Master Node를 이용한다. Master Node에만 etcd, kube-apiserver, kube-scheduler, kube-controller-manager가 동작한다.
 
@@ -32,7 +32,7 @@ Master Node는 Kubernetes Cluster를 관리하는 Node이다. HA (High Availabil
 
 * kube-scheduler : Pod의 Scheduling을 담당한다. kube-scheduler는 kube-apiserver를 통해서 각 Worker Node의 Pod의 상태 및 Resource 상태 정보를 얻어오고, 얻은 상태정보를 바탕으로 다시 kube-apiserver를 통해서 Pod Scheduling을 수행한다.
 
-#### 1.3. Worker Node
+### 1.3. Worker Node
 
 Worker Node는 Kubernetes 사용자가 배포한 Application이 동작하는 Node이다.
 

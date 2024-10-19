@@ -8,7 +8,7 @@ Jaeger Architecture를 분석한다.
 
 Jaeger는 MSA(Micro Service Architecture) Service(App)의 Profiling 및 Monitoring을 제공하는 Distributed Tracing System이다. **OpenTracing** 표준을 따른다. Jaeger는 Kafka를 이용하지 않고 구축하는 방식과 Kafka를 이용하는 방식으로 구축할 수 있다.
 
-#### 1.1 Without Kafka
+### 1.1 Without Kafka
 
 {{< figure caption="[Figure 1] Jeager Architecture without Kafka" src="images/jeager-architecture-without-kafka.png" width="900px" >}}
 
@@ -22,7 +22,7 @@ App이 처리하는 모든 Business Logic에 대해서 Span 및 Trace 정보를 
 
 Jaeger는 **all-in-one** Binary를 제공하며 all-in-one Binary를 통해서 Jaeger를 동작시키는 경우 Jeager Backend에 포함되어 있는 jaeger-collector, Storage(BadgerDB, Memory), jaeger-query, jaeger-ui가 하나의 Process 안에서 동작하게 된다. Storage의 경우에는 BadgerDB, Memory만 지원하며, Spark Job은 포함되지 않는다.
 
-#### 1.2. With Kafka
+### 1.2. With Kafka
 
 {{< figure caption="[Figure 2] Jeager Architecture with Kafka" src="images/jeager-architecture-with-kafka.png" width="900px" >}}
 

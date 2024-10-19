@@ -10,7 +10,7 @@ OIDC 기반 Kubernetes Authentication 기법을 분석한다.
 
 Kubernetes는 OIDC 기반의 인증 기법을 제공한다. [Figure 1]은 OIDC 기반의 Kubernetes 인증 기법을 나타내고 있다. Kubernetes Client (kubectl)은 Identity Provider에게 **client-id**와 **client-secret**을 전달하여 인증을 하고 **ID Token**을 얻어온다. Identity Provider가 전달하는 ID Token은 인증된 App/User의 정보가 **JWT** 형태로 저장되어 있다. ID Token을 얻은 Kubernetes Client는 ID Token을 **Authorization: Bearer $TOKEN** Header를 통해서 Kubernetes API Server에 전달하여 Kubernetes API Server에게 인증 받는다.
 
-#### 1.1. ID Token Validation
+### 1.1. ID Token Validation
 
 Kubernetes API Server는 ID Token이 유효한지 확인하기 위해서는 **ID Token를 발행한 Identity Provider의 정보**가 포함되어 있는 HTTPS URL 정보가 필요하다. Kubernetes API Server의 "--oidc-issuer-url" Option을 통해서 Identity Provider의 HTTPS URL을 지정할 수 있다. [Figure 1]에서 Identity Provider는 "https://accounts.google.com"이기 때문에 "--oidc-issuer-url" Option에 "https://accounts.google.com"을 지정하면 된다. ID Token의 **iss Claim**에도 ID Token의 Identity Provider가 저장되어 있는것을 확인할 수 있다.
 

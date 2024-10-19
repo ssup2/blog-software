@@ -10,7 +10,7 @@ Kubernetes Authentication 기법중 하나인 Service Account를 분석한다.
 
 Kubernetes의 Service Account는 Kubernetes Cluster 내부에서 Object로 관리되는 계정이다. Service Account는 Pod 안의 App 또는 Kubernetes Cluster의 User가 Kubernetes API Server에게 인증할 때 이용된다. [Figure 1]은 Service Account를 생성, Service Account를 Pod에 주입, Service Account를 이용하는 과정을 나타내고 있다.
 
-#### 1.1. Service Account
+### 1.1. Service Account
 
 ```json {caption="[Text 1] Kubernetes default Service Account Token", linenos=table}
 {
@@ -31,7 +31,7 @@ Kubernetes의 Service Account는 Kubernetes Cluster 내부에서 Object로 관�
 
 **ca.crt**는 Kubernetes API Server가 이용하는 Private Root CA 인증서를 나타낸다. 따라서 대부분의 경우 모든 Service Account의 ca.crt는 동일하다. ca.crt는 Service Account를 이용하는 Client가 Kubernetes API Server에 접근할때 이용된다. **namespace**는 Service Account가 존재하는 Namespace를 나타낸다. Service Account는 각 Namespace마다 별도로 존재하는 Object이다.
 
-##### 1.1.1. default Service Account
+#### 1.1.1. default Service Account
 
 ```shell {caption="[Shell 1] Kubernetes Service Account"}
 $ kubectl get sa -A | grep default                           [13:42:56]
@@ -45,7 +45,7 @@ Kubernetes에서는 각 Namespace에 "default" 이름을 갖는 Service Account�
 
 Namespace가 생성될때 "default" Service Account를 생성하거나, Namespace가 제거될때 "default" Service Account를 삭제하는 역활은 Kubernetes Controller Manager의 **serviceacount** Controller가 수행한다.
 
-#### 1.2. Create Service Account
+### 1.2. Create Service Account
 
 ```shell {caption="[Shell 2] Kubernetes Service Account 확인"}
 $ kubectl get serviceaccounts default -o yaml
@@ -76,7 +76,7 @@ Kubernetes Client에 의해서 Service Account가 생성이 되면, Kubernetes C
 
 [Text 1]에 보면 JWT Token이 RSA256 비대칭 암호화 알고리즘을 이용하여 Signing된 것을 확인할 수 있다. JWT Signing시 이용한 Key는 Controller Manager의 "--service-account-private-key-file" Option을 통해서 지정한다.
 
-#### 1.3. Create Pod with Service Account
+### 1.3. Create Pod with Service Account
 
 Pod가 생성될때 Service Account를 지정하지 않으면 Pod가 존재하는 Namespace의 "default" Service Account를 이용하도록 Kubernetes가 강제로 설정한다. 이러한 강제 설정은 Kubernetes API Server에 존재하는 ServiceAccount Admission Controller에 의해서 이루어진다. 
 
@@ -110,13 +110,13 @@ ca.crt  namespace  token
 
 Volume이 기본적으로 Mount되는 경로는 "/var/run/secrets/kubernetes.io/serviceaccount"로 설정된다. 따라서 Pod 내부에서 "/var/run/secrets/kubernetes.io/serviceaccount" 경로에 들어가면 token, ca.crt, namespace 파일을 확인할 수 있게된다. 만약 Pod의 Spec에 이용할 Service Account가 명시되어 있다면, ServiceAccount Admission Controller는 명시된 Service Account를 Pod 내부에서 이용할 수 있도록 Volume 관련 Spec만 변경한다.
 
-#### 1.4. Use Service Account
+### 1.4. Use Service Account
 
 Service Account의 Token을 알고 있는 Kubernetes Client (kubectl)은 Service Account의 Token을 Kubernetes API Server에게 전달하여 인증을 진행한다. Service Account의 Token은 **Authorization: Bearer $TOKEN** Header로 전달하면 된다. Service Account의 Token을 전달받은 Kubernetes API Server는 "--service-account-key-file" Option으로 설정된 Key를 이용하여 Token이 유효한지 검증한다.
 
 따라서 Controller Manager의 "--service-account-private-key-file" Option으로 설정된 Key와 Kubernetes API Server의 "--service-account-key-file" Option으로 설정된 Key는 반드시 서로 비대칭 Key Pair 관계를 갖고 있어야한다. 또한 Kubernetes API Server는 Private Root CA 인증서를 이용하기 때문에 Client도 Kubernetes API Server의 Private Root CA 인증서를 갖고 있어야 한다.
 
-##### 1.4.1. in Pod
+#### 1.4.1. in Pod
 
 ```shell {caption="[Shell 4] Kubernetes Service Account 사용"}
 $ TOKEN="$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)"

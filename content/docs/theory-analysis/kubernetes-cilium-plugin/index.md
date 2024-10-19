@@ -22,11 +22,11 @@ Cilium은 **BPF (Berkeley Packet Filter)**를 기반으로 Pod Network를 구축
 
 * cilium-operator : cilium-operator는 Deployment를 통해서 동작하며 Cluster에서 한번만 Action이 필요한 동작의 경우 모두 cilium-operator가 수행한다. 예를들어 Cluster에서 Host(Node)가 제거 되었을때 제거된 Host와 관련된 정보를 Key-value Store에서 제거하는 GC 역활을 cilium-operator가 수행한다. 다수의 cilium-operator가 동작하는 경우 Active-standby 형태로 동작하며 HA를 수행한다.
 
-#### 1.1. Pod Network
+### 1.1. Pod Network
 
 Cilium은 Pod Network를 구축하는 방법으로 VXLAN 기반의 기법과 Host Network를 그대로 이용하는 기법 2가지를 제공한다.
 
-##### 1.1.1. with VXLAN
+#### 1.1.1. with VXLAN
 
 {{< figure caption="[Figure 2] Cilium VXLAN Pod Network" src="images/cilium-network-vxlan.png" width="900px" >}}
 
@@ -72,7 +72,7 @@ ENDPOINT   POLICY (ingress)   POLICY (egress)   IDENTITY   LABELS (source:key[=v
 
 Cilium은 Cilium이 이용하는 etcd에는 **Endpoint**라는 이름으로 Cilium이 관리하는 모든 Pod의 IP, MAC을 저장하고 관리하고 있다. cilium-agent는 BPF Map을 통해 Endpoint 정보를 BPF에 전달하여 BPF가 Routing을 수행할 수 있도록 한다. [Shell 1]은 'cilium map get cilium-lxc' 또는 'cilium endpoint list' 명령어를 이용하여 특정 Host에 있는 모든 Pod의 IP를 조회하는 Shell의 모습을 나타내고 있다.
 
-##### 1.1.2. with Host L3
+#### 1.1.2. with Host L3
 
 {{< figure caption="[Figure 3] Cilium Host L3 Pod Network" src="images/cilium-network-host.png" width="900px" >}}
 
@@ -82,7 +82,7 @@ Cilium은 Cilium이 이용하는 etcd에는 **Endpoint**라는 이름으로 Cili
 
 VXLAN을 이용할 때와 다른 또하나의 차이점은 Pod가 이용하는 Network Namespace에 관계없이 Pod에서 전송한 Packet이 Host의 Routing Table을 통해서 전송된다는 점이다. 이외에는 VXLAN을 이용할 때와 크게 다르지 않다. Cilium의 설정에 따라서 [Figure 3]과 다른 Pod Network가 생성될 수 있다.
 
-#### 1.2. Connection Tracking
+### 1.2. Connection Tracking
 
 ```text {caption="", linenos=table}
 # cilium bpf ct list global
@@ -98,7 +98,7 @@ ICMP IN 30.0.0.160:0 -> 30.0.0.34:58168 expires=250323 RxPackets=1 RxBytes=50 Rx
 
 Cilium은 Pod의 Connection 정보를 Linux conntrack을 이용하지 않고 BPF와 BPF MAP을 이용하여 직접 관리한다. [Shell 2]는 'cilium bpf ct list global' 명령어를 이용하여 BPF Map에 저장되어 있는 Connection 정보를 출력하는 Shell을 나타내고 있다.
 
-#### 1.3. Service Load Balancing
+### 1.3. Service Load Balancing
 
 ```text {caption="", linenos=table}
 # cilium service list
@@ -127,7 +127,7 @@ Load Balancing Algorithm은 **Random 방식**과 Cilium이 저장하는 Connecti
 
 Cilium 17.XX 이전 Version의 경우에 Cilium은 ClusterIP Type의 Service만 Load Balancing을 지원하였지만, Cilium 17.XX 이후 Version에서는 NodePort, Loadbalancer Type의 Service의 Load Balancing도 지원한다.
 
-##### 1.3.1. with VXLAN
+#### 1.3.1. with VXLAN
 
 {{< figure caption="[Figure 3] Cilium Service Load Balancing with VXLAN" src="images/cilium-service-vxlan.png" width="900px" >}}
 
@@ -135,17 +135,17 @@ Cilium 17.XX 이전 Version의 경우에 Cilium은 ClusterIP Type의 Service만 
 
 Host Network Namespace를 이용하는 Pod에서 Service의 Cluster IP로 Packet을 전송하는 경우에는 기본적으로 kube-proxy가 설정하는 iptables 또는 IPVS를 이용하여 DNAT를 수행한다. 하지만 cilium 16.xx 이후 Version의 경우에는 CGROUP-SOCK-ADDR BPF를 이용하여 DNAT를 수행할 수 있는 기능이 추가 되었다. 물론 CGROUP-SOCK-ADDR BPF를 지원하는 Kernel Version에서만 이용할 수 있다. SNAT는 응답 Packet을 전송한 Pod의 위치에 따라서 veth Interface의 SCHED-CLS Ingress BPF 또는 cilium-host의 SCHED-CLS Egress BPF에서 SNAT 된다.
 
-##### 1.3.2. with Host L3
+#### 1.3.2. with Host L3
 
 {{< figure caption="[Figure 4] Cilium Service Load Balancing with Host L3" src="images/cilium-service-host.png" width="900px" >}}
 
 [Figure 4]는 Host L3 Network을 이용할 경우의 Service Load Balancing 과정을 나타내고 있다. Pod Network Namespace를 이용하는 Pod에서 Service의 Cluster IP로 Packet을 전송할 경우 Service와 연결된 Pod이 외부에 있다면, SNAT가 cilium-host의 SCHED-CLS Egress BPF에서 수행된다는 점을 제외하고는 VXLAN을 이용할 때와 크게 다르지 않다.
 
-#### 1.4. Filtering
+### 1.4. Filtering
 
 Cilium에서 제공하는 추가적인 기능중 하나는 Packet Filtering이다. Cilium의 Filtering 기법은 Cilium에서 제공하는 CiliumNetworkPolicy CRD를 통해서 정의하는 Network Policy 기법과 XDP를 이용하는 Prefileter 기법 두가지가 존재한다.
 
-##### 1.4.1. Network Policy
+#### 1.4.1. Network Policy
 
 ```text {caption="", linenos=table}
 # cilium policy get
@@ -182,7 +182,7 @@ Cilium에서 제공하는 추가적인 기능중 하나는 Packet Filtering이�
 
 Cilium이 설치되면 **CiliumNetworkPolicy** CRD를 이용하여 Network Policy를 정의할 수 있다. Network Policy을 통해서 L3, L4, L7 Level Packet Filtering Rule을 정의할 수 있다. [Shell 4]는 정의된 Network Policy를 'cilium policy get' 명령어를 통해서 확인하는 Shell의 모습을 나타내고 있다. 정의된 Network Policy는 [Figure 1] 또는 [Figure 2]에 나타난 모든 BPF에서 Packet을 전송할때 적용된다.
 
-##### 1.4.2. Prefilter
+#### 1.4.2. Prefilter
 
 {{< figure caption="[Figure 5] Cilium Prefilter" src="images/cilium-prefilter.png" width="900px" >}}
 

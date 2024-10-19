@@ -14,7 +14,7 @@ Kafka Broker는 **Topic**이라는 단위로 Message를 관리한다. Topic은 �
 
 [Figure 1]은 Kafka에서 Message를 전달하는 과정도 나타내고 있다. Producer가 특정 Topic으로 Message를 전송(Publish)하면, Kafka Cluster는 해당 Topic을 구독(Subscribe)하고 있는 모든 Consumer Group에게 Producer로부터 전달받은 Message를 전송한다. [Figure 1]에서 Consumer Group B와 Consumer Group C는 Topic B를 구독하고 있기 때문에 Kafka Broker는 Producer A가 Topic B로 전송한 Message를 Consumer Group B와 Consumer Group C에게 전달한다. Kafka는 Message의 신뢰성보다 높은 Message 처리량에 중점을 둔 Message Queue이다. 따라서 Kafka는 Spark, Storm 같은 빅데이터 처리 Platform의 Data Stream Queue로도 많이 이용되고 있다.
 
-#### 1.1. Partition
+### 1.1. Partition
 
 {{< figure caption="[Figure 2] Kafka Partition" src="images/kafka-partition.png" width="750px" >}}
 
@@ -30,7 +30,7 @@ Partition을 저장하는데 이용하는 Disk는 일반적으로 Memory에 비�
 
 Partition은 실제로 하나의 파일로 Disk에 저장되지 않고 **Segment** 불리는 단위로 쪼개져서 저장된다. Segment의 기본 크기값은 1GB이다. Kafka는 Partition에 저장되어있는 Message를 일정한 기준에 따라서 보존한다. Kafka에서는 Message Retention 정책이라고 표현한다. Message Retention 정책에는 먼져 특정 기간안의 Message만 보존하는 방법이 있다. 기간을 7일로 설정해 준다면 Message는 Kakfka에 도착한뒤 7일까지 보존되며 그 이후에는 보존을 보장하지 않는다. 두번째로는 Partition 사이즈가 특정 용량을 초과하지 않게 보존하는 방법이 있다. Message Write로 인해서 Partition이 설정한 용량보다 커지게 되면 Partition 앞의 Message를 지원 Partition 용량을 유지한다.
 
-#### 1.2. Consumer Group
+### 1.2. Consumer Group
 
 Consumer Group은 다수의 Consumer를 묶어 하나의 Topic을 다수의 Consumer가 동시에 처리할 수 있도록 만들어준다. 첫 그림에서 Consumer Group C는 Topic C를 구독하고 있다. Consumer Group C는 2개의 Consumer를 갖고 있기 때문에 Topic C의 Message는 2개의 Consumer가 나누어 병렬처리가 가능하다. 다만 Consumer Group의 효율을 높이기 위해서는 Consumer Group이 구독하는 Topic의 Partiton의 개수가 중요하다.
 
@@ -40,7 +40,7 @@ Consumer Group은 다수의 Consumer를 묶어 하나의 Topic을 다수의 Cons
 
 각 Consumer Group에는 **Consumer Leader**가 존재하며 Consumer Group의 Consumer들을 관리하는 역할을 수행한다. 또한 Consumer Leader는 Kafka Broker와 협력하여 Consumer와 Topic을 Mapping하는 작업을 수행한다. Consumer와 Topic을 Mapping 작업은 Consumer Group의 일부 Consumer가 죽었을 경우, Parition이 추가될 경우, Consumer Group에 Consumer가 추가되었을 경우 등 다양한 Event 발생시 수행된다.
 
-#### 1.3. ACK
+### 1.3. ACK
 
 Kafka는 Producer를 위한 ACK 관련 Option을 제공한다. Producer는 ACK를 이용하여 자신이 전송한 Message가 Broker에게 잘 전달되었는지 확인할 수 있을 뿐만 아니라 Message 유실도 최소화 할 수 있다. 0, 1, all 3가지 Option을 제공한다. Producer마다 각각 다른 ACK Option을 설정할 수 있다.
 

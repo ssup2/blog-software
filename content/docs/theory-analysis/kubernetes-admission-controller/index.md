@@ -16,7 +16,7 @@ API 요청은 Mutating 단계에서 한번, Validating 단계에서 한번, 총 
 
 Admission Controller는 Kubernetes API Server와 같이 Compile된 **Compiled-in Admission Controller**와 Kubernetes User가 개발하여 Kubernetes API Server 외부에서 동작하는 **Custom Admission Controller** 2종류가 존재한다.
 
-#### 1.1. Compiled-in Admission Controller
+### 1.1. Compiled-in Admission Controller
 
 Compiled-in Admission Controller는 Kubernetes API Server와 같이 Compile되어 존재하는 Admission Controller를 의미한다. Kubernetes API Server의 "--enable-admission-plugins" Option을 통해서 이용할 Compiled-in Admission Controller만 활성화 할 수 있다. Compiled-in Admission Controller는 필요에 따라서 Mutating Hook만 이용하는 Controller, Validating Hook만 이용하는 Controller, Mutating Hook과 Validating Hook을 모두 이용하는 Controller로 구분할 수 있다. Mutating Hook을 이용하는 Controller는 [MutationInterface](https://github.com/kubernetes/kubernetes/blob/v1.19.2/staging/src/k8s.io/apiserver/pkg/admission/interfaces.go#L129)의 Admit() 함수를 구현해야 하며, Validating Hook을 이용하는 Controller는 [ValidationInterface](https://github.com/kubernetes/kubernetes/blob/f5743093fd1c663cb0cbc89748f730662345d44d/staging/src/k8s.io/apiserver/pkg/admission/interfaces.go#L138)의 Validat() 함수를 구현해야 한다.
 
@@ -24,7 +24,7 @@ DefaultIngressClass Admission Controller는 Mutating Hook만을 이용하는 Com
 
 ServiceAccount Admission Controller는 Mutating Hook과 Validating Hook을 둘다 이용하는 Compiled-in Admission Controller이다. Mutating Hook은 Service Account가 설정되어 있지 않는 Pod에 Default Service Account를 설정하고, 설정된 Service Account의 Token을 Pod 내부에서 얻을수 있도록 Pod에 Mount 설정을 추가하는 용도로 이용한다. Validating Hook은 Pod에 설정된 Service Account가 실제 유효한지 검사하는 용도로 이용한다. 이처럼 Kubernetes의 많은 기능들이 Compiled-in Admission Controller를 통해서 구현된다.
 
-#### 1.2. Custom Admission Controller
+### 1.2. Custom Admission Controller
 
 Custom Admission Controller는 Kubernetes API Server 외부에서 동작하는 Kubernetes User가 개발한 Admission Controller를 의미한다. Custom Admission Controller의 동작을 이해하기 위해서는 Compiled-in Admission Controller인 MutatingAdmissionWebhook Controller와 ValidatingAdmissionWebhook Controller의 역할을 이해하고 있어야한다. 
 

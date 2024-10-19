@@ -20,7 +20,7 @@ Calico는 Container, VM 환경에서 **L3기반** Virtual Network를 구축하�
 
 * confd : confd는 etcd의 Key-Value 변경 내용을 감지하여 동적으로 bird Conf 파일을 생성하고 bird를 깨우는 역할을 수행한다.
 
-#### 1.1 Pod Network with IP-in-IP
+### 1.1 Pod Network with IP-in-IP
 
 {{< figure caption="[Figure 2] Calico IP-in-IP Pod Network" src="images/calico-network-ipip.png" width="800px" >}}
 

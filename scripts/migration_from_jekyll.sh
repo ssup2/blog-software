@@ -16,7 +16,7 @@ mkdir -p "$HUGO_CONTENT_ROOT_DIR"
 
 cat "$JEKYLL_MARKDOWN_FILE" \
     | sed '3,7d' \
-    | sed 's/^### /## /g' \
+    | sed 's/### /## /g' \
     | sed 's/\[그림 /\[Figure /g' \
     | sed 's/\[파일 /\[File /g' \
     | sed 's/\[Console /\[Shell /g' \

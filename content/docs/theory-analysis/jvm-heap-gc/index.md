@@ -14,9 +14,9 @@ JVM Heap은 주로 new 문법으로 할당된 Object(Instance)들이 위치하�
 
 ## 2. Garbage Collector
 
-#### 2.1. Serial, Parallel, CMS
+### 2.1. Serial, Parallel, CMS
 
-#### 2.2. G1
+### 2.2. G1
 
 ## 3. Object Reachability
 

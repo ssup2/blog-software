@@ -108,7 +108,7 @@ Istio에서는 Traffic 제어를 위해서 Virtual Service, Destination Rule, Ga
 
 verion:v1/v2 Container는 Deployment를 통해서 배포되며, version:v1을 연결하는 version-v1 Service와 version:v2를 연결하는 version-v2 Service가 존재한다. 또한 version:v1/v2 둘다 연결하는 version Service도 존재한다. 따라서 version-v1 Service에 HTTP 요청을 전송하면 "version v1" 문자열이 반환되고, version-v2 Service에 HTTP 요청을 전송하면 "version v2" 문자열이 반환된다. version Service에 HTTP 요청을 전송하면 "version v1", "version v2" 문자열이 Random으로 반환된다.
 
-## 1.1. Virtual Service
+### 1.1. Virtual Service
 
 {{< figure caption="[Figure 2] Version Virtual Service" src="images/version-virtual-service.png" width="700px" >}}
 
@@ -134,7 +134,7 @@ Virtual Service는 Host를 기반으로 Traffic을 Routing하는 역할을 수�
 
 version-v1-v2 Version Service가 version을 Host로 이용할 수 있는 이유는 version Service가 선언되어 있기 때문이다. version Service를 통해서 실제로 Traffic이 Routing이 되는것은 아니지만 version Service가 존재하지 않으면 version-v1-v2 Version Service가 version을 Host로 이용할 수 없기 때문에, 반드시 version Service도 선언되어 있어야 한다.
 
-## 1.2. Destination Rule
+### 1.2. Destination Rule
 
 {{< figure caption="[Figure 3] Version Virtual Service, Destination Rule" src="images/version-virtual-service-desitination-rule.png" width="750px" >}}
 
@@ -181,7 +181,7 @@ version Destination Rule은 version Service에 대해서 Routing 규칙을 정�
 
 v2 SubSet에는 loadBalancer LEAST-CONN가 설정 되어있기 때문에, v2 SubSet에 포함되어 있는 Pod들 사이에 Traffic은 Least Connection Algorithm에 따라서 Load Balancing 된다. Load Balancing Algorithm은 Default로 ROUND-ROBIN이 적용되며 LEAST-CONN, RANDOM, L7 기반 Consistent Hashing 기법등을 적용할수 있다.
 
-## 1.3. Gateway
+### 1.3. Gateway
 
 {{< figure caption="[Figure 4] Version Gateway, Virtual Service" src="images/version-gateway-virtual-service.png" width="750px" >}}
 
