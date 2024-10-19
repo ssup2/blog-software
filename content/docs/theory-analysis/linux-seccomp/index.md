@@ -6,7 +6,7 @@ Linux의 Process Sandboxing 기법인 seccomp을 분석한다.
 
 ## 1. seccomp (secure computing)
 
-{{< figure caption="[Figure 1] seccomp Hook" src="images/seccomp-hook.png" width="900px" >}}
+{{< figure caption="[Figure 1] seccomp Hook" src="images/seccomp-hook.png" width="700px" >}}
 
 seccomp은 Linux kernel 2.6.12부터 적용된 process sandboxing 기법이다. 하지만 실제로 seccomp을 분석하면 단순한 **System Call Filtering** 기법이란걸 알 수 있다. [Figure 1]은 System Call 수행시 seccomp이 적용되는 시점을 나타내고 있다. seccomp은 실제 각 system call function이 수행되기 전 Software Interrupt Handler에서 System Call을 filtering한다. seccomp은 prctl() System Call 호출을 통해 설정할 수 있으며, Linux Kernel 3.17 버전 이후에는 seccomp() System Call을 이용해서도 설정 할 수 있다.
 
