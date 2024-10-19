@@ -37,9 +37,9 @@ http {
 ...                       
 ```
 
-Nginx는 Lua Module을 이용하여 Nginx Config를 Reload를 최소화 하여 Packet 손실을 최소화 하도록 구현되어 있다. 또한 Metric 정보도 Lua Module을 이용하여 수집하도록 구성되어 있다. [File 1]은 Lua Module을 이용하는 Nginx의 nginx.conf 파일을 나타내고 있다. [File 1]의 3~5줄은 [Figure 1]에도 표현된 Nginx의 Backend 정보와 Certificate가 저장되는 Dictionary 기반 Shared Memory를 나타내고 있다. nginx.conf의 upstream 부분에는 일반적으로 Load Balancing의 대상이 되는 Server의 정보가 저장되어 있는데, [File 1]의 8~10줄에는 Server 정보 대신 balancer Lua Module을 호출하는 것을 확인할 수 있다.
+Nginx는 Lua Module을 이용하여 Nginx Config를 Reload를 최소화 하여 Packet 손실을 최소화 하도록 구현되어 있다. 또한 Metric 정보도 Lua Module을 이용하여 수집하도록 구성되어 있다. [File 1]은 Lua Module을 이용하는 Nginx의 nginx.conf 파일을 나타내고 있다. [File 1]의 3 ~ 5줄은 [Figure 1]에도 표현된 Nginx의 Backend 정보와 Certificate가 저장되는 Dictionary 기반 Shared Memory를 나타내고 있다. nginx.conf의 upstream 부분에는 일반적으로 Load Balancing의 대상이 되는 Server의 정보가 저장되어 있는데, [File 1]의 8~10줄에는 Server 정보 대신 balancer Lua Module을 호출하는 것을 확인할 수 있다.
 
-nginx.conf의 server 부분에는 일반적으로 Certificate Path 정보가 저장되는데, [File 1]의 14~16줄은 Certificate Path 정보 대신 certificate Lua Module을 호출하는 것을 확인할 수 있다. [File 1]의 18~23줄은 /app URL이 호출될 경우 balancer를 통해서 Packet이 어느 Pod으로 전달되는지 Log를 남기고, monitor를 통해서 관련 Metric 정보를 남기는 부분을 나타낸다.
+nginx.conf의 server 부분에는 일반적으로 Certificate Path 정보가 저장되는데, [File 1]의 14~16줄은 Certificate Path 정보 대신 certificate Lua Module을 호출하는 것을 확인할 수 있다. [File 1]의 18 ~ 23줄은 /app URL이 호출될 경우 balancer를 통해서 Packet이 어느 Pod으로 전달되는지 Log를 남기고, monitor를 통해서 관련 Metric 정보를 남기는 부분을 나타낸다.
 
 ### 1.1. Configuration
 
