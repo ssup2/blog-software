@@ -20,6 +20,7 @@ cat "$JEKYLL_MARKDOWN_FILE" \
     | sed 's/\[그림 /\[Figure /g' \
     | sed 's/\[파일 /\[File /g' \
     | sed 's/\[Console /\[Shell /g' \
+    | sed 's/\[공식 /\[Formula /g' \
     | sed 's/{% highlight \(.*\) %}/```\1 {caption="", linenos=table}/g' \
     | sed 's/{% endhighlight %}/```/g' \
     | gsed -E 's/!\[(.*)\]\(.*\/(.*)\.PNG\).*width="([^"]*)".*/{{< figure caption="\1" src="images\/\L\2.png" width="\3" >}}/; s/_/-/g;' \
