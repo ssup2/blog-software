@@ -23,6 +23,9 @@ cat "$JEKYLL_MARKDOWN_FILE" \
     | sed 's/\[공식 /\[Formula /g' \
     | sed 's/{% highlight \(.*\) %}/```\1 {caption="", linenos=table}/g' \
     | sed 's/{% endhighlight %}/```/g' \
+    | sed 's/~~~console/```shell/g' \
+    | sed 's/~~~/```/g' \
+    | sed '/^```shell/,/^```/ s/^#/$/' \
     | gsed -E 's/!\[(.*)\]\(.*\/(.*)\.PNG\).*width="([^"]*)".*/{{< figure caption="\1" src="images\/\L\2.png" width="\3" >}}/; s/_/-/g;' \
     | gsed -E 's/!\[(.*)\]\(.*\/(.*)\.PNG\).*/{{< figure caption="\1" src="images\/\L\2.png" width="900px" >}}/; s/_/-/g;' \
     > "$HUGO_CONTENT_ROOT_DIR/index.md"
