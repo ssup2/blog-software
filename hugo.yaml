@@ -65,6 +65,12 @@ params:
       # link: /
     width: full
 
+  highlight:
+    copy:
+      enable: true
+      # hover | always
+      display: always
+
   search:
     enable: true
     type: flexsearch

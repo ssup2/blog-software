@@ -45,7 +45,7 @@ WSL Ubuntu가 Default 계정으로 root를 이용하도록 설정한다. WSL Ubu
 
 위의 링크에서 Installer를 받아 설치한다.
 
-``` {caption="[파일 1] WSLtty grubbox Theme", linenos=table}
+``` {caption="[File 1] WSLtty grubbox Theme", linenos=table}
 ForegroundColour=235,219,178
 BackgroundColour=29,32,33
 CursorColour=253,157,79
@@ -67,9 +67,9 @@ White=168,153,132
 BoldWhite=235,219,178
 ```
 
-%APPDATA%\wsltty\themes\grubbox 파일을 생성하고 [파일 1]의 내용으로 저장하여 wsltty에서 이용할 grubbox Theme를 설정한다.
+%APPDATA%\wsltty\themes\grubbox 파일을 생성하고 [File 1]의 내용으로 저장하여 wsltty에서 이용할 grubbox Theme를 설정한다.
 
-``` {caption="[파일 2] WSLtty Config", linenos=table}
+``` {caption="[File 2] WSLtty Config", linenos=table}
 # To use common configuration in %APPDATA%\mintty, simply remove this file
 ThemeFile=gruvbox
 Term=xterm-256color
@@ -77,7 +77,7 @@ FontHeight=10
 AllowSetSelection=yes
 ```
 
-%APPDATA%\wsltty\config 파일을 [파일 2]의 내용으로 수정한다.
+%APPDATA%\wsltty\config 파일을 [File 2]의 내용으로 수정한다.
 
 ## 5. 참고
 
