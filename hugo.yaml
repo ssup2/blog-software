@@ -31,15 +31,18 @@ menu:
   - name: Docs
     pageRef: /docs
     weight: 1
+  - name: Series
+    pageRef: /series
+    weight: 2
   - name: Me
     pageRef: /me
-    weight: 2
-  - name: Search
     weight: 3
+  - name: Search
+    weight: 4
     params:
       type: search
   - name: GitHub
-    weight: 4
+    weight: 5
     url: https://github.com/ssup2/blog-software
     params:
       icon: github
