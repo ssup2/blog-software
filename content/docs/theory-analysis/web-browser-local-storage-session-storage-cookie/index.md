@@ -6,13 +6,13 @@ Web Browser에서 이용하는 Local Storage, Session Storage, Cookie를 분석�
 
 ## 1. Local Storage
 
-{{< figure caption="[Figure 1] Chrome Local Storage" src="images/chrome-local-storage.png" width="400px" >}}
+{{< figure caption="[Figure 1] Chrome Local Storage" src="images/chrome-local-storage.png" width="700px" >}}
 
 Local Storage는 Web Browser가 이용하는 Key/Value 기반 저장 공간이다. Web Brower가 설치된 PC의 Storage에 저장되며, Web Browser의 Java Script/HTML에서만 이용할 수 있다. 각 Domain당 최대 5MB의 저장 공간을 이용할 수 있다. Local Storage에 저장된 Data는 만료가 없다는 특징을 가지고 있다.
 
 ## 2. Session Storage
 
-{{< figure caption="[Figure 2] Chrome Session Storage" src="images/chrome-session-storage.png" width="400px" >}}
+{{< figure caption="[Figure 2] Chrome Session Storage" src="images/chrome-session-storage.png" width="700px" >}}
 
 Session Storage는 Web Browser가 이용하는 Key/Value 기반 저장 공간이다. Web Browser가 설치된 PC의 Storage에 저장되며, Web Browser의 Java Script/HTML에서만 이용할 수 있다. 각 Domain당 최대 5MB의 저장 공간을 이용할 수 있다.
 
@@ -20,7 +20,7 @@ Session Storage에 저장된 Data는 Web Browser의 Window/Tab의 수명과 동�
 
 ## 3. Cookie
 
-{{< figure caption="[Figure 3] Chrome Cookie" src="images/chrome-cookie.png" width="700px" >}}
+{{< figure caption="[Figure 3] Chrome Cookie" src="images/chrome-cookie.png" width="1000px" >}}
 
 Cookie는 Web Browser가 설치된 PC의 Storage를 이용하는 저장공간이지만, 저장되는 Data는 주로 Web Server가 전송하는 Data를 저장하는 저장 공간이다. Web Server는 Web Browser에게 응답을 전송할 때 필요에 따라서 Cookie에 저장될 Data도 같이 전송한다. Web Browser는 Web Server에게 Cookie에 저장될 Data를 전송받으면 Cookie에 저장하고, 이후 Web Server에게 요청을 전송할 때 Cookie에 저장된 Data도 같이 전송한다. 즉 Cookie는 Web Server를 위한 저장 공간이다. Web Browser에서도 Cookie에 저장된 Data를 활용할 수도 있다.
 
