@@ -47,6 +47,7 @@ CA(Certificate Authority)는 Certificate를 발행하고 인증하는 기관이�
 Root CA의 Private Key를 이용하여 하위 CA가 발행한 Certificate에 서명을 하면, Root Certificate의 신뢰 때문에 하위 CA의 Certificate에게도 신뢰가 부여된다. 또한 신뢰도를 얻은 하위 CA의 Private Key를 이용하여 또다른 하위 CA가 발행한 Certificate에게 신뢰를 부여 할 수 있다. 이처럼 Certificate의 관계는 Root Certificate가 Root가 되어 **Tree 구조**의 관계를 갖는다. 따라서 Tree의 Leaf에 가까운 Certificate일수록 다수의 상위 Certificate가 필요하게 된다.
 
 ## 2. 참조
+
 * [https://en.wikipedia.org/wiki/Transport-Layer-Security](https://en.wikipedia.org/wiki/Transport-Layer-Security)
 * [https://sites.google.com/site/amitsciscozone/home/security/ssl-connection-setup](https://sites.google.com/site/amitsciscozone/home/security/ssl-connection-setup)
 * [https://www.ibm.com/support/knowledgecenter/en/SSFKSJ-7.1.0/com.ibm.mq.doc/sy10660\-.htm](https://www.ibm.com/support/knowledgecenter/en/SSFKSJ-7.1.0/com.ibm.mq.doc/sy10660\-.htm)
