@@ -14,9 +14,7 @@ HMAC (Hash based Message Authentication Code)은 Hashing 기법을 통해서 Dat
 
 HMAC은 Rest API에서도 Message의 `무결성 보장`과 `인증` 과정을 HMAC을 활용한다. MAC 값은 일반적으로 HTTP, GRPC의 Header 값에 포함되어 발신자에서 수신자로 같이 전송된다. HMAC을 포함하는 Header는 아직까지 표준이 정해져 있지 않으며 API마다 별도로 지정하여 이용한다.
 
-```text
-
-```
+예를 들어 AWS API의 경우에는 Message를 `SHA-256` 알고리즘을 통해서 생성한 문자열과 함께 `Secret Access Key`를 같이 활용하여 Signature (MAC) 값을 생성하며, 생성한 Signature는 `X-Amz-Signature` Header에 포함되어 전송된다.
 
 ## 2. 참조
 
