@@ -20,7 +20,7 @@ golang을 설치한다. /usr/local/go Directory에 설치한다.
 
 ## 3. 환경변수 설정
 
-```text {caption="", linenos=table}
+```text {caption="[File 1] ~/.bashrc", linenos=table}
 ...
 export GOROOT=/usr/local/go
 export GOPATH=$HOME/go
@@ -28,9 +28,6 @@ export GOBIN=$GOPATH/bin
 export PATH=$GOROOT/bin:$GOBIN:$PATH
 ...
 ```
-<figure>
-<figcaption class="caption">[File 1] ~/.bashrc</figcaption>
-</figure>
 
 ~/.bashrc 파일에 golang에 이용하는 환경변수를 설정하고, 어느 Directory에서든 golang을 이용할 수 있도록 한다.
 * GOROOT : golang의 명령어, Package, Library 등이 있는 Directory이다.

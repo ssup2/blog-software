@@ -52,7 +52,7 @@ Goroutine 내부에서도 Sync System Call을 호출하는 경우 Goroutine을 �
 
 #### 1.4. Work Stealing
 
-```cpp {caption="", linenos=table}
+```cpp {caption="[Code 1] Goroutine Scheduling Algorithm", linenos=table}
 runtime.schedule() {
     // only 1/61 of the time, check the global runnable queue for a G.
     // if not found, check the local queue.
@@ -62,9 +62,6 @@ runtime.schedule() {
     //     if not found, poll network.
 }
 ```
-<figure>
-<figcaption class="caption">[Code 1] Goroutine Scheduling Algorithm</figcaption>
-</figure>
 
 Golang Scheduler는 LRQ에 Goroutine이 존재하지 않을 경우 다른 곳으로부터 Goroutine을 가져온다. [Code 1]은 Golang Scheduler가 수행하는 Goroutine Scheduling Algorithm을 나타내고 있다. LRQ에 Goroutine이 없다면 다른 LRQ의 Goroutine이 존재하는지 확인하고, LRQ에 Goroutine이 존재한다면 절반의 Goroutine을 가져온다.
 

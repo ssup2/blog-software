@@ -42,13 +42,10 @@ $ chmod a+x ~/bin/repo
 
 Repo는 Android Build시 이용된다. Android Build시 이용하는 Repo를 설치한다.
 
-```shell {caption="", linenos=table}
+```shell {caption="[File 1] ~/.bashrc", linenos=table}
 ...
 PATH=~/bin:$PATH
 ```
-<figure>
-<figcaption class="caption">[File 1] ~/.bashrc</figcaption>
-</figure>
 
 `~/.bashrc` 파일에 [File 1]의 내용을 추가하여 어느 Directory에서든 Repo를 이용할 수 있도록 만든다.
 
@@ -64,13 +61,10 @@ Cross Compiler를 설치한다.
 
 * Download : http://dn.odroid.com/ODROID-XU/compiler/arm-eabi-4.6.tar.gz
 
-```shell {caption="", linenos=table}
+```shell {caption="[File 2] ~/.bashrc", linenos=table}
 ...
 PATH=/usr/local/arm-eabi-4.6/bin:$PATH
 ```
-<figure>
-<figcaption class="caption">[File 2] ~/.bashrc</figcaption>
-</figure>
 
 `~/.bashrc` 파일에 [File 2]의 내용을 추가하여 어느 Directory에서든 Compiler를 이용할 수 있도록 만든다.
 

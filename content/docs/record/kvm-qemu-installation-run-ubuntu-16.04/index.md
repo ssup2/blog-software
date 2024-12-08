@@ -275,13 +275,10 @@ VM Booting 후 Rootfs Mount Issue를 해결하기 위해서 다음과 같은 방
 (VM) # vi /etc/fstab
 ```
 
-```text {caption="", linenos=table}
+```text {caption="[File 1] VM /etc/fstab", linenos=table}
 ...
 UUID=(UUID of blk) / ext4 errors=remount-ro 0 1
 ```
-<figure>
-<figcaption class="caption">[File 1] VM /etc/fstab</figcaption>
-</figure>
 
 Shell에서 blkid 확인 및 [File 1]의 내용으로 fstab 설정을 진행한다.
 

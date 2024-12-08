@@ -22,14 +22,11 @@ Control Node에 Ansible을 설치한다.
 
 ## 3. Inventory 구성
 
-```text {caption="", linenos=table}
+```text {caption="[File 1] Control Node - /etc/ansible/hosts", linenos=table}
 [cluster]
 172.35.0.101
 172.35.0.102
 ```
-<figure>
-<figcaption class="caption">[File 1] Control Node - /etc/ansible/hosts</figcaption>
-</figure>
 
 Control Node의 /etc/ansible/hosts 파일에 [File 1]과 같이 Managed Node의 IP 정보를 저장한다.
 

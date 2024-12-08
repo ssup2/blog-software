@@ -20,7 +20,7 @@ VirtualBox를 이용하여 [Figure 1]과 같이 가상의 Node (VM)을 생성한
 
 ### 2.1. Ceph Node
 
-```yaml {caption="", linenos=table}
+```yaml {caption="[File 1] Node 01 - /etc/netplan/50-cloud-init.yaml", linenos=table}
 network:
     version: 2
     ethernets:
@@ -36,13 +36,10 @@ network:
             nameservers:
                 addresses: [8.8.8.8]
 ```
-<figure>
-<figcaption class="caption">[File 1] Node 01 - /etc/netplan/50-cloud-init.yaml</figcaption>
-</figure>
 
 Ceph Node 01의 /etc/netplan/50-cloud-init.yaml 파일을 [File 1]의 내용으로 생성한다.
 
-```yaml {caption="", linenos=table}
+```yaml {caption="[File 2] Node 02 - /etc/netplan/50-cloud-init.yaml", linenos=table}
 network:
     version: 2
     ethernets:
@@ -53,13 +50,10 @@ network:
             nameservers:
                 addresses: [8.8.8.8]
 ```
-<figure>
-<figcaption class="caption">[File 2] Node 02 - /etc/netplan/50-cloud-init.yaml</figcaption>
-</figure>
 
 Ceph Node 02의 /etc/netplan/50-cloud-init.yaml 파일을 [File 2]의 내용으로 생성한다.
 
-```yaml {caption="", linenos=table}
+```yaml {caption="[File 3] Node 03 - /etc/netplan/50-cloud-init.yaml", linenos=table}
 network:
     version: 2
     ethernets:
@@ -70,9 +64,6 @@ network:
             nameservers:
                 addresses: [8.8.8.8]
 ```
-<figure>
-<figcaption class="caption">[File 3] Node 03 - /etc/netplan/50-cloud-init.yaml</figcaption>
-</figure>
 
 Ceph Node 03의 /etc/netplan/50-cloud-init.yaml 파일을 [File 3]의 내용으로 생성한다.
 
@@ -103,16 +94,13 @@ cephnode User를 생성한다.
 
 ### 3.2. Deploy Node
 
-```shell
+```text {caption="[File 4] Deploy Node - /etc/hosts", linenos=table}
 ...
 10.0.0.10 node01
 10.0.0.20 node02
 10.0.0.30 node03
 ...
 ```
-<figure>
-<figcaption class="caption">[File 4] Deploy Node - /etc/hosts</figcaption>
-</figure>
 
 /etc/hosts 파일을 [File 4]의 내용처럼 수정한다.
 
@@ -156,7 +144,7 @@ Enter same passphrase again:
 SSH Key를 생성 및 복사한다.
 * passphrases는 Empty 상태로 유지한다.
 
-```text {caption="", linenos=table}
+```text {caption="[File 5] Deploy Node - /home/cephdeploy/.ssh/config", linenos=table}
 Host node01
    Hostname node01
    User cephnode
@@ -167,9 +155,6 @@ Host node03
    Hostname node03
    User cephnode
 ```
-<figure>
-<figcaption class="caption">[File 5] Deploy Node - /home/cephdeploy/.ssh/config</figcaption>
-</figure>
 
 /home/cephdeploy/.ssh/config 파일을 [File 5]와 같이 수정한다.
 
@@ -288,12 +273,9 @@ Pool 생성 및 File Storage를 생성한다.
 
 admin Key를 확인한다.
 
-```text {caption="", linenos=table}
+```text {caption="[File 6] Ceph Node - /root/admin.secret", linenos=table}
 AQAk1SxcbTz/IBAAHCPTQ5x1SHFcA0fn2tTW7w==
 ```
-<figure>
-<figcaption class="caption">[File 6] Ceph Node - /root/admin.secret</figcaption>
-</figure>
 
 확인한 admin Key를 이용하여 [File 6]의 내용으로 /root/admin.secret 파일을 생성한다.
 

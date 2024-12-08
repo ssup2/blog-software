@@ -36,14 +36,12 @@ URN은 의미 그대로 Web Resource에게 고유한 이름을 부여하는데 �
 * NID (Namespace Identifier) : Namespace를 나타낸다.
 * NSS (Namespace Specific String) : Namespace 내부에서 고유한 String 값을 의미한다. URL의 Subdirectory 처럼 Depth를 나타내기 위해서 URN에서 ":" 문자를 통해서 Depth를 나타내는 경우가 있는데, 이 경우에도 NID 부분을 제외한 나머지 모든 부분은 NSS로 간주한다.
 
-{: .newline }
-> urn:isbn:0451450523a (Book Number)
-> urn:isan:0000-0000-2CEA-0000-1-0000-0000-Y (Move Number)
-> urn:uuid:6e8bc430-9c3a-11d9-9669-0800200c9a66 (UUID)
-> urn:mpeg:mpeg7:schema:2001<br/>
-<figure>
-<figcaption class="caption">[Text 1] URN Example</figcaption>
-</figure>
+```text {caption="[Text 1] URN Example"}
+urn:isbn:0451450523a (Book Number)
+urn:isan:0000-0000-2CEA-0000-1-0000-0000-Y (Move Number)
+urn:uuid:6e8bc430-9c3a-11d9-9669-0800200c9a66 (UUID)
+urn:mpeg:mpeg7:schema:2001<br/>
+```
 
 [Text 1]은 URN의 예제를 나타내고 있다.
 

@@ -6,7 +6,7 @@ title: 3. Namespace
 
 각 Container는 같은 Host에서 동작하는 다른 Container들의 존재를 알지 못하고 독립된 공간에서 동작하는데, 이러한 성질을 **격리**되었다 라고 표현한다. 이러한 Container의 격리 특성은 Linux Kernel의 Namespace 기능을 이용하여 구현한다. Namespace는 Process가 소속되는 **격리된 공간**을 의미한다.
 
-```console {caption="", linenos=table}
+```console {caption="[Shell 1] Host", linenos=table}
 # Host의 Process 확인
 (host)# ps -ef
  # ps -ef                                                                                                                      [14:24:56]
@@ -48,11 +48,8 @@ tmpfs on /run type tmpfs (rw,nosuid,noexec,relatime,size=403028k,mode=755)
 /dev/sda2 on / type ext4 (rw,relatime)
 ...
 ```
-<figure>
-<figcaption class="caption">[Shell 1] Host</figcaption>
-</figure>
 
-```console {caption="", linenos=table}
+```console {caption="[Shell 2] nginx Container", linenos=table}
 # nginx Container를 Daemon으로 실행하고 exec을 통해서 nginx Container에 bash Process 실행
 (host)# docker run -d --rm --name nginx nginx:1.16.1
 (host)# docker exec -it nginx bash
@@ -86,11 +83,8 @@ e7be60e98500
 overlay on / type overlay (rw,relatime,lowerdir=/var/lib/docker/overlay2/l/UKEEN547MUO7AKZE74MR4CQSH6:/var/lib/docker/overlay2/l/42OTIQ6YNKBDVIPRRPMWUJUFJU:/var/lib/docker/overlay2/l/L5EUFYZJGX4AOOMNPLVOFWK74D:/var/lib/docker/overlay2/l/LUKFVFAM3CX4HXFG4WFWLWUN67:/var/lib/docker/overlay2/l/TW3MKSPXR2SUCQRAPS4T27HEUB:/var/lib/docker/overlay2/l/SIYVDXCEC4PJCY3QEY6KHWIYTT,upperdir=/var/lib/docker/overlay2/d229127edfad9cd9ad54475d941ebc612dd4d8ab8cc25c9d11d24d87beb0956f/diff,workdir=/var/lib/docker/overlay2/d229127edfad9cd9ad54475d941ebc612dd4d8ab8cc25c9d11d24d87beb0956f/work)
 ...
 ```
-<figure>
-<figcaption class="caption">[Shell 2] nginx Container</figcaption>
-</figure>
 
-```console {caption="", linenos=table}
+```console {caption="[Shell 3] httpd Container", linenos=table}
 # httpd Container를 Daemon으로 실행하고 exec을 통해서 httpd Container에 bash Process 실행
 (host)# docker run -d --rm --name httpd httpd:2.4.43
 (host)# docker exec -it httpd bash
@@ -126,9 +120,6 @@ root       505    91  0 14:23 pts/0    00:00:00 ps -ef
 overlay on / type overlay (rw,relatime,lowerdir=/var/lib/docker/overlay2/l/BAAGB4VNPW5L5OLLIVNW4PUM4B:/var/lib/docker/overlay2/l/QET7RFTW5Q7DKT6DVKS3W7ZJKT:/var/lib/docker/overlay2/l/WWIQKNFHFRBTOVRM7EJ3JOAJ6P:/var/lib/docker/overlay2/l/SIYVDXCEC4PJCY3QEY6KHWIYTT,upperdir=/var/lib/docker/overlay2/bbc23b396889938987edcc526eba58794b41afa26cf259b5cb38617c3eee46e7/diff,workdir=/var/lib/docker/overlay2/bbc23b396889938987edcc526eba58794b41afa26cf259b5cb38617c3eee46e7/work)
 ...
 ```
-<figure>
-<figcaption class="caption">[Shell 3] httpd Container </figcaption>
-</figure>
 
 [Shell 1~3]은 Container를 통해서 Namespace의 격리 특성을 실험하기 위해서 하나의 Host안에서 nginx Container와 httpd Container를 구동한 다음, Host 및 각 Container 내부에서 Process, Network, Hostname, Mount 정보를 확인하는 과정을 나타내고 있다. nginx Container와 httpd Container는 동일한 Host안에서 동작하고 있지만 서로 다른 Process, Network, Hostname, Mount 정보를 갖고 있는걸 확인 할 수 있다. 이러한 현상이 나타나는 이유는 Host, nginx Container, httpd Container가 서로 다른 Namespace를 이용하고 있기 때문이다. 좀더 구체적으로 말하면 Host, nginx Container, httpd Container의 Process가 서로 다른 Namespace에 소속되어 있기 때문이다.
 

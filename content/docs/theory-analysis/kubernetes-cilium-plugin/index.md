@@ -42,7 +42,7 @@ Pod C에서 Pod A로 Packet을 전송하는 경우 Packet은 Host 1의 Routing T
 
 Pod가 이용한는 Network Namespace에 관계없이 Pod에서 전송한 Packet이 Pod가 아닌 Cluster 외부로 전송될 경우, Packet은 Host의 Routing Table에 의해서 Routing 되어 Host 밖으로 전송된다. [Figure 2]에서는 Default Gateway가 eth0이기 때문에 Packet은 eth0를 통해서 Cluster 외부로 전송된다. Cilium의 설정에 따라서 [Figure 2]와 다른 Pod Network가 생성될 수 있다. 예를들어 Cilium이 IPsec을 이용하도록 설정되어 있다면 Pod의 veth Interface에 붙는 SCHED-CLS Ingress BPF에서 Packet의 목적지에 관계없이 Packet을 무조건 Host의 Routing Table을 통해서 전송하도록 설정한다.
 
-```text {caption="", linenos=table}
+```text {caption="[Shell 1] Cilium Endpoint", linenos=table}
 # cilium map get cilium-lxc
 Key               Value                                                                               State   Error
 30.0.0.160:0      (localhost)                                                                         sync
@@ -66,9 +66,6 @@ ENDPOINT   POLICY (ingress)   POLICY (egress)   IDENTITY   LABELS (source:key[=v
                                                            k8s:k8s-app=kube-dns
 3787       Disabled           Disabled          4          reserved:health                                          192.167.2.88    ready 
 ```
-<figure>
-<figcaption class="caption">[Shell 1] Cilium Endpoint</figcaption>
-</figure>
 
 Cilium은 Cilium이 이용하는 etcd에는 **Endpoint**라는 이름으로 Cilium이 관리하는 모든 Pod의 IP, MAC을 저장하고 관리하고 있다. cilium-agent는 BPF Map을 통해 Endpoint 정보를 BPF에 전달하여 BPF가 Routing을 수행할 수 있도록 한다. [Shell 1]은 'cilium map get cilium-lxc' 또는 'cilium endpoint list' 명령어를 이용하여 특정 Host에 있는 모든 Pod의 IP를 조회하는 Shell의 모습을 나타내고 있다.
 
@@ -84,7 +81,7 @@ VXLAN을 이용할 때와 다른 또하나의 차이점은 Pod가 이용하는 N
 
 ### 1.2. Connection Tracking
 
-```text {caption="", linenos=table}
+```text {caption="[Shell 2] Cilium Connection Info", linenos=table}
 # cilium bpf ct list global
 TCP IN 192.167.0.113:58044 -> 192.167.0.175:8080 expires=247809 RxPackets=6 RxBytes=525 RxFlagsSeen=0x1b LastRxReport=247799 TxPackets=4 TxBytes=409 TxFlagsSeen=0x1b LastTxReport=247799 Flags=0x0013 [ RxClosing TxClosing SeenNonSyn ] RevNAT=0 SourceSecurityID=1
 TCP OUT 30.0.0.34:59050 -> 192.168.0.40:8774 expires=246703 RxPackets=4 RxBytes=2436 RxFlagsSeen=0x13 LastRxReport=246693 TxPackets=5 TxBytes=761 TxFlagsSeen=0x1b LastTxReport=246693 Flags=0x0013 [ RxClosing TxClosing SeenNonSyn ] RevNAT=0 SourceSecurityID=0
@@ -92,15 +89,12 @@ ICMP OUT 30.0.0.34:49527 -> 30.0.0.79:0 expires=258603 RxPackets=1 RxBytes=50 Rx
 ICMP IN 192.167.1.109:25170 -> 192.167.0.76:0 expires=256931 RxPackets=1 RxBytes=50 RxFlagsSeen=0x00 LastRxReport=256871 TxPackets=1 TxBytes=50 TxFlagsSeen=0x00 LastTxReport=256871 Flags=0x0000 [ ] RevNAT=0 SourceSecurityID=1
 ICMP IN 30.0.0.160:0 -> 30.0.0.34:58168 expires=250323 RxPackets=1 RxBytes=50 RxFlagsSeen=0x00 LastRxReport=250263 TxPackets=0 TxBytes=0 TxFlagsSeen=0x00 LastTxReport=0 Flags=0x0000 [ ] RevNAT=0 SourceSecurityID=0
 ```
-<figure>
-<figcaption class="caption">[Shell 2] Cilium Connection Info</figcaption>
-</figure>
 
 Cilium은 Pod의 Connection 정보를 Linux conntrack을 이용하지 않고 BPF와 BPF MAP을 이용하여 직접 관리한다. [Shell 2]는 'cilium bpf ct list global' 명령어를 이용하여 BPF Map에 저장되어 있는 Connection 정보를 출력하는 Shell을 나타내고 있다.
 
 ### 1.3. Service Load Balancing
 
-```text {caption="", linenos=table}
+```text {caption="[Shell 3] Cilium Service", linenos=table}
 # cilium service list
 ID   Frontend           Backend
 1    10.96.0.10:53      1 => 192.167.2.194:53
@@ -117,9 +111,6 @@ ID   Frontend           Backend
 7    192.168.0.101:80   1 => 192.167.2.32:80
                         2 => 192.167.2.194:80
 ```
-<figure>
-<figcaption class="caption">[Shell 3] Cilium Service</figcaption>
-</figure>
 
 Cilium에서 제공하는 추가적인 기능중 하나는 Service Load Balancing을 지원한다는 점이다. Cilium은 Kubernetes API Server로부터 Service 정보를 얻어 Cilium이 이용하는 etcd에 저장한다. [Shell 3]은 'cilium service list' 명령어를 이용하여 Cilium의 etcd에 저장되어 있는 Service 정보를 출력하는 Shell을 나타내고 있다. Frontent는 Kubernetes Service의 Cluster IP를 의미하고, Backend는 해당 Service에 소속되어 있는 Pod의 IP를 의미한다. Cilium의 BPF는 BPF Map의 Service 정보를 바탕으로 전달 받은 Packet의 Dest IP가 Service의 Cluster IP인 경우, 해당 Packet의 Dest IP를 Service와 연결된 Pod의 IP로 **DNAT**하여 Load Balancing을 수행한다.
 
@@ -147,7 +138,7 @@ Cilium에서 제공하는 추가적인 기능중 하나는 Packet Filtering이�
 
 #### 1.4.1. Network Policy
 
-```text {caption="", linenos=table}
+```text {caption="[Shell 4] Cilium Network Policy", linenos=table}
 # cilium policy get
 [
   {
@@ -176,9 +167,6 @@ Cilium에서 제공하는 추가적인 기능중 하나는 Packet Filtering이�
 ...  
 ]
 ```
-<figure>
-<figcaption class="caption">[Shell 4] Cilium Network Policy</figcaption>
-</figure>
 
 Cilium이 설치되면 **CiliumNetworkPolicy** CRD를 이용하여 Network Policy를 정의할 수 있다. Network Policy을 통해서 L3, L4, L7 Level Packet Filtering Rule을 정의할 수 있다. [Shell 4]는 정의된 Network Policy를 'cilium policy get' 명령어를 통해서 확인하는 Shell의 모습을 나타내고 있다. 정의된 Network Policy는 [Figure 1] 또는 [Figure 2]에 나타난 모든 BPF에서 Packet을 전송할때 적용된다.
 

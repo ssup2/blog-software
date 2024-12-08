@@ -146,16 +146,13 @@ kubeadm 초기화를 진행한다. 실행 후 Key 값을 얻을 수 있다. 10.0
 
 kubectl config 설정을 진행한다.
 
-```text {caption="", linenos=table}
+```text {caption="[File 4] Master Node - ~/.bashrc", linenos=table}
 if [ -f /etc/bash-completion ] && ! shopt -oq posix; then
     . /etc/bash-completion
 fi
 
 source <(kubectl completion bash)
 ```
-<figure>
-<figcaption class="caption">[File 4] Master Node - ~/.bashrc</figcaption>
-</figure>
 
 kubectl autocomplete 설정을 진행한다. ~/.bashrc에 [File 4]의 내용을 추가한다.
 

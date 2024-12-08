@@ -41,9 +41,6 @@ roleRef:
   name: role-name
   apiGroup: rbac.authorization.k8s.io
 ```
-<figure>
-<figcaption class="caption">[Text 2] Role Binding with Group</figcaption>
-</figure>
 
 [Text 1]은 "ssup2" User에게 Role을 부여하기 위한 Role Binding을 나타내고 있고, [Text 2]는 "kube" Group에게 Role을 부여하기 위한 Role Binding을 나타내고 있다. "system:"으로 시작하는 Group은 Kubernetes에서 예약된 Group 이름이다. 따라서 "system:masters" Group도 Kubernetes에서 예약된 Group을 의미한다. Kubernetes에서 "system:masters" Group은 Super 권한을 갖는 Group이다.
 

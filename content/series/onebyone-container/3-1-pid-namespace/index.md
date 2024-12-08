@@ -23,7 +23,7 @@ Zombie Process는 죽지 않는 Process를 의미한다. Zombie Process가 죽�
 
 [Figure 3]은 Linux에서 부모 Process가 wait() System Call을 호출하지 않았을 경우 Zombie Process의 처리 과정을 나타내고 있다. C Process가 종료되었지만 B Process가 wait() System Call을 호출하지 않았기 때문에 C Process는 Zombie Process가 된다. 이후 B Process가 종료되면 C Process의 부모 Process는 Init Process가 되기 때문에 Init Process는 wait() System Call을 호출하여 C Process를 제거한다. 이와 같은 이유 때문에 Init Process는 반드시 wait() System Call을 호출하여 Zombie Process를 제거하는 역할을 수행해야 한다. 가장 많이 이용되는 Init Process인 systemd는 Zombie Process 제거 역할을 수행한다.
 
-```console {caption="", linenos=table}
+```console {caption="[Shell 1] Linux Host에서 고아 Process 확인", linenos=table}
 # sleep process을 생성하는 bash Process를 생성
 (host)# bash -c "(bash -c 'sleep 60')" &
 (host)# ps -ef
@@ -47,15 +47,12 @@ root         1     0  0 Apr22 ?        00:00:03 /sbin/init
 ...
 root     29779 28207  0 22:07 pts/24   00:00:00 ps -ef
 ```
-<figure>
-<figcaption class="caption">[Shell 1] Linux Host에서 고아 Process 확인</figcaption>
-</figure>
 
 [Shell 1]은 Linux Host에서 고아 Process 생성 및 상태를 확인하는 과정을 나타내고 있다. [Shell 1]에서 sleep Process는 Bash Process가 부모 Process인데, Bash Process가 종료된 다음 sleep Process의 새로운 부모 Process는 init Process가 되는것을 확인할 수 있다. 60초 후에 sleep Process가 종료된 다음 /sbin/init Process는 자식 Process인 sleep Process의 Meta 정보를 회수하여 sleep Process가 Zombie Process가 되는것을 방지하여 sleep Process를 제거한다.
 
 ## PID Namespace
 
-```console {caption="", linenos=table}
+```console {caption="[Shell 1] nginx Container Process", linenos=table}
 # nginx Container를 Daemon으로 실행하고 exec을 통해서 nginx Container에 bash Process를 실행
 (host)# docker run -d --rm --name nginx nginx:1.16.1
 (host)# docker exec -it nginx bash
@@ -66,11 +63,8 @@ UID        PID  PPID  C STIME TTY          TIME CMD
 root         1     0  0 Apr10 ?        00:00:00 nginx: master process nginx -g daemon off;
 nginx        6     1  0 Apr10 ?        00:00:00 nginx: worker process
 ```
-<figure>
-<figcaption class="caption">[Shell 1] nginx Container Process</figcaption>
-</figure>
 
-```console {caption="", linenos=table}
+```console {caption="[Shell 2] httpd Container Process", linenos=table}
 # httpd Container를 Daemon으로 실행하고 exec을 통해서 httpd Container에 bash Process를 실행
 (host)# docker run -d --rm --name httpd httpd:2.4.43
 (host)# docker exec -it httpd bash
@@ -83,11 +77,8 @@ daemon       7     1  0 Apr10 ?        00:00:00 httpd -DFOREGROUND
 daemon       8     1  0 Apr10 ?        00:00:00 httpd -DFOREGROUND
 daemon       9     1  0 Apr10 ?        00:00:00 httpd -DFOREGROUND
 ```
-<figure>
-<figcaption class="caption">[Shell 2] httpd Container Process</figcaption>
-</figure>
 
-```console {caption="", linenos=table}
+```console {caption="[Shell 3] Host Process", linenos=table}
 # host에서 nginx Container와 httpd Container의 Process를 확인
 (host)# ps -ef
 UID        PID  PPID  C STIME TTY          TIME CMD
@@ -101,9 +92,6 @@ daemon   25817 25759  0 Apr10 ?        00:00:00 httpd -DFOREGROUND
 daemon   25818 25759  0 Apr10 ?        00:00:00 httpd -DFOREGROUND
 ...
 ```
-<figure>
-<figcaption class="caption">[Shell 3] Host Process</figcaption>
-</figure>
 
 [Shell 1]은 nginx Container 내부에서 본 Process를 나타내고 있고 [Shell 2]는 httpd Container 내부에서 본 Process를 나타내고 있다. 마지막으로 [Shell 3]은 nginx Container와 httpd Container를 구동한 Host에서 본 Process를 나타내고 있다. NGNIX Container와 httpd Container는 서로의 Process를 확인할 수 없지만, Host는 두 Container의 Proces를 모두 확인할 수 있다. 이러한 현상은 PID Namespace의 특징 때문에 발생한다.
 
@@ -135,7 +123,7 @@ C Process는 Container PID Namespace의 Init Process이기 때문에, 이후 C P
 
 즉 Container의 Zombie Process가 Container의 Init Process에 의해서 제거되지 않더라도, Container가 죽으면 Host의 systemd와 같은 Init Process에 의해서 Container의 Zombie Proces는 제거된다는 의미이다. Container의 Init Process로 많이 이용되는 supervisord, dumb-init, tini 같은 명령어들은 모두 Child Process의 Meta 정보를 회수하는 기능을 갖고 있기 때문에 Container의 Zombie Process를 예방하는 역할을 수행한다.
 
-```console {caption="", linenos=table}
+```console {caption="[Shell 5] Container의 고아 Process, Zombie Process 확인", linenos=table}
 # Init Process가 sleep infinity인 ubuntu Container를 Daemon으로 실행하고 exec을 통해서 ubuntu Container에 bash Process를 실행한다.
 (host)# docker run -d --rm --name ubuntu ubuntu sleep infinity
 (host)# docker exec -it ubuntu bash
@@ -167,13 +155,10 @@ root         6     0  0 13:45 pts/0    00:00:00 bash
 root        16     1  0 13:46 pts/0    00:00:00 [sleep] <defunct>
 root        19     6  0 13:47 pts/0    00:00:00 ps -ef
 ```
-<figure>
-<figcaption class="caption">[Shell 5] Container의 고아 Process, Zombie Process 확인</figcaption>
-</figure>
 
 [Shell 5]는 Container에서 고아 Process와 Zombie Process를 확인하는 과정을 나타내고 있다. [Shell 5]에서 ubuntu Container의 Init Process는 sleep infinity Process로 설정하였다. 그 후 ubuntu Container에 bash Process를 생성하여 sleep 60 Process를 고아 Process로 만들었다. sleep 60 Process의 Parant는 Container의 Init Process인 sleep inifinity가 되는것을 확인할 수 있다. sleep infinity Process는 wait() System Call 호출하지 않기 때문에 죽은 Child Process의 Meta 정보를 회수하는 기능을 수행하지 못한다. 따라서 60초 후에 sleep 60 Process가 종료되면 sleep 60 Process는 Zombie Process가 된다. defunt는 Zombie Process가 되었다는걸 의미한다.
 
-```console {caption="", linenos=table}
+```console {caption="[Shell 6] Container Zombie Process 확인 및 제거", linenos=table}
 # Host에서 ubuntu Container의 Zombie Process 확인
 (host)# ps -ef
 root     12552 12526  0 22:33 ?        00:00:00 sleep infinity
@@ -186,8 +171,5 @@ root     20908 28207  0 22:51 pts/24   00:00:00 ps -ef
 (host)# ps -ef
 root     22783 28207  0 22:55 pts/24   00:00:00 ps -ef
 ```
-<figure>
-<figcaption class="caption">[Shell 6] Container Zombie Process 확인 및 제거</figcaption>
-</figure>
 
 [Shell 6]은 Host에서 ubuntu Container의 Zombie Process를 확인하고, ubuntu Container를 제거하여 Container의 Zombie Process도 제거된것을 확인하는 과정을 나타내고 있다. Host에서는 Container의 모든 Process를 볼수 있기 때문에 ubuntu Container의 Zombie Process는 Host Process에서도 확인할 수 있다. ubuntu Container를 제거한 다음 ubuntu Container의 Zombie Process도 제거된것을 확인할 수 있다.

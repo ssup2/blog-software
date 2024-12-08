@@ -16,55 +16,43 @@ Elasticsearch는 분산형 Data 검색 및 분석 엔진 역할을 수행한다.
 
 #### 2.1. Master-elibigle Node
 
-```cpp linenos {caption="", linenos=table}
+```cpp linenos {caption="[Text 1] Master Node 설정 Configuration", linenos=table}
 node.master: true 
 node.data: false
 node.ingest: false
 ```
-<figure>
-<figcaption class="caption">[설정 1] Master Node 설정 Configuration</figcaption>
-</figure>
 
-Master-eligible Node는 Elasticsearch Cluster를 전반적으로 관리하는 Node이다. Cluster를 구성하는 Node들의 상태를 관리하고, Index를 관리하고, Data를 어느 Shard에 저장할지 결정한다. Cluster에서 다수의 Master-elibigle Node가 있는 경우 실제로 Master 역할을 수행하는 Node는 하나이며, 나머지 Master-elibigle Node는 Failover시 Master가 될 수 있는 예비 Node 역할을 수행한다. [설정 1]은 Master-elibigle Node를 설정하는 Configuration이다.
+Master-eligible Node는 Elasticsearch Cluster를 전반적으로 관리하는 Node이다. Cluster를 구성하는 Node들의 상태를 관리하고, Index를 관리하고, Data를 어느 Shard에 저장할지 결정한다. Cluster에서 다수의 Master-elibigle Node가 있는 경우 실제로 Master 역할을 수행하는 Node는 하나이며, 나머지 Master-elibigle Node는 Failover시 Master가 될 수 있는 예비 Node 역할을 수행한다. [Text 1]은 Master-elibigle Node를 설정하는 Configuration이다.
 
 #### 2.2. Data Node
 
-```cpp linenos {caption="", linenos=table}
+```cpp linenos {caption="[Text 2] Data Node 설정", linenos=table}
 node.master: false 
 node.data: true 
 node.ingest: false 
 ```
-<figure>
-<figcaption class="caption">[설정 2] Data Node 설정</figcaption>
-</figure>
 
-Data Node는 Shard를 저장하고 관리하는 Node이다. [설정 2]는 Data Node를 설정하는 Configuration이다.
+Data Node는 Shard를 저장하고 관리하는 Node이다. [Text 2]는 Data Node를 설정하는 Configuration이다.
 
 #### 2.3. Ingest Node
 
-```cpp linenos {caption="", linenos=table}
+```cpp linenos {caption="[Text 3] Ingest Node 설정", linenos=table}
 node.master: false 
 node.data: false
 node.ingest: true 
 ```
-<figure>
-<figcaption class="caption">[설정 3] Ingest Node 설정</figcaption>
-</figure>
 
-Ingest Node는 Data Pre-processing Pipeline을 수행하는 Node이다. 따라서 Logstash가 수행하는 Data 전처리를 Ingest Node에서도 수행할 수 있다. [설정 3]은 Ingest Node를 설정하는 Configuration이다.
+Ingest Node는 Data Pre-processing Pipeline을 수행하는 Node이다. 따라서 Logstash가 수행하는 Data 전처리를 Ingest Node에서도 수행할 수 있다. [Text 3]은 Ingest Node를 설정하는 Configuration이다.
 
 #### 2.4. Coodinating (Client) Node
 
-```cpp linenos {caption="", linenos=table}
+```cpp linenos {caption="[Text 4] Coodinating Node 설정", linenos=table}
 node.master: false
 node.data: false
 node.ingest: false
 ```
-<figure>
-<figcaption class="caption">[설정 4] Coodinating Node 설정</figcaption>
-</figure>
 
-Coodinating Node는 외부의 (Logstash, Kibana) 요청에 따라서 Master Node, Data Node, Coodinating Node에 적절한 요청을 보내고, 요청 결과를 받아 다시 외부로 전달하는 Load Balaner 또는 Proxy 역할을 수행한다. [설정 4]는 Coodinating Node를 설정하는 Configuration이다.
+Coodinating Node는 외부의 (Logstash, Kibana) 요청에 따라서 Master Node, Data Node, Coodinating Node에 적절한 요청을 보내고, 요청 결과를 받아 다시 외부로 전달하는 Load Balaner 또는 Proxy 역할을 수행한다. [Text 4]는 Coodinating Node를 설정하는 Configuration이다.
 
 ## 3. Logstash
 

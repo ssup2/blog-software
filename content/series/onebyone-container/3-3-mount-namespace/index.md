@@ -4,7 +4,7 @@ title: 3.3. Mount Namespace
 
 ## Mount Namespace
 
-```console {caption="", linenos=table}
+```console {caption="[Shell 1] nginx Container의 Mount 정보 확인", linenos=table}
 # Host에 nginx Container의 Volume으로 이용할 Directory 생성 및 File 생성 
 (host)# mkdir -p /mnt/nginx-volume
 (host)# touch /mnt/nginx-volume/nginx-file
@@ -29,11 +29,8 @@ tmpfs on /sys/fs/cgroup type tmpfs (ro,nosuid,nodev,noexec,relatime,mode=755)
 (nginx)# ls /nginx-volume
 nginx-file
 ```
-<figure>
-<figcaption class="caption">[Shell 1] nginx Container의 Mount 정보 확인</figcaption>
-</figure>
 
-```console {caption="", linenos=table}
+```console {caption="[Shell 2] httpd Container의 Mount 정보 확인", linenos=table}
 # Host에 httpd Container의 Volume으로 이용할 Directory 생성 및 File 생성 
 (host)# mkdir -p /mnt/httpd-volume
 (host)# touch /mnt/httpd-volume/httpd-file
@@ -58,15 +55,12 @@ tmpfs on /sys/fs/cgroup type tmpfs (ro,nosuid,nodev,noexec,relatime,mode=755)
 (nginx)# ls /httpd-volume
 httpd-file
 ```
-<figure>
-<figcaption class="caption">[Shell 2] httpd Container의 Mount 정보 확인</figcaption>
-</figure>
 
 Mount 격리를 담당하는 Mount Namespace를 알아본다. [Shell 1,2]는 Container에서 File을 별도로 저장하는 공간으로 이용하는 Volume을 생성하고, 생성한 Volume을 Container에 붙이고, Container안에서 붙인 Volume과 Container의 Mount 정보를 확인하는 과정을 나타내고 있다. Container에서 보이는 Mount 정보는 얼핏보면 동일해 보이지만 자세히 보면 서로 다른 Mount 정보를 갖고 있는것을 확인 할 수 있다.
 
 각 Container의 "/(Root)"에 Mount되어 있는 Root Filesystem은 overlay라고 명시되어 있고 동일해 보이지만 Mount Option을 보면 Mount Option이 다른걸 확인할 수 있다. 여기서 overlay는 OverlayFS이라고 불리는 특수 Filesystem을 의미하며 Container의 Root Filesystem을 구성하는데 가장 많이 이용되는 Filesystem이다. OverlayFS은 Container Image를 설명할 때 자세히 설명할 예정이다. nginx Container의 경우 Volume을 "/nginx-volume"에 붙였기 때문에 Mount 정보에도 "/nginx-volume"에 Volume 정보가 보이는것을 확인할 수 있다. 반면 http Container의 경우 Volume을 "/http-volume"에 붙였기 때문에 Mount 정보에도 "/http-volume"에 Volume 정보가 보이는 것을 확인할 수 있다.
 
-```console {caption="", linenos=table}
+```console {caption="[Shell 3] Host의 Mount 정보 확인", linenos=table}
 # nginx Container와 httpd Container의 Root Directory 경로 확인
 (host)# docker inspect nginx | jq -r '.[0].GraphDriver.Data.MergedDir'
 /var/lib/docker/overlay2/60cdd9ada3570b00bcaa4d6d418b00f0424741e1f53c205477401eeff935f627/merged
@@ -86,9 +80,6 @@ overlay on /var/lib/docker/overlay2/60cdd9ada3570b00bcaa4d6d418b00f0424741e1f53c
 overlay on /var/lib/docker/overlay2/4af3d974a9c5adfcb7d7efb7437ab020e6289ae5b0d186265d5727d77748f5e0/merged type overlay (rw,relatime,lowerdir=/var/lib/docker/overlay2/l/25BMCB5TMIJIGCXBPYGABX4VV3:/var/lib/docker/overlay2/l/RP6BFGRYNFHDHH3LADBIHK7RKS:/var/lib/docker/overlay2/l/GVVCUIKIMMAQWODR7MXUDNZ2ED:/var/lib/docker/overlay2/l/T52KDQTNBHR6KNC47WM64ISHKE:/var/lib/docker/overlay2/l/NXDEMBX7ZWJT6QZKOPJEHUXRQZ:/var/lib/docker/overlay2/l/D5TZIT4QTMFPUNXZNTB3DZNSLZ,upperdir=/var/lib/docker/overlay2/4af3d974a9c5adfcb7d7efb7437ab020e6289ae5b0d186265d5727d77748f5e0/diff,workdir=/var/lib/docker/overlay2/4af3d974a9c5adfcb7d7efb7437ab020e6289ae5b0d186265d5727d77748f5e0/work)
 ...
 ```
-<figure>
-<figcaption class="caption">[Shell 3] Host의 Mount 정보 확인</figcaption>
-</figure>
 
 [Shell 3]은 nginx, httpd Container를 생성한 다음 Host에서 보이는 Mount 정보를 조회하는 과정을 나타내고 있다. Mount 정보를 살펴보면 OverlayFS 정보를 확인할 수 있다. [Shell 3]의 첫번째 OverlayFS의 Option은 nginx Container의 Root Filesystem인 OverlayFS의 Option과 동일한것 알 수 있다. 즉 [Shell 3]의 첫번째 OverlayFS은 nginx Container를 위한 Filesystem인걸 알 수 있다. 이와 동일한 방법으로 [Shell 3]의 두번째 OverlayFS은 http Container를 위한 Filesystem인걸 알 수 있다. 각 Container와 Host가 각각 다른 Mount 정보를 갖을수 있는 이유는 Mount Namespace 때문이다. 
 

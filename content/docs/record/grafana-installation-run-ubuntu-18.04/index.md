@@ -10,12 +10,9 @@ title: Grafana 설치, 실행 / Ubuntu 18.04 환경
 
 ## 2. Grafana 설치
 
-```text {caption="", linenos=table}
+```text {caption="[File 1] /etc/apt/sources.list", linenos=table}
 deb https://packagecloud.io/grafana/stable/debian/ stretch main
 ```
-<figure>
-<figcaption class="caption">[File 1] /etc/apt/sources.list</figcaption>
-</figure>
 
 /etc/apt/sources.list에 다음의 [File 1]의 내용을 추가한다.
 
