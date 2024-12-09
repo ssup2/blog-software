@@ -143,4 +143,5 @@ Chain ISTIO_REDIRECT (1 references)
 
 * [https://istio.io/latest/docs/ops/configuration/traffic-management/dns-proxy/](https://istio.io/latest/docs/ops/configuration/traffic-management/dns-proxy/)
 * [https://istio.io/latest/blog/2020/dns-proxy/](https://istio.io/latest/blog/2020/dns-proxy/)
+* [https://tetrate.io/blog/trying-out-istios-dns-proxy-2/](https://tetrate.io/blog/trying-out-istios-dns-proxy-2/)
 * [https://www.anyflow.net/sw-engineer/istio-dns-proxying](https://www.anyflow.net/sw-engineer/istio-dns-proxying)
