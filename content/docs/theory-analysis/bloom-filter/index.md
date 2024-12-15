@@ -20,7 +20,7 @@ Bloom Filter는 Bitmap을 활용하는 방식이기 때문에 적은양의 메�
 
 [Figure 3]은 True Netative 현상을 보여주고 있다. `ssup` 데이터 결과와 `fake` 데이터의 결과가 동일할 경우 Bloom Filter에는 `fake` 데이터가 존재하지 않더라도 존재하고 있다라는 결과를 보여주고 있다. 이러한 이유는 Hashing 충돌시에 별다른 처리를 수행하지 않기 때문이다. 만약 Hashing 충돌시 추가적인 메모리를 활용하여 별도의 처리 과정을 수행한다면, 메모리를 절약할 수 있는 Bloom Filter의 특징이 사라지게 된다. 반면에 Bloom Filter를 통해서 존재하지 않는 데이터라고 판정될 경우에는 **100% 확률로 데이터가 존재하지 않는걸** 의미한다. 따라서 Bloom Filter는 `Data가 존재한다는 결과가 나올경우에도 실제로 존재하지 않을 확률이 존재`, `Data가 존재하지 않는다는 결과가 나온다면 100% 확률로 존재하지 않음` 2가지 특징을 가지며, 이러한 특징을 만족시킬수 있는 곳에서만 이용해야한다.
 
-[Figure 1]에서는 3개의 Hash Function과, 12 자리수의 BitMap을 이용하고 있지만 데이터의 개수, False Positive 확률, 메모리 사이즈를 고려하여 Bitmap의 크기를 조정하거나 Hash Function의 개수를 조정할 수 있다. 일반적으로 Bitmap의 크기를 증가시키면 
+[Figure 1]에서는 3개의 Hash Function과, 12 자리수의 BitMap을 이용하고 있지만 데이터의 개수, False Positive 확률, Bitmap의 크기, 3개의 변수를 고려하여 Bitmap의 크기를 조정하거나 Hash Function의 개수를 조정할 수 있다. Bitmap의 크기를 증가시키면 False Positive 확률이 줄어들지만 메모리 사용량이 증가한다. Hash Function의 개수의 경우 Hash Function 개수가 적을 경우에는 Hash Function의 개수가 증가할 수록 False Positive 확률이 감소하지만, Hash Function의 개수가 너무 많을 경우에는 반대로 False Positive 확률이 증가한다. 따라서 적절한 Hash Function의 개수와 Bitmap 크기 설정이 중요하며 [Bloom Filter Calculator](https://hur.st/bloomfilter/)를 활용하여 설정을 권장한다.
 
 Cassandra, HBase, Oracle과 같이 Disk에 큰 데이터를 저장하고 관리하는 Database에서 Disk에 데이터 유무를 빠르게 판변하기 위해서 Bloom Filter를 이용하고 있다. Bloom Filter 결과 Data가 없다라고 한다면 Disk에 접근을 수행하지 않으며, Bloom Filter 결과 Data가 있다라고 판단되면 Data가 존재하지 않을수 있는걸 가정하고 Disk에서 탐색 동작을 수행한다. 즉 Bloom Filter를 통해서 Disk 접근을 최소화 하는 용도로 이용하고 있다.
 
