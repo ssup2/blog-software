@@ -24,7 +24,7 @@ draft : true
 Host 이름, Username, Password, Timezone, SSH Server를 설정하고 OS Image를 uSD Card에 복사한다.
 
 * Host 이름 : [Figure 1] 참조
-* Username/Password : `root`/`root`
+* Username/Password : `temp`/`temp`
 
 ### 2.2. Jetson Nano
 
