@@ -120,12 +120,12 @@ kubelet, kubeadm을 설치한다.
 ```shell
 apt-get update
 apt-get install -y apt-transport-https ca-certificates curl gnupg
-curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.31/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 chmod 644 /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.31/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
 sudo chmod 644 /etc/apt/sources.list.d/kubernetes.list
 apt-get update
-apt-get install -y kubelet=1.31.4-1.1 kubeadm=1.31.4-1.1
+apt-get install -y kubelet=1.30.8-1.1 kubeadm=1.30.8-1.1
 ```
 
 ### 4.2. Jetson Nano
@@ -178,12 +178,12 @@ kubelet, kubeadm을 설치한다.
 apt-get update
 mkdir -p /etc/apt/keyrings
 apt-get install -y apt-transport-https ca-certificates curl gnupg
-curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.31/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 chmod 644 /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.31/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
 sudo chmod 644 /etc/apt/sources.list.d/kubernetes.list
 apt-get update
-apt-get install -y kubelet=1.31.4-1.1 kubeadm=1.31.4-1.1
+apt-get install -y kubelet=1.30.8-1.1 kubeadm=1.30.8-1.1
 ```
 
 ## 5. Kubernetes Cluster 구성
@@ -193,24 +193,24 @@ apt-get install -y kubelet=1.31.4-1.1 kubeadm=1.31.4-1.1
 kubectl을 설치한다.
 
 ```shell
-apt-get install -y kubectl=1.31.4-1.1
+apt-get install -y kubectl=1.30.8-1.1
 ```
 
 Kubernetes Cluster를 구성한다.
 
 ```shell
 cat <<EOF | tee kubeadm-config.yaml
-apiVersion: kubeadm.k8s.io/v1beta4
+apiVersion: kubeadm.k8s.io/v1beta3
 kind: ClusterConfiguration
 certificateValidityPeriod: 876000h
 caCertificateValidityPeriod: 876000h
-kubernetesVersion: "v1.31.4"
+kubernetesVersion: "v1.30.8"
 networking:
   podSubnet: "10.244.0.0/16"
 EOF
 
 kubeadm init --config kubeadm-config.yaml
-# kubeadm join 192.168.1.71:6443 --token bbr13k.5uvt3vpc1gs0hig9 --discovery-token-ca-cert-hash sha256:3f77bd111ac5a437cdf43de62b5d75141a4295f4b1a69ccec159de8800c2e2a3
+# kubeadm join 192.168.1.71:6443 --token e5t05s.1z4zbpm3oxdhskya --discovery-token-ca-cert-hash sha256:01c2bf6ead65ea0e9c39186d92a51baa9aa6dc6963b900cd825d7e14dcb08fba
 ```
 
 kubectl config 파일을 복사한다.
@@ -232,7 +232,7 @@ kubectl apply -f https://github.com/flannel-io/flannel/releases/download/v0.26.2
 Kubernetes Cluster에 Join 한다.
 
 ```shell
-kubeadm join 192.168.1.71:6443 --token bbr13k.5uvt3vpc1gs0hig9 --discovery-token-ca-cert-hash sha256:3f77bd111ac5a437cdf43de62b5d75141a4295f4b1a69ccec159de8800c2e2a3
+kubeadm join 192.168.1.71:6443 --token e5t05s.1z4zbpm3oxdhskya --discovery-token-ca-cert-hash sha256:01c2bf6ead65ea0e9c39186d92a51baa9aa6dc6963b900cd825d7e14dcb08fba
 ```
 
 ## 6. Data Component 설치
