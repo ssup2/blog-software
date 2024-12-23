@@ -149,11 +149,11 @@ certificateValidityPeriod: 876000h
 caCertificateValidityPeriod: 876000h
 kubernetesVersion: "v1.31.4"
 networking:
-  podSubnet: "10.244.0.0/24"
+  podSubnet: "10.244.0.0/16"
 EOF
 
 kubeadm init --config kubeadm-config.yaml
-# kubeadm join 192.168.1.71:6443 --token 6vj8jy.8i28zq7leqs0hru1 --discovery-token-ca-cert-hash sha256:00a4d45b7c715b99aa46ffd05d6e8bf2ba3423909a7725c16a98bbdcaf0cc1c4
+# kubeadm join 192.168.1.71:6443 --token bbr13k.5uvt3vpc1gs0hig9 --discovery-token-ca-cert-hash sha256:3f77bd111ac5a437cdf43de62b5d75141a4295f4b1a69ccec159de8800c2e2a3
 ```
 
 kubectl config 파일을 복사한다.
