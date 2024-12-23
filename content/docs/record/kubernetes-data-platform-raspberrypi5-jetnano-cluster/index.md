@@ -107,6 +107,7 @@ sysctl --system
 containerd를 설치한다.
 
 ```shell
+apt update
 apt install -y containerd
 mkdir -p /etc/containerd
 containerd config default | tee /etc/containerd/config.toml
@@ -128,6 +129,62 @@ apt-get install -y kubelet=1.31.4-1.1 kubeadm=1.31.4-1.1
 ```
 
 ### 4.2. Jetson Nano
+
+Swap Memory를 제거한다.
+
+```shell
+swapoff -a
+mv /etc/systemd/nvzramconfig.sh /etc/systemd/nvzramconfig.sh.back
+```
+
+Kernel Module을 로드한다.
+
+```shell
+cat <<EOF | tee /etc/modules-load.d/k8s.conf
+overlay
+br_netfilter
+EOF
+
+modprobe overlay
+modprobe br_netfilter
+```
+
+sysctl Parameter를 설정한다.
+
+```shell
+cat <<EOF | tee /etc/sysctl.d/k8s.conf
+net.bridge.bridge-nf-call-iptables  = 1
+net.bridge.bridge-nf-call-ip6tables = 1
+net.ipv4.ip_forward                 = 1
+EOF
+
+sysctl --system
+```
+
+containerd를 설치한다.
+
+```shell
+apt update
+apt install -y containerd
+mkdir -p /etc/containerd
+containerd config default | tee /etc/containerd/config.toml
+sed -i 's/SystemdCgroup = false/SystemdCgroup = true/g' /etc/containerd/config.toml
+systemctl restart containerd.service
+```
+
+kubelet, kubeadm을 설치한다.
+
+```shell
+apt-get update
+mkdir -p /etc/apt/keyrings
+apt-get install -y apt-transport-https ca-certificates curl gnupg
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.31/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+chmod 644 /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.31/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+sudo chmod 644 /etc/apt/sources.list.d/kubernetes.list
+apt-get update
+apt-get install -y kubelet=1.31.4-1.1 kubeadm=1.31.4-1.1
+```
 
 ## 5. Kubernetes Cluster 구성
 
@@ -171,5 +228,11 @@ kubectl apply -f https://github.com/flannel-io/flannel/releases/download/v0.26.2
 ```
 
 ### 5.2. Compute, Storage, GPU Nodes
+
+Kubernetes Cluster에 Join 한다.
+
+```shell
+kubeadm join 192.168.1.71:6443 --token bbr13k.5uvt3vpc1gs0hig9 --discovery-token-ca-cert-hash sha256:3f77bd111ac5a437cdf43de62b5d75141a4295f4b1a69ccec159de8800c2e2a3
+```
 
 ## 6. Data Component 설치
