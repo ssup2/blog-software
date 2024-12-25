@@ -8,7 +8,7 @@ Kubernetes Pod을 분석한다.
 
 {{< figure caption="[Figure 1] Kubernetes Pod" src="images/pod-component.png" width="500px" >}}
 
-Pod은 Kubernetes에서 이용하는 **Container 관리 단위**이다. Kubernetes는 Pod 단위로 Scheduling을 및 Load Balancing을 수행한다. 대부분의 Pod은 하나의 Container로 구성되어 있지만 다수의 Container로도 구성 될 수 있다. 이러한 Pod을 Multi-container Pod이라고 표현한다. Multi-container Pod의 Container들은 같은 Network Namespace와 IPC Namespace를 공유한다. 또한 같은 Volume(Storage)를 공유한다. 
+Pod은 Kubernetes에서 이용하는 **Container 관리 단위**이다. Kubernetes는 Pod 단위로 Scheduling을 및 Load Balancing을 수행한다. 대부분의 Pod은 하나의 Container로 구성되어 있지만 다수의 Container로도 구성 될 수 있다. 이러한 Pod을 Multi-container Pod이라고 표현한다. Multi-container Pod의 Container들은 같은 Network Namespace와 IPC Namespace를 공유한다. 또한 같은 Volume(Storage)를 공유한다.
 
 Pod의 각 Container는 대부분 하나의 App만을 구동시킨다. Container에 하나의 App만을 구동시키면 App이 죽었을 경우 Container도 제거된다. 즉 App의 Life Time과 Container의 Life Time이 일치하게 된다. 또한 App의 Log를 stdout/stderr으로 출력하게 설정하면, Container 외부에서도 App의 Log를 쉽게 파악할 수 있게 된다. 물론 하나의 Container에서 다수의 App을 구동하여 하나의 Pod에 하나의 Container만을 띄우는 방식으로도 구성할 수 있지만, 위에서 언급한 장점들이 사라진다.
 
