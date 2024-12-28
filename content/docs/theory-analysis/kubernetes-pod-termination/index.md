@@ -13,13 +13,21 @@ Pod가 종료되도 Pod 안에서 동작하는 App Container가 안정적으로 
 2. Pod 종료 요청을 받은 Kubelet은 Pod 안에서 동작하고 있는 App Container의 PreStop Hook을 동작시킨다.
 3. Endpoint Slice Controller는 종료될 Pod를 Endpoint Slice에서 제거하여 kube-proxy가 신규 Request를 종료될 Pod로 전달되지 못하도록 만든다.
 4. PreStop Hook의 동작이 완료되면 kubelet은 `SIGTERM` Signal을 전송한다. `SIGTERM`을 받은 App Container는 현재 처리중인 Request를 모두 처리하고 종료를 시도한다.
-5. 만약 `SIGTERM`을 받은 App Container가 종료되지 않으면 `SIGKILL` Signal을 받고 강제로 종료된다. kubelet은 K8s API 서버가 받은 Pod 종료 요청 시간부터 App Container에 설정된 `terminationGracePeriodSeconds` 시간만큼 대기후에 `SIGKILL` Signal을 전송하며, `terminationGracePeriodSeconds`의 기본값은 30초이다.
+5. 만약 `SIGTERM`을 받은 App Container가 종료되지 않으면 `SIGKILL` Signal을 받고 강제로 종료된다. kubelet은 K8s API 서버가 받은 Pod 종료 요청 시간부터 App Container에 설정된 `terminationGracePeriodSeconds` 시간만큼 대기후에 `SIGKILL` Signal을 전송한다. `terminationGracePeriodSeconds`의 기본값은 30초이다.
+
+App Container가 우아하게 종료되기 위해서는 마지막 `SIGKILL` 과정을 제외한 **1~4의 과정이 수행**되어야 한다. 1,3번의 과정은 Kubernetes 내부적으로 자동으로 수행되는 과정이지만, 2번의 과정은 Pod 내부의 App Container에 PreStop Hook을 설정하지 않으면 수행되지 않으며, 4번의 과정은 App Container에서 `SIGTERM`을 처리하지 않도록 설정하면 수행되지 않기 때문에 관리가 필요하다. 또한 App Container가 `SIGKILL`을 받으면 Request가 제대로 처리되지 않고 강제로 종료될 수 있기 때문에 `terminationGracePeriodSeconds`의 값도 적절하게 설정해야한다.
+
+### 1.1. PreStop Hook 설정
 
 {{< figure caption="[Figure 2] Kubernetes Pod Termination without Prestop Hook" src="images/kubernetes-pod-termination-without-prestop-hook.png" width="1000px" >}}
 
 App Container가 우아하게 종료되기 위해서는 `SIGKILL` 과정을 제외한 **1에서 4의 과정이 반드시 수행**되어야 한다. [Figure 2] 과정은 App Container에 Prestop Hook을 설정하지 않았을 경우, App Container로 전달된 일부 App 
 
-### 1.1. with Istio Sidecar
+### 1.2. App Container의 SIGTERM 처리
+
+### 1.3. terminationGracePeriodSeconds 설정
+
+### 1.4. with Istio Sidecar
 
 `terminationDrainDuration`
 
