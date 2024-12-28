@@ -12,7 +12,7 @@ Pod가 종료되도 Pod 안에서 동작하는 App Container가 안정적으로 
 1. K8s API 서버는 Pod 종료 요청을 받으면 종료 요청을 받은 Pod가 동작하는 Node의 kubelet에게 Pod 종료 요청을 전달한다. 또한 K8s API 서버는 Endpoint Slice Controller에게도 Pod 종료를 전달한다.
 2. Pod 종료 요청을 받은 Kubelet은 Pod 안에서 동작하고 있는 App Container의 PreStop Hook을 동작시킨다.
 3. Endpoint Slice Controller는 종료될 Pod를 Endpoint Slice에서 제거하여 kube-proxy가 신규 Request를 종료될 Pod로 전달되지 못하도록 만든다.
-4. PreStop Hook의 동작이 완료되면 kubelet은 `SIGTERM` Signal을 전송한다. `SIGTERM` Signal을 받은 App Container는 현재 처리중인 Request를 모두 처리하고 종료를 시도한다.
+4. PreStop Hook의 동작이 완료되면 kubelet은 `SIGTERM` Signal을 전송한다. `SIGTERM` Signal을 받은 App Container는 현재 처리중인 Request를 모두 완료하고 종료를 시도한다.
 5. 만약 `SIGTERM`을 받은 App Container가 종료되지 않으면 `SIGKILL` Signal을 받고 강제로 종료된다. kubelet은 K8s API 서버가 받은 Pod 종료 요청 시간부터 App Container에 설정된 `terminationGracePeriodSeconds` 시간만큼 대기후에 `SIGKILL` Signal을 전송한다. `terminationGracePeriodSeconds`의 기본값은 30초이다.
 
 {{< figure caption="[Figure 2] Kubernetes Pod Termination with Gracefully Termination" src="images/kubernetes-pod-termination-with-gracefully-termination.png" width="1000px" >}}
@@ -46,18 +46,18 @@ PreStop Hook은 `SIGTERM` Signal을 늦게 받기 위한 용도로 활용되기 
 
 {{< figure caption="[Figure 4] Kubernetes Pod Termination without PreStop Hook" src="images/kubernetes-pod-termination-without-sigterm-handler.png" width="1000px" >}}
 
-Linux 환경에서 `SIGTERM` Signal Handler가 설정되지 않는 Application (Process)는 `SIGTERM` Signal을 받는 순간 죽는다. [Figure 4]는 App Container가 SIGTERM Handler가 설정되지 않았을 때를 나타내고 있다. SIGTERM을 받자마자 App Container가 제거되기 때문에, 전달 받은 Request를 제대로 처리하지 못하고 종료될 수 있다.
+Linux 환경에서 `SIGTERM` Signal Handler가 설정되지 않는 Application (Process)는 `SIGTERM` Signal을 받는 순간 죽으며, App Container도 동일하다. [Figure 4]는 App Container가 SIGTERM Handler가 설정되지 않았을 때를 나타내고 있다. SIGTERM을 받자마자 App Container가 제거되기 때문에, 현재 처리중인 Request를 제대로 처리하지 못하고 종료될 수 있다. 따라서 App Container는 `SIGTERM` Signal을 받더라도 현재 처리중 Request를 완료하고 죽도록 설정되어 있어야 한다.
 
 ```yaml {caption="[File 2] SpringBoot SIGTEM Handler Configuration", linenos=table}
 server
   shutdown: graceful
 ```
 
-대부분의 App Server Framework에서는 `SIGTERM` Signal을 손쉽게 처리할 수 있는 Gracefully Termination 설정을 제공하기 때문에, 직접 `SIGTERM` Handler를 작성할 필요는 없다. [File 2]는 SpringBoot의 예제를 나타내고 있다. Spring Boot에 `shutdown: graceful`을 설정하면 `SIGTERM` Signal을 수신하는 순간 신규 Request의 처리는 거절되며, 현재 처리중인 모든 Request가 마무리 된 이후에 종료된다.
+대부분의 App Server Framework에서는 `SIGTERM` Signal을 손쉽게 처리할 수 있는 Gracefully Termination 설정을 제공하기 때문에, 직접 `SIGTERM` Handler를 작성할 필요는 없으며, App Container의 경우에도 동일하다. [File 2]는 SpringBoot의 예제를 나타내고 있다. Spring Boot에 `shutdown: graceful`을 설정하면 `SIGTERM` Signal을 수신하는 순간 신규 Request의 처리는 거절되며, 현재 처리중인 모든 Request가 완료 된 이후에 종료된다.
 
 SpringBoot 뿐만이 아니라 대부분의 App Server Framework에서는 Gracefully Termination이 동작하면 `SIGTERM` Signal을 수신하는 순간 신규 Request도 거절하기 때문에, `SIGTERM` Signal을 App Container로 전송한 이후에는 신규 Request도 App Container로 전달되면 안되며, 이러한 역할은 PreStop Hook이 수행한다. 
 
-App Container가 `SIGTERM` Signal을 처리하지 않는 상태에서 우아한 종료를 수행하기 위해서는 PreStop Hook의 시간을 30초 이상으로 늘리는 방법이 존재한다. PreStop Hook이 길어질 수록 App Container가 `SIGTERM` Signal을 받는 시간이 늘어나고 그만큼 현재 처리중인 Request를 마무리할 수 있는 시간을 얻을 수 있기 때문이다. 하지만 PreStop Hook이 길어질 수록 Pod 종료 시간도 길어지고 그 만큼 Pod 배포 시간도 증가하기 때문에 가능하면 App Container에서 `SIGTERM` Signal Handler를 설정하는 방법을 권장한다.
+App Container가 `SIGTERM` Signal을 처리하지 않는 상태에서 우아한 종료를 수행하기 위해서는 PreStop Hook의 시간을 30초 이상으로 늘리는 방법이 존재한다. PreStop Hook이 길어질 수록 App Container가 `SIGTERM` Signal을 받는 시간이 늘어나고 그만큼 현재 처리중인 Request를 완료할 수 있는 시간을 얻을 수 있기 때문이다. 하지만 PreStop Hook이 길어질 수록 Pod 종료 시간도 길어지고 그 만큼 Pod 배포 시간도 증가하기 때문에 가능하면 App Container에서 `SIGTERM` Signal Handler를 설정하는 방법이 권장된다.
 
 ### 1.3. terminationGracePeriodSeconds 설정
 
