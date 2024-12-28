@@ -15,13 +15,15 @@ Pod가 종료되도 Pod 안에서 동작하는 App Container가 안정적으로 
 4. PreStop Hook의 동작이 완료되면 kubelet은 `SIGTERM` Signal을 전송한다. `SIGTERM` Signal을 받은 App Container는 현재 처리중인 Request를 모두 처리하고 종료를 시도한다.
 5. 만약 `SIGTERM`을 받은 App Container가 종료되지 않으면 `SIGKILL` Signal을 받고 강제로 종료된다. kubelet은 K8s API 서버가 받은 Pod 종료 요청 시간부터 App Container에 설정된 `terminationGracePeriodSeconds` 시간만큼 대기후에 `SIGKILL` Signal을 전송한다. `terminationGracePeriodSeconds`의 기본값은 30초이다.
 
-App Container가 우아하게 종료되기 위해서는 마지막 `SIGKILL` 과정을 제외한 **1~4의 과정이 수행**되어야 한다. 1,3번의 과정은 Kubernetes 내부적으로 자동으로 수행되는 과정이지만, 2번의 과정은 Pod 내부의 App Container에 PreStop Hook을 설정하지 않으면 수행되지 않으며, 4번의 과정은 App Container에서 `SIGTERM` Signal을 처리하지 않도록 설정하면 수행되지 않기 때문에 관리가 필요하다. 또한 App Container가 `SIGKILL`을 받으면 Request가 제대로 처리되지 않고 강제로 종료될 수 있기 때문에 `terminationGracePeriodSeconds`의 값도 적절하게 설정해야한다.
+{{< figure caption="[Figure 2] Kubernetes Pod Termination with Gracefully Termination" src="images/kubernetes-pod-termination-with-gracefully-termination.png" width="1000px" >}}
+
+App Container가 우아하게 종료되기 위해서는 [Figure 2]와 같이 마지막 `SIGKILL` 과정을 제외한 **1~4의 과정이 수행**되어야 한다. 1,3번의 과정은 Kubernetes 내부적으로 자동으로 수행되는 과정이지만, 2번의 과정은 Pod 내부의 App Container에 **PreStop Hook**을 설정하지 않으면 수행되지 않으며, 4번의 과정은 App Container에서 `SIGTERM` Signal을 처리하지 않도록 설정하면 수행되지 않기 때문에 관리가 필요하다. 또한 App Container가 `SIGKILL`을 받으면 Request가 제대로 처리되지 않고 강제로 종료될 수 있기 때문에 `terminationGracePeriodSeconds`의 값도 적절하게 설정해야한다.
 
 ### 1.1. PreStop Hook 설정
 
-{{< figure caption="[Figure 2] Kubernetes Pod Termination without PreStop Hook" src="images/kubernetes-pod-termination-without-prestop-hook.png" width="1000px" >}}
+{{< figure caption="[Figure 3] Kubernetes Pod Termination without PreStop Hook" src="images/kubernetes-pod-termination-without-prestop-hook.png" width="1000px" >}}
 
-[Figure 2] 과정은 App Container에 PreStop Hook을 설정하지 않았을 경우 발생할 수 있는 App Container로 전달된 Request가 처리되지 못한 문제를 나타내고 있다. App Container에 PreStop Hook이 설정되어 있지 않으면 Pod Termination 요청을 받은 kubelet은 `SIGTERM` Signal을 곧바로 전송한다. `SIGTERM` Signal을 받은 App Container는 이후에 전달받은 Request를 처리하지 않거나, 곧바로 종료되어 제거될 수 있다.
+[Figure 3] 과정은 App Container에 PreStop Hook을 설정하지 않았을 경우 발생할 수 있는 App Container로 전달된 Request가 처리되지 못한 문제를 나타내고 있다. App Container에 PreStop Hook이 설정되어 있지 않으면 Pod Termination 요청을 받은 kubelet은 `SIGTERM` Signal을 곧바로 전송한다. `SIGTERM` Signal을 받은 App Container는 이후에 전달받은 Request를 처리하지 않거나, 곧바로 종료되어 제거될 수 있다.
 
 문제는 Pod Termination 요청 Endpoint Slice Controller가 처리하고 다시 kube-proxy로 전달되고, kube-proxy가 다시 iptable/IPVS Rule을 설정하는데 시간이 소요된다는 점이다. 즉 **Endpoint Slice Propagation Delay**가 발생하고 이로 인해서 `SIGTERM` Signal을 받은 App Container는 이후에도 짧은 시간동안 다른 Pod로부터 Request를 전달 받을수 있다. [Figure 1]처럼 App Container에 PreStop Hook이 설정되어 있다면 App Container가 늦게 `SIGTERM` Signal을 받고 늦게 종료가 시작되기 때문에 Endpoint Slice Propagation Delay로 인해서 늦게 Request가 도착해도 문제없이 처리가 가능해 진다.
 
@@ -42,13 +44,30 @@ PreStop Hook은 `SIGTERM` Signal을 늦게 받기 위한 용도로 활용되기 
 
 ### 1.2. App Container의 SIGTERM 처리
 
+{{< figure caption="[Figure 4] Kubernetes Pod Termination without PreStop Hook" src="images/kubernetes-pod-termination-without-sigterm-handler.png" width="1000px" >}}
+
+Linux 환경에서 `SIGTERM` Signal Handler가 설정되지 않는 Application (Process)는 `SIGTERM` Signal을 받는 순간 죽는다. [Figure 4]는 App Container가 SIGTERM Handler가 설정되지 않았을 때를 나타내고 있다. SIGTERM을 받자마자 App Container가 제거되기 때문에, 전달 받은 Request를 제대로 처리하지 못하고 종료될 수 있다.
+
+```yaml {caption="[File 2] SpringBoot SIGTEM Handler Configuration", linenos=table}
+server
+  shutdown: graceful
+```
+
+대부분의 App Server Framework에서는 `SIGTERM` Signal을 손쉽게 처리할 수 있는 Gracefully Termination 설정을 제공하기 때문에, 직접 `SIGTERM` Handler를 작성할 필요는 없다. [File 2]는 SpringBoot의 예제를 나타내고 있다. Spring Boot에 `shutdown: graceful`을 설정하면 `SIGTERM` Signal을 수신하는 순간 신규 Request의 처리는 거절되며, 현재 처리중인 모든 Request가 마무리 된 이후에 종료된다.
+
+SpringBoot 뿐만이 아니라 대부분의 App Server Framework에서는 Gracefully Termination이 동작하면 `SIGTERM` Signal을 수신하는 순간 신규 Request도 거절하기 때문에, `SIGTERM` Signal을 App Container로 전송한 이후에는 신규 Request도 App Container로 전달되면 안되며, 이러한 역할은 PreStop Hook이 수행한다. 
+
+App Container가 `SIGTERM` Signal을 처리하지 않는 상태에서 우아한 종료를 수행하기 위해서는 PreStop Hook의 시간을 30초 이상으로 늘리는 방법이 존재한다. PreStop Hook이 길어질 수록 App Container가 `SIGTERM` Signal을 받는 시간이 늘어나고 그만큼 현재 처리중인 Request를 마무리할 수 있는 시간을 얻을 수 있기 때문이다. 하지만 PreStop Hook이 길어질 수록 Pod 종료 시간도 길어지고 그 만큼 Pod 배포 시간도 증가하기 때문에 가능하면 App Container에서 `SIGTERM` Signal Handler를 설정하는 방법을 권장한다.
+
 ### 1.3. terminationGracePeriodSeconds 설정
 
 ### 1.4. with Istio Sidecar
 
 `terminationDrainDuration`
 
-### 1.5. 우아한 종료 Test
+### 1.5. Gracefully Ter
+
+### 1.6. 우아한 종료 Test
 
 ## 2. 참조
 
