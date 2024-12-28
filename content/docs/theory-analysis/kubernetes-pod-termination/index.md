@@ -49,25 +49,37 @@ PreStop Hook은 `SIGTERM` Signal을 늦게 받기 위한 용도로 활용되기 
 Linux 환경에서 `SIGTERM` Signal Handler가 설정되지 않는 Application (Process)는 `SIGTERM` Signal을 받는 순간 죽으며, App Container도 동일하다. [Figure 4]는 App Container가 SIGTERM Handler가 설정되지 않았을 때를 나타내고 있다. SIGTERM을 받자마자 App Container가 제거되기 때문에, 현재 처리중인 Request를 제대로 처리하지 못하고 종료될 수 있다. 따라서 App Container는 `SIGTERM` Signal을 받더라도 현재 처리중 Request를 완료하고 죽도록 설정되어 있어야 한다.
 
 ```yaml {caption="[File 2] SpringBoot SIGTEM Handler Configuration", linenos=table}
-server
+server:
   shutdown: graceful
 ```
 
 대부분의 App Server Framework에서는 `SIGTERM` Signal을 손쉽게 처리할 수 있는 Gracefully Termination 설정을 제공하기 때문에, 직접 `SIGTERM` Handler를 작성할 필요는 없으며, App Container의 경우에도 동일하다. [File 2]는 SpringBoot의 예제를 나타내고 있다. Spring Boot에 `shutdown: graceful`을 설정하면 `SIGTERM` Signal을 수신하는 순간 신규 Request의 처리는 거절되며, 현재 처리중인 모든 Request가 완료 된 이후에 종료된다.
 
-SpringBoot 뿐만이 아니라 대부분의 App Server Framework에서는 Gracefully Termination이 동작하면 `SIGTERM` Signal을 수신하는 순간 신규 Request도 거절하기 때문에, `SIGTERM` Signal을 App Container로 전송한 이후에는 신규 Request도 App Container로 전달되면 안되며, 이러한 역할은 PreStop Hook이 수행한다. 
+SpringBoot 뿐만이 아니라 대부분의 App Server Framework에서는 Gracefully Termination이 동작하면 `SIGTERM` Signal을 수신하는 순간 신규 Request도 거절하기 때문에, `SIGTERM` Signal을 App Container로 전송한 이후에는 신규 Request도 App Container로 전달되면 안되며, 이러한 역할은 PreStop Hook이 수행한다.
 
 App Container가 `SIGTERM` Signal을 처리하지 않는 상태에서 우아한 종료를 수행하기 위해서는 PreStop Hook의 시간을 30초 이상으로 늘리는 방법이 존재한다. PreStop Hook이 길어질 수록 App Container가 `SIGTERM` Signal을 받는 시간이 늘어나고 그만큼 현재 처리중인 Request를 완료할 수 있는 시간을 얻을 수 있기 때문이다. 하지만 PreStop Hook이 길어질 수록 Pod 종료 시간도 길어지고 그 만큼 Pod 배포 시간도 증가하기 때문에 가능하면 App Container에서 `SIGTERM` Signal Handler를 설정하는 방법이 권장된다.
 
 ### 1.3. terminationGracePeriodSeconds 설정
 
-`terminationGracePeriodSeconds`은 kubelet이 PreStop Hook을 실행하고 난뒤 `SIGKILL` Singal을 전송하기 전까지 대기하는 시간이다. Linux 환경에서 `SIGTERM` Signal과 달리 `SIGKILL` Signal을 받는 Application (Process)는 반드시 죽는다. 따라서 `terminationGracePeriodSeconds` 값은 PreStop Hook 시간과 App Container에서 대부분의 요청을 처리하는 시간의 합보다 반드시 커야한다. `terminationGracePeriodSeconds`의 기본값은 30초이다.
+`terminationGracePeriodSeconds`은 kubelet이 PreStop Hook을 실행하고 난뒤 `SIGKILL` Singal을 전송하기 전까지 대기하는 시간이다. Linux 환경에서 `SIGTERM` Signal과 달리 `SIGKILL` Signal을 받는 Application (Process)는 반드시 죽는다. 따라서 `terminationGracePeriodSeconds` 값은 PreStop Hook 시간과 App Container에서 대부분의 요청을 처리하는 시간의 합보다 반드시 커야한다. `terminationGracePeriodSeconds`의 기본값은 30초이며 Pod 내부의 각 Container마다 설정할 수 없고 Pod에 설정하는 값이다.
 
 ### 1.4. with Istio Sidecar
 
-`terminationDrainDuration`
+Istio를 이용하는 경우 Pod 종료시에 Istio의 Sidecar Container로 우아하게 종료되어야 한다. Istio의 Sidecar Container인 Envoy의 경우에도 `SIGTERM` Signal을 받으면 신규 Request를 처리하지 않으며, 기존에 처리중인 Request를 완료하고 종료된다. 이때 Istio의 `terminationDrainDuration` 설정값 만큼 처리중인 Request가 완료될때까지 대기하며 이후에는 강제로 종료된다. 따라서 Pod의 `terminationGracePeriodSeconds`의 시간이 반드시 `terminationDrainDuration` 시간보다 커야한다. 만약에 크지 않다면 `SIGKILL` Signal에 의해서 Sidecar Container도 강제로 종료되기 때문이다.
 
-### 1.5. 우아한 종료 Test 
+``` {caption="[File 3] Istio terminationDrainDuration Configuration", linenos=table}
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+spec:
+  meshConfig:
+    defaultConfig:
+      terminationDrainDuration: 60s
+...
+```
+
+[File 3]은 Istio Operator 이용시 `terminationDrainDuration`을 60초로 설정하는 예시를 나타내고 있으며, 기본값은 30초이다.
+
+### 1.5. 우아한 종료 Test
 
 ## 2. 참조
 
@@ -75,3 +87,4 @@ App Container가 `SIGTERM` Signal을 처리하지 않는 상태에서 우아한 
 * Pod PreStop Hook Sleep KEP : [https://github.com/kubernetes/enhancements/blob/master/keps/sig-node/3960-pod-lifecycle-sleep-action/README.md](https://github.com/kubernetes/enhancements/blob/master/keps/sig-node/3960-pod-lifecycle-sleep-action/README.md)
 * Pod Readiness Gates : [https://kubernetes-sigs.github.io/aws-load-balancer-controller/latest/deploy/pod_readiness_gate/](https://kubernetes-sigs.github.io/aws-load-balancer-controller/latest/deploy/pod_readiness_gate/)
 * Istio Sidecar : [https://github.com/hashicorp/consul-k8s/issues/650](https://github.com/hashicorp/consul-k8s/issues/650)
+* Istio Gracefully Shutown : [https://github.com/istio/istio/issues/47779](https://github.com/istio/istio/issues/47779)
