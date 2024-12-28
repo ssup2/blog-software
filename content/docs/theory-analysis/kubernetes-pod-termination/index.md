@@ -7,13 +7,13 @@ draft: true
 
 {{< figure caption="[Figure 1] Kubernetes Pod Termination" src="images/kubernetes-pod-termination.png" width="1000px" >}}
 
-Pod가 종료되도 Pod 안에서 동작하는 App Container가 안정적으로 Request을 처리하며 우아하게 종료되기 위해서는 Pod의 종료 과정을 완전히 이해하고 적절하게 Pod를 설정해야한다. [Figure 1]은 상세한 Pod의 종료 과정을 나타내고 있다.
+Pod가 종료되도 Pod 안에서 동작하는 App Container가 안정적으로 Request을 처리하며 **우아하게 종료**(Gracefully Termination)되기 위해서는 Pod의 종료 과정을 완전히 이해하고 적절하게 Pod를 설정해야한다. [Figure 1]은 상세한 Pod의 종료 과정을 나타내고 있다.
 
 1. K8s API 서버는 Pod 종료 요청을 받으면 종료 요청을 받은 Pod가 동작하는 Node의 kubelet에게 Pod 종료 요청을 전달한다. 또한 K8s API 서버는 Endpoint Slice Controller에게도 Pod 종료를 전달한다.
 2. Pod 종료 요청을 받은 Kubelet은 Pod 안에서 동작하고 있는 App Container의 PreStop Hook을 동작시킨다.
 3. Endpoint Slice Controller는 종료될 Pod를 Endpoint Slice에서 제거하여 kube-proxy가 신규 Request를 종료될 Pod로 전달되지 못하도록 만든다.
 4. PreStop Hook의 동작이 완료되면 kubelet은 `SIGTERM` Signal을 전송한다. `SIGTERM` Signal을 받은 App Container는 현재 처리중인 Request를 모두 완료하고 종료를 시도한다.
-5. 만약 `SIGTERM`을 받은 App Container가 종료되지 않으면 `SIGKILL` Signal을 받고 강제로 종료된다. kubelet은 K8s API 서버가 받은 Pod 종료 요청 시간부터 App Container에 설정된 `terminationGracePeriodSeconds` 시간만큼 대기후에 `SIGKILL` Signal을 전송한다. `terminationGracePeriodSeconds`의 기본값은 30초이다.
+5. 만약 `SIGTERM`을 받은 App Container가 종료되지 않으면 `SIGKILL` Signal을 받고 강제로 종료된다. kubelet은 K8s API 서버가 받은 Pod 종료 요청 시간부터 App Container에 설정된 `terminationGracePeriodSeconds` 시간만큼 대기후에 `SIGKILL` Signal을 전송한다.
 
 {{< figure caption="[Figure 2] Kubernetes Pod Termination with Gracefully Termination" src="images/kubernetes-pod-termination-with-gracefully-termination.png" width="1000px" >}}
 
@@ -61,13 +61,13 @@ App Container가 `SIGTERM` Signal을 처리하지 않는 상태에서 우아한 
 
 ### 1.3. terminationGracePeriodSeconds 설정
 
+`terminationGracePeriodSeconds`은 kubelet이 PreStop Hook을 실행하고 난뒤 `SIGKILL` Singal을 전송하기 전까지 대기하는 시간이다. Linux 환경에서 `SIGTERM` Signal과 달리 `SIGKILL` Signal을 받는 Application (Process)는 반드시 죽는다. 따라서 `terminationGracePeriodSeconds` 값은 PreStop Hook 시간과 App Container에서 대부분의 요청을 처리하는 시간의 합보다 반드시 커야한다. `terminationGracePeriodSeconds`의 기본값은 30초이다.
+
 ### 1.4. with Istio Sidecar
 
 `terminationDrainDuration`
 
-### 1.5. Gracefully Ter
-
-### 1.6. 우아한 종료 Test
+### 1.5. 우아한 종료 Test 
 
 ## 2. 참조
 
