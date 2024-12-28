@@ -35,10 +35,10 @@ spec:
     lifecycle:
       preStop:
         exec:
-          command: ["/bin/sh","-c","sleep 20"]
+          command: ["/bin/sh","-c","sleep 5"]
 ```
 
-PreStop Hook은 `SIGTERM` Signal을 늦게 받기 위한 용도로 활용되기 때문에 일반적으로는 [File 1]의 내용과 같이 `sleep` 명령어를 활용하여 구성한다. 따라서 App Container Image에는 `sleep` 명령어와, Shell이 설치되어 있어야 한다. 추후에는 Kubernetes 자체에서 Sleep 기능을 제공할 예정이며 자세한 내용은 [Link](https://github.com/kubernetes/enhancements/blob/master/keps/sig-node/3960-pod-lifecycle-sleep-action/README.md)에서 확인 할 수 있다.
+PreStop Hook은 `SIGTERM` Signal을 늦게 받기 위한 용도로 활용되기 때문에 일반적으로는 [File 1]의 내용과 같이 `sleep` 명령어를 활용하여 구성한다. 따라서 App Container Image에는 `sleep` 명령어와, Shell이 설치되어 있어야 한다. 일반적으로는 **5~10초** 정도로 설정하며, 너무 큰 값을 설정하면 Pod 종료가 늦어져 배포 속도가 느려지기 때문에 적절한 값을 설정해야 한다. 추후에는 Kubernetes 자체에서 Sleep 기능을 제공할 예정이며 자세한 내용은 [Link](https://github.com/kubernetes/enhancements/blob/master/keps/sig-node/3960-pod-lifecycle-sleep-action/README.md)에서 확인할 수 있다.
 
 ### 1.2. App Container의 SIGTERM 처리
 
@@ -47,6 +47,8 @@ PreStop Hook은 `SIGTERM` Signal을 늦게 받기 위한 용도로 활용되기 
 ### 1.4. with Istio Sidecar
 
 `terminationDrainDuration`
+
+### 1.5. 우아한 종료 Test
 
 ## 2. 참조
 
