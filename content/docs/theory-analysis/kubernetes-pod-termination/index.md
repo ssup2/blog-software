@@ -1,6 +1,5 @@
 ---
 title: Kubernetes Pod Termination
-draft: true
 ---
 
 ## 1. Kuberentes Pod Termination
@@ -73,30 +72,8 @@ Pod의 Gracefully Termination을 설정해도 Kubernetes는 Pod가 종료될때�
 
 Gracefully Termination을 수행하지 못한 경우에 발생할 수 있는 Business Logic의 영향은 Client 또는 Sidecar Container에서 재요청을 수행하여 대부분 완화가 가능하다. 따라서 Gracefully Termination을 위한 지속 시간을 설정할때도 일반적으로는 모든 Request를 100% 완전히 처리하며 종료되는 것을 목표로 긴 지속 시간을 설정하는것 보다는, 99%와 같이 일부 Request의 완료를 포기하고 대신 짧은 지속 시간을 설정하여 빠른 배포가 가능하도록 설정하는 방식이 더 올바른 방식이다.
 
-## 2. with Istio Sidecar
-
-Istio를 이용하는 경우 Pod 종료시에 Istio의 Sidecar Container로 우아하게 종료되어야 한다. Istio의 Sidecar Container인 Envoy의 경우에도 `SIGTERM` Signal을 받으면 신규 Request를 처리하지 않으며, 
-
-기존에 처리중인 Request를 완료하고 종료된다. 이때 Istio의 `terminationDrainDuration` 설정값 만큼 처리중인 Request가 완료될때까지 대기하며 이후에는 강제로 종료된다. 따라서 Pod의 `terminationGracePeriodSeconds`의 시간이 반드시 `terminationDrainDuration` 시간보다 커야한다. 만약에 크지 않다면 `SIGKILL` Signal에 의해서 Sidecar Container도 강제로 종료되기 때문이다.
-
-``` {caption="[File 3] Istio terminationDrainDuration Configuration", linenos=table}
-apiVersion: install.istio.io/v1alpha1
-kind: IstioOperator
-spec:
-  meshConfig:
-    defaultConfig:
-      drainDuration: 45s
-      terminationDrainDuration: 30s
-...
-```
-
-[File 3]은 Istio Operator 이용시 `terminationDrainDuration`을 60초로 설정하는 예시를 나타내고 있으며, 기본값은 30초이다.
-
-## 3. 참조
+## 2. 참조
 
 * Pod Termination : [https://docs.aws.amazon.com/eks/latest/best-practices/load-balancing.html](https://docs.aws.amazon.com/eks/latest/best-practices/load-balancing.html)
 * Pod PreStop Hook Sleep KEP : [https://github.com/kubernetes/enhancements/blob/master/keps/sig-node/3960-pod-lifecycle-sleep-action/README.md](https://github.com/kubernetes/enhancements/blob/master/keps/sig-node/3960-pod-lifecycle-sleep-action/README.md)
 * Pod Readiness Gates : [https://kubernetes-sigs.github.io/aws-load-balancer-controller/latest/deploy/pod_readiness_gate/](https://kubernetes-sigs.github.io/aws-load-balancer-controller/latest/deploy/pod_readiness_gate/)
-* Istio Sidecar : [https://github.com/hashicorp/consul-k8s/issues/650](https://github.com/hashicorp/consul-k8s/issues/650)
-* Istio Gracefully Shutown : [https://github.com/istio/istio/issues/47779](https://github.com/istio/istio/issues/47779)
-* Istio EXIT_ON_ZERO_ACTIVE_CONNECTIONS : [https://umi0410.github.io/blog/devops/istio-exit-on-zero-active-connections/](https://umi0410.github.io/blog/devops/istio-exit-on-zero-active-connections/)
