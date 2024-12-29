@@ -63,9 +63,21 @@ App Container가 `SIGTERM` Signal을 처리하지 않는 상태에서 Gracefully
 
 `terminationGracePeriodSeconds`은 kubelet이 PreStop Hook을 실행하고 난뒤 `SIGKILL` Singal을 전송하기 전까지 대기하는 시간이다. Linux 환경에서 `SIGTERM` Signal과 달리 `SIGKILL` Signal을 받는 Application (Process)는 반드시 죽는다. 따라서 `terminationGracePeriodSeconds` 값은 PreStop Hook 시간과 App Container에서 대부분의 요청을 처리하는 시간의 합보다 반드시 커야한다. `terminationGracePeriodSeconds`의 기본값은 30초이며 Pod 내부의 각 Container마다 설정할 수 없고 Pod 전체에만 설정이 가능하다.
 
-### 1.4. with Istio Sidecar
+### 1.5. Gracefully Termination
 
-Istio를 이용하는 경우 Pod 종료시에 Istio의 Sidecar Container로 우아하게 종료되어야 한다. Istio의 Sidecar Container인 Envoy의 경우에도 `SIGTERM` Signal을 받으면 신규 Request를 처리하지 않으며, 기존에 처리중인 Request를 완료하고 종료된다. 이때 Istio의 `terminationDrainDuration` 설정값 만큼 처리중인 Request가 완료될때까지 대기하며 이후에는 강제로 종료된다. 따라서 Pod의 `terminationGracePeriodSeconds`의 시간이 반드시 `terminationDrainDuration` 시간보다 커야한다. 만약에 크지 않다면 `SIGKILL` Signal에 의해서 Sidecar Container도 강제로 종료되기 때문이다.
+Pod의 Gracefully Termination을 위해서는 App Container의 PreStop Hook의 지속 시간, Pod의 `terminationGracePeriodSeconds`의 지속 시간 등 다양한 지속 시간들을 적절하게 설정해야 한다. 이러한 지속 시간들을 정확하게 결정하는 공식은 존재하지 않으며 다양한 요소에 따라서 변경이 될 수 있다.
+
+PreStop Hook의 경우에는 일반적으로 5초로 설정하지만 Kubernetes Cluster 내부에서 Endpoint Slice의 변경이 많다면 5초 이상으로 설정이 필요할 수 있다. 또는 App Container에서 `SIGTERM` Signal Handler가 설정되어 있지 않아면 App Container의 Request 처리 시간 이상으로 PreStop Hook을 설정해야 한다. Pod의 `terminationGracePeriodSeconds` 지속 시간은 App Container의 App Container의 Request 처리 시간으로 결정된다. 다양한 고려 요소들이 존재하고 명확한 공식이 존재하지 않기 때문에 일반적으로는 Pod 재시작을 반복하는 환경에서도 Request 처리에 문제가 없는지를 검증하며, Heuristic 방식으로 지속 시간을 설정한다.
+
+Pod의 Gracefully Termination을 설정해도 Kubernetes는 Pod가 종료될때는 항상 Gracefully Termination이 수행되는 것을 보장하지는 않는다. 대표적인 예로 Kubernetes Cluster의 특정 Node가 장애로 죽을 경우에, 죽은 Node에서 동작하던 Pod는 당연하게도 Gracefully Termination을 수행하지 못하고 종료된다. 또는 App Container가 대부분의 Request를 1초 안에 처리하지만 간혹 특정 Request의 경우에는 60초 이상이 소요되어 Pod의 `terminationGracePeriodSeconds` 시간 이후에도 Request을 완료하지 못한다면 `SIGKILL` Signal을 통해서 강제로 종료될 수 있다.
+
+Gracefully Termination을 수행하지 못한 경우에 발생할 수 있는 Business Logic의 영향은 Client 또는 Sidecar Container에서 재요청을 수행하여 대부분 완화가 가능하다. 따라서 Gracefully Termination을 위한 지속 시간을 설정할때도 일반적으로는 모든 Request를 100% 완전히 처리하며 종료되는 것을 목표로 긴 지속 시간을 설정하는것 보다는, 99%와 같이 일부 Request의 완료를 포기하고 대신 짧은 지속 시간을 설정하여 빠른 배포가 가능하도록 설정하는 방식이 더 올바른 방식이다.
+
+## 2. with Istio Sidecar
+
+Istio를 이용하는 경우 Pod 종료시에 Istio의 Sidecar Container로 우아하게 종료되어야 한다. Istio의 Sidecar Container인 Envoy의 경우에도 `SIGTERM` Signal을 받으면 신규 Request를 처리하지 않으며, 
+
+기존에 처리중인 Request를 완료하고 종료된다. 이때 Istio의 `terminationDrainDuration` 설정값 만큼 처리중인 Request가 완료될때까지 대기하며 이후에는 강제로 종료된다. 따라서 Pod의 `terminationGracePeriodSeconds`의 시간이 반드시 `terminationDrainDuration` 시간보다 커야한다. 만약에 크지 않다면 `SIGKILL` Signal에 의해서 Sidecar Container도 강제로 종료되기 때문이다.
 
 ``` {caption="[File 3] Istio terminationDrainDuration Configuration", linenos=table}
 apiVersion: install.istio.io/v1alpha1
@@ -73,23 +85,14 @@ kind: IstioOperator
 spec:
   meshConfig:
     defaultConfig:
-      terminationDrainDuration: 60s
+      drainDuration: 45s
+      terminationDrainDuration: 30s
 ...
 ```
 
 [File 3]은 Istio Operator 이용시 `terminationDrainDuration`을 60초로 설정하는 예시를 나타내고 있으며, 기본값은 30초이다.
 
-### 1.5. Gracefully Termination
-
-Pod의 Gracefully Termination을 위해서는 App Container의 PreStop Hook의 지속 시간, Pod의 `terminationGracePeriodSeconds`의 지속 시간, Istio의 `terminationDrainDuration` 지속 시간 등 다양한 지속 시간들을 적절하게 설정해야 한다. 이러한 지속 시간들을 정확하게 결정하는 공식은 존재하지 않으며 다양한 요소에 따라서 변경이 될 수 있다.
-
-PreStop Hook의 경우에는 일반적으로 5초로 설정하지만 Kubernetes Cluster 내부에서 Endpoint Slice의 변경이 많다면 5초 이상으로 설정이 필요할 수 있다. 또는 App Container에서 `SIGTERM` Signal Handler가 설정되어 있지 않아면 App Container의 Request 처리 시간 이상으로 PreStop Hook을 설정해야 한다. Pod의 `terminationGracePeriodSeconds`와 Istio의 `terminationDrainDuration` 지속 시간은 App Container의 App Container의 Request 처리 시간으로 결정된다. 다양한 고려 요소들이 존재하고 명확한 공식이 존재하지 않기 때문에 일반적으로는 Pod 재시작을 반복하는 환경에서도 Request 처리에 문제가 없는지를 검증하며, Heuristic 방식으로 지속 시간을 설정한다.
-
-Pod의 Gracefully Termination을 설정해도 Kubernetes는 Pod가 종료될때는 항상 Gracefully Termination이 수행되는 것을 보장하지는 않는다. 대표적인 예로 Kubernetes Cluster의 특정 Node가 장애로 죽을 경우에, 죽은 Node에서 동작하던 Pod는 당연하게도 Gracefully Termination을 수행하지 못하고 종료된다. 또는 App Container가 대부분의 Request를 1초 안에 처리하지만 간혹 특정 Request의 경우에는 60초 이상이 소요되어 Pod의 `terminationGracePeriodSeconds` 시간 이후에도 Request을 완료하지 못한다면 `SIGKILL` Signal을 통해서 강제로 종료될 수 있다.
-
-Gracefully Termination을 수행하지 못한 경우에 발생할 수 있는 Business Logic의 영향은 Client 또는 Sidecar Container에서 재요청을 수행하여 대부분 완화가 가능하다. 따라서 Gracefully Termination을 위한 지속 시간을 설정할때도 일반적으로는 모든 Request를 100% 완전히 처리하며 종료되는 것을 목표로 긴 지속 시간을 설정하는것 보다는, 99%와 같이 일부 Request의 완료를 포기하고 대신 짧은 지속 시간을 설정하여 빠른 배포가 가능하도록 설정하는 방식이 더 올바른 방식이다.
-
-## 2. 참조
+## 3. 참조
 
 * Pod Termination : [https://docs.aws.amazon.com/eks/latest/best-practices/load-balancing.html](https://docs.aws.amazon.com/eks/latest/best-practices/load-balancing.html)
 * Pod PreStop Hook Sleep KEP : [https://github.com/kubernetes/enhancements/blob/master/keps/sig-node/3960-pod-lifecycle-sleep-action/README.md](https://github.com/kubernetes/enhancements/blob/master/keps/sig-node/3960-pod-lifecycle-sleep-action/README.md)
