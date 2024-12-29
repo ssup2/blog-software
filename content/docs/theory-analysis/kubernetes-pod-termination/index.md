@@ -7,7 +7,7 @@ draft: true
 
 {{< figure caption="[Figure 1] Kubernetes Pod Termination" src="images/kubernetes-pod-termination.png" width="1000px" >}}
 
-Pod가 종료되도 Pod 안에서 동작하는 App Container가 안정적으로 Request을 처리하며 **우아하게 종료**(Gracefully Termination)되기 위해서는 Pod의 종료 과정을 완전히 이해하고 적절하게 Pod를 설정해야한다. [Figure 1]은 상세한 Pod의 종료 과정을 나타내고 있다.
+Pod가 종료되도 Pod 안에서 동작하는 App Container가 안정적으로 Request을 처리하며 Gracefully Termination을 위해서는 Pod의 종료 과정을 완전히 이해하고 적절하게 Pod를 설정해야한다. [Figure 1]은 상세한 Pod의 종료 과정을 나타내고 있다.
 
 1. K8s API 서버는 Pod 종료 요청을 받으면 종료 요청을 받은 Pod가 동작하는 Node의 kubelet에게 Pod 종료 요청을 전달한다. 또한 K8s API 서버는 Endpoint Slice Controller에게도 Pod 종료를 전달한다.
 2. Pod 종료 요청을 받은 Kubelet은 Pod 안에서 동작하고 있는 App Container의 PreStop Hook을 동작시킨다.
@@ -40,7 +40,7 @@ spec:
           command: ["/bin/sh","-c","sleep 5"]
 ```
 
-PreStop Hook은 `SIGTERM` Signal을 늦게 받기 위한 용도로 활용되기 때문에 일반적으로는 [File 1]의 내용과 같이 `sleep` 명령어를 활용하여 구성한다. 따라서 App Container Image에는 `sleep` 명령어와, Shell이 설치되어 있어야 한다. 일반적으로는 **5~10초** 정도로 설정하며, 너무 큰 값을 설정하면 Pod 종료가 늦어져 배포 속도가 느려지기 때문에 적절한 값을 설정해야 한다. 추후에는 Kubernetes 자체에서 Sleep 기능을 제공할 예정이며 자세한 내용은 [Link](https://github.com/kubernetes/enhancements/blob/master/keps/sig-node/3960-pod-lifecycle-sleep-action/README.md)에서 확인할 수 있다.
+PreStop Hook은 `SIGTERM` Signal을 늦게 받기 위한 용도로 활용되기 때문에 일반적으로는 [File 1]의 내용과 같이 `sleep` 명령어를 활용하여 구성한다. 따라서 App Container Image에는 `sleep` 명령어와, Shell이 설치되어 있어야 한다. 일반적으로는 **5초** 정도로 설정하며, 너무 큰 값을 설정하면 Pod 종료가 늦어져 배포 속도가 느려지기 때문에 적절한 값을 설정해야 한다. 추후에는 Kubernetes 자체에서 Sleep 기능을 제공할 예정이며 자세한 내용은 [Link](https://github.com/kubernetes/enhancements/blob/master/keps/sig-node/3960-pod-lifecycle-sleep-action/README.md)에서 확인할 수 있다.
 
 ### 1.2. App Container의 SIGTERM 처리
 
@@ -57,11 +57,11 @@ server:
 
 SpringBoot 뿐만이 아니라 대부분의 App Server Framework에서는 Gracefully Termination이 동작하면 `SIGTERM` Signal을 수신하는 순간 신규 Request도 거절하기 때문에, `SIGTERM` Signal을 App Container로 전송한 이후에는 신규 Request도 App Container로 전달되면 안되며, 이러한 역할은 PreStop Hook이 수행한다.
 
-App Container가 `SIGTERM` Signal을 처리하지 않는 상태에서 우아한 종료를 수행하기 위해서는 PreStop Hook의 시간을 30초 이상으로 늘리는 방법이 존재한다. PreStop Hook이 길어질 수록 App Container가 `SIGTERM` Signal을 받는 시간이 늘어나고 그만큼 현재 처리중인 Request를 완료할 수 있는 시간을 얻을 수 있기 때문이다. 하지만 PreStop Hook이 길어질 수록 Pod 종료 시간도 길어지고 그 만큼 Pod 배포 시간도 증가하기 때문에 가능하면 App Container에서 `SIGTERM` Signal Handler를 설정하는 방법이 권장된다.
+App Container가 `SIGTERM` Signal을 처리하지 않는 상태에서 Gracefully Termination을 수행하기 위해서는 PreStop Hook의 시간을 30초 이상으로 늘리는 방법이 존재한다. PreStop Hook이 길어질 수록 App Container가 `SIGTERM` Signal을 받는 시간이 늘어나고 그만큼 현재 처리중인 Request를 완료할 수 있는 시간을 얻을 수 있기 때문이다. 하지만 PreStop Hook이 길어질 수록 Pod 종료 시간도 길어지고 그 만큼 Pod 배포 시간도 증가하기 때문에 가능하면 App Container에서 `SIGTERM` Signal Handler를 설정하는 방법이 권장된다.
 
 ### 1.3. terminationGracePeriodSeconds 설정
 
-`terminationGracePeriodSeconds`은 kubelet이 PreStop Hook을 실행하고 난뒤 `SIGKILL` Singal을 전송하기 전까지 대기하는 시간이다. Linux 환경에서 `SIGTERM` Signal과 달리 `SIGKILL` Signal을 받는 Application (Process)는 반드시 죽는다. 따라서 `terminationGracePeriodSeconds` 값은 PreStop Hook 시간과 App Container에서 대부분의 요청을 처리하는 시간의 합보다 반드시 커야한다. `terminationGracePeriodSeconds`의 기본값은 30초이며 Pod 내부의 각 Container마다 설정할 수 없고 Pod에 설정하는 값이다.
+`terminationGracePeriodSeconds`은 kubelet이 PreStop Hook을 실행하고 난뒤 `SIGKILL` Singal을 전송하기 전까지 대기하는 시간이다. Linux 환경에서 `SIGTERM` Signal과 달리 `SIGKILL` Signal을 받는 Application (Process)는 반드시 죽는다. 따라서 `terminationGracePeriodSeconds` 값은 PreStop Hook 시간과 App Container에서 대부분의 요청을 처리하는 시간의 합보다 반드시 커야한다. `terminationGracePeriodSeconds`의 기본값은 30초이며 Pod 내부의 각 Container마다 설정할 수 없고 Pod 전체에만 설정이 가능하다.
 
 ### 1.4. with Istio Sidecar
 
@@ -79,7 +79,13 @@ spec:
 
 [File 3]은 Istio Operator 이용시 `terminationDrainDuration`을 60초로 설정하는 예시를 나타내고 있으며, 기본값은 30초이다.
 
-### 1.5. 우아한 종료 Test
+### 1.5. Gracefully Termination
+
+Pod의 Gracefully Termination을 위해서는 App Container의 PreStop Hook의 지속 시간, Pod의 `terminationGracePeriodSeconds`의 지속 시간, Istio의 `terminationDrainDuration` 지속 시간 등 다양한 지속 시간들을 적절하게 설정해야 한다. 이러한 지속 시간들을 정확하게 결정하는 공식은 존재하지 않으며 다양한 요소에 따라서 변경이 될 수 있다.
+
+PreStop Hook의 경우에는 일반적으로 5초로 설정하지만 Kubernetes Cluster 내부에서 Endpoint Slice의 변경이 많다면 5초 이상으로 설정이 필요할 수 있다. 또는 App Container에서 `SIGTERM` Signal Handler가 설정되어 있지 않아면 App Container의 Request 처리 시간 이상으로 PreStop Hook을 설정해야 한다. Pod의 `terminationGracePeriodSeconds`와 Istio의 `terminationDrainDuration` 지속 시간은 App Container의 App Container의 Request 처리 시간으로 결정된다.
+
+다양한 고려 요소들이 존재하고 명확한 공식이 존재하지 않기 때문에 일반적으로는 Pod 재시작을 반복하는 환경에서도 Request 처리에 문제가 없는지를 검증하며, 휴리스틱한 방식으로 지속 시간을 설정한다.
 
 ## 2. 참조
 
