@@ -38,7 +38,7 @@ spec:
 
 PreStop Hook은 App Container가 `SIGTERM` Signal을 늦게 받기 위한 용도로 활용되기 때문에 일반적으로는 [File 1]의 내용과 같이 `sleep` 명령어를 활용하여 구성한다. 따라서 App Container Image에는 `sleep` 명령어와, Shell이 설치되어 있어야 한다. 일반적으로는 **5초** 정도로 설정하며, 너무 큰 값을 설정하면 Pod 종료가 늦어져 배포 속도가 느려지기 때문에 적절한 값을 설정해야 한다. 추후에는 Kubernetes 자체에서 Sleep 기능을 제공할 예정이며 자세한 내용은 [Link](https://github.com/kubernetes/enhancements/blob/master/keps/sig-node/3960-pod-lifecycle-sleep-action/README.md)에서 확인할 수 있다.
 
-### 1.2. App Container의 SIGTERM 처리
+### 1.2. App Container의 SIGTERM Signal 처리
 
 {{< figure caption="[Figure 3] Kubernetes Pod Termination without PreStop Hook" src="images/kubernetes-pod-termination-without-sigterm-handler.png" width="1000px" >}}
 
@@ -55,7 +55,7 @@ SpringBoot 뿐만이 아니라 대부분의 App Server Framework에서는 Gracef
 
 App Container가 `SIGTERM` Signal을 처리하지 않는 상태에서 Gracefully Termination을 수행하기 위해서는 PreStop Hook의 지속 시간을 App Container의 Request 처리 시간 이상으로 늘리는 방법이 존재한다. PreStop Hook이 길어질 수록 App Container가 `SIGTERM` Signal을 받는 시간이 늘어나고 그만큼 현재 처리중인 Request를 완료할 수 있는 시간을 얻을 수 있기 때문이다. 하지만 PreStop Hook이 길어질 수록 Pod 종료 시간도 길어지고 그 만큼 Pod 배포 시간도 증가하기 때문에 가능하면 App Container에서 `SIGTERM` Signal Handler를 설정하는 방법이 권장된다.
 
-### 1.3. SIGKILL 설정
+### 1.3. terminationGracePeriodSeconds 설정
 
 {{< figure caption="[Figure 4] Kubernetes Pod Termination with SIGKILL" src="images/kubernetes-pod-termination-with-sigkill.png" width="1000px" >}}
 

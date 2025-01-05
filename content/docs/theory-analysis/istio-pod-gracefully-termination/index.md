@@ -3,7 +3,7 @@ title: Istio Pod Termination
 draft: true
 ---
 
-## 1. Istio Pod Termination
+## 1. Istio Pod Gracefully Termination
 
 {{< figure caption="[Figure 1] Istio Pod Component" src="images/istio-pod-component.png" width="600px" >}}
 
@@ -11,7 +11,7 @@ Istio 환경에서 App Container가 안정적으로 Request를 처리하며 Grac
 
 Envoy Proxy Container 내부에는 **pilot-agent**와 Envory Proxy와 동작하며, pilot-agent가 Init Process로 동작하며 가장 먼져 실행되고 이후에 pilot-agent는 Envoy Proxy를 실행한다. pilot-agent는 Istio의 Control Plane 역할을 수행하는 **istiod**와 통신하며 Envoy Proxy를 제어하는 역할을 수행하며, App Pod가 종료될때 kubelet으로부터 `SIGTERM` Singal을 수신하여 Envoy Proxy를 종료시키는 역할도 수행한다. Envoy Proxy Container의 Init Process가 pilot-agent이기 때문에 `SIGTERM` Signal은 pilot-agent만 수신하며, Envoy Proxy는 수신하지 않는다.
 
-Istio 환경에서 App Pod의 종료 과정은 App Container와 Envoy Proxy Container로 구분할 수 있다.
+Istio 환경에서 App Pod의 Grace 과정은 App Container와 Envoy Proxy Container로 구분할 수 있다.
 
 ### 1.1. App Container Termination
 
