@@ -30,11 +30,11 @@ Envoy Proxy Container의 Termination 수행 과정은 `EXIT_ON_ZERO_ACTIVE_CONNE
 
 {{< figure caption="[Figure 3] Envoy Proxy Container Termination with terminationDrainDuration" src="images/istio-envoy-container-termination-with-terminationdrainduration.png" width="1000px" >}}
 
-[Figure 3]은 `EXIT_ON_ZERO_ACTIVE_CONNECTIONS`이 설정되지 않은, 즉 `terminationDrainDuration` 설정값에 따라서 Enovy Proxy가 종료되는 과정을 나타내고 있다. `SIGTERM` Signal을 받은 pilot-agents는 Envoy Proxy를 Drain Mode로 전환하며, 전환한 이후에는 Drain Mode로 전환한 이후에는 Istio의 `terminationDrainDuration` 설정값 만큼 대기하며 Envoy Proxy를 종료하고 자기 자신을 종료시킨다. pilot-agents가 종료되면 Envoy Proxy Container가 제거된다. 여기서 중요한 점은 pilot-agents가 Envoy Proxy를 Drain Mode로 전환한 이후에 반드시 `terminationDrainDuration` 설정값 만큼 대기한 다음에 Envoy Proxy를 종료한다는 점이다.
+[Figure 3]은 `EXIT_ON_ZERO_ACTIVE_CONNECTIONS`이 설정되지 않은, 즉 `terminationDrainDuration` 설정값에 따라서 Enovy Proxy가 종료되는 과정을 나타내고 있다. `SIGTERM` Signal을 받은 pilot-agents는 Envoy Proxy를 Drain Mode로 전환하며, 전환한 이후에는 Istio의 `terminationDrainDuration` 설정값 만큼 대기하며 Envoy Proxy를 종료하고 자기 자신을 종료시킨다. pilot-agents가 종료되면 Envoy Proxy Container가 제거된다. 여기서 중요한 점은 pilot-agents가 Envoy Proxy를 Drain Mode로 전환한 이후에 반드시 `terminationDrainDuration` 설정값 만큼 대기한 다음에 Envoy Proxy를 종료한다는 점이다.
 
-이는 Drain Mode로 진입한 Envoy가 `terminationDrainDuration` 시간 이전에 모든 Request를 처리하였어도 `terminationDrainDuration` 설정값 만큼 대기한 다음 종료가 된다는 것을 의미한다. 따라서 `terminationDrainDuration` 시간이 너무 길어도 Envoy Proxy Container의 종료 시간이 늦어지게 된다. 반대로 Envoy가 `terminationDrainDuration` 시간 이후에도 처리하지 못한 Request가 존재한다면, 해당 Request를 처리하지 못하고 종료된다. 따라서 적절한 `terminationDrainDuration` 설정값이 필요하다.
+이는 Drain Mode로 진입한 Envoy가 `terminationDrainDuration` 시간 이전에 모든 Request를 처리하였어도 `terminationDrainDuration` 설정값 만큼 반드시 대기한 다음 종료가 된다는 것을 의미한다. 따라서 `terminationDrainDuration` 시간이 너무 길어도 Envoy Proxy Container의 종료 시간이 늦어지게 된다. 반대로 Envoy가 `terminationDrainDuration` 시간 이후에도 처리하지 못한 Request가 존재한다면, 해당 Request를 처리하지 못하고 종료된다. 따라서 적절한 `terminationDrainDuration` 설정값이 필요하다.
 
-Envoy Proxy는 Drain Mode에 진입해도 신규 Request를 계속해서 처리가 가능하다. 이는 Envoy Proxy Propagation Delay 발생으로 인해서 신규 Request가 늦게 도착해도 문제없이 처리가 가능하도록 만든다. 이는 App Container와 다르게 Envoy Proxy Container에는 preStop이 존재하지 않는 이유기도 하다. `terminationDrainDuration` 값 이상으로 Pod의 `terminationGracePeriodSeconds` 값도 같이 설정해야 Envoy Proxy가 `SIGKILL` Signal에 의해서 강제로 제거되지 않는다.
+Envoy Proxy는 Drain Mode에 진입해도 신규 Request를 계속해서 처리가 가능하다. 이는 Envoy Proxy Propagation Delay 발생으로 인해서 신규 Request가 늦게 도착해도 문제없이 처리가 가능하도록 만든다. App Container와 다르게 Envoy Proxy Container에는 preStop이 존재하지 않는 이유기도 하다. `terminationDrainDuration` 값 이상으로 Pod의 `terminationGracePeriodSeconds` 값도 같이 설정해야 Envoy Proxy가 `SIGKILL` Signal에 의해서 강제로 제거되지 않는다.
 
 ```yaml {caption="[File 1] terminationDrainDuration Configuration on IstioOperator", linenos=table}
 apiVersion: install.istio.io/v1alpha1

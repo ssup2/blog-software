@@ -210,7 +210,9 @@ networking:
 EOF
 
 kubeadm init --config kubeadm-config.yaml
-# kubeadm join 192.168.1.71:6443 --token e5t05s.1z4zbpm3oxdhskya --discovery-token-ca-cert-hash sha256:01c2bf6ead65ea0e9c39186d92a51baa9aa6dc6963b900cd825d7e14dcb08fba
+```
+```shell
+kubeadm join 192.168.1.71:6443 --token e5t05s.1z4zbpm3oxdhskya --discovery-token-ca-cert-hash sha256:01c2bf6ead65ea0e9c39186d92a51baa9aa6dc6963b900cd825d7e14dcb08fba
 ```
 
 kubectl config 파일을 복사한다.
@@ -229,10 +231,55 @@ kubectl apply -f https://github.com/flannel-io/flannel/releases/download/v0.26.2
 
 ### 5.2. Compute, Storage, GPU Nodes
 
-Kubernetes Cluster에 Join 한다.
+각각의 Node에 SSH로 접근하여 Kubernetes Cluster에 Join 한다.
 
 ```shell
 kubeadm join 192.168.1.71:6443 --token e5t05s.1z4zbpm3oxdhskya --discovery-token-ca-cert-hash sha256:01c2bf6ead65ea0e9c39186d92a51baa9aa6dc6963b900cd825d7e14dcb08fba
 ```
 
+Master Node의 Master Label과 Taint를 제거한다.
+
+```shell
+kubectl taint node dp-master node-role.kubernetes.io/control-plane:NoSchedule-
+kubectl label node dp-master node-role.kubernetes.io/control-plane-
+```
+
+각각의 Node에 Role을 부여한다.
+
+```shell
+kubectl label node dp-master node-role.kubernetes.io/master=""
+kubectl label node dp-compute-01 node-role.kubernetes.io/compute=""
+kubectl label node dp-compute-02 node-role.kubernetes.io/compute=""
+kubectl label node dp-storage-01 node-role.kubernetes.io/storage=""
+kubectl label node dp-storage-02 node-role.kubernetes.io/storage=""
+kubectl label node dp-gpu-01 node-role.kubernetes.io/gpu=""
+kubectl label node dp-gpu-02 node-role.kubernetes.io/gpu=""
+```
+
+Node의 Role을 확인한다.
+
+```shell
+kubectl get nodes
+```
+```shell
+NAME            STATUS   ROLES                  AGE   VERSION
+dp-compute-01   Ready    compute                16d   v1.30.8
+dp-compute-02   Ready    compute                16d   v1.30.8
+dp-gpu-01       Ready    gpu                    16d   v1.30.8
+dp-gpu-02       Ready    gpu                    16d   v1.30.8
+dp-master       Ready    control-plane,master   16d   v1.30.8
+dp-storage-01   Ready    storage                16d   v1.30.8
+dp-storage-02   Ready    storage                16d   v1.30.8
+```
+
 ## 6. Data Component 설치
+
+```shell
+# MetelLB
+helm upgrade --install --create-namespace --namespace metallb metallb metallb -f metallb/my-values.yaml
+kubectl apply -f metallb/ip-address-pool.yaml
+kubectl apply -f metallb/l2-advertisement.yaml
+
+# Longhorn
+helm upgrade --install --create-namespace --namespace longhorn longhorn longhorn -f longhorn/my-values.yaml
+```
