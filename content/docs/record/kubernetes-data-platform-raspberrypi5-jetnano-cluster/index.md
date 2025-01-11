@@ -289,4 +289,13 @@ kubectl apply -f metallb/l2-advertisement.yaml
 
 # Longhorn
 helm upgrade --install --create-namespace --namespace longhorn longhorn longhorn -f longhorn/my-values.yaml
+
+# MinIO (root ID/PW: root/root123!)
+helm upgrade --install --create-namespace --namespace minio minio minio -f minio/my-values.yaml
+
+# PostgreSQL (root ID/PW: posgres/root123!)
+helm upgrade --install --create-namespace --namespace postgresql postgresql postgresql -f postgresql/my-values.yaml
+
+# JupyterHub (ID/PW: root/root123!)
+helm upgrade --install --create-namespace --namespace jupyterhub jupyterhub jupyterhub -f jupyterhub/my-values.yaml
 ```
