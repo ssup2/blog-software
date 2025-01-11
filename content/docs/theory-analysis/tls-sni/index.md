@@ -6,7 +6,7 @@ TLS의 SNI (Server Name Indication)를 분석한다.
 
 ## 1. SNI (Server Name Indication)
 
-SNI는 TLS의 Handshake 과정중 가장 처음에 이루어지는 Hello 과정에 이용되는 TLS 확장 기법이다. 예전에는 하나의 Server(IP)에 하나의 Domain을 등록하여 이용하였다. 하지만 현재는 하나의 Server(IP)에 다수의 Domain을 등록하여 이용하고 있다. 이러한 이유 때문에 Client가 SNI가 없는 SSL을 통해서 다수의 Domain을 갖고 있는 Server에 인증서를 요청하는 경우, Server는 어떤 Domain의 인증서를 Client에 전달해야할지 정확히 알 수 없다. TLS의 SNI는 이러한 문제를 해결한다. 
+SNI는 TLS의 Handshake 과정중 가장 처음에 이루어지는 Hello 과정에 이용되는 TLS의 확장 기법이다. 예전에는 하나의 Server(IP)에 하나의 Domain을 등록하여 이용하였다. 하지만 현재는 하나의 Server(IP)에 다수의 Domain을 등록하여 이용하고 있다. 이러한 이유 때문에 Client가 SNI가 없는 SSL을 통해서 다수의 Domain을 갖고 있는 Server에 인증서를 요청하는 경우, Server는 어떤 Domain의 인증서를 Client에 전달해야할지 정확히 알 수 없다. TLS의 SNI는 이러한 문제를 해결한다. 
 
 {{< figure caption="[Figure 1] SNI를 이용한 TLS의 Handshake 과정" src="images/tls-sni.png" width="600px" >}}
 

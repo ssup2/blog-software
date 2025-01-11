@@ -254,6 +254,13 @@ kubectl label node dp-storage-01 node-role.kubernetes.io/storage=""
 kubectl label node dp-storage-02 node-role.kubernetes.io/storage=""
 kubectl label node dp-gpu-01 node-role.kubernetes.io/gpu=""
 kubectl label node dp-gpu-02 node-role.kubernetes.io/gpu=""
+kubectl label node dp-master node-group.dp.ssup2="master"
+kubectl label node dp-compute-01 node-group.dp.ssup2="compute"
+kubectl label node dp-compute-02 node-group.dp.ssup2="compute"
+kubectl label node dp-storage-01 node-group.dp.ssup2="storage"
+kubectl label node dp-storage-02 node-group.dp.ssup2="storage"
+kubectl label node dp-gpu-01 node-group.dp.ssup2="gpu"
+kubectl label node dp-gpu-02 node-group.dp.ssup2="gpu"
 ```
 
 Node의 Role을 확인한다.
