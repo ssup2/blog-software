@@ -309,5 +309,8 @@ helm upgrade --install --create-namespace --namespace prometheus-node-exporter p
 helm upgrade --install --create-namespace --namespace kube-state-metrics kube-state-metrics kube-state-metrics -f kube-state-metrics/values.yaml
 
 # Loki
-helm upgrade --install --create-namespace --namespace loki loki loki -f loki/my-values.yaml
+helm upgrade --install --create-namespace --namespace loki loki loki -f loki/values.yaml
+
+# Grafana (ID/PW: admin/root123!)
+helm upgrade --install --create-namespace --namespace grafana grafana grafana -f grafana/values.yaml
 ```
