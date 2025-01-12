@@ -298,4 +298,16 @@ helm upgrade --install --create-namespace --namespace postgresql postgresql post
 
 # JupyterHub (ID/PW: root/root123!)
 helm upgrade --install --create-namespace --namespace jupyterhub jupyterhub jupyterhub -f jupyterhub/my-values.yaml
+
+# Prometheus
+helm upgrade --install --create-namespace --namespace prometheus prometheus prometheus -f prometheus/my-values.yaml
+
+# Prometheus Node Exporter
+helm upgrade --install --create-namespace --namespace prometheus-node-exporter prometheus-node-exporter prometheus-node-exporter -f prometheus-node-exporter/my-values.yaml
+
+# kube-state-metrics
+helm upgrade --install --create-namespace --namespace kube-state-metrics kube-state-metrics kube-state-metrics -f kube-state-metrics/my-values.yaml
+
+# Loki
+helm upgrade --install --create-namespace --namespace loki loki loki -f loki/my-values.yaml
 ```
