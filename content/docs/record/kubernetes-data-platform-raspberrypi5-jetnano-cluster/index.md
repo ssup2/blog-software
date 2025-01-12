@@ -283,30 +283,30 @@ dp-storage-02   Ready    storage                16d   v1.30.8
 
 ```shell
 # MetelLB
-helm upgrade --install --create-namespace --namespace metallb metallb metallb -f metallb/my-values.yaml
+helm upgrade --install --create-namespace --namespace metallb metallb metallb -f metallb/values.yaml
 kubectl apply -f metallb/ip-address-pool.yaml
 kubectl apply -f metallb/l2-advertisement.yaml
 
 # Longhorn
-helm upgrade --install --create-namespace --namespace longhorn longhorn longhorn -f longhorn/my-values.yaml
+helm upgrade --install --create-namespace --namespace longhorn longhorn longhorn -f longhorn/values.yaml
 
 # MinIO (root ID/PW: root/root123!)
-helm upgrade --install --create-namespace --namespace minio minio minio -f minio/my-values.yaml
+helm upgrade --install --create-namespace --namespace minio minio minio -f minio/values.yaml
 
 # PostgreSQL (root ID/PW: posgres/root123!)
-helm upgrade --install --create-namespace --namespace postgresql postgresql postgresql -f postgresql/my-values.yaml
+helm upgrade --install --create-namespace --namespace postgresql postgresql postgresql -f postgresql/values.yaml
 
 # JupyterHub (ID/PW: root/root123!)
-helm upgrade --install --create-namespace --namespace jupyterhub jupyterhub jupyterhub -f jupyterhub/my-values.yaml
+helm upgrade --install --create-namespace --namespace jupyterhub jupyterhub jupyterhub -f jupyterhub/values.yaml
 
 # Prometheus
-helm upgrade --install --create-namespace --namespace prometheus prometheus prometheus -f prometheus/my-values.yaml
+helm upgrade --install --create-namespace --namespace prometheus prometheus prometheus -f prometheus/values.yaml
 
 # Prometheus Node Exporter
-helm upgrade --install --create-namespace --namespace prometheus-node-exporter prometheus-node-exporter prometheus-node-exporter -f prometheus-node-exporter/my-values.yaml
+helm upgrade --install --create-namespace --namespace prometheus-node-exporter prometheus-node-exporter prometheus-node-exporter -f prometheus-node-exporter/values.yaml
 
 # kube-state-metrics
-helm upgrade --install --create-namespace --namespace kube-state-metrics kube-state-metrics kube-state-metrics -f kube-state-metrics/my-values.yaml
+helm upgrade --install --create-namespace --namespace kube-state-metrics kube-state-metrics kube-state-metrics -f kube-state-metrics/values.yaml
 
 # Loki
 helm upgrade --install --create-namespace --namespace loki loki loki -f loki/my-values.yaml
