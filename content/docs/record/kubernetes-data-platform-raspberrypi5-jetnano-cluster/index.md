@@ -293,9 +293,6 @@ helm upgrade --install --create-namespace --namespace longhorn longhorn longhorn
 # MinIO (root ID/PW: root/root123!)
 helm upgrade --install --create-namespace --namespace minio minio minio -f minio/values.yaml
 
-# PostgreSQL (root ID/PW: posgres/root123!)
-helm upgrade --install --create-namespace --namespace postgresql postgresql postgresql -f postgresql/values.yaml
-
 # JupyterHub (ID/PW: root/root123!)
 helm upgrade --install --create-namespace --namespace jupyterhub jupyterhub jupyterhub -f jupyterhub/values.yaml
 
@@ -311,6 +308,12 @@ helm upgrade --install --create-namespace --namespace kube-state-metrics kube-st
 # Loki
 helm upgrade --install --create-namespace --namespace loki loki loki -f loki/values.yaml
 
+# Promtail
+helm upgrade --install --create-namespace --namespace promtail promtail promtail -f promtail/values.yaml
+
 # Grafana (ID/PW: admin/root123!)
 helm upgrade --install --create-namespace --namespace grafana grafana grafana -f grafana/values.yaml
+
+# PostgreSQL (root ID/PW: posgres/root123!)
+helm upgrade --install --create-namespace --namespace postgresql postgresql postgresql -f postgresql/values.yaml
 ```
