@@ -316,4 +316,12 @@ helm upgrade --install --create-namespace --namespace grafana grafana grafana -f
 
 # PostgreSQL (root ID/PW: posgres/root123!)
 helm upgrade --install --create-namespace --namespace postgresql postgresql postgresql -f postgresql/values.yaml
+kubectl -n postgresql exec -it postgresql-0 -- bash -c 'PGPASSWORD=root123! psql -U postgres -c "create database airflow;"'
+
+# Airflow (admin/admin)
+helm upgrade --install --create-namespace --namespace airflow airflow airflow -f airflow/values.yaml
 ```
+
+## 참조
+
+* Airflow on Kubernetes : [https://zerohertz.github.io/k8s-airflow/](https://zerohertz.github.io/k8s-airflow/)
