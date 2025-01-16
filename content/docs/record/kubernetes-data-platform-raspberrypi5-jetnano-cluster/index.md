@@ -302,8 +302,12 @@ helm upgrade --install --create-namespace --namespace longhorn longhorn longhorn
 # MinIO (root ID/PW: root/root123!)
 helm upgrade --install --create-namespace --namespace minio minio minio -f minio/values.yaml
 
-# JupyterHub (ID/PW: root/root123!)
-helm upgrade --install --create-namespace --namespace jupyterhub jupyterhub jupyterhub -f jupyterhub/values.yaml
+# PostgreSQL (root ID/PW: posgres/root123!)
+helm upgrade --install --create-namespace --namespace postgresql postgresql postgresql -f postgresql/values.yaml
+kubectl -n postgresql exec -it postgresql-0 -- bash -c 'PGPASSWORD=root123! psql -U postgres -c "create database airflow;"'
+
+# Nvidia Device Plugin
+helm upgrade --install --create-namespace --namespace nvidia-device-plugin nvidia-device-plugin nvidia-device-plugin -f nvidia-device-plugin/values.yaml
 
 # Prometheus
 helm upgrade --install --create-namespace --namespace prometheus prometheus prometheus -f prometheus/values.yaml
@@ -323,10 +327,6 @@ helm upgrade --install --create-namespace --namespace promtail promtail promtail
 # Grafana (ID/PW: admin/root123!)
 helm upgrade --install --create-namespace --namespace grafana grafana grafana -f grafana/values.yaml
 
-# PostgreSQL (root ID/PW: posgres/root123!)
-helm upgrade --install --create-namespace --namespace postgresql postgresql postgresql -f postgresql/values.yaml
-kubectl -n postgresql exec -it postgresql-0 -- bash -c 'PGPASSWORD=root123! psql -U postgres -c "create database airflow;"'
-
 # Airflow (admin/admin)
 helm upgrade --install --create-namespace --namespace airflow airflow airflow -f airflow/values.yaml
 
@@ -338,6 +338,9 @@ helm upgrade --install --create-namespace --namespace flink-kubernetes-operator 
 
 # Trino Operator
 helm upgrade --install --create-namespace --namespace trino trino trino -f trino/values.yaml
+
+# JupyterHub (ID/PW: root/root123!)
+helm upgrade --install --create-namespace --namespace jupyterhub jupyterhub jupyterhub -f jupyterhub/values.yaml
 ```
 
 ## 참조
