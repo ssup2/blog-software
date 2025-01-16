@@ -287,6 +287,15 @@ helm upgrade --install --create-namespace --namespace metallb metallb metallb -f
 kubectl apply -f metallb/ip-address-pool.yaml
 kubectl apply -f metallb/l2-advertisement.yaml
 
+# Cert Manager
+helm upgrade --install --create-namespace --namespace cert-manager cert-manager cert-manager -f cert-manager/values.yaml
+
+# Yunikorn
+helm upgrade --install --create-namespace --namespace yunikorn yunikorn yunikorn -f yunikorn/values.yaml
+
+# KEDA
+helm upgrade --install --create-namespace --namespace keda keda keda -f keda/values.yaml
+
 # Longhorn
 helm upgrade --install --create-namespace --namespace longhorn longhorn longhorn -f longhorn/values.yaml
 
@@ -320,6 +329,15 @@ kubectl -n postgresql exec -it postgresql-0 -- bash -c 'PGPASSWORD=root123! psql
 
 # Airflow (admin/admin)
 helm upgrade --install --create-namespace --namespace airflow airflow airflow -f airflow/values.yaml
+
+# Spark Operator
+helm upgrade --install --create-namespace --namespace spark-operator spark-operator spark-operator -f spark-operator/values.yaml
+
+# Flink Kubernetes Operator
+helm upgrade --install --create-namespace --namespace flink-kubernetes-operator flink-kubernetes-operator flink-kubernetes-operator -f flink-kubernetes-operator/values.yaml
+
+# Trino Operator
+helm upgrade --install --create-namespace --namespace trino trino trino -f trino/values.yaml
 ```
 
 ## 참조
