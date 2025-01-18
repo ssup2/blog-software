@@ -88,7 +88,7 @@ $ tcpdump -i veth5f577e0f dst port 9080
 
 ### 1.2. Sidecar Object 적용 후
 
-```yaml
+```yaml {caption="[File 1] Default Sidecar Object for default Namespace"}
 apiVersion: networking.istio.io/v1
 kind: Sidecar
 metadata:
@@ -100,6 +100,8 @@ spec:
     - "./*"
     - "istio-system/*"
 ```
+
+[File 1]은 `default` Namespace에서 동작하는 `my-shell` Pod의 Sidecar Object를 나타내고 있다. `./*`는 Sidecar Object가 존재하는 Namespace의 모든 Endpoint를 나타내며, `istio-system/*`는 `istio-system` Namespace의 모든 Endpoint를 나타낸다. 하지만 `bookinfo` Namespace는 제외되어 있는것을 확인할 수 있다.
 
 ```shell
 $ istioctl proxy-config endpoint my-shell
