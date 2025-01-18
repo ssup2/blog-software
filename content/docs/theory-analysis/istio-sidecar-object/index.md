@@ -3,13 +3,13 @@ title: Istio Sidecar Object
 draft: true
 ---
 
-Istio의 Sidecar Object를 분석한다.
-
 ## 1. Istio Sidecar Object
 
-Istio에서 제공하는 Sidecar Object는 Istio의 Sidecar Proxy의 Endpoint 설정을 세세하게 제어하도록 만든다.
+Istio에서 제공하는 Sidecar Object는 Istio의 Sidecar Proxy의 Endpoint 설정을 세세하게 제어할 때 이용한다. 일반적으로는 Endpoint 개수 증가에 따른 Sidecar Proxy의 부하 또는 Sidecar Proxy를 제어하는 `istiod`의 부하를 줄이기 위해서 Sidecar Object를 설정한다.
 
-```shell
+### 1.1. Sidecar Object Test 환경
+
+```shell {caption="[Shell 1] Sidecar Object Test Environment"}
 $ kubectl -n bookinfo get pod -o wide
 NAME                             READY   STATUS    RESTARTS   AGE   IP            NODE           NOMINATED NODE   READINESS GATES
 details-v1-79dfbd6fff-l876n      2/2     Running   0          18m   10.244.1.29   kind-worker2   <none>           <none>
@@ -18,13 +18,29 @@ ratings-v1-65f797b499-rftkh      2/2     Running   0          18m   10.244.1.30 
 reviews-v1-5c4d6d447c-qwmbv      2/2     Running   0          18m   10.244.2.31   kind-worker    <none>           <none>
 reviews-v2-65cb66b45c-dtwjd      2/2     Running   0          18m   10.244.1.31   kind-worker2   <none>           <none>
 reviews-v3-f68f94645-bmzrn       2/2     Running   0          18m   10.244.2.32   kind-worker    <none>           <none>
+
 $ kubectl -n bookinfo get service -o wide
 NAME          TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE   SELECTOR
 details       ClusterIP   10.96.117.59    <none>        9080/TCP   20m   app=details
 productpage   ClusterIP   10.96.159.57    <none>        9080/TCP   20m   app=productpage
 ratings       ClusterIP   10.96.116.237   <none>        9080/TCP   20m   app=ratings
 reviews       ClusterIP   10.96.209.151   <none>        9080/TCP   20m   app=reviews
+
+$ kubectl -n default get pod
+NAME      READY   STATUS    RESTARTS      AGE
+my-shell  2/2     Running   0             81m
 ```
+
+[Shell 1]은 Sidecar Object Test를 위한 환경을 보여주고 있다. `bookinfo` Namespace에는 Istio에서 제공하는 Bookinfo Example을 활용하여 관련 Service와 Pod를 동작시키고 있다. `default` Namespace에는 `bookinfo` Namespace의 `reviews` Service에 요청을 생성하기 위한 `my-shell` Pod가 동작하고 있다.
+
+```shell {caption="[Shell 2] Create Request to review Service in my-shell Pod"}
+$ curl 10.96.209.151:9080/reviews/1
+{"id": "1","podname": "reviews-v3-f68f94645-bmzrn","clustername": "null","reviews": [{  "reviewer": "Reviewer1",  "text": "An extremely entertaining play by Shakespeare. The slapstick humour is refreshing!", "rating": {"stars": 5, "color": "red"}},{  "reviewer": "Reviewer2",  "text": "Absolutely fun and entertaining. The play lacks thematic depth when compared to other plays by Shakespeare.", "rating": {"stars": 4, "color": "red"}}]}
+```
+
+[Shell 2]는 `my-shell` Pod에서 `bookinfo` Namespace의 `reviews` Service에 요청을 보내고 받은 응답을 보여주고 있다.
+
+### 1.1. Sidecar Object 적용 전
 
 ```shell
 $ istioctl proxy-config endpoint my-shell
@@ -53,10 +69,6 @@ ENDPOINT                                                STATUS      OUTLIER CHEC
 ...
 ```
 
-```shell
-$ curl 10.96.209.151:9080/reviews/1
-{"id": "1","podname": "reviews-v3-f68f94645-bmzrn","clustername": "null","reviews": [{  "reviewer": "Reviewer1",  "text": "An extremely entertaining play by Shakespeare. The slapstick humour is refreshing!", "rating": {"stars": 5, "color": "red"}},{  "reviewer": "Reviewer2",  "text": "Absolutely fun and entertaining. The play lacks thematic depth when compared to other plays by Shakespeare.", "rating": {"stars": 4, "color": "red"}}]}
-```
 
 ```shell
 $ tcpdump -i veth5f577e0f dst port 9080
@@ -70,6 +82,8 @@ $ tcpdump -i veth5f577e0f dst port 9080
 14:57:06.585129 IP 10.244.2.34.39690 > 10.244.2.31.9080: Flags [.], ack 2393, win 623, options [nop,nop,TS val 1871838366 ecr 3884980099], length 0
 ...
 ```
+
+### 1.2. Sidecar Object 적용 후
 
 ```yaml
 apiVersion: networking.istio.io/v1
