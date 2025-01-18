@@ -33,7 +33,7 @@ my-shell  2/2     Running   0             81m
 
 [Shell 1]은 Sidecar Object Test를 위한 환경을 보여주고 있다. `bookinfo` Namespace에는 Istio에서 제공하는 Bookinfo Example을 활용하여 관련 Service와 Pod를 동작시키고 있다. `default` Namespace에는 `bookinfo` Namespace의 `reviews` Service에 요청을 생성하기 위한 `my-shell` Pod가 동작하고 있다.
 
-```shell {caption="[Shell 2] Create Request to review Service in my-shell Pod"}
+```shell {caption="[Shell 2] my-shell Pod에서 reviews 서비스 호출"}
 $ curl 10.96.209.151:9080/reviews/1
 {"id": "1","podname": "reviews-v3-f68f94645-bmzrn","clustername": "null","reviews": [{  "reviewer": "Reviewer1",  "text": "An extremely entertaining play by Shakespeare. The slapstick humour is refreshing!", "rating": {"stars": 5, "color": "red"}},{  "reviewer": "Reviewer2",  "text": "Absolutely fun and entertaining. The play lacks thematic depth when compared to other plays by Shakespeare.", "rating": {"stars": 4, "color": "red"}}]}
 ```
@@ -42,7 +42,7 @@ $ curl 10.96.209.151:9080/reviews/1
 
 ### 1.1. Sidecar Object 적용 전
 
-```shell {caption="[Shell 3] sidecar proxy endpoint config of my-shell Pod"}
+```shell {caption="[Shell 3] Sidecar Object 적용 전 my-shell Pod Sidecar Proxy의 Endpoint 목록"}
 $ istioctl proxy-config endpoint my-shell
 ENDPOINT                                                STATUS      OUTLIER CHECK     CLUSTER
 10.244.0.3:53                                           HEALTHY     OK                outbound|53||kube-dns.kube-system.svc.cluster.local
@@ -69,9 +69,9 @@ ENDPOINT                                                STATUS      OUTLIER CHEC
 ...
 ```
 
-[Shell 3]은 `my-shell` Pod의 Sidecar Proxy에 설정된 Endpoint 목록을 나타내고 있다. Kubernetes Cluster에 존재하는 대부분의 Endpoint들이 존재하며, `bookinfo` Namespace에 존재하는 서비스들도 확인할 수 있다.
+[Shell 3]은 Sidecar Object 적용 전 `my-shell` Pod의 Sidecar Proxy에 설정된 Endpoint 목록을 나타내고 있다. Kubernetes Cluster에 존재하는 대부분의 Endpoint들이 존재하며, `bookinfo` Namespace에 존재하는 서비스들도 확인할 수 있다.
 
-```shell {caption="[Shell 4] tcpdump in node of my-shell Pod"}
+```shell {caption="[Shell 4] my-shell Pod가 동작하는 Node에서 tcpdump 수행"}
 $ tcpdump -i veth5f577e0f dst port 9080
 14:57:02.572059 IP 10.244.2.34.44644 > 10.244.2.32.9080: Flags [P.], seq 3112:3890, ack 5085, win 684, options [nop,nop,TS val 1627817850 ecr 1863232535], length 778
 14:57:02.586416 IP 10.244.2.34.44644 > 10.244.2.32.9080: Flags [.], ack 6356, win 684, options [nop,nop,TS val 1627817864 ecr 1863242761], length 0
@@ -88,7 +88,7 @@ $ tcpdump -i veth5f577e0f dst port 9080
 
 ### 1.2. Sidecar Object 적용 후
 
-```yaml {caption="[File 1] Default Sidecar Object for default Namespace"}
+```yaml {caption="[File 1]default Namespace의 Default Sidecar Object"}
 apiVersion: networking.istio.io/v1
 kind: Sidecar
 metadata:
@@ -103,7 +103,7 @@ spec:
 
 [File 1]은 `default` Namespace에서 동작하는 `my-shell` Pod의 Sidecar Object를 나타내고 있다. `./*`는 Sidecar Object가 존재하는 Namespace의 모든 Endpoint를 나타내며, `istio-system/*`는 `istio-system` Namespace의 모든 Endpoint를 나타낸다. 하지만 `bookinfo` Namespace는 제외되어 있는것을 확인할 수 있다.
 
-```shell
+```shell {caption="[Shell 5] Sidecar Object 적용 후 my-shell Pod Sidecar Proxy의 Endpoint 목록"}
 $ istioctl proxy-config endpoint my-shell
 ENDPOINT                                                STATUS      OUTLIER CHECK     CLUSTER
 10.244.1.2:15010                                        HEALTHY     OK                outbound|15010||istiod.istio-system.svc.cluster.local
@@ -119,6 +119,8 @@ ENDPOINT                                                STATUS      OUTLIER CHEC
 10.244.2.29:8443                                        HEALTHY     OK                outbound|443||istio-egressgateway.istio-system.svc.cluster.local
 127.0.0.1:15000                                         HEALTHY     OK                prometheus_stats
 ```
+
+[Shell 5]는 Sidecar Object 적용 후 `my-shell` Pod의 Sidecar Proxy에 설정된 Endpoint 목록을 나타내고 있다. Sidecar Object에 `bookinfo` Namespace의 Endpoint들이 존재하지 않는것을 확인할 수 있다.
 
 ```shell
 15:10:06.153435 IP 10.244.2.34.42122 > 10.96.209.151.9080: Flags [S], seq 1197298391, win 64240, options [mss 1460,sackOK,TS val 954649444 ecr 0,nop,wscale 7], length 0
@@ -138,3 +140,4 @@ ENDPOINT                                                STATUS      OUTLIER CHEC
 
 ## 2. 참조
 
+* Istio Sidecar Object : [https://istio.io/latest/docs/reference/config/networking/sidecar/](https://istio.io/latest/docs/reference/config/networking/sidecar/)
