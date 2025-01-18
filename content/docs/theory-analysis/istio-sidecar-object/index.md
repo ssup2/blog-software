@@ -71,7 +71,7 @@ ENDPOINT                                                STATUS      OUTLIER CHEC
 
 [Shell 3]은 Sidecar Object 적용 전 `my-shell` Pod의 Sidecar Proxy에 설정된 Endpoint 목록을 나타내고 있다. Kubernetes Cluster에 존재하는 대부분의 Endpoint들이 존재하며, `bookinfo` Namespace에 존재하는 서비스들도 확인할 수 있다.
 
-```shell {caption="[Shell 4] my-shell Pod가 동작하는 Node에서 tcpdump 수행"}
+```shell {caption="[Shell 4] Sidecar Object 적용 전 my-shell Pod가 동작하는 Node에서 tcpdump 수행"}
 $ tcpdump -i veth5f577e0f dst port 9080
 14:57:02.572059 IP 10.244.2.34.44644 > 10.244.2.32.9080: Flags [P.], seq 3112:3890, ack 5085, win 684, options [nop,nop,TS val 1627817850 ecr 1863232535], length 778
 14:57:02.586416 IP 10.244.2.34.44644 > 10.244.2.32.9080: Flags [.], ack 6356, win 684, options [nop,nop,TS val 1627817864 ecr 1863242761], length 0
@@ -84,7 +84,7 @@ $ tcpdump -i veth5f577e0f dst port 9080
 ...
 ```
 
-[Shell 4]는 `my-shell` Pod에서 `reviews` Service에 요청을 보낼시 `my-shell` Pod의 Node에서 `my-shell` Pod의 veth Interface에 tcpdump를 수행한 모습을 나타내고 있다. `my-shell` Pod에서는 `reviews` Service의 ClusterIP로 요청을 전송하지만, Sidecar Proxy에서 DNAT를 수행하기 때문에 tcpdump에서는 `reviews` Pod의 IP가 보이는것을 확인할 수 있다.
+[Shell 4]는 Sidecar Object 적용 전 `my-shell` Pod에서 `reviews` Service에 요청을 보낼시 `my-shell` Pod의 Node에서 `my-shell` Pod의 veth Interface에 tcpdump를 수행한 모습을 나타내고 있다. `my-shell` Pod에서는 `reviews` Service의 ClusterIP로 요청을 전송하지만, Sidecar Proxy에서 DNAT를 수행하기 때문에 tcpdump에서는 `reviews` Pod의 IP가 보이는것을 확인할 수 있다.
 
 ### 1.2. Sidecar Object 적용 후
 
@@ -120,9 +120,11 @@ ENDPOINT                                                STATUS      OUTLIER CHEC
 127.0.0.1:15000                                         HEALTHY     OK                prometheus_stats
 ```
 
-[Shell 5]는 Sidecar Object 적용 후 `my-shell` Pod의 Sidecar Proxy에 설정된 Endpoint 목록을 나타내고 있다. Sidecar Object에 `bookinfo` Namespace의 Endpoint들이 존재하지 않는것을 확인할 수 있다.
+[Shell 5]는 Sidecar Object 적용 후 `my-shell` Pod의 Sidecar Proxy에 설정된 Endpoint 목록을 나타내고 있다. Sidecar Object에 `bookinfo` Namespace의 Endpoint들이 존재하지 않는것을 확인할 수 있다. 이처럼 Sidecar Object를 활용하여 Sidecar Proxy의 Endpoint 개수를 조절할 수 있다. 모든 Endpoint가 아니라 Sidecar Object를 활용해서 실제로 서로 통신하는 Endpoint(Pod)들만 Sidecar Proxy에 설정되게 만들면, Endpoint 개수를 줄일 수 있고 이는 Sidecar Proxy의 부하 또는 `istiod`의 부하를 줄일수 있게 만든다.
 
-```shell
+다만 Sidecar Object로 인해서 Endpoint에 존재하지 않는다고 Traffic이 차단되는건 아니다. Sidecar Proxy는 존재하지 않는 Endpoint로 Traffic을 전송하는 경우에는 Traffic을 **Unmatched Traffic**으로 간주하며 해당 Traffic을 그대로 `통과`시키기 때문이다. 즉 Mesh Network를 이용하지 못핣뿐 Traffic은 주고 받을 수 있다.
+
+```shell {caption="[Shell 6] Sidecar Object 적용 후 my-shell Pod가 동작하는 Node에서 tcpdump 수행"}
 15:10:06.153435 IP 10.244.2.34.42122 > 10.96.209.151.9080: Flags [S], seq 1197298391, win 64240, options [mss 1460,sackOK,TS val 954649444 ecr 0,nop,wscale 7], length 0
 15:10:06.153588 IP 10.244.2.34.42122 > 10.96.209.151.9080: Flags [.], ack 211632145, win 502, options [nop,nop,TS val 954649444 ecr 1864026328], length 0
 15:10:06.153903 IP 10.244.2.34.42122 > 10.96.209.151.9080: Flags [P.], seq 0:90, ack 1, win 502, options [nop,nop,TS val 954649445 ecr 1864026328], length 90
@@ -137,6 +139,8 @@ ENDPOINT                                                STATUS      OUTLIER CHEC
 15:10:13.732331 IP 10.244.2.34.46354 > 10.96.209.151.9080: Flags [.], ack 728, win 497, options [nop,nop,TS val 954657023 ecr 1864033907], length 0
 ...
 ```
+
+[Shell 6]은 Sidecar Object 적용 후 `my-shell` Pod에서 `reviews` Service에 요청을 보낼시 `my-shell` Pod의 Node에서 `my-shell` Pod의 veth Interface에 tcpdump를 수행한 모습을 나타내고 있다. `reviews` Service의 ClusterIP가 Destination IP로 설정되어 있는것을 확인할 수 있다. 즉 Traffic은 `my-shell` Pod의 Sidecar Proxy를 그대로 통과하여 DNAT가 되지 않고, Node의 kube-proxy (iptables)로 인해서 DNAT가 된다는 사실을 알 수 있다.
 
 ## 2. 참조
 
