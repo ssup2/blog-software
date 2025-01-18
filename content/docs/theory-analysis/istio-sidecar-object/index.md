@@ -38,11 +38,11 @@ $ curl 10.96.209.151:9080/reviews/1
 {"id": "1","podname": "reviews-v3-f68f94645-bmzrn","clustername": "null","reviews": [{  "reviewer": "Reviewer1",  "text": "An extremely entertaining play by Shakespeare. The slapstick humour is refreshing!", "rating": {"stars": 5, "color": "red"}},{  "reviewer": "Reviewer2",  "text": "Absolutely fun and entertaining. The play lacks thematic depth when compared to other plays by Shakespeare.", "rating": {"stars": 4, "color": "red"}}]}
 ```
 
-[Shell 2]는 `my-shell` Pod에서 `bookinfo` Namespace의 `reviews` Service에 요청을 보내고 받은 응답을 보여주고 있다.
+[Shell 2]는 `my-shell` Pod에서 `bookinfo` Namespace의 `reviews` Service에 요청을 보내고 받은 응답을 보여주고 있다. `10.96.209.151` IP 주소는 `reviews` Service의 ClusterIP이다. `reviews` Service로 요청을 보낼시 tcpdump를 통해서 Sidecar Object 적용 유무에 따라서 Packet이 어떻게 전송되는지 확인할 예정이다.
 
 ### 1.1. Sidecar Object 적용 전
 
-```shell
+```shell {caption="[Shell 3] sidecar proxy endpoint config of my-shell Pod"}
 $ istioctl proxy-config endpoint my-shell
 ENDPOINT                                                STATUS      OUTLIER CHECK     CLUSTER
 10.244.0.3:53                                           HEALTHY     OK                outbound|53||kube-dns.kube-system.svc.cluster.local
@@ -69,8 +69,9 @@ ENDPOINT                                                STATUS      OUTLIER CHEC
 ...
 ```
 
+[Shell 3]은 `my-shell` Pod의 Sidecar Proxy에 설정된 Endpoint 목록을 나타내고 있다. Kubernetes Cluster에 존재하는 대부분의 Endpoint들이 존재하며, `bookinfo` Namespace에 존재하는 서비스들도 확인할 수 있다.
 
-```shell
+```shell {caption="[Shell 4] tcpdump in node of my-shell Pod"}
 $ tcpdump -i veth5f577e0f dst port 9080
 14:57:02.572059 IP 10.244.2.34.44644 > 10.244.2.32.9080: Flags [P.], seq 3112:3890, ack 5085, win 684, options [nop,nop,TS val 1627817850 ecr 1863232535], length 778
 14:57:02.586416 IP 10.244.2.34.44644 > 10.244.2.32.9080: Flags [.], ack 6356, win 684, options [nop,nop,TS val 1627817864 ecr 1863242761], length 0
@@ -82,6 +83,8 @@ $ tcpdump -i veth5f577e0f dst port 9080
 14:57:06.585129 IP 10.244.2.34.39690 > 10.244.2.31.9080: Flags [.], ack 2393, win 623, options [nop,nop,TS val 1871838366 ecr 3884980099], length 0
 ...
 ```
+
+[Shell 4]는 `my-shell` Pod에서 `reviews` Service에 요청을 보낼시 `my-shell` Pod의 Node에서 `my-shell` Pod의 veth Interface에 tcpdump를 수행한 모습을 나타내고 있다. `my-shell` Pod에서는 `reviews` Service의 ClusterIP로 요청을 전송하지만, Sidecar Proxy에서 DNAT를 수행하기 때문에 tcpdump에서는 `reviews` Pod의 IP가 보이는것을 확인할 수 있다.
 
 ### 1.2. Sidecar Object 적용 후
 
