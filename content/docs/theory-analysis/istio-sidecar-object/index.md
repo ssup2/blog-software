@@ -88,7 +88,7 @@ $ tcpdump -i veth5f577e0f dst port 9080
 
 ### 1.2. Sidecar Object 적용 후
 
-```yaml {caption="[File 1]default Namespace의 Default Sidecar Object"}
+```yaml {caption="[File 1] default Namespace의 Default Sidecar Object"}
 apiVersion: networking.istio.io/v1
 kind: Sidecar
 metadata:
@@ -141,6 +141,24 @@ ENDPOINT                                                STATUS      OUTLIER CHEC
 ```
 
 [Shell 6]은 Sidecar Object 적용 후 `my-shell` Pod에서 `reviews` Service에 요청을 보낼시 `my-shell` Pod의 Node에서 `my-shell` Pod의 veth Interface에 tcpdump를 수행한 모습을 나타내고 있다. `reviews` Service의 ClusterIP가 Destination IP로 설정되어 있는것을 확인할 수 있다. 즉 Traffic은 `my-shell` Pod의 Sidecar Proxy를 그대로 통과하여 DNAT가 되지 않고, Node의 kube-proxy (iptables)로 인해서 DNAT가 된다는 사실을 알 수 있다.
+
+### 1.3. Sidecar Object 예제
+
+```yaml {caption="[File 2] Sidecar Object의 workloadSelector 예시"}
+apiVersion: networking.istio.io/v1
+kind: Sidecar
+metadata:
+  namespace: default
+  name: default
+spec:
+  workloadSelector:
+    labels:
+      app: reviews
+  egress:
+  - hosts:
+    - "./*"
+    - "istio-system/*"
+```
 
 ## 2. 참조
 
