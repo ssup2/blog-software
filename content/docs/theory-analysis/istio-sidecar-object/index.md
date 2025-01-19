@@ -124,9 +124,11 @@ ENDPOINT                                                STATUS      OUTLIER CHEC
 127.0.0.1:15000                                         HEALTHY     OK                prometheus_stats
 ```
 
-[Shell 5]는 Sidecar Object 적용 후 `my-shell` Pod의 Sidecar Proxy에 설정된 Endpoint 목록을 나타내고 있다. Sidecar Object에 `bookinfo` Namespace의 Endpoint들이 존재하지 않는것을 확인할 수 있다. 이처럼 Sidecar Object를 활용하여 Sidecar Proxy의 Endpoint 개수를 조절할 수 있다. 모든 Endpoint가 아니라 Sidecar Object를 활용해서 실제로 서로 통신하는 Endpoint(Pod)들만 Sidecar Proxy에 설정되게 만들면, Endpoint 개수를 줄일 수 있고 이는 Sidecar Proxy 및 `istiod`의 부하를 줄일수 있게 만든다.
+[Shell 5]는 Sidecar Object 적용 후 `my-shell` Pod의 Sidecar Proxy에 설정된 Endpoint 목록을 나타내고 있다. Sidecar Object에 `bookinfo` Namespace의 Endpoint들이 존재하지 않는것을 확인할 수 있다. 이처럼 Sidecar Object를 활용하여 Sidecar Proxy에 등록되는 Endpoint 설정할 수 있다. 이는 각 Pod의 Egress 목적지를 모두 Sidecar Object에 등록하면 Endpoint의 개수를 줄일수 있는것을 의미한다. 물론 Kubernetes Cluster를 관리하는 조직에서 각 Pod의 모든 Egress 목적지를 파악하고 갱신하는 것은 쉬운일은 아니다.
 
-다만 Sidecar Object로 인해서 Endpoint에 존재하지 않는다고 Traffic이 차단되는건 아니다. Sidecar Proxy는 존재하지 않는 Endpoint로 Traffic을 전송하는 경우에는 Traffic을 **Unmatched Traffic**으로 간주하며 해당 Traffic을 그대로 `통과`시키기 때문이다. 즉 Mesh Network를 이용하지 못핣뿐 Traffic은 주고 받을 수 있다.
+Sidecar Object는 Pod의 Traffic을 차단하는 기법이 아니다. 따라서 Pod에서 Sidecar Object로 인해서 Endpoint에 존재하지 않는 Egress 목적지로 Traffic을 전송하면 Traffic은 그대로 전송된다. Sidecar Proxy는 존재하지 않는 Endpoint로 Traffic을 전송하는 경우에는 Traffic을 **Unmatched Traffic**으로 간주하며 해당 Traffic을 그대로 **통과**시키기 때문이다. 즉 Mesh Network를 이용하지 못핣뿐 Traffic은 주고 받을 수 있다.
+
+Sidecar Object로 인해서 Endpoint가 존재하지 않더라도 Traffic을 주고 받을수 있기 때문에 일부 Endpoint각 Sidecar Object에 누락되더라도 서비스 장애까지는 이어지지 않는다. 다만 Mesh Network를 활용할 수 없기 때문에 가능하면 Pod의 Egress 목적지를 모두 Sidecar Object에 등록해야한다.
 
 ```shell {caption="[Shell 6] Sidecar Object 적용 후 my-shell Pod가 동작하는 Node에서 tcpdump 수행"}
 15:10:06.153435 IP 10.244.2.34.42122 > 10.96.209.151.9080: Flags [S], seq 1197298391, win 64240, options [mss 1460,sackOK,TS val 954649444 ecr 0,nop,wscale 7], length 0
@@ -144,7 +146,7 @@ ENDPOINT                                                STATUS      OUTLIER CHEC
 ...
 ```
 
-[Shell 6]은 Sidecar Object 적용 후 `my-shell` Pod에서 `reviews` Service에 요청을 보낼시 `my-shell` Pod의 Node에서 `my-shell` Pod의 veth Interface에 tcpdump를 수행한 모습을 나타내고 있다. `reviews` Service의 ClusterIP가 Destination IP로 설정되어 있는것을 확인할 수 있다. 즉 Traffic은 `my-shell` Pod의 Sidecar Proxy를 그대로 통과하여 DNAT가 되지 않고, Node의 kube-proxy (iptables)로 인해서 DNAT가 된다는 사실을 알 수 있다.
+[Shell 6]은 Sidecar Object 적용 후 `my-shell` Pod에서 `reviews` Service에 요청을 보낼시 `my-shell` Pod의 Node에서 `my-shell` Pod의 veth Interface에 tcpdump를 수행한 모습을 나타내고 있다. `reviews` Service의 ClusterIP가 Destination IP로 설정되어 있는것을 확인할 수 있다. 즉 Traffic은 `my-shell` Pod의 Sidecar Proxy를 그대로 **통과**하여 DNAT가 되지 않고, Node의 kube-proxy (iptables)로 인해서 DNAT가 된다는 사실을 알 수 있다.
 
 #### 1.1.4. workloadSelector 활용
 
