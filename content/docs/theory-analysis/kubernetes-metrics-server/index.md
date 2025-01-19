@@ -18,7 +18,7 @@ Metrics Server는 Prometheus와 동일하게 Pull 방식으로 kubelet으로부�
 
 ### 1.1. High Availability
 
-{{< figure caption="[Figure 2] Kubernetes Metrics Server with HA" src="images/kubernetes-metrics-server.png" width="700px" >}}
+{{< figure caption="[Figure 2] Kubernetes Metrics Server with HA" src="images/kubernetes-metrics-server-ha.png" width="700px" >}}
 
 Metrics Server의 Metric은 Horizontal Pod Autoscaler Controller에서 Pod Auto Scailing을 위한 기준 Metric으로 이용되기 때문에, Metrics Server의 장애는 서비스의 장애로 이어질 수 있다. Metrics Server의 장애를 대비하기 위해서 HA 구성이 가능하며, HA 구성은 여분의 Metrics Server를 동작시키는 형태로 구성된다. [Figure 2]는 HA를 구성한 Metrics Server를 나타내고 있다. Metrics Server가 여러대 동작하더라도 각각의 Metrics Server는 독립되어 별도로 Metric을 수집한다.
 
