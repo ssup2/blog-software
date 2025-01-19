@@ -104,9 +104,9 @@ spec:
     version: v2
 ```
 
-Istio에서는 Traffic 제어를 위해서 Virtual Service, Destination Rule, Gateway 3가지 Resource를 제공한다. [Figure 1]과 [File 1]은 Virtual Service, Destination Rule, Gateway 이해 및 적용을 위한 "version" 이라고 불리는 App을 위한 Service와 Deployment를 나타내고 있다. verion:v1 Image에 포함된 version App은 HTTP 요청시 "version v1" 문자열을 반환하고, version:v2 Image에 포함된 App은 HTTP 요청시 "version v2" 문자열을 반환하는 간단한 App이다.
+Istio에서는 Traffic 제어를 위해서 Virtual Service, Destination Rule, Gateway 3가지 Resource를 제공한다. [Figure 1]과 [File 1]은 Virtual Service, Destination Rule, Gateway 이해 및 적용을 위한 "version" 이라고 불리는 App을 위한 Service와 Deployment를 나타내고 있다. verion:v1 Image에 포함된 version App은 HTTP 요청시 `version v1` 문자열을 반환하고, version:v2 Image에 포함된 App은 HTTP 요청시 `version v2` 문자열을 반환하는 간단한 App이다.
 
-verion:v1/v2 Container는 Deployment를 통해서 배포되며, version:v1을 연결하는 version-v1 Service와 version:v2를 연결하는 version-v2 Service가 존재한다. 또한 version:v1/v2 둘다 연결하는 version Service도 존재한다. 따라서 version-v1 Service에 HTTP 요청을 전송하면 "version v1" 문자열이 반환되고, version-v2 Service에 HTTP 요청을 전송하면 "version v2" 문자열이 반환된다. version Service에 HTTP 요청을 전송하면 "version v1", "version v2" 문자열이 Random으로 반환된다.
+verion:v1/v2 Container는 Deployment를 통해서 배포되며, version:v1을 연결하는 version-v1 Service와 version:v2를 연결하는 version-v2 Service가 존재한다. 또한 version:v1/v2 둘다 연결하는 version Service도 존재한다. 따라서 version-v1 Service에 HTTP 요청을 전송하면 `version v1` 문자열이 반환되고, version-v2 Service에 HTTP 요청을 전송하면 `version v2` 문자열이 반환된다. version Service에 HTTP 요청을 전송하면 `version v1`, `version v2` 문자열이 Random으로 반환된다.
 
 ### 1.1. Virtual Service
 
