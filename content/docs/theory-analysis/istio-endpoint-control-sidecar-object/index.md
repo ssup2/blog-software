@@ -83,7 +83,9 @@ $ tcpdump -i veth5f577e0f dst port 9080
 ...
 ```
 
-[Shell 4]는 Sidecar Object 적용 전 `my-shell` Pod에서 `reviews` Service에 요청을 보낼시 `my-shell` Pod의 Node에서 `my-shell` Pod의 veth Interface에 tcpdump를 수행한 모습을 나타내고 있다. `my-shell` Pod에서는 `reviews` Service의 ClusterIP로 요청을 전송하지만, Sidecar Proxy에서 DNAT를 수행하기 때문에 tcpdump에서는 3개의 `reviews` Pod의 IP가 보이는것을 확인할 수 있다.
+{{< figure caption="[Figure 1] Sidecar Object 적용 전 Traffic Flow" src="images/traffic-flow-without-sidecar-object.png" width="700px" >}}
+
+[Shell 4]는 Sidecar Object 적용 전 `my-shell` Pod에서 `reviews` Service에 요청을 보낼시 `my-shell` Pod의 Node에서 `my-shell` Pod의 veth Interface에 tcpdump를 수행한 모습을 나타내고 있다. `my-shell` Pod에서는 `reviews` Service의 ClusterIP로 요청을 전송하지만, Sidecar Proxy에서 DNAT를 수행하기 때문에 tcpdump에서는 3개의 `reviews` Pod의 IP가 보이는것을 확인할 수 있다. [Figure 1]은 이러한 Traffic의 흐름을 간단하게 나타내고 있다.
 
 ### 1.3. Sidecar Object 적용 후
 
@@ -141,7 +143,9 @@ Sidecar Object로 인해서 Endpoint가 존재하지 않더라도 Traffic은 통
 ...
 ```
 
-[Shell 6]은 Sidecar Object 적용 후 `my-shell` Pod에서 `reviews` Service에 요청을 보낼시 `my-shell` Pod의 Node에서 `my-shell` Pod의 veth Interface에 tcpdump를 수행한 모습을 나타내고 있다. `reviews` Service의 ClusterIP가 Destination IP로 설정되어 있는것을 확인할 수 있다. 즉 `my-shell` Pod의 Egress Traffic은 Sidecar Proxy를 그대로 **통과**하여 DNAT가 되지 않고, Node의 kube-proxy (iptables)로 인해서 DNAT가 된다는 사실을 알 수 있다.
+{{< figure caption="[Figure 2] Sidecar Object 적용 후 Traffic Flow" src="images/traffic-flow-with-sidecar-object.png" width="700px" >}}
+
+[Shell 6]은 Sidecar Object 적용 후 `my-shell` Pod에서 `reviews` Service에 요청을 보낼시 `my-shell` Pod의 Node에서 `my-shell` Pod의 veth Interface에 tcpdump를 수행한 모습을 나타내고 있다. `reviews` Service의 ClusterIP가 Destination IP로 설정되어 있는것을 확인할 수 있다. 즉 `my-shell` Pod의 Egress Traffic은 Sidecar Proxy를 그대로 **통과**하여 DNAT가 되지 않고, Node의 kube-proxy (iptables)로 인해서 DNAT가 된다는 사실을 알 수 있다. [Figure 2]는 이러한 Traffic의 흐름을 간단하게 나타내고 있다.
 
 ### 1.4. workloadSelector 활용
 
