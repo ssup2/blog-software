@@ -1,16 +1,12 @@
 ---
-title: Istio Sidecar Object
+title: Istio Sidecar Object를 활용한 Sidecar Proxy Endpoint 제어
 ---
 
 ## 1. Istio Sidecar Object
 
-Istio에서 제공하는 Sidecar Object는 Istio의 Sidecar Proxy의 Inbound, Outbound Traffic 관련 설정을 세세하게 제어할 때 이용한다. 
+Istio에서 제공하는 Sidecar Object는 Istio의 Sidecar Proxy의 Inbound, Outbound Traffic 관련 설정을 세세하게 제어할 때 이용하며, Sidecar Object의 **Egress** 설정을 활용하면 Sidecar Proxy가 관리하는 Endpoint를 제어할 수 있다. 일반적으로는 Endpoint 개수 증가하면 각각의 Endpoint 정보를 관리하고 설정하는 **Sidecar Proxy와 istiod의 부하**도 같이 증가하는데, Sidecar Object를 활용하면 Sidecar Proxy와 istiod가 관리하는 Endpoint의 개수를 줄여 부하를 줄일 수 있다.
 
-### 1.1. Endpoint 부하 절감
-
-일반적으로는 Endpoint 개수 증가하면 각각의 Endpoint 정보를 관리하고 설정하는 Sidecar Proxy와 `istiod`의 부하도 증가하는데, Sidecar Object를 활용하면 Sidecar Proxy와 `istiod`가 관리하는 Endpoint의 개수를 줄여 부하를 줄일 수 있다.
-
-#### 1.1.1. Sidecar Object Test 환경
+### 1.1. Sidecar Object Test 환경
 
 ```shell {caption="[Shell 1] Sidecar Object Test Environment"}
 $ kubectl -n bookinfo get pod -o wide
@@ -43,7 +39,7 @@ $ curl 10.96.209.151:9080/reviews/1
 
 [Shell 2]는 `my-shell` Pod에서 `bookinfo` Namespace의 `reviews` Service에 요청을 보내고 받은 응답을 보여주고 있다. `10.96.209.151` IP 주소는 `reviews` Service의 ClusterIP이다. `reviews` Service로 요청을 보낼시 tcpdump를 통해서 Sidecar Object 적용 유무에 따라서 Packet이 어떻게 전송되는지 확인할 예정이다.
 
-#### 1.1.2. Sidecar Object 적용 전
+### 1.2. Sidecar Object 적용 전
 
 ```shell {caption="[Shell 3] Sidecar Object 적용 전 my-shell Pod Sidecar Proxy의 Endpoint 목록"}
 $ istioctl proxy-config endpoint my-shell
@@ -89,7 +85,7 @@ $ tcpdump -i veth5f577e0f dst port 9080
 
 [Shell 4]는 Sidecar Object 적용 전 `my-shell` Pod에서 `reviews` Service에 요청을 보낼시 `my-shell` Pod의 Node에서 `my-shell` Pod의 veth Interface에 tcpdump를 수행한 모습을 나타내고 있다. `my-shell` Pod에서는 `reviews` Service의 ClusterIP로 요청을 전송하지만, Sidecar Proxy에서 DNAT를 수행하기 때문에 tcpdump에서는 3개의 `reviews` Pod의 IP가 보이는것을 확인할 수 있다.
 
-#### 1.1.3. Sidecar Object 적용 후
+### 1.3. Sidecar Object 적용 후
 
 ```yaml {caption="[File 1] default Namespace의 Default Sidecar Object"}
 apiVersion: networking.istio.io/v1
@@ -147,7 +143,7 @@ Sidecar Object로 인해서 Endpoint가 존재하지 않더라도 Traffic은 통
 
 [Shell 6]은 Sidecar Object 적용 후 `my-shell` Pod에서 `reviews` Service에 요청을 보낼시 `my-shell` Pod의 Node에서 `my-shell` Pod의 veth Interface에 tcpdump를 수행한 모습을 나타내고 있다. `reviews` Service의 ClusterIP가 Destination IP로 설정되어 있는것을 확인할 수 있다. 즉 `my-shell` Pod의 Egress Traffic은 Sidecar Proxy를 그대로 **통과**하여 DNAT가 되지 않고, Node의 kube-proxy (iptables)로 인해서 DNAT가 된다는 사실을 알 수 있다.
 
-#### 1.1.4. workloadSelector 활용
+### 1.4. workloadSelector 활용
 
 ```yaml {caption="[File 2] Sidecar Object의 workloadSelector 예시"}
 apiVersion: networking.istio.io/v1
