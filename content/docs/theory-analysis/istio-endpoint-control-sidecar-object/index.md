@@ -100,7 +100,7 @@ spec:
     - "istio-system/*"
 ```
 
-[File 1]은 `default` Namespace에서 동작하는 `my-shell` Pod의 Sidecar Object를 나타내고 있다. `./*`는 Sidecar Object가 존재하는 Namespace의 모든 Endpoint를 나타내며, `istio-system/*`는 `istio-system` Namespace의 모든 Endpoint를 나타낸다. 하지만 `bookinfo` Namespace는 제외되어 있는것을 확인할 수 있다.
+[File 1]은 `default` Namespace의 모든 Pod에 적용되는 Sidecar Object를 나타내고 있다. Sidecar Object는 각 Namespace마다 정의가 필요하다. `my-shell` Pod도 `default` Namespace에 존재하기 때문에 [File 1]의 Sidecar Object 설정에 영향을 받는다. `./*`는 Sidecar Object가 존재하는 Namespace 즉 `default` Namespace의 모든 Endpoint를 나타내며, `istio-system/*`는 `istio-system` Namespace의 모든 Endpoint를 나타낸다. 하지만 `bookinfo` Namespace는 제외되어 있는것을 확인할 수 있다.
 
 ```shell {caption="[Shell 5] Sidecar Object 적용 후 my-shell Pod Sidecar Proxy의 Endpoint 목록"}
 $ istioctl proxy-config endpoint my-shell
