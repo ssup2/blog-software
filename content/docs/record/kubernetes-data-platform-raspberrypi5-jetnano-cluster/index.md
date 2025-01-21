@@ -309,6 +309,7 @@ helm upgrade --install --create-namespace --namespace minio minio minio -f minio
 # PostgreSQL (root ID/PW: posgres/root123!)
 helm upgrade --install --create-namespace --namespace postgresql postgresql postgresql -f postgresql/values.yaml
 kubectl -n postgresql exec -it postgresql-0 -- bash -c 'PGPASSWORD=root123! psql -U postgres -c "create database airflow;"'
+kubectl -n postgresql exec -it postgresql-0 -- bash -c 'PGPASSWORD=root123! psql -U postgres -c "create database nessie;"'
 
 # Nvidia Device Plugin
 helm upgrade --install --create-namespace --namespace nvidia-device-plugin nvidia-device-plugin nvidia-device-plugin -f nvidia-device-plugin/values.yaml
@@ -332,6 +333,11 @@ helm upgrade --install --create-namespace --namespace promtail promtail promtail
 
 # Grafana (ID/PW: admin/root123!)
 helm upgrade --install --create-namespace --namespace grafana grafana grafana -f grafana/values.yaml
+
+# Nessie
+kubectl create namespace nessie
+kubectl -n nessie create secret generic postgresql-cred --from-literal=username=postgres --from-literal=password=root123!
+helm upgrade --install --create-namespace --namespace nessie nessie nessie -f nessie/values.yaml
 
 # Airflow (admin/admin)
 helm upgrade --install --create-namespace --namespace airflow airflow airflow -f airflow/values.yaml
