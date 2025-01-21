@@ -313,6 +313,8 @@ kubectl -n postgresql exec -it postgresql-0 -- bash -c 'PGPASSWORD=root123! psql
 # Nvidia Device Plugin
 helm upgrade --install --create-namespace --namespace nvidia-device-plugin nvidia-device-plugin nvidia-device-plugin -f nvidia-device-plugin/values.yaml
 
+# Nvidia Jetson Exporter
+
 # Prometheus
 helm upgrade --install --create-namespace --namespace prometheus prometheus prometheus -f prometheus/values.yaml
 
@@ -340,7 +342,7 @@ helm upgrade --install --create-namespace --namespace spark-operator spark-opera
 # Flink Kubernetes Operator
 helm upgrade --install --create-namespace --namespace flink-kubernetes-operator flink-kubernetes-operator flink-kubernetes-operator -f flink-kubernetes-operator/values.yaml
 
-# Trino Operator
+# Trino
 helm upgrade --install --create-namespace --namespace trino trino trino -f trino/values.yaml
 
 # JupyterHub (ID/PW: root/root123!)
