@@ -164,12 +164,16 @@ sysctl --system
 containerd를 설치한다.
 
 ```shell
-apt update
-apt install -y containerd
+curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
+  && curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
+    sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
+    tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+apt-get update
+apt-get install -y nvidia-container-toolkit containerd
 mkdir -p /etc/containerd
 containerd config default | tee /etc/containerd/config.toml
-sed -i 's/SystemdCgroup = false/SystemdCgroup = true/g' /etc/containerd/config.toml
-systemctl restart containerd.service
+nvidia-ctk runtime configure --runtime=containerd --set-as-default
+systemctl restart containerd
 ```
 
 kubelet, kubeadm을 설치한다.
@@ -345,4 +349,5 @@ helm upgrade --install --create-namespace --namespace jupyterhub jupyterhub jupy
 
 ## 참조
 
+* Nvidia Containerd : [https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)
 * Airflow on Kubernetes : [https://zerohertz.github.io/k8s-airflow/](https://zerohertz.github.io/k8s-airflow/)
