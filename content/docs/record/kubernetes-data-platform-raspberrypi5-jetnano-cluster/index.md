@@ -310,6 +310,8 @@ helm upgrade --install --create-namespace --namespace minio minio minio -f minio
 helm upgrade --install --create-namespace --namespace postgresql postgresql postgresql -f postgresql/values.yaml
 kubectl -n postgresql exec -it postgresql-0 -- bash -c 'PGPASSWORD=root123! psql -U postgres -c "create database airflow;"'
 kubectl -n postgresql exec -it postgresql-0 -- bash -c 'PGPASSWORD=root123! psql -U postgres -c "create database nessie;"'
+kubectl -n postgresql exec -it postgresql-0 -- bash -c 'PGPASSWORD=root123! psql -U postgres -c "create database mlflow;"'
+kubectl -n postgresql exec -it postgresql-0 -- bash -c 'PGPASSWORD=root123! psql -U postgres -c "create database mlflow_auth;"'
 
 # Nvidia Device Plugin
 helm upgrade --install --create-namespace --namespace nvidia-device-plugin nvidia-device-plugin nvidia-device-plugin -f nvidia-device-plugin/values.yaml
@@ -353,6 +355,11 @@ helm upgrade --install --create-namespace --namespace trino trino trino -f trino
 
 # JupyterHub (ID/PW: root/root123!)
 helm upgrade --install --create-namespace --namespace jupyterhub jupyterhub jupyterhub -f jupyterhub/values.yaml
+
+# Apache Ranger
+
+# MLflow (ID/PW: root/root123!)
+helm upgrade --install --create-namespace --namespace mlflow mlflow mlflow -f mlflow/values.yaml
 ```
 
 ## 참조
