@@ -306,10 +306,10 @@ helm upgrade --install --create-namespace --namespace longhorn longhorn longhorn
 # MinIO (root ID/PW: root/root123!)
 helm upgrade --install --create-namespace --namespace minio minio minio -f minio/values.yaml
 
-# PostgreSQL (root ID/PW: posgres/root123!)
+# PostgreSQL (root ID/PW: postgres/root123!)
 helm upgrade --install --create-namespace --namespace postgresql postgresql postgresql -f postgresql/values.yaml
 kubectl -n postgresql exec -it postgresql-0 -- bash -c 'PGPASSWORD=root123! psql -U postgres -c "create database airflow;"'
-kubectl -n postgresql exec -it postgresql-0 -- bash -c 'PGPASSWORD=root123! psql -U postgres -c "create database nessie;"'
+kubectl -n postgresql exec -it postgresql-0 -- bash -c 'PGPASSWORD=root123! psql -U postgres -c "create database metastore;"'
 kubectl -n postgresql exec -it postgresql-0 -- bash -c 'PGPASSWORD=root123! psql -U postgres -c "create database mlflow;"'
 kubectl -n postgresql exec -it postgresql-0 -- bash -c 'PGPASSWORD=root123! psql -U postgres -c "create database mlflow_auth;"'
 
@@ -336,10 +336,8 @@ helm upgrade --install --create-namespace --namespace promtail promtail promtail
 # Grafana (ID/PW: admin/root123!)
 helm upgrade --install --create-namespace --namespace grafana grafana grafana -f grafana/values.yaml
 
-# Nessie
-kubectl create namespace nessie
-kubectl -n nessie create secret generic postgresql-cred --from-literal=username=postgres --from-literal=password=root123!
-helm upgrade --install --create-namespace --namespace nessie nessie nessie -f nessie/values.yaml
+# Hive Metastore
+helm upgrade --install --create-namespace --namespace hive-metastore hive-metastore hive-metastore -f hive-metastore/values.yaml
 
 # Airflow (admin/admin)
 helm upgrade --install --create-namespace --namespace airflow airflow airflow -f airflow/values.yaml
@@ -350,7 +348,7 @@ helm upgrade --install --create-namespace --namespace spark-operator spark-opera
 # Flink Kubernetes Operator
 helm upgrade --install --create-namespace --namespace flink-kubernetes-operator flink-kubernetes-operator flink-kubernetes-operator -f flink-kubernetes-operator/values.yaml
 
-# Trino
+# Trino (ID: root)
 helm upgrade --install --create-namespace --namespace trino trino trino -f trino/values.yaml
 
 # JupyterHub (ID/PW: root/root123!)
