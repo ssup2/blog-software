@@ -294,6 +294,9 @@ kubectl apply -f metallb/l2-advertisement.yaml
 # Cert Manager
 helm upgrade --install --create-namespace --namespace cert-manager cert-manager cert-manager -f cert-manager/values.yaml
 
+# ArgoCD
+helm upgrade --install --create-namespace --namespace argocd argocd argocd -f argocd/values.yaml
+
 # Yunikorn
 helm upgrade --install --create-namespace --namespace yunikorn yunikorn yunikorn -f yunikorn/values.yaml
 
@@ -342,6 +345,8 @@ helm upgrade --install --create-namespace --namespace hive-metastore hive-metast
 # Airflow (admin/admin)
 helm upgrade --install --create-namespace --namespace airflow airflow airflow -f airflow/values.yaml
 
+# Dagster
+helm upgrade --install --create-namespace --namespace dagster dagster dagster -f dagster/values.yaml
 # Spark Operator
 helm upgrade --install --create-namespace --namespace spark-operator spark-operator spark-operator -f spark-operator/values.yaml
 

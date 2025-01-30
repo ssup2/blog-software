@@ -19,10 +19,11 @@ MinIO CLI Client를 통해서 MinIO에 Data를 적재한다.
 ```shell
 wget https://raw.githubusercontent.com/datasets/airport-codes/refs/heads/main/data/airport-codes.csv
 mc mb dp/airport-codes
-mc cp airport-codes.csv dp/airport-codes
+mc cp airport-codes.csv dp/airport-codes/data
 ```
 
 ## 3. 참조
 
+* Hive Metastore : [https://mjs1995.tistory.com/307](https://mjs1995.tistory.com/307)
 * Trino Query : [https://developnote-blog.tistory.com/187](https://developnote-blog.tistory.com/187)
 * Trino Qeury : [https://mjs1995.tistory.com/307](https://mjs1995.tistory.com/307)
