@@ -308,10 +308,14 @@ helm upgrade --install --create-namespace --namespace longhorn longhorn longhorn
 
 # MinIO (root ID/PW: root/root123!)
 helm upgrade --install --create-namespace --namespace minio minio minio -f minio/values.yaml
+brew install minio/stable/mc
+mc alias set dp http://$(kubectl -n minio get service minio -o jsonpath="{.status.loadBalancer.ingress[0].ip}"):9000 root root123!
+mc mb dp/spark/logs
 
 # PostgreSQL (root ID/PW: postgres/root123!)
 helm upgrade --install --create-namespace --namespace postgresql postgresql postgresql -f postgresql/values.yaml
 kubectl -n postgresql exec -it postgresql-0 -- bash -c 'PGPASSWORD=root123! psql -U postgres -c "create database airflow;"'
+kubectl -n postgresql exec -it postgresql-0 -- bash -c 'PGPASSWORD=root123! psql -U postgres -c "create database dagster;"'
 kubectl -n postgresql exec -it postgresql-0 -- bash -c 'PGPASSWORD=root123! psql -U postgres -c "create database metastore;"'
 kubectl -n postgresql exec -it postgresql-0 -- bash -c 'PGPASSWORD=root123! psql -U postgres -c "create database mlflow;"'
 kubectl -n postgresql exec -it postgresql-0 -- bash -c 'PGPASSWORD=root123! psql -U postgres -c "create database mlflow_auth;"'
@@ -347,8 +351,12 @@ helm upgrade --install --create-namespace --namespace airflow airflow airflow -f
 
 # Dagster
 helm upgrade --install --create-namespace --namespace dagster dagster dagster -f dagster/values.yaml
+
 # Spark Operator
 helm upgrade --install --create-namespace --namespace spark-operator spark-operator spark-operator -f spark-operator/values.yaml
+
+# Spark History Server
+helm upgrade --install --create-namespace --namespace spark-history-server spark-history-server spark-history-server -f spark-history-server/values.yaml
 
 # Flink Kubernetes Operator
 helm upgrade --install --create-namespace --namespace flink-kubernetes-operator flink-kubernetes-operator flink-kubernetes-operator -f flink-kubernetes-operator/values.yaml
