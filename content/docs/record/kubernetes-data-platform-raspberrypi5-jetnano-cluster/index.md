@@ -311,6 +311,7 @@ helm upgrade --install --create-namespace --namespace minio minio minio -f minio
 brew install minio/stable/mc
 mc alias set dp http://$(kubectl -n minio get service minio -o jsonpath="{.status.loadBalancer.ingress[0].ip}"):9000 root root123!
 mc mb dp/spark/logs
+mc mb dp/dagster/pipelines
 
 # PostgreSQL (root ID/PW: postgres/root123!)
 helm upgrade --install --create-namespace --namespace postgresql postgresql postgresql -f postgresql/values.yaml

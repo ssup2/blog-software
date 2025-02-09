@@ -7,6 +7,23 @@ draft : true
 
 ## 2. Trino 접속
 
+Trino Service의 External IP 주소를 확인한다.
+
+```shell
+kubectl -n trino get service trino --output jsonpath='{.status.loadBalancer.ingress[0].ip}'
+```
+```shell
+192.168.1.87
+```
+
+DBeaver에서 신규 Database를 추가하고 Trino를 선택한다.
+
+{{< figure caption="[Figure 1] DBeaver에서 Trino 선택" src="images/dbeaver-trino-select.png" width="700px" >}}
+
+Trino Service의 External IP와 Username를 입력한다. Username은 아무런 문자열이나 입력해도 관계 없으며, Password는 반드시 비워둔다.
+
+{{< figure caption="[Figure 2] Trino 접속 정보 입력" src="images/dbeaver-trino-connection-setting.png" width="700px" >}}
+
 ## 3. Hive Metastore에 Table 생성
 
 ```sql
