@@ -283,6 +283,12 @@ dp-storage-01   Ready    storage                16d   v1.30.8
 dp-storage-02   Ready    storage                16d   v1.30.8
 ```
 
+core-dns가 Master Node에만 동작하도록 설정한다.
+
+```shell
+kubectl patch deployment coredns -n kube-system -p '{"spec":{"template":{"spec":{"nodeSelector":{"node-group.dp.ssup2":"master"}}}}}'
+```
+
 ## 6. Data Component 설치
 
 ```shell
@@ -315,11 +321,13 @@ mc mb dp/dagster/pipelines
 
 # PostgreSQL (root ID/PW: postgres/root123!)
 helm upgrade --install --create-namespace --namespace postgresql postgresql postgresql -f postgresql/values.yaml
-kubectl -n postgresql exec -it postgresql-0 -- bash -c 'PGPASSWORD=root123! psql -U postgres -c "create database airflow;"'
 kubectl -n postgresql exec -it postgresql-0 -- bash -c 'PGPASSWORD=root123! psql -U postgres -c "create database dagster;"'
 kubectl -n postgresql exec -it postgresql-0 -- bash -c 'PGPASSWORD=root123! psql -U postgres -c "create database metastore;"'
 kubectl -n postgresql exec -it postgresql-0 -- bash -c 'PGPASSWORD=root123! psql -U postgres -c "create database mlflow;"'
 kubectl -n postgresql exec -it postgresql-0 -- bash -c 'PGPASSWORD=root123! psql -U postgres -c "create database mlflow_auth;"'
+
+# ZincSearch (ID/PW: admin/Rootroot123!)
+helm upgrade --install --create-namespace --namespace zincsearch zincsearch zincsearch -f zincsearch/values.yaml
 
 # Nvidia Device Plugin
 helm upgrade --install --create-namespace --namespace nvidia-device-plugin nvidia-device-plugin nvidia-device-plugin -f nvidia-device-plugin/values.yaml
@@ -344,8 +352,14 @@ helm upgrade --install --create-namespace --namespace promtail promtail promtail
 # Grafana (ID/PW: admin/root123!)
 helm upgrade --install --create-namespace --namespace grafana grafana grafana -f grafana/values.yaml
 
+# Ranger
+helm upgrade --install --create-namespace --namespace ranger ranger ranger -f ranger/values.yaml
+
 # Hive Metastore
 helm upgrade --install --create-namespace --namespace hive-metastore hive-metastore hive-metastore -f hive-metastore/values.yaml
+
+# Kafka
+helm upgrade --install --create-namespace --namespace kafka kafka kafka -f kafka/values.yaml
 
 # Airflow (admin/admin)
 helm upgrade --install --create-namespace --namespace airflow airflow airflow -f airflow/values.yaml
