@@ -358,10 +358,11 @@ helm upgrade --install --create-namespace --namespace ranger ranger ranger -f ra
 # Hive Metastore
 helm upgrade --install --create-namespace --namespace hive-metastore hive-metastore hive-metastore -f hive-metastore/values.yaml
 
-# Kafka
+# Kafka (ID/PW: user/user)
 helm upgrade --install --create-namespace --namespace kafka kafka kafka -f kafka/values.yaml
+helm upgrade --install --create-namespace --namespace kafka kafka-ui kafka-ui -f kafka-ui/values.yaml
 
-# Airflow (admin/admin)
+# Airflow (ID/PW: admin/admin)
 helm upgrade --install --create-namespace --namespace airflow airflow airflow -f airflow/values.yaml
 
 # Dagster
