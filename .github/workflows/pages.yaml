@@ -72,4 +72,3 @@ jobs:
         uses: actions/deploy-pages@v4
         with:
           artifact_name: public
-          artifact_path: ./public
