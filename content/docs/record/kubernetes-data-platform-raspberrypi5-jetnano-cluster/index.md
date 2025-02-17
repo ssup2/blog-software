@@ -300,8 +300,19 @@ kubectl apply -f metallb/l2-advertisement.yaml
 # Cert Manager
 helm upgrade --install --create-namespace --namespace cert-manager cert-manager cert-manager -f cert-manager/values.yaml
 
-# ArgoCD
-helm upgrade --install --create-namespace --namespace argocd argocd argocd -f argocd/values.yaml
+# PostgreSQL (ID/PW: postgres/root123!)
+helm upgrade --install --create-namespace --namespace postgresql postgresql postgresql -f postgresql/values.yaml
+kubectl -n postgresql exec -it postgresql-0 -- bash -c 'PGPASSWORD=root123! psql -U postgres -c "create database dagster;"'
+kubectl -n postgresql exec -it postgresql-0 -- bash -c 'PGPASSWORD=root123! psql -U postgres -c "create database metastore;"'
+kubectl -n postgresql exec -it postgresql-0 -- bash -c 'PGPASSWORD=root123! psql -U postgres -c "create database ranger;"'
+kubectl -n postgresql exec -it postgresql-0 -- bash -c 'PGPASSWORD=root123! psql -U postgres -c "create database mlflow;"'
+kubectl -n postgresql exec -it postgresql-0 -- bash -c 'PGPASSWORD=root123! psql -U postgres -c "create database mlflow_auth;"'
+
+# Redis (ID/PW: default/default)
+helm upgrade --install --create-namespace --namespace redis redis redis -f redis/values.yaml
+
+# ArgoCD (ID/PW: default/default)
+helm upgrade --install --create-namespace --namespace argo-cd argo-cd argo-cd -f argo-cd/values.yaml
 
 # Yunikorn
 helm upgrade --install --create-namespace --namespace yunikorn yunikorn yunikorn -f yunikorn/values.yaml
@@ -312,22 +323,43 @@ helm upgrade --install --create-namespace --namespace keda keda keda -f keda/val
 # Longhorn
 helm upgrade --install --create-namespace --namespace longhorn longhorn longhorn -f longhorn/values.yaml
 
-# MinIO (root ID/PW: root/root123!)
+# MinIO (ID/PW: root/root123!)
 helm upgrade --install --create-namespace --namespace minio minio minio -f minio/values.yaml
 brew install minio/stable/mc
 mc alias set dp http://$(kubectl -n minio get service minio -o jsonpath="{.status.loadBalancer.ingress[0].ip}"):9000 root root123!
 mc mb dp/spark/logs
 mc mb dp/dagster/pipelines
 
-# PostgreSQL (root ID/PW: postgres/root123!)
-helm upgrade --install --create-namespace --namespace postgresql postgresql postgresql -f postgresql/values.yaml
-kubectl -n postgresql exec -it postgresql-0 -- bash -c 'PGPASSWORD=root123! psql -U postgres -c "create database dagster;"'
-kubectl -n postgresql exec -it postgresql-0 -- bash -c 'PGPASSWORD=root123! psql -U postgres -c "create database metastore;"'
-kubectl -n postgresql exec -it postgresql-0 -- bash -c 'PGPASSWORD=root123! psql -U postgres -c "create database mlflow;"'
-kubectl -n postgresql exec -it postgresql-0 -- bash -c 'PGPASSWORD=root123! psql -U postgres -c "create database mlflow_auth;"'
 
 # ZincSearch (ID/PW: admin/Rootroot123!)
 helm upgrade --install --create-namespace --namespace zincsearch zincsearch zincsearch -f zincsearch/values.yaml
+
+INDEX_MAPPING='{
+  "settings": {
+    "index": {
+      "number_of_shards": 1,
+      "number_of_replicas": 1
+    }
+  },
+  "mappings": {
+    "properties": {
+      "id": {
+        "type": "keyword"
+      },
+      "name": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      },
+      "created_at": {
+        "type": "date",
+        "format": "strict_date_optional_time||epoch_millis"
+      }
+    }
+  }
+}'
+curl -s -X PUT "http://$(kubectl -n zincsearch get service zincsearch -o jsonpath='{.status.loadBalancer.ingress[0].ip}'):4080/ranger" -u "admin:Rootroot123\!" -H "Content-Type: application/json" -d "$INDEX_MAPPING"
 
 # Nvidia Device Plugin
 helm upgrade --install --create-namespace --namespace nvidia-device-plugin nvidia-device-plugin nvidia-device-plugin -f nvidia-device-plugin/values.yaml
