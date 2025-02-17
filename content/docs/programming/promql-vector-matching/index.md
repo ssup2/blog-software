@@ -170,8 +170,8 @@ candy2{} * on(color) group-left ice2{}
 [Query 5]는 group-left를 활용한 One-to-mnay Query를 나타내고 있다. color Label을 기준으로 `ice2`에서는 blue/1개, green/1개, red/1개 즉 모두 1개의 Value만 선택이 되기 때문에 "1"이 될 수 있는 자격이되고, `candy2`에서는 color Label을 기준으로 blue/1개, green/2개, red/0개가 되기 때문에 "1"이 될 수 없고 "N"만 될 수 있다. 따라서 group-left를 통해서 `candy2`가 "N"이 되도록 Matching을 수행해야 한다.
 
 ```promql {caption="[SQL Syntax 5] One-to-many, Many-to-one Matching with Label"}
-<Instant Vector> [Op] on/ignoring(<label>, ...) group-left(<label>, ...) <Instant Vector>
-<Instant Vector> [Op] on/ignoring(<label>, ...) group-right(<label>, ...) <Instant Vector>
+<Instant Vector> <Op> on/ignoring(<label>, ...) group-left(<label>, ...) <Instant Vector>
+<Instant Vector> <Op> on/ignoring(<label>, ...) group-right(<label>, ...) <Instant Vector>
 
 # --- example ---
 candy2{} * on(size) group-left(flavor) ice2{}
