@@ -1,8 +1,8 @@
 ---
-title: PromQL Range Vector 증가량, 증가량 계산 함수
+title: PromQL Range Vector 증가 계산 함수
 ---
 
-## 1. PromQL 증가 계산 함수
+## 1. PromQL 증가 계산
 
 PromQL에서는 Range Vector를 사용하여 증가량, 증가율 등을 계산할 수 있으며, 이를 위해 `increase()`, `rate()`, `irate()`, `changes()`, `delta()`, `idelta()`, `deriv()` 함수를 제공한다.
 
