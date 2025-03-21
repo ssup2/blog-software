@@ -200,6 +200,24 @@ kubectl patch deployment coredns -n kube-system -p '{"spec":{"template":{"spec":
 ## 6. Data Component 설치
 
 ```shell
+# Prometheus
+helm upgrade --install --create-namespace --namespace prometheus prometheus prometheus -f prometheus/values.yaml
+
+# Prometheus Node Exporter
+helm upgrade --install --create-namespace --namespace prometheus-node-exporter prometheus-node-exporter prometheus-node-exporter -f prometheus-node-exporter/values.yaml
+
+# kube-state-metrics
+helm upgrade --install --create-namespace --namespace kube-state-metrics kube-state-metrics kube-state-metrics -f kube-state-metrics/values.yaml
+
+# Loki
+helm upgrade --install --create-namespace --namespace loki loki loki -f loki/values.yaml
+
+# Promtail
+helm upgrade --install --create-namespace --namespace promtail promtail promtail -f promtail/values.yaml
+
+# Grafana (ID/PW: admin/root123!)
+helm upgrade --install --create-namespace --namespace grafana grafana grafana -f grafana/values.yaml
+
 # MetelLB
 helm upgrade --install --create-namespace --namespace metallb metallb metallb -f metallb/values.yaml
 kubectl apply -f metallb/ip-address-pool.yaml
@@ -238,60 +256,6 @@ mc alias set dp http://$(kubectl -n minio get service minio -o jsonpath="{.statu
 mc mb dp/spark/logs
 mc mb dp/dagster/pipelines
 
-
-# ZincSearch (ID/PW: admin/Rootroot123!)
-helm upgrade --install --create-namespace --namespace zincsearch zincsearch zincsearch -f zincsearch/values.yaml
-
-INDEX_MAPPING='{
-  "settings": {
-    "index": {
-      "number_of_shards": 1,
-      "number_of_replicas": 1
-    }
-  },
-  "mappings": {
-    "properties": {
-      "id": {
-        "type": "keyword"
-      },
-      "name": {
-        "type": "text"
-      },
-      "description": {
-        "type": "text"
-      },
-      "created_at": {
-        "type": "date",
-        "format": "strict_date_optional_time||epoch_millis"
-      }
-    }
-  }
-}'
-curl -s -X PUT "http://$(kubectl -n zincsearch get service zincsearch -o jsonpath='{.status.loadBalancer.ingress[0].ip}'):4080/ranger" -u "admin:Rootroot123\!" -H "Content-Type: application/json" -d "$INDEX_MAPPING"
-
-# Nvidia Device Plugin
-helm upgrade --install --create-namespace --namespace nvidia-device-plugin nvidia-device-plugin nvidia-device-plugin -f nvidia-device-plugin/values.yaml
-
-# Nvidia Jetson Exporter
-
-# Prometheus
-helm upgrade --install --create-namespace --namespace prometheus prometheus prometheus -f prometheus/values.yaml
-
-# Prometheus Node Exporter
-helm upgrade --install --create-namespace --namespace prometheus-node-exporter prometheus-node-exporter prometheus-node-exporter -f prometheus-node-exporter/values.yaml
-
-# kube-state-metrics
-helm upgrade --install --create-namespace --namespace kube-state-metrics kube-state-metrics kube-state-metrics -f kube-state-metrics/values.yaml
-
-# Loki
-helm upgrade --install --create-namespace --namespace loki loki loki -f loki/values.yaml
-
-# Promtail
-helm upgrade --install --create-namespace --namespace promtail promtail promtail -f promtail/values.yaml
-
-# Grafana (ID/PW: admin/root123!)
-helm upgrade --install --create-namespace --namespace grafana grafana grafana -f grafana/values.yaml
-
 # Ranger
 helm upgrade --install --create-namespace --namespace ranger ranger ranger -f ranger/values.yaml
 
@@ -322,8 +286,6 @@ helm upgrade --install --create-namespace --namespace trino trino trino -f trino
 
 # JupyterHub (ID/PW: root/root123!)
 helm upgrade --install --create-namespace --namespace jupyterhub jupyterhub jupyterhub -f jupyterhub/values.yaml
-
-# Apache Ranger
 
 # MLflow (ID/PW: root/root123!)
 helm upgrade --install --create-namespace --namespace mlflow mlflow mlflow -f mlflow/values.yaml
