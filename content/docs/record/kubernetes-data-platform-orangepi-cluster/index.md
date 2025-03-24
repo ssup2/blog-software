@@ -132,10 +132,22 @@ sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 ```
 
+core-dns가 Master Node에만 동작하도록 설정한다.
+
+```shell
+kubectl patch deployment coredns -n kube-system -p '{"spec":{"template":{"spec":{"nodeSelector":{"node-group.dp.ssup2":"master"}}}}}'
+```
+
 flannel CNI Plugin을 설치한다.
 
 ```shell
 kubectl apply -f https://github.com/flannel-io/flannel/releases/download/v0.26.2/kube-flannel.yml
+```
+
+NFS Server에서 이용할 Directory를 생성한다.
+
+```shell
+mkdir -p /srv/nfs
 ```
 
 ### 5.2. Worker Nodes
@@ -146,7 +158,7 @@ kubectl apply -f https://github.com/flannel-io/flannel/releases/download/v0.26.2
 kubeadm join 192.168.1.71:6443 --token wweo8m.uyl4fgnc7j21orw5 --discovery-token-ca-cert-hash sha256:599058d317291ab64e0cc8166fe0f9cff5defcc606623fdb2c1aa1b2e2a93604
 ```
 
-### 5.3. Label 설정
+## 6. Label 설정
 
 Master Node의 Master Label과 Taint를 제거한다.
 
@@ -191,33 +203,18 @@ dp-worker-5   Ready    worker   73s     v1.30.8
 dp-worker-6   Ready    worker   70s     v1.30.8
 ```
 
-core-dns가 Master Node에만 동작하도록 설정한다.
+## 7. Data Component 설치
+
+Helm Chart를 Download 한다.
 
 ```shell
-kubectl patch deployment coredns -n kube-system -p '{"spec":{"template":{"spec":{"nodeSelector":{"node-group.dp.ssup2":"master"}}}}}'
+git clone https://github.com/ssup2-playground/k8s-data-platform_helm-charts.git
+cd k8s-data-platform_helm-charts
 ```
 
-## 6. Data Component 설치
+Helm Chart를 통해서 Data Component를 설치한다.
 
 ```shell
-# Prometheus
-helm upgrade --install --create-namespace --namespace prometheus prometheus prometheus -f prometheus/values.yaml
-
-# Prometheus Node Exporter
-helm upgrade --install --create-namespace --namespace prometheus-node-exporter prometheus-node-exporter prometheus-node-exporter -f prometheus-node-exporter/values.yaml
-
-# kube-state-metrics
-helm upgrade --install --create-namespace --namespace kube-state-metrics kube-state-metrics kube-state-metrics -f kube-state-metrics/values.yaml
-
-# Loki
-helm upgrade --install --create-namespace --namespace loki loki loki -f loki/values.yaml
-
-# Promtail
-helm upgrade --install --create-namespace --namespace promtail promtail promtail -f promtail/values.yaml
-
-# Grafana (ID/PW: admin/root123!)
-helm upgrade --install --create-namespace --namespace grafana grafana grafana -f grafana/values.yaml
-
 # MetelLB
 helm upgrade --install --create-namespace --namespace metallb metallb metallb -f metallb/values.yaml
 kubectl apply -f metallb/ip-address-pool.yaml
@@ -225,6 +222,22 @@ kubectl apply -f metallb/l2-advertisement.yaml
 
 # Cert Manager
 helm upgrade --install --create-namespace --namespace cert-manager cert-manager cert-manager -f cert-manager/values.yaml
+
+# NFS Provdier
+kubectl apply -f nfs-server-provisioner/pv.yaml
+helm upgrade --install --create-namespace --namespace nfs-server-provisioner nfs-server-provisioner nfs-server-provisioner -f nfs-server-provisioner/values.yaml
+
+# Prometheus
+helm upgrade --install --create-namespace --namespace prometheus prometheus prometheus -f prometheus/values.yaml
+helm upgrade --install --create-namespace --namespace prometheus prometheus-node-exporter prometheus-node-exporter -f prometheus-node-exporter/values.yaml
+helm upgrade --install --create-namespace --namespace prometheus kube-state-metrics kube-state-metrics -f kube-state-metrics/values.yaml
+
+# Loki
+helm upgrade --install --create-namespace --namespace loki loki loki -f loki/values.yaml
+helm upgrade --install --create-namespace --namespace loki promtail promtail -f promtail/values.yaml
+
+# Grafana (ID/PW: admin/root123!)
+helm upgrade --install --create-namespace --namespace grafana grafana grafana -f grafana/values.yaml
 
 # PostgreSQL (ID/PW: postgres/root123!)
 helm upgrade --install --create-namespace --namespace postgresql postgresql postgresql -f postgresql/values.yaml
@@ -237,6 +250,22 @@ kubectl -n postgresql exec -it postgresql-0 -- bash -c 'PGPASSWORD=root123! psql
 # Redis (ID/PW: default/default)
 helm upgrade --install --create-namespace --namespace redis redis redis -f redis/values.yaml
 
+# Kafka (ID/PW: user/user)
+helm upgrade --install --create-namespace --namespace kafka kafka kafka -f kafka/values.yaml
+helm upgrade --install --create-namespace --namespace kafka kafka-ui kafka-ui -f kafka-ui/values.yaml
+
+# OpenSearch (ID/PW: admin/Rootroot123!)
+helm upgrade --install --create-namespace --namespace opensearch opensearch opensearch -f opensearch/values.yaml
+helm upgrade --install --create-namespace --namespace opensearch opensearch-dashboards opensearch-dashboards -f opensearch-dashboards/values.yaml
+
+# MinIO (ID/PW: root/root123!)
+helm upgrade --install --create-namespace --namespace minio minio minio -f minio/values.yaml
+brew install minio/stable/mc
+mc alias set dp http://$(kubectl -n minio get service minio -o jsonpath="{.status.loadBalancer.ingress[0].ip}"):9000 root root123!
+mc mb dp/dagster/io-manager
+mc mb dp/dagster/compute-log
+mc mb dp/spark/logs
+
 # ArgoCD (ID/PW: default/default)
 helm upgrade --install --create-namespace --namespace argo-cd argo-cd argo-cd -f argo-cd/values.yaml
 
@@ -246,31 +275,17 @@ helm upgrade --install --create-namespace --namespace yunikorn yunikorn yunikorn
 # KEDA
 helm upgrade --install --create-namespace --namespace keda keda keda -f keda/values.yaml
 
-# Longhorn
-helm upgrade --install --create-namespace --namespace longhorn longhorn longhorn -f longhorn/values.yaml
+# Airflow (ID/PW: admin/admin)
+helm upgrade --install --create-namespace --namespace airflow airflow airflow -f airflow/values.yaml
 
-# MinIO (ID/PW: root/root123!)
-helm upgrade --install --create-namespace --namespace minio minio minio -f minio/values.yaml
-brew install minio/stable/mc
-mc alias set dp http://$(kubectl -n minio get service minio -o jsonpath="{.status.loadBalancer.ingress[0].ip}"):9000 root root123!
-mc mb dp/spark/logs
-mc mb dp/dagster/pipelines
+# Dagster
+helm upgrade --install --create-namespace --namespace dagster dagster dagster -f dagster/values.yaml
 
 # Ranger
 helm upgrade --install --create-namespace --namespace ranger ranger ranger -f ranger/values.yaml
 
 # Hive Metastore
 helm upgrade --install --create-namespace --namespace hive-metastore hive-metastore hive-metastore -f hive-metastore/values.yaml
-
-# Kafka (ID/PW: user/user)
-helm upgrade --install --create-namespace --namespace kafka kafka kafka -f kafka/values.yaml
-helm upgrade --install --create-namespace --namespace kafka kafka-ui kafka-ui -f kafka-ui/values.yaml
-
-# Airflow (ID/PW: admin/admin)
-helm upgrade --install --create-namespace --namespace airflow airflow airflow -f airflow/values.yaml
-
-# Dagster
-helm upgrade --install --create-namespace --namespace dagster dagster dagster -f dagster/values.yaml
 
 # Spark Operator
 helm upgrade --install --create-namespace --namespace spark-operator spark-operator spark-operator -f spark-operator/values.yaml
@@ -291,7 +306,7 @@ helm upgrade --install --create-namespace --namespace jupyterhub jupyterhub jupy
 helm upgrade --install --create-namespace --namespace mlflow mlflow mlflow -f mlflow/values.yaml
 ```
 
-## 참조
+## 8. 참조
 
 * Nvidia Containerd : [https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)
 * Airflow on Kubernetes : [https://zerohertz.github.io/k8s-airflow/](https://zerohertz.github.io/k8s-airflow/)

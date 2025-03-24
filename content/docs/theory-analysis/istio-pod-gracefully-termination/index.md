@@ -18,7 +18,7 @@ title: Istio Pod Gracefully Termination
 * App에서 `SIGTERM` Signal 수신시 현재 처리하고 있는 Request를 완료한 다음 종료
 * App에서 Request를 처리하는 시간보다 큰 시간으로 Pod의 `terminationGracePeriodSeconds`을 설정
 
-단 `terminationGracePeriodSeconds`은 각 Container에 설정할 수 있는 설정값이 아니라 Pod에 하나의 값만 설정할 수 있는 값이기 때문에 Enovy Proxy Container의 설정값도 같이 고려하여 설정해야 한다.
+단 Pod의 `terminationGracePeriodSeconds`은 각 Container에 설정할 수 있는 설정값이 아니라 Pod에 하나의 값만 설정할 수 있는 값이기 때문에 Enovy Proxy Container의 설정값도 같이 고려하여 설정해야 한다.
 
 ### 1.2. Envoy Proxy Container Gracefully Termination
 
@@ -46,7 +46,7 @@ spec:
 ...
 ```
 
-```yaml {caption="[File 2] terminationDrainDuration Configuration on IstioOperator", linenos=table}
+```yaml {caption="[File 2] terminationDrainDuration Configuration on Pod Annotation", linenos=table}
 ...
   template:
     metadata:
