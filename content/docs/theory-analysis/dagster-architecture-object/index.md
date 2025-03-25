@@ -17,7 +17,12 @@ Dagster에서는 다양한 Type의 Object들이 존재하지만 대표적인 Obj
 
 #### 1.1.1. Op
 
-Op는 Workflow에서 실행되는 가장 작은 단위의 Action을 의미한다. 이러한 Op들을 조합하여 Workflow를 구성할 수 있다.
+Op는 Workflow에서 실행되는 가장 작은 단위의 Action을 의미한다. 이러한 Op들을 조합하여 Workflow를 구성할 수 있다. Airflow를 기준으로 하나의 Task가 Dagster에서는 Op에 해당한다.
+
+```python
+```
+
+다만 Dagster에서는 Action 위주의 Workflow를 구성하는것 보다 Data 중심의 Workflow를 구성을 권장하기 때문에 Op보다는 Asset을 중심으로 Workflow 이용을 권장한다.
 
 #### 1.1.2. Asset
 
