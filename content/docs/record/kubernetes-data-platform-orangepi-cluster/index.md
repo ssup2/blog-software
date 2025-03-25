@@ -10,9 +10,10 @@ title : Kubernetes Data Platform 구축 / Orange Pi 5 Max Cluster 환경
 
 ## 2. OS 설치
 
-Install Guide에 따라서 uSD Card에 OS를 설치한다.
+[User Guide](documents/OrangePi_5_Max_RK3588_User%20Manual_v1.3.pdf)의 **2.6. Method for burning Linux images to SPIFlash+NVMeSSD** 부분을 따라서 OrangePi 5 Max에 OS를 설치한다.
 
 * Install Guide : [https://developer.nvidia.com/embedded/learn/get-started-jetson-nano-devkit#write](https://developer.nvidia.com/embedded/learn/get-started-jetson-nano-devkit#write)
+* Debian bookwoarm OS : [https://drive.google.com/drive/folders/1b6hqA6zdgiScWvohsUdopBrtmytF4-ma](https://drive.google.com/drive/folders/1b6hqA6zdgiScWvohsUdopBrtmytF4-ma)
 
 ## 3. Hostname, Network 설정
 
@@ -215,6 +216,9 @@ cd k8s-data-platform_helm-charts
 Helm Chart를 통해서 Data Component를 설치한다.
 
 ```shell
+# Metrics Server
+helm upgrade --install --create-namespace --namespace kube-system metrics-server metrics-server -f metrics-server/values.yaml
+
 # MetelLB
 helm upgrade --install --create-namespace --namespace metallb metallb metallb -f metallb/values.yaml
 kubectl apply -f metallb/ip-address-pool.yaml
@@ -298,6 +302,9 @@ helm upgrade --install --create-namespace --namespace flink-kubernetes-operator 
 
 # Trino (ID: root)
 helm upgrade --install --create-namespace --namespace trino trino trino -f trino/values.yaml
+
+# Clickhouse
+helm upgrade --install --create-namespace --namespace clickhouse clickhouse clickhouse -f clickhouse/values.yaml
 
 # JupyterHub (ID/PW: root/root123!)
 helm upgrade --install --create-namespace --namespace jupyterhub jupyterhub jupyterhub -f jupyterhub/values.yaml
