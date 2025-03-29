@@ -17,16 +17,27 @@ Dagster에서는 다양한 Type의 Object들이 존재하지만 대표적인 Obj
 
 #### 1.1.1. Op
 
-Op는 Workflow에서 실행되는 가장 작은 단위의 Action을 의미한다. 이러한 Op들을 조합하여 Workflow를 구성할 수 있다. Airflow를 기준으로 하나의 Task가 Dagster에서는 Op에 해당한다.
+```python {caption="[Code 1] Op Example", linenos=table}
+@op(description="Generate a list of numbers from 1 to 10")
+def generate_numbers():
+    return list(range(1, 11))
 
-```python
+@op(description="Filter even numbers from the list")
+def filter_even_numbers(numbers):
+    return [num for num in numbers if num % 2 == 0]
+
+@op(description="Filter odd numbers from the list")
+def filter_odd_numbers(numbers):
+    return [num for num in numbers if num % 2 != 0]
 ```
 
-다만 Dagster에서는 Action 위주의 Workflow를 구성하는것 보다 Data 중심의 Workflow를 구성을 권장하기 때문에 Op보다는 Asset을 중심으로 Workflow 이용을 권장한다.
+Op는 Workflow에서 실행되는 가장 작은 단위의 Action을 의미한다. 이러한 Op들을 조합하여 Workflow를 구성할 수 있다. Airflow를 기준으로 하나의 Task가 Dagster에서는 Op에 해당한다. [Code 1]은 Op의 예제를 나타내고 있다. `generate_numbers()`, `filter_even_numbers()`, `filter_odd_numbers()` 3개의 Action 함수가 정의되어 있고, `Op` Decorator를 통해 Op인것을 명시한다.
+
+Dagster에서는 Action 위주의 Workflow를 구성하는것 보다 Data 중심의 Workflow를 구성을 권장하기 때문에 Op보다는 다음에 소개할 Asset을 중심으로 Workflow 구성을 권장한다. 따라서 Op는 Slack 알림/e-mail 알림과 같이 Asset으로 간주하기 어려운 Action들 또는 하나의 Asset 내부에서 너무 많은 Action이 필요할때 Action을 쪼개는 용도로 활용된다.
 
 #### 1.1.2. Asset
 
-Asset은 Dagster에서 생성되는 Data를 의미한다. 
+Asset은 Dagster에서 생성되는 Data를 의미한다.
 
 #### 1.1.3. Job
 
