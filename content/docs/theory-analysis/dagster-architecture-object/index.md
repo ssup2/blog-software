@@ -61,6 +61,18 @@ def filtered_even_numbers(generated_numbers):
 @asset(description="Filter odd numbers from the list")
 def filtered_odd_numbers(generated_numbers):
     return [num for num in generated_numbers if num % 2 != 0]
+
+@asset(description="Calculate the sum of the even numbers")
+def summed_even_numbers(filtered_even_numbers):
+    return sum(filtered_even_numbers)
+
+@asset(description="Calculate the sum of the odd numbers")
+def summed_odd_numbers(filtered_odd_numbers):
+    return sum(filtered_odd_numbers)
+
+@asset(description="Sum the two sums")
+def summed_two_numbers(summed_even_numbers, summed_odd_numbers):
+    return summed_even_numbers + summed_odd_numbers
 ```
 
 Asset은 Workflow 과정중에 생성되는 Data를 의미한다. ETL 과정의 최종 Data 뿐만 아니라 ETL 과정 중간중간 생성되는 Data 또한 Asset으로 정의할 수 있다. 즉 Workflow를 순차적인 Action의 실행이 아닌 Data의 변화 과정으로 이해할 수 있으며, 이 경우 이용되는 Dagster의 Object가 Asset이다.
