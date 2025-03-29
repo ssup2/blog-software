@@ -7,11 +7,11 @@ draft: true
 
 {{< figure caption="[Figure 1] Dagster Architecture" src="images/dagster-architecture.png" width="1000px" >}}
 
-[Figure 1]은 Dagster Architecture를 나타내고 있다. Dagster Architecture는 크게 Workflow를 제어하는 **Control Plane**과 실제 Workflow가 동작하는 **Data Plane**으로 구분지을 수 있다. Control Plane에는 Web Server (Dagit), Daemon, Code Location, Run이 존재하며, Data Plane에는 Workflow 및 Workflow 동작에 필요한 I/O Manager 및 External Resource로 구성되어 있다.
-
-Dagster는 Workflow 구성을 위한 다양한 Type의 **Object**를 제공하며, User는 이러한 Object들을 조합하여 Workflow를 구성할 수 있다. Workflow에 이용되는 대부분의 Dagster Object들은 Control Plane의 Code Location에 모두 정의되어 활용된다. 즉 Workflow를 구성하는 User는 Dagster Object들을 정의하고 정의한 Object들을 Code Location에 등록하면, Dagster는 이를 활용하여 Workflow를 구성하고 실행한다.
+[Figure 1]은 Dagster Architecture를 나타내고 있다. Dagster Architecture는 정의된 Workflow가 존재하는 **Control Plane**과 실제 Workflow가 동작하는 **Data Plane**으로 구분지을 수 있다. Dagster는 Workflow 구성을 위한 다양한 Type의 **Object**를 제공하며, User는 이러한 Object들을 조합하여 Workflow를 구성할 수 있다. Workflow에 이용되는 대부분의 Dagster Object들은 Control Plane의 **Code Location**에 모두 정의되어 활용된다. 즉 Workflow를 구성하는 User는 Dagster Object들을 정의하고 정의한 Object들을 Code Location에 등록하면, Dagster는 이를 활용하여 Workflow를 구성하고 실행한다.
 
 ### 1.1. Dagster Object in Code Location
+
+Code Location에 정의되서 활용되는 Dagster Object들은 다음과 같다.
 
 #### 1.1.1. Op, Job
 
@@ -91,7 +91,7 @@ process_numbers_asset = define_asset_job(
     selection=AssetSelection.groups("numbers"))
 ```
 
-Asset은 Workflow 과정중에 생성되는 Data를 의미한다. ETL 과정의 최종 Data 뿐만 아니라 ETL 과정 중간중간 생성되는 Data 또한 Asset으로 정의할 수 있다. 즉 Workflow를 순차적인 Action의 실행이 아닌 Data의 변화 과정으로 이해할 수 있으며, 이 경우 이용되는 Dagster의 Object가 Asset이다.
+Asset은 Workflow 과정중에 생성되는 Data를 의미한다. ETL 과정의 최종 Data 뿐만 아니라 ETL 과정 중간중간 생성되는 Data 또한 Asset으로 정의할 수 있다. 즉 Workflow를 순차적인 Action의 실행이 아닌 Data의 변화 과정으로 이해할 수 있으며, 이 경우 이용되는 Dagster의 Object가 Asset이다. Asset은 Me
 
 [Code 2]는 Asset의 예제를 나타내고 있다. `generated_numbers`, `filtered_even_numbers`, `filtered_odd_numbers`, `summed_even_numbers`, `summed_odd_numbers`, `summed_two_numbers` 6개의 Asset 함수가 정의되어 있고, `@asset` Decorator를 통해 Asset인것을 명시한다. [Code 1]의 Op들과 동일한 역할을 수행하지만 Action이 중심이 아닌 Data가 중심이며, Asset 이름도 Data인 `numbers`를 기준으로 수동태가 사용된것을 확인할 수 있다.
 
@@ -101,9 +101,13 @@ Asset과 Op의 문법적인 차이는 Parameter로 Asset을 받는다는 점이�
 
 #### 1.1.3. I/O Manager
 
-#### 1.1.4. Sensor
+I/O Manager는 
 
-#### 1.1.5. Schedule
+#### 1.1.4. Schedule
+
+#### 1.1.5. Sensor
+
+#### 1.1.6. Definitions
 
 ### 1.2. Control Plane
 
@@ -111,23 +115,18 @@ Asset과 Op의 문법적인 차이는 Parameter로 Asset을 받는다는 점이�
 
 Dagster는 Dagit이라는 이름의 Web Server를 제공하여 Dagster를 **Web 기반의 UI**를 통해서 제어할 수 있는 환경을 제공한다. 또한 Dagster의 상태를 제어하고 조회할 수 있는 **GraphQL API**를 제공하는 역활도 수행한다.
 
-#### 1.2.2. Code Location
+#### 1.2.2. Daemon
 
-Code Location은 Dagster에서 실행되는 **Workflow가 정의**되어 있는 위치를 의미한다. 따라서 Workflow 구성에 필요한 모든 Dagster Resource가 Code Location에 정의되어 있다. Daster에는 다양한 Resource Type들이 존재하지만 대표적인 Resource Type들은 다음과 같다.
-
-#### 1.2.3. Daemon
-
-#### 1.2.4. Run
+#### 1.2.3. Run
 
 ### 1.3. Data Plane
 
-#### 1.3.1. Op
-
-#### 1.2.2. Asset
-
 #### 1.2.3. I/O Manager
+
+### 1.4. Database
 
 ## 2. 참조
 
 * Dagster Architecture : [https://docs.dagster.io/guides/deploy/oss-deployment-architecture](https://docs.dagster.io/guides/deploy/oss-deployment-architecture)
 * Dagster Concepts : [https://docs.dagster.io/getting-started/concepts](https://docs.dagster.io/getting-started/concepts)
+* Dagster Code Location : [https://dagster.io/blog/dagster-code-locations](https://dagster.io/blog/dagster-code-locations)
