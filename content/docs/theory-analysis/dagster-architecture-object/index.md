@@ -9,11 +9,9 @@ draft: true
 
 [Figure 1]은 Dagster Architecture를 나타내고 있다. Dagster Architecture는 크게 Workflow를 제어하는 **Control Plane**과 실제 Workflow가 동작하는 **Data Plane**으로 구분지을 수 있다. Control Plane에는 Web Server (Dagit), Daemon, Code Location, Run이 존재하며, Data Plane에는 Workflow 및 Workflow 동작에 필요한 I/O Manager 및 External Resource로 구성되어 있다.
 
-Dagster는 다양한 Type의 **Object**를 제공하며, User는 이러한 Object들을 조합하여 Workflow를 구성할 수 있다. Workflow에 이용되는 모든 Dagster Object들은 Control Plane의 Code Location에 모두 정의되어 활용된다.
+Dagster는 Workflow 구성을 위한 다양한 Type의 **Object**를 제공하며, User는 이러한 Object들을 조합하여 Workflow를 구성할 수 있다. Workflow에 이용되는 대부분의 Dagster Object들은 Control Plane의 Code Location에 모두 정의되어 활용된다. 즉 Workflow를 구성하는 User는 Dagster Object들을 정의하고 정의한 Object들을 Code Location에 등록하면, Dagster는 이를 활용하여 Workflow를 구성하고 실행한다.
 
-### 1.1. Dagster Object
-
-Dagster에서는 다양한 Type의 Object들이 존재하지만 대표적인 Object들은 다음과 같다.
+### 1.1. Dagster Object in Code Location
 
 #### 1.1.1. Op, Job
 
@@ -101,15 +99,11 @@ Asset과 Op의 문법적인 차이는 Parameter로 Asset을 받는다는 점이�
 
 즉 Asset의 Parameter를 통해서 Asset 사이의 의존성을 나타낼 수 있으며, 자연스럽게 DAG 형태로 표현된다. `define_asset_job` 함수는 이러한 Asset들을 하나의 Job으로 변환하는 함수이다. selection은 어떤 Asset들을 포함할지를 명시하며, [Code 2]에서는 `numbers` 그룹에 속한 Asset들을 포함하도록 명시하고 있다.
 
-#### 1.1.3. Graph
+#### 1.1.3. I/O Manager
 
-#### 1.1.4. Run
+#### 1.1.4. Sensor
 
-#### 1.1.5. I/O Manager
-
-#### 1.1.6. Sensor
-
-#### 1.1.7. Schedule
+#### 1.1.5. Schedule
 
 ### 1.2. Control Plane
 
