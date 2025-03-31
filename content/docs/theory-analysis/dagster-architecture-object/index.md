@@ -101,7 +101,16 @@ Asset과 Op의 문법적인 차이는 Parameter로 Asset을 받는다는 점이�
 
 #### 1.1.3. I/O Manager
 
-I/O Manager는 
+I/O Manager는 Op 또는 Asset 사이의 데이터를 주고 받는 역할을 수행한다. 다양한 Backend를 지원하며, 지원하는 주요 Backend는 다음과 같다.
+
+* FilesystemIOManager : Local Filesystem에 데이터를 저장한다. 별도로 I/O Manager를 지정하지 않으면 Default I/O Manager로 동작한다.
+* InMemoryIOManager : Local Memory에 데이터를 저장한다.
+* s3.S3PickleIOManager : AWS S3에 Pickle 형태로 데이터를 저장한다.
+* GCSPickleIOManager : GCP GCS에 Pickle 형태로 데이터를 저장한다.
+* BigQueryPandasIOManager : BigQuery에 Pandas DataFrame 형태로 데이터를 저장한다.
+* BigQueryPySparkIOManager : BigQuery에 PySpark DataFrame 형태로 데이터를 저장한다.
+
+I/O Manager는 비교적 작은 크기의 데이터를 손쉽게 전달하도록 설계되어 있으며, 몇십 TB 이상의 큰 데이터를 병렬처리를 통해서 빠르게 전달하도록 설계되어 있지는 않다. 따라서 큰 데이터를 주고 받는 경우에는 외부 저장소에 Data를 저장한 이후에 Data가 저장된 경로를 I/O Manager를 통해서 전달하는 방식이 효과적이다.
 
 #### 1.1.4. Schedule
 
