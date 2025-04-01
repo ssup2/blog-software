@@ -7,7 +7,7 @@ draft: true
 
 {{< figure caption="[Figure 1] Dagster Architecture" src="images/dagster-architecture.png" width="1000px" >}}
 
-[Figure 1]은 Dagster Architecture를 나타내고 있다. Dagster Architecture는 정의된 Workflow가 존재하는 **Control Plane**과 실제 Workflow가 동작하는 **Data Plane**으로 구분지을 수 있다. Dagster는 Workflow 구성을 위한 다양한 Type의 **Object**를 제공하며, User는 이러한 Object들을 조합하여 Workflow를 구성할 수 있다. Workflow에 이용되는 대부분의 Dagster Object들은 Control Plane의 **Code Location**에 모두 정의되어 활용된다. 즉 Workflow를 구성하는 User는 Dagster Object들을 정의하고 정의한 Object들을 Code Location에 등록하면, Dagster는 이를 활용하여 Workflow를 구성하고 실행한다.
+[Figure 1]은 Dagster Architecture를 나타내고 있다. Dagster Architecture는 정의된 Workflow가 존재하는 **Control Plane**과 실제 Workflow가 동작하는 **Data Plane**으로 구분지을 수 있다. Dagster는 Workflow 구성을 위한 다양한 Type의 **Object**를 제공하며, User는 이러한 Object들을 이용하여 Workflow를 구성할 수 있다. Workflow에 이용되는 대부분의 Dagster Object들은 Control Plane의 **Code Location**에 모두 정의되어 활용된다. 즉 Workflow를 구성하는 User는 Dagster Object들을 정의하고 정의한 Object들을 Code Location에 등록하면, Dagster는 이를 활용하여 Workflow를 구성하고 실행한다.
 
 ### 1.1. Dagster Object in Code Location
 
@@ -16,31 +16,34 @@ Code Location에 정의되서 활용되는 Dagster Object들은 다음과 같다
 #### 1.1.1. Op, Job
 
 ```python {caption="[Code 1] Op, Job Example", linenos=table}
-@op
+@op(description="Generate a list of numbers from 1 to 10")
 def generate_numbers():
     return list(range(1, 11))
 
-@op
+@op(description="Filter even numbers from the list")
 def filter_even_numbers(numbers):
     return [num for num in numbers if num % 2 == 0]
 
-@op
+@op(description="Filter odd numbers from the list")
 def filter_odd_numbers(numbers):
     return [num for num in numbers if num % 2 != 0]
 
-@op
+@op(description="Calculate the sum of the given list of even numbers")
 def sum_even_numbers(numbers):
     return sum(numbers)
 
-@op
+@op(description="Calculate the sum of the given list of odd numbers")
 def sum_odd_numbers(numbers):
     return sum(numbers)
 
-@op
-def sum_two_numbers(first_number, second_number):
+@op(description="Sum the two numbers")
+def sum_two_sums(first_number, second_number):
     return first_number + second_number
 
-@job
+@job(description="Process numbers",
+    tags={
+        "domain": "numbers",
+    })
 def process_numbers():
     numbers = generate_numbers()
     
@@ -50,40 +53,54 @@ def process_numbers():
     even_sum = sum_even_numbers(even_numbers)
     odd_sum = sum_odd_numbers(odd_numbers)
 
-    sum_two_numbers(even_sum, odd_sum)
+    sum_two_sums(even_sum, odd_sum)
 ```
 
 **Op**는 Workflow에서 실행되는 가장 작은 단위의 Action을 의미한다. 이러한 Op들을 조합하여 Workflow를 구성할 수 있다. Airflow를 기준으로 하나의 Task가 Dagster에서는 Op에 해당한다. **Job**은 하나의 Workflow를 의미하며 하나 이상의 Op를 포함할 수 있다.
 
-[Code 1]은 Op와 Job의 예제를 나타내고 있다. `generate_numbers`, `filter_even_numbers`, `filter_odd_numbers`, `sum_even_numbers`, `sum_odd_numbers`, `sum_two_numbers` 6개의 Action 함수가 정의되어 있고, `@Op` Decorator를 통해 Op인것을 명시하고 있다. 또한 `process_numbers` Job 함수가 정의되어 있고, `@job` Decorator를 통해 Job 인것을 명시하고 있다. 정의된 Op는 Job 함수 내부에서 DAG 형태로 호출되고 있는것을 확인할 수 있다.
+[Code 1]은 Op와 Job의 예제를 나타내고 있다. `generate_numbers`, `filter_even_numbers`, `filter_odd_numbers`, `sum_even_numbers`, `sum_odd_numbers`, `sum_two_numbers` 6개의 Action 함수가 정의되어 있고, `@Op` Decorator를 통해 Op인것을 명시하고 있다. 또한 `process_numbers` Job 함수가 정의되어 있고, `@job` Decorator를 통해 Job 인것을 명시하고 있다. 정의된 Op는 Job 함수 내부에서 DAG 형태로 호출되고 있는것을 확인할 수 있다. Decorator를 통해서 Object 명시와 함께 **Description** 또는 **Tag**등의 다양한 Metadata를 같이 정의할 수 있다.
 
-Dagster에서는 Action 위주의 Workflow를 구성하는것 보다 Data 중심의 Workflow를 구성을 권장하기 때문에 Op보다는 다음에 소개할 Asset을 중심으로 Workflow 구성을 권장한다. 따라서 Op는 Slack 알림/e-mail 알림과 같이 Asset으로 간주하기 어려운 Action들 또는 하나의 Asset 내부에서 너무 많은 Action이 필요할때 Action을 쪼개는 용도로 활용된다.
+{{< figure caption="[Figure 2] Dagster Op, Job Example" src="images/dagster-op-job-example.png" width="700px" >}}
+
+[Figure 2]는 [Code 1]의 Op와 Job을 Dagster의 Web Console에서 확인한 모습을 나타내고 있다. 정의된 Op는 Job 함수 내부에서 DAG 형태로 호출되고 있는것을 확인할 수 있다. Dagster에서는 Action 위주의 Workflow를 구성하는것 보다 Data 중심의 Workflow를 구성을 권장하기 때문에 Op보다는 다음에 소개할 Asset을 중심으로 Workflow 구성을 권장한다. 따라서 Op는 Slack 알림/e-mail 알림과 같이 Asset으로 간주하기 어려운 Action들 또는 하나의 Asset 내부에서 너무 많은 Action이 필요할때 Action을 쪼개는 용도로 활용된다.
 
 #### 1.1.2. Asset
 
 ```python {caption="[Code 2] Asset Example", linenos=table}
-@asset(group_name="numbers")
+@asset(group_name="numbers",
+    description="Generated a list of numbers from 1 to 10",
+    kinds=["python"])
 def generated_numbers():
     return list(range(1, 11))
 
-@asset(group_name="numbers")
+@asset(group_name="numbers",
+    description="Filtered even numbers from the list",
+    kinds=["python"])
 def filtered_even_numbers(generated_numbers):
     return [num for num in generated_numbers if num % 2 == 0]
 
-@asset(group_name="numbers")
+@asset(group_name="numbers",
+    description="Filtered odd numbers from the list",
+    kinds=["python"])
 def filtered_odd_numbers(generated_numbers):
     return [num for num in generated_numbers if num % 2 != 0]
 
-@asset(group_name="numbers")
+@asset(group_name="numbers",
+    description="Summed the even numbers",
+    kinds=["python"])
 def summed_even_numbers(filtered_even_numbers):
     return sum(filtered_even_numbers)
 
-@asset(group_name="numbers")
+@asset(group_name="numbers",
+    description="Summed the odd numbers",
+    kinds=["python"])
 def summed_odd_numbers(filtered_odd_numbers):
     return sum(filtered_odd_numbers)
 
-@asset(group_name="numbers")
-def summed_two_numbers(summed_even_numbers, summed_odd_numbers):
+@asset(group_name="numbers",
+    description="Summed the two sums",
+    kinds=["python"])
+def summed_two_sums(summed_even_numbers, summed_odd_numbers):
     return summed_even_numbers + summed_odd_numbers
 
 process_numbers_asset = define_asset_job(
@@ -91,7 +108,7 @@ process_numbers_asset = define_asset_job(
     selection=AssetSelection.groups("numbers"))
 ```
 
-Asset은 Workflow 과정중에 생성되는 Data를 의미한다. ETL 과정의 최종 Data 뿐만 아니라 ETL 과정 중간중간 생성되는 Data 또한 Asset으로 정의할 수 있다. 즉 Workflow를 순차적인 Action의 실행이 아닌 Data의 변화 과정으로 이해할 수 있으며, 이 경우 이용되는 Dagster의 Object가 Asset이다. Asset은 Me
+Asset은 Workflow 과정중에 생성되는 Data를 의미한다. ETL 과정의 최종 Data 뿐만 아니라 ETL 과정 중간중간 생성되는 Data 또한 Asset으로 정의할 수 있다. 즉 Workflow를 순차적인 Action의 실행이 아닌 Data의 변화 과정으로 이해할 수 있으며, 이 경우 이용되는 Dagster의 Object가 Asset이다.
 
 [Code 2]는 Asset의 예제를 나타내고 있다. `generated_numbers`, `filtered_even_numbers`, `filtered_odd_numbers`, `summed_even_numbers`, `summed_odd_numbers`, `summed_two_numbers` 6개의 Asset 함수가 정의되어 있고, `@asset` Decorator를 통해 Asset인것을 명시한다. [Code 1]의 Op들과 동일한 역할을 수행하지만 Action이 중심이 아닌 Data가 중심이며, Asset 이름도 Data인 `numbers`를 기준으로 수동태가 사용된것을 확인할 수 있다.
 
@@ -113,6 +130,12 @@ I/O Manager는 Op 또는 Asset 사이의 데이터를 주고 받는 역할을 �
 I/O Manager는 비교적 작은 크기의 데이터를 손쉽게 전달하도록 설계되어 있으며, 몇십 TB 이상의 큰 데이터를 병렬처리를 통해서 빠르게 전달하도록 설계되어 있지는 않다. 따라서 큰 데이터를 주고 받는 경우에는 외부 저장소에 Data를 저장한 이후에 Data가 저장된 경로를 I/O Manager를 통해서 전달하는 방식이 효과적이다.
 
 #### 1.1.4. Schedule
+
+```python {caption="[Code 3] Asset Example", linenos=table}
+
+```
+
+Schedule은 Workflow를 주기적으로 실행시키는 역할을 수행한다.
 
 #### 1.1.5. Sensor
 
