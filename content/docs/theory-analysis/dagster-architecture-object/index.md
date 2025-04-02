@@ -7,11 +7,11 @@ draft: true
 
 {{< figure caption="[Figure 1] Dagster Architecture" src="images/dagster-architecture.png" width="1000px" >}}
 
-[Figure 1]은 Dagster Architecture를 나타내고 있다. Dagster Architecture는 정의된 Workflow가 존재하는 **Control Plane**과 실제 Workflow가 동작하는 **Data Plane**으로 구분지을 수 있다. Dagster는 Workflow 구성을 위한 다양한 Type의 **Object**를 제공하며, User는 이러한 Object들을 이용하여 Workflow를 구성할 수 있다. Workflow에 이용되는 대부분의 Dagster Object들은 Control Plane의 **Code Location**에 모두 정의되어 활용된다. 즉 Workflow를 구성하는 User는 Dagster Object들을 정의하고 정의한 Object들을 Code Location에 등록하면, Dagster는 이를 활용하여 Workflow를 구성하고 실행한다.
+[Figure 1]은 Dagster Architecture를 나타내고 있다. 사용자가 정의한 Workflow가 존재하는 **Control Plane**과 실제 Workflow가 동작하는 **Data Plane**으로 구분지을 수 있다. Dagster는 Workflow 구성을 위한 다양한 Type의 **Object**를 제공하며, User는 이러한 Object들을 이용하여 Workflow를 구성할 수 있다.
 
-### 1.1. Dagster Object in Code Location
+### 1.1. Code Location
 
-Code Location에 정의되서 활용되는 Dagster Object들은 다음과 같다.
+ Workflow에 이용되는 대부분의 Dagster Object들은 Control Plane의 **Code Location**에 모두 정의되어 활용된다. 즉 Workflow를 구성하는 User는 Dagster Object들을 정의하고 정의한 Object들을 Code Location에 등록하면, Dagster는 이를 활용하여 Workflow를 구성하고 실행한다. Code Location에 정의되어 이용되는 Dagster Object들은 다음과 같다.
 
 #### 1.1.1. Op, Job
 
@@ -131,35 +131,41 @@ I/O Manager는 Op 또는 Asset 사이의 데이터를 주고 받는 역할을 �
 * BigQueryPandasIOManager : BigQuery에 Pandas DataFrame 형태로 데이터를 저장한다.
 * BigQueryPySparkIOManager : BigQuery에 PySpark DataFrame 형태로 데이터를 저장한다.
 
-I/O Manager는 비교적 작은 크기의 데이터를 손쉽게 전달하도록 설계되어 있으며, 몇십 TB 이상의 큰 데이터를 병렬처리를 통해서 빠르게 전달하도록 설계되어 있지는 않다. 따라서 큰 데이터를 주고 받는 경우에는 외부 저장소에 Data를 저장한 이후에 Data가 저장된 경로를 I/O Manager를 통해서 전달하는 방식이 효과적이다.
+I/O Manager는 비교적 작은 크기의 데이터를 손쉽게 전달하도록 설계되어 있으며, 몇십 TB 이상의 큰 데이터를 병렬처리를 통해서 빠르게 전달하도록 설계되어 있지는 않다. 따라서 큰 데이터를 주고 받는 경우에는 외부 저장소에 Data를 저장한 이후에 Data가 저장된 경로를 I/O Manager를 통해서 전달하는 방식이 효과적이다. Op 또는 Asset을 수행하는 방식을 결정하는 Run Launcher나 Executor에 따라서 이용할 수 있는 I/O Manager가 제한되기도 한다.
 
 #### 1.1.4. Schedule
 
 ```python {caption="[Code 3] Asset Example", linenos=table}
+process_numbers_every_minute = ScheduleDefinition(
+    job=process_numbers,
+    cron_schedule="* * * * *",
+)
 
+process_numbers_asset_every_minute = ScheduleDefinition(
+    job=process_numbers_asset,
+    cron_schedule="* * * * *",
+)
 ```
 
-Schedule은 Workflow를 주기적으로 실행시키는 역할을 수행한다.
+Schedule은 **cron** 형식의 문법을 이용해서 Workflow를 주기적으로 실행시키는 역할을 수행한다. [Code 3]은 [Code 1]에서 정의한 `process_numbers` Job과 [Code 2]에서 정의한 `process_numbers_asset` Job을 매 분마다 실행시키는 Schedule을 정의한 예제를 나타내고 있다.
 
 #### 1.1.5. Sensor
 
+```python {caption="[Code 4] Sensor Example", linenos=table}
+
+```
+
 #### 1.1.6. Definitions
 
-### 1.2. Control Plane
+```python {caption="[Code 5] Definitions Example", linenos=table}
 
-#### 1.2.1. Web Server (Dagit)
+```
+
+### 1.2. Dagster Instance, Database
+
+### 1.3. Dagster Job Trigger
 
 Dagster는 Dagit이라는 이름의 Web Server를 제공하여 Dagster를 **Web 기반의 UI**를 통해서 제어할 수 있는 환경을 제공한다. 또한 Dagster의 상태를 제어하고 조회할 수 있는 **GraphQL API**를 제공하는 역활도 수행한다.
-
-#### 1.2.2. Daemon
-
-#### 1.2.3. Run
-
-### 1.3. Data Plane
-
-#### 1.2.3. I/O Manager
-
-### 1.4. Database
 
 ## 2. 참조
 
