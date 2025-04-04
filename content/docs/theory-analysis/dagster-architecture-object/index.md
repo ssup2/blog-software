@@ -1,6 +1,5 @@
 ---
 title: Dagster Architecture, Object
-draft: true
 ---
 
 ## 1. Dagster Architecture, Object
@@ -216,90 +215,105 @@ Definitions는 Dagster에서 사용되는 모든 Object를 등록하는 역할�
 ### 1.2. Dagster Instance
 
 ```yaml {caption="[File 1] Dagster Instance Example", linenos=table}
-local_artifact_storage:
-  module: dagster._core.storage.root
-  class: LocalArtifactStorage
-  config:
-    base_dir: /opt/dagster/dagster_home
-run_storage:
-  module: dagster_postgres.run_storage
-  class: PostgresRunStorage
-  config:
-    postgres_db:
-      db_name: dagster
-      hostname: postgresql.postgresql
-      params: {}
-      password:
-        env: DAGSTER_PG_PASSWORD
-      port: 5432
-      username: postgres
-event_log_storage:
-  module: dagster_postgres.event_log
-  class: PostgresEventLogStorage
-  config:
-    postgres_db:
-      db_name: dagster
-      hostname: postgresql.postgresql
-      params: {}
-      password:
-        env: DAGSTER_PG_PASSWORD
-      port: 5432
-      username: postgres
-compute_logs: NoneType
+scheduler:
+  module: dagster.core.scheduler
+  class: DagsterDaemonScheduler
+
 schedule_storage:
   module: dagster_postgres.schedule_storage
   class: PostgresScheduleStorage
   config:
     postgres_db:
-      db_name: dagster
-      hostname: postgresql.postgresql
-      params: {}
+      username: postgres
       password:
         env: DAGSTER_PG_PASSWORD
+      hostname: "postgresql.postgresql"
+      db_name: dagster
       port: 5432
-      username: postgres
-scheduler:
-  module: dagster._core.scheduler
-  class: DagsterDaemonScheduler
-  config: {}
-run_coordinator:
-  module: dagster._core.run_coordinator
-  class: QueuedRunCoordinator
-  config:
-    dequeue_num_workers: 4
-    dequeue_use_threads: true
-    max_concurrent_runs: -1
+      params: {}
+
 run_launcher:
   module: dagster_k8s
   class: K8sRunLauncher
   config:
-    dagster_home: /opt/dagster/dagster_home
-    image_pull_policy: Always
-    instance_config_map: dagster-instance
-    job_namespace: dagster
     load_incluster_config: true
-    postgres_password_secret: dagster-postgresql-secret
+    job_namespace: dagster
+    image_pull_policy: Always
+    service_account_name: dagster
+    dagster_home: "/opt/dagster/dagster_home"
+    instance_config_map: "dagster-instance"
+    postgres_password_secret: "dagster-postgresql-secret"
     run_k8s_config:
       pod_spec_config:
         nodeSelector:
           node-group.dp.ssup2: worker
-    service_account_name: dagster
-run_retries:
-  enabled: true
-sensors:
-  use_threads: true
-  num_workers: 4
-telemetry:
-  enabled: true
+
+run_storage:
+  module: dagster_postgres.run_storage
+  class: PostgresRunStorage
+  config:
+    postgres_db:
+      username: postgres
+      password:
+        env: DAGSTER_PG_PASSWORD
+      hostname: "postgresql.postgresql"
+      db_name: dagster
+      port: 5432
+      params: {}
+
+event_log_storage:
+  module: dagster_postgres.event_log
+  class: PostgresEventLogStorage
+  config:
+    postgres_db:
+      username: postgres
+      password:
+        env: DAGSTER_PG_PASSWORD
+      hostname: "postgresql.postgresql"
+      db_name: dagster
+      port: 5432
+      params: {}
+
+run_coordinator:
+  module: dagster.core.run_coordinator
+  class: QueuedRunCoordinator
+  config:
+    max_concurrent_runs: -1
+    dequeue_use_threads: true
+    dequeue_num_workers: 4
+
+compute_logs:
+  module: "dagster_obstore.s3.compute_log_manager"
+  class: "S3ComputeLogManager"
+  config:
+    access_key_id: root
+    allow_http: true
+    allow_invalid_certificates: true
+    bucket: dagster
+    endpoint: http://minio.minio:9000
+    prefix: compute-log
+    region: default
+    secret_access_key: root123!
+
 run_monitoring:
   enabled: true
   start_timeout_seconds: 300
   max_resume_run_attempts: 0
   poll_interval_seconds: 120
   free_slots_after_run_end_seconds: 0
+
+run_retries:
+  enabled: true
+
+sensors:
+  use_threads: true
+  num_workers: 4
+
 schedules:
   use_threads: true
   num_workers: 4
+
+telemetry:
 ```
 
 **Dagster Instance**는 Dagster Control Plane의 모든 설정 정보를 포함하는 Object를 의미하며 내부적으로는 `dagster.yaml` 파일로 형태로 설정 정보를 관리한다. Dagster Control Plane의 모든 Component는 Dagster Instance에 접근하여 설정 정보를 조회하고 사용한다. [File 1]은 Dagster Instance의 예제를 나타내고 있다.
@@ -344,6 +358,14 @@ Run Coordinator는 Workflow Scheduling을 수행하며 Dagster Instance([File 1]
 Dagster Daemon은 Dagster 운영에 필수적인 Component는 아니며, Dagster Daemon이 없으면 Schedule Object, Sensor Object와 QueuedRunCoordinator를 이용하지 못하지만 Workflow 실행에는 문제가 없다.
 
 ### 1.5. Compute Log
+
+Compute Log는 Dagster에서 실행되는 Op 또는 Asset의 실행 로그를 저장하는 역할을 수행한다. Compute Log는 Dagster Instance([File 1])에 설정된다. Dagster에서 지원하는 Compute Log는 다음과 같다.
+
+* LocalComputeLogManager : Local Filesystem에 Compute Log를 저장한다.
+* NoOpComputeLogManager : Compute Log를 저장하지 않는다.
+* S3ComputeLogManager : AWS S3에 Compute Log를 저장한다.
+* AzureComputeLogManager : Azure Blob Storage에 Compute Log를 저장한다.
+* GCSComputeLogManager : Google Cloud Storage에 Compute Log를 저장한다.
 
 ## 2. 참조
 
