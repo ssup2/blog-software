@@ -161,9 +161,112 @@ Schedule은 **cron** 형식의 문법을 이용해서 Workflow를 주기적으�
 
 ```
 
-### 1.2. Dagster Instance, Database
+### 1.2. Dagster Instance
 
-### 1.3. Dagster Job Trigger
+```yaml {caption="[File 1] Dagster Instance Example", linenos=table}
+local_artifact_storage:
+  module: dagster._core.storage.root
+  class: LocalArtifactStorage
+  config:
+    base_dir: /opt/dagster/dagster_home
+run_storage:
+  module: dagster_postgres.run_storage
+  class: PostgresRunStorage
+  config:
+    postgres_db:
+      db_name: dagster
+      hostname: postgresql.postgresql
+      params: {}
+      password:
+        env: DAGSTER_PG_PASSWORD
+      port: 5432
+      username: postgres
+event_log_storage:
+  module: dagster_postgres.event_log
+  class: PostgresEventLogStorage
+  config:
+    postgres_db:
+      db_name: dagster
+      hostname: postgresql.postgresql
+      params: {}
+      password:
+        env: DAGSTER_PG_PASSWORD
+      port: 5432
+      username: postgres
+compute_logs: NoneType
+schedule_storage:
+  module: dagster_postgres.schedule_storage
+  class: PostgresScheduleStorage
+  config:
+    postgres_db:
+      db_name: dagster
+      hostname: postgresql.postgresql
+      params: {}
+      password:
+        env: DAGSTER_PG_PASSWORD
+      port: 5432
+      username: postgres
+scheduler:
+  module: dagster._core.scheduler
+  class: DagsterDaemonScheduler
+  config: {}
+run_coordinator:
+  module: dagster._core.run_coordinator
+  class: QueuedRunCoordinator
+  config:
+    dequeue_num_workers: 4
+    dequeue_use_threads: true
+    max_concurrent_runs: -1
+run_launcher:
+  module: dagster_k8s
+  class: K8sRunLauncher
+  config:
+    dagster_home: /opt/dagster/dagster_home
+    image_pull_policy: Always
+    instance_config_map: dagster-instance
+    job_namespace: dagster
+    load_incluster_config: true
+    postgres_password_secret: dagster-postgresql-secret
+    run_k8s_config:
+      pod_spec_config:
+        nodeSelector:
+          node-group.dp.ssup2: worker
+    service_account_name: dagster
+run_retries:
+  enabled: true
+sensors:
+  use_threads: true
+  num_workers: 4
+telemetry:
+  enabled: true
+run_monitoring:
+  enabled: true
+  start_timeout_seconds: 300
+  max_resume_run_attempts: 0
+  poll_interval_seconds: 120
+  free_slots_after_run_end_seconds: 0
+schedules:
+  use_threads: true
+  num_workers: 4
+```
+
+**Dagster Instance**는 Dagster Control Plane의 모든 설정 정보를 포함하는 Object를 의미하며 내부적으로는 `dagster.yaml` 파일로 형태로 설정 정보를 관리한다. Dagster Control Plane의 모든 Component는 Dagster Instance에 접근하여 설정 정보를 조회하고 사용한다. [File 1]은 Dagster Instance의 예제를 나타내고 있다.
+
+### 1.3. Dagster Database
+
+Database는 Run Storage, Event Storage, Schedule Storage의 역할을 수행하며 Dagster Control Plane의 모든 Component가 접근하여 이용한다. Database 및 각 Storage의 설정정보는 Dagster Instance([File 1])에서 확인할 수 있다.
+
+* Run Storage : 하나의 Run은 하나의 Trigger된 Workflow를 의미하며, Run Storage는 이러한 Run의 상태 정보를 저장하는 저장소이다. 즉 Workflow의 현재 상태나 실행 결과 같은 Run의 메타 정보를 저장하는 역할을 수행한다.
+* Event Storage : Event Storage는 Workflow의 실행과정 중에 발생하는 Event를 저장하는 저장소이다.
+* Schedule Storage : Workflow Schedule 정보를 저장하는 저장소이다.
+
+### 1.4. Dagster Workflow Trigger
+
+Dagster Web Server, Dagster CLI, Dagster Daemon은 Workflow를 Trigger하는 역할을 수행한다. 3개의 Component 모두 Code Location, Dagster Instance의 정보를 참고하여 Workflow를 Trigger하며, Dagster Instance에 설정된 Storage에 따라서 Trigger된 Workflow의 상태 정보는 Database에 저장된다.
+
+사용자는 Dagster는 Web Server 또는 CLI를 통해서 Workflow를 Trigger를 직접 수행할 수 있으며, Dagster Daemon은 사용자가 Code Location에 정의한 Schedule Object 또는 Sensor Object를 통해서 Job을 Trigger한다. Trigger된 Workflow는 **Run Coordinator**에 Scheduling 과정을 거쳐 **Run Launcher**에 의해서 **Run**이 생성되고, Run 내부에서는 **Executor**를 통해서 하나씩 Op 또는 Asset이 실행되며 Workflow가 수행된다.
+
+하나의 Run은 하나의 Trigger된 Workflow를 의미하며, Workflow가 종료되면 종료된 Workflow를 담당하는 Run도 같이 종료된다. Run이 실제적인 Workflow의 Control Plane 역할을 수행하며, Op 또는 Asset을 Executor를 통해서 DAG 형태로 수행한다. Run은 Run Launcher에 의해서 생성이 되며, Run Launcher와 Executor의 설정에 따라서 Workflow가 수행되는 방식이 결정된다.
 
 Dagster는 Dagit이라는 이름의 Web Server를 제공하여 Dagster를 **Web 기반의 UI**를 통해서 제어할 수 있는 환경을 제공한다. 또한 Dagster의 상태를 제어하고 조회할 수 있는 **GraphQL API**를 제공하는 역활도 수행한다.
 
@@ -172,3 +275,4 @@ Dagster는 Dagit이라는 이름의 Web Server를 제공하여 Dagster를 **Web 
 * Dagster Architecture : [https://docs.dagster.io/guides/deploy/oss-deployment-architecture](https://docs.dagster.io/guides/deploy/oss-deployment-architecture)
 * Dagster Concepts : [https://docs.dagster.io/getting-started/concepts](https://docs.dagster.io/getting-started/concepts)
 * Dagster Code Location : [https://dagster.io/blog/dagster-code-locations](https://dagster.io/blog/dagster-code-locations)
+* Dagster Internals : [https://docs.dagster.io/api/python-api/internals](https://docs.dagster.io/api/python-api/internals)
