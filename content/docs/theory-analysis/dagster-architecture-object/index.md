@@ -120,9 +120,9 @@ Asset과 Op의 문법적인 차이는 Parameter로 Asset을 받는다는 점이�
 
 [Figure 3]은 [Code 2]의 Asset을 Dagster의 Web Console에서 확인한 모습을 나타내고 있다. Asset이 DAG 형태로 표현되어 있는것을 확인할 수 있으며, 자연스럽게 Asset의 Lineage가 표현되어 있는것을 확인할 수 있다. Asset의 경우에는 수행 과정을 **Materialize (구체화)** 과정으로 표현한다.
 
-#### 1.1.3. I/O Manager
+#### 1.1.3. External Resource
 
-I/O Manager는 Op 또는 Asset 사이의 데이터를 주고 받는 역할을 수행한다. 다양한 Backend를 지원하며, 지원하는 주요 Backend는 다음과 같다.
+**External Resource**는 Dagster에서 지원하는 다양한 외부 리소스를 의미한다. 주로 I/O Manager, 외부 데이터 저장소, BI 도구들을 External Resource로 정의하고 이용한다. External Resource 중에서 **I/O Manager**는 Op 또는 Asset 사이의 데이터를 주고 받는 역할을 수행하기 때문에 중요한 External Resource이다. I/O Manager는 다양한 Backend를 이용할 수 있으며, 지원되는 주요 Backend는 다음과 같다.
 
 * FilesystemIOManager : Local Filesystem에 데이터를 저장한다. 별도로 I/O Manager를 지정하지 않으면 Default I/O Manager로 동작한다.
 * InMemoryIOManager : Local Memory에 데이터를 저장한다.
@@ -131,11 +131,28 @@ I/O Manager는 Op 또는 Asset 사이의 데이터를 주고 받는 역할을 �
 * BigQueryPandasIOManager : BigQuery에 Pandas DataFrame 형태로 데이터를 저장한다.
 * BigQueryPySparkIOManager : BigQuery에 PySpark DataFrame 형태로 데이터를 저장한다.
 
+```python {caption="[Code 3] External Resource (I/O Manager) Example", linenos=table}
+def get_io_manager():
+    return {
+        "io_manager": s3_pickle_io_manager.configured({
+            "s3_bucket": IO_MANAGER_S3_BUCKET,
+            "s3_prefix": IO_MANAGER_S3_PREFIX,
+        }),
+        "s3": s3_resource.configured({
+            "endpoint_url": IO_MANAGER_S3_ENDPOINT_URL,
+            "use_ssl": False,
+            "aws_access_key_id": IO_MANAGER_S3_ACCESS_KEY_ID,
+            "aws_secret_access_key": IO_MANAGER_S3_SECRET_ACCESS_KEY,
+        })
+```
+
+[Code 3]은 I/O Manager를 정의하는 External Resource 예제를 나타내고 있다. 예제에서는 S3PickleIOManager를 I/O Manager로 이용하고 있고, Backend로 이용할 S3도 External Resource로 정의하고 있다. 설정들은 Python Dictionary 형태로 정의된다.
+
 I/O Manager는 비교적 작은 크기의 데이터를 손쉽게 전달하도록 설계되어 있으며, 몇십 TB 이상의 큰 데이터를 병렬처리를 통해서 빠르게 전달하도록 설계되어 있지는 않다. 따라서 큰 데이터를 주고 받는 경우에는 외부 저장소에 Data를 저장한 이후에 Data가 저장된 경로를 I/O Manager를 통해서 전달하는 방식이 효과적이다. Op 또는 Asset을 수행하는 방식을 결정하는 Run Launcher나 Executor에 따라서 이용할 수 있는 I/O Manager가 제한되기도 한다.
 
 #### 1.1.4. Schedule
 
-```python {caption="[Code 3] Asset Example", linenos=table}
+```python {caption="[Code 4] Asset Example", linenos=table}
 process_numbers_every_minute = ScheduleDefinition(
     job=process_numbers,
     cron_schedule="* * * * *",
@@ -151,15 +168,50 @@ Schedule은 **cron** 형식의 문법을 이용해서 Workflow를 주기적으�
 
 #### 1.1.5. Sensor
 
-```python {caption="[Code 4] Sensor Example", linenos=table}
-
+```python {caption="[Code 5] Sensor Example", linenos=table}
+@dg.sensor(
+    job=process_numbers,
+    minimum_interval_seconds=5,
+)
+def check_file_sensor():
+    if os.path.exists("/check"):
+        yield dg.RunRequest(
+            run_key="check_file_exists",
+        )
+    else:
+        yield dg.SkipReason("check file not exists")
 ```
+
+**Sensor**는 외부 조건에 따라서 Workflow를 실행시키는 역할을 수행한다. [Code 4]는 `/check` 파일이 존재하는지 확인하는 Sensor를 정의한 예제를 나타내고 있다. 파일이 존재하면 `process_numbers` Job을 실행시키고, 파일이 존재하지 않으면 `process_numbers` Job을 실행시키지 않는다. `dg.sensor` Decorator를 통해서 Sensor를 정의하고, `job` Parameter를 통해서 실행할 Job을 명시한다. Sensor는 Polling 기반으로 동작하며  `minimum_interval_seconds` Parameter는 Polling 간격을 명시한다.
 
 #### 1.1.6. Definitions
 
 ```python {caption="[Code 5] Definitions Example", linenos=table}
-
+defs = Definitions(
+    assets=[
+        generated_numbers,
+        filtered_even_numbers,
+        filtered_odd_numbers,
+        summed_even_numbers,
+        summed_odd_numbers,
+        summed_two_sums,
+    ],
+    jobs=[
+        process_numbers,
+        process_numbers_k8s,
+    ],
+    schedules=[
+        process_numbers_every_minute,
+        process_numbers_asset_every_minute,
+    ],
+    sensors=[
+        check_file_sensor,
+    ],
+    resources=get_io_manager(),
+)
 ```
+
+Definitions는 Dagster에서 사용되는 모든 Object를 등록하는 역할을 수행한다. [Code 5]는 [Code 1 ~ 4]에서 정의한 Object들을 포함하는 Definitions Object를 정의한 예제를 나타내고 있다. Definitions에 등록되지 않은 Object는 Dagster에서 인식하지 못하기 때문에 반드시 Definitions에 등록해야 한다.
 
 ### 1.2. Dagster Instance
 
@@ -266,9 +318,32 @@ Dagster Web Server, Dagster CLI, Dagster Daemon은 Workflow를 Trigger하는 역
 
 사용자는 Dagster는 Web Server 또는 CLI를 통해서 Workflow를 Trigger를 직접 수행할 수 있으며, Dagster Daemon은 사용자가 Code Location에 정의한 Schedule Object 또는 Sensor Object를 통해서 Job을 Trigger한다. Trigger된 Workflow는 **Run Coordinator**에 Scheduling 과정을 거쳐 **Run Launcher**에 의해서 **Run**이 생성되고, Run 내부에서는 **Executor**를 통해서 하나씩 Op 또는 Asset이 실행되며 Workflow가 수행된다.
 
-하나의 Run은 하나의 Trigger된 Workflow를 의미하며, Workflow가 종료되면 종료된 Workflow를 담당하는 Run도 같이 종료된다. Run이 실제적인 Workflow의 Control Plane 역할을 수행하며, Op 또는 Asset을 Executor를 통해서 DAG 형태로 수행한다. Run은 Run Launcher에 의해서 생성이 되며, Run Launcher와 Executor의 설정에 따라서 Workflow가 수행되는 방식이 결정된다.
+하나의 Run은 하나의 Trigger된 Workflow를 의미하며, Workflow가 종료되면 종료된 Workflow를 담당하는 Run도 같이 종료된다. Run이 실제적인 Workflow의 Control Plane 역할을 수행하며, Op 또는 Asset을 Executor를 통해서 DAG 형태로 순차적으로 수행한다. Run은 Run Launcher에 의해서 생성된다. Dagster는 몇가지 Type의 Run Launcher와 Executor를 제공하며 설정된 Run Launcher와 Executor에 따라서 Workflow가 수행되는 방식이 결정된다.
 
-Dagster는 Dagit이라는 이름의 Web Server를 제공하여 Dagster를 **Web 기반의 UI**를 통해서 제어할 수 있는 환경을 제공한다. 또한 Dagster의 상태를 제어하고 조회할 수 있는 **GraphQL API**를 제공하는 역활도 수행한다.
+Run Launcher는 Dagster Instance([File 1])에 설정되며, Dagster가 지원하는 Run Launcher는 다음과 같다.
+
+* K8sRunLauncher : Run이 Kubernetes의 Job (Pod) 형태로 실행된다. 
+* ecs.EcsRunLauncher : Run이 AWS ECS의 Task 형태로 실행된다.
+* DockerRunLauncher : Run이 Docker Container 형태로 실행된다.
+* CeleryK8sRunLauncher : Run이 Celery를 이용하여 Kubernetes의 Job (Pod) 형태로 실행된다.
+
+Dagster가 지원하는 주요 Executor는 다음과 같다.
+
+* in_process_executor : Op/Asset이 하나의 Process 내부에서 순차적으로 실행된다.
+* multiprocess_executor : Op/Asset이 다수의 Process 내부에서 병렬로 실행된다.
+* celery_executor : Op/Asset이 Celery를 이용하여 병렬로 실행된다.
+* docker_executor : Op/Asset이 Docker Container를 이용하여 병렬로 실행된다.
+* k8s_job_executor : Op/Asset이 Kubernetes Job을 이용하여 병렬로 실행된다.
+* celery_k8s_job_executor : Op/Asset이 Celery와 Kubernetes Job을 이용하여 병렬로 실행된다.
+
+Run Coordinator는 Workflow Scheduling을 수행하며 Dagster Instance([File 1])에 설정된다. Dagster에서 지원하는 Run Coordinator는 다음과 같다.
+
+* DefaultRunCoordinator : Workflow 생성 요청이 오면 즉시 Run Launcher를 호출하여 Run을 생성한다. Dagster Web Server와 Dagster CLI에서 이용된다.
+* QueuedRunCoordinator : Workflow 생성 요청이 오면 요청을 Queue에 저장한다음 규칙에 맞게 가져와 Run을 생성한다. Dagster Daemon에서 이용된다. QueuedRunCoordinator를 이용하도록 설정되어 있으면 Dagster Web Server는 Workflow 생성 요청을 직접 처리하지 않고 Dagster Daemon에게 전달한다.
+
+Dagster Daemon은 Dagster 운영에 필수적인 Component는 아니며, Dagster Daemon이 없으면 Schedule Object, Sensor Object와 QueuedRunCoordinator를 이용하지 못하지만 Workflow 실행에는 문제가 없다.
+
+### 1.5. Compute Log
 
 ## 2. 참조
 
@@ -276,3 +351,5 @@ Dagster는 Dagit이라는 이름의 Web Server를 제공하여 Dagster를 **Web 
 * Dagster Concepts : [https://docs.dagster.io/getting-started/concepts](https://docs.dagster.io/getting-started/concepts)
 * Dagster Code Location : [https://dagster.io/blog/dagster-code-locations](https://dagster.io/blog/dagster-code-locations)
 * Dagster Internals : [https://docs.dagster.io/api/python-api/internals](https://docs.dagster.io/api/python-api/internals)
+* Dagster Run Launcher : [https://docs.dagster.io/guides/deploy/execution/run-launchers](https://docs.dagster.io/guides/deploy/execution/run-launchers)
+* Dagster Executor : [https://docs.dagster.io/guides/operate/run-executors](https://docs.dagster.io/guides/operate/run-executors)
