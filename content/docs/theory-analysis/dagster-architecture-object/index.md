@@ -314,6 +314,7 @@ schedules:
   num_workers: 4
 
 telemetry:
+  enabled: true
 ```
 
 **Dagster Instance**는 Dagster Control Plane의 모든 설정 정보를 포함하는 Object를 의미하며 내부적으로는 `dagster.yaml` 파일로 형태로 설정 정보를 관리한다. Dagster Control Plane의 모든 Component는 Dagster Instance에 접근하여 설정 정보를 조회하고 사용한다. [File 1]은 Dagster Instance의 예제를 나타내고 있다.
