@@ -5,15 +5,21 @@ draft: true
 
 Dagster를 Kubernetes 위에서 동작시킬때의 Architecture를 분석한다.
 
-## 1. Run Launcher, Executor
+## 1. Control Plane
+
+{{< figure caption="[Figure 1] Dagster K8s Run Launcher + Multiprocess Executor Architecture" src="images/dagster-architecture-k8srunlauncher-multiprocess.png" width="1000px" >}}
+
+[Figure 1]은 Dagster를 Kubernetes 위에서 구성할 경우 기본적인 Architecture를 나타내고 있다. Dagster Control Plane에 위치한 **Dagster Web Server**, **Dagster Daemon**, **Code Location Server**는 모두 Kubernetes의 Deployment를 통해서 Pod로 동작한다.
+
+Code Location Server는 Code Location을 Dagster의 가이드에 따라서 Containerize를 수행한 Server이다. 다수의 Code Location Server가 Control Plane에 위치하여 동작할 수 있으며, Dagster Web Server에서도 **Workspace** 기능을 통해서 Code Location Server 단위로 Dagster Object들을 분리하여 이용할 수 있도록 제공한다. 일반적으로 Project 단위로 Code Location Server를 분리하여 구성한다. **Dagster Instance**는 Kubernetes의 ConfigMap으로 저장되며, Dagster Control Plane에 위치한 다른 Component들은 Dagster Instance ConfigMap을 참조하여 동작한다.
+
+## 2. Run Launcher, Executor
 
 Dagster를 Kubernetes 위에서 동작시키는 경우 3가지 조합의 Run Launcher와 Executor를 이용할 수 있다.
 
 ### 1.1. K8s Run Launcher + Multiprocess Executor
 
-{{< figure caption="[Figure 1] Dagster K8s Run Launcher + Multiprocess Executor Architecture" src="images/dagster-architecture-k8srunlauncher-multiprocess.png" width="1000px" >}}
-
-K8s Run Launcher와 Multiprocess Executor 조합은 가장 기본적인 조합이다. [Figure 1]은 K8s Run Launcher와 Multiprocess Executor 조합하여 이용하는 경우의 Architecture를 나타내고 있다. Dagster Control Plane에 위치한 Dagster Web Server, Dagster Daemon, Code Location Server는 모두 Kubernetes의 Deployment를 통해서 Pod로 동작한다. Dagster Instance는 Kubernetes의 ConfigMap으로 저장되며, Dagster Control Plane에 위치한 다른 Component들은 Dagster Instance ConfigMap을 참조하여 동작한다.
+K8s Run Launcher와 Multiprocess Executor 조합은 가장 기본적인 조합이며, [Figure 1]의 Dagster Architecture도 K8s Run Launcher와 Multiprocess Executor 조합을 이용하여 구성되어 있을 경우의 Architecture를 나타내고 있다. K8s Run Launcher는 각 Run을 위한 별도의 Kubernetes Job을 생성하며, Run은 생성된 Kubernetes Job의 Pod에서 실행된다. 이후에 Run은 다수의 Process를 생성하며 Op/Asset을 수행한다.
 
 ```yaml {caption="[Text 1] K8s Run Launcher Config in Dagster Instance", linenos=table}
 run_launcher:
@@ -63,15 +69,17 @@ process_numbers_asset = define_asset_job(
     })
 ```
 
-K8s Run Launcher는 각 Run을 위한 별도의 Kubernetes Job을 생성하며, Run은 생성된 Kubernetes Job의 Pod에서 실행된다. 이후에 Run은 다수의 Process를 생성하며 Op/Asset을 수행한다. K8s Run Launcher가 생성한 Kubernetes Job Pod의 Resource는 Dagster Instance에 Default 값을 지정하거나, 각 Workflow마다 정의할 수 있다.
+K8s Run Launcher가 생성한 Kubernetes Job Pod의 Resource는 Dagster Instance에 Default 값을 지정하거나, 각 Dagster Job마다 정의할 수 있다. [Text 1]은 Dagster Instance에 Default Resource 값을 지정하는 경우의 Config 예시이며, [Code 1]은 각 Dagster Job마다 Tag를 통해서 Resource 값을 정의하는 경우의 Code 예시를 나타내고 있다.
 
 ### 1.2. K8s Run Launcher + K8s Job Executor
 
 {{< figure caption="[Figure 2] Dagster K8s Run Launcher + K8s Job Executor Architecture" src="images/dagster-architecture-k8srunlauncher-multiprocess.png" width="1000px" >}}
 
-[Figure 2]는 K8s Run Launcher와 K8s Job Executor 조합하여 이용하는 경우의 Architecture를 나타내고 있다. Multiprocess Executor 대신 K8s Job Executor를 이용하는 경우 Run은 각 Op/Asset을 위한 별도의 Kubernetes Job을 생성하여 실행된다. 이러한 특징 때문에 Multiprocess Executor와 비교하여 장단점을 가지고 있다. 다수의 Kubernetes Job을 이용하는 방식이기 때문에 하나의 Workflow가 Kubernetes Cluster의 Resource를 폭넓게 이용할 수 있다는 장점이 있지만, 각 Run을 위한 별도의 Kubernetes Job을 생성하기 때문에 각 Run의 실행 시간이 길어질 수 있다는 단점이 있다. 반면에 Multiprocess Executor는 하나의 Workflow가 Run Kubernetes Job이 할당받은 Resource 이상을 이용할 수 없다는 단점을 가지고 있지만, 모든 Asset/Op들이 동일한 Kubernetes Job에서 실행되기 때문에 빠르게 실행될 수 있는 장점을 갖는다.
+[Figure 2]는 K8s Run Launcher와 K8s Job Executor 조합하여 이용하는 경우의 Architecture를 나타내고 있다. Multiprocess Executor 대신 K8s Job Executor를 이용하는 경우 Run은 각 Op/Asset을 위한 별도의 Kubernetes Job을 생성하여 실행된다. 이러한 특징 때문에 Multiprocess Executor와 비교하여 장단점을 가지고 있다. 다수의 Kubernetes Job을 이용하는 방식이기 때문에 하나의 Workflow가 Kubernetes Cluster의 Resource를 폭넓게 이용할 수 있다는 장점이 있지만, 각 Run을 위한 별도의 Kubernetes Job을 생성하기 때문에 생성 시간으로 인해서 긴 Cold Start 시간이 발생할 수 있다.
 
-```python {caption="[Code 1] Op/Asset Resource Example", linenos=table}
+반면에 Multiprocess Executor는 하나의 Workflow가 Run Kubernetes Job이 할당받은 Resource 이상을 이용할 수 없다는 단점을 가지고 있지만, 모든 Asset/Op들이 동일한 Kubernetes Job에서 실행되기 때문에 Cold Start가 발생하지 않는 장점을 갖는다. 물론 Multiprocess Executor를 활용해도 Dagster의 External Pipeline 기능을 활용하여 Dagster 외부에서 Workflow를 수행할 수 있으며, 이 경우는 Run Kubernetes Job이 할당받은 Resource와 별개의 Resource를 활용하는 형태이기 때문에 예외 사항이다.
+
+```python {caption="[Code 2] Op/Asset Resource Example", linenos=table}
 @op(description="Generate a list of numbers from 1 to 10",
     tags={
         "domain": "numbers",
@@ -104,6 +112,8 @@ def generate_numbers():
 def generated_numbers():
     return list(range(1, 11))
 ```
+
+K8s Job Executor를 통해서 생성되는 Kubernetes Job의 Resource는 Dagster Instance에 Default 값을 지정하거나, 각 Dagster Job마다 정의할 수 있다. [Code 2]는 Op/Asset에 Tag를 통해서 Resource 값을 정의하는 경우의 Code 예시를 나타내고 있다.
 
 ### 1.3. Celery K8s Run Launcher + Celery K8s Job Executor
 
