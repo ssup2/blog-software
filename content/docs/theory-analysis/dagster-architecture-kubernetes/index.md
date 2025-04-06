@@ -163,6 +163,42 @@ K8s Job Executor를 통해서 생성되는 Kubernetes Job의 Resource는 Dagster
 
 {{< figure caption="[Figure 3] Dagster Celery K8s Run Launcher + Celery K8s Job Executor Architecture" src="images/dagster-architecture-k8scelery.png" width="1000px" >}}
 
+```text {caption="[Text 4] Dagster Pod Examples with Celery K8s Run Launcher + Celery K8s Job Executor"}
+$ kubectl -n dagster-celery get job
+NAME                                               STATUS     COMPLETIONS   DURATION   AGE
+dagster-run-990449b2-9da1-41ad-a5ca-d7ee397b768d   Complete   1/1           50s        6m34s
+dagster-step-50f4e368528a8887c5267d0b44535f5d      Complete   1/1           6s         6m31s
+dagster-step-75121c5003b6ac46dc231aa21cb2ab5c      Complete   1/1           5s         5m58s
+dagster-step-a7b5d7af7d831e8ead03771ba8744827      Complete   1/1           5s         6m9s
+dagster-step-c6f52e1bf24419530e61e13f7d7bb0ed      Complete   1/1           5s         6m9s
+dagster-step-f5ae327359276c078786d7ce2ae3d818      Complete   1/1           6s         6m20s
+dagster-step-fd9bd10d0477966ec56f4d5ac1455f02      Complete   1/1           5s         6m20s
+
+$ kubectl -n dagster get pod
+NAME                                                              READY   STATUS      RESTARTS        AGE
+dagster-celery-workers-dagster-bdb4bb986-9mhc5                    1/1     Running     2 (7d15h ago)   21d
+dagster-celery-workers-dagster-bdb4bb986-x8gml                    1/1     Running     2 (7d15h ago)   21d
+dagster-daemon-64d894f867-57qnx                                   1/1     Running     2 (7d15h ago)   21d
+dagster-dagster-user-deployments-dagster-workflows-76b4b65q2f75   1/1     Running     2 (7d15h ago)   21d
+dagster-dagster-webserver-6755c86fb8-s7x2x                        1/1     Running     2 (7d15h ago)   21d
+dagster-flower-5cb9449b54-hwhph                                   1/1     Running     0               2m47s
+dagster-postgresql-0                                              1/1     Running     2 (7d15h ago)   22d
+dagster-redis-master-0                                            1/1     Running     2 (7d15h ago)   22d
+dagster-redis-slave-0                                             1/1     Running     2 (7d15h ago)   22d
+dagster-redis-slave-1                                             1/1     Running     2 (7d15h ago)   22d
+dagster-run-990449b2-9da1-41ad-a5ca-d7ee397b768d-54fn4            0/1     Completed   0               6m9s
+dagster-step-50f4e368528a8887c5267d0b44535f5d-dvjn7               0/1     Completed   0               6m6s
+dagster-step-75121c5003b6ac46dc231aa21cb2ab5c-46mks               0/1     Completed   0               5m33s
+dagster-step-a7b5d7af7d831e8ead03771ba8744827-brvsk               0/1     Completed   0               5m44s
+dagster-step-c6f52e1bf24419530e61e13f7d7bb0ed-xf54r               0/1     Completed   0               5m44s
+dagster-step-f5ae327359276c078786d7ce2ae3d818-dkpnl               0/1     Completed   0               5m55s
+dagster-step-fd9bd10d0477966ec56f4d5ac1455f02-288lw               0/1     Completed   0               5m55s
+```
+
+```python {caption="[Code 3] Op/Asset Resource Example", linenos=table}
+
+```
+
 ## 2. Configuration Propagation
 
 ```text {caption="[Text 2] "}
