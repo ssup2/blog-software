@@ -9,9 +9,11 @@ Dagster를 Kubernetes 위에서 동작시킬때의 Architecture를 분석한다.
 
 {{< figure caption="[Figure 1] Dagster K8s Run Launcher + Multiprocess Executor Architecture" src="images/dagster-architecture-k8srunlauncher-multiprocess.png" width="1000px" >}}
 
-[Figure 1]은 Dagster를 Kubernetes 위에서 구성할 경우 기본적인 Architecture를 나타내고 있다. Dagster Control Plane에 위치한 **Dagster Web Server**, **Dagster Daemon**, **Code Location Server**는 모두 Kubernetes의 Deployment를 통해서 Pod로 동작한다.
+[Figure 1]은 Dagster를 Kubernetes 위에서 구성할 경우 기본적인 Architecture를 나타내고 있다. Dagster Control Plane에 위치한 **Dagster Web Server**, **Dagster Daemon**, **Code Location Server**는 언제나 동작하고 있어야하는 Component이기 때문에 모두 Kubernetes의 Deployment를 통해서 Pod로 동작한다. **Run**은 Workflow와 동일한 Lifecycle을 가지며 Workflow가 생성될때 같이 생성되며 Workflow가 종료되는 경우에 같이 종료되기 때문에, Kubernetes Job으로 동작한다. **Dagster Instance**는 Kubernetes의 ConfigMap으로 저장되며, Dagster Control Plane에 위치한 다른 Component들은 Dagster Instance ConfigMap을 참조하여 동작한다.
 
-Code Location Server는 Code Location을 Dagster의 가이드에 따라서 Containerize를 수행한 Server이다. 서로 다른 Dagster Object가 정의된  다수의 Code Location Server가 Control Plane에 위치하여 동작할 수 있으며, Dagster Web Server에서도 **Workspace** 기능을 통해서 Code Location Server 단위로 Dagster Object들을 분리하여 이용할 수 있도록 제공한다. 일반적으로 Project 단위로 Code Location Server를 분리하여 구성한다. **Dagster Instance**는 Kubernetes의 ConfigMap으로 저장되며, Dagster Control Plane에 위치한 다른 Component들은 Dagster Instance ConfigMap을 참조하여 동작한다.
+Code Location Server는 Code Location을 Dagster의 가이드에 따라서 Containerize를 수행한 Server이다. 서로 다른 Dagster Object가 정의된  다수의 Code Location Server가 Control Plane에 위치하여 동작할 수 있으며, Dagster Web Server에서도 **Workspace** 기능을 통해서 Code Location Server 단위로 Dagster Object들을 분리하여 이용할 수 있도록 제공한다. 일반적으로 Project 단위로 Code Location Server를 분리하여 구성한다.
+
+Workflow가 수행되면 Workflow를 담당하는 실질적인 Control Plane Component는 Run이다. 나머지 Control Plane Component는 Run 실행을 위해서 Dagster Instance 및 Code Location Server로 부터 Workflow 설정 정보를 가져와 Run을 실행하는 역할을 수행한다. 실행된 Run은 Workflow를 실행하고 그 결과를 직접 Database에 접근하여 저장한다. 이러한 특징 때문에 Run이 실행된 이후에는 Dagster Control Plane Component (Dagster Web Server, Dagster Daemon, Code Location Server)가 동작하지 않더라도 Workflows는 계속해서 문제 없이 실행이 가능하다. 이는 Workflow 수행에 관계없이 Dagster Control Plane의 Component를 자유롭게 배포할 수 있다는걸 의미한다.
 
 ## 2. Run Launcher, Executor
 
@@ -195,7 +197,20 @@ Kubernetes Deployment로 동작하는 Dagster Component의 경우에는 다수�
 
 ### 3.2. Kubernetes Job Component
 
+```text {caption="[Text 10] "}
+dagsterDaemon:
+  runRetries:
+    enabled: true
+    maxRetries: 2
+```
 
+```python {caption="[Code 2] Op/Asset Resource Example", linenos=table}
+@job(tags={"dagster/max_retries": 3})
+def sample_job():
+    pass
+```
+
+Kubernetes Job으로 동작하는 Run 또는 Op/Asset의 경우에는 High Availability를 위해서 Kubernetes Job이 제공하는 Restart Policy를 이용하지 않으며, Dagster 자체적으로 제공하는 Retry Policy 기능을 활용하여 재시작을 수행한다. 
 
 ## 4. 참조
 
