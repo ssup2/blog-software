@@ -34,9 +34,9 @@ dagster-dagster-webserver-85d8d95dfc-q6j97                        1/1     Runnin
 dagster-run-527436fd-ef2f-40c5-978f-1b7bbffeab8b-2hzsn            0/1     Completed   0               9m30s
 ```
 
-[Text 1]은 K8s Run Launcher와 Multiprocess Executor 조합을 이용하여 Dagster Run을 수행한 경우의 Kubernetes Job과 Pod의 목록을 나타내고 있다. `dagster-run` 문자열으로 시작하는 Kubernetes Job과 Pod가 특정 Run을 위한 Kubernetes Job과 Pod를 나타내며, 실행이 완료된 것을 확인할 수 있다. [Text 1]에서는 Dagster Control Plane의 Pod들도 확인할 수 있다.
+[Text 1]은 K8s Run Launcher와 Multiprocess Executor 조합을 이용하여 Dagster Run을 수행한 경우의 Kubernetes Job과 Pod의 목록을 나타내고 있다. `dagster-run` 문자열으로 시작하는 Kubernetes Job과 Pod가 특정 Run을 위한 Kubernetes Job과 Pod를 나타내며, 실행이 완료된 것을 확인할 수 있다. Workflow가 한번 수행될때마다 수행된 Workflow를 담당하는 Kubernetes Job과 Pod가 생성되며 실행된다. [Text 1]에서는 Dagster Control Plane의 Pod들도 확인할 수 있다.
 
-```yaml {caption="[Text 1] K8s Run Launcher Config in Dagster Instance", linenos=table}
+```yaml {caption="[Text 2] K8s Run Launcher Config in Dagster Instance", linenos=table}
 run_launcher:
   module: dagster_k8s
   class: K8sRunLauncher
@@ -84,7 +84,7 @@ process_numbers_asset = define_asset_job(
     })
 ```
 
-K8s Run Launcher가 생성한 Kubernetes Job Pod의 Resource는 Dagster Instance에 Default 값을 지정하거나, 각 Dagster Job마다 정의할 수 있다. [Text 1]은 Dagster Instance에 Default Resource 값을 지정하는 경우의 Config 예시이며, [Code 1]은 각 Dagster Job마다 Tag를 통해서 Resource 값을 정의하는 경우의 Code 예시를 나타내고 있다.
+K8s Run Launcher가 생성한 Kubernetes Job Pod의 Resource는 Dagster Instance에 Default 값을 지정하거나, 각 Dagster Job마다 정의할 수 있다. [Text 2]는 Dagster Instance에 Default Resource 값을 지정하는 경우의 Config 예시이며, [Code 1]은 각 Dagster Job마다 Tag를 통해서 Resource 값을 정의하는 경우의 Code 예시를 나타내고 있다.
 
 ### 1.2. K8s Run Launcher + K8s Job Executor
 
@@ -93,6 +93,33 @@ K8s Run Launcher가 생성한 Kubernetes Job Pod의 Resource는 Dagster Instance
 [Figure 2]는 K8s Run Launcher와 K8s Job Executor 조합하여 이용하는 경우의 Architecture를 나타내고 있다. Multiprocess Executor 대신 K8s Job Executor를 이용하는 경우 Run은 각 Op/Asset을 위한 별도의 Kubernetes Job을 생성하여 실행된다. 이러한 특징 때문에 Multiprocess Executor와 비교하여 장단점을 가지고 있다. 다수의 Kubernetes Job을 이용하는 방식이기 때문에 하나의 Workflow가 Kubernetes Cluster의 Resource를 폭넓게 이용할 수 있다는 장점이 있지만, 각 Run을 위한 별도의 Kubernetes Job을 생성하기 때문에 생성 시간으로 인해서 긴 Cold Start 시간이 발생할 수 있다.
 
 반면에 Multiprocess Executor는 하나의 Workflow가 Run Kubernetes Job이 할당받은 Resource 이상을 이용할 수 없다는 단점을 가지고 있지만, 모든 Asset/Op들이 동일한 Kubernetes Job에서 실행되기 때문에 Cold Start가 발생하지 않는 장점을 갖는다. 물론 Multiprocess Executor를 활용해도 Dagster의 External Pipeline 기능을 활용하여 Dagster 외부에서 Workflow를 수행할 수 있으며, 이 경우는 Run Kubernetes Job이 할당받은 Resource와 별개의 Resource를 활용하는 형태이기 때문에 예외 사항이다.
+
+```text {caption="[Text 3] Dagster Pod Examples with K8s Run Launcher + K8s Job Executor"}
+$ kubectl -n dagster get job
+NAME                                               STATUS     COMPLETIONS   DURATION   AGE
+dagster-run-7089f4e0-dfb9-49af-8c3b-6f9355085e27   Complete   1/1           2m46s      3m6s
+dagster-step-377e3eab56ac3a9139bf74dff9436c8f      Complete   1/1           29s        78s
+dagster-step-3a37b43a00d6475349fc9e814cd81e57      Complete   1/1           42s        2m43s
+dagster-step-44d73c2196cbd520aadfb579c1665019      Complete   1/1           52s        2m5s
+dagster-step-7fa7ca8f57d34ec0669efd681a7799f3      Complete   1/1           43s        2m6s
+dagster-step-955bb321c832a470073fe7c84820a920      Complete   1/1           29s        54s
+dagster-step-a46eb649b986676185b781c6f046a707      Complete   1/1           20s        87s
+
+$ kubectl -n dagster get pod
+NAME                                                              READY   STATUS      RESTARTS        AGE
+dagster-daemon-84c4c57ffd-4cdp4                                   1/1     Running     0               2d18h
+dagster-dagster-user-deployments-dagster-workflows-868f5b75mfxv   1/1     Running     0               2d18h
+dagster-dagster-webserver-85d8d95dfc-q6j97                        1/1     Running     1 (6d15h ago)   7d
+dagster-run-7089f4e0-dfb9-49af-8c3b-6f9355085e27-qfk2r            0/1     Completed   0               3m23s
+dagster-step-377e3eab56ac3a9139bf74dff9436c8f-g4tjl               0/1     Completed   0               96s
+dagster-step-3a37b43a00d6475349fc9e814cd81e57-fvkzb               0/1     Completed   0               3m1s
+dagster-step-44d73c2196cbd520aadfb579c1665019-84mxl               0/1     Completed   0               2m23s
+dagster-step-7fa7ca8f57d34ec0669efd681a7799f3-4dggd               0/1     Completed   0               2m24s
+dagster-step-955bb321c832a470073fe7c84820a920-kdshq               0/1     Completed   0               72s
+dagster-step-a46eb649b986676185b781c6f046a707-v9cdg               0/1     Completed   0               105s
+```
+
+[Text 3]은 K8s Run Launcher와 K8s Job Executor 조합을 이용하여 Dagster Run을 수행한 경우의 Kubernetes Job과 Pod의 목록을 나타내고 있다. Multiprocess Executor와 동일하게 `dagster-run` 문자열으로 시작하는 Kubernetes Job과 Pod가 동일하게 존재하며, `dagster-step` 문자열로 시작하는 Kubernetes Job과 Pod도 확인할 수 있다. `dagster-step` 문자열로 시작하는 Kubernetes Job과 Pod가 각 Op/Asset을 위한 Kubernetes Job과 Pod를 나타내며, 모두 실행이 완료된 것을 확인할 수 있다.
 
 ```python {caption="[Code 2] Op/Asset Resource Example", linenos=table}
 @op(description="Generate a list of numbers from 1 to 10",
