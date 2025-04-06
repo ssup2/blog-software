@@ -21,6 +21,21 @@ Dagster를 Kubernetes 위에서 동작시키는 경우 3가지 조합의 Run Lau
 
 K8s Run Launcher와 Multiprocess Executor 조합은 가장 기본적인 조합이며, [Figure 1]의 Dagster Architecture도 K8s Run Launcher와 Multiprocess Executor 조합을 이용하여 구성되어 있을 경우의 Architecture를 나타내고 있다. K8s Run Launcher는 각 Run을 위한 별도의 Kubernetes Job을 생성하며, Run은 생성된 Kubernetes Job의 Pod에서 실행된다. 이후에 Run은 다수의 Process를 생성하며 Op/Asset을 수행한다.
 
+```text {caption="[Text 1] Dagster Pod Examples with K8s Run Launcher + Multiprocess Executor"}
+$ kubectl -n dagster get job
+NAME                                               STATUS     COMPLETIONS   DURATION   AGE
+dagster-run-527436fd-ef2f-40c5-978f-1b7bbffeab8b   Complete   1/1           85s        9m9s
+
+$ kubectl -n dagster get pod
+NAME                                                              READY   STATUS      RESTARTS        AGE
+dagster-daemon-84c4c57ffd-4cdp4                                   1/1     Running     0               2d18h
+dagster-dagster-user-deployments-dagster-workflows-868f5b75mfxv   1/1     Running     0               2d18h
+dagster-dagster-webserver-85d8d95dfc-q6j97                        1/1     Running     1 (6d15h ago)   7d
+dagster-run-527436fd-ef2f-40c5-978f-1b7bbffeab8b-2hzsn            0/1     Completed   0               9m30s
+```
+
+[Text 1]은 K8s Run Launcher와 Multiprocess Executor 조합을 이용하여 Dagster Run을 수행한 경우의 Kubernetes Job과 Pod의 목록을 나타내고 있다. `dagster-run` 문자열으로 시작하는 Kubernetes Job과 Pod가 특정 Run을 위한 Kubernetes Job과 Pod를 나타내며, 실행이 완료된 것을 확인할 수 있다. [Text 1]에서는 Dagster Control Plane의 Pod들도 확인할 수 있다.
+
 ```yaml {caption="[Text 1] K8s Run Launcher Config in Dagster Instance", linenos=table}
 run_launcher:
   module: dagster_k8s
