@@ -21,7 +21,7 @@ Dagster를 Kubernetes 위에서 동작시키는 경우 3가지 조합의 Run Lau
 
 ### 1.1. K8s Run Launcher + Multiprocess Executor
 
-K8s Run Launcher와 Multiprocess Executor 조합은 가장 기본적인 조합이며, [Figure 1]의 Dagster Architecture도 K8s Run Launcher와 Multiprocess Executor 조합을 이용하여 구성되어 있을 경우의 Architecture를 나타내고 있다. K8s Run Launcher는 각 Run을 위한 별도의 Kubernetes Job을 생성하며, Run은 생성된 Kubernetes Job의 Pod에서 실행된다. 이후에 Run은 다수의 Process를 생성하며 Op/Asset을 수행한다.
+**K8s Run Launcher**와 **Multiprocess Executor** 조합은 가장 기본적인 조합이며, [Figure 1]의 Dagster Architecture도 K8s Run Launcher와 Multiprocess Executor 조합을 이용하여 구성되어 있을 경우의 Architecture를 나타내고 있다. K8s Run Launcher는 각 Run을 위한 별도의 Kubernetes Job을 생성하며, Run은 생성된 Kubernetes Job의 Pod에서 실행된다. 이후에 Run은 다수의 Process를 생성하며 Op/Asset을 수행한다.
 
 ```text {caption="[Text 1] Dagster Pod Examples with K8s Run Launcher + Multiprocess Executor"}
 $ kubectl -n dagster get job
@@ -92,7 +92,7 @@ K8s Run Launcher가 생성한 Kubernetes Job Pod의 Resource는 Dagster Instance
 
 {{< figure caption="[Figure 2] Dagster K8s Run Launcher + K8s Job Executor Architecture" src="images/dagster-architecture-k8srunlauncher-multiprocess.png" width="1000px" >}}
 
-[Figure 2]는 K8s Run Launcher와 K8s Job Executor 조합하여 이용하는 경우의 Architecture를 나타내고 있다. Multiprocess Executor 대신 K8s Job Executor를 이용하는 경우 Run은 각 Op/Asset을 위한 별도의 Kubernetes Job을 생성하여 실행된다. 이러한 특징 때문에 Multiprocess Executor와 비교하여 장단점을 가지고 있다. 다수의 Kubernetes Job을 이용하는 방식이기 때문에 하나의 Workflow가 Kubernetes Cluster의 Resource를 폭넓게 이용할 수 있다는 장점이 있지만, 각 Run을 위한 별도의 Kubernetes Job을 생성하기 때문에 생성 시간으로 인해서 긴 Cold Start 시간이 발생할 수 있다.
+[Figure 2]는 **K8s Run Launcher**와 **K8s Job Executor**를 조합하여 이용하는 경우의 Architecture를 나타내고 있다. Multiprocess Executor 대신 K8s Job Executor를 이용하는 경우 Run은 각 Op/Asset을 위한 별도의 Kubernetes Job을 생성하여 실행된다. 이러한 특징 때문에 Multiprocess Executor와 비교하여 장단점을 가지고 있다. 다수의 Kubernetes Job을 이용하는 방식이기 때문에 하나의 Workflow가 Kubernetes Cluster의 Resource를 폭넓게 이용할 수 있다는 장점이 있지만, 각 Run을 위한 별도의 Kubernetes Job을 생성하기 때문에 생성 시간으로 인해서 긴 Cold Start 시간이 발생할 수 있다.
 
 반면에 Multiprocess Executor는 하나의 Workflow가 Run Kubernetes Job이 할당받은 Resource 이상을 이용할 수 없다는 단점을 가지고 있지만, 모든 Asset/Op들이 동일한 Kubernetes Job에서 실행되기 때문에 Cold Start가 발생하지 않는 장점을 갖는다. 물론 Multiprocess Executor를 활용해도 Dagster의 External Pipeline 기능을 활용하여 Dagster 외부에서 Workflow를 수행할 수 있으며, 이 경우는 Run Kubernetes Job이 할당받은 Resource와 별개의 Resource를 활용하는 형태이기 때문에 예외 사항이다.
 
@@ -163,6 +163,12 @@ K8s Job Executor를 통해서 생성되는 Kubernetes Job의 Resource는 Dagster
 
 {{< figure caption="[Figure 3] Dagster Celery K8s Run Launcher + Celery K8s Job Executor Architecture" src="images/dagster-architecture-k8scelery.png" width="1000px" >}}
 
+[Figure 3]은 **Celery K8s Run Launcher**와 **Celery K8s Job Executor**를 조합을 이용하여 Dagster Run을 수행한 경우의 Architecture를 나타내고 있다. K8s Run Launcher와 동일하게 Celery K8s Run Launcher는 각 Run을 위한 별도의 Kubernetes Job을 생성하여 실행한다. 다만 차이점은 Run에서 Op/Asset 수행을 위해서 Process나 Kubernetes Job을 생성하는 것이 아니라, Celery에게 Op/Asset 처리를 Queuing한다. 이후에 Celery Worker는 Celery에서 Op/Asset을 전달받아 처리한다. 이러한 동작 방식 때문에 Celery K8s Run Launcher를 이용할 경우 반드시 Celery K8s Job Executor를 이용해야 한다.
+
+Op/Asset의 병렬 처리 개수는 Celery Worker의 개수와 동일하다. 만약 Celery Worker의 개수가 5개라면 Op/Asset의 최대 병렬 처리 개수도 5개가 된다. 즉 Celery Worker의 개수를 통해서 Op/Asset의 병렬 처리 개수를 조절할 수 있다. K8s Run Launcher와 K8s Job Executor를 이용하는 경우에는 동시에 많은 Workflow가 실행되면 이에 비례하여 동시에 많은 Op/Asset Pod가 생성되고 실행된다. 이는 Kubernetes Cluster에 많은 부담을 발생시킬 수 있다. 반면에 Celery K8s Run Launcher와 Celery K8s Job Executor를 이용하는 경우에는 동시에 많은 Workflow가 실행되더라도 최대 Celery Worker의 개수 만큼만 Op/Asset Pod가 생성되고 실행되기 때문에 Kubernetes Cluster의 부담을 경감시킬 수 있다.
+
+하지만 Celery K8s Run Launcher와 Celery K8s Job Executor를 이용하기 위해서는 Celery의 Queue로 활용되는 RabbitMQ/Redis와 Celery Worker를 추가적으로 운영해야하영 때문에 운영의 복잡도는 더 올라가는 단점이 존재한다.
+
 ```text {caption="[Text 4] Dagster Pod Examples with Celery K8s Run Launcher + Celery K8s Job Executor"}
 $ kubectl -n dagster-celery get job
 NAME                                               STATUS     COMPLETIONS   DURATION   AGE
@@ -195,9 +201,7 @@ dagster-step-f5ae327359276c078786d7ce2ae3d818-dkpnl               0/1     Comple
 dagster-step-fd9bd10d0477966ec56f4d5ac1455f02-288lw               0/1     Completed   0               5m55s
 ```
 
-```python {caption="[Code 3] Op/Asset Resource Example", linenos=table}
-
-```
+[Text 4]는 Celery K8s Run Launcher와 Celery K8s Job Executor 조합을 이용하여 Dagster Run을 수행한 경우의 Kubernetes Job과 Pod의 목록을 나타내고 있다. K8s Run Launcher와 K8s Job Executor를 이용하는 경우와 동일하게 `dagster-run` 문자열로 시작하는 Run을 위한 Kubernetes Job과 Pod가 존재하며, `dagster-step` 문자열로 시작하는 Op/Asset을 위한 Kubernetes Job과 Pod도 확인할 수 있다. 또한 `dagster-celery-workers` 문자열로 시작하는 Celery Worker Pod와 Celery의 Queue로 이용되는 Redis도 확인할 수 있다.
 
 ## 2. Configuration Propagation
 
