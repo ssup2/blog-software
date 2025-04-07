@@ -333,7 +333,7 @@ Dagster Web Server, Dagster CLI, Dagster Daemon은 Workflow를 Trigger하는 역
 
 사용자는 Dagster는 Web Server 또는 CLI를 통해서 Workflow를 Trigger를 직접 수행할 수 있으며, Dagster Daemon은 사용자가 Code Location에 정의한 Schedule Object 또는 Sensor Object를 통해서 Job을 Trigger한다. Trigger된 Workflow는 **Run Coordinator**에 Scheduling 과정을 거쳐 **Run Launcher**에 의해서 **Run**이 생성되고, Run 내부에서는 **Executor**를 통해서 하나씩 Op 또는 Asset이 실행되며 Workflow가 수행된다.
 
-하나의 Run은 하나의 Trigger된 Workflow를 의미하며, Workflow가 종료되면 종료된 Workflow를 담당하는 Run도 같이 종료된다. Run이 실제적인 Workflow의 Control Plane 역할을 수행하며, Op 또는 Asset을 Executor를 통해서 DAG 형태로 순차적으로 수행한다. Run은 Run Launcher에 의해서 생성된다. Dagster는 몇가지 Type의 Run Launcher와 Executor를 제공하며 설정된 Run Launcher와 Executor에 따라서 Workflow가 수행되는 방식이 결정된다. 하나의 Dagster Cluster에서는 하나의 Run Launcher만 이용할 수 있으며, Executor는 Workflow마다 설정하여 이용할 수 있다.
+하나의 Run은 하나의 Trigger된 Workflow를 의미하며, Workflow가 종료되면 종료된 Workflow를 담당하는 Run도 같이 종료된다. Run이 실제적인 Workflow의 Control Plane 역할을 수행하며, Op 또는 Asset을 Executor를 통해서 DAG 형태로 순차적으로 수행한다. Run은 Run Launcher에 의해서 생성된다. Dagster는 몇가지 Type의 Run Launcher와 Executor를 제공하며 설정된 Run Launcher와 Executor에 따라서 Workflow가 수행되는 방식이 결정된다. 하나의 Dagster Cluster에서는 하나의 Run Launcher만 이용할 수 있으며, Executor는 Workflow (Job)마다 설정하여 이용할 수 있다.
 
 Run Launcher는 Dagster Instance([File 1])에 설정되며, Dagster가 지원하는 Run Launcher는 다음과 같다.
 
