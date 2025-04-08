@@ -167,7 +167,7 @@ K8s Job Executor를 통해서 생성되는 Kubernetes Job의 Resource는 Dagster
 
 Op/Asset의 병렬 처리 개수는 Celery Worker의 개수와 동일하다. 만약 Celery Worker의 개수가 5개라면 Op/Asset의 최대 병렬 처리 개수도 5개가 된다. 즉 Celery Worker의 개수를 통해서 Op/Asset의 병렬 처리 개수를 조절할 수 있다. K8s Run Launcher와 K8s Job Executor를 이용하는 경우에는 동시에 많은 Workflow가 실행되면 이에 비례하여 동시에 많은 Op/Asset Pod가 생성되고 실행된다. 이는 Kubernetes Cluster에 많은 부담을 발생시킬 수 있다. 반면에 Celery K8s Run Launcher와 Celery K8s Job Executor를 이용하는 경우에는 동시에 많은 Workflow가 실행되더라도 최대 Celery Worker의 개수 만큼만 Op/Asset Pod가 생성되고 실행되기 때문에 Kubernetes Cluster의 부담을 경감시킬 수 있다.
 
-하지만 Celery K8s Run Launcher와 Celery K8s Job Executor를 이용하기 위해서는 Celery의 Queue로 활용되는 RabbitMQ/Redis와 Celery Worker를 추가적으로 운영해야하영 때문에 운영의 복잡도는 더 올라가는 단점이 존재한다.
+하지만 Celery K8s Run Launcher와 Celery K8s Job Executor를 이용하기 위해서는 Celery의 Queue로 활용되는 RabbitMQ/Redis와 Celery Worker를 추가적으로 운영해야 하기 때문에 운영의 복잡도는 더 올라가는 단점이 존재한다.
 
 ```text {caption="[Text 4] Dagster Pod Examples with Celery K8s Run Launcher + Celery K8s Job Executor"}
 $ kubectl -n dagster-celery get job
@@ -204,6 +204,8 @@ dagster-step-fd9bd10d0477966ec56f4d5ac1455f02-288lw               0/1     Comple
 [Text 4]는 Celery K8s Run Launcher와 Celery K8s Job Executor 조합을 이용하여 Dagster Run을 수행한 경우의 Kubernetes Job과 Pod의 목록을 나타내고 있다. K8s Run Launcher와 K8s Job Executor를 이용하는 경우와 동일하게 `dagster-run` 문자열로 시작하는 Run을 위한 Kubernetes Job과 Pod가 존재하며, `dagster-step` 문자열로 시작하는 Op/Asset을 위한 Kubernetes Job과 Pod도 확인할 수 있다. 또한 `dagster-celery-workers` 문자열로 시작하는 Celery Worker Pod와 Celery의 Queue로 이용되는 Redis도 확인할 수 있다.
 
 ## 2. Configuration Propagation
+
+Code Location Server Pod의 Container Image는 Run, Op/Asset의 Pod에서도 그대로 이용된다. `Code Location Server A` 내부에 있는 Workflow가 Trigger되면 Run, Op/Asset의 Pod는 모두 `Code Location Server A`의 Container Image를 이용하여 동작하며, 유사하게 `Code Location Server B` 내부에 있는 Job이 Trigger되면 Run, Op/Asset의 Pod는 모두 `Code Location Server B`의 Container Image를 이용하여 동작한다. Run Pod와 Op/Asset Pod는 모두 Workflow가 실행될때 동적으로 생성되는 Pod이기 때문에 Code Location Server Pod의 Container Image의 크기가 너무 큰 경우에는 Download 시간으로 인해서 Cold Start 시간이 길어져 Workflow 실행 시간이 길어질 수 있다. 따라서 Code Location Server의 Container Image는 가능한 작은 크기를 갖도록 유지하는 것이 중요하다.
 
 ```text {caption="[Text 2] "}
 # Code Location Server Command
