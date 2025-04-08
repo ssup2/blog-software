@@ -1,6 +1,5 @@
 ---
 title: Dagster Architecture on Kubernetes
-draft: true
 ---
 
 Dagster를 Kubernetes 위에서 동작시킬때의 Architecture를 분석한다.
