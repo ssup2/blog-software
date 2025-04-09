@@ -80,12 +80,17 @@ process_numbers_asset = define_asset_job(
                     "requests": {"cpu": "2000m", "memory": "4096Mi"},
                     "limits": {"cpu": "2000m", "memory": "4096Mi"},
                 }
+            },
+            "pod_spec_config": {
+                "node_selector": {
+                    "node-group.dp.ssup2": "worker"
+                }
             }
         }
     })
 ```
 
-K8s Run Launcher가 생성한 Kubernetes Job Pod의 Resource는 Dagster Instance에 Default 값을 지정하거나, 각 Dagster Job마다 정의할 수 있다. [Text 2]는 Dagster Instance에 Default Resource 값을 지정하는 경우의 Config 예시이며, [Code 1]은 각 Dagster Job마다 Tag를 통해서 Resource 값을 정의하는 경우의 Code 예시를 나타내고 있다.
+K8s Run Launcher가 생성한 Run의 Kubernetes Pod의 Spec은 Dagster Instance에 **Default** 값을 지정하거나, 각 Dagster Job마다 정의할 수 있다. [Text 2]는 Dagster Instance에 Default Spec을 지정하는 경우의 Config 예시이며, [Code 1]은 각 Dagster Job마다 Tag를 통해서 Spec을 정의하는 경우의 Code 예제를 나타내고 있다. 예제에서는 Resource와 Node Selector를 지정하고 있으며, 이외에 대부분의 Pod Spec을 지정할 수 있다.
 
 ### 1.2. K8s Run Launcher + K8s Job Executor
 
@@ -120,7 +125,7 @@ dagster-step-955bb321c832a470073fe7c84820a920-kdshq               0/1     Comple
 dagster-step-a46eb649b986676185b781c6f046a707-v9cdg               0/1     Completed   0               105s
 ```
 
-[Text 3]은 K8s Run Launcher와 K8s Job Executor 조합을 이용하여 Dagster Run을 수행한 경우의 Kubernetes Job과 Pod의 목록을 나타내고 있다. Multiprocess Executor와 동일하게 `dagster-run` 문자열으로 시작하는 Kubernetes Job과 Pod가 동일하게 존재하며, `dagster-step` 문자열로 시작하는 Kubernetes Job과 Pod도 확인할 수 있다. `dagster-step` 문자열로 시작하는 Kubernetes Job과 Pod가 각 Op/Asset을 위한 Kubernetes Job과 Pod를 나타내며, `STATUS`와 `AGE`를 보면 순차적으로 모두 실행이 완료된 것을 확인할 수 있다.
+[Text 3]은 K8s Run Launcher와 K8s Job Executor 조합을 이용하여 Dagster Run을 수행한 경우의 Kubernetes Job과 Pod의 목록을 나타내고 있다. Multiprocess Executor와 동일하게 `dagster-run` 문자열으로 시작하는 Run을 위한 Kubernetes Job과 Pod가 동일하게 존재하며, `dagster-step` 문자열로 시작하는 Kubernetes Job과 Pod도 확인할 수 있다. `dagster-step` 문자열로 시작하는 Kubernetes Job과 Pod가 각 Op/Asset을 위한 Kubernetes Job과 Pod를 나타내며, `STATUS`와 `AGE`를 보면 순차적으로 모두 실행이 완료된 것을 확인할 수 있다.
 
 ```python {caption="[Code 2] Op/Asset Resource Example", linenos=table}
 @op(description="Generate a list of numbers from 1 to 10",
@@ -156,7 +161,7 @@ def generated_numbers():
     return list(range(1, 11))
 ```
 
-K8s Job Executor를 통해서 생성되는 Kubernetes Job의 Resource는 Dagster Instance에 Default 값을 지정하거나, 각 Dagster Job마다 정의할 수 있다. [Code 2]는 Op/Asset에 Tag를 통해서 Resource 값을 정의하는 경우의 Code 예시를 나타내고 있다.
+K8s Job Executor를 통해서 생성되는 Op/Asset Kubernetes Pod의 Spec은 기본적으로는 Run의 Kubernetes Job과 Pod의 Spec을 **상속**하며, 각 Dagster Op/Asset마다 정의도 할 수 있다. [Code 2]는 Op/Asset에 Tag를 통해서 Resource 값을 정의하는 경우의 예제를 나타내고 있다.
 
 ### 1.3. Celery K8s Run Launcher + Celery K8s Job Executor
 
@@ -202,7 +207,7 @@ dagster-step-fd9bd10d0477966ec56f4d5ac1455f02-288lw               0/1     Comple
 
 [Text 4]는 Celery K8s Run Launcher와 Celery K8s Job Executor 조합을 이용하여 Dagster Run을 수행한 경우의 Kubernetes Job과 Pod의 목록을 나타내고 있다. K8s Run Launcher와 K8s Job Executor를 이용하는 경우와 동일하게 `dagster-run` 문자열로 시작하는 Run을 위한 Kubernetes Job과 Pod가 존재하며, `dagster-step` 문자열로 시작하는 Op/Asset을 위한 Kubernetes Job과 Pod도 확인할 수 있다. 또한 `dagster-celery-workers` 문자열로 시작하는 Celery Worker Pod와 Celery의 Queue로 이용되는 Redis도 확인할 수 있다.
 
-## 2. Configuration Propagation
+## 2. Container Image, Configuration 전파
 
 Code Location Server Pod의 Container Image는 Run, Op/Asset의 Pod에서도 그대로 이용된다. `Code Location Server A` 내부에 있는 Workflow가 Trigger되면 Run, Op/Asset의 Pod는 모두 `Code Location Server A`의 Container Image를 이용하여 동작하며, 유사하게 `Code Location Server B` 내부에 있는 Job이 Trigger되면 Run, Op/Asset의 Pod는 모두 `Code Location Server B`의 Container Image를 이용하여 동작한다. Run Pod와 Op/Asset Pod는 모두 Workflow가 실행될때 동적으로 생성되는 Pod이기 때문에 Code Location Server Pod의 Container Image의 크기가 너무 큰 경우에는 Download 시간으로 인해서 Cold Start 시간이 길어져 Workflow 실행 시간이 길어질 수 있다. 따라서 Code Location Server의 Container Image는 가능한 작은 크기를 갖도록 유지하는 것이 중요하다.
 
@@ -432,7 +437,9 @@ def process_words_k8s_job():
     echo_goodbye_job_k8s(echo_hello_job_op())
 ```
 
-[Code 4]는 `k8s_job_op()`와 `execute_k8s_job()`를 이용하여 외부 Kubernetes Job을 생성하는 예제를 나타내고 있다. 두 함수는 모두 외부 Kubernetes Job을 생성하는 함수지만 용도가 다르다. `k8s_job_op()`는 op 생성과 함께 외부 Kubernetes Job을 정의할때 이용하는 High Level 함수이며, `execute_k8s_job()`는 op/asset 함수 내부에서 외부 Kubernetes Jobs을 생성할때 이용하는 Low Level 함수이다.
+[Code 4]는 `k8s_job_op()`와 `execute_k8s_job()`를 이용하여 외부 Kubernetes Job을 생성하는 예제를 나타내고 있다. 두 함수는 모두 외부 Kubernetes Job을 생성하는 함수지만 용도가 다르다. `k8s_job_op()`는 op 생성과 함께 외부 Kubernetes Job을 정의할때 이용하는 High Level 함수이며, `execute_k8s_job()`는 op/asset 함수 내부에서 외부 Kubernetes Jobs을 생성할때 이용하는 Low Level 함수이다. 두 함수 모두 다양한 옵션을 제공하여 자유롭게 외부 Kubernetes Job의 Spec을 정의할 수 있다.
+
+두 함수로 외부 Kubernetes Job를 생성하는 경우 Pod의 Spec또한 Run, Op/Asset의 Kubernetes Pod의 Spec을 상속받는다. 따라서 Code Location Server에 설정된 환경변수, Resource, Node Selector 등의 설정도 그대로 외부 Kubernetes Job에 적용된다. 생성된 외부 Kubernetes Job의 Stdout/Stderr도 Dagster Web Server에서 확인 할 수 있다. 이러한 특징 때문에 외부 Kubernetes Job을 생성할 경우 Kubernetes Client를 직접 이용하는것 보다는 Dagster에서 제공하는 `k8s_job_op()`와 `execute_k8s_job()`를 이용이 권장된다.
 
 ## 5. 참조
 
