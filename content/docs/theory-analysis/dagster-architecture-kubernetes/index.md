@@ -360,6 +360,8 @@ Container Image는 동일하지만 내부의 Command와 환경 변수 등이 다
 
 Run Pod의 경우에는 `dagster api execute_run [config]` Command를 이용하고 있으며 `config`는 Dagster Instance의 정보과 Code Location Server로부터 받은 Workflow 정보를 기반으로 구성되어 있다. 환경 변수의 경우에는 Job의 이름과 PostgreSQL Password 정보들이 환경 변수에 설정되어 있다. 마지막으로 Op/Asset (Step) Pod의 경우에는 `dagster api execute_step [compressed config]` Command를 이용하고 있으며, 환경 변수에는 Job 이름과 Op/Asset 이름, PostgreSQL Password 정보들이 환경 변수에 설정되어 있다. `compressed config`는 base64 Decoding 및 Zlib Decoding을 통해서 원본 Config 값을 확인할 수 있으며 [Text 8]은 원본 Config 값의 예제를 나타내고 있다.
 
+Code Location Server에 설정된 Custom 환경변수도 Run Pod, Op/Asset (Step) Pod에도 모두 동일하게 설정된다. [Text 5] Code Location Server에 설정된  `User:ssup2` 환경 변수가 [Text 6~8] Run Pod, Op/Asset (Step)의 환경 변수에도 모두 동일하게 설정되어 있는것을 확인할 수 있다. 따라서 Workflow에서 이용할 환경변수는 Code Location Server에 설정하면 된다.
+
 ## 3. High Availability
 
 Dagster의 Component 마다 다른 방식으로 **High Availability**를 보장한다. 크게 Kubernetes Deployment로 Component와 Kubernetes Job으로 동작하는 Component로 구분지을 수 있다.
@@ -394,9 +396,46 @@ def sample_job():
 
 Kubernetes Job으로 동작하는 Run 또는 Op/Asset의 경우에는 High Availability를 위해서 Kubernetes Job이 제공하는 Restart Policy를 이용하지 않으며, Dagster 자체적으로 제공하는 Retry Policy 기능을 활용하여 재시작을 수행한다. [Text 9]는 Dagster Daemon의 Default Retry Policy 설정 예제를 나타내고 있으며, [Code 3]은 Op/Asset의 Retry Policy 설정 예제를 나타내고 있다.
 
-## 4. External Pipeline
+## 4. 외부 Kubernetes Job 생성
+
+Dagster를 Kubernetes에 동작시키는 경우 Workflow의 Op/Asset은 기본적으로 Dagster가 관리하는 Run Kubernetes Job 또는 Op/Asset (Step) Kubernetes Job 안에서 동작한다. 하지만 필요에 따라서 Op/Asset이 Dagster가 관리하는 Kubernetes Job이 아닌 별도 외부의 Kubernetes Job에서 실행되도록 구성도 할 수 있다. 이때 이용되는 Dagster에서 제공하는 Kubernetes Job Client의 함수가 `k8s_job_op()`와 `execute_k8s_job()`가 있다.
+
+```python {caption="[Code 4] k8s_job_op, execute_k8s_job Example", linenos=table}
+echo_hello_job_op = k8s_job_op.configured(
+    {
+        "image": "busybox",
+        "command": ["/bin/sh", "-c"],
+        "args": ["echo HELLO"],
+        "resources": {
+            "requests": {"cpu": "125m", "memory": "256Mi"},
+            "limits": {"cpu": "250m", "memory": "512Mi"},
+        }
+    },
+    name="echo_hello_job_op",
+)
+
+@op(description="Echo goodbye")
+def echo_goodbye_job_k8s(context: OpExecutionContext, Nothing):
+    execute_k8s_job(
+        context=context,
+        image="busybox",
+        command=["/bin/sh", "-c"],
+        args=["echo GOODBYE"],
+        resources={
+            "requests": {"cpu": "125m", "memory": "256Mi"},
+            "limits": {"cpu": "250m", "memory": "512Mi"},
+        }
+    )
+
+@job
+def process_words_k8s_job():
+    echo_goodbye_job_k8s(echo_hello_job_op())
+```
+
+[Code 4]는 `k8s_job_op()`와 `execute_k8s_job()`를 이용하여 외부 Kubernetes Job을 생성하는 예제를 나타내고 있다. 두 함수는 모두 외부 Kubernetes Job을 생성하는 함수지만 용도가 다르다. `k8s_job_op()`는 op 생성과 함께 외부 Kubernetes Job을 정의할때 이용하는 High Level 함수이며, `execute_k8s_job()`는 op/asset 함수 내부에서 외부 Kubernetes Jobs을 생성할때 이용하는 Low Level 함수이다.
 
 ## 5. 참조
 
 * Dagster Run Launcher: [https://docs.dagster.io/guides/deploy/execution/run-launchers](https://docs.dagster.io/guides/deploy/execution/run-launchers)
 * Dagster Executor: [https://docs.dagster.io/guides/operate/run-executors](https://docs.dagster.io/guides/operate/run-executors)
+* Dagster Kubernetes : [https://docs.dagster.io/api/python-api/libraries/dagster-k8s](https://docs.dagster.io/api/python-api/libraries/dagster-k8s)
