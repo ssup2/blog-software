@@ -9,7 +9,7 @@ CPU 사용량을 출력하는 mpstat의 사용법을 정리한다.
 ### 1.1. mpstat -P ALL
 
 ```shell {caption="[Shell 1] mpstat -P ALL"}
-# mpstat -P ALL
+$ mpstat -P ALL
 Linux 4.15.0-60-generic (node09)        10/09/19        _x86_64_        (2 CPU)
 
 13:00:37     CPU    %usr   %nice    %sys %iowait    %irq   %soft  %steal  %guest  %gnice   %idle

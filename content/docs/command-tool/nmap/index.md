@@ -9,8 +9,7 @@ title: nmap
 ### 1.1. nmap [Host]
 
 ```shell {caption="[Shell 1] nmap localhost"}
-# nmap localhost
-
+$ nmap localhost
 Starting Nmap 7.60 ( https://nmap.org ) at 2020-05-12 23:33 KST
 Nmap scan report for localhost (127.0.0.1)
 Host is up (0.0000040s latency).
@@ -37,6 +36,7 @@ host에서 일반적으로 많이 이용되는 1000개의 TCP Port들을 Scannin
 ### 1.2. nmap -sU [Host]
 
 ```shell {caption="[Shell 2] nmap -p 1-65535 localhost"}
+$ nmap -p 1-65535 localhost
 Starting Nmap 7.60 ( https://nmap.org ) at 2020-05-13 23:12 KST
 Nmap scan report for localhost (127.0.0.1)
 Host is up (0.0000040s latency).
@@ -59,8 +59,7 @@ host에서 일반적으로 많이 이용되는 1000개의 UDP Port들을 Scannin
 ### 1.3. nmap -p [Port Range] [Host]
 
 ```shell {caption="[Shell 3] nmap -p 1-65535 localhost"}
-# nmap localhost
-
+$ nmap -p 1-65535 localhost
 Starting Nmap 7.60 ( https://nmap.org ) at 2020-05-12 23:33 KST
 Nmap scan report for localhost (127.0.0.1)
 Host is up (0.0000040s latency).

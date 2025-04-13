@@ -9,7 +9,7 @@ Network 통계 정보를 보여주는 netstat 사용법을 정리한다.
 ### 1.1. netstat
 
 ```shell {caption="[Shell 1] netstat"}
-# netstat 
+$ netstat 
 Active Internet connections (w/o servers)
 Proto Recv-Q Send-Q Local Address           Foreign Address         State
 tcp        0      0 node09:9100             node09:50588            TIME_WAIT
@@ -42,7 +42,7 @@ unix  2      [ ]         DGRAM                    21526
 ### 1.2. netstat -i
 
 ```shell {caption="[Shell 2] netstat -i"}
-# netstat -i
+$ netstat -i
 Kernel Interface table
 Iface      MTU    RX-OK RX-ERR RX-DRP RX-OVR    TX-OK TX-ERR TX-DRP TX-OVR Flg
 docker0   1500        0      0      0 0            52      0      0      0 BMRU
@@ -64,7 +64,7 @@ lo       65536   126777      0      0 0        126777      0      0      0 LRU
 ### 1.3. netstat -nr
 
 ```shell {caption="[Shell 3] netstat -nr"}
-# netstat -nr
+$ netstat -nr
 Kernel IP routing table
 Destination     Gateway         Genmask         Flags   MSS Window  irtt Iface
 0.0.0.0         192.168.0.1     0.0.0.0         UG        0 0          0 eth0
@@ -77,7 +77,7 @@ Routing Table 정보를 출력한다. [Shell 3]은 `netstat -nr`을 이용하여
 ### 1.4. netstat -plnt
 
 ```shell {caption="[Shell 4] netstat -pln"}
-# netstat -plnt
+$ netstat -plnt
 Active Internet connections (only servers)
 Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name
 tcp        0      0 10.0.0.19:9100          0.0.0.0:*               LISTEN      3080/node_exporter

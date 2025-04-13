@@ -9,7 +9,7 @@ systemd-journald를 제어하는 journalctl의 사용법을 정리한다.
 ### 1.1. journalctl -xu [Service]
 
 ```shell {caption="[Shell 1] journalctl -xu"}
-journalctl -xu ssh
+$ journalctl -xu ssh
 
 -- Logs begin at Sat 2019-07-13 18:32:30 UTC, end at Mon 2019-09-30 08:16:09 UTC. --
 Jul 13 19:06:29 node09 systemd[1]: Starting OpenBSD Secure Shell server...
@@ -35,7 +35,7 @@ Jul 13 19:06:29 node09 systemd[1]: Started OpenBSD Secure Shell server.
 ### 1.3. journalctl -fu [Service]
 
 ```shell {caption="[Shell 2] journalctl -fu"}
-# journalctl -fu ssh
+$ journalctl -fu ssh
 -- Logs begin at Sat 2019-07-13 18:32:30 UTC. --
 Sep 23 15:27:55 node09 sshd[14092]: Accepted password for root from 10.0.0.10 port 9334 ssh2
 Sep 25 15:08:49 node09 sshd[1440]: Accepted password for root from 10.0.0.10 port 11432 ssh2
@@ -54,7 +54,7 @@ Sep 30 05:48:50 node09 sshd[17667]: Accepted password for root from 10.0.0.10 po
 ### 1.4. journalctl -t kernel
 
 ```shell {caption="[Shell 3] journalctl -t kernel"}
- # journalctl -t kernel
+$ journalctl -t kernel
 -- Logs begin at Sat 2019-07-13 18:32:30 UTC, end at Mon 2019-09-30 08:24:09 UTC. --
 Jul 13 18:32:30 localhost.localdomain kernel: Linux version 4.15.0-54-generic (buildd@lgw01-amd64-014) (gcc version 7.4.0 (Ubuntu 7.4.0-1ubuntu1~18.04.1)) #58-Ubuntu SMP Mon Jun
 Jul 13 18:32:30 localhost.localdomain kernel: Command line: BOOT_IMAGE=/boot/vmlinuz-4.15.0-54-generic root=UUID=c30770af-2d12-43ce-8bf2-1480721d056e ro

@@ -21,7 +21,7 @@ Service를 재시작한다.
 ### 1.4. systemctl status [Service]
 
 ```shell {caption="[Shell 1] systemctl status"}
-# systemctl status sshd
+$ systemctl status sshd
 ● ssh.service - OpenBSD Secure Shell server
    Loaded: loaded (/lib/systemd/system/ssh.service; enabled; vendor preset: enabled)
    Active: active (running) since Sun 2020-08-16 14:21:33 KST; 4min 44s ago

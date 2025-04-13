@@ -9,7 +9,7 @@ Linux 상태 분석 Tool들을 정리한다.
 ### 1.1. netstat
 
 ```shell {caption="[Shell 1] uptime"}
-# netstat -plnt
+$ netstat -plnt
 Active Internet connections (only servers)
 Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name
 tcp        0      0 10.0.0.19:9100          0.0.0.0:*               LISTEN      3080/node_exporter

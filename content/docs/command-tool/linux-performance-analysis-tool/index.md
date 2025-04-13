@@ -9,7 +9,7 @@ Linux에서 성능 측정시 이용되는 Tool들을 정리한다.
 ### 1.1. uptime
 
 ```shell {caption="[Shell 1] uptime"}
-# uptime
+$ uptime
 10:00:00 up  8:04,  1 user,  load average: 3.37, 3.37, 3.45
 ```
 
@@ -18,7 +18,7 @@ uptime은 Linux의 구동 시간 및 평균 CPU 부하를 보여주는 Tool이�
 ### 1.2. free
 
 ```shell {caption="[Shell 2] free"}
-# free -m
+$ free -m
               total        used        free      shared  buff/cache   available
 Mem:           7977        1185        2710           1        4081        6490
 Swap:          4095           0        4095
@@ -29,7 +29,7 @@ free는 Memory 및 Swap 사용량을 출력하는 Tool이다. [Shell 2]는 `free
 ### 1.3. vmstat
 
 ```shell {caption="[Shell 3] vmstat"}
-# vmstat 1
+$ vmstat 1
 procs -----------memory---------- ---swap-- -----io---- -system-- ------cpu-----
  r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa st
  2  1      0 2659952 815660 3469920    0    0    40  5839  197  477 17  3 32 48  0
@@ -44,7 +44,7 @@ vmstat은 CPU, Memory, Disk등 System의 전반적인 사용량을 출력하는 
 ### 1.4. pidstat
 
 ```shell {caption="[Shell 4] pidstat"}
-# pidstat 1
+$ pidstat 1
 Linux 4.15.0-60-generic (node09)        09/22/19        _x86_64_        (2 CPU)
 
 Average:      UID       PID    %usr %system  %guest   %wait    %CPU   CPU  Command
@@ -60,7 +60,7 @@ pidstat은 process별 Resource 사용량을 출력하는 Tool이다. [Shell 4]�
 ### 1.5. mpstat
 
 ```shell {caption="[Shell 5] mpstat"}
-# mpstat -P ALL 1
+$ mpstat -P ALL 1
 Linux 4.15.0-60-generic (node09)        09/22/19        _x86_64_        (2 CPU)
 
 11:25:06     CPU    %usr   %nice    %sys %iowait    %irq   %soft  %steal  %guest  %gnice   %idle
@@ -74,7 +74,7 @@ mpstat은 CPU Core별 사용량을 출력하는 Tool이다. [Shell 5]는 `mpstat
 ### 1.6. iostat
 
 ```shell {caption="[Shell 6] iostat"}
-# iostat -x 1
+$ iostat -x 1
 Linux 4.15.0-60-generic (node09)        09/22/19        _x86_64_        (2 CPU)
 
 avg-cpu:  %user   %nice %system %iowait  %steal   %idle
@@ -95,7 +95,7 @@ iostat은 Block Device별 사용량을 출력하는 Tool이다. [Shell 6]는 `io
 ### 1.7. netstat
 
 ```shell {caption="[Shell 7] uptime"}
-# netstat -i
+$ netstat -i
 Kernel Interface table
 Iface      MTU    RX-OK RX-ERR RX-DRP RX-OVR    TX-OK TX-ERR TX-DRP TX-OVR Flg
 docker0   1500        0      0      0 0            37      0      0      0 BMRU
@@ -110,7 +110,7 @@ netstat은 Linux Kernel이 갖고있는 대부분의 Network 정보를 출력하
 ### 1.8. nicstat
 
 ```shell {caption="[Shell 8] nicstat"}
-# nicstat 1
+$ nicstat 1
     Time      Int   rKB/s   wKB/s   rPk/s   wPk/s    rAvs    wAvs %Util    Sat
 15:41:38  docker0    0.00    0.00    0.00    0.00    0.00   73.56  0.00   0.00
 15:41:38     eth0    6.21    0.12    4.77    1.81  1332.9   69.11  0.01   0.00
@@ -124,7 +124,7 @@ nicstat은 Network Interface별 성능을 출력하는 Tool이다. [Shell 8]은 
 ### 1.9. top
 
 ```shell {caption="[Shell 9] top"}
-# top
+$ top
 top - 12:32:20 up  9:49,  1 user,  load average: 3.02, 2.97, 3.10
 Tasks: 132 total,   1 running,  85 sleeping,   0 stopped,   0 zombie
 %Cpu(s): 15.5 us,  3.5 sy,  0.0 ni, 24.3 id, 56.4 wa,  0.0 hi,  0.2 si,  0.0 st
@@ -143,7 +143,7 @@ top은 CPU 사용률 또는 Memory 사용률이 높은 순서대로 Process 또�
 ### 1.10. slabtop
 
 ```shell {caption="[Shell 10] slabtop"}
-# slabtop
+$ slabtop
  Active / Total Objects (% used)    : 2581763 / 2731476 (94.5%)
  Active / Total Slabs (% used)      : 101112 / 101112 (100.0%)
  Active / Total Caches (% used)     : 85 / 122 (69.7%)
@@ -164,7 +164,7 @@ slabtop은 Kernel이 이용하는 Slab Memory 사용량을 출력하는 Tool이�
 ### 1.11. iotop
 
 ```shell {caption="[Shell 11] iotop"}
-# iotop
+$ iotop
 Total DISK READ :      46.79 K/s | Total DISK WRITE :       5.48 M/s
 Actual DISK READ:      46.79 K/s | Actual DISK WRITE:       5.52 M/s
   TID  PRIO  USER     DISK READ  DISK WRITE  SWAPIN     IO>    COMMAND
@@ -183,7 +183,7 @@ iotop은 Block I/O 사용률이 높은 순서대로 Process 또는 Thread를 출
 ### 1.12. iftop
 
 ```shell {caption="[Shell 12] iftop"}
-# iftop
+$ iftop
  Press H or ? for help            25.0Kb            37.5Kb           50.0Kb      62.5Kb
 └─┴─┴─┴─┴──
 node09                        => dns.google                      672b   1.11Kb  1.05Kb
@@ -212,7 +212,7 @@ iftop은 특정 Interface의 Network Bandwidth 사용량을 Src IP/Dst IP로 분
 ### 1.13. nethogs
 
 ```shell {caption="[Shell 13] nethogs"}
-# nethogs
+$ nethogs
 NetHogs version 0.8.5-2
 
     PID USER     PROGRAM DEV SENT      RECEIVED

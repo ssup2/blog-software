@@ -9,7 +9,7 @@ Process들을 CPU 사용률 또는 Memory 사용률 순서대로 출력하는 to
 ### 1.1. top
 
 ```shell {caption="[Shell 1] top"} 
-# top
+$ top
 top - 10:27:27 up 36 min,  3 users,  load average: 0.00, 0.01, 0.05
 Tasks: 238 total,   1 running, 237 sleeping,   0 stopped,   0 zombie
 %Cpu(s):  0.2 us,  0.1 sy,  0.0 ni, 99.7 id,  0.1 wa,  0.0 hi,  0.0 si,  0.0 st

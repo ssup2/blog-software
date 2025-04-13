@@ -9,6 +9,7 @@ Process들을 Network Bandwidth 사용량이 높은 순서대로 출력하는 ne
 ### 1.1. # nethogs
 
 ```shell {caption="[Shell 1] nethogs"}
+$ nethogs
 NetHogs version 0.8.5-2
 
     PID USER     PROGRAM DEV SENT      RECEIVED

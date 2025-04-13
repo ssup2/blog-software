@@ -9,7 +9,7 @@ Memory 사용량을 출력하는 free의 사용법을 정리한다.
 ### 1.1. free -m
 
 ```shell {caption="[Shell 1] free -m"}
-# free -m
+$ free -m
               total        used        free      shared  buff/cache   available
 Mem:           7977        1430        2455           1        4090        6249
 Swap:          4095           0        4095

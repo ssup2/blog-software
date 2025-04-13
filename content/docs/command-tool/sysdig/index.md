@@ -9,6 +9,7 @@ Linux Kernel의 다양한 동작들을 출력하고, 성능 측정도 할 수 �
 #### 1.1. sysdig
 
 ```shell {caption="[Shell 1] sysdig"}
+$ sysdig
 8464 01:23:53.859656137 1 sshd (30637) < read res=2 data=..
 8465 01:23:53.859656937 1 sshd (30637) > getpid
 8466 01:23:53.859657037 1 sshd (30637) < getpid
@@ -37,6 +38,7 @@ sysdig가 감지할 수 있는 Kernel의 모든 동작을 출력한다. [Shell 1
 ### 1.2. sysdig -c topprocs_cpu
 
 ```shell {caption="[Shell 2] sysdig -c topprocs_cpu"}
+$ sysdig -c topprocs_cpu
 CPU%                Process             PID
 --------------------------------------------------------------------------------
 5.03%               cadvisor            2521
@@ -51,6 +53,7 @@ CPU 사용률 높은 Process들을 순서대로 출력한다. [Shell 2]는 `sysd
 ### 1.3. sysdig -c topprocs_net
 
 ```shell {caption="[Shell 3] sysdig -c topprocs_net"}
+$ sysdig -c topprocs_net
 Bytes               Process             PID
 --------------------------------------------------------------------------------
 1.70KB              openstack-expor     3228
@@ -65,6 +68,7 @@ Network Bandwidth 사용률 높은 Process들을 순서대로 출력한다. [She
 ### 1.4. sysdig -c topprocs_file
 
 ```shell {caption="[Shell 4] sysdig -c topprocs_file"}
+$ sysdig -c topprocs_file
 Bytes               Process             PID
 --------------------------------------------------------------------------------
 38.40M              prometheus          2574
@@ -78,6 +82,7 @@ Disk Bandwidth 사용률 높은 Process들을 순서대로 출력한다. [Shell 
 ### 1.5. sysdig -c topfiles_bytes
 
 ```shell {caption="[Shell 5] sysdig -c topprocs_bytes"}
+$ sysdig -c topfiles_bytes
 Bytes               Filename
 --------------------------------------------------------------------------------
 1.12KB              /proc/stat

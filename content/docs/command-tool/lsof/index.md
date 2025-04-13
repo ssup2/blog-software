@@ -9,7 +9,7 @@ Open File List를 출력하는 lsof의 사용법을 정리한다.
 ### 1.1. lsof
 
 ```shell {caption="[Shell 1] lsof"}
-# lsof
+$ lsof
 COMMAND     PID   TID             USER   FD      TYPE             DEVICE SIZE/OFF       NODE NAME
 systemd       1                   root  cwd       DIR                8,2     4096          2 /
 systemd       1                   root  rtd       DIR                8,2     4096          2 /

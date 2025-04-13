@@ -11,7 +11,7 @@ nc (netcat)는 Network Connection으로부터 Data를 송수신하는 Tool이다
 ### 1.1. nc [IP] [Port]
 
 ```shell {caption="[Shell 1] netcat [IP] [Port]"}
-# nc 10.0.0.10 80
+$ nc 10.0.0.10 80
 GET /
 <!DOCTYPE html>
 <html>

@@ -9,7 +9,7 @@ NIC의 통계 정보를 출력하는 nicstat의 사용법을 정리한다.
 ### 1.1. nicstat
 
 ```shell {caption="[Shell 1] nicstat"}
-# nicstat
+$ nicstat
     Time      Int   rKB/s   wKB/s   rPk/s   wPk/s    rAvs    wAvs %Util    Sat
 15:13:34  docker0    0.00    0.00    0.00    0.00    0.00   71.78  0.00   0.00
 15:13:34     eth0    2.18    0.08    2.22    0.91  1007.5   86.86  0.00   0.00
@@ -30,7 +30,7 @@ NIC의 통계 정보를 출력하는 nicstat의 사용법을 정리한다.
 ### 1.2. nicstat -U
 
 ```shell {caption="[Shell 2] nicstat -U"}
-# nicstat -U
+$ nicstat -U
     Time      Int   rKB/s   wKB/s   rPk/s   wPk/s    rAvs    wAvs %rUtil %wUtil
 12:23:34  docker0    0.00    0.00    0.00    0.00    0.00   71.78   0.00   0.00
 12:23:34     eth0    2.64    0.09    2.53    1.04  1067.3   84.93   0.00   0.00
@@ -42,7 +42,7 @@ NIC의 통계 정보를 출력하는 nicstat의 사용법을 정리한다.
 ### 1.3. nicstat -x
 
 ```shell {caption="[Shell 3] nicstat -x"}
-# nicstat -x  
+$ nicstat -x  
 12:25:57      RdKB    WrKB   RdPkt   WrPkt   IErr  OErr  Coll  NoCP Defer  %Util
 docker0       0.00    0.00    0.00    0.00   0.00  0.00  0.00  0.00  0.00   0.00
 eth0          2.63    0.09    2.53    1.04   0.00  0.00  0.00  0.00  0.00   0.00

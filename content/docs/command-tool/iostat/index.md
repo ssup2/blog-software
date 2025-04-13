@@ -9,7 +9,7 @@ Block Device I/O 통계 정보와 CPU 통계 정보를 보여주는 iostat 사�
 ### 1.1. iostat
 
 ```shell {caption="[Shell 1] iostat"}
-# iostat
+$ iostat
 Linux 4.15.0-60-generic (node09)        09/28/19        _x86_64_        (2 CPU)
 
 avg-cpu:  %user   %nice %system %iowait  %steal   %idle
@@ -42,7 +42,7 @@ Block Device의 I/O 통계 정보와 CPU 통계 정보를 출력한다. [Shell 1
 ### 1.2. iostat -x
 
 ```shell {caption="[Shell 2] iostat -x"}
-# iostat -x
+$ iostat -x
 Linux 4.15.0-60-generic (node09)        09/28/19        _x86_64_        (2 CPU)
 
 avg-cpu:  %user   %nice %system %iowait  %steal   %idle

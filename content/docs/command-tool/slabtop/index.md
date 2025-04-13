@@ -9,6 +9,7 @@ Slab 사용량을 출력하는 slabtop의 사용법을 정리한다.
 ### 1.1. slabtop (-s o)
 
 ```shell {caption="[Shell 1] slabtop"}
+$ slabtop
  Active / Total Objects (% used)    : 3108938 / 3354154 (92.7%)
  Active / Total Slabs (% used)      : 118963 / 118963 (100.0%)
  Active / Total Caches (% used)     : 86 / 124 (69.4%)

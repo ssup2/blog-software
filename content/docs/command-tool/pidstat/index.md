@@ -9,7 +9,7 @@ process별 Resource 사용량을 출력하는 pidstat의 사용법을 정리한�
 ### 1.1. pidstat (-u)
 
 ```shell {caption="[Shell 1] pidstat"}
-# pidstat
+$ pidstat
 Linux 4.15.0-60-generic (node09)        10/02/19        _x86_64_        (2 CPU)
 
 15:23:24      UID       PID    %usr %system  %guest   %wait    %CPU   CPU  Command
@@ -66,7 +66,7 @@ Interval 간격으로 [PID] Process의 CPU 사용량을 출력한다.
 ### 1.5. pidstat -d
 
 ```shell {caption="[Shell 3] pidstat -d"}
-# pidstat -d
+$ pidstat -d
 Linux 4.15.0-60-generic (node09)        10/02/19        _x86_64_        (2 CPU)
 
 15:43:32      UID       PID   kB_rd/s   kB_wr/s kB_ccwr/s iodelay  Command
@@ -87,7 +87,7 @@ Process별 Disk I/O 사용량을 출력한다. [Shell 3]은 `pidstat -d`를 이�
 ### 1.6. pidstat -r
 
 ```shell {caption="[Shell 4] pidstat -r"}
-# pidstat -r
+$ pidstat -r
 Linux 4.15.0-60-generic (node09)        10/02/19        _x86_64_        (2 CPU)
 
 15:44:13      UID       PID  minflt/s  majflt/s     VSZ     RSS   %MEM  Command
@@ -108,7 +108,7 @@ Process별 Memory 사용량을 출력한다. [Shell 4]는 `pidstat -r`을 이용
 ### 1.7. pidstat -s
 
 ```shell {caption="[Shell 5] pidstat -s"}
-# pidstat -s
+$ pidstat -s
 Linux 4.15.0-60-generic (node09)        10/02/19        _x86_64_        (2 CPU)
 
 15:45:02      UID       PID StkSize  StkRef  Command
@@ -127,7 +127,7 @@ Process별 Stack 사용량을 출력한다. [Shell 5]는 `pidstat -s`를 이용�
 ### 1.8. pidstat -v
 
 ```shell {caption="[Shell 6] pidstat -v"}
-# pidstat -v
+$ pidstat -v
 Linux 4.15.0-60-generic (node09)        10/02/19        _x86_64_        (2 CPU)
 
 15:45:34      UID       PID threads   fd-nr  Command
@@ -146,7 +146,7 @@ Process별 Thread Count, FD (File Descriptor) Count 정보를 출력한다. [She
 ### 1.9. pidstat -w
 
 ```shell {caption="[Shell 7] pidstat -w"}
-# pidstat -w
+$ pidstat -w
 Linux 4.15.0-60-generic (node09)        10/02/19        _x86_64_        (2 CPU)
 
 15:47:23      UID       PID   cswch/s nvcswch/s  Command

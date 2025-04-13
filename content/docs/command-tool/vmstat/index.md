@@ -9,7 +9,7 @@ Memory 통계 정보를 보여주는 vmstat 사용법을 정리한다.
 ### 1.1. vmstat
 
 ```shell {caption="[Shell 1] vmstat"}
-# vmstat
+$ vmstat
 procs -----------memory---------- ---swap-- -----io---- -system-- ------cpu-----
  r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa st
  1  1    268 782960 849224 3488324    0    0    14  1733   77   78  6  2 68 24  0
@@ -48,7 +48,7 @@ procs -----------memory---------- ---swap-- -----io---- -system-- ------cpu-----
 ### 1.3. vmstat -d
 
 ```shell {caption="[Shell 2] vmstat -d"}
-# vmstat -d
+$ vmstat -d
 disk- ------------reads------------ ------------writes----------- -----IO------
        total merged sectors      ms  total merged sectors      ms    cur    sec
 loop0   8669      0   21324  109832      0      0       0       0      0      4
@@ -99,7 +99,7 @@ sda2          reads   read sectors  writes    requested writes
 ### 1.5. vmstat -m
 
 ```shell {caption="[Shell 4] vmstat -m"}
-# vmstat -m
+$ vmstat -m
 Cache                       Num  Total   Size  Pages
 SCTPv6                       22     22   1472     22
 SCTP                          0      0   1344     12
