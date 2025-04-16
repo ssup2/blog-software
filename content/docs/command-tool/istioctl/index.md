@@ -25,4 +25,8 @@ $ istioctl -n istio-system dashboard istiod-debug istiod-b877844fb-bw4qx
 http://localhost:15014/debug
 ```
 
-### 
+### 1.3. istioctl analyze [Istio Ingress Pod]
+
+### 1.4. istioctl admin log [Istio Ingress Pod]
+
+### 1.5. istioctl validate [Istio Ingress Pod]
