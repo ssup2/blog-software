@@ -5,6 +5,8 @@ draft: true
 
 ## 1. Istio Authorization Policy
 
+{{< figure caption="[Figure 1] Istio Authorization Process" src="images/istio-authorization-process.png" width="900px" >}}
+
 ```yaml {caption="[Code 1] Linux NFS4 Mount 함수", linenos=table}
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
