@@ -58,23 +58,22 @@ spec:
   - from:
     - source:
         namespaces: ["test"]
-    - source:
         ipBlocks: ["10.0.0.0/24", "20.0.0.20"]
-    - source:
         principals: ["cluster.local/ns/default/sa/user"]
     - source:
         requestPrincipals: ["example.com/sub"]
-    - source:
         remoteIpBlocks: ["20.0.0.0/24"]
 ```
 
-**from**은 Target Pod로 연결을 시작할 수 있는 조건을 정의한다. **namespace**, **ipBlocks**, **principals**, **requestPrincipals**, **remoteIpBlocks** 5가지의 조건과 **not** Prefix를 붙인 **notNamespace**, **notIpBlocks**, **notPrincipals**, **notRequestPrincipals**, **notRemoteIpBlocks** 5가지의 조건을 이용할 수 있으며, not Prefix를 붙인 조건은 해당 조건을 만족하지 않는 경우를 의미한다. 다수의 조건이 존재할 경우 하나의 조건만 만족하면 연결이 허용된다.
+**from**은 Target Pod로 연결을 수행할 수 있는 외부 주체를 정의한다. from에는 다수의 **Source**가 존재할 수 있으며, 하나의 Source에는 **namespace**, **ipBlocks**, **principals**, **requestPrincipals**, **remoteIpBlocks** 5가지의 조건과 **not** Prefix를 붙인 **notNamespace**, **notIpBlocks**, **notPrincipals**, **notRequestPrincipals**, **notRemoteIpBlocks** 5가지의 조건 총 10가지의 조건을 이용할 수 있으며, not Prefix를 붙인 조건은 해당 조건을 만족하지 않는 경우를 의미한다.
 
 * namespaces : 연결을 시작이 가능한 Pod의 Namespace를 지정한다.
 * ipBlocks : 연결을 시작하는 주체의 IP를 지정한다. 여기서 IP는 IP Header의 Source IP를 의미한다. CIDR 또는 단일 IP 형태로 지정할 수 있다.
 * principals : 연결을 시작이 가능한 특정 Namespace의 Service Account를 이용하는 Pod를 지정한다. `cluster.local/ns/[namespace]/sa/[serviceaccount]` 형태로 Namespace와 Service Account를 지정한다. 예를 들어 `cluster.local/ns/default/sa/user`는 `default` Namespace에서 `user`라는 Service Account를 이용하는 Pod를 의미한다.
 * requestPrincipals : 연결을 허용할 JWT Token의 정보를 지정한다. `"[ISS]/[SUB]"` 형태로 Issuer와 Subject를 지정한다. 예를 들어 `example.com/sub`는 Issuer가 `example.com`이고 Subject가 `sub`인 JWT Token을 의미한다.
 * remoteIpBlocks : 연결을 시작하는 주체의 IP를 지정한다. 여기서 IP는 `X-Forwarded-For` Header에 저장된 Source IP를 의미한다.
+
+다수의 Source가 존재할 경우 하나의 Source만 만족하면 조건이 성립되는 **OR 조건**으로 동작하며, 하나의 Source안에 다수의 조건이 존재할 경우 모든 조건을 만족해야 조건이 성립되는 **AND 조건**으로 동작한다.
 
 ####  1.2.2. to
 
@@ -92,10 +91,16 @@ spec:
   - to:
     - operation:
         methods: ["GET", "POST"]
-        paths: ["/api/v1/data"]
+        paths: ["/v1/users"]
         hosts: ["api.example.com", "api.example2.com"]
-    - 
+        ports: [80, 443]
+    - operation:
+        methods: ["GET", "POST", "DELETE"]
+        hosts: ["api.ssup.com", "api.ssup2.com"]
+        ports: [443]
 ```
+
+**to**는 Target Pod에서 연결할 수 있는 외부 주체를 정의한다. to에는 다수의 **Operation**이 존재할 수 있으며, 하나의 Operation에는 **methods**, **paths**, **hosts**, **ports** 4가지의 조건과 **not** Prefix를 붙인 **notMethods**, **notPaths**, **notHosts**, **notPorts** 4가지의 조건 총 8가지의 조건을 이용할 수 있으며, not Prefix를 붙인 조건은 해당 조건을 만족하지 않는 경우를 의미한다. 
 
 ### 1.3. Custom
 
