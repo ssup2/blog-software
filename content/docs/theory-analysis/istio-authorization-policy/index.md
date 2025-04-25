@@ -30,15 +30,16 @@ Istio의 Authorization Policy는 **Pod와 Pod 사이** 또는 **Pod와 외부 �
 
 {{< figure caption="[Figure 1] Istio Authorization Process" src="images/istio-authorization-process.png" width="900px" >}}
 
-[Figure 1]은 Authorization Policy로 인해서 어떻게 통신의 허용 또는 거부가 결정되는 과정을 나타내고 있다. 허용 또는 거부 처리 과정은 Authorization Policy의 **존재 및 Selector에 의한 적용 여부**와 어떤 Authorization Policy에 설정된 **Action**과 **Rule**에 의해서 결정된다. 총 4단계의 처리 과정을 통해서 통신의 허용 또는 거부가 결정된다.
+[Figure 1]은 Authorization Policy로 인해서 어떻게 통신의 허용 또는 거부가 결정되는 과정을 나타내고 있다. 허용 또는 거부 처리 과정은 Authorization Policy의 **존재 여부**와 어떤 Authorization Policy에 설정된 **Action**에 의해서 결정된다. 총 4단계의 처리 과정을 통해서 통신의 허용 또는 거부가 결정된다.
 
-1. 1 단계에서는 Selector에 의해서 선택된 특정 Pod (Workload)를 위한 CUSTOM Action의 Authorization Policy가 존재하고, 그 결과 거부가 결정되면 해당 통신은 거부된다. 반면에 허용된다면 2단계로 진행된다.
-2. 2 단계에서는 Selector에 의해서 선택된 특정 Pod (Workload)를 위한 DENY Action의 Authorization Policy가 존재하고 Rule과 일치한 통신 경로라면, 통신은 거부된다. 만약 아니라면 3단계로 진행된다.
-3. 3 단계에서는 Selector에 의해서 선택된 특정 Pod (Workload)를 위한 ALLOW Action의 Authoration Policy가 아무것도 존재하지 않는다면, 통신은 허용된다. 만약 Selector에 의해서 선택된 특정 Pod를 위한 ALLOW Action의 Authorization Policy가 존재한다면 4단계로 진행된다.
+1. 1 단계에서는 Selector에 의해서 선택된 특정 Pod (Workload)를 위한 **CUSTOM** Action의 Authorization Policy가 **존재**하고, 그 결과 거부가 결정되면 해당 통신은 거부된다. 반면에 허용된다면 2단계로 진행된다.
+2. 2 단계에서는 Selector에 의해서 선택된 특정 Pod (Workload)를 위한 **DENY** Action의 Authorization Policy가 **존재**하고 Rule과 일치한 통신 경로라면, 통신은 거부된다. 만약 아니라면 3단계로 진행된다.
+3. 3 단계에서는 Selector에 의해서 선택된 특정 Pod (Workload)를 위한 **ALLOW** Action의 Authoration Policy가 아무것도 **존재하지 않는**다면, 통신은 허용된다. 만약 Selector에 의해서 선택된 특정 Pod를 위한 ALLOW Action의 Authorization Policy가 존재한다면 4단계로 진행된다.
+4. 4 단계에서는 Selector에 의해서 선택된 특정 Pod (Workload)를 위한 **ALLOW** Action의 Authoration Policy의 Rule과 일치한 통신 경로라면 통신은 허용된다. 만약 Rule과 일치하지 않는다면 통신은 거부된다.
 
- 통신 요청이 들어오는 대상의 통신 정보를 수집한다. 수집된 통신 정보는 다음과 같은 순서로 허용, 거부 처리 과정을 거친다.
+### 1.2. Rules
 
-### 1.1. from Rules
+#### 1.2.1. from
 
 ```yaml {caption="[Code 1] Linux NFS4 Mount 함수", linenos=table}
 apiVersion: security.istio.io/v1beta1
@@ -65,7 +66,7 @@ spec:
         remoteIpBlocks: ["20.0.0.0/24"]
 ```
 
-### 1.2. to Rules
+####  1.2.2. to
 
 ```yaml {caption="[Code 1] Linux NFS4 Mount 함수", linenos=table}
 apiVersion: security.istio.io/v1beta1
