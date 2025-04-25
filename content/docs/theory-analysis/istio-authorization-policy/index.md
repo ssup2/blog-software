@@ -20,17 +20,17 @@ spec:
 ...
 ```
 
-Istio의 Authorization Policy는 **Pod와 Pod 사이** 또는 **Pod와 외부 사이**의 연결을 제어하는 기능을 제공한다. [Text 1]은 Authorization Policy의 형식을 나타내고 있다. Authorization Policy는 크게 **Selector**, **Action**, **Rule** 3가지 요소로 구성되어 있다.
+Istio의 Authorization Policy는 Pod의 Istio Sidecar가 주입된 Pod의 **Inbound Traffic**을 제어하는 기능을 제공한다. [Text 1]은 Authorization Policy의 형식을 나타내고 있다. Authorization Policy는 크게 **Selector**, **Action**, **Rule** 3가지 요소로 구성되어 있다.
 
-* Selector : Selector는 Authorization Policy가 적용될 Pod를 지정할때 이용한다. 만약 Selector가 지정되지 않으면 Authorization Policy는 Authorization Policy가 존재하는 Namespace 내의 모든 Pod에 적용된다. 본 글에서는 Selector에 의해서 Authorization Policy가 적용될 Pod를 **Target Pod**라고 지칭한다.
-* Action : Action은 Authorization Policy를 통해서 연결이 허용 또는 거부 될지를 결정하는 요소이다. **ALLOW**, **DENY**, **CUSTOM**, **AUDIT** 4가지 중에 하나를 선택할 수 있으며, 의미 그대로 ALLOW는 허용, DENY는 거부, CUSTOM은 사용자 정의 규칙을 의미한다. 마지막으로 AUDIT은 실제 연결의 허용 여부를 결정하지는 않고 연결 로그를 남기는 역할을 수행한다.
-* Rule : Rule은 어느 구간의 연결이 허용 또는 거부 될지를 결정한다.
+* Selector : Selector는 Authorization Policy가 적용될 Pod를 지정한다. 만약 Selector가 지정되지 않으면 Authorization Policy는 Authorization Policy가 존재하는 Namespace 내의 모든 Pod에 적용된다. 본 글에서는 Selector에 의해서 Authorization Policy가 적용될 Pod를 **Target Pod**라고 지칭한다.
+* Rule : Rule은 Inbound Traffic의 조건을 지정한다.
+* Action : Action은 Rule에 의해서 지정된 Inbound Traffic을 허용할지 또는 거부할지 결정한다. **ALLOW**, **DENY**, **CUSTOM**, **AUDIT** 4가지 중에 하나를 선택할 수 있으며, 의미 그대로 ALLOW는 허용, DENY는 거부, CUSTOM은 사용자 정의 규칙을 의미한다. 마지막으로 AUDIT은 실제 Inbound Traffic을 제어하지는 않고 관련 로그만 남기는 역할을 수행한다.
 
 ### 1.1. 허용, 거부 처리 과정
 
 {{< figure caption="[Figure 1] Istio Authorization Process" src="images/istio-authorization-process.png" width="900px" >}}
 
-[Figure 1]은 Authorization Policy로 인해서 어떻게 연결의 허용 또는 거부가 결정되는 과정을 나타내고 있다. 허용 또는 거부 처리 과정은 Authorization Policy의 **존재 여부**와 어떤 Authorization Policy에 설정된 **Action**에 의해서 결정된다. 총 4단계의 처리 과정을 통해서 연결의 허용 또는 거부가 결정된다.
+[Figure 1]은 Authorization Policy로 인해서 어떻게 Inbound Traffic의 허용 또는 거부가 결정되는 과정을 나타내고 있다. 허용 또는 거부 처리 과정은 Authorization Policy의 **존재 여부**와 어떤 Authorization Policy에 설정된 **Action**에 의해서 결정된다. 총 4단계의 처리 과정을 통해서 Inbound Traffic의 허용 또는 거부가 결정된다.
 
 1. 1 단계에서는 Target Pod (Workload)를 위한 **CUSTOM** Action의 Authorization Policy가 **존재**하고, 그 결과 거부가 결정되면 해당 연결은 거부된다. 반면에 허용된다면 2단계로 진행된다.
 2. 2 단계에서는 Target Pod (Workload)를 위한 **DENY** Action의 Authorization Policy가 **존재**하고 Rule과 일치한 연결 경로라면, 연결은 거부된다. 만약 아니라면 3단계로 진행된다.
@@ -39,7 +39,7 @@ Istio의 Authorization Policy는 **Pod와 Pod 사이** 또는 **Pod와 외부 �
 
 ### 1.2. Rule
 
-Authorization Policy의 Rule은 연결을 정의하는 요소이다. Rule은 **from**과 **to** 2가지 요소로 구성되어 있다.
+하나의 Authorization Policy는 다수의 Rule을 포함할 수 있으며, 하나의 Rule은 **from**, **to**, **when** 3가지 요소로 구성되어 있다. 다수의 Rule이 존재할 경우 하나의 Rule만 만족하면 조건이 성립되는 **OR 조건**으로 동작하며, 하나의 Rule안에 다수의 조건이 존재할 경우 모든 조건을 만족해야 조건이 성립되는 **AND 조건**으로 동작한다.
 
 #### 1.2.1. from
 
@@ -65,7 +65,7 @@ spec:
         remoteIpBlocks: ["20.0.0.0/24"]
 ```
 
-**from**은 Target Pod로 연결을 수행할 수 있는 외부 주체를 정의한다. from에는 다수의 **Source**가 존재할 수 있으며, 하나의 Source에는 **namespace**, **ipBlocks**, **principals**, **requestPrincipals**, **remoteIpBlocks** 5가지의 조건과 **not** Prefix를 붙인 **notNamespace**, **notIpBlocks**, **notPrincipals**, **notRequestPrincipals**, **notRemoteIpBlocks** 5가지의 조건 총 10가지의 조건을 이용할 수 있으며, not Prefix를 붙인 조건은 해당 조건을 만족하지 않는 경우를 의미한다.
+**from**은 Target Pod로 연결을 수행할 수 있는 **외부 주체**를 정의한다. from에는 다수의 **Source**가 존재할 수 있으며, 하나의 Source에는 **namespace**, **ipBlocks**, **principals**, **requestPrincipals**, **remoteIpBlocks** 5가지의 조건과 **not** Prefix를 붙인 **notNamespace**, **notIpBlocks**, **notPrincipals**, **notRequestPrincipals**, **notRemoteIpBlocks** 5가지의 조건 총 10가지의 조건을 이용할 수 있으며, not Prefix를 붙인 조건은 해당 조건을 만족하지 않는 경우를 의미한다.
 
 * namespaces : 연결을 시작이 가능한 Pod의 Namespace를 지정한다.
 * ipBlocks : 연결을 시작하는 주체의 IP를 지정한다. 여기서 IP는 IP Header의 Source IP를 의미한다. CIDR 또는 단일 IP 형태로 지정할 수 있다.
@@ -77,7 +77,7 @@ spec:
 
 ####  1.2.2. to
 
-```yaml {caption="[Code 1] Linux NFS4 Mount 함수", linenos=table}
+```yaml {caption="[Text 3] to Rule", linenos=table}
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
@@ -100,8 +100,13 @@ spec:
         ports: [443]
 ```
 
-**to**는 Target Pod에서 연결할 수 있는 외부 주체를 정의한다. to에는 다수의 **Operation**이 존재할 수 있으며, 하나의 Operation에는 **methods**, **paths**, **hosts**, **ports** 4가지의 조건과 **not** Prefix를 붙인 **notMethods**, **notPaths**, **notHosts**, **notPorts** 4가지의 조건 총 8가지의 조건을 이용할 수 있으며, not Prefix를 붙인 조건은 해당 조건을 만족하지 않는 경우를 의미한다. 
+**to**는 외부 주체에서 Target Pod에 연결 시 이용하는 **Request의 조건**을 지정한다. to에는 다수의 **Operation**이 존재할 수 있으며, 하나의 Operation에는 **methods**, **paths**, **hosts**, **ports** 4가지의 조건과 **not** Prefix를 붙인 **notMethods**, **notPaths**, **notHosts**, **notPorts** 4가지의 조건 총 8가지의 조건을 이용할 수 있으며, not Prefix를 붙인 조건은 해당 조건을 만족하지 않는 경우를 의미한다.
 
+#### 1.2.3. when
+
+```yaml {caption="[Text 3] when Rule", linenos=table}
+
+```
 ### 1.3. Custom
 
 ### 1.4. vs Network Policy
