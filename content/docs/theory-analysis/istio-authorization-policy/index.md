@@ -65,7 +65,7 @@ spec:
         remoteIpBlocks: ["20.0.0.0/24"]
 ```
 
-[Text 2]는 **From** Rule의 예시를 나타내고 있다. From Rule은 Target Pod로 연결을 수행할 수 있는 **외부 주체**를 정의한다. From Rule에는 다수의 **Source**가 존재할 수 있으며, 하나의 Source에는 **namespace**, **ipBlocks**, **principals**, **requestPrincipals**, **remoteIpBlocks** 5가지의 조건과 **not** Prefix를 붙인 **notNamespace**, **notIpBlocks**, **notPrincipals**, **notRequestPrincipals**, **notRemoteIpBlocks** 5가지의 조건 총 10가지의 조건을 이용할 수 있으며, not Prefix를 붙인 조건은 해당 조건을 만족하지 않는 경우를 의미한다.
+[Text 2]는 **From** Rule의 예제를 나타내고 있다. From Rule은 Target Pod로 연결을 수행할 수 있는 **외부 주체**를 정의한다. From Rule에는 다수의 **Source**가 존재할 수 있으며, 하나의 Source에는 **namespace**, **ipBlocks**, **principals**, **requestPrincipals**, **remoteIpBlocks** 5가지의 조건과 **not** Prefix를 붙인 **notNamespace**, **notIpBlocks**, **notPrincipals**, **notRequestPrincipals**, **notRemoteIpBlocks** 5가지의 조건 총 10가지의 조건을 이용할 수 있으며, not Prefix를 붙인 조건은 해당 조건을 만족하지 않는 경우를 의미한다.
 
 * namespaces : 연결을 시작이 가능한 Pod의 Namespace를 지정한다.
 * ipBlocks : 연결을 시작하는 주체의 IP를 지정한다. 여기서 IP는 IP Header의 Source IP를 의미한다. CIDR 또는 단일 IP 형태로 지정할 수 있다.
@@ -101,7 +101,7 @@ spec:
         ports: [443]
 ```
 
-[Text 3]는 **To** Rule의 예시를 나타내고 있다. To Rule은 외부 주체에서 Target Pod에 연결 시 이용하는 **Request의 조건**을 지정한다. To Rule에는 다수의 **Operation**이 존재할 수 있으며, 하나의 Operation에는 **methods**, **paths**, **hosts**, **ports** 4가지의 조건과 **not** Prefix를 붙인 **notMethods**, **notPaths**, **notHosts**, **notPorts** 4가지의 조건 총 8가지의 조건을 이용할 수 있으며, not Prefix를 붙인 조건은 해당 조건을 만족하지 않는 경우를 의미한다.
+[Text 3]는 **To** Rule의 예제를 나타내고 있다. To Rule은 외부 주체에서 Target Pod에 연결 시 이용하는 **Request의 조건**을 지정한다. To Rule에는 다수의 **Operation**이 존재할 수 있으며, 하나의 Operation에는 **methods**, **paths**, **hosts**, **ports** 4가지의 조건과 **not** Prefix를 붙인 **notMethods**, **notPaths**, **notHosts**, **notPorts** 4가지의 조건 총 8가지의 조건을 이용할 수 있으며, not Prefix를 붙인 조건은 해당 조건을 만족하지 않는 경우를 의미한다.
 
 다수의 Operation이 존재할 경우 하나의 Operation만 만족하면 조건이 성립되는 **OR 조건**으로 동작하며, 하나의 Operation안에 다수의 조건이 존재할 경우 모든 조건을 만족해야 조건이 성립되는 **AND 조건**으로 동작한다. 따라서 [Text 3]의 경우에는 Target Pod로 `api.example.com`, `api.example2.com` Hostname으로 `GET`, `POST` 메서드를 이용하여 `/v1/users` Path로 연결을 시작하는 경우, 또는 `api.ssup.com`, `api.ssup2.com` Hostname으로 `GET`, `POST`, `DELETE` 메서드를 이용하여 `443` 포트로 연결을 시작하는 경우 연결을 거부한다.
 
@@ -135,15 +135,11 @@ spec:
       values: ["https://accounts.google.com"]
 ```
 
-[Text 4]는 **When** Rule의 예시를 나타내고 있다. When Rule은 From Rule과 To Rule 사이에서 **세밀한 조건**을 지정하는데 이용한다. 다수의 Key/Value를 이용하여 조건을 설정할 수 있으며, 다수의 Key/Value가 설정되는 경우에는 하나의 Key/Value가 설정된 조건을 만족하는 경우에만 조건이 성립되는 **OR 조건**으로 동작한다.
+[Text 4]는 **When** Rule의 예제를 나타내고 있다. When Rule은 From Rule과 To Rule 사이에서 **세밀한 조건**을 지정하는데 이용한다. 다수의 Key/Value를 이용하여 조건을 설정할 수 있으며, 다수의 Key/Value가 설정되는 경우에는 하나의 Key/Value가 설정된 조건을 만족하는 경우에만 조건이 성립되는 **OR 조건**으로 동작한다.
 
 when의 key/value에 이용할수 있는 조건은 [Link](https://istio.io/latest/docs/reference/config/security/conditions/)에서 확인할 수 있으며, from rule과 to rule에서도 이용 가능한 IP, Namespace, JWT Token의 정보를 설정할 수 있는걸 확인할 수 있다. 따라서 from과 to를 이용하지 않고 when만을 이용하여 조건을 설정하는것도 가능은 하다. 다만 일반적으로 when만 이용하여 조건을 지정하는 경우는 드물며, from과 to를 활용하여 큰 범위의 조건을 지정하고, 세밀한 조건은 when에서 지정하는 것이 일반적이다.
 
 ### 1.3. Custom Action
-
-
-
-[Text 5]는 **Custom Action**의 예시를 나타내고 있다. Custom Action은 사용자가 직접 정의한 조건을 이용하여 연결을 제어할 수 있는 기능을 제공한다. Authorization Rules를 통해서 제어할수 없는 조건을 Custom Action을 통해서 제어하는 한다. 일반적으로 Istio의 Ingress Gateway에 붙여 별도의 인증 시스템을 연동하는 경우에 많이 이용된다.
 
 ```yaml {caption="[Text 5] Custom Action Example", linenos=table}
 apiVersion: security.istio.io/v1
@@ -164,8 +160,25 @@ spec:
         paths: ["/v1/users"]
 ```
 
+[Text 5]는 **Custom Action**의 예제를 나타내고 있다. Custom Action은 사용자가 직접 정의한 조건을 이용하여 연결을 제어할 수 있는 기능을 제공한다. Authorization Rules를 통해서 제어할수 없는 조건을 Custom Action을 통해서 제어하는 한다. 일반적으로 Istio의 Ingress Gateway에 붙여 별도의 인증 시스템을 연동하는 경우에 많이 이용된다. [Text 5]의 예시도 Selector에 의해서 Istio의 Ingress Gateway에 붙은 Custom Action인 것을 확인할 수 있다. Custom Action에서 허용되더라도 Custom Action뒤에 처리되는 Deny, Allow Authorization Policy에 의해서 연결이 거부될 수도 있다.
+
+```yaml {caption="[Text 6] Istio ConfigMap Example for extensionProviders Example", linenos=table}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: istio
+  namespace: istio-system
+data:
+  mesh: |-
+    extensionProviders:
+    - name: "custom-authz"
+      envoyExtAuthzHttp:
+        service: "custom-authz.istio-system.svc.cluster.local"
+        port: "8000"
+        includeRequestHeadersInCheck: ["custom-authz"]
 ```
-```
+
+Authorization Policy의 Provider는 Custom Action의 Custom Logic을 처리하는 곳을 지정하며, Provider는 Istio의 Mesh Config에 정의되어 있다. [Text 6]은 Provider가 정의된 Mesh Config의 예제를 나타내고 있다. `custom-authz`라는 Provider가 정의되어 있으며, 이 Provider는 `istio-system` Namespace에 존재하는 `custom-authz`라는 Service에 `8000` 포트로 인증 요청을 전송하여 연결허용 여부를 결정한다.
 
 ### 1.4. vs Network Policy
 
