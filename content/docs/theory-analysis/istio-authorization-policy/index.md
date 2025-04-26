@@ -177,7 +177,7 @@ data:
         includeRequestHeadersInCheck: ["custom-authz"]
 ```
 
-Authorization Policy의 Provider는 Custom Action의 Custom Logic을 처리하는 곳을 지정하며, Provider는 Istio의 Mesh Config에 정의되어 있다. [Text 6]은 Provider가 정의된 Mesh Config의 예제를 나타내고 있다. `custom-authz`라는 Provider가 정의되어 있으며, 이 Provider는 `istio-system` Namespace에 존재하는 `custom-authz`라는 Service에 `8000` 포트로 인증 요청을 전송하여 요청 거부/허용을 결정한다.
+Authorization Policy의 Provider는 Custom Action의 Custom Logic을 처리하는 곳을 지정하며, Provider는 Istio의 Mesh Config에 정의되어 있다. [Text 6]은 Provider가 정의된 Mesh Config의 예제를 나타내고 있다. `custom-authz`라는 Provider가 정의되어 있으며, 이 Provider는 `istio-system` Namespace에 존재하는 `custom-authz`라는 Service에 `8000` 포트로 요청을 전송하여 요청 거부/허용을 결정한다.
 
 ### 1.4. vs Network Policy
 
