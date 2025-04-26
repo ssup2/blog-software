@@ -73,7 +73,7 @@ spec:
 * requestPrincipals : 연결을 허용할 JWT Token의 정보를 지정한다. `"[ISS]/[SUB]"` 형태로 Issuer와 Subject를 지정한다. 예를 들어 `example.com/sub`는 Issuer가 `example.com`이고 Subject가 `sub`인 JWT Token을 의미한다.
 * remoteIpBlocks : 연결을 시작하는 주체의 IP를 지정한다. 여기서 IP는 `X-Forwarded-For` Header에 저장된 Source IP를 의미한다.
 
-다수의 Source가 존재할 경우 하나의 Source만 만족하면 조건이 성립되는 **OR 조건**으로 동작하며, 하나의 Source안에 다수의 조건이 존재할 경우 모든 조건을 만족해야 조건이 성립되는 **AND 조건**으로 동작한다.
+다수의 Source가 존재할 경우 하나의 Source만 만족하면 조건이 성립되는 **OR 조건**으로 동작하며, 하나의 Source안에 다수의 조건이 존재할 경우 모든 조건을 만족해야 조건이 성립되는 **AND 조건**으로 동작한다. 따라서 [Text 2]의 경우에는 Target Pod로 `test` Namespace에서 `user`라는 Service Account를 이용하는 Pod에서 `10.0.0.0/24`나 `20.0.0.20` IP로 연결을 시작하는 경우, 또는 `example.com/sub`라는 Subject를 가진 JWT Token을 이용하는 경우 연결을 허용한다.
 
 ####  1.2.2. To
 
@@ -101,7 +101,9 @@ spec:
         ports: [443]
 ```
 
-[Text 3]는 **To** Rule의 예시를 나타내고 있다. To Rule은 외부 주체에서 Target Pod에 연결 시 이용하는 **Request의 조건**을 지정한다. To Rule에는 다수의 **Operation**이 존재할 수 있으며, 하나의 Operation에는 **methods**, **paths**, **hosts**, **ports** 4가지의 조건과 **not** Prefix를 붙인 **notMethods**, **notPaths**, **notHosts**, **notPorts** 4가지의 조건 총 8가지의 조건을 이용할 수 있으며, not Prefix를 붙인 조건은 해당 조건을 만족하지 않는 경우를 의미한다. 다수의 Operation이 존재할 경우 하나의 Operation만 만족하면 조건이 성립되는 **OR 조건**으로 동작하며, 하나의 Operation안에 다수의 조건이 존재할 경우 모든 조건을 만족해야 조건이 성립되는 **AND 조건**으로 동작한다.
+[Text 3]는 **To** Rule의 예시를 나타내고 있다. To Rule은 외부 주체에서 Target Pod에 연결 시 이용하는 **Request의 조건**을 지정한다. To Rule에는 다수의 **Operation**이 존재할 수 있으며, 하나의 Operation에는 **methods**, **paths**, **hosts**, **ports** 4가지의 조건과 **not** Prefix를 붙인 **notMethods**, **notPaths**, **notHosts**, **notPorts** 4가지의 조건 총 8가지의 조건을 이용할 수 있으며, not Prefix를 붙인 조건은 해당 조건을 만족하지 않는 경우를 의미한다.
+
+다수의 Operation이 존재할 경우 하나의 Operation만 만족하면 조건이 성립되는 **OR 조건**으로 동작하며, 하나의 Operation안에 다수의 조건이 존재할 경우 모든 조건을 만족해야 조건이 성립되는 **AND 조건**으로 동작한다. 따라서 [Text 3]의 경우에는 Target Pod로 `api.example.com`, `api.example2.com` Hostname으로 `GET`, `POST` 메서드를 이용하여 `/v1/users` Path로 연결을 시작하는 경우, 또는 `api.ssup.com`, `api.ssup2.com` Hostname으로 `GET`, `POST`, `DELETE` 메서드를 이용하여 `443` 포트로 연결을 시작하는 경우 연결을 거부한다.
 
 #### 1.2.3. When
 
@@ -140,6 +142,30 @@ when의 key/value에 이용할수 있는 조건은 [Link](https://istio.io/lates
 ### 1.3. Custom Action
 
 
+
+[Text 5]는 **Custom Action**의 예시를 나타내고 있다. Custom Action은 사용자가 직접 정의한 조건을 이용하여 연결을 제어할 수 있는 기능을 제공한다. Authorization Rules를 통해서 제어할수 없는 조건을 Custom Action을 통해서 제어하는 한다. 일반적으로 Istio의 Ingress Gateway에 붙여 별도의 인증 시스템을 연동하는 경우에 많이 이용된다.
+
+```yaml {caption="[Text 5] Custom Action Example", linenos=table}
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: custom-authz
+  namespace: istio-system
+spec:
+  selector:
+    matchLabels:
+      app: istio-ingressgateway
+  action: CUSTOM
+  provider:
+    name: "custom-authz"
+  rules:
+  - to:
+    - operation:
+        paths: ["/v1/users"]
+```
+
+```
+```
 
 ### 1.4. vs Network Policy
 
