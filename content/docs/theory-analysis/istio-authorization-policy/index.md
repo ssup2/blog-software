@@ -181,7 +181,7 @@ Authorization Policy의 Provider는 Custom Action의 Custom Logic을 처리하�
 
 ### 1.4. vs Network Policy
 
-Authorzation Policy는 Target Pod로 전송되는 요청의 거부/허용 여부를 결정하는 반면에, Network Policy는 Target Pod의 Inbound/Outbound Traffic을 제어하는데 이용한다. Authorzation Policy는 L7 Layer에서 동작하기 때문에 HTTP Header 정보를 기반으로 요청의 거부/허용 여부를 결정하는 반면에, Network Policy는 L3/L4 Layer에서 동작하기 때문에 IP, Port 정보를 기반으로 Inbound/Outbound Traffic을 제어한다.
+Authorzation Policy는 Target Pod로 전송되는 요청의 거부/허용 여부를 결정하는 반면에, Network Policy는 Target Pod의 Inbound/Outbound Traffic을 제어하는데 이용한다. Authorzation Policy는 L7 Layer에서 동작하기 때문에 HTTP Header 정보를 기반으로 요청의 거부/허용 여부를 결정하는 반면에, Network Policy는 L3/L4 Layer에서 동작하기 때문에 IP, Port 정보를 기반으로 Inbound/Outbound Traffic을 제어한다. Authorization Policy는 Istio의 Envoy Proxy에서 동작하는 반면에, Network Policy는 Kubernetes의 CNI Plugin에서 동작한다.
 
 ## 2. 참조
 
