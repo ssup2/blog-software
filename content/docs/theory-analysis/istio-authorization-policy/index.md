@@ -41,13 +41,13 @@ Istio의 Authorization Policy는 Pod의 Istio Sidecar가 주입된 Pod의 **Inbo
 
 하나의 Authorization Policy는 다수의 Rule을 포함할 수 있으며, 하나의 Rule은 **from**, **to**, **when** 3가지 요소로 구성되어 있다. 다수의 Rule이 존재할 경우 하나의 Rule만 만족하면 조건이 성립되는 **OR 조건**으로 동작하며, 하나의 Rule안에 다수의 조건이 존재할 경우 모든 조건을 만족해야 조건이 성립되는 **AND 조건**으로 동작한다.
 
-#### 1.2.1. from
+#### 1.2.1. From
 
-```yaml {caption="[Text 2] from Rule", linenos=table}
+```yaml {caption="[Text 2] from Rule Example", linenos=table}
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
-  name: allow-user1
+  name: from-rule
   namespace: default
 spec:
   selector:
@@ -65,7 +65,7 @@ spec:
         remoteIpBlocks: ["20.0.0.0/24"]
 ```
 
-**from**은 Target Pod로 연결을 수행할 수 있는 **외부 주체**를 정의한다. from에는 다수의 **Source**가 존재할 수 있으며, 하나의 Source에는 **namespace**, **ipBlocks**, **principals**, **requestPrincipals**, **remoteIpBlocks** 5가지의 조건과 **not** Prefix를 붙인 **notNamespace**, **notIpBlocks**, **notPrincipals**, **notRequestPrincipals**, **notRemoteIpBlocks** 5가지의 조건 총 10가지의 조건을 이용할 수 있으며, not Prefix를 붙인 조건은 해당 조건을 만족하지 않는 경우를 의미한다.
+[Text 2]는 **From** Rule의 예시를 나타내고 있다. From Rule은 Target Pod로 연결을 수행할 수 있는 **외부 주체**를 정의한다. From Rule에는 다수의 **Source**가 존재할 수 있으며, 하나의 Source에는 **namespace**, **ipBlocks**, **principals**, **requestPrincipals**, **remoteIpBlocks** 5가지의 조건과 **not** Prefix를 붙인 **notNamespace**, **notIpBlocks**, **notPrincipals**, **notRequestPrincipals**, **notRemoteIpBlocks** 5가지의 조건 총 10가지의 조건을 이용할 수 있으며, not Prefix를 붙인 조건은 해당 조건을 만족하지 않는 경우를 의미한다.
 
 * namespaces : 연결을 시작이 가능한 Pod의 Namespace를 지정한다.
 * ipBlocks : 연결을 시작하는 주체의 IP를 지정한다. 여기서 IP는 IP Header의 Source IP를 의미한다. CIDR 또는 단일 IP 형태로 지정할 수 있다.
@@ -75,18 +75,19 @@ spec:
 
 다수의 Source가 존재할 경우 하나의 Source만 만족하면 조건이 성립되는 **OR 조건**으로 동작하며, 하나의 Source안에 다수의 조건이 존재할 경우 모든 조건을 만족해야 조건이 성립되는 **AND 조건**으로 동작한다.
 
-####  1.2.2. to
+####  1.2.2. To
 
-```yaml {caption="[Text 3] to Rule", linenos=table}
+```yaml {caption="[Text 3] to Rule Example", linenos=table}
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
-  name: allow-read-only
+  name: to-rule
   namespace: default
 spec:
   selector:
     matchLabels:
-      app: my-api
+      app: my-service
+  action: DENY
   rules:
   - to:
     - operation:
@@ -100,14 +101,45 @@ spec:
         ports: [443]
 ```
 
-**to**는 외부 주체에서 Target Pod에 연결 시 이용하는 **Request의 조건**을 지정한다. to에는 다수의 **Operation**이 존재할 수 있으며, 하나의 Operation에는 **methods**, **paths**, **hosts**, **ports** 4가지의 조건과 **not** Prefix를 붙인 **notMethods**, **notPaths**, **notHosts**, **notPorts** 4가지의 조건 총 8가지의 조건을 이용할 수 있으며, not Prefix를 붙인 조건은 해당 조건을 만족하지 않는 경우를 의미한다.
+[Text 3]는 **To** Rule의 예시를 나타내고 있다. To Rule은 외부 주체에서 Target Pod에 연결 시 이용하는 **Request의 조건**을 지정한다. To Rule에는 다수의 **Operation**이 존재할 수 있으며, 하나의 Operation에는 **methods**, **paths**, **hosts**, **ports** 4가지의 조건과 **not** Prefix를 붙인 **notMethods**, **notPaths**, **notHosts**, **notPorts** 4가지의 조건 총 8가지의 조건을 이용할 수 있으며, not Prefix를 붙인 조건은 해당 조건을 만족하지 않는 경우를 의미한다. 다수의 Operation이 존재할 경우 하나의 Operation만 만족하면 조건이 성립되는 **OR 조건**으로 동작하며, 하나의 Operation안에 다수의 조건이 존재할 경우 모든 조건을 만족해야 조건이 성립되는 **AND 조건**으로 동작한다.
 
-#### 1.2.3. when
+#### 1.2.3. When
 
-```yaml {caption="[Text 3] when Rule", linenos=table}
-
+```yaml {caption="[Text 4] when Rule Example", linenos=table}
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: when-rule
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: my-service
+  action: ALLOW
+  - from:
+    - source:
+        namespaces: ["test"]
+    - source:
+        principals: ["cluster.local/ns/default/sa/user"]
+    to:
+    - operation:
+        methods: ["GET"]
+        paths: ["/info*"]
+    - operation:
+        methods: ["POST"]
+        paths: ["/data"]
+    when:
+    - key: request.auth.claims[iss]
+      values: ["https://accounts.google.com"]
 ```
-### 1.3. Custom
+
+[Text 4]는 **When** Rule의 예시를 나타내고 있다. When Rule은 From Rule과 To Rule 사이에서 **세밀한 조건**을 지정하는데 이용한다. 다수의 Key/Value를 이용하여 조건을 설정할 수 있으며, 다수의 Key/Value가 설정되는 경우에는 하나의 Key/Value가 설정된 조건을 만족하는 경우에만 조건이 성립되는 **OR 조건**으로 동작한다.
+
+when의 key/value에 이용할수 있는 조건은 [Link](https://istio.io/latest/docs/reference/config/security/conditions/)에서 확인할 수 있으며, from rule과 to rule에서도 이용 가능한 IP, Namespace, JWT Token의 정보를 설정할 수 있는걸 확인할 수 있다. 따라서 from과 to를 이용하지 않고 when만을 이용하여 조건을 설정하는것도 가능은 하다. 다만 일반적으로 when만 이용하여 조건을 지정하는 경우는 드물며, from과 to를 활용하여 큰 범위의 조건을 지정하고, 세밀한 조건은 when에서 지정하는 것이 일반적이다.
+
+### 1.3. Custom Action
+
+
 
 ### 1.4. vs Network Policy
 
