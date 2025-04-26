@@ -1,6 +1,5 @@
 ---
 title: Istio Authorization Policy
-draft: true
 ---
 
 ## 1. Istio Authorization Policy
@@ -20,11 +19,11 @@ spec:
 ...
 ```
 
-Istio의 Authorization Policy는 Pod의 Istio Sidecar가 주입된 Pod의 **Inbound Traffic**을 제어하는 기능을 제공한다. [Text 1]은 Authorization Policy의 형식을 나타내고 있다. Authorization Policy는 크게 **Selector**, **Action**, **Rule** 3가지 요소로 구성되어 있다.
+Istio의 Authorization Policy는 Pod의 Istio Sidecar가 주입된 Pod로 들어오는 요청을 거부/허용 할지를 결정하는 기능을 제공한다. [Text 1]은 Authorization Policy의 형식을 나타내고 있다. Authorization Policy는 크게 **Selector**, **Action**, **Rule** 3가지 요소로 구성되어 있다.
 
 * Selector : Selector는 Authorization Policy가 적용될 Pod를 지정한다. 만약 Selector가 지정되지 않으면 Authorization Policy는 Authorization Policy가 존재하는 Namespace 내의 모든 Pod에 적용된다. 본 글에서는 Selector에 의해서 Authorization Policy가 적용될 Pod를 **Target Pod**라고 지칭한다.
-* Rule : Rule은 Inbound Traffic의 조건을 지정한다.
-* Action : Action은 Rule에 의해서 지정된 Inbound Traffic을 허용할지 또는 거부할지 결정한다. **ALLOW**, **DENY**, **CUSTOM**, **AUDIT** 4가지 중에 하나를 선택할 수 있으며, 의미 그대로 ALLOW는 허용, DENY는 거부, CUSTOM은 사용자 정의 규칙을 의미한다. 마지막으로 AUDIT은 실제 Inbound Traffic을 제어하지는 않고 관련 로그만 남기는 역할을 수행한다.
+* Rule : Rule은 Target Pod로 들어오는 요청의 조건을 지정한다.
+* Action : Action은 Rule에 의해서 Target Pod로 들어오는 요청을 거부/허용 할지 결정한다. **ALLOW**, **DENY**, **CUSTOM**, **AUDIT** 4가지 중에 하나를 선택할 수 있으며, 의미 그대로 ALLOW는 허용, DENY는 거부, CUSTOM은 사용자 정의 규칙을 의미한다. 마지막으로 AUDIT은 실제 Inbound Traffic을 제어하지는 않고 관련 로그만 남기는 역할을 수행한다.
 
 ### 1.1. 허용, 거부 처리 과정
 
@@ -32,10 +31,10 @@ Istio의 Authorization Policy는 Pod의 Istio Sidecar가 주입된 Pod의 **Inbo
 
 [Figure 1]은 Authorization Policy로 인해서 어떻게 Inbound Traffic의 허용 또는 거부가 결정되는 과정을 나타내고 있다. 허용 또는 거부 처리 과정은 Authorization Policy의 **존재 여부**와 어떤 Authorization Policy에 설정된 **Action**에 의해서 결정된다. 총 4단계의 처리 과정을 통해서 Inbound Traffic의 허용 또는 거부가 결정된다.
 
-1. 1 단계에서는 Target Pod (Workload)를 위한 **CUSTOM** Action의 Authorization Policy가 **존재**하고, 그 결과 거부가 결정되면 해당 연결은 거부된다. 반면에 허용된다면 2단계로 진행된다.
-2. 2 단계에서는 Target Pod (Workload)를 위한 **DENY** Action의 Authorization Policy가 **존재**하고 Rule과 일치한 연결 경로라면, 연결은 거부된다. 만약 아니라면 3단계로 진행된다.
-3. 3 단계에서는 Target Pod (Workload)를 위한 **ALLOW** Action의 Authoration Policy가 아무것도 **존재하지 않는**다면, 연결은 허용된다. 만약 Selector에 의해서 선택된 특정 Pod를 위한 ALLOW Action의 Authorization Policy가 존재한다면 4단계로 진행된다.
-4. 4 단계에서는 Target Pod (Workload)를 위한 **ALLOW** Action의 Authoration Policy의 Rule과 일치한 연결 경로라면 연결은 허용된다. 만약 Rule과 일치하지 않는다면 연결은 거부된다.
+1. 1 단계에서는 Target Pod (Workload)를 위한 **CUSTOM** Action의 Authorization Policy가 **존재**하고, 그 결과 거부가 결정되면 해당 요청은 거부된다. 반면에 허용된다면 2단계로 진행된다.
+2. 2 단계에서는 Target Pod (Workload)를 위한 **DENY** Action의 Authorization Policy가 **존재**하고 Rule과 일치한 요청이라면, 해당 요청은 거부된다. 만약 아니라면 3단계로 진행된다.
+3. 3 단계에서는 Target Pod (Workload)를 위한 **ALLOW** Action의 Authoration Policy가 아무것도 **존재하지 않는**다면, 요청은 허용된다. 만약 Selector에 의해서 선택된 특정 Pod를 위한 ALLOW Action의 Authorization Policy가 존재한다면 4단계로 진행된다.
+4. 4 단계에서는 Target Pod (Workload)를 위한 **ALLOW** Action의 Authoration Policy의 Rule과 일치한 요청이라면 요청은 허용된다. 만약 Rule과 일치하지 않는다면 요청은 거부된다.
 
 ### 1.2. Rule
 
@@ -65,15 +64,15 @@ spec:
         remoteIpBlocks: ["20.0.0.0/24"]
 ```
 
-[Text 2]는 **From** Rule의 예제를 나타내고 있다. From Rule은 Target Pod로 연결을 수행할 수 있는 **외부 주체**를 정의한다. From Rule에는 다수의 **Source**가 존재할 수 있으며, 하나의 Source에는 **namespace**, **ipBlocks**, **principals**, **requestPrincipals**, **remoteIpBlocks** 5가지의 조건과 **not** Prefix를 붙인 **notNamespace**, **notIpBlocks**, **notPrincipals**, **notRequestPrincipals**, **notRemoteIpBlocks** 5가지의 조건 총 10가지의 조건을 이용할 수 있으며, not Prefix를 붙인 조건은 해당 조건을 만족하지 않는 경우를 의미한다.
+[Text 2]는 **From** Rule의 예제를 나타내고 있다. From Rule은 Target Pod로 요청을 전달할 수 있는 **외부 주체**를 정의한다. From Rule에는 다수의 **Source**가 존재할 수 있으며, 하나의 Source에는 **namespace**, **ipBlocks**, **principals**, **requestPrincipals**, **remoteIpBlocks** 5가지의 조건과 **not** Prefix를 붙인 **notNamespace**, **notIpBlocks**, **notPrincipals**, **notRequestPrincipals**, **notRemoteIpBlocks** 5가지의 조건 총 10가지의 조건을 이용할 수 있으며, not Prefix를 붙인 조건은 해당 조건을 만족하지 않는 경우를 의미한다.
 
-* namespaces : 연결을 시작이 가능한 Pod의 Namespace를 지정한다.
-* ipBlocks : 연결을 시작하는 주체의 IP를 지정한다. 여기서 IP는 IP Header의 Source IP를 의미한다. CIDR 또는 단일 IP 형태로 지정할 수 있다.
-* principals : 연결을 시작이 가능한 특정 Namespace의 Service Account를 이용하는 Pod를 지정한다. `cluster.local/ns/[namespace]/sa/[serviceaccount]` 형태로 Namespace와 Service Account를 지정한다. 예를 들어 `cluster.local/ns/default/sa/user`는 `default` Namespace에서 `user`라는 Service Account를 이용하는 Pod를 의미한다.
-* requestPrincipals : 연결을 허용할 JWT Token의 정보를 지정한다. `"[ISS]/[SUB]"` 형태로 Issuer와 Subject를 지정한다. 예를 들어 `example.com/sub`는 Issuer가 `example.com`이고 Subject가 `sub`인 JWT Token을 의미한다.
-* remoteIpBlocks : 연결을 시작하는 주체의 IP를 지정한다. 여기서 IP는 `X-Forwarded-For` Header에 저장된 Source IP를 의미한다.
+* namespaces : 요청 시작이 가능한 Pod의 Namespace를 지정한다.
+* ipBlocks : 요청을 시작하는 주체의 IP를 지정한다. 여기서 IP는 IP Header의 Source IP를 의미한다. CIDR 또는 단일 IP 형태로 지정할 수 있다.
+* principals : 요청 시작이 가능한 특정 Namespace의 Service Account를 이용하는 Pod를 지정한다. `cluster.local/ns/[namespace]/sa/[serviceaccount]` 형태로 Namespace와 Service Account를 지정한다. 예를 들어 `cluster.local/ns/default/sa/user`는 `default` Namespace에서 `user`라는 Service Account를 이용하는 Pod를 의미한다.
+* requestPrincipals : 요청을 허용할 JWT Token의 정보를 지정한다. `"[ISS]/[SUB]"` 형태로 Issuer와 Subject를 지정한다. 예를 들어 `example.com/sub`는 Issuer가 `example.com`이고 Subject가 `sub`인 JWT Token을 의미한다.
+* remoteIpBlocks : 요청을 시작하는 주체의 IP를 지정한다. 여기서 IP는 `X-Forwarded-For` Header에 저장된 Source IP를 의미한다.
 
-다수의 Source가 존재할 경우 하나의 Source만 만족하면 조건이 성립되는 **OR 조건**으로 동작하며, 하나의 Source안에 다수의 조건이 존재할 경우 모든 조건을 만족해야 조건이 성립되는 **AND 조건**으로 동작한다. 따라서 [Text 2]의 경우에는 Target Pod로 `test` Namespace에서 `user`라는 Service Account를 이용하는 Pod에서 `10.0.0.0/24`나 `20.0.0.20` IP로 연결을 시작하는 경우, 또는 `example.com/sub`라는 Subject를 가진 JWT Token을 이용하는 경우 연결을 허용한다.
+다수의 Source가 존재할 경우 하나의 Source만 만족하면 조건이 성립되는 **OR 조건**으로 동작하며, 하나의 Source안에 다수의 조건이 존재할 경우 모든 조건을 만족해야 조건이 성립되는 **AND 조건**으로 동작한다. 따라서 [Text 2]의 경우에는 Target Pod로 `test` Namespace에서 `user`라는 Service Account를 이용하는 Pod에서 `10.0.0.0/24`나 `20.0.0.20` IP로 연결을 시작하는 경우, 또는 `example.com/sub`라는 Subject를 가진 JWT Token을 이용하는 경우 요청을 허용한다.
 
 ####  1.2.2. To
 
@@ -101,9 +100,9 @@ spec:
         ports: [443]
 ```
 
-[Text 3]는 **To** Rule의 예제를 나타내고 있다. To Rule은 외부 주체에서 Target Pod에 연결 시 이용하는 **Request의 조건**을 지정한다. To Rule에는 다수의 **Operation**이 존재할 수 있으며, 하나의 Operation에는 **methods**, **paths**, **hosts**, **ports** 4가지의 조건과 **not** Prefix를 붙인 **notMethods**, **notPaths**, **notHosts**, **notPorts** 4가지의 조건 총 8가지의 조건을 이용할 수 있으며, not Prefix를 붙인 조건은 해당 조건을 만족하지 않는 경우를 의미한다.
+[Text 3]는 **To** Rule의 예제를 나타내고 있다. To Rule은 외부 주체에서 Target Pod에 전송하는 **요청의 조건**을 지정한다. To Rule에는 다수의 **Operation**이 존재할 수 있으며, 하나의 Operation에는 **methods**, **paths**, **hosts**, **ports** 4가지의 조건과 **not** Prefix를 붙인 **notMethods**, **notPaths**, **notHosts**, **notPorts** 4가지의 조건 총 8가지의 조건을 이용할 수 있으며, not Prefix를 붙인 조건은 해당 조건을 만족하지 않는 경우를 의미한다.
 
-다수의 Operation이 존재할 경우 하나의 Operation만 만족하면 조건이 성립되는 **OR 조건**으로 동작하며, 하나의 Operation안에 다수의 조건이 존재할 경우 모든 조건을 만족해야 조건이 성립되는 **AND 조건**으로 동작한다. 따라서 [Text 3]의 경우에는 Target Pod로 `api.example.com`, `api.example2.com` Hostname으로 `GET`, `POST` 메서드를 이용하여 `/v1/users` Path로 연결을 시작하는 경우, 또는 `api.ssup.com`, `api.ssup2.com` Hostname으로 `GET`, `POST`, `DELETE` 메서드를 이용하여 `443` 포트로 연결을 시작하는 경우 연결을 거부한다.
+다수의 Operation이 존재할 경우 하나의 Operation만 만족하면 조건이 성립되는 **OR 조건**으로 동작하며, 하나의 Operation안에 다수의 조건이 존재할 경우 모든 조건을 만족해야 조건이 성립되는 **AND 조건**으로 동작한다. 따라서 [Text 3]의 경우에는 Target Pod로 `api.example.com`, `api.example2.com` Hostname으로 `GET`, `POST` 메서드를 이용하여 `/v1/users` Path로 요청을 전송하는 경우, 또는 `api.ssup.com`, `api.ssup2.com` Hostname으로 `GET`, `POST`, `DELETE` 메서드를 이용하여 `443` 포트로 요청을 전송하는 경우 요청을 거부한다.
 
 #### 1.2.3. When
 
@@ -160,7 +159,7 @@ spec:
         paths: ["/v1/users"]
 ```
 
-[Text 5]는 **Custom Action**의 예제를 나타내고 있다. Custom Action은 사용자가 직접 정의한 조건을 이용하여 연결을 제어할 수 있는 기능을 제공한다. Authorization Rules를 통해서 제어할수 없는 조건을 Custom Action을 통해서 제어하는 한다. 일반적으로 Istio의 Ingress Gateway에 붙여 별도의 인증 시스템을 연동하는 경우에 많이 이용된다. [Text 5]의 예시도 Selector에 의해서 Istio의 Ingress Gateway에 붙은 Custom Action인 것을 확인할 수 있다. Custom Action에서 허용되더라도 Custom Action뒤에 처리되는 Deny, Allow Authorization Policy에 의해서 연결이 거부될 수도 있다.
+[Text 5]는 **Custom Action**의 예제를 나타내고 있다. Custom Action은 사용자가 직접 정의한 조건을 이용하여 요청을 거부/허용 할 수 있는 기능을 제공한다. Authorization Rules를 통해서 제어할수 없는 조건을 Custom Action을 통해서 제어하는 한다. 일반적으로 Istio의 Ingress Gateway에 붙여 별도의 인증 시스템을 연동하는 경우에 많이 이용된다. [Text 5]의 예시도 Selector에 의해서 Istio의 Ingress Gateway에 붙은 Custom Action인 것을 확인할 수 있다. Custom Action에서 허용되더라도 Custom Action뒤에 처리되는 Deny, Allow Authorization Policy에 의해서 요청이 거부될 수도 있다.
 
 ```yaml {caption="[Text 6] Istio ConfigMap Example for extensionProviders Example", linenos=table}
 apiVersion: v1
@@ -178,15 +177,11 @@ data:
         includeRequestHeadersInCheck: ["custom-authz"]
 ```
 
-Authorization Policy의 Provider는 Custom Action의 Custom Logic을 처리하는 곳을 지정하며, Provider는 Istio의 Mesh Config에 정의되어 있다. [Text 6]은 Provider가 정의된 Mesh Config의 예제를 나타내고 있다. `custom-authz`라는 Provider가 정의되어 있으며, 이 Provider는 `istio-system` Namespace에 존재하는 `custom-authz`라는 Service에 `8000` 포트로 인증 요청을 전송하여 연결허용 여부를 결정한다.
+Authorization Policy의 Provider는 Custom Action의 Custom Logic을 처리하는 곳을 지정하며, Provider는 Istio의 Mesh Config에 정의되어 있다. [Text 6]은 Provider가 정의된 Mesh Config의 예제를 나타내고 있다. `custom-authz`라는 Provider가 정의되어 있으며, 이 Provider는 `istio-system` Namespace에 존재하는 `custom-authz`라는 Service에 `8000` 포트로 인증 요청을 전송하여 요청 거부/허용을 결정한다.
 
 ### 1.4. vs Network Policy
 
-Istio Authorization Policy와 유사한 Kubernetes Object중에 하나는 Network Policy가 존재한다. Network Policy 또한 Pod와 Pod 사이의 연결 또는 Pod와 외부 사이의 연결을 제어하는데 이용된다. 다만 Istio Authorization Policy는 **Network Layer 7**에서 동작하는 반면 Network Policy는 **Network Layer 3/4**에서 동작한다.
-
-```yaml {caption="[Code 1] Linux NFS4 Mount 함수", linenos=table}
-
-```
+Authorzation Policy는 Target Pod로 전송되는 요청의 거부/허용 여부를 결정하는 반면에, Network Policy는 Target Pod의 Inbound/Outbound Traffic을 제어하는데 이용한다. Authorzation Policy는 L7 Layer에서 동작하기 때문에 HTTP Header 정보를 기반으로 요청의 거부/허용 여부를 결정하는 반면에, Network Policy는 L3/L4 Layer에서 동작하기 때문에 IP, Port 정보를 기반으로 Inbound/Outbound Traffic을 제어한다.
 
 ## 2. 참조
 
