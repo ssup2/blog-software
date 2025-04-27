@@ -25,7 +25,7 @@ Istio의 Authorization Policy는 Pod의 Istio Sidecar가 주입된 Pod로 들어
 * Rule : Rule은 Target Pod로 들어오는 **요청의 조건**을 지정한다.
 * Action : Action은 Rule에 의해서 Target Pod로 들어오는 요청을 거부/허용 할지 결정한다. **ALLOW**, **DENY**, **CUSTOM**, **AUDIT** 4가지 중에 하나를 선택할 수 있으며, 의미 그대로 ALLOW는 허용, DENY는 거부, CUSTOM은 사용자 정의 규칙을 의미한다. 마지막으로 AUDIT은 실제 Inbound Traffic을 제어하지는 않고 관련 로그만 남기는 역할을 수행한다.
 
-Authorization Policy는 Target Pod로 들어오는 요청을 거부/허용하는, 즉 **Ingress Traffic**을 제어하는 기법이며 Outbound Traffic을 제어하는 기능은 제공하지 않는다. 또한 Authorization Policy는 **Target Pod의 Sidecar로 동작중인 Envoy Proxy에서 동작**하기 때문에, 만약 Target Pod에 Sidecar가 주입되지 않은 경우에는 동작하지 않으며 모든 요청이 허용된다. **mTLS 설정이 필요한 Rule**을 이용할 경우에는 Target Pod의 Sidecar뿐만 아니라, 요청을 시작하는 Pod에도 Sidecar가 주입되어 있어야 mTLS가 동작하기 때문에 Target Pod와 요청을 시작하는 Pod에 모두 Sidecar가 주입되어 있어야 한다.
+Authorization Policy는 Target Pod로 들어오는 요청을 거부/허용하는, 즉 **Ingress Traffic**을 제어하는 기법이며 Outbound Traffic을 제어하는 기능은 제공하지 않는다. 또한 Authorization Policy는 **Target Pod의 Sidecar로 동작중인 Envoy Proxy에서 동작**하기 때문에, 만약 Target Pod에 Sidecar가 주입되지 않은 경우에는 동작하지 않으며 모든 요청이 허용된다. 또한 **mTLS 설정이 필요한 Rule**을 이용할 경우에는 Target Pod의 Sidecar뿐만 아니라, 요청을 시작하는 Pod에도 Sidecar가 주입되어 있어야 mTLS가 동작하기 때문에 Target Pod와 요청을 시작하는 Pod에 모두 Sidecar가 주입되어 있어야 한다.
 
 ### 1.1. 허용, 거부 처리 과정
 
