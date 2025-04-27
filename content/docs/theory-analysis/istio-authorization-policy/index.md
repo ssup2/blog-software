@@ -25,6 +25,8 @@ Istio의 Authorization Policy는 Pod의 Istio Sidecar가 주입된 Pod로 들어
 * Rule : Rule은 Target Pod로 들어오는 요청의 조건을 지정한다.
 * Action : Action은 Rule에 의해서 Target Pod로 들어오는 요청을 거부/허용 할지 결정한다. **ALLOW**, **DENY**, **CUSTOM**, **AUDIT** 4가지 중에 하나를 선택할 수 있으며, 의미 그대로 ALLOW는 허용, DENY는 거부, CUSTOM은 사용자 정의 규칙을 의미한다. 마지막으로 AUDIT은 실제 Inbound Traffic을 제어하지는 않고 관련 로그만 남기는 역할을 수행한다.
 
+Authorization Policy는 Target Pod로 들어오는 요청을 거부/허용하는, 즉 **Ingress Traffic**을 제어하는 기법이며 Outbound Traffic을 제어하는 기능은 제공하지 않는다. 또한 Authorization Policy는 **Target Pod의 Sidecar로 동작중인 Envoy Proxy에서 동작**하기 때문에, 만약 Target Pod에 Sidecar가 주입되지 않은 경우에는 동작하지 않는다.
+
 ### 1.1. 허용, 거부 처리 과정
 
 {{< figure caption="[Figure 1] Istio Authorization Process" src="images/istio-authorization-process.png" width="900px" >}}
@@ -136,7 +138,7 @@ spec:
 
 [Text 4]는 **When** Rule의 예제를 나타내고 있다. When Rule은 From Rule과 To Rule 사이에서 **세밀한 조건**을 지정하는데 이용한다. 다수의 Key/Value를 이용하여 조건을 설정할 수 있으며, 다수의 Key/Value가 설정되는 경우에는 하나의 Key/Value가 설정된 조건을 만족하는 경우에만 조건이 성립되는 **OR 조건**으로 동작한다.
 
-when의 key/value에 이용할수 있는 조건은 [Link](https://istio.io/latest/docs/reference/config/security/conditions/)에서 확인할 수 있으며, from rule과 to rule에서도 이용 가능한 IP, Namespace, JWT Token의 정보를 설정할 수 있는걸 확인할 수 있다. 따라서 from과 to를 이용하지 않고 when만을 이용하여 조건을 설정하는것도 가능은 하다. 다만 일반적으로 when만 이용하여 조건을 지정하는 경우는 드물며, from과 to를 활용하여 큰 범위의 조건을 지정하고, 세밀한 조건은 when에서 지정하는 것이 일반적이다.
+when의 key/value에 이용할수 있는 조건은 [Link](https://istio.io/latest/docs/reference/config/security/conditions/)에서 확인할 수 있으며, from rule과 to rule에서도 이용 가능한 IP, Namespace, JWT Token의 정보를 설정할 수 있는걸 확인할 수 있다. 따라서 from과 to를 이용하지 않고 when만을 이용하여 조건을 설정하는것도 가능은 하다. 다만 일반적으로 when만 이용하여 조건을 지정하는 경우는 드물며, from과 to를 활용하여 큰 범위의 조건을 지정하고 세밀한 조건은 when에서 지정하는 것이 일반적인 방법이다.
 
 ### 1.3. Custom Action
 
