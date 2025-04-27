@@ -21,8 +21,8 @@ spec:
 
 Istio의 Authorization Policy는 Pod의 Istio Sidecar가 주입된 Pod로 들어오는 요청을 거부/허용 할지를 결정하는 기능을 제공한다. [Text 1]은 Authorization Policy의 형식을 나타내고 있다. Authorization Policy는 크게 **Selector**, **Action**, **Rule** 3가지 요소로 구성되어 있다.
 
-* Selector : Selector는 Authorization Policy가 적용될 Pod를 지정한다. 만약 Selector가 지정되지 않으면 Authorization Policy는 Authorization Policy가 존재하는 Namespace 내의 모든 Pod에 적용된다. 본 글에서는 Selector에 의해서 Authorization Policy가 적용될 Pod를 **Target Pod**라고 지칭한다.
-* Rule : Rule은 Target Pod로 들어오는 요청의 조건을 지정한다.
+* Selector : Selector는 Authorization Policy가 적용될 Pod를 지정한다. 만약 Selector가 지정되지 않으면 Authorization Policy는 Authorization Policy가 존재하는 Namespace 내의 모든 Pod에 적용된다. 본 글에서는 Selector에 의해서 Authorization Policy가 적용될 Pod를 **Target Pod**라고 지칭한다. Worklaod Pod 뿐만 아니라 Istio의 Ingress Gateway와 Egress Gateway도 Target Pod가 될 수 있다.
+* Rule : Rule은 Target Pod로 들어오는 **요청의 조건**을 지정한다.
 * Action : Action은 Rule에 의해서 Target Pod로 들어오는 요청을 거부/허용 할지 결정한다. **ALLOW**, **DENY**, **CUSTOM**, **AUDIT** 4가지 중에 하나를 선택할 수 있으며, 의미 그대로 ALLOW는 허용, DENY는 거부, CUSTOM은 사용자 정의 규칙을 의미한다. 마지막으로 AUDIT은 실제 Inbound Traffic을 제어하지는 않고 관련 로그만 남기는 역할을 수행한다.
 
 Authorization Policy는 Target Pod로 들어오는 요청을 거부/허용하는, 즉 **Ingress Traffic**을 제어하는 기법이며 Outbound Traffic을 제어하는 기능은 제공하지 않는다. 또한 Authorization Policy는 **Target Pod의 Sidecar로 동작중인 Envoy Proxy에서 동작**하기 때문에, 만약 Target Pod에 Sidecar가 주입되지 않은 경우에는 동작하지 않는다.
@@ -179,7 +179,7 @@ data:
         includeRequestHeadersInCheck: ["custom-authz"]
 ```
 
-Authorization Policy의 Provider는 Custom Action의 Custom Logic을 처리하는 곳을 지정하며, Provider는 Istio의 Mesh Config에 정의되어 있다. [Text 6]은 Provider가 정의된 Mesh Config의 예제를 나타내고 있다. `custom-authz`라는 Provider가 정의되어 있으며, 이 Provider는 `istio-system` Namespace에 존재하는 `custom-authz`라는 Service에 `8000` 포트로 요청을 전송하여 요청 거부/허용을 결정한다.
+Authorization Policy의 Provider는 Custom Action의 **Custom Logic을 처리하는 곳**을 지정하며, Provider는 Istio의 Mesh Config에 정의되어 있다. [Text 6]은 Provider가 정의된 Mesh Config의 예제를 나타내고 있다. `custom-authz`라는 Provider가 정의되어 있으며, 이 Provider는 `istio-system` Namespace에 존재하는 `custom-authz`라는 Service에 `8000` 포트로 요청을 전송하여 요청 거부/허용을 결정한다. `includeRequestHeadersInCheck`을 통해서 요청 거부/허용을 결정하기 위해서 반드시 필요한 Header를 지정할 수 있으며, 예제에서는 `custom-authz` Header를 지정하고 있다.
 
 ### 1.4. vs Network Policy
 
@@ -189,3 +189,4 @@ Authorzation Policy는 Target Pod로 전송되는 요청의 거부/허용 여부
 
 * Istio Authorization Policy : [https://istio.io/latest/docs/reference/config/security/authorization-policy/](https://istio.io/latest/docs/reference/config/security/authorization-policy/)
 * Istio Authorization Policy : [https://nginxstore.com/blog/istio/istio-authorization-policy-%ED%99%9C%EC%9A%A9-deny-allow-%EC%A0%91%EA%B7%BC-%EC%A0%9C%ED%95%9C-%EA%B5%AC%EC%84%B1-%EA%B0%80%EC%9D%B4%EB%93%9C/](https://nginxstore.com/blog/istio/istio-authorization-policy-%ED%99%9C%EC%9A%A9-deny-allow-%EC%A0%91%EA%B7%BC-%EC%A0%9C%ED%95%9C-%EA%B5%AC%EC%84%B1-%EA%B0%80%EC%9D%B4%EB%93%9C/)
+* Istio Authorization Policy : [https://netpple.github.io/docs/istio-in-action/Istio-ch9-securing-3-authorizing](https://netpple.github.io/docs/istio-in-action/Istio-ch9-securing-3-authorizing)
