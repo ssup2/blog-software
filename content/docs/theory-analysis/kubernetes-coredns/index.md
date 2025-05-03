@@ -96,10 +96,41 @@ CoreDNS는 일반적으로 CPU/Memory 사용량이 많지 않기 때문에 일�
 [INFO] 10.244.5.175:48479 - 8047 "A IN postgresql.postgresql.svc.cluster.local. udp 57 false 512" NOERROR qr,aa,rd 112 0.000853697s
 [INFO] 10.244.5.175:39729 - 58289 "AAAA IN postgresql.postgresql.dagster.svc.cluster.local. udp 65 false 512" NXDOMAIN qr,aa,rd 158 0.000522368s
 [INFO] 10.244.5.175:39729 - 34179 "A IN postgresql.postgresql.dagster.svc.cluster.local. udp 65 false 512" NXDOMAIN qr,aa,rd 158 0.000654199s
-[INFO] 10.244.5.175:51351 - 27693 "A IN postgres제l.postgresql.dagster.svc.cluster.local. udp 65 false 512" NXDOMAIN qr,aa,rd 158 0.000357578s
+[INFO] 10.244.5.175:51351 - 27693 "A IN postgresql.postgresql.dagster.svc.cluster.local. udp 65 false 512" NXDOMAIN qr,aa,rd 158 0.000357578s
 ```
 
-CoreDNS는 `log` 설정을 통해서 CoreDNS로 전달되는 모든 DNS Record 조회를 Log로 남길 수 있다. [File 2]는 CoreDNS의 `log` 설정을 나타내고 있으며, [File 3]은 CoreDNS의 DNS Record 조회 Log의 예제 나타내고 있다. `log` 설정 시 기본적으로 `{remote}:{port} - {>id} "{type} {class} {name} {proto} {size} {>do} {>bufsize}" {rcode} {>rflags} {rsize} {duration}` 형태의 Log를 남긴다.
+CoreDNS는 `log` 설정을 통해서 CoreDNS로 전달되는 모든 DNS Record 조회 요청을 Log로 남길 수 있다. [File 2]는 CoreDNS의 `log` 설정을 나타내고 있으며, [File 3]은 CoreDNS의 DNS Record 조회 Log의 예제 나타내고 있다. `log` 설정 시 기본적으로 `{remote}:{port} - {>id} "{type} {class} {name} {proto} {size} {>do} {>bufsize}" {rcode} {>rflags} {rsize} {duration}` 형태의 Log를 남긴다.
+
+* remote : 조회 요청에 사용된 **Pod의 IP**를 의미
+* port : 조회 요청에 사용된 **Pod의 Port**를 의미
+* id : **조회 요청의 ID**를 의미
+* type : **조회 요청의 Type**을 의미 (Query Type)
+  * A : IPv4 Address
+  * AAAA : IPv6 Address
+  * CNAME : Canonical Name
+* class : **조회 요청의 Class**를 의미 (Query Class)
+  * IN : Internet
+* name :  **조회 요청의 이름**을 의미 (Query Name)
+* proto : **조회 요청에 사용된 Protocol**을 의미
+  * udp : UDP
+  * tcp : TCP
+* size : **조회 요청의 크기**를 의미
+* do : 조회 요청에 **DNSSEC 이용 여부**를 의미 (DNSSEC OK)
+  * false : DNSSEC 이용하지 않음
+  * true : DNSSEC 이용함
+* bufsize : 조회 요청의 **EDNS0** 확장 프로토콜 대한 Buffer 크기를 의미
+* rcode : 조회 요청에 대한 **응답 Code**를 의미 (Response Code)
+  * NOERROR : 조회 요청에 대한 응답이 있음
+  * NXDOMAIN : 조회 요청에 대한 응답이 없음
+  * SERVFAIL : 조회 요청에 대한 응답이 있지만 오류가 발생함
+  * REFUSED : 조회 요청에 대한 응답이 거절됨
+* rflags : DNS Record 조회 요청에 대한 **응답 Flag**를 의미 (Response Flags)
+  * QR : Response Flag
+  * AA : Authoritative Answer Flag
+  * RD : Recursion Desired Flag
+  * TC : Truncated Flag
+* rsize : 조회 요청에 대한 **응답 크기**를 의미, 압축되지 않은 응답 크기를 의미하며 Pod는 압축된 응답 크기를 받음
+* duration : 조회 요청에 소요된 **응답 시간**을 의미
 
 ## 2. 참조
 
