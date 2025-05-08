@@ -1,6 +1,5 @@
 ---
 title : Trino, Hive Metastore 연동 / Kubernetes Data Platform 환경
-draft : true
 ---
 
 ## 1. 실습 환경
@@ -24,9 +23,11 @@ Trino Service의 External IP와 Username를 입력한다. Username은 아무런 
 
 {{< figure caption="[Figure 2] Trino 접속 정보 입력" src="images/dbeaver-trino-connection-setting.png" width="800px" >}}
 
-## 3. Hive Metastore에 Table 생성
+## 3. 단일 Object Query 수행
 
-DBeaver에서 Trino에 접속한 다음 다음의 DML을 실행하여 Hive Metastore에 Table을 생성한다.
+### 3.1. Hive Metastore에 Table 생성
+
+DBeaver에서 Trino에 접속한 다음, 다음의 DML을 실행하여 Hive Metastore에 Table을 생성한다.
 
 ```sql
 create schema hive.airport;
@@ -51,7 +52,7 @@ with (
 );
 ```
 
-## 4. MinIO에 Data 적재
+### 3.2. MinIO에 Data 적재
 
 MinIO CLI Client를 설치한다.
 
@@ -68,7 +69,7 @@ mc mb dp/airport-codes
 mc cp airport-codes.csv dp/airport-codes/data/
 ```
 
-## 5. Trino에서 데이터 조회
+### 3.3. Trino에서 데이터 조회
 
 Trino에서 Select 쿼리를 실행하여 데이터를 조회한다.
 
@@ -77,6 +78,10 @@ select * from hive.airport.codes;
 ```
 
 {{< figure caption="[Figure 3] Trino에서 데이터 조회" src="images/dbeaver-trino-query-select.png" width="800px" >}}
+
+## 4. 다수의 Partition Object Query 수행
+
+## 5. Ranger 기반 Data 접근 제어
 
 ## 6. 참조
 
