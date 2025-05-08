@@ -25,7 +25,24 @@ Trino Service의 External IP와 Username를 입력한다. Username은 아무런 
 
 ## 3. 단일 Object Query 수행
 
-### 3.1. Hive Metastore에 Table 생성
+### 3.1. MinIO에 Data 적재
+
+MinIO CLI Client를 설치한다.
+
+```shell
+brew install minio/stable/mc
+mc alias set dp http://$(kubectl -n minio get service minio -o jsonpath="{.status.loadBalancer.ingress[0].ip}"):9000 root root123!
+```
+
+MinIO CLI Client를 통해서 MinIO에 Sample Data를 적재한다.
+
+```shell
+wget https://raw.githubusercontent.com/datasets/airport-codes/refs/heads/main/data/airport-codes.csv
+mc mb dp/airport-codes
+mc cp airport-codes.csv dp/airport-codes/data/
+```
+
+### 3.2. Hive Metastore에 Table 생성
 
 DBeaver에서 Trino에 접속한 다음, 다음의 DML을 실행하여 Hive Metastore에 Table을 생성한다.
 
@@ -50,23 +67,6 @@ with (
 	external_location = 's3a://airport-codes/data/',
 	format = 'CSV'
 );
-```
-
-### 3.2. MinIO에 Data 적재
-
-MinIO CLI Client를 설치한다.
-
-```shell
-brew install minio/stable/mc
-mc alias set dp http://192.168.1.89:9000 root root123!
-```
-
-MinIO CLI Client를 통해서 MinIO에 Sample Data를 적재한다.
-
-```shell
-wget https://raw.githubusercontent.com/datasets/airport-codes/refs/heads/main/data/airport-codes.csv
-mc mb dp/airport-codes
-mc cp airport-codes.csv dp/airport-codes/data/
 ```
 
 ### 3.3. Trino에서 데이터 조회
