@@ -40,20 +40,20 @@ MinIO CLI Client를 통해서 MinIO에 Sample Data를 적재한다.
 
 ```shell
 wget https://raw.githubusercontent.com/datasets/airport-codes/refs/heads/main/data/airport-codes.csv
-mc mb dp/airport-codes
-mc cp airport-codes.csv dp/airport-codes/data/
+mc mb dp/airport/codes
+mc cp airport-codes.csv dp/airport/codes/data.csv
 ```
 
-### 3.2. Hive Metastore에 Table 생성
+### 3.2. Schema, Table 생성
 
-DBeaver에서 Trino에 접속한 다음, 다음의 DML을 실행하여 Hive Metastore에 Table을 생성한다.
+Airport Schema와 MinIO에 저장되어 있는 Object를 기반으로 Airport Code Table을 생성한다. CSV Format으로 저장되어 있는 데이터는 모두 `VARCHAR` Type으로 선언된다.
 
 ```sql
 CREATE SCHEMA hive.airport;
 
 CREATE TABLE hive.airport.codes (
-	ident VARCHAR,	
-	type  VARCHAR,	
+	ident VARCHAR,
+	type  VARCHAR,
 	name  VARCHAR,
 	elevation_ft VARCHAR,
 	continent    VARCHAR,
@@ -66,14 +66,14 @@ CREATE TABLE hive.airport.codes (
 	coordinates  VARCHAR
 )
 WITH (
-	external_location = 's3a://airport-codes/data/',
+	external_location = 's3a://airport/codes/',
 	format = 'CSV'
 );
 ```
 
 ### 3.3. Trino에서 데이터 조회
 
-Trino에서 Select 쿼리를 실행하여 데이터를 조회한다.
+Airport Code Table에 적재된 데이터를 조회한다.
 
 ```sql
 select * from hive.airport.codes;
@@ -81,18 +81,19 @@ select * from hive.airport.codes;
 
 {{< figure caption="[Figure 3] Trino에서 데이터 조회" src="images/dbeaver-trino-query-select.png" width="800px" >}}
 
-## 4. 다수의 Partition Object Query 수행
+## 4. Partition Object Query 수행
 
-### 4.1. MinIO에 Partition된 Object 적재
-
-```shell
-```
-
-### 4.2. Hive Metastore에 Partition된 Table 생성
+Weather Schema를 생성한다.
 
 ```sql
 CREATE SCHEMA hive.weather;
+```
 
+### 4.1. CSV Partition Table 생성 및 조회
+
+MinIO에 저장되어 있는 Partition된 CSV Format의 Object를 기반으로 South Korea Hourly Weather Table을 생성한다.
+
+```sql
 CREATE TABLE hive.weather.southkorea_hourly_csv (
     branch_name VARCHAR,
 
@@ -125,13 +126,23 @@ WITH (
 );
 ```
 
+Partition 정보를 동기화하고, 동기화된 Partition 정보를 조회한다.
+
 ```sql
 CALL hive.system.sync_partition_metadata('weather', 'southkorea_hourly_csv', 'ADD');
 
 SELECT * FROM hive.weather."southkorea_hourly_csv$partitions";
 ```
 
-### 4.3. Trino에서 데이터 조회
+South Korea Hourly Weather Table에 적재된 데이터를 조회한다.
+
+```sql
+SELECT * FROM hive.weather.southkorea_hourly_csv;
+```
+
+### 4.3. Parquet Partition Table 생성 및 조회
+
+### 4.4. Iceberg Partition Table 생성 및 조회
 
 ## 5. Ranger 기반 Data 접근 제어
 
