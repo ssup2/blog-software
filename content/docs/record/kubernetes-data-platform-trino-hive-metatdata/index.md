@@ -91,7 +91,7 @@ CREATE SCHEMA hive.weather;
 
 ### 4.1. CSV Partition Table 생성 및 조회
 
-MinIO에 저장되어 있는 Partition된 CSV Format의 Object를 기반으로 South Korea Hourly Weather Table을 생성한다.
+MinIO에 저장되어 있는 Partition된 CSV Format의 Object를 기반으로 South Korea Hourly Weather Table을 생성한다. CSV Format으로 저장되어 있는 데이터는 모두 `VARCHAR` Type으로 선언된다.
 
 ```sql
 CREATE TABLE hive.weather.southkorea_hourly_csv (
@@ -141,6 +141,55 @@ SELECT * FROM hive.weather.southkorea_hourly_csv;
 ```
 
 ### 4.3. Parquet Partition Table 생성 및 조회
+
+MinIO에 저장되어 있는 Partition된 Parquet Format의 Object를 기반으로 South Korea Hourly Weather Table을 생성한다.
+
+```sql
+CREATE TABLE hive.weather.southkorea_hourly_parquet (
+    branch_name VARCHAR,
+
+    temp DOUBLE,
+    rain DOUBLE,
+    snow DOUBLE,
+
+    cloud_cover_total     INT,
+    cloud_cover_lowmiddle INT,
+    cloud_lowest          INT,
+    cloud_shape           VARCHAR,
+
+    humidity       INT,
+    wind_speed     DOUBLE,
+    wind_direction VARCHAR,
+    pressure_local DOUBLE,
+    pressure_sea   DOUBLE,
+    pressure_vaper DOUBLE,
+    dew_point      DOUBLE,    
+
+    year  INT,
+    month INT,
+    day   INT,
+    hour  INT
+)
+WITH (
+	external_location = 's3a://weather/southkorea/hourly-parquet',
+	format = 'PARQUET',
+	partitioned_by = ARRAY['year', 'month', 'day', 'hour']
+);
+```
+
+Partition 정보를 동기화하고, 동기화된 Partition 정보를 조회한다.
+
+```sql
+CALL hive.system.sync_partition_metadata('weather', 'southkorea_hourly_parquet', 'ADD');
+
+SELECT * FROM hive.weather."southkorea_hourly_parquet$partitions";
+```
+
+South Korea Hourly Weather Table에 적재된 데이터를 조회한다.
+
+```sql
+SELECT * FROM hive.weather.southkorea_hourly_parquet;
+```
 
 ### 4.4. Iceberg Partition Table 생성 및 조회
 
