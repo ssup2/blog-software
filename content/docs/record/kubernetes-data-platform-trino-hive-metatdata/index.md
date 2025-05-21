@@ -191,7 +191,43 @@ South Korea Hourly Weather Table에 적재된 데이터를 조회한다.
 SELECT * FROM hive.weather.southkorea_hourly_parquet;
 ```
 
-### 4.4. Iceberg Partition Table 생성 및 조회
+### 4.4. Iceberg Parquet Partition Table 생성 및 조회
+
+MinIO에 저장되어 있는 Partition된 Iceberg Parquet Format의 Object를 기반으로 South Korea Hourly Weather Table을 생성한다.
+
+```sql
+CREATE TABLE iceberg.weather.southkorea_hourly_iceberg_parquet (
+    branch_name VARCHAR,
+
+    temp DOUBLE,
+    rain DOUBLE,
+    snow DOUBLE,
+
+    cloud_cover_total     INT,
+    cloud_cover_lowmiddle INT,
+    cloud_lowest          INT,
+    cloud_shape           VARCHAR,
+
+    humidity       INT,
+    wind_speed     DOUBLE,
+    wind_direction VARCHAR,
+    pressure_local DOUBLE,
+    pressure_sea   DOUBLE,
+    pressure_vaper DOUBLE,
+    dew_point      DOUBLE,    
+
+    year  INT,
+    month INT,
+    day   INT,
+    hour  INT
+)
+WITH (
+	location = 's3a://weather/southkorea/hourly-iceberg-parquet',
+	format = 'PARQUET',
+	partitioned_by = ARRAY['year', 'month', 'day', 'hour'],
+    'write.delete.isolation-level' = 'serializable'
+);
+```
 
 ## 5. Ranger 기반 Data 접근 제어
 
