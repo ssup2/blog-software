@@ -6,7 +6,7 @@ title: Istio Pod Gracefully Termination
 
 {{< figure caption="[Figure 1] Istio Pod Component" src="images/istio-app-pod-component.png" width="600px" >}}
 
-[Figure 1]은 Istio 환경에서의 App Pod의 구성 요소를 나타내고 있다. 크게 App이 동작하는 App Container와 App Container이 송수신하는 모든 Traffic이 거치는 Sidecar Container인 Envoy Proxy Container로 구분할 수 있다. 따라서 Gracefully Termination도 App Container와 Envoy Container를 나누어 고려해야 한다.
+[Figure 1]은 Istio 환경에서의 App Pod의 구성 요소를 나타내고 있다. 크게 App이 동작하는 **App Container**와 App Container이 송수신하는 모든 Traffic이 거치는 Sidecar Container인 **Envoy Proxy Container**로 구분할 수 있다. 따라서 Gracefully Termination도 App Container와 Envoy Proxy Container를 나누어 고려해야 한다.
 
 ### 1.1. App Container Gracefully Termination
 
@@ -30,11 +30,11 @@ Envoy Proxy Container의 Termination 수행 과정은 `EXIT_ON_ZERO_ACTIVE_CONNE
 
 {{< figure caption="[Figure 3] Envoy Proxy Container Termination with terminationDrainDuration" src="images/istio-envoy-container-termination-with-terminationdrainduration.png" width="1000px" >}}
 
-[Figure 3]은 `EXIT_ON_ZERO_ACTIVE_CONNECTIONS`이 설정되지 않은, 즉 `terminationDrainDuration` 설정값에 따라서 Enovy Proxy가 종료되는 과정을 나타내고 있다. `SIGTERM` Signal을 받은 pilot-agents는 Envoy Proxy를 Drain Mode로 전환하며, 전환한 이후에는 Istio의 `terminationDrainDuration` 설정값 만큼 대기하며 Envoy Proxy를 종료하고 자기 자신을 종료시킨다. pilot-agents가 종료되면 Envoy Proxy Container가 제거된다. 여기서 중요한 점은 pilot-agents가 Envoy Proxy를 Drain Mode로 전환한 이후에 반드시 `terminationDrainDuration` 설정값 만큼 대기한 다음에 Envoy Proxy를 종료한다는 점이다.
+[Figure 3]은 `EXIT_ON_ZERO_ACTIVE_CONNECTIONS`이 설정되지 않은, 즉 `terminationDrainDuration` 설정값에 따라서 Enovy Proxy가 Gracefully Termination을 수행하는 과정을 나타내고 있다. `SIGTERM` Signal을 받은 pilot-agents는 Envoy Proxy를 **Drain Mode**로 전환하며, 전환한 이후에는 Istio의 `terminationDrainDuration` 설정값 만큼 대기하며 Envoy Proxy를 종료하고 자기 자신을 종료시킨다. pilot-agents가 종료되면 Envoy Proxy Container가 제거된다. 여기서 중요한 점은 pilot-agents가 Envoy Proxy를 Drain Mode로 전환한 이후에 반드시 `terminationDrainDuration` 설정값 만큼 대기한 다음에 Envoy Proxy를 종료한다는 점이다.
 
 이는 Drain Mode로 진입한 Envoy가 `terminationDrainDuration` 시간 이전에 모든 Request를 처리하였어도 `terminationDrainDuration` 설정값 만큼 반드시 대기한 다음 종료가 된다는 것을 의미한다. 따라서 `terminationDrainDuration` 시간이 너무 길어도 Envoy Proxy Container의 종료 시간이 늦어지게 된다. 반대로 Envoy가 `terminationDrainDuration` 시간 이후에도 처리하지 못한 Request가 존재한다면, 해당 Request를 처리하지 못하고 종료된다. 따라서 적절한 `terminationDrainDuration` 설정값이 필요하다.
 
-Envoy Proxy는 Drain Mode에 진입해도 신규 Request를 계속해서 처리가 가능하다. 이는 Envoy Proxy Propagation Delay 발생으로 인해서 신규 Request가 늦게 도착해도 문제없이 처리가 가능하도록 만든다. App Container와 다르게 Envoy Proxy Container에는 preStop이 존재하지 않는 이유기도 하다. `terminationDrainDuration` 값 이상으로 Pod의 `terminationGracePeriodSeconds` 값도 같이 설정해야 Envoy Proxy가 `SIGKILL` Signal에 의해서 강제로 제거되지 않는다.
+Envoy Proxy는 Drain Mode에 진입해도 신규 Request를 계속해서 처리가 가능하다. 이는 [Figure 3]에 나타낸 **Envoy Proxy Propagation Delay** 발생으로 인해서 신규 Request가 늦게 도착해도 문제없이 처리가 가능하도록 만든다. App Container와 다르게 Envoy Proxy Container에는 preStop이 존재하지 않는 이유기도 하다. Pod의 `terminationGracePeriodSeconds` 값은 반드시 `terminationDrainDuration` 값 이상으로 설정해야 한다. 그렇지 않으면 Envoy Proxy가 `terminationDrainDuration` 시간만큼 대기하지 못하고 Pod의 `terminationGracePeriodSeconds`에 의해서 `SIGKILL` Signal에 의해서 강제로 종료되기 때문이다.
 
 ```yaml {caption="[File 1] terminationDrainDuration Configuration on IstioOperator", linenos=table}
 apiVersion: install.istio.io/v1alpha1
@@ -56,7 +56,7 @@ spec:
 ...
 ```
 
-[File 1]은 `terminationDrainDuration` 설정값을 전역으로 30초로 설정하기 위한 IstioOperator를 나타내고 있으며, [File 2]는 특정 Pod에만 30초로 설정하기 위한 Annotation 예제를 나타내고 있다. `terminationDrainDuration`를 별도로 설정하지 않으면 기본값인 **5초**로 설정이 된다.
+`terminationDrainDuration` 값은 전역으로 설정하는 방법과 각 Pod별로 설정하는 방법 모두 존재한다. [File 1]은 전역으로 `terminationDrainDuration` 설정값을 30초로 설정하기 위한 IstioOperator를 나타내고 있으며, [File 2]는 특정 Pod에만 30초로 설정하기 위한 Annotation 예제를 나타내고 있다. `terminationDrainDuration`를 별도로 설정하지 않으면 기본값인 **5초**로 설정이 된다.
 
 ```text {caption="[Log 1] Envoy Proxy Termination Log with terminationDrainDuration", linenos=table}
 2025-01-06T15:53:11.767769Z     info    Status server has successfully terminated
@@ -76,9 +76,9 @@ spec:
 
 #### 1.2.2. EXIT_ON_ZERO_ACTIVE_CONNECTIONS
 
-{{< figure caption="[Figure 4] Envoy Proxy Container Termination with terminationDrainDuration" src="images/istio-envoy-container-termination-with-terminationdrainduration.png" width="1000px" >}}
+{{< figure caption="[Figure 4] Envoy Proxy Container Termination with EXIT_ON_ZERO_ACTIVE_CONNECTIONS" src="images/istio-envoy-container-termination-with-zeroactiveconnections.png" width="1000px" >}}
 
-[Figure 4]는 `EXIT_ON_ZERO_ACTIVE_CONNECTIONS`이 설정된 Envoy Proxy Container의 Termination 수행 과정을 나타내고 있다. `SIGTERM` Signal을 받은 pilot-agent는 곧바로 Envoy Proxy를 Drain Mode로 전환하고 `MINIMUM_DRAIN_DURATION` 설정값의 시간만큼 대기한다. 이후에 Envoy Proxy의 모든 Connection이 종료될때까지 대기하다가 모든 Connection이 종료되면 Envoy Proxy를 종료하고 자기 자신을 종료한다. pilot-agents가 종료되면 Envoy Proxy Container가 제거된다.
+[Figure 4]는 `EXIT_ON_ZERO_ACTIVE_CONNECTIONS`이 설정된 Envoy Proxy Container의 Termination 수행 과정을 나타내고 있다. `SIGTERM` Signal을 받은 pilot-agent는 곧바로 Envoy Proxy를 **Drain Mode**로 전환하고 `MINIMUM_DRAIN_DURATION` 설정값의 시간만큼 대기한다. 이후에 Envoy Proxy의 모든 Connection이 종료될때까지 대기하다가 모든 Connection이 종료되면 Envoy Proxy를 종료하고 자기 자신을 종료한다. pilot-agents가 종료되면 Envoy Proxy Container가 제거된다.
 
 `EXIT_ON_ZERO_ACTIVE_CONNECTIONS`이 설정되면 `terminationDrainDuration` 설정값은 무시된다. `terminationDrainDuration` 설정값으로 종료될때와 동일하게 Drain Mode에 진입한 Envoy Proxy는 신규 Request를 계속해서 처리가 가능하며, 이로 인해서 Envoy Proxy Container에는 preStop이 존재하지 않는다. `terminationGracePeriodSeconds` 값도 같이 크게 설정해야 Envoy Proxy가 `SIGKILL` Signal에 의해서 강제로 제거되지 않는다.
 
@@ -107,7 +107,7 @@ spec:
 ...
 ```
 
-[File 3]은 `EXIT_ON_ZERO_ACTIVE_CONNECTIONS`를 설정하고 `MINIMUM_DRAIN_DURATION` 설정값을 전역으로 15초로 설정하기 위한 IstioOperator를 나타내고 있으며, [File 4]는 동일한 설정을 특정 Pod에만 적용하기 위한 Annotation 예제를 나타내고 있다. `MINIMUM_DRAIN_DURATION`를 별도로 설정하지 않으면 기본값인 **5초**로 설정이 된다.
+`EXIT_ON_ZERO_ACTIVE_CONNECTIONS`와 `MINIMUM_DRAIN_DURATION` 값은 전역으로 설정하는 방법과 각 Pod별로 설정하는 방법 모로 존재한다. [File 3]은 전역으로 `EXIT_ON_ZERO_ACTIVE_CONNECTIONS`를 설정하고 `MINIMUM_DRAIN_DURATION` 설정값을 15초로 설정하기 위한 IstioOperator를 나타내고 있으며, [File 4]는 동일한 설정을 특정 Pod에만 적용하기 위한 Annotation 예제를 나타내고 있다. `MINIMUM_DRAIN_DURATION`를 별도로 설정하지 않으면 기본값인 **5초**로 설정이 된다.
 
 ```text {caption="[Log 2] Envoy Proxy Termination Log with EXIT_ON_ZERO_ACTIVE_CONNECTIONS", linenos=table}
 2025-01-06T18:27:37.713164Z     info    Status server has successfully terminated
