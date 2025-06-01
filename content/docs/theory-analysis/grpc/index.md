@@ -64,9 +64,9 @@ gRPC는 HTTP/1.1 대비 HTTP/2의 다양한 장점들을 활용하며 동작한�
 | UNAUTHENTICATED | 16 | 인증 실패. 토큰 누락 또는 유효하지 않음. |
 {{< /table >}}
 
-[Table 1]은 gRPC의 Status Code를 나타내고 있다. gRPC에서 각각의 RPC 요청은 응답으로 돌아오는 **Status Code**를 통해 요청의 성공 여부를 판단한다. HTTP/2의 Status Code와 유사하지만 서로 다른 역할을 수행한다. gRPC의 Status Code는 각 RPC 요청에 대한 결과이지만, HTTP/2의 Status Code는 HTTP/2 관점에서의 Data 전송 및 라우팅 결과를 나타낸다.
+[Table 1]은 gRPC의 Status Code를 나타내고 있다. gRPC에서 각각의 RPC 요청은 응답으로 돌아오는 **Status Code**를 통해 요청의 성공 여부를 판단한다. 
 
-예를들어 Client가 gRPC를 통해서 Server로 존재하지 않는 Method를 호출할 경우 Status Code는 **UNIMPLEMENTED**으로 응답되지만, HTTP/2의 Status Code는 **200**으로 응답될 수 있다. 왜냐하면 HTTP/2 관점에서는 Data를 성공적으로 주고 받았기 때문이다.
+HTTP/2의 Status Code와 유사하지만 서로 다른 역할을 수행한다. gRPC의 Status Code는 각 RPC 요청에 대한 결과이지만, HTTP/2의 Status Code는 HTTP/2 관점에서의 Data 전송 및 라우팅 결과를 나타낸다. 예를들어 Client가 gRPC를 통해서 Server로 존재하지 않는 Method를 호출할 경우 Status Code는 **UNIMPLEMENTED**으로 응답되지만, HTTP/2의 Status Code는 **200**으로 응답될 수 있다. 왜냐하면 HTTP/2 관점에서는 Data를 성공적으로 주고 받았기 때문이다.
 
 ### 1.4. vs HTTP/1.1 + JSON
 
