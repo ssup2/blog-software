@@ -34,15 +34,24 @@ Circuit Breaking은 주로 **Destination Rule**의 **Connection Pool** (`traffic
 
 Connection Pool은 Client Pod의 Sidecar Proxy에서 이용할 수 있는 **최대 Connection의 개수** 또는 **Request의 대기 개수**를 정의한다. Connection Pool의 Client에서 많은 요청이 발생하여 Client Pool에 설정된 이상이 필요할 경우에는 Circuit Breaking이 동작하며, Client의 요청은 Client Pod의 Sidecar Proxy에서 중단된다. Connection Pool에서 제공하는 주요 설정들은 다음과 같다.
 
-* `tcp.maxConnections` : TCP Connection의 최대 개수를 의미한다.
-* `tcp.connectTimeout` : TCP Connection을 맺는데 걸리는 최대 시간. 기본값은 10초이다.
-* `tcp.maxConnectionDuration` : TCP Connection을 유지할 수 있는 최대 시간. 설정하지 않으면 최대 유지 시간에 제한이 없어진다.
-* `tcp.idleTimeout` : TCP Idle Timeout 시간. 기본값은 1시간 이며, 0s (0초)로 설정하는 경우 제한이 없어진다.
-* `http.http1MaxPendingRequests` : HTTP/1.1 요청의 최대 대기 개수를 의미한다.
-* `http.maxRequestsPerConnection` : 각 TCP Connection당 최대 요청 개수를 의미한다.
-* 
+* `tcp.maxConnections` : TCP Connection의 최대 개수를 설정한다.
+* `tcp.connectTimeout` : TCP Connection을 맺는데 걸리는 최대 시간을 설정한다. 기본값은 10초이다.
+* `tcp.maxConnectionDuration` : TCP Connection을 유지할 수 있는 최대 시간을 설정한다. 설정하지 않으면 최대 유지 시간에 제한이 없어진다.
+* `tcp.idleTimeout` : TCP Idle Timeout 시간을 설정한다. 기본값은 1시간 이며, 0s (0초)로 설정하는 경우 제한이 없어진다.
+* `http.http1MaxPendingRequests` : HTTP 요청의 최대 대기 개수를 설정한다. 이름에는 `http1`이 포함되어 있지만, HTTP/1.1 뿐만 아니라 HTTP/2 요청에도 적용된다. 기본값은 2^31-1이다.
+* `http.http2MaxRequests` : 동시에 처리할 수 있는 최대 HTTP 요청의 개수를 설정한다. 이름에는 `http2`가 포함되어 있지만, HTTP/2 뿐만 아니라 HTTP/1.1 요청에도 적용된다. 기본값은 2^31-1이다.
+* `http.maxRequestsPerConnection` : 하나의 TCP Connection당 처리할 수 있는 최대 HTTP 요청 개수를 설정한다. 기본값은 2^31-1이며, 0으로 설정하는 경우에는 제한이 없어진다. 1로 설정하는 경우에는 하나의 TCP Connection당 최대 1개의 HTTP 요청만 처리하기 때문에 Keep Alive 기능 비활성활르 의미한다.
+* `http.maxRetries` : XX
+* `http.maxConcurrentStreams` : 하나의 HTTP/2 Connection당 처리할 수 있는 최대 Stream의 개수를 설정한다. 기본값은 2^31-1이다.
 
-또한 Destination Rule 규칙은 각 Client Pod에 별개로 적용된다. 예를들어 [File 1]에서는 `trafficPolicy.connectionPool.tcp.maxConnections: 1`이 설정되어 있는데, 이는 Client Pod의 Sidecar Proxy에서 Server Pod로 전달되는 최대 TCP Connection의 개수를 1개로 제한하는 것을 의미하며, 각 Client Pod의 Sidecar Proxy마다 별도로 적용된다. 즉 Client Pod가 5개라면 Server Pod로 전달되는 TCP Connection의 개수는 최대 5개가 된다.
+Outlier Detection은 비정상 상태를 판단하는 기준을 정의한다. 주요 설정은 다음과 같다.
+
+* `consecutive5xxErrors` : 연속적으로 발생한 5xx 에러의 개수를 설정한다.
+* `interval` : 비정상 상태를 판단하는데 이용되는 시간 간격을 설정한다.
+* `baseEjectionTime` : 비정상 상태로 판단된 경우 최소 제거 시간을 설정한다.
+* `maxEjectionPercent` : 제거할 수 있는 최대 비정상 상태의 비율을 설정한다.
+
+Destination Rule 규칙은 **각 Client Pod에 개별**로 적용된다. 예를들어 [File 1]에서는 `trafficPolicy.connectionPool.tcp.maxConnections: 1`이 설정되어 있는데, 이는 Client Pod의 Sidecar Proxy에서 Server Pod로 전달되는 최대 TCP Connection의 개수를 1개로 제한하는 것을 의미하며, 각 Client Pod의 Sidecar Proxy마다 별도로 적용된다. 즉 Client Pod가 5개라면 Server Pod로 전달되는 TCP Connection의 개수는 최대 5개가 된다.
 
 ### 1.2. Sidecar Proxy (Envoy) Access Log
 
@@ -63,3 +72,4 @@ Connection Pool은 Client Pod의 Sidecar Proxy에서 이용할 수 있는 **최�
 
 * Istio Circuit Breaking : [https://istio.io/latest/docs/tasks/traffic-management/circuit-breaking/](https://istio.io/latest/docs/tasks/traffic-management/circuit-breaking/)
 * Istio Destination Rule Cross Namespace : [https://learncloudnative.com/blog/2023-02-03-global-dr](https://learncloudnative.com/blog/2023-02-03-global-dr)
+* Envoy Circuit Breaking : [https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/upstream/circuit_breaking](https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/upstream/circuit_breaking)
