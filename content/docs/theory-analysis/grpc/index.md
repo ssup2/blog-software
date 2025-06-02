@@ -35,7 +35,7 @@ message Person {
 
 ### 1.2. HTTP/2
 
-gRPC는 HTTP/1.1 대비 HTTP/2의 다양한 장점들을 활용하며 동작한다.
+gRPC는 HTTP/1.1 대비 HTTP/2의 장점들을 활용하며 동작한다.
 
 * Multiplexing, Stream : HTTP/1.1에서는 하나의 TCP Connection에서 동시에 하나의 요청만 처리할 수 있었지만, HTTP/2는 하나의 TCP Connection에서 동시에 여러 요청을 처리할 수 있는 Multiplexing 기능을 지원한다. 하나의 TCP Connection에서 다수의 Stream을 생성하며 Client와 Server는 생성된 Stream을 이용하여 각각 요청을 독립적으로 처리한다. gRPC에서는 HTTP/2의 Stream을 이용하여 하나의 TCP Connection에서 동시에 여러 RPC을 처리한다.
 * Header Compression : HTTP/1.1에서는 평문으로 전송되는 Header를 압축하는 기능이 없었지만, HTTP/2는 Header Compression 기능을 제공하여 Header 크기를 줄일 수 있다. gRPC의 Header도 HTTP/2의 Header Compression 기능을 이용하여 크기를 줄인다.
