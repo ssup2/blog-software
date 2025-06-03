@@ -44,12 +44,13 @@ Connection Pool은 Client Pod의 Sidecar Proxy에서 이용할 수 있는 **최�
 * `http.maxRetries` : XX
 * `http.maxConcurrentStreams` : 하나의 HTTP/2 Connection당 처리할 수 있는 최대 Stream의 개수를 설정한다. 기본값은 2^31-1이다.
 
-Outlier Detection은 비정상 상태를 판단하는 기준을 정의한다. 주요 설정은 다음과 같다.
+Outlier Detection은 비정상 상태를 판단하는 기준을 정의하며, Outlier로 판단되면 Circuit Breaking이 동작한다. Outlier Detection에서 제공하는 주요 설정은 다음과 같다.
 
-* `consecutive5xxErrors` : 연속적으로 발생한 5xx 에러의 개수를 설정한다.
-* `interval` : 비정상 상태를 판단하는데 이용되는 시간 간격을 설정한다.
-* `baseEjectionTime` : 비정상 상태로 판단된 경우 최소 제거 시간을 설정한다.
-* `maxEjectionPercent` : 제거할 수 있는 최대 비정상 상태의 비율을 설정한다.
+* `consecutiveGatewayErrors` : 연속적으로 발생한 502,503,504 에러의 개수를 설정한다. 0으로 설정하는 경우 제한이 없어진다.
+* `consecutive5xxErrors` : 연속적으로 발생한 5xx 에러의 개수를 설정한다. 0으로 설정하는 경우 제한이 없어진다.
+* `interval` : Outlier 상태를 판단하는데 이용되는 시간 간격을 설정한다. 기본값은 10초이다.
+* `baseEjectionTime` : Outlier 상태로 판단될 경우 최소 Circuit Breaking 시간을 설정한다. 기본값은 30초이다.
+* `maxEjectionPercent` : Circuit Breaking 적용 가능한 최대 Outlier의 비율을 설정한다. 기본값은 10%이며, 100%로 설정하는 경우 모든 Outlier에 Circuit Breaking이 적용될 수 있다.
 
 Destination Rule 규칙은 **각 Client Pod에 개별**로 적용된다. 예를들어 [File 1]에서는 `trafficPolicy.connectionPool.tcp.maxConnections: 1`이 설정되어 있는데, 이는 Client Pod의 Sidecar Proxy에서 Server Pod로 전달되는 최대 TCP Connection의 개수를 1개로 제한하는 것을 의미하며, 각 Client Pod의 Sidecar Proxy마다 별도로 적용된다. 즉 Client Pod가 5개라면 Server Pod로 전달되는 TCP Connection의 개수는 최대 5개가 된다.
 
