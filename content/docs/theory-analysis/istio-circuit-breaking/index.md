@@ -69,6 +69,114 @@ Destination Rule 규칙은 **각 Client Pod에 개별**로 적용된다. 예를�
 
 ### 1.3. Global Circuit Breaking
 
+```yaml {caption="[File 2] Global Circuit Breaking Example"}
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: global-dr
+  namespace: istio-system
+spec:
+  host: "*.cluster.local"
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 20
+      http:
+        http1MaxPendingRequests: 20
+        maxRequestsPerConnection: 20
+    outlierDetection:
+      consecutive5xxErrors: 20
+      interval: 20s
+      baseEjectionTime: 20s
+      maxEjectionPercent: 20
+```
+
+```text {caption="[Text 2] Global Circuit Breaking Example"}
+$ istioctl pc cluster deploy/httpbin -o yaml | grep consecutive5xx -A 4 -B 3
+  name: outbound|9080||details.default.svc.cluster.local
+  outlierDetection:
+    baseEjectionTime: 20s
+    consecutive5xx: 20
+    enforcingConsecutive5xx: 100
+    enforcingSuccessRate: 0
+    interval: 20s
+    maxEjectionPercent: 20
+--
+  name: outbound|8080||fortio.default.svc.cluster.local
+  outlierDetection:
+    baseEjectionTime: 20s
+    consecutive5xx: 20
+    enforcingConsecutive5xx: 100
+    enforcingSuccessRate: 0
+    interval: 20s
+    maxEjectionPercent: 20
+--
+  name: outbound|8000||httpbin.default.svc.cluster.local
+  outlierDetection:
+    baseEjectionTime: 20s
+    consecutive5xx: 20
+    enforcingConsecutive5xx: 100
+    enforcingSuccessRate: 0
+    interval: 20s
+    maxEjectionPercent: 20
+--
+...
+```
+
+```yaml {caption="[File 3] Global Circuit Breaking Example"}
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: httpbin
+spec:
+  host: httpbin
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 10
+      http:
+        http1MaxPendingRequests: 10
+        maxRequestsPerConnection: 10
+    outlierDetection:
+      consecutive5xxErrors: 10
+      interval: 10s
+      baseEjectionTime: 10s
+      maxEjectionPercent: 10
+```
+
+```text {caption="[Text 3] Global Circuit Breaking Example"}
+$ istioctl pc cluster deploy/httpbin -o yaml | grep consecutive5xx -A 4 -B 3
+  name: outbound|9080||details.default.svc.cluster.local
+  outlierDetection:
+    baseEjectionTime: 20s
+    consecutive5xx: 20
+    enforcingConsecutive5xx: 100
+    enforcingSuccessRate: 0
+    interval: 20s
+    maxEjectionPercent: 20
+--
+  name: outbound|8080||fortio.default.svc.cluster.local
+  outlierDetection:
+    baseEjectionTime: 20s
+    consecutive5xx: 20
+    enforcingConsecutive5xx: 100
+    enforcingSuccessRate: 0
+    interval: 20s
+    maxEjectionPercent: 20
+--
+  name: outbound|8000||httpbin.default.svc.cluster.local
+  outlierDetection:
+    baseEjectionTime: 10s
+    consecutive5xx: 10
+    enforcingConsecutive5xx: 100
+    enforcingSuccessRate: 0
+    interval: 10s
+    maxEjectionPercent: 10
+--
+```
+
+
+
 ## 2. 참조
 
 * Istio Circuit Breaking : [https://istio.io/latest/docs/tasks/traffic-management/circuit-breaking/](https://istio.io/latest/docs/tasks/traffic-management/circuit-breaking/)
