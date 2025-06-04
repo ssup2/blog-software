@@ -139,9 +139,6 @@ spec:
         maxRequestsPerConnection: 10
     outlierDetection:
       consecutive5xxErrors: 10
-      interval: 10s
-      baseEjectionTime: 10s
-      maxEjectionPercent: 10
 ```
 
 ```text {caption="[Text 3] Global Circuit Breaking Example"}
@@ -164,18 +161,17 @@ $ istioctl pc cluster deploy/httpbin -o yaml | grep consecutive5xx -A 4 -B 3
     interval: 20s
     maxEjectionPercent: 20
 --
+          namespace: default
   name: outbound|8000||httpbin.default.svc.cluster.local
   outlierDetection:
-    baseEjectionTime: 10s
     consecutive5xx: 10
     enforcingConsecutive5xx: 100
     enforcingSuccessRate: 0
-    interval: 10s
-    maxEjectionPercent: 10
+  transportSocketMatches:
+  - match:
 --
+...
 ```
-
-
 
 ## 2. 참조
 
