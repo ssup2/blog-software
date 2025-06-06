@@ -4,9 +4,11 @@ title: Istio Circuit Breaking
 
 ## 1. Istio Circuit Breaking
 
-Istio는 Sidecar Proxy (Envoy)를 활용하여 Circuit Breaking 기능을 제공한다. **Destination Rule**을 활용하여 각 Service 마다 **개별의 Circuit Breaking 규칙**을 설정할 수 있으며, 필요에 따라서는 **Global Circuit Breaking 규칙**도 설정 가능하다. Circuit Breaking은 **Client Pod의 Sidecar Proxy** (Envoy)에서 동작한다. 따라서 Client Pod에 Sidecar Proxy가 Injection되어 동작하지 않으면 Circuit Breaking이 동작하지 않는다.
+Istio는 Sidecar Proxy (Envoy)를 활용하여 Circuit Breaking 기능을 제공한다. **Destination Rule**을 활용하여 각 Service 마다 **개별의 Circuit Breaking 규칙**을 설정할 수 있으며, 필요에 따라서는 **Global Circuit Breaking 규칙**도 설정 가능하다. 
 
-### 1.1. Circuit Breaking을 위한 Destination Rule Spec
+Circuit Breaking은 **Client Pod의 Sidecar Proxy** (Envoy)에서 동작한다. 따라서 Client Pod에 Sidecar Proxy가 Injection되어 동작하지 않으면 Circuit Breaking이 동작하지 않는다.
+
+### 1.1. Circuit Breaking을 위한 Destination Rule
 
 ```yaml {caption="[File 1] Destination Rule with Circuit Breaking Example", linenos=table}
 apiVersion: networking.istio.io/v1
@@ -31,7 +33,7 @@ spec:
 
 Circuit Breaking은 주로 **Destination Rule**의 **Connection Pool** (`trafficPolicy.connectionPool`) 필드와 **Outlier Detection** (`trafficPolicy.outlierDetection`) 필드를 통해 설정한다. [File 1]은 Circuit Breaking을 위한 Destination Rule의 예제를 나타내고 있다.
 
-Connection Pool은 Client Pod의 Sidecar Proxy에서 이용할 수 있는 **최대 Connection의 개수** 또는 **Request의 대기 개수**를 정의한다. Connection Pool의 Client에서 많은 요청이 발생하여 Client Pool에 설정된 이상이 필요할 경우에는 Circuit Breaking이 동작하며, Client의 요청은 Client Pod의 Sidecar Proxy에서 중단된다. Connection Pool에서 제공하는 주요 설정들은 다음과 같다.
+Connection Pool은 Client Pod의 Sidecar Proxy에서 이용할 수 있는 **최대 Connection의 개수** 또는 **최대 요청 대기 개수**를 정의한다. Connection Pool의 Client에서 많은 요청이 발생하여 설정된 최대 Connection Pool 이상으로 Connection이 필요한 경우, 또는 설정된 최대 요청 대기 개수 이상으로 요청 대기가 발생하는 경우 **Circuit Breaking이 동작**한다. Connection Pool에서 제공하는 주요 설정들은 다음과 같다.
 
 * `tcp.maxConnections` : TCP Connection의 최대 개수를 설정한다.
 * `tcp.connectTimeout` : TCP Connection을 맺는데 걸리는 최대 시간을 설정한다. 기본값은 10초이다.
