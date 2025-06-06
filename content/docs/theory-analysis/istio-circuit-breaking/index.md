@@ -40,7 +40,7 @@ Connection Pool은 Client Pod의 Sidecar Proxy에서 이용할 수 있는 **최�
 * `http.http1MaxPendingRequests` : HTTP 요청의 최대 대기 개수를 설정한다. 이름에는 `http1`이 포함되어 있지만, HTTP/1.1 뿐만 아니라 HTTP/2 요청에도 적용된다. 기본값은 2^31-1이다.
 * `http.http2MaxRequests` : 동시에 처리할 수 있는 최대 HTTP 요청의 개수를 설정한다. 이름에는 `http2`가 포함되어 있지만, HTTP/2 뿐만 아니라 HTTP/1.1 요청에도 적용된다. 기본값은 2^31-1이다.
 * `http.maxRequestsPerConnection` : 하나의 TCP Connection당 처리할 수 있는 최대 HTTP 요청 개수를 설정한다. 기본값은 2^31-1이며, 0으로 설정하는 경우에는 제한이 없어진다. 1로 설정하는 경우에는 하나의 TCP Connection당 최대 1개의 HTTP 요청만 처리하기 때문에 Keep Alive 기능 비활성활르 의미한다.
-* `http.maxRetries` : XX
+* `http.maxRetries` : HTTP 최대 재시도 개수를 설정한다. 여기서 최대 재시도 횟수는 Host (Service)당 횟수를 의미한다. 기본값은 2^32-1이다.
 * `http.maxConcurrentStreams` : 하나의 HTTP/2 Connection당 처리할 수 있는 최대 Stream의 개수를 설정한다. 기본값은 2^31-1이다.
 
 Outlier Detection은 비정상 상태를 판단하는 기준을 정의하며, Outlier로 판단되면 Circuit Breaking이 동작한다. Outlier Detection에서 제공하는 주요 설정은 다음과 같다.
