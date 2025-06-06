@@ -244,10 +244,13 @@ $ istioctl pc cluster deploy/fortio -o yaml | grep consecutive5xx -A 4 -B 3
 
 [File 3]는 Namespace 내부에서만 적용되는 Circuit Breaking을 위한 Destination Rule의 예제를 나타내고 있으며, [Text 3]은 [File 3]가 적용된 Envoy Proxy의 Config에 `consecutive5xxErrors: 10` 설정이 적용된 예시를 나타내고 있다. [File 3]에서는 `default` Namespace에 존재하는 `httpbin` 서비스에만 `consecutive5xxErrors: 10` 설정을 적용하고 있으며, Global Destination Rule의 우선순위가 가장 낮기 때문에 `default` Namespace에 존재하는 `httpbin` 서비스에만 `consecutive5xxErrors: 10` 설정이 적용되며, 그외 나머지 서비스에는 `consecutive5xxErrors: 20` 설정이 적용된걸 확인할 수 있다.
 
+`PILOT_ENABLE_DESTINATION_RULE_INHERITANCE`를 istiod에 설정하여 Global Destination Rule을 상속받는 기능이 존재했었지만, istio `v1.20.0` Version부터 해당 기능이 제거되었다. 따라서 현재는 각 Namespace에 개별적으로 필요한 설정들을 모두 일일히 Destination Rule을 설정해야 한다.
+
 ## 2. 참조
 
 * Istio Circuit Breaking : [https://istio.io/latest/docs/tasks/traffic-management/circuit-breaking/](https://istio.io/latest/docs/tasks/traffic-management/circuit-breaking/)
 * Istio Destination Rule Cross Namespace : [https://learncloudnative.com/blog/2023-02-03-global-dr](https://learncloudnative.com/blog/2023-02-03-global-dr)
+* Istio Destination Rule Cross Namespace : [https://istio.io/latest/docs/ops/best-practices/traffic-management/#cross-namespace-configuration](https://istio.io/latest/docs/ops/best-practices/traffic-management/#cross-namespace-configuration)
 * Istio Global Traffic Policy: [https://docs.google.com/document/d/1TkIiovpPLwd-JQ_zKA1Fhy5MVGW3dQKtNwOlFTCKb_Y/edit?tab=t.0](https://docs.google.com/document/d/1TkIiovpPLwd-JQ_zKA1Fhy5MVGW3dQKtNwOlFTCKb_Y/edit?tab=t.0)
-* Istio Cross Namespace Destination Rule : [https://istio.io/latest/docs/ops/best-practices/traffic-management/#cross-namespace-configuration](https://istio.io/latest/docs/ops/best-practices/traffic-management/#cross-namespace-configuration)
 * Envoy Circuit Breaking : [https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/upstream/circuit_breaking](https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/upstream/circuit_breaking)
+* Drop PILOT_ENABLE_DESTINATION_RULE_INHERITANCE : [https://github.com/istio/istio/pull/46270](https://github.com/istio/istio/pull/46270)
