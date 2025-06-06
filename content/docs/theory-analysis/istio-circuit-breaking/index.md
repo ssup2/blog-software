@@ -1,6 +1,5 @@
 ---
 title: Istio Circuit Breaking
-draft: true
 ---
 
 ## 1. Istio Circuit Breaking
@@ -69,6 +68,14 @@ Destination Rule 규칙은 **각 Client Pod에 개별**로 적용된다. 예를�
 
 ### 1.3. Global Circuit Breaking
 
+Destination Rule은 다음과 같은 우선순위로 적용된다.
+
+1. Client Pod가 위치한 Namespace의 Destination Rule
+2. Server Pod가 위치한 Namespace의 Destination Rule
+3. Root Namespace (istio-system)의 Destination Rule
+
+Client Pod가 위치한 Namespace의 Destination Rule과 Server Pod가 위치한 Namespace의 Destination Rule은 모두 Namespace 내부에서만 적용된다. 반면에 Root Namespace (istio-system)의 Destination Rule은 우선순위가 가장 낮지만 모든 Namespace에 적용되는 특징을 갖는다. 따라서 **Root Namespace의 Destination Rule**을 이용하여 Global Circuit Breaking을 설정할 수 있다.
+
 ```yaml {caption="[File 2] Global Circuit Breaking Example"}
 apiVersion: networking.istio.io/v1
 kind: DestinationRule
@@ -91,8 +98,38 @@ spec:
       maxEjectionPercent: 20
 ```
 
-```text {caption="[Text 2] Global Circuit Breaking Example"}
+```text {caption="[Text 2] Global Circuit Breaking Envoy Proxy consecutive5xx Configuration Example"}
 $ istioctl pc cluster deploy/httpbin -o yaml | grep consecutive5xx -A 4 -B 3
+  name: outbound|9080||details.default.svc.cluster.local
+  outlierDetection:
+    baseEjectionTime: 20s
+    consecutive5xx: 20
+    enforcingConsecutive5xx: 100
+    enforcingSuccessRate: 0
+    interval: 20s
+    maxEjectionPercent: 20
+--
+  name: outbound|8080||fortio.default.svc.cluster.local
+  outlierDetection:
+    baseEjectionTime: 20s
+    consecutive5xx: 20
+    enforcingConsecutive5xx: 100
+    enforcingSuccessRate: 0
+    interval: 20s
+    maxEjectionPercent: 20
+--
+  name: outbound|8000||httpbin.default.svc.cluster.local
+  outlierDetection:
+    baseEjectionTime: 20s
+    consecutive5xx: 20
+    enforcingConsecutive5xx: 100
+    enforcingSuccessRate: 0
+    interval: 20s
+    maxEjectionPercent: 20
+--
+...
+
+$ istioctl pc cluster deploy/fortio -o yaml | grep consecutive5xx -A 4 -B 3
   name: outbound|9080||details.default.svc.cluster.local
   outlierDetection:
     baseEjectionTime: 20s
@@ -123,7 +160,9 @@ $ istioctl pc cluster deploy/httpbin -o yaml | grep consecutive5xx -A 4 -B 3
 ...
 ```
 
-```yaml {caption="[File 3] Global Circuit Breaking Example"}
+[File 2]는 Global Circuit Breaking을 위한 Destination Rule의 예제를 나타내고 있으며, [Text 2]는 [File 2]가 적용된 Envoy Proxy의 Config에 `consecutive5xxErrors: 20` 설정이 적용된 예시를 나타내고 있다. [File 2]를 제외하고 적용된 Destination Rule이 없다면 [Text 2]에 나타난 것처럼 모든 Service에 대해서 `consecutive5xx: 20` 설정이 적용된다. [Text 2]에는 `default` Namespace에 존재하는 `httpbin`, `fortio` Deployment에 적용된 Envoy Proxy의 Config만을 보여주고 있지만, 그 외의 모든 Pod의 Envoy Proxy에 Circuit Breaking이 적용된다.
+
+```yaml {caption="[File 3] Namespace Circuit Breaking Example"}
 apiVersion: networking.istio.io/v1
 kind: DestinationRule
 metadata:
@@ -141,8 +180,38 @@ spec:
       consecutive5xxErrors: 10
 ```
 
-```text {caption="[Text 3] Global Circuit Breaking Example"}
+```text {caption="[Text 3] Namespace Circuit Breaking Example"}
 $ istioctl pc cluster deploy/httpbin -o yaml | grep consecutive5xx -A 4 -B 3
+  name: outbound|9080||details.default.svc.cluster.local
+  outlierDetection:
+    baseEjectionTime: 20s
+    consecutive5xx: 20
+    enforcingConsecutive5xx: 100
+    enforcingSuccessRate: 0
+    interval: 20s
+    maxEjectionPercent: 20
+--
+  name: outbound|8080||fortio.default.svc.cluster.local
+  outlierDetection:
+    baseEjectionTime: 20s
+    consecutive5xx: 20
+    enforcingConsecutive5xx: 100
+    enforcingSuccessRate: 0
+    interval: 20s
+    maxEjectionPercent: 20
+--
+          namespace: default
+  name: outbound|8000||httpbin.default.svc.cluster.local
+  outlierDetection:
+    consecutive5xx: 10
+    enforcingConsecutive5xx: 100
+    enforcingSuccessRate: 0
+  transportSocketMatches:
+  - match:
+--
+...
+
+$ istioctl pc cluster deploy/fortio -o yaml | grep consecutive5xx -A 4 -B 3
   name: outbound|9080||details.default.svc.cluster.local
   outlierDetection:
     baseEjectionTime: 20s
@@ -173,8 +242,12 @@ $ istioctl pc cluster deploy/httpbin -o yaml | grep consecutive5xx -A 4 -B 3
 ...
 ```
 
+[File 3]는 Namespace 내부에서만 적용되는 Circuit Breaking을 위한 Destination Rule의 예제를 나타내고 있으며, [Text 3]은 [File 3]가 적용된 Envoy Proxy의 Config에 `consecutive5xxErrors: 10` 설정이 적용된 예시를 나타내고 있다. [File 3]에서는 `default` Namespace에 존재하는 `httpbin` 서비스에만 `consecutive5xxErrors: 10` 설정을 적용하고 있으며, Global Destination Rule의 우선순위가 가장 낮기 때문에 `default` Namespace에 존재하는 `httpbin` 서비스에만 `consecutive5xxErrors: 10` 설정이 적용되며, 그외 나머지 서비스에는 `consecutive5xxErrors: 20` 설정이 적용된걸 확인할 수 있다.
+
 ## 2. 참조
 
 * Istio Circuit Breaking : [https://istio.io/latest/docs/tasks/traffic-management/circuit-breaking/](https://istio.io/latest/docs/tasks/traffic-management/circuit-breaking/)
 * Istio Destination Rule Cross Namespace : [https://learncloudnative.com/blog/2023-02-03-global-dr](https://learncloudnative.com/blog/2023-02-03-global-dr)
+* Istio Global Traffic Policy: [https://docs.google.com/document/d/1TkIiovpPLwd-JQ_zKA1Fhy5MVGW3dQKtNwOlFTCKb_Y/edit?tab=t.0](https://docs.google.com/document/d/1TkIiovpPLwd-JQ_zKA1Fhy5MVGW3dQKtNwOlFTCKb_Y/edit?tab=t.0)
+* Istio Cross Namespace Destination Rule : [https://istio.io/latest/docs/ops/best-practices/traffic-management/#cross-namespace-configuration](https://istio.io/latest/docs/ops/best-practices/traffic-management/#cross-namespace-configuration)
 * Envoy Circuit Breaking : [https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/upstream/circuit_breaking](https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/upstream/circuit_breaking)

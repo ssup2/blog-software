@@ -12,7 +12,7 @@ title: Trino Architecture
 * Planner/Optimizer : Query를 Tree 형태의 Task로 쪼개는 역할을 수행한다. 
 * Scheduler : Task를 어느 Worker에 할당할지 결정한다.
 
-Trino는 다양한 Data Source를 대상으로 Query 수행이 가능하며, 다양한 Data Source 지원을 위해서 "SPI (Service Provider Interface)"를 이용한다. SPI는 Parser/Analyzer가 이용하는 "Metadata SPI", Planner/Optimzer가 이용하는 "Data Statistics SPI", Scheduler가 이용하는 "Data Location SPI", Worker가 이용하는 "Data Stream SPI"로 구성되어 있으며 역할은 다음과 같다.
+Trino는 다양한 Data Source를 대상으로 Query 수행이 가능하며, 다양한 Data Source 지원을 위해서 "SPI (Service Provider Interface)"를 이용한다. SPI는 Parser/Analyzer가 이용하는 **Metadata SPI**, Planner/Optimzer가 이용하는 **Data Statistics SPI**, Scheduler가 이용하는 **Data Location SPI**, Worker가 이용하는 **Data Stream SPI**로 구성되어 있으며 역할은 다음과 같다.
 
 * Metadata SPI : Query 점검을 위해서 Table, Column, Type 정보를 제공한다.
 * Data Statistics SPI : Query 최적화를 위해서 Table의 크기 및 Table의 Row 개수 정보를 제공한다.
