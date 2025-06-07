@@ -1,10 +1,59 @@
 ---
-title : Trino, Hive Metastore 연동 / Kubernetes Data Platform 환경
+title : Trino MinIO Query 수행 / Kubernetes Data Platform 환경
 ---
 
-## 1. 실습 환경
+Trino를 통해서 MinIO에 저장되어 있는 데이터를 조회한다.
 
-### 1.1. MinIO CLI Client 설정
+## 1. 실습 환경 구성
+
+### 1.1. 전체 실습 환경
+
+Trino를 통해서 MinIO에 저장되어 있는 데이터를 조회하는 실습 환경은 다음과 같다.
+
+{{< figure caption="[Figure 1] Trino, Hive Metastore 연동 환경" src="images/environment.png" width="1000px" >}}
+
+* MinIO : Data를 저장하는 Object Storage 역할을 수행한다. Airport Data와 South Korea Weather Data를 저장한다.
+  * Airport Data : CSV Format으로 저장된다.
+  * South Korea Weather Data : CSV, Parquet, Iceberg 3가지 Data Format으로 시간별로 Partition되어 저장된다.
+* Trino : MinIO에 저장되어 있는 Data를 조회하는 역할을 수행한다.
+* Hive Metastore : Data의 Schema 정보를 관리하며, Trino에게 Schema 정보를 제공한다.
+* Dagster : Data Pipeline을 실행하여 MinIO에 South Korea Weather Data를 저장한다.
+* DBeaver : Trino에 접속하고 Query를 수행하기 위한 Client 역할을 수행한다.
+
+전체 실슴 환경 구성은 다음의 링크를 참조한다.
+
+* Kubernetes Cluster 구축 : [https://ssup2.github.io/blog-software/docs/record/orangepi-cluster-build/](https://ssup2.github.io/blog-software/docs/record/orangepi-cluster-build/)
+* Kubernetes Data Platform 구축 : [https://ssup2.github.io/blog-software/docs/record/kubernetes-data-platform-orangepi-cluster/](https://ssup2.github.io/blog-software/docs/record/kubernetes-data-platform-orangepi-cluster/)
+* Dagster Workflow Github : [https://github.com/ssup2-playground/k8s-data-platform_dagster-workflows](https://github.com/ssup2-playground/k8s-data-platform_dagster-workflows)
+
+### 1.2. Hive Metastore 주요 설정
+
+Hive Metastore의 Helm Chart에 CSV, Parquet Data Format을 위한 Hive Catalog와 Iceberg Data Format을 위한 Iceberg Catalog를 설정한다.
+
+```yaml
+catalogs:
+  hive: |
+    connector.name=hive
+    hive.metastore.uri=thrift://hive-metastore.hive-metastore:9083
+    hive.partition-projection-enabled=true
+    fs.native-s3.enabled=true
+    s3.endpoint=http://minio.minio:9000
+    s3.region=default
+    s3.aws-access-key=root
+    s3.aws-secret-key=root123!
+    s3.path-style-access=true
+  iceberg: |
+    connector.name=iceberg
+    hive.metastore.uri=thrift://hive-metastore.hive-metastore:9083
+    fs.native-s3.enabled=true
+    s3.endpoint=http://minio.minio:9000
+    s3.region=default
+    s3.aws-access-key=root
+    s3.aws-secret-key=root123!
+    s3.path-style-access=true
+```
+
+### 1.3. MinIO CLI Client 설정
 
 MinIO CLI Client를 설치한다.
 
@@ -91,7 +140,7 @@ CREATE SCHEMA hive.weather;
 
 ### 4.1. CSV Partition Table 생성 및 조회
 
-MinIO에 저장되어 있는 Partition된 CSV Format의 Object를 기반으로 South Korea Hourly Weather Table을 생성한다. CSV Format으로 저장되어 있는 데이터는 모두 `VARCHAR` Type으로 선언된다.
+MinIO에 저장되어 있는 Partition된 CSV Format의 Object를 기반으로 South Korea Hourly Weather Table을 생성한다. CSV Format으로 저장되어 있는 데이터는 모두 `VARCHAR` Type으로 선언된다. CSV Format의 경우, 모든 데이터가 `VARCHAR` Type으로 선언된다.
 
 ```sql
 CREATE TABLE hive.weather.southkorea_hourly_csv (
@@ -140,7 +189,7 @@ South Korea Hourly Weather Table에 적재된 데이터를 조회한다.
 SELECT * FROM hive.weather.southkorea_hourly_csv;
 ```
 
-### 4.3. Parquet Partition Table 생성 및 조회
+### 4.2. Parquet Partition Table 생성 및 조회
 
 MinIO에 저장되어 있는 Partition된 Parquet Format의 Object를 기반으로 South Korea Hourly Weather Table을 생성한다.
 
@@ -191,7 +240,7 @@ South Korea Hourly Weather Table에 적재된 데이터를 조회한다.
 SELECT * FROM hive.weather.southkorea_hourly_parquet;
 ```
 
-### 4.4. Iceberg Parquet Partition Table 생성 및 조회
+### 4.3. Iceberg Parquet Partition Table 생성 및 조회
 
 MinIO에 저장되어 있는 Partition된 Iceberg Parquet Format의 Object를 기반으로 South Korea Hourly Weather Table을 생성한다.
 
@@ -229,9 +278,13 @@ WITH (
 );
 ```
 
-## 5. Ranger 기반 Data 접근 제어
+South Korea Hourly Weather Table에 적재된 데이터를 조회한다.
 
-## 6. 참조
+```sql
+SELECT * FROM iceberg.weather.southkorea_hourly_iceberg_parquet;
+```
+
+## 5. 참조
 
 * Hive Metastore : [https://mjs1995.tistory.com/307](https://mjs1995.tistory.com/307)
 * Trino Query : [https://developnote-blog.tistory.com/187](https://developnote-blog.tistory.com/187)

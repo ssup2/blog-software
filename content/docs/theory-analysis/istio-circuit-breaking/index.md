@@ -4,9 +4,7 @@ title: Istio Circuit Breaking
 
 ## 1. Istio Circuit Breaking
 
-Istio는 Sidecar Proxy (Envoy)를 활용하여 Circuit Breaking 기능을 제공한다. **Destination Rule**을 활용하여 각 Service 마다 **개별의 Circuit Breaking 규칙**을 설정할 수 있으며, 필요에 따라서는 **Global Circuit Breaking 규칙**도 설정 가능하다. 
-
-Circuit Breaking은 **Client Pod의 Sidecar Proxy** (Envoy)에서 동작한다. 따라서 Client Pod에 Sidecar Proxy가 Injection되어 동작하지 않으면 Circuit Breaking이 동작하지 않는다.
+Istio는 Sidecar Proxy (Envoy)를 활용하여 Circuit Breaking 기능을 제공한다. **Destination Rule**을 활용하여 각 Service 마다 **개별의 Circuit Breaking 규칙**을 설정할 수 있으며, 필요에 따라서는 **Global Circuit Breaking 규칙**도 설정 가능하다. Circuit Breaking은 **Client Pod의 Sidecar Proxy** (Envoy)에서 동작한다. 따라서 Client Pod에 Sidecar Proxy가 Injection되어 동작하지 않으면 Circuit Breaking이 동작하지 않는다.
 
 ### 1.1. Circuit Breaking을 위한 Destination Rule
 

@@ -2,7 +2,11 @@
 title : Kubernetes Data Platform 구축 / Orange Pi 5 Max Cluster 환경
 ---
 
-## 1. 설치 환경
+Kubernetes 기반의 Data Platform을 구축하기 위해서 OrangePi 5 Max 7대를 사용하여 클러스터를 구성한다.
+
+## 1. 구축 환경
+
+Kubernetes Cluster 구성에 이용되는 OrangePi 5 Max 7대의 사양과, 설치되는 Component는 다음과 같다.
 
 {{< figure caption="[Figure 1] Cluster Spec" src="images/cluster-spec.png" width="1000px" >}}
 
