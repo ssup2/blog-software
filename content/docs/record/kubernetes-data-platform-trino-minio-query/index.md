@@ -83,17 +83,7 @@ Trino Service의 External IP와 Username를 입력한다. Username은 아무런 
 
 ## 3. 단일 Object Query 수행
 
-### 3.1. MinIO에 Object 적재
-
-MinIO CLI Client를 통해서 MinIO에 Sample Data를 적재한다.
-
-```shell
-wget https://raw.githubusercontent.com/datasets/airport-codes/refs/heads/main/data/airport-codes.csv
-mc mb dp/airport/codes
-mc cp airport-codes.csv dp/airport/codes/data.csv
-```
-
-### 3.2. Schema, Table 생성
+### 3.1. Schema, Table 생성
 
 Airport Schema와 MinIO에 저장되어 있는 Object를 기반으로 Airport Code Table을 생성한다. CSV Format으로 저장되어 있는 데이터는 모두 `VARCHAR` Type으로 선언된다.
 
@@ -120,17 +110,29 @@ WITH (
 );
 ```
 
-### 3.3. Trino에서 데이터 조회
+### 3.2. Data 적재
 
-Airport Code Table에 적재된 데이터를 조회한다.
+MinIO CLI Client를 통해서 MinIO에 Sample Data를 적재한다.
+
+```shell
+wget https://raw.githubusercontent.com/datasets/airport-codes/refs/heads/main/data/airport-codes.csv
+mc mb dp/airport/codes
+mc cp airport-codes.csv dp/airport/codes/data.csv
+```
+
+### 3.3. Data 조회
+
+`airport.codes` Table에 적재된 데이터를 조회한다.
 
 ```sql
 select * from hive.airport.codes;
 ```
 
-{{< figure caption="[Figure 3] Trino에서 데이터 조회" src="images/dbeaver-trino-query-select.png" width="800px" >}}
+{{< figure caption="[Figure 3] Trino에서 `airport.codes` Table 데이터 조회" src="images/dbeaver-trino-airport-query-select.png" width="900px" >}}
 
 ## 4. Partition Object Query 수행
+
+### 4.1. Schema,Table 생성
 
 Weather Schema를 생성한다.
 
@@ -138,9 +140,7 @@ Weather Schema를 생성한다.
 CREATE SCHEMA hive.weather;
 ```
 
-### 4.1. CSV Partition Table 생성 및 조회
-
-MinIO에 저장되어 있는 Partition된 CSV Format의 Object를 기반으로 South Korea Hourly Weather Table을 생성한다. CSV Format으로 저장되어 있는 데이터는 모두 `VARCHAR` Type으로 선언된다. CSV Format의 경우, 모든 데이터가 `VARCHAR` Type으로 선언된다.
+MinIO에 저장되어 있는 Partition된 CSV Format의 Object를 기반으로 `southkorea_hourly_csv` Table을 생성한다. CSV Format으로 저장되어 있는 데이터는 모두 `VARCHAR` Type으로 선언된다. CSV Format의 경우, 모든 데이터가 `VARCHAR` Type으로 선언된다.
 
 ```sql
 CREATE TABLE hive.weather.southkorea_hourly_csv (
@@ -175,23 +175,7 @@ WITH (
 );
 ```
 
-Partition 정보를 동기화하고, 동기화된 Partition 정보를 조회한다.
-
-```sql
-CALL hive.system.sync_partition_metadata('weather', 'southkorea_hourly_csv', 'ADD');
-
-SELECT * FROM hive.weather."southkorea_hourly_csv$partitions";
-```
-
-South Korea Hourly Weather Table에 적재된 데이터를 조회한다.
-
-```sql
-SELECT * FROM hive.weather.southkorea_hourly_csv;
-```
-
-### 4.2. Parquet Partition Table 생성 및 조회
-
-MinIO에 저장되어 있는 Partition된 Parquet Format의 Object를 기반으로 South Korea Hourly Weather Table을 생성한다.
+MinIO에 저장되어 있는 Partition된 Parquet Format의 Object를 기반으로 `southkorea_hourly_parquet` Table을 생성한다.
 
 ```sql
 CREATE TABLE hive.weather.southkorea_hourly_parquet (
@@ -226,23 +210,7 @@ WITH (
 );
 ```
 
-Partition 정보를 동기화하고, 동기화된 Partition 정보를 조회한다.
-
-```sql
-CALL hive.system.sync_partition_metadata('weather', 'southkorea_hourly_parquet', 'ADD');
-
-SELECT * FROM hive.weather."southkorea_hourly_parquet$partitions";
-```
-
-South Korea Hourly Weather Table에 적재된 데이터를 조회한다.
-
-```sql
-SELECT * FROM hive.weather.southkorea_hourly_parquet;
-```
-
-### 4.3. Iceberg Parquet Partition Table 생성 및 조회
-
-MinIO에 저장되어 있는 Partition된 Iceberg Parquet Format의 Object를 기반으로 South Korea Hourly Weather Table을 생성한다.
+MinIO에 저장되어 있는 Partition된 Iceberg Parquet Format의 Object를 기반으로 `southkorea_hourly_iceberg_parquet` Table을 생성한다.
 
 ```sql
 CREATE TABLE iceberg.weather.southkorea_hourly_iceberg_parquet (
@@ -278,11 +246,41 @@ WITH (
 );
 ```
 
-South Korea Hourly Weather Table에 적재된 데이터를 조회한다.
+### 4.2. Data 적재
+
+Dagster의 Data Pipeline을 실행하여 MinIO에 South Korea Weather Data를 저장한다. CSV, Parquet Format을 이용하는 `southkorea_hourly_csv`, `southkorea_hourly_parquet` Table은 MinIO에 Data를 적재하고 Table을 생성해도 무방하다. 하지만 Iceberg Parquet Format을 이용하는 `southkorea_hourly_iceberg_parquet` Table에 Data 적재하기 위해서는 반드시 Table을 먼저 생성한 다음에 Data를 적재해야 한다.
+
+### 4.3. Data 조회
+
+`southkorea_hourly_csv`, `southkorea_hourly_parquet`, `southkorea_hourly_iceberg_parquet` Table에 적재된 Data를 조회한다. 각 Table은 저장된 Format만 다를뿐 모두 동일한 Data를 갖는다. 따라서 모든 Query는 동일한 결과를 반환한다. Partition (시간) 정보도 Query 결과에서 확인할 수 있다.
+
+CSV, Parquet Format을 이용하는 `southkorea_hourly_csv`, `southkorea_hourly_parquet` Table은 추가된 파티션 정보를 `hive.system.sync_partition_metadata` Query를 활용하여 Hive Metastore에 동기화한 다음 Data 조회가 가능하다. 반면에 Iceberg Parquet Format을 이용하는 `southkorea_hourly_iceberg_parquet` Table은 파티션 정보를 동기화하지 않아도 데이터 조회가 가능하다.
+
+`southkorea_hourly_csv` Table 파티션 정보를 동기화하고, 동기화된 파티션 정보를 조회한다. 
+
+```sql
+CALL hive.system.sync_partition_metadata('weather', 'southkorea_hourly_csv', 'ADD');
+SELECT * FROM hive.weather."southkorea_hourly_csv$partitions";
+
+SELECT * FROM hive.weather.southkorea_hourly_csv;
+```
+
+`southkorea_hourly_parquet` Table 파티션 정보를 동기화하고, 동기화된 파티션 정보를 조회한다.
+
+```sql
+CALL hive.system.sync_partition_metadata('weather', 'southkorea_hourly_parquet', 'ADD');
+SELECT * FROM hive.weather."southkorea_hourly_parquet$partitions";
+
+SELECT * FROM hive.weather.southkorea_hourly_parquet;
+```
+
+`southkorea_hourly_iceberg_parquet` Table 정보를 조회한다.
 
 ```sql
 SELECT * FROM iceberg.weather.southkorea_hourly_iceberg_parquet;
 ```
+
+{{< figure caption="[Figure 4] Trino에서 `airport.codes` Table 데이터 조회" src="images/dbeaver-trino-weather-query-select.png" width="900px" >}}
 
 ## 5. 참조
 
