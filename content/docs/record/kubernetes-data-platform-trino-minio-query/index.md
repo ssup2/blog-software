@@ -282,6 +282,8 @@ SELECT * FROM iceberg.weather.southkorea_hourly_iceberg_parquet;
 
 {{< figure caption="[Figure 4] Trino에서 `southkorea_hourly_*` Table 데이터 조회" src="images/dbeaver-trino-weather-query-select.png" width="900px" >}}
 
+Iceberg Parquet Format을 이용하는 `southkorea_hourly_iceberg_parquet` Table만 Transaction 기능을 활용하여 Data 조회뿐만 아니라 Data 삽입, 수정, 삭제도 가능하다.
+
 ## 5. 참조
 
 * Hive Metastore : [https://mjs1995.tistory.com/307](https://mjs1995.tistory.com/307)
