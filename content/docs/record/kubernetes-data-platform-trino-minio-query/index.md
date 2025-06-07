@@ -280,7 +280,7 @@ SELECT * FROM hive.weather.southkorea_hourly_parquet;
 SELECT * FROM iceberg.weather.southkorea_hourly_iceberg_parquet;
 ```
 
-{{< figure caption="[Figure 4] Trino에서 `airport.codes` Table 데이터 조회" src="images/dbeaver-trino-weather-query-select.png" width="900px" >}}
+{{< figure caption="[Figure 4] Trino에서 `southkorea_hourly_*` Table 데이터 조회" src="images/dbeaver-trino-weather-query-select.png" width="900px" >}}
 
 ## 5. 참조
 
