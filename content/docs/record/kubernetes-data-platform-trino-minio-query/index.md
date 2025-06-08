@@ -140,7 +140,7 @@ Weather Schema를 생성한다.
 CREATE SCHEMA hive.weather;
 ```
 
-MinIO에 저장되어 있는 Partition된 CSV Format의 Object를 기반으로 `southkorea_hourly_csv` Table을 생성한다. CSV Format으로 저장되어 있는 데이터는 모두 `VARCHAR` Type으로 선언된다. CSV Format의 경우, 모든 데이터가 `VARCHAR` Type으로 선언된다.
+MinIO에 저장되어 있는 Partition된 CSV Format의 Object를 기반으로 `southkorea_hourly_csv` Table을 생성한다. CSV Format으로 저장되어 있는 데이터는 모두 `VARCHAR` Type으로 선언된다. CSV Format의 경우, 모든 데이터가 `VARCHAR` Type으로 선언된다. `skip_header_line_count` 설정을 통해서 첫 번째 Header 라인을 무시한다.
 
 ```sql
 CREATE TABLE hive.weather.southkorea_hourly_csv (
