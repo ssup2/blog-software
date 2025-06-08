@@ -8,7 +8,7 @@ Kubernetes 기반의 Data Platform을 구축하기 위해서 OrangePi 5 Max 7대
 
 Kubernetes Cluster 구성에 이용되는 OrangePi 5 Max 7대의 사양과, 설치되는 Component는 다음과 같다.
 
-{{< figure caption="[Figure 1] Cluster Spec" src="images/cluster-spec.png" width="1000px" >}}
+{{< figure caption="[Figure 1] Cluster Spec" src="images/cluster-spec.png" width="800px" >}}
 
 {{< figure caption="[Figure 2] Cluster 구성 요소" src="images/cluster-component.png" width="1000px" >}}
 

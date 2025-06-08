@@ -1,5 +1,5 @@
 ---
-title : Trino MinIO Query 수행 / Kubernetes Data Platform 환경
+title : Trino MinIO Query 수행 / Orange Pi 5 Max Cluster 환경
 ---
 
 Trino를 통해서 MinIO에 저장되어 있는 데이터를 조회한다.
