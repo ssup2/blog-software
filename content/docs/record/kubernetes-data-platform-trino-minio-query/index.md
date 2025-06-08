@@ -171,7 +171,8 @@ CREATE TABLE hive.weather.southkorea_hourly_csv (
 WITH (
 	external_location = 's3a://weather/southkorea/hourly-csv',
 	format = 'CSV',
-	partitioned_by = ARRAY['year', 'month', 'day', 'hour']
+	partitioned_by = ARRAY['year', 'month', 'day', 'hour'],
+    skip_header_line_count = 1
 );
 ```
 
