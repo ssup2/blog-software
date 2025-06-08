@@ -242,8 +242,7 @@ CREATE TABLE iceberg.weather.southkorea_hourly_iceberg_parquet (
 WITH (
 	location = 's3a://weather/southkorea/hourly-iceberg-parquet',
 	format = 'PARQUET',
-	partitioned_by = ARRAY['year', 'month', 'day', 'hour'],
-    'write.delete.isolation-level' = 'serializable'
+	partitioning = ARRAY['year', 'month', 'day', 'hour']
 );
 ```
 
