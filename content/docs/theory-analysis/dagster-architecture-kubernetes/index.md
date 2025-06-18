@@ -169,9 +169,9 @@ K8s Job Executor를 통해서 생성되는 Op/Asset Kubernetes Pod의 Spec은 �
 
 [Figure 3]은 **Celery K8s Run Launcher**와 **Celery K8s Job Executor**를 조합을 이용하여 Dagster Run을 수행한 경우의 Architecture를 나타내고 있다. K8s Run Launcher와 동일하게 Celery K8s Run Launcher는 각 Run을 위한 별도의 Kubernetes Job을 생성하여 실행한다. 다만 차이점은 Run에서 Op/Asset 수행을 위해서 Process나 Kubernetes Job을 생성하는 것이 아니라, Celery에게 Op/Asset 처리를 Queuing한다. 이후에 Celery Worker는 Celery에서 Op/Asset을 전달받아 처리한다. 이러한 동작 방식 때문에 Celery K8s Run Launcher를 이용할 경우 반드시 Celery K8s Job Executor를 이용해야 한다.
 
-Op/Asset의 병렬 처리 개수는 Celery Worker의 개수와 동일하다. 만약 Celery Worker의 개수가 5개라면 Op/Asset의 최대 병렬 처리 개수도 5개가 된다. 즉 Celery Worker의 개수를 통해서 Op/Asset의 병렬 처리 개수를 조절할 수 있다. K8s Run Launcher와 K8s Job Executor를 이용하는 경우에는 동시에 많은 Workflow가 실행되면 이에 비례하여 동시에 많은 Op/Asset Pod가 생성되고 실행된다. 이는 Kubernetes Cluster에 많은 부담을 발생시킬 수 있다. 반면에 Celery K8s Run Launcher와 Celery K8s Job Executor를 이용하는 경우에는 동시에 많은 Workflow가 실행되더라도 최대 Celery Worker의 개수 만큼만 Op/Asset Pod가 생성되고 실행되기 때문에 Kubernetes Cluster의 부담을 경감시킬 수 있다.
+Op/Asset의 병렬 처리 개수는 Celery Worker의 개수와 동일하다. 만약 Celery Worker의 개수가 5개라면 Op/Asset의 최대 병렬 처리 개수도 5개가 된다. 즉 Celery Worker의 개수를 통해서 Op/Asset의 병렬 처리 개수를 조절할 수 있다. K8s Run Launcher와 K8s Job Executor를 이용하는 경우에는 동시에 많은 Workflow가 실행되면 이에 비례하여 동시에 많은 Op/Asset Pod가 생성되고 실행된다. 이는 Kubernetes Cluster에 많은 부담을 발생시킬 수 있다. 
 
-하지만 Celery K8s Run Launcher와 Celery K8s Job Executor를 이용하기 위해서는 Celery의 Queue로 활용되는 RabbitMQ/Redis와 Celery Worker를 추가적으로 운영해야 하기 때문에 운영의 복잡도는 더 올라가는 단점이 존재한다.
+반면에 Celery K8s Run Launcher와 Celery K8s Job Executor를 이용하는 경우에는 동시에 많은 Workflow가 실행되더라도 최대 Celery Worker의 개수 만큼만 Op/Asset Pod가 생성되고 실행되기 때문에 Kubernetes Cluster의 부담을 경감시킬 수 있다. 또한 Celery의 다양한 Retry, Rate Limit, Backoff 기능을 활용할 수 있으며, Celery Worker가 항상 동작하고 있기 때문에 Op/Asset 처리를 위한 Cold Start가 발생하지 않는다는 장점도 갖는다. 하지만 Celery K8s Run Launcher와 Celery K8s Job Executor를 이용하기 위해서는 Celery의 Queue로 활용되는 RabbitMQ/Redis와 Celery Worker를 추가적으로 운영해야 하기 때문에 운영의 복잡도는 더 올라가는 단점이 존재한다.
 
 ```text {caption="[Text 4] Dagster Pod Examples with Celery K8s Run Launcher + Celery K8s Job Executor"}
 $ kubectl -n dagster-celery get job
