@@ -88,15 +88,15 @@ spark-submit \
   --master k8s://192.168.1.71:6443 \
   --deploy-mode cluster \
   --name spark-on-k8s-example \
-  --conf spark.kubernetes.container.image=ghcr.io/ssup2-playground/k8s-data-platform_spark-apps:0.1.0 \
+  --conf spark.kubernetes.container.image=ghcr.io/ssup2-playground/k8s-data-platform_spark-jobs:0.1.1 \
   --conf spark.kubernetes.namespace=spark \
   --conf spark.kubernetes.authenticate.driver.serviceAccountName=spark \
   --conf spark.executor.instances=2 \
   --conf spark.jars.packages=org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262 \
-  local:///app/weather_southkorea_daily_average_parquet.py \
+  --conf spark.driver.extraJavaOptions="-Divy.cache.dir=/tmp -Divy.home=/tmp" \
+  local:///app/jobs/weather_southkorea_daily_average_parquet.py \
   --date 20250602
 ```
-
 
 ```yaml
 ---
