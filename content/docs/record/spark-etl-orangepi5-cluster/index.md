@@ -66,36 +66,21 @@ spark-submit \
 ## 3. Kubernetes 환경에서 spark-submit 실행
 
 ```shell
-spark-submit \
+spark-submit \                                                                    
   --master k8s://192.168.1.71:6443 \
   --deploy-mode cluster \
-  --name spark-on-k8s-example \
-  --conf spark.kubernetes.container.image=ghcr.io/ssup2-playground/k8s-data-platform_spark-jobs:0.1.0 \
-  --conf spark.kubernetes.namespace=spark \
-  --conf spark.executor.instances=2 \
-  --conf spark.kubernetes.authenticate.driver.serviceAccountName=spark \
-  --conf spark.hadoop.fs.s3a.endpoint=http://minio:9000 \
-  --conf spark.hadoop.fs.s3a.access.key=<YOUR_MINIO_ACCESS_KEY> \
-  --conf spark.hadoop.fs.s3a.secret.key=<YOUR_MINIO_SECRET_KEY> \
-  --conf spark.hadoop.fs.s3a.path.style.access=true \
-  --conf spark.hadoop.fs.s3a.impl=org.apache.hadoop.fs.s3a.S3AFileSystem \
-  --conf spark.jars.packages=org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262 \
-  local:///opt/spark/app/your_script.py
-```
-
-```shell
-spark-submit \
-  --master k8s://192.168.1.71:6443 \
-  --deploy-mode cluster \
-  --name spark-on-k8s-example \
-  --conf spark.kubernetes.container.image=ghcr.io/ssup2-playground/k8s-data-platform_spark-jobs:0.1.1 \
+  --name weather-southkorea-daily-average-parquet \
+  --conf spark.kubernetes.container.image=ghcr.io/ssup2-playground/k8s-data-platform_spark-jobs:0.1.6 \
   --conf spark.kubernetes.namespace=spark \
   --conf spark.kubernetes.authenticate.driver.serviceAccountName=spark \
   --conf spark.executor.instances=2 \
+  --conf spark.pyspark.python=/app/.venv/bin/python3 \
   --conf spark.jars.packages=org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262 \
   --conf spark.driver.extraJavaOptions="-Divy.cache.dir=/tmp -Divy.home=/tmp" \
+  --conf spark.eventLog.enabled=true \
+  --conf spark.eventLog.dir=s3a://spark-event-logs \
   local:///app/jobs/weather_southkorea_daily_average_parquet.py \
-  --date 20250602
+  --date 20250604
 ```
 
 ```yaml
@@ -113,14 +98,11 @@ metadata:
   namespace: spark
 rules:
   - apiGroups: [""]
-    resources: ["pods", "services", "endpoints", "persistentvolumeclaims"]
+    resources: ["pods", "services", "endpoints"]
     verbs: ["create", "get", "list", "watch", "delete"]
   - apiGroups: [""]
     resources: ["configmaps"]
-    verbs: ["create", "get", "delete"]
-  - apiGroups: ["apps"]
-    resources: ["deployments"]
-    verbs: ["get", "list", "watch"]
+    verbs: ["create", "get", "list", "delete"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -138,6 +120,58 @@ roleRef:
 ```
 
 ## 4. Kubernetes 환경에서 Spark Operator 실행
+
+```yaml
+apiVersion: "sparkoperator.k8s.io/v1beta2"
+kind: SparkApplication
+metadata:
+  namespace: spark
+  name: spark-on-k8s-example
+spec:
+  type: Python
+  mode: cluster
+  image: "ghcr.io/ssup2-playground/k8s-data-platform_spark-jobs:0.1.2"
+  sparkVersion: "3.5.3"
+  imagePullPolicy: Always
+  mainApplicationFile: "local:///app/jobs/weather_southkorea_daily_average_parquet.py"
+  
+  # Application arguments
+  arguments:
+    - "--date"
+    - "20250602"
+  
+  # Spark configuration
+  sparkConf:
+    "spark.jars.packages": "org.apache.hadoop:hadoop-aws:3.4.0,com.amazonaws:aws-java-sdk-bundle:1.12.262"
+    "spark.driver.extraJavaOptions": "-Divy.cache.dir=/tmp -Divy.home=/tmp"
+  
+  # Executor configuration
+  executor:
+    instances: 2
+    cores: 1
+    memory: "1g"
+    serviceAccount: spark
+  
+  # Driver configuration
+  driver:
+    cores: 1
+    memory: "1g"
+    serviceAccount: spark
+  
+  # Restart policy
+  restartPolicy:
+    type: Never
+  
+  # TTL for automatic cleanup (1 hour after completion)
+  timeToLiveSeconds: 300
+  
+  # Optional: monitoring and dependencies
+  monitoring:
+    exposeDriverMetrics: true
+    exposeExecutorMetrics: true
+    prometheus:
+      jmxExporterJar: "/prometheus/jmx_prometheus_javaagent-0.11.0.jar"
+```
 
 ## 5. Dagster와 연동
 
