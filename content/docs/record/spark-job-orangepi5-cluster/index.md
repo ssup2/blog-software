@@ -1,5 +1,5 @@
 ---
-title: Spark ETL 수행 / Orange Pi 5 Max Cluster 환경
+title: Spark Job 수행 / Orange Pi 5 Max Cluster 환경
 draft: true
 ---
 
@@ -20,7 +20,7 @@ export PATH="$JAVA_HOME/bin:$PATH"
 Spark를 설치한다.
 
 ```shell
-SPARK_VERSION="3.5.1"
+SPARK_VERSION="3.5.5"
 HADOOP_VERSION="3"
 
 curl -O "https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz"
@@ -66,7 +66,7 @@ spark-submit \
 ## 3. Kubernetes 환경에서 spark-submit 실행
 
 ```shell
-spark-submit \                                                                    
+spark-submit \
   --master k8s://192.168.1.71:6443 \
   --deploy-mode cluster \
   --name weather-southkorea-daily-average-parquet \
@@ -76,11 +76,13 @@ spark-submit \
   --conf spark.executor.instances=2 \
   --conf spark.pyspark.python=/app/.venv/bin/python3 \
   --conf spark.jars.packages=org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262 \
-  --conf spark.driver.extraJavaOptions="-Divy.cache.dir=/tmp -Divy.home=/tmp" \
   --conf spark.eventLog.enabled=true \
-  --conf spark.eventLog.dir=s3a://spark-event-logs \
+  --conf spark.eventLog.dir=s3a://spark/logs \
+  --conf spark.kubernetes.driver.annotation.prometheus.io/scrape=true \
+  --conf spark.kubernetes.driver.annotation.prometheus.io/path=/metrics/executors/prometheus \
+  --conf spark.kubernetes.driver.annotation.prometheus.io/port=4040 \
   local:///app/jobs/weather_southkorea_daily_average_parquet.py \
-  --date 20250604
+  --date 20250601
 ```
 
 ```yaml
@@ -98,11 +100,8 @@ metadata:
   namespace: spark
 rules:
   - apiGroups: [""]
-    resources: ["pods", "services", "endpoints"]
-    verbs: ["create", "get", "list", "watch", "delete"]
-  - apiGroups: [""]
-    resources: ["configmaps"]
-    verbs: ["create", "get", "list", "delete"]
+    resources: ["pods", "services", "endpoints", "configmaps", "persistentvolumeclaims"]
+    verbs: ["create", "get", "list", "watch", "delete", "deletecollection"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -126,24 +125,33 @@ apiVersion: "sparkoperator.k8s.io/v1beta2"
 kind: SparkApplication
 metadata:
   namespace: spark
-  name: spark-on-k8s-example
+  name:  weather-southkorea-daily-average-parquet
 spec:
   type: Python
   mode: cluster
-  image: "ghcr.io/ssup2-playground/k8s-data-platform_spark-jobs:0.1.2"
-  sparkVersion: "3.5.3"
+  image: "ghcr.io/ssup2-playground/k8s-data-platform_spark-jobs:0.1.6"
+  sparkVersion: "3.5.5"
   imagePullPolicy: Always
   mainApplicationFile: "local:///app/jobs/weather_southkorea_daily_average_parquet.py"
   
   # Application arguments
   arguments:
     - "--date"
-    - "20250602"
+    - "20250601"
   
   # Spark configuration
   sparkConf:
-    "spark.jars.packages": "org.apache.hadoop:hadoop-aws:3.4.0,com.amazonaws:aws-java-sdk-bundle:1.12.262"
-    "spark.driver.extraJavaOptions": "-Divy.cache.dir=/tmp -Divy.home=/tmp"
+    "spark.eventLog.enabled": "true"
+    "spark.eventLog.dir": "s3a://spark/logs"
+    "spark.kubernetes.driver.annotation.prometheus.io/scrape": "true"
+    "spark.kubernetes.driver.annotation.prometheus.io/path": "/metrics/executors/prometheus"
+    "spark.kubernetes.driver.annotation.prometheus.io/port": "4040"
+
+  # Spark dependencies
+  deps:
+    packages:
+      - org.apache.hadoop:hadoop-aws:3.4.0
+      - com.amazonaws:aws-java-sdk-bundle:1.12.262
   
   # Executor configuration
   executor:
@@ -164,13 +172,6 @@ spec:
   
   # TTL for automatic cleanup (1 hour after completion)
   timeToLiveSeconds: 300
-  
-  # Optional: monitoring and dependencies
-  monitoring:
-    exposeDriverMetrics: true
-    exposeExecutorMetrics: true
-    prometheus:
-      jmxExporterJar: "/prometheus/jmx_prometheus_javaagent-0.11.0.jar"
 ```
 
 ## 5. Dagster와 연동
