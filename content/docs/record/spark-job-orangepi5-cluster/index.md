@@ -39,6 +39,37 @@ Spark Application을 Download 한다.
 uv sync
 ```
 
+```sql
+CREATE TABLE iceberg.weather.southkorea_daily_average_iceberg_parquet (
+    branch_name VARCHAR,
+
+    temp DOUBLE,
+    rain DOUBLE,
+    snow DOUBLE,
+
+    cloud_cover_total     INT,
+    cloud_cover_lowmiddle INT,
+    cloud_lowest          INT,
+
+    humidity       INT,
+    wind_speed     DOUBLE,
+    pressure_local DOUBLE,
+    pressure_sea   DOUBLE,
+    pressure_vaper DOUBLE,
+    dew_point      DOUBLE,
+
+    year  INT,
+    month INT,
+    day   INT,
+    hour  INT
+)
+WITH (
+	location = 's3a://weather/southkorea/daily-average-iceberg-parquet',
+	format = 'PARQUET',
+	partitioning = ARRAY['year', 'month', 'day']
+);
+```
+
 ## 2. Local 환경에서 실행
 
 Shell을 2개 실행하여 각각 Master와 Worker로 설정하여 실행한다.
@@ -55,8 +86,49 @@ spark-submit \
   --master spark://localhost:7077 \
   --total-executor-cores 2 \
   --executor-memory 500m \
-  src/app/weather_southkorea_daily_average_parquet.py \
+  src/jobs/weather_southkorea_daily_average_parquet.py \
   --date 20250601
+```
+
+```shell
+export PYTHONPATH=$(pwd)/src
+spark-submit \
+  --packages org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262,org.apache.iceberg:iceberg-spark3-runtime:0.13.2 \
+  --master spark://localhost:7077 \
+  --total-executor-cores 2 \
+  --executor-memory 500m \
+  src/jobs/weather_southkorea_daily_average_iceberg_parquet.py \
+  --date 20250601
+```
+
+```
+CREATE TABLE iceberg.weather.southkorea_daily_average_iceberg_parquet (
+    branch_name VARCHAR,
+
+    avg_temp DOUBLE,
+    avg_rain DOUBLE,
+    avg_snow DOUBLE,
+
+    avg_cloud_cover_total     DOUBLE,
+    avg_cloud_cover_lowmiddle DOUBLE,
+    avg_cloud_lowest          DOUBLE,
+
+    avg_humidity       DOUBLE,
+    avg_wind_speed     DOUBLE,
+    avg_pressure_local DOUBLE,
+    avg_pressure_sea   DOUBLE,
+    avg_pressure_vaper DOUBLE,
+    avg_dew_point      DOUBLE,
+
+    year  INT,
+    month INT,
+    day   INT
+)
+WITH (
+	location = 's3a://weather/southkorea/daily-average-iceberg-parquet',
+	format = 'PARQUET',
+	partitioning = ARRAY['year', 'month', 'day']
+);
 ```
 
 ```shell
