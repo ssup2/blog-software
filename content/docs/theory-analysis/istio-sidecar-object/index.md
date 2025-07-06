@@ -1,10 +1,10 @@
 ---
-title: Istio Sidecar Object를 활용한 Sidecar Proxy Endpoint 제어
+title: Istio Sidecar Object
 ---
 
 ## 1. Istio Sidecar Object
 
-Istio에서 제공하는 Sidecar Object는 Istio의 Sidecar Proxy의 Inbound, Outbound Traffic 관련 설정을 세세하게 제어할 때 이용하며, Sidecar Object의 **Egress** 설정을 활용하면 Sidecar Proxy가 관리하는 Endpoint를 제어할 수 있다. 일반적으로는 Endpoint 개수 증가하면 각각의 Endpoint 정보를 관리하고 설정하는 **Sidecar Proxy와 istiod의 부하**도 같이 증가하는데, Sidecar Object를 활용하면 Sidecar Proxy와 istiod가 관리하는 Endpoint의 개수를 줄여 부하를 줄일 수 있다.
+Istio에서 제공하는 Sidecar Object는 Istio의 Sidecar Proxy의 Inbound, Outbound Traffic 관련 설정을 세세하게 제어할 때 이용한다. 일반적으로는 Sidecar Proxy가 관리하는 Endpoint를 제한하여 Egress 통신을 제한하거나, Endpoint 개수를 줄여서 istiod의 부하를 줄이는 용도로 활용된다.
 
 ### 1.1. Sidecar Object Test 환경
 
@@ -123,7 +123,7 @@ ENDPOINT                                                STATUS      OUTLIER CHEC
 
 [Shell 5]는 [File 1]의 Sidecar Object 적용 후 `my-shell` Pod의 Sidecar Proxy에 설정된 Endpoint 목록을 나타내고 있다. [Shell 3]의 내용과 다르게 `bookinfo` Namespace의 Endpoint들이 존재하지 않는것을 확인할 수 있다. 이처럼 Sidecar Object를 활용하여 Sidecar Proxy에 등록되는 Endpoint 설정할 수 있다. 이는 각 Pod의 Egress 목적지를 모두 Sidecar Object에 등록하면 Endpoint의 개수를 줄일수 있는것을 의미한다. 물론 Kubernetes Cluster를 관리하는 조직에서 각 Pod의 모든 Egress 목적지를 파악하고 갱신하는 것은 쉬운일은 아니다.
 
-Sidecar Object는 Pod의 Traffic을 차단하는 기법이 아니다. 따라서 Pod에서 Sidecar Object로 인해서 Endpoint에 존재하지 않는 Egress 목적지로 Traffic을 전송하면 Traffic은 그대로 전송된다. Sidecar Proxy는 존재하지 않는 Endpoint로 Traffic을 전송하는 경우에는 Traffic을 **Unmatched Traffic**으로 간주하며 해당 Traffic을 그대로 **통과**시키기 때문이다. 즉 Mesh Network를 이용하지 못핣뿐 Traffic 통과되며, 통과된 Traffic은 목적지에 따라서 kube-proxy나 외부 Load Balancer에 의해서 라우팅 되거나, 관련 라우팅 룰이 없다면 Drop 될 수 있다.
+Sidecar Object는 기본적으로 Pod의 Traffic을 차단하는 기법이 아니다. 따라서 Pod에서 Sidecar Object로 인해서 Endpoint에 존재하지 않는 Egress 목적지로 Traffic을 전송하면 Traffic은 그대로 전송된다. Sidecar Proxy는 존재하지 않는 Endpoint로 Traffic을 전송하는 경우에는 Traffic을 **Unmatched Traffic**으로 간주하며 해당 Traffic을 그대로 **통과**시키기 때문이다. 즉 Mesh Network를 이용하지 못핣뿐 Traffic 통과되며, 통과된 Traffic은 목적지에 따라서 kube-proxy나 외부 Load Balancer에 의해서 라우팅 되거나, 관련 라우팅 룰이 없다면 Drop 될 수 있다.
 
 Sidecar Object로 인해서 Endpoint가 존재하지 않더라도 Traffic은 통과되기 일부 Endpoint각 Sidecar Object에 누락되더라도 서비스 장애까지는 이어지지 않을수 있다. 다만 Mesh Network를 활용할 수 없기 때문에 가능하면 Pod의 Egress 목적지를 모두 Sidecar Object에 등록해야한다.
 
