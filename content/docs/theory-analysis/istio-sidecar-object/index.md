@@ -4,7 +4,7 @@ title: Istio Sidecar Object
 
 ## 1. Istio Sidecar Object
 
-Istio에서 제공하는 Sidecar Object는 Istio의 Sidecar Proxy의 Inbound, Outbound Traffic 관련 설정을 세세하게 제어할 때 이용한다. 일반적으로는 Sidecar Proxy가 관리하는 Endpoint를 제한하여 Egress 통신을 제한하거나, Endpoint 개수를 줄여서 istiod의 부하를 줄이는 용도로 활용된다.
+Istio에서 제공하는 Sidecar Object는 Istio의 Sidecar Proxy의 Inbound, Outbound Traffic 관련 설정을 세세하게 제어할 때 이용한다. 일반적으로는 Sidecar Proxy가 관리하는 Endpoint를 제한하여 Outbound 통신을 제한하거나, Endpoint 개수를 줄여서 istiod의 부하를 줄이는 용도로 활용된다.
 
 ### 1.1. Sidecar Object Test 환경
 
@@ -147,7 +147,19 @@ Sidecar Object로 인해서 Endpoint가 존재하지 않더라도 Traffic은 통
 
 [Shell 6]은 Sidecar Object 적용 후 `my-shell` Pod에서 `reviews` Service에 요청을 보낼시 `my-shell` Pod의 Node에서 `my-shell` Pod의 veth Interface에 tcpdump를 수행한 모습을 나타내고 있다. `reviews` Service의 ClusterIP가 Destination IP로 설정되어 있는것을 확인할 수 있다. 즉 `my-shell` Pod의 Egress Traffic은 Sidecar Proxy를 그대로 **통과**하여 DNAT가 되지 않고, Node의 kube-proxy (iptables)로 인해서 DNAT가 된다는 사실을 알 수 있다. [Figure 2]는 이러한 Traffic의 흐름을 간단하게 나타내고 있다.
 
-### 1.4. workloadSelector 활용
+### 1.4. Outbound 통신 제한
+
+```yaml {caption="[File 3] Sidecar Object의 egress 설정"}
+meshConfig:
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+```
+
+기본적으로 Sidecar Proxy는 Sidecar Object로 인해서 등록되지 않는 Endpoint로 전송되는 Traffic을 통과시키지만, Mesh Config의 `outboundTrafficPolicy`를 `REGISTRY_ONLY`로 설정하여 Sidecar Proxy에 등록되어 있지 않은 Endpoint로 전송되는 Traffic을 차단할 수 있다. [File 3]은 Istio의 Mesh Configuration에서 `outboundTrafficPolicy`를 `REGISTRY_ONLY`로 설정하는 예제를 나타내고 있다.
+
+`REGISTRY_ONLY`는 이름에서 알 수 있듯이 Sidecar Proxy에 등록된 Endpoint만 통과시키는 설정이다. 즉 Sidecar Proxy에 등록된 Endpoint만 통과시키고, 등록되지 않은 Endpoint로 전송되는 Traffic은 차단한다. `outboundTrafficPolicy`의 기본값은 `ALLOW_ANY`이며, 이 경우 Sidecar Proxy는 Sidecar Object로 인해서 등록되지 않는 Endpoint로 전송되는 Traffic을 통과시킨다.
+
+### 1.5. workloadSelector 활용
 
 ```yaml {caption="[File 2] Sidecar Object의 workloadSelector 예시"}
 apiVersion: networking.istio.io/v1
@@ -165,8 +177,9 @@ spec:
     - "istio-system/*"
 ```
 
-[File 2]는 Sidecar Object를 Namespace 전체가 아니라, Namespace의 특정 Pod에만 적용하는 예제를 나타내고 있다. `workloadSelector`를 활용하여 Sidecar Ojbect가 적용될 Pod의 Label을 선택하면 된다.
+Sidecar Object의 `workloadSelector`를 활용하면 Sidecar Object가 적용될 Pod의 Label을 선택할 수 있다. [File 2]는 Sidecar Object를 Namespace 전체가 아니라, Namespace의 특정 Pod에만 적용하는 예제를 나타내고 있다. `app: reviews` Label을 가진 Pod에만 Sidecar Object가 적용되도록 설정되어 있다.
 
 ## 2. 참조
 
 * Istio Sidecar Object : [https://istio.io/latest/docs/reference/config/networking/sidecar/](https://istio.io/latest/docs/reference/config/networking/sidecar/)
+* Istio Sidecar Object : [https://www.kimsehwan96.com/istio-sidecar-egress-control/](https://www.kimsehwan96.com/istio-sidecar-egress-control/)
