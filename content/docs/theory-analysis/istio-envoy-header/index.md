@@ -14,3 +14,4 @@ draft: true
 ## 2. 참조
 
 * Istio Mesh Option : [https://istio.io/latest/docs/reference/config/istio.mesh.v1alpha1/](https://istio.io/latest/docs/reference/config/istio.mesh.v1alpha1/)
+* Envoy Header Manipulation : [https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_conn_man/headers#http-header-manipulation](https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_conn_man/headers#http-header-manipulation)
