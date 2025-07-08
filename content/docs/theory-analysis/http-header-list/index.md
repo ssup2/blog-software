@@ -65,21 +65,19 @@ Cache-Control Header는 Cache 정책을 지시하기 위한 Header이다. 여기
   * `no-transform` : Shared Cache는 데이터를 변환하지 않는다.
   * `only-if-cached` : Shared Cache는 Caching된 데이터가 있는지 확인하고 있으면 해당 데이터를 응답하고, 없으면 응답하지 않는다.
 
-* Server의 `<cache-directive>` : Local Cache에 대한 정책 지시를 의미한다.
-  * `max-age` : 캐시를 사용하지 않는다.
-  * `s-maxage` : 캐시를 사용하지 않는다.
-  * `no-cache` : 캐시를 사용하지 않는다.
-  * `no-store` : 캐시를 사용하지 않는다.
-  * `no-transform` : 캐시를 사용하지 않는다.
-  * `must-revalidate` : 캐시를 사용하지 않는다.
-  * `proxy-revalidate` : 캐시를 사용하지 않는다.
-  * `must-understand` : 캐시를 사용하지 않는다.
-  * `private` : 캐시를 사용하지 않는다.
-  * `public` : 캐시를 사용하지 않는다.
-  * `immutable` : 캐시를 사용하지 않는다.
-  * `no-cache` : 캐시를 사용하지 않는다.
-  * `stale-while-revalidate` : 캐시를 사용하지 않는다.
-  * `stale-if-error` : stale-if-error
+* Server의 `<cache-directive>` : Local Cache 또는 Shared Cache에 대한 정책 지시를 의미한다. 여러개의 Cache Directive를 사용될 수 있다.
+  * `max-age=<seconds>` : Local Cache는 seconds 미만의 Caching된 데이터가 있을 경우에는 Caching된 데이터를 응답하고, seconds 이상의 Caching된 데이터가 있을 경우에는 Orgin Server로부터 새로운 Data를 다시 Caching후에 응답한다.
+  * `s-maxage=<seconds>` : Shared Cache는 seconds 미만의 Caching된 데이터가 있을 경우에는 Caching된 데이터를 응답하고, seconds 이상의 Caching된 데이터가 있을 경우에는 Orgin Server로부터 새로운 Data를 다시 Caching후에 응답한다.
+  * `no-cache` : Local Cache는 반드시 Orgin Server로부터 원본 Data를 검증한 다음 응답한다.
+  * `no-store` : Local Cache는 데이터를 Caching하지 않는다. Client는 항상 Orgin Server로부터 새로운 Data를 받는다.
+  * `no-transform` : Local Cache는 데이터를 변환하지 않는다.
+  * `must-revalidate` : Local Cache는 데이터가 만료되었을 경우 반드시 Orgin Server로부터 원본 Data를 검증한 다음 응답한다.
+  * `proxy-revalidate` : Shared Cache는 데이터가 만료되었을 경우 반드시 Orgin Server로부터 원본 Data를 검증한 다음 응답한다.
+  * `private` : Local Cache에만 데이터를 Caching한다.
+  * `public` : Local Cache와 Shared Cache에 데이터를 Caching한다.
+  * `immutable` : Orgin Server로부터 받은 데이터가 변경되지 않는 것을 의미한다.
+  * `stale-while-revalidate=<seconds>` : Local Cache는 데이터가 만료 되었을경우 seconds 시간 동안 Orgin Server로부터 원본 Data를 가져오며, Data를 가져오면서 캐시된 유요하지 않는 데이터로 임시 응답한다.
+  * `stale-if-error=<seconds>` : Local Cache는 Origin Server가 5XX 응답을 보내는 경우 seconds 시간 동안 Caching된 데이터로 응답한다.
 
 일반적으로 Client는 Request Header에서 `no-cache` 값을 사용하며, Server는 Response Header에서 `no-cache` 값을 사용한다.
 
