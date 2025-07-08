@@ -103,26 +103,34 @@ Host: example.com:8080
 #### 1.2.2. Authorization
 
 ``` {caption="[Text 7] Authorization Header Format"}
-Authorization: <credentials>
+Authorization: <auth-scheme> <authorization-parameters>
 ```
 
 Authorization Header는 요청을 보내는 Client의 인증 정보를 나타낸다. [Text 7]은 Authorization Header의 Format을 나타낸다.
 
-* `<credentials>` : 인증 정보를 나타낸다.
+* `<auth-scheme>` : 인증 방식을 나타낸다.
+  * `Basic` : 사용자 이름과 비밀번호를 Base64 Encoding 방식으로 인코딩하여 전송한다.
+  * `Bearer` : Token 인증 방식을 의미한다.
+  * `Digest` : Digest 인증 방식을 의미한다. 요청의 Header와 Body를 Hashing 하여 인증 정보를 전송한다.
+  * `AWS4-HMAC-SHA256` : AWS 인증 방식을 의미한다.
+* `<authorization-parameters>` : 인증에 필요한 Parameter를 나타낸다.
 
 ``` {caption="[Text 8] Authorization Header Example"}
 Authorization: Basic YWxhZGRpbjpvcGVuc2VzYW1l
+Authorization: Bearer <token>
+Authorization: Digest username="<username>", realm="<realm>", qop=<qop>, nonce="<nonce>", uri="<uri>", response="<response>", opaque="<opaque>"
+Authorization: AWS4-HMAC-SHA256 Credential=<access_key_id>/<date>/<region>/<service>/aws4_request, SignedHeaders=<signed_headers>, Signature=<signature>
 ```
 
 [Text 8]은 Authorization Header의 몇가지 예시를 나타낸다.
 
-#### 1.2.2. User-Agent
+#### 1.2.3. User-Agent
 
 ``` {caption="[Text 9] User-Agent Header Format"}
 User-Agent: <user-agent>
 ```
 
-User-Agent Header는 요청을 보내는 Client의 정보를 나타낸다. [Text 7]은 User-Agent Header의 Format을 나타낸다.
+User-Agent Header는 요청을 보내는 Client의 정보를 나타낸다. [Text 9]은 User-Agent Header의 Format을 나타낸다.
 
 ``` {caption="[Text 10] User-Agent Header Example"}
 User-Agent: curl/7.64.1
@@ -131,13 +139,44 @@ User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (
 
 [Text 10]은 User-Agent Header의 몇가지 예시를 나타낸다. curl Client와 MacOS의 Chrome Browser의 예시를 나타낸다.
 
-#### 1.2.3. Accept
+#### 1.2.4. If-Modified-Since
 
-``` {caption="[Text 11] Accept Header Format"}
+``` {caption="[Text 11] If-Modified-Since Header Format"}
+If-Modified-Since: <date>
+```
+
+If-Modified-Since Header는 요청을 보내는 클라이언트가 최근에 수정된 시간을 나타낸다. [Text 11]은 If-Modified-Since Header의 Format을 나타낸다.
+
+``` {caption="[Text 12] If-Modified-Since Header Example"}
+If-Modified-Since: Wed, 21 Oct 2015 07:28:00 GMT
+If-Modified-Since: Mon, 19 Oct 2015 07:28:00 GMT
+If-Modified-Since: Tue, 20 Oct 2015 07:28:00 GMT
+```
+
+[Text 12]은 If-Modified-Since Header의 몇가지 예시를 나타낸다.
+
+#### 1.2.5. If-None-Match
+
+``` {caption="[Text 13] If-None-Match Header Format"}
+If-None-Match: <etag>
+``` 
+
+If-None-Match Header는 요청을 보내는 클라이언트가 최근에 수정된 시간을 나타낸다. [Text 13]은 If-None-Match Header의 Format을 나타낸다.
+
+``` {caption="[Text 14] If-None-Match Header Example"}
+If-None-Match: "33a64"
+If-None-Match: W/"33a58", "33a64"
+```
+
+[Text 14]은 If-None-Match Header의 몇가지 예시를 나타낸다.
+
+#### 1.2.6. Accept
+
+``` {caption="[Text 15] Accept Header Format"}
 Accept: <media-type>, <media-type>...
 ```
 
-Accept Header는 요청을 보내는 클라이언트가 받을 수 있는 Media Type을 나타낸다. [Text 9]는 Accept Header의 Format을 나타낸다. 여러개의 Media Type을 지정할 수 있으며, 각 Media Type은 `,` 문자로 구분한다.
+Accept Header는 요청을 보내는 클라이언트가 받을 수 있는 Media Type을 나타낸다. [Text 15]는 Accept Header의 Format을 나타낸다. 여러개의 Media Type을 지정할 수 있으며, 각 Media Type은 `,` 문자로 구분한다.
 
 * `<media-type>` : Media Type을 나타낸다.
   * `text/html` : HTML 문서
@@ -145,20 +184,20 @@ Accept Header는 요청을 보내는 클라이언트가 받을 수 있는 Media 
   * `application/xml` : XML 문서
   * `*/*` : 모든 Media Type
 
-``` {caption="[Text 12] Accept Header Example"}
+``` {caption="[Text 16] Accept Header Example"}
 Accept: text/html
 Accept: text/html, application/xhtml+xml, application/xml;q=0.9, */*;q=0.8
 ```
 
-[Text 12]은 Accept Header의 몇가지 예시를 나타낸다. `q` 값은 우선순위를 나타내며, 0에서 1 사이의 값을 갖는다. `q` 값이 높을수록 우선순위가 높다. `q` 값이 없는 경우 `1`로 간주한다. 따라서 [Text 12]의 두번째 예시에서는 `text/html`과 `application/xhtml+xml`의 우선순위가 가장 높으며, `application/xml`, `*/*` 순서대로 우선순위가 낮아진다.
+[Text 16]은 Accept Header의 몇가지 예시를 나타낸다. `q` 값은 우선순위를 나타내며, 0에서 1 사이의 값을 갖는다. `q` 값이 높을수록 우선순위가 높다. `q` 값이 없는 경우 `1`로 간주한다. 따라서 [Text 16]의 두번째 예시에서는 `text/html`과 `application/xhtml+xml`의 우선순위가 가장 높으며, `application/xml`, `*/*` 순서대로 우선순위가 낮아진다.
 
-#### 1.2.4. Accept-Encoding
+#### 1.2.7. Accept-Encoding
 
-``` {caption="[Text 13] Accept-Encoding Header Format"}
+``` {caption="[Text 17] Accept-Encoding Header Format"}
 Accept-Encoding: <encoding-option>, <encoding-option>...
 ```
 
-Accept-Encoding Header는 요청을 보내는 클라이언트가 받을 수 있는 Encoding을 나타낸다. [Text 11]은 Accept-Encoding Header의 Format을 나타낸다. 여러개의 Encoding을 지정할 수 있으며, 각 Encoding은 `,` 문자로 구분한다.
+Accept-Encoding Header는 요청을 보내는 클라이언트가 받을 수 있는 Encoding을 나타낸다. [Text 17]은 Accept-Encoding Header의 Format을 나타낸다. 여러개의 Encoding을 지정할 수 있으며, 각 Encoding은 `,` 문자로 구분한다.
 
 * `<encoding-option>` : Encoding을 나타낸다.
   * `gzip` : gzip Encoding
@@ -166,20 +205,20 @@ Accept-Encoding Header는 요청을 보내는 클라이언트가 받을 수 있�
   * `br` : brotli Encoding
   * `identity` : Encoding을 사용하지 않는다.
 
-``` {caption="[Text 14] Accept-Encoding Header Example"}
+``` {caption="[Text 18] Accept-Encoding Header Example"}
 Accept-Encoding: gzip;q=0.9,deflate;q=0.8,br;q=1.0
 Accept-Encoding: identity
 ```
 
-[Text 14]은 Accept-Encoding Header의 몇가지 예시를 나타낸다. `q` 값은 우선순위를 나타내며, 0에서 1 사이의 값을 갖는다. `q` 값이 높을수록 우선순위가 높다. `q` 값이 없는 경우 `1`로 간주한다. 따라서 [Text 14]의 첫번째 예시에서는 `br`의 우선순위가 가장 높으며, `gzip`, `deflate` 순서대로 우선순위가 낮아진다.
+[Text 18]은 Accept-Encoding Header의 몇가지 예시를 나타낸다. `q` 값은 우선순위를 나타내며, 0에서 1 사이의 값을 갖는다. `q` 값이 높을수록 우선순위가 높다. `q` 값이 없는 경우 `1`로 간주한다. 따라서 [Text 18]의 첫번째 예시에서는 `br`의 우선순위가 가장 높으며, `gzip`, `deflate` 순서대로 우선순위가 낮아진다.
 
-#### 1.2.5. Accept-Language
+#### 1.2.8. Accept-Language
 
-``` {caption="[Text 15] Accept-Language Header Format"}
+``` {caption="[Text 19] Accept-Language Header Format"}
 Accept-Language: <language-range>, <language-range>...
 ```
 
-Accept-Language Header는 요청을 보내는 클라이언트가 받을 수 있는 언어를 나타낸다. [Text 13]은 Accept-Language Header의 Format을 나타낸다. 여러개의 언어를 지정할 수 있으며, 각 언어는 `,` 문자로 구분한다.
+Accept-Language Header는 요청을 보내는 클라이언트가 받을 수 있는 언어를 나타낸다. [Text 19]은 Accept-Language Header의 Format을 나타낸다. 여러개의 언어를 지정할 수 있으며, 각 언어는 `,` 문자로 구분한다.
 
 * `<language-range>` : 언어 범위를 나타낸다.
   * `en-US` : 미국 영어
@@ -188,30 +227,30 @@ Accept-Language Header는 요청을 보내는 클라이언트가 받을 수 있�
   * `ko` : 한국어
   * `*` : 모든 언어
 
-``` {caption="[Text 16] Accept-Language Header Example"}
+``` {caption="[Text 20] Accept-Language Header Example"}
 Accept-Language: en-US,ko;q=0.8
 Accept-Language: en-GB,en;q=0.9,ko;q=0.8
 ```
 
-[Text 16]은 Accept-Language Header의 몇가지 예시를 나타낸다. `q` 값은 우선순위를 나타내며, 0에서 1 사이의 값을 갖는다. `q` 값이 높을수록 우선순위가 높다. `q` 값이 없는 경우 `1`로 간주한다. 따라서 [Text 16]의 첫번째 예시에서는 `en-US`의 우선순위가 가장 높으며, 다음으로 `ko`의 우선순위가 높다. 두번째 예시에서는 `en-GB`의 우선순위가 가장 높으며, 다음으로 `en`, `ko` 순서대로 우선순위가 낮아진다.
+[Text 20]은 Accept-Language Header의 몇가지 예시를 나타낸다. `q` 값은 우선순위를 나타내며, 0에서 1 사이의 값을 갖는다. `q` 값이 높을수록 우선순위가 높다. `q` 값이 없는 경우 `1`로 간주한다. 따라서 [Text 16]의 첫번째 예시에서는 `en-US`의 우선순위가 가장 높으며, 다음으로 `ko`의 우선순위가 높다. 두번째 예시에서는 `en-GB`의 우선순위가 가장 높으며, 다음으로 `en`, `ko` 순서대로 우선순위가 낮아진다.
 
-#### 1.2.6. X-Forwarded-For
+#### 1.2.9. X-Forwarded-For
 
-``` {caption="[Text 17] X-Forwarded-For Header Format"}
+``` {caption="[Text 21] X-Forwarded-For Header Format"}
 X-Forwarded-For: <ip-address>, <ip-address>...
 ```
 
-X-Forwarded-For Header는 요청을 처리하는 서버의 정보를 나타낸다. [Text 17]는 X-Forwarded-For Header의 Format을 나타낸다. 여러개의 IP 주소를 지정할 수 있으며, 각 IP 주소는 `,` 문자로 구분한다.
+X-Forwarded-For Header는 요청을 처리하는 서버의 정보를 나타낸다. [Text 21]은 X-Forwarded-For Header의 Format을 나타낸다. 여러개의 IP 주소를 지정할 수 있으며, 각 IP 주소는 `,` 문자로 구분한다.
 
 * `<ip-address>` : IP 주소를 나타낸다.
 
-``` {caption="[Text 18] X-Forwarded-For Header Example"}
+``` {caption="[Text 22] X-Forwarded-For Header Example"}
 X-Forwarded-For: 192.168.1.1, 192.168.1.2, 192.168.1.3
 ```
 
-[Text 18]은 X-Forwarded-For Header의 몇가지 예시를 나타낸다. 첫번째 예시에서는 요청을 처리하는 서버의 IP 주소가 `192.168.1.1`, `192.168.1.2`, `192.168.1.3` 순서대로 처리되었음을 나타낸다.
+[Text 22]는 X-Forwarded-For Header의 몇가지 예시를 나타낸다. 첫번째 예시에서는 요청을 처리하는 서버의 IP 주소가 `192.168.1.1`, `192.168.1.2`, `192.168.1.3` 순서대로 처리되었음을 나타낸다.
 
-#### 1.2.7. X-Forwarded-Host
+#### 1.2.10. X-Forwarded-Host
 
 ``` {caption="[Text 19] X-Forwarded-Host Header Format"}
 X-Forwarded-Host: <host>
@@ -227,7 +266,7 @@ X-Forwarded-Host: example.com
 
 [Text 20]은 X-Forwarded-Host Header의 몇가지 예시를 나타낸다.
 
-#### 1.2.8. X-Forwarded-Port
+#### 1.2.11. X-Forwarded-Port
 
 ``` {caption="[Text 21] X-Forwarded-Port Header Format"}
 X-Forwarded-Port: <port>
@@ -243,7 +282,7 @@ X-Forwarded-Port: 80
 
 [Text 20]은 X-Forwarded-Port Header의 몇가지 예시를 나타낸다.
 
-#### 1.2.9. X-Forwarded-Proto
+#### 1.2.12. X-Forwarded-Proto
 
 ``` {caption="[Text 21] X-Forwarded-Proto Header Format"}
 X-Forwarded-Proto: <protocol>
@@ -260,7 +299,7 @@ X-Forwarded-Proto: https
 
 [Text 22]은 X-Forwarded-Proto Header의 몇가지 예시를 나타낸다.  
 
-#### 1.2.10. X-Forwarded-Server
+#### 1.2.13. X-Forwarded-Server
 
 ``` {caption="[Text 23] X-Forwarded-Server Header Format"}
 X-Forwarded-Server: <server>
@@ -276,7 +315,7 @@ X-Forwarded-Server: example.com
 
 [Text 24]은 X-Forwarded-Server Header의 몇가지 예시를 나타낸다.
 
-#### 1.2.11. X-Forwarded-User
+#### 1.2.14. X-Forwarded-User
 
 ``` {caption="[Text 25] X-Forwarded-User Header Format"}
 X-Forwarded-User: <user>
@@ -293,7 +332,7 @@ X-Forwarded-User: user2
 
 [Text 26]은 X-Forwarded-User Header의 몇가지 예시를 나타낸다.
 
-#### 1.2.12. X-Real-IP
+#### 1.2.15. X-Real-IP
 
 ``` {caption="[Text 27] X-Real-IP Header Format"}
 X-Real-IP: <ip-address>
@@ -311,7 +350,7 @@ X-Real-IP: 192.168.1.3
 
 [Text 28]은 X-Real-IP Header의 몇가지 예시를 나타낸다.
 
-#### 1.2.13. X-Request-ID
+#### 1.2.16. X-Request-ID
 
 ``` {caption="[Text 29] X-Request-ID Header Format"}
 X-Request-ID: <request-id>
@@ -329,7 +368,7 @@ X-Request-ID: 1234567892
 
 [Text 30]은 X-Request-ID Header의 몇가지 예시를 나타낸다.
 
-#### 1.2.14. X-Trace-ID
+#### 1.2.17. X-Trace-ID
 
 ``` {caption="[Text 31] X-Trace-ID Header Format"}
 X-Trace-ID: <trace-id>
