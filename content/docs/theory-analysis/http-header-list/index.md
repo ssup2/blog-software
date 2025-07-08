@@ -237,67 +237,70 @@ Accept-Language: en-GB,en;q=0.9,ko;q=0.8
 #### 1.2.9. X-Forwarded-For
 
 ``` {caption="[Text 21] X-Forwarded-For Header Format"}
-X-Forwarded-For: <ip-address>, <ip-address>...
+X-Forwarded-For: <client-ip>, <proxy-ip>, <proxy-ip>, ...
 ```
 
-X-Forwarded-For Header는 요청을 처리하는 서버의 정보를 나타낸다. [Text 21]은 X-Forwarded-For Header의 Format을 나타낸다. 여러개의 IP 주소를 지정할 수 있으며, 각 IP 주소는 `,` 문자로 구분한다.
+X-Forwarded-For Header는 요청을 전송하는 Client의 IP 및 Proxy Server의 IP 정보를 나타낸다. [Text 21]은 X-Forwarded-For Header의 Format을 나타낸다. 하나의 Client IP와 다수의 Proxy Server의 IP 정보가 포함될 수 있다.
 
-* `<ip-address>` : IP 주소를 나타낸다.
+* `<client-ip>` : 요청을 보내는 클라이언트의 IP 주소를 나타낸다.
+* `<proxy-ip>` : 요청을 처리하는 Proxy Server의 IP 주소를 나타낸다. 요청을 처리하는 Proxy Server가 여러개인 경우 여러개의 Proxy Server의 IP가 요청을 처리하는 순서대로 순차적으로 붙는다.
 
 ``` {caption="[Text 22] X-Forwarded-For Header Example"}
-X-Forwarded-For: 192.168.1.1, 192.168.1.2, 192.168.1.3
+X-Forwarded-For: 203.0.113.45, 10.0.0.1, 192.168.10.2
 ```
 
-[Text 22]는 X-Forwarded-For Header의 몇가지 예시를 나타낸다. 첫번째 예시에서는 요청을 처리하는 서버의 IP 주소가 `192.168.1.1`, `192.168.1.2`, `192.168.1.3` 순서대로 처리되었음을 나타낸다.
+[Text 22]는 X-Forwarded-For Header의 몇가지 예시를 나타낸다. Client의 IP 주소가 `203.0.113.45`, 첫번째 Proxy Server의 IP 주소가 `10.0.0.1`, 두번째 Proxy Server의 IP 주소가 `192.168.10.2`인 것을 확인할 수 있다.
 
 #### 1.2.10. X-Forwarded-Host
 
-``` {caption="[Text 19] X-Forwarded-Host Header Format"}
+``` {caption="[Text 23] X-Forwarded-Host Header Format"}
 X-Forwarded-Host: <host>
 ```
 
-X-Forwarded-Host Header는 요청을 처리하는 서버의 Host 정보를 나타낸다. [Text 19]은 X-Forwarded-Host Header의 Format을 나타낸다.
+X-Forwarded-Host Header는 Client가 원래 요청한 Host 정보를 보존하기 위해 사용되는 Header이다. Host를 기반으로 요청을 라우팅하는 경우 Host Header가 변경될 수 있기 때문이다. [Text 23]은 X-Forwarded-Host Header의 Format을 나타낸다.
 
 * `<host>` : Host 정보를 나타낸다.
 
-``` {caption="[Text 20] X-Forwarded-Host Header Example"}
+``` {caption="[Text 24] X-Forwarded-Host Header Example"}
 X-Forwarded-Host: example.com
+X-Forwarded-Host: ssup2.com
 ```
 
-[Text 20]은 X-Forwarded-Host Header의 몇가지 예시를 나타낸다.
+[Text 24]은 X-Forwarded-Host Header의 몇가지 예시를 나타낸다.
 
 #### 1.2.11. X-Forwarded-Port
 
-``` {caption="[Text 21] X-Forwarded-Port Header Format"}
+``` {caption="[Text 25] X-Forwarded-Port Header Format"}
 X-Forwarded-Port: <port>
 ```
 
-X-Forwarded-Port Header는 요청을 처리하는 서버의 Port 정보를 나타낸다. [Text 21]는 X-Forwarded-Port Header의 Format을 나타낸다.
+X-Forwarded-Port Header는 Client가 원래 요청한 Port 정보를 보존하기 위해 사용되는 Header이다. 요청이 CDN, Load Balancer를 거치면서 Port가 변경될 수 있기 때문이다. [Text 25]는 X-Forwarded-Port Header의 Format을 나타낸다.
 
 * `<port>` : Port 정보를 나타낸다.
 
-``` {caption="[Text 20] X-Forwarded-Port Header Example"}
+``` {caption="[Text 26] X-Forwarded-Port Header Example"}
 X-Forwarded-Port: 80
+X-Forwarded-Port: 443
 ```
 
-[Text 20]은 X-Forwarded-Port Header의 몇가지 예시를 나타낸다.
+[Text 26]은 X-Forwarded-Port Header의 몇가지 예시를 나타낸다.
 
 #### 1.2.12. X-Forwarded-Proto
 
-``` {caption="[Text 21] X-Forwarded-Proto Header Format"}
+``` {caption="[Text 27] X-Forwarded-Proto Header Format"}
 X-Forwarded-Proto: <protocol>
 ```
 
-X-Forwarded-Proto Header는 요청을 처리하는 서버의 프로토콜 정보를 나타낸다. [Text 21]는 X-Forwarded-Proto Header의 Format을 나타낸다.
+X-Forwarded-Proto Header는 Client가 원래 요청한 프로토콜 정보를 보존하기 위해 사용되는 Header이다. 요청이 CDN, Load Balancer를 거치면서 프로토콜 정보가 변경될 수 있기 때문이다. [Text 27]는 X-Forwarded-Proto Header의 Format을 나타낸다.
 
 * `<protocol>` : 프로토콜 정보를 나타낸다.
 
-``` {caption="[Text 22] X-Forwarded-Proto Header Example"}
+``` {caption="[Text 28] X-Forwarded-Proto Header Example"}
 X-Forwarded-Proto: http
 X-Forwarded-Proto: https
 ```
 
-[Text 22]은 X-Forwarded-Proto Header의 몇가지 예시를 나타낸다.  
+[Text 22]은 X-Forwarded-Proto Header의 몇가지 예시를 나타낸다.
 
 #### 1.2.13. X-Forwarded-Server
 
@@ -305,12 +308,12 @@ X-Forwarded-Proto: https
 X-Forwarded-Server: <server>
 ```
 
-X-Forwarded-Server Header는 요청을 처리하는 서버의 이름을 나타낸다. [Text 23]는 X-Forwarded-Server Header의 Format을 나타낸다.
+X-Forwarded-Server Header는 요청을 처리한 Proxy Server의 이름을 나타낸다. [Text 23]는 X-Forwarded-Server Header의 Format을 나타낸다. 요청이 다수의 Proxy Server를 지나도 마지막 Proxy Server의 이름만 포함된다.
 
 * `<server>` : 서버 이름을 나타낸다.
 
 ``` {caption="[Text 24] X-Forwarded-Server Header Example"}
-X-Forwarded-Server: example.com
+X-Forwarded-Server: proxy1.example.com
 ```
 
 [Text 24]은 X-Forwarded-Server Header의 몇가지 예시를 나타낸다.
@@ -321,7 +324,7 @@ X-Forwarded-Server: example.com
 X-Forwarded-User: <user>
 ```
 
-X-Forwarded-User Header는 요청을 처리하는 서버의 사용자 정보를 나타낸다. [Text 25]는 X-Forwarded-User Header의 Format을 나타낸다.
+X-Forwarded-User Header는 요청을 전송한 사용자 정보를 나타낸다. [Text 25]는 X-Forwarded-User Header의 Format을 나타낸다.
 
 * `<user>` : 사용자 정보를 나타낸다.
 
@@ -338,14 +341,12 @@ X-Forwarded-User: user2
 X-Real-IP: <ip-address>
 ```
 
-X-Real-IP Header는 요청을 처리하는 서버의 실제 IP 주소를 나타낸다. [Text 27]는 X-Real-IP Header의 Format을 나타낸다.
+X-Real-IP Header는 요청을 전송한 Client의 IP 주소를 나타낸다. [Text 27]는 X-Real-IP Header의 Format을 나타낸다. X-Forwarded-For Header와 유사하지만 Client의 IP 주소만 포함되며, Proxy Server의 IP 주소는 포함되지 않는다. Nginx나 HAProxy에서 사용되는 Header이다.
 
 * `<ip-address>` : IP 주소를 나타낸다.
 
 ``` {caption="[Text 28] X-Real-IP Header Example"}  
-X-Real-IP: 192.168.1.1
-X-Real-IP: 192.168.1.2
-X-Real-IP: 192.168.1.3
+X-Real-IP: 182.168.1.50
 ```
 
 [Text 28]은 X-Real-IP Header의 몇가지 예시를 나타낸다.
@@ -356,14 +357,12 @@ X-Real-IP: 192.168.1.3
 X-Request-ID: <request-id>
 ``` 
 
-X-Request-ID Header는 요청을 처리하는 서버의 요청 ID를 나타낸다. [Text 29]는 X-Request-ID Header의 Format을 나타낸다.
+X-Request-ID Header는 요청을 나타내는 고유의 ID를 나타낸다. [Text 29]는 X-Request-ID Header의 Format을 나타낸다. 일반적으로 request ID는 UUID 형식으로 생성된다.
 
 * `<request-id>` : 요청 ID를 나타낸다.
 
 ``` {caption="[Text 30] X-Request-ID Header Example"}
-X-Request-ID: 1234567890
-X-Request-ID: 1234567891
-X-Request-ID: 1234567892
+X-Request-ID: 550e8400-e29b-41d4-a716-446655440000
 ```
 
 [Text 30]은 X-Request-ID Header의 몇가지 예시를 나타낸다.
@@ -379,9 +378,7 @@ X-Trace-ID Header는 요청을 처리하는 서버의 트레이스 ID를 나타�
 * `<trace-id>` : 트레이스 ID를 나타낸다.
 
 ``` {caption="[Text 32] X-Trace-ID Header Example"} 
-X-Trace-ID: 1234567890
-X-Trace-ID: 1234567891
-X-Trace-ID: 1234567892
+X-Trace-ID: 550e8400-e29b-41d4-a716-446655440000
 ```
 
 [Text 32]은 X-Trace-ID Header의 몇가지 예시를 나타낸다.
