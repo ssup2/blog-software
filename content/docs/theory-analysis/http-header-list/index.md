@@ -57,13 +57,13 @@ Cache-Control: <cache-directive>
 Cache-Control Header는 Cache 정책을 지시하기 위한 Header이다. 여기서 Cache는 Browser에 위치한 **Local Cache**와 CDN, Proxy Server에 위치한 **Shared Cache**를 의미한다. [Text 4]은 Cache-Control Header의 Format을 나타낸다. Client가 Cache-Control Header를 포함하여 요청을 보내는 경우 Shared Cache에 대한 정책 지시를 의미하며, 반대로 Server가 Cache-Control Header를 포함하여 응답을 보내는 경우 Local Cache에 대한 정책 지시를 의미한다. 따라서 Client와 Server가 이용하는 Cache Directive가 다르다.
 
 * Client의 `<cache-directive>` : Shared Cache에 대한 정책 지시를 의미한다.
-  * `max-age=<seconds>` : Shared Cache에 seconds 미만의 Caching된 데이터가 있을 경우에는 Caching된 데이터를 사용하고, seconds 이상의 Caching된 데이터가 있을 경우에는 Orgin Server로부터 새로운 Data를 
-  * `max-stale` : 캐시를 사용하지 않는다.
-  * `min-fresh` : 캐시를 사용하지 않는다.
-  * `no-cache` : 캐시를 사용하지 않는다.
-  * `no-store` : 캐시를 사용하지 않는다.
-  * `no-transform` : 캐시를 사용하지 않는다.
-  * `only-if-cached` : 캐시를 사용하지 않는다.
+  * `max-age=<seconds>` : Shared Cache는 seconds 미만의 Caching된 데이터가 있을 경우에는 Caching된 데이터를 응답하고, seconds 이상의 Caching된 데이터가 있을 경우에는 Orgin Server로부터 새로운 Data를 다시 Caching후에 응답한다.
+  * `max-stale=<seconds>` : Shared Cache는 `데이터의 유효기간 + seconds` 미만의 Caching된 데이터가 있을 경우에는 Caching된 데이터를 응답하고, `데이터의 유효기간 + seconds` 이상의 Caching된 데이터가 있을 경우에는 Orgin Server로부터 새로운 Data를 다시 Caching후에 응답한다.
+  * `min-fresh=<seconds>` : Shared Cache는 `데이터의 유효기간 - seconds` 미만의 Caching된 데이터가 있을 경우에는 Caching된 데이터를 응답하고, `데이터의 유효기간 - seconds` 이상의 Caching된 데이터가 있을 경우에는 Orgin Server로부터 새로운 Data를 다시 Caching후에 응답한다.
+  * `no-cache` : Shared Cache는 반드시 Orgin Server로부터 원본 Data를 검증한 다음 응답한다. `If-Modified-Since`, `If-None-Match` Header와 같이 이용된다.
+  * `no-store` : Shared Cache는 Origin Server로 부터 받은 데이터를 저장하지 않는다. Client는 항상 Orgin Server로부터 새로운 Data를 받는다.
+  * `no-transform` : Shared Cache는 데이터를 변환하지 않는다.
+  * `only-if-cached` : Shared Cache는 Caching된 데이터가 있는지 확인하고 있으면 해당 데이터를 응답하고, 없으면 응답하지 않는다.
 
 * Server의 `<cache-directive>` : Local Cache에 대한 정책 지시를 의미한다.
   * `max-age` : 캐시를 사용하지 않는다.
