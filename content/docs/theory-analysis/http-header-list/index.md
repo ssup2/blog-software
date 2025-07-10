@@ -223,7 +223,6 @@ Accept-Language Header는 요청을 보내는 클라이언트가 받을 수 있�
 * `<language-range>` : 언어 범위를 나타낸다.
   * `en-US` : 미국 영어
   * `en-GB` : 영국 영어
-  * `en` : 영어
   * `ko` : 한국어
   * `*` : 모든 언어
 
@@ -387,14 +386,140 @@ X-Trace-ID: 550e8400-e29b-41d4-a716-446655440000
 
 #### 1.3.1. Server
 
+``` {caption="[Text 33] Server Header Format"}
+Server: <server>
+```
+
+Server Header는 요청을 처리한 서버 소프트웨소의 이름을 나타낸다. [Text 33]은 Server Header의 Format을 나타낸다.
+
+* `<server>` : 서버 소프트웨어 이름을 나타낸다.
+
+``` {caption="[Text 34] Server Header Example"}
+Server: nginx/1.23.의
+Server: Apache/2.4.54
+```
+
 #### 1.3.2. Content-Type
+
+``` {caption="[Text 35] Content-Type Header Format"}
+Content-Type: <media-type>
+```
+
+Content-Type Header는 응답의 미디어 타입을 나타낸다. [Text 35]는 Content-Type Header의 Format을 나타낸다.
+
+* `<media-type>` : 미디어 타입을 나타낸다.
+ * text/html : HTML 문서
+ * text/plain : 텍스트 문서
+ * application/json : JSON 문서
+ * image/png : PNG 이미지
+ * image/jpeg : JPEG 이미지
+ * image/gif : GIF 이미지
+ * image/webp : WebP 이미지
+
+``` {caption="[Text 36] Content-Type Header Example"}
+Content-Type: text/html
+Content-Type: text/plain
+Content-Type: application/json
+Content-Type: image/png
+Content-Type: image/jpeg
+```
 
 #### 1.3.3. Content-Length
 
+``` {caption="[Text 37] Content-Length Header Format"}
+Content-Length: <length>
+```
+
+Content-Length Header는 응답의 길이를 나타낸다. [Text 37]는 Content-Length Header의 Format을 나타낸다.
+
+* `<length>` : 길이를 나타낸다. 단위는 Byte이다.
+
+``` {caption="[Text 38] Content-Length Header Example"}
+Content-Length: 0
+Content-Length: 1024
+Content-Length: 512
+```
+
+[Text 38]은 Content-Length Header의 몇가지 예시를 나타낸다.
+
 #### 1.3.4. Content-Encoding
+
+``` {caption="[Text 39] Content-Encoding Header Format"}
+Content-Encoding: <encoding>
+```
+
+Content-Encoding Header는 응답의 압축 방식을 나타낸다. [Text 39]는 Content-Encoding Header의 Format을 나타낸다.
+
+* `<encoding>` : 압축 방식을 나타낸다.
+ * `gzip` : gzip 압축
+ * `deflate` : deflate 압축
+ * `br` : brotli 압축
+ * `identity` : 압축 없음
+
+``` {caption="[Text 40] Content-Encoding Header Example"}
+Content-Encoding: gzip
+Content-Encoding: deflate
+Content-Encoding: br
+Content-Encoding: identity
+```
+
+[Text 40]은 Content-Encoding Header의 몇가지 예시를 나타낸다.
 
 #### 1.3.5. Content-Language
 
+``` {caption="[Text 40] Content-Language Header Format"}
+Content-Language: <language>
+```
+
+Content-Language Header는 응답의 언어를 나타낸다. [Text 40]는 Content-Language Header의 Format을 나타낸다.
+
+* `<language>` : 언어를 나타낸다.
+  * `en-US` : 미국 영어
+  * `en-GB` : 영국 영어
+  * `ko` : 한국어
+
+``` {caption="[Text 41] Content-Language Header Example"}
+Content-Language: en-US
+Content-Language: en-GB
+Content-Language: ko
+```
+
+[Text 41]은 Content-Language Header의 몇가지 예시를 나타낸다.
+
+#### 1.3.6. Content-Location
+
+``` {caption="[Text 42] Content-Location Header Format"}
+Content-Location: <location>
+```
+
+Content-Location은 Client가 요청한 Resource와 실제 Resource의 위치가 다른 경우, 실제 Resource의 위치를 나타낸다. [Text 42]는 Content-Location Header의 Format을 나타낸다.
+
+* `<location>` : 실제 Resource의 위치를 나타낸다.
+
+``` {caption="[Text 43] Content-Location Header Language Example"}
+# Request
+GET /about HTTP/1.1
+Host: example.com
+Accept-Language: ko
+
+# Response
+HTTP/1.1 200 OK
+Content-Type: text/html; charset=UTF-8
+Content-Location: /about_ko.html
+```
+
+``` {caption="[Text 44] Content-Location Header API Example"}
+# Request
+GET /api/v1/users/latest HTTP/1.1
+Host: api.example.com
+
+# Response
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Location: /api/v1/users/v5
+```
+
+[Text 43]은 Client가 `/about`을 Resource를 `Accept-Language: ko`로 요청하여, 한국어 버전의 `/about_ko.html`을 받아오는 경우를 나타낸다. [Text 44]는 Client가 `/api/v1/users/latest`를 Resource를 요청하였으며, 가장 최신 버전의 `/api/v1/users/v5`를 받아오는 경우를 나타낸다. 모두 원래 요청한 Resource의 위치가 변경되었음을 확인할 수 있다.
 
 
 ## 2. 참조
