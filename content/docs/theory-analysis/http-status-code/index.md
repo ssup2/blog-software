@@ -115,7 +115,47 @@ Server가 요청을 성공적으로 수신하였지만, 다른 요청과 충돌�
 
 ### 1.5. 5xx Server Error
 
-5XX Status Code는 서버에 오류가 발생했으며, 서버는 요청을 처리하지 못했다는 의미이다.
+5XX Status Code는 Server에 오류가 발생하여 요청을 처리하지 못한 경우에 사용된다.
+
+#### 1.5.1. 500 Internal Server Error
+
+Server가 요청을 성공적으로 수신하였지만, 요청 처리 과정중에 Server에 오류가 발생하여 요청을 처리하지 못한 경우에 사용된다.
+
+#### 1.5.2. 501 Not Implemented
+
+Server가 요청을 성공적으로 수신하였지만, 서버에서 해당 요청을 지원하지 않아 요청을 처리하지 못한 경우에 사용된다.
+
+#### 1.5.3. 502 Bad Gateway
+
+Proxy가 Server로부터 잘못된 응답을 받은 경우에 사용된다. Server의 Error가 발생하거나, Proxy와 Server 사이의 네트워크 문제로 인해서 요청을 Proxy가 Server에 요청을 제대로 전달하지 못하거나, 반대로 Proxy가 Server의 응답을 제대로 전달하지 못하는 경우에 발생한다응
+
+#### 1.5.4. 503 Service Unavailable
+
+Server가 현재 요청을 제대로 처리할 수 없는 상태인 경우에 사용된다. 일반적으로 Server가 과부화 상태이거나 점검 상태인 경우에 발생한다.
+
+#### 1.5.5. 504 Gateway Timeout
+
+Proxy가 Server로부터 특정 시간동안 응답을 받지 못한 경우에 사용된다. 일반적으로 Server의 과부화나 Proxy와 Server 사이의 네트워크 문제로 인해서 발생한다.
+
+#### 1.5.6. 505 HTTP Version Not Supported
+
+Server가 요청받은 HTTP Version을 지원하지 않는 경우에 사용된다.
+
+#### 1.5.7. 506 Variant Also Negotiates
+
+Server가 `Accept`, `Accept-Language`, `Accept-Charset`, `Accept-Encoding` 등의 Header 정보를 참고하여 요청을 처리할 수 없는 경우에 사용된다.
+
+#### 1.5.8. 507 Insufficient Storage
+
+Server가 요청을 성공적으로 수신하였지만, Server의 Disk 공간이 부족하여 요청을 처리하지 못한 경우에 사용된다.
+
+#### 1.5.9. 508 Loop Detected
+
+Server가 요청을 성공적으로 수신하였지만, 요청을 처리하는 과정중에 순환 참조가 발생한 경우에 사용된다.
+
+#### 1.5.10. 510 Not Extended
+
+Server가 요청을 성공적으로 수신하였지만, 요청에 HTTP Extension 내용이 포함되어 있지 않아 요청을 처리하지 못한 경우에 사용된다.
 
 ## 2. 참고
 
