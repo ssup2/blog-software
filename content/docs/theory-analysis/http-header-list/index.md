@@ -529,13 +529,13 @@ Content-Location: /api/v1/users/v5
 
 [Text 43]은 Client가 `/about`을 Resource를 `Accept-Language: ko`로 요청하여, 한국어 버전의 `/about_ko.html`을 받아오는 경우를 나타낸다. [Text 44]는 Client가 `/api/v1/users/latest`를 Resource를 요청하였으며, 가장 최신 버전의 `/api/v1/users/v5`를 받아오는 경우를 나타낸다. 모두 원래 요청한 Resource의 위치가 변경되었음을 확인할 수 있다.
 
-#### 1.3.8. Last-Modified
+#### 1.3.8. Expires
 
-``` {caption="[Text 47] Last-Modified Header Format"}
-Last-Modified: <day-name>, <day> <month> <year> <hour>:<minute>:<second> GMT
+``` {caption="[Text 44] Expires Header Format"}
+Expires: <day-name>, <day> <month> <year> <hour>:<minute>:<second> GMT
 ```
 
-Last-Modified Header는 Resource가 마지막으로 수정된 날짜와 시간을 나타낸다. [Text 47]는 Last-Modified Header의 Format을 나타낸다. 일반적으로 Client는 Last-Modified Header의 날짜, 시간 값을 활용해 If-Modified-Since Header를 생성하여 요청한다.
+Expires Header는 Resource가 만료되는 날짜와 시간을 나타낸다. [Text 44]는 Expires Header의 Format을 나타낸다. Cache-Control Header와 유사하지만, Cache-Control Header는 상대적인 시간을 나타내는 반면, Expires Header는 절대적인 시간을 나타낸다.
 
 * `<day-name>` : 요일을 나타내며, `Mon`, `Tue`, `Wed`, `Thu`, `Fri`, `Sat`, `Sun` 문자열을 이용한다.
 * `<day>` : 일을 나타낸다.
@@ -545,15 +545,39 @@ Last-Modified Header는 Resource가 마지막으로 수정된 날짜와 시간�
 * `<minute>` : 분을 나타낸다.
 * `<second>` : 초를 나타낸다.
 * `GMT` : 그리니치 표준시를 의미하며, 항상 GMT 시간을 사용한다.
-``` {caption="[Text 48] Last-Modified Header Example"}
+
+``` {caption="[Text 45] Expires Header Example"}
+Expires: Wed, 21 Oct 2015 07:28:00 GMT
+```
+
+[Text 45]은 Expires Header의 예시를 나타낸다.
+
+#### 1.3.9. Last-Modified
+
+``` {caption="[Text 46] Last-Modified Header Format"}
+Last-Modified: <day-name>, <day> <month> <year> <hour>:<minute>:<second> GMT
+```
+
+Last-Modified Header는 Resource가 마지막으로 수정된 날짜와 시간을 나타낸다. [Text 46]는 Last-Modified Header의 Format을 나타낸다. 일반적으로 Client는 Last-Modified Header의 날짜, 시간 값을 활용해 If-Modified-Since Header를 생성하여 요청한다.
+
+* `<day-name>` : 요일을 나타내며, `Mon`, `Tue`, `Wed`, `Thu`, `Fri`, `Sat`, `Sun` 문자열을 이용한다.
+* `<day>` : 일을 나타낸다.
+* `<month>` : 월을 나타내며, `Jan`, `Feb`, `Mar`, `Apr`, `May`, `Jun`, `Jul`, `Aug`, `Sep`, `Oct`, `Nov`, `Dec` 문자열을 이용한다.
+* `<year>` : 년을 나타낸다.
+* `<hour>` : 시간을 나타낸다.
+* `<minute>` : 분을 나타낸다.
+* `<second>` : 초를 나타낸다.
+* `GMT` : 그리니치 표준시를 의미하며, 항상 GMT 시간을 사용한다.
+
+``` {caption="[Text 47] Last-Modified Header Example"}
 Last-Modified: Wed, 21 Oct 2015 07:28:00 GMT
 ```
 
-[Text 48]은 Last-Modified Header의 예시를 나타낸다.
+[Text 47]은 Last-Modified Header의 예시를 나타낸다.
 
-#### 1.3.9. ETag
+#### 1.3.10. ETag
 
-``` {caption="[Text 45] ETag Header Format"}
+``` {caption="[Text 48] ETag Header Format"}
 ETag: <etag>
 ```
 
@@ -566,31 +590,90 @@ ETag: "v1.0"
 ETag: "v1.1"
 ```
 
-[Text 46]은 ETag Header의 예시를 나타낸다.
+[Text 48]은 ETag Header의 예시를 나타낸다.
 
-#### 1.3.10. Expires
+#### 1.3.11. Access-Control-Allow-Origin
 
-``` {caption="[Text 47] Expires Header Format"}
-Expires: <day-name>, <day> <month> <year> <hour>:<minute>:<second> GMT
+``` {caption="[Text 49] Access-Control-Allow-Origin Header Format"}
+Access-Control-Allow-Origin: <origin>
 ```
 
-Expires Header는 Resource가 만료되는 날짜와 시간을 나타낸다. [Text 47]는 Expires Header의 Format을 나타낸다. Cache-Control Header와 유사하지만, Cache-Control Header는 상대적인 시간을 나타내는 반면, Expires Header는 절대적인 시간을 나타낸다.
+Access-Control-Allow-Origin Header는 CORS에 의해서 특정 Origin에 대해서만 요청을 허용하는 경우 사용되는 Header이다. [Text 49]는 Access-Control-Allow-Origin Header의 Format을 나타낸다.
 
-* `<day-name>` : 요일을 나타내며, `Mon`, `Tue`, `Wed`, `Thu`, `Fri`, `Sat`, `Sun` 문자열을 이용한다.
-* `<day>` : 일을 나타낸다.
-* `<month>` : 월을 나타내며, `Jan`, `Feb`, `Mar`, `Apr`, `May`, `Jun`, `Jul`, `Aug`, `Sep`, `Oct`, `Nov`, `Dec` 문자열을 이용한다.
-* `<year>` : 년을 나타낸다.
-* `<hour>` : 시간을 나타낸다.
-* `<minute>` : 분을 나타낸다.
-* `<second>` : 초를 나타낸다.
-* `GMT` : 그리니치 표준시를 의미하며, 항상 GMT 시간을 사용한다.
+* `<origin>` : 허용된 Origin을 나타낸다.
 
-``` {caption="[Text 48] Expires Header Example"}
-Expires: Wed, 21 Oct 2015 07:28:00 GMT
+``` {caption="[Text 50] Access-Control-Allow-Origin Header Example"}
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Origin: https://example.com
 ```
 
-[Text 48]은 Expires Header의 예시를 나타낸다.
+[Text 50]은 Access-Control-Allow-Origin Header의 몇가지 예시를 나타낸다.
 
+#### 1.3.12. Access-Control-Allow-Methods
+
+``` {caption="[Text 51] Access-Control-Allow-Methods Header Format"}
+Access-Control-Allow-Methods: <method>
+```
+
+Access-Control-Allow-Methods Header는 CORS에 의해서 특정 Method에 대해서만 요청을 허용하는 경우 사용되는 Header이다. [Text 51]는 Access-Control-Allow-Methods Header의 Format을 나타낸다.
+
+* `<method>` : 허용된 Method를 나타낸다.
+
+``` {caption="[Text 52] Access-Control-Allow-Methods Header Example"}
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE
+Access-Control-Allow-Methods: GET, POST
+```
+
+[Text 52]은 Access-Control-Allow-Methods Header의 몇가지 예시를 나타낸다.
+
+#### 1.3.13. Access-Control-Allow-Headers
+
+``` {caption="[Text 53] Access-Control-Allow-Headers Header Format"}
+Access-Control-Allow-Headers: <header>
+```
+
+Access-Control-Allow-Headers Header는 CORS에 의해서 특정 Header에 대해서만 요청을 허용하는 경우 사용되는 Header이다. [Text 53]는 Access-Control-Allow-Headers Header의 Format을 나타낸다.
+
+* `<header>` : 허용된 Header를 나타낸다.
+
+``` {caption="[Text 54] Access-Control-Allow-Headers Header Example"}
+Access-Control-Allow-Headers: Content-Type, Authorization
+Access-Control-Allow-Headers: X-Custom-Header
+```
+
+[Text 54]은 Access-Control-Allow-Headers Header의 몇가지 예시를 나타낸다.
+
+#### 1.3.14. Access-Control-Allow-Credentials
+
+``` {caption="[Text 55] Access-Control-Allow-Credentials Header Format"}
+Access-Control-Allow-Credentials: true
+```
+
+Access-Control-Allow-Credentials Header는 CORS에 의해서 특정 Credentials를 포함한 요청을 허용하는 경우 사용되는 Header이다. [Text 55]는 Access-Control-Allow-Credentials Header의 Format을 나타낸다.
+
+* `true` : Credentials를 포함한 요청을 허용한다.  
+
+``` {caption="[Text 56] Access-Control-Allow-Credentials Header Example"}
+Access-Control-Allow-Credentials: true
+```
+
+[Text 56]은 Access-Control-Allow-Credentials Header의 예시를 나타낸다.
+
+#### 1.3.15. Access-Control-Allow-Max-Age
+
+``` {caption="[Text 57] Access-Control-Allow-Max-Age Header Format"}
+Access-Control-Allow-Max-Age: <max-age>
+``` 
+
+Access-Control-Allow-Max-Age Header는 CORS에 의해서 특정 시간동안 요청을 허용하는 경우 사용되는 Header이다. [Text 57]는 Access-Control-Allow-Max-Age Header의 Format을 나타낸다.
+
+* `<max-age>` : 허용된 시간을 나타낸다.
+
+``` {caption="[Text 58] Access-Control-Allow-Max-Age Header Example"}
+Access-Control-Allow-Max-Age: 3600
+```
+
+[Text 58]은 Access-Control-Allow-Max-Age Header의 예시를 나타낸다.
 
 ## 2. 참조
 
