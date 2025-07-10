@@ -598,7 +598,7 @@ ETag: "v1.1"
 Access-Control-Allow-Origin: <origin>
 ```
 
-Access-Control-Allow-Origin Header는 CORS에 의해서 특정 Origin에 대해서만 요청을 허용하는 경우 사용되는 Header이다. [Text 49]는 Access-Control-Allow-Origin Header의 Format을 나타낸다.
+Access-Control-Allow-Origin Header는 CORS 기법에 의해서 특정 Origin에 대해서만 요청을 허용하는 경우 사용되는 Header이다. [Text 49]는 Access-Control-Allow-Origin Header의 Format을 나타낸다.
 
 * `<origin>` : 허용된 Origin을 나타낸다.
 
@@ -607,7 +607,7 @@ Access-Control-Allow-Origin: *
 Access-Control-Allow-Origin: https://example.com
 ```
 
-[Text 50]은 Access-Control-Allow-Origin Header의 몇가지 예시를 나타낸다.
+[Text 50]은 Access-Control-Allow-Origin Header의 몇가지 예시를 나타낸다. 첫번째 예제는 모든 Origin에 대해서 요청을 허용하는 경우를 나타낸다. 두번째 예제는 `https://example.com` Origin에 대해서만 요청을 허용하는 경우를 나타낸다.
 
 #### 1.3.12. Access-Control-Allow-Methods
 
@@ -617,7 +617,7 @@ Access-Control-Allow-Methods: <method>
 
 Access-Control-Allow-Methods Header는 CORS에 의해서 특정 Method에 대해서만 요청을 허용하는 경우 사용되는 Header이다. [Text 51]는 Access-Control-Allow-Methods Header의 Format을 나타낸다.
 
-* `<method>` : 허용된 Method를 나타낸다.
+* `<method>` : 허용된 Method를 나타낸다. 다수의 Method를 허용하는 경우 쉼표(`,`)로 구분한다.
 
 ``` {caption="[Text 52] Access-Control-Allow-Methods Header Example"}
 Access-Control-Allow-Methods: GET, POST, PUT, DELETE
@@ -646,12 +646,12 @@ Access-Control-Allow-Headers: X-Custom-Header
 #### 1.3.14. Access-Control-Allow-Credentials
 
 ``` {caption="[Text 55] Access-Control-Allow-Credentials Header Format"}
-Access-Control-Allow-Credentials: true
+Access-Control-Allow-Credentials: <boolean>
 ```
 
 Access-Control-Allow-Credentials Header는 CORS에 의해서 특정 Credentials를 포함한 요청을 허용하는 경우 사용되는 Header이다. [Text 55]는 Access-Control-Allow-Credentials Header의 Format을 나타낸다.
 
-* `true` : Credentials를 포함한 요청을 허용한다.  
+* `<boolean>` : `true` 또는 `false`를 나타낸다.
 
 ``` {caption="[Text 56] Access-Control-Allow-Credentials Header Example"}
 Access-Control-Allow-Credentials: true
@@ -667,7 +667,7 @@ Access-Control-Allow-Max-Age: <max-age>
 
 Access-Control-Allow-Max-Age Header는 CORS에 의해서 특정 시간동안 요청을 허용하는 경우 사용되는 Header이다. [Text 57]는 Access-Control-Allow-Max-Age Header의 Format을 나타낸다.
 
-* `<max-age>` : 허용된 시간을 나타낸다.
+* `<max-age>` : 허용된 시간을 나타낸다. 단위는 초이다.
 
 ``` {caption="[Text 58] Access-Control-Allow-Max-Age Header Example"}
 Access-Control-Allow-Max-Age: 3600
