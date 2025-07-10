@@ -1,6 +1,5 @@
 ---
 title: HTTP Header 목록
-draft: true
 ---
 
 ## 1. HTTP Header
