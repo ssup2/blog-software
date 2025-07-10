@@ -1,5 +1,5 @@
 ---
-title: HTTP Status Code 목록
+title: HTTP Status Code
 draft: true
 ---
 
@@ -75,7 +75,43 @@ Server가 요청을 성공적으로 수신하였지만, 요청 받은 Resource�
 
 ### 1.4. 4xx Client Error
 
-4XX Status Code는 요청이 잘못되었으며, 서버는 요청을 처리하지 못했다는 의미이다.
+4XX Status Code는 요청이 잘못되어 서버가 요청을 처리하지 못했다는 의미이다.
+
+#### 1.4.1. 400 Bad Request
+
+Server가 요청을 성공적으로 수신하였지만, 요청이 잘못되어 서버가 요청을 처리하지 못했다는 의미이다. 일반적으로 요청의 Header, Query Parameter, Body 등이 잘못된 경우에 사용된다. 또한 요청의 길이가 너무 길거나 Encoding 문제가 있는 경우에도 사용된다.
+
+#### 1.4.2. 401 Unauthorized
+
+Server가 요청을 성공적으로 수신하였지만, 인증된 요청이 아니라는 의미이다.
+
+#### 1.4.3. 403 Forbidden
+
+Server가 요청을 성공적으로 수신하였고 인증도 완료된 요청이지만, 요청한 Resource에 대한 접근 권한이 없다는 의미이다.
+
+#### 1.4.4. 404 Not Found
+
+Server가 요청을 성공적으로 수신하였지만, 요청한 Resource가 존재하지 않는 경우에 사용된다.
+
+#### 1.4.5. 405 Method Not Allowed
+
+Server가 요청을 성공적으로 수신하였지만, 요청한 Resource에 대해서 사용 가능한 Method가 아닌 경우에 사용된다.
+
+#### 1.4.6. 406 Not Acceptable
+
+Server가 요청을 성공적으로 수신하였지만, 요청에 `Accept` Header에 지정된 Media Type을 지원하지 않는 경우에 사용된다.
+
+#### 1.4.7. 407 Proxy Authentication Required
+
+Proxy가 Server보다 먼저 요청을 성공적으로 수신하였지만, 인증된 요청이 아니라는 의미이다. Proxy에게 인증을 요구하는 경우에 사용된다.
+
+#### 1.4.8. 408 Request Timeout
+
+Server가 Client의 요청을 다 받지 못한 경우에 사용된다. 일반적으로 요청이 오래 걸려 Server의 Timeout 시간을 초과한 경우에 발생한다.
+
+#### 1.4.9. 409 Conflict
+
+Server가 요청을 성공적으로 수신하였지만, 다른 요청과 충돌이 발생한 경우에 사용된다. 다수의 Client가 동시에 하나의 Resource를 수정하거나, 동시에 Resource를 생성하는 경우에 발생한다.
 
 ### 1.5. 5xx Server Error
 

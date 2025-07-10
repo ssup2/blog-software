@@ -1,5 +1,5 @@
 ---
-title: HTTP Header 목록
+title: HTTP Header
 ---
 
 ## 1. HTTP Header
@@ -695,7 +695,7 @@ HTTP/1.1 301 Moved Permanently
 Location: /new-blog-post
 ```
 
-[Text 60]은 `Location` Header의 예시를 나타낸다. `/old-blog-post` Resource를 요청하였으나, 이동된 `/new-blog-post` Resource를 받아오는 경우를 나타낸다. 일반적으로 `301 Moved Permanently`, `302 Found`, `303 See Other` 응답과 같이 이용된다.
+[Text 60]은 `Location` Header의 예시를 나타낸다. `/old-blog-post` Resource를 요청하였으나, 이동된 `/new-blog-post` Resource를 받아오는 경우를 나타낸다. 일반적으로 3XX 응답과 같이 이용된다.
 
 ## 2. 참조
 
