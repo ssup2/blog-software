@@ -14,7 +14,7 @@ WebSocket은 Web Browser와 Server 사이의 **Full-duplex**를 구현가능하�
 
 Sec-WebSocket-Key는 Random으로 생성되는 값으로써 Sec-WebSocket-Accept 값을 구할때 이용되는 값이다. Client는 Sec-WebSocket-Accept값을 통해 자신이 요청한 WebSocket Handshaking에 대한 응답인지 확인할 수 있다.
 
-Sec-WebSocket-Accept값은 "258EAFA5-E914-47DA-95CA-C5AB0DC85B11" 문자열을 CONCATENATE 한 값과 Sec-WebSocket-Accept값을 더한 다음 SHA-1 Hashing과 Base64 Encoding을 통해 구할 수 있다. Sec-WebSocket-Protocol은 Application이 이용할 SubProtocol을 나타낸다. WebSocket Handshaking이 완료된후 Client와 Server는 서로 자유롭게 Message를 주고 받을 수 있다. Message는 **Data Frame**라는 작은 단위로 쪼개져서 전송된다. Data Frame은 작은 크기의 Header와 Payload로 구성되어 있다.
+Sec-WebSocket-Accept값은 `258EAFA5-E914-47DA-95CA-C5AB0DC85B11` 문자열을 CONCATENATE 한 값과 Sec-WebSocket-Accept값을 더한 다음 SHA-1 Hashing과 Base64 Encoding을 통해 구할 수 있다. Sec-WebSocket-Protocol은 Application이 이용할 SubProtocol을 나타낸다. WebSocket Handshaking이 완료된 후 Client와 Server는 서로 자유롭게 Message를 주고 받을 수 있다. Message는 **Data Frame**라는 작은 단위로 쪼개져서 전송된다. Data Frame은 작은 크기의 Header와 Payload로 구성되어 있다.
 
 ## 2. 참조
 * [https://tools.ietf.org/html/rfc6455](https://tools.ietf.org/html/rfc6455)
