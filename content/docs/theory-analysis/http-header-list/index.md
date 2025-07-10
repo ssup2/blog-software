@@ -501,7 +501,7 @@ Content-Language: ko
 Content-Location: <location>
 ```
 
-Content-Location은 Client가 요청한 Resource와 실제 Resource의 위치가 다른 경우, 실제 Resource의 위치를 나타낸다. [Text 42]는 Content-Location Header의 Format을 나타낸다.
+Content-Location Header는 Client가 요청한 Resource와 실제 Resource의 위치가 다른 경우 실제 Resource의 위치를 나타낸다. [Text 42]는 Content-Location Header의 Format을 나타낸다.
 
 * `<location>` : 실제 Resource의 위치를 나타낸다.
 
@@ -529,6 +529,69 @@ Content-Location: /api/v1/users/v5
 ```
 
 [Text 43]은 Client가 `/about`을 Resource를 `Accept-Language: ko`로 요청하여, 한국어 버전의 `/about_ko.html`을 받아오는 경우를 나타낸다. [Text 44]는 Client가 `/api/v1/users/latest`를 Resource를 요청하였으며, 가장 최신 버전의 `/api/v1/users/v5`를 받아오는 경우를 나타낸다. 모두 원래 요청한 Resource의 위치가 변경되었음을 확인할 수 있다.
+
+#### 1.3.8. Last-Modified
+
+``` {caption="[Text 47] Last-Modified Header Format"}
+Last-Modified: <day-name>, <day> <month> <year> <hour>:<minute>:<second> GMT
+```
+
+Last-Modified Header는 Resource가 마지막으로 수정된 날짜와 시간을 나타낸다. [Text 47]는 Last-Modified Header의 Format을 나타낸다. 일반적으로 Client는 Last-Modified Header의 날짜, 시간 값을 활용해 If-Modified-Since Header를 생성하여 요청한다.
+
+* `<day-name>` : 요일을 나타내며, `Mon`, `Tue`, `Wed`, `Thu`, `Fri`, `Sat`, `Sun` 문자열을 이용한다.
+* `<day>` : 일을 나타낸다.
+* `<month>` : 월을 나타내며, `Jan`, `Feb`, `Mar`, `Apr`, `May`, `Jun`, `Jul`, `Aug`, `Sep`, `Oct`, `Nov`, `Dec` 문자열을 이용한다.
+* `<year>` : 년을 나타낸다.
+* `<hour>` : 시간을 나타낸다.
+* `<minute>` : 분을 나타낸다.
+* `<second>` : 초를 나타낸다.
+* `GMT` : 그리니치 표준시를 의미하며, 항상 GMT 시간을 사용한다.
+``` {caption="[Text 48] Last-Modified Header Example"}
+Last-Modified: Wed, 21 Oct 2015 07:28:00 GMT
+```
+
+[Text 48]은 Last-Modified Header의 예시를 나타낸다.
+
+#### 1.3.9. ETag
+
+``` {caption="[Text 45] ETag Header Format"}
+ETag: <etag>
+```
+
+ETag Header는 Resource의 고유한 식별자를 나타낸다. [Text 45]는 ETag Header의 Format을 나타낸다. 일반적으로 Client는 ETag Header의 값을 활용해 If-None-Match Header를 생성하여 요청한다.
+
+* `<etag>` : Resource의 고유한 식별자를 나타낸다.
+
+``` {caption="[Text 46] ETag Header Example"}
+ETag: "v1.0"
+ETag: "v1.1"
+```
+
+[Text 46]은 ETag Header의 예시를 나타낸다.
+
+#### 1.3.10. Expires
+
+``` {caption="[Text 47] Expires Header Format"}
+Expires: <day-name>, <day> <month> <year> <hour>:<minute>:<second> GMT
+```
+
+Expires Header는 Resource가 만료되는 날짜와 시간을 나타낸다. [Text 47]는 Expires Header의 Format을 나타낸다. Cache-Control Header와 유사하지만, Cache-Control Header는 상대적인 시간을 나타내는 반면, Expires Header는 절대적인 시간을 나타낸다.
+
+* `<day-name>` : 요일을 나타내며, `Mon`, `Tue`, `Wed`, `Thu`, `Fri`, `Sat`, `Sun` 문자열을 이용한다.
+* `<day>` : 일을 나타낸다.
+* `<month>` : 월을 나타내며, `Jan`, `Feb`, `Mar`, `Apr`, `May`, `Jun`, `Jul`, `Aug`, `Sep`, `Oct`, `Nov`, `Dec` 문자열을 이용한다.
+* `<year>` : 년을 나타낸다.
+* `<hour>` : 시간을 나타낸다.
+* `<minute>` : 분을 나타낸다.
+* `<second>` : 초를 나타낸다.
+* `GMT` : 그리니치 표준시를 의미하며, 항상 GMT 시간을 사용한다.
+
+``` {caption="[Text 48] Expires Header Example"}
+Expires: Wed, 21 Oct 2015 07:28:00 GMT
+```
+
+[Text 48]은 Expires Header의 예시를 나타낸다.
+
 
 ## 2. 참조
 
