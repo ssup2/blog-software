@@ -142,18 +142,25 @@ User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (
 #### 1.2.4. If-Modified-Since
 
 ``` {caption="[Text 11] If-Modified-Since Header Format"}
-If-Modified-Since: <date>
+If-Modified-Since: <day-name>, <day> <month> <year> <hour>:<minute>:<second> GMT
 ```
 
-If-Modified-Since Header는 요청을 보내는 클라이언트가 최근에 수정된 시간을 나타낸다. [Text 11]은 If-Modified-Since Header의 Format을 나타낸다.
+If-Modified-Since Header는 Client가 특정 날짜, 시간 이후에 변경된 Resource만 받아오기 위해 사용되는 Header이다아 [Text 11]은 If-Modified-Since Header의 Format을 나타낸다.
+
+* `<day-name>` : 요일을 나타내며, `Mon`, `Tue`, `Wed`, `Thu`, `Fri`, `Sat`, `Sun` 문자열을 이용한다.
+* `<day>` : 일을 나타낸다.
+* `<month>` : 월을 나타내며, `Jan`, `Feb`, `Mar`, `Apr`, `May`, `Jun`, `Jul`, `Aug`, `Sep`, `Oct`, `Nov`, `Dec` 문자열을 이용한다.
+* `<year>` : 년을 나타낸다.
+* `<hour>` : 시간을 나타낸다.
+* `<minute>` : 분을 나타낸다.
+* `<second>` : 초를 나타낸다.
+* `GMT` : 그리니치 표준시를 의미하며, 항상 GMT 시간을 사용한다.
 
 ``` {caption="[Text 12] If-Modified-Since Header Example"}
 If-Modified-Since: Wed, 21 Oct 2015 07:28:00 GMT
-If-Modified-Since: Mon, 19 Oct 2015 07:28:00 GMT
-If-Modified-Since: Tue, 20 Oct 2015 07:28:00 GMT
 ```
 
-[Text 12]은 If-Modified-Since Header의 몇가지 예시를 나타낸다.
+[Text 12]은 If-Modified-Since Header의 예시를 나타낸다. 2015년 10월 21일 오전 7시 28분 00초 이후에 변경된 Resource가 존재하는 경우에만 Server는 `200 OK` 응답을 보내며, 만약 Resource가 변경되지 않았을 경우에는 `304 Not Modified` 응답을 보낸다.
 
 #### 1.2.5. If-None-Match
 
@@ -161,14 +168,16 @@ If-Modified-Since: Tue, 20 Oct 2015 07:28:00 GMT
 If-None-Match: <etag>
 ``` 
 
-If-None-Match Header는 요청을 보내는 클라이언트가 최근에 수정된 시간을 나타낸다. [Text 13]은 If-None-Match Header의 Format을 나타낸다.
+If-None-Match Header는 요청을 보내는 Client가 특정 Resource의 Version을 확인하기 위해 사용되는 Header이다. [Text 13]은 If-None-Match Header의 Format을 나타낸다.
+
+* `<etag>` : Resource의 Version을 나타낸다.
 
 ``` {caption="[Text 14] If-None-Match Header Example"}
-If-None-Match: "33a64"
-If-None-Match: W/"33a58", "33a64"
+If-None-Match: "v1.0"
+If-None-Match: "v1.1", "v1.2", "v2.0"
 ```
 
-[Text 14]은 If-None-Match Header의 몇가지 예시를 나타낸다.
+[Text 14]은 If-None-Match Header의 몇가지 예시를 나타낸다. 첫번째 예제의 경우 Server는 Client가 요청한 `v1.0` 버전의 Resource가 갱신 되었을 경우 `200 OK` 응답을과 함께 갱신된 버전의 Etag를 `ETag` Header에 포함하여 응답한다. 만약 `v1.0` 버전의 Resource가 갱신되지 않았을 경우 `304 Not Modified` 응답을 보낸다. 두번째 예제와 같이 여러개의 Etag를 지정할 수도 있다. 여러개의 Etag를 지정할 경우 하나의 Etag만 일치해도 Server는 `304 Not Modified` 응답을 보낸다.
 
 #### 1.2.6. Accept
 
@@ -520,7 +529,6 @@ Content-Location: /api/v1/users/v5
 ```
 
 [Text 43]은 Client가 `/about`을 Resource를 `Accept-Language: ko`로 요청하여, 한국어 버전의 `/about_ko.html`을 받아오는 경우를 나타낸다. [Text 44]는 Client가 `/api/v1/users/latest`를 Resource를 요청하였으며, 가장 최신 버전의 `/api/v1/users/v5`를 받아오는 경우를 나타낸다. 모두 원래 요청한 Resource의 위치가 변경되었음을 확인할 수 있다.
-
 
 ## 2. 참조
 
