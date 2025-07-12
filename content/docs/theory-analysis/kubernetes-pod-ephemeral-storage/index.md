@@ -195,6 +195,8 @@ spec:
         sizeLimit: 512Mi
 ```
 
+**Memory** Medium의 **emptyDir** Volume을 `/dev/shm`경로에 설정하면 App에서 이용하는 **Shared Memory**의 크기를 제한할 수 있다. [File 4]는 Shared Memory의 크기를 제한하는 `my-shell-memory-shm` Pod의 예제를 나타낸다. **emptyDir** Volume의 크기가 `512Mi`로 제한되어 있기 때문에 Shared Memory의 크기도 `512Mi`로 제한된다.
+
 ## 3. 참조
 
 * Ephemeral Storage : [https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#local-ephemeral-storage](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#local-ephemeral-storage)
