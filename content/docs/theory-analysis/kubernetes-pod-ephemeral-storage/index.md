@@ -2,7 +2,7 @@
 title: Kubernetes Pod Ephemeral Storage
 ---
 
-Kubernetes Pod가 이용할 수 있는 Ephemeral Storage는 Node의 Storage를 이용하는 방식과 Node의 Memory를 이용하는 방식이 존재한다. 어떠한 저장소를 이용하냐에 따라서 Pod의 설정과 동작이 달라진다.
+Kubernetes Pod가 이용할 수 있는 Ephemeral Storage는 **Node의 Storage**를 이용하는 방식과 **Node의 Memory**를 이용하는 방식이 존재한다. 어떠한 저장소를 이용하냐에 따라서 Pod의 설정과 동작이 달라진다.
 
 ## 1. Node Storage 기반의 Ephemeral Storage
 
@@ -21,9 +21,7 @@ spec:
   containers:
   - name: my-shell
     image: nicolaka/netshoot:v0.14
-    args:
-    - sleep
-    - infinity
+    args: [sleep, infinity]
     resources:
       requests:
         ephemeral-storage: "1Gi"
@@ -102,9 +100,7 @@ spec:
   containers:
   - name: my-shell
     image: nicolaka/netshoot:v0.14
-    args:
-    - sleep
-    - infinity
+    args: [sleep, infinity]
     resources:
       requests:
         memory: "1Gi"
@@ -140,9 +136,7 @@ spec:
   containers:
   - name: my-shell
     image: nicolaka/netshoot:v0.14
-    args:
-    - sleep
-    - infinity
+    args: [sleep, infinity]
     resources:
       requests:
         memory: "1Gi"
@@ -179,9 +173,7 @@ spec:
   containers:
   - name: my-shell
     image: nicolaka/netshoot:v0.14
-    args:
-    - sleep
-    - infinity
+    args: [sleep, infinity]
     resources:
       requests:
         memory: "1Gi"
