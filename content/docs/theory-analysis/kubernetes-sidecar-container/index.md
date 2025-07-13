@@ -202,6 +202,8 @@ Events:
   Normal   Killing    27s (x2 over 87s)   kubelet            Init container sidecar failed liveness probe
 ```
 
+[File 4]는 Sidecar Container의 Liveness Probe가 실패하는 경우를 확인하기 위한 예제를 나타낸다. [Shell 3]은 [File 4]에 정의된 Pod를 생성하고 Pod의 상태와 이벤트를 확인하는 예제를 나타낸다. Sidecar의 Liveness Probe가 실패하면서 계속해서 재시작을 시도하는걸 확인할 수 있다.
+
 ```yaml {caption="[File 5] Sidecar Container Readiness Probe Test Example", linenos=table}
 apiVersion: v1
 kind: Pod
@@ -243,6 +245,8 @@ Events:
   Normal   Started    71s                kubelet            Started container app
   Warning  Unhealthy  2s (x11 over 71s)  kubelet            Readiness probe failed:
 ```
+
+[File 5]는 Sidecar Container의 Readiness Probe가 실패하는 경우를 확인하기 위한 예제를 나타낸다. [Shell 4]는 [File 5]에 정의된 Pod를 생성하고 Pod의 상태와 이벤트를 확인하는 예제를 나타낸다. Sidecar의 Readiness Probe가 실패하면서 Pod의 상태가 **Ready**가 아닌 상태로 유지되는걸 확인할 수 있다.
 
 ## 2. 참조
 
