@@ -30,9 +30,17 @@ spec:
     image: nicolaka/netshoot:v0.14
     command: ["sleep", "infinity"]
     restartPolicy: Always
+    livenessProbe:
+      exec:
+        command: ["sh", "-c", "exit 0"]
+    readinessProbe:
+      exec:
+        command: ["sh", "-c", "exit 0"]
 ```
 
 [File 1]은 간단한 Sidecar Container의 예제를 나타낸다. Kubernetes에서는 Sidecar Container를 **특수한 Init Container**로 간주한다. 따라서 Pod 내부에서 Sidecar Container를 선언하기 `initContainers` 하위에 정의해야 하며, Init Container 중에서 `restartPolicy`가 `Always`로 설정되어 있으면 Sidecar Container로 간주된다. `restartPolicy`가 설정되어 있지 않거나 `Always`로 설정되어 있지 않은 경우에는 App Container 동작전 잠깐 동안 동작하는 일반적인 Init Container로 간주된다.
+
+Sidecar Container는 `restartPolicy`가 `Always`로 설정되어 있기 어떤한 이유로 종료되어도 계속해서 반복해서 실행되며, App Container와 별개로 동작한다. Sidecar Container는 일반 Init Container와 다르게 **Probe** 설정이 가능하다. Livness Probe 실패시 자동으로 재시작하며, Readiness Probe 실패시에는 Pod의 상태를 **Ready**가 아닌 상태로 변경하기 때문에, Readiness Probe 설정에는 주의가 필요하다.
 
 ### 1.1. Sidecar Container 생성, 종료 순서 확인
 
@@ -100,7 +108,7 @@ kind: Pod
 metadata:
   name: sidecar-container-exit-example
 spec:
-  restartPolicy: OnFailure
+  restartPolicy: Never
   containers:
   - name: app
     image: nicolaka/netshoot:v0.14
@@ -147,7 +155,94 @@ LAST SEEN   TYPE      REASON      OBJECT                               MESSAGE
 2025-07-14 01:16:57.242	first-sidecar
 ```
 
-[Shell 2]는 [File 3]에 정의된 Pod를 생성하고 Pod의 상태와 이벤트를 확인하는 예제를 나타낸다. `app` Container가 정상 종료되면 `first-sidecar`, `second-sidecar` Sidecar Container도 정상 종료되는걸 확인할 수 있다. [Log 2]는 각 Container의 Log를 통해서 Sidecar Container가 SIGTERM Signal을 받고 종료되는걸 확인할 수 있다.
+[Shell 2]는 [File 3]에 정의된 Pod를 생성하고 Pod의 상태와 이벤트를 확인하는 예제를 나타낸다. `app` Container가 정상 종료되면 `second-sidecar`, `first-sidecar` Sidecar Container도 순서대로 정상 종료되는걸 확인할 수 있다. [Log 2]는 각 Container의 Log를 통해서 Sidecar Container가 SIGTERM Signal을 받고 종료되는걸 확인할 수 있다.
+
+### 1.3. Sidecar Container Probe 확인
+
+```yaml {caption="[File 4] Sidecar Container Liveness Probe Test Example", linenos=table}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: sidecar-container-liveness-fail-example
+spec:
+  containers:
+  - name: app
+    image: nicolaka/netshoot:v0.14
+    command: ["sleep", "infinity"]
+  initContainers:
+  - name: sidecar
+    image: nicolaka/netshoot:v0.14
+    command: ["sleep", "infinity"]
+    restartPolicy: Always
+    livenessProbe:
+      exec:
+        command: ["sh", "-c", "exit 1"]
+    readinessProbe:
+      exec:
+        command: ["sh", "-c", "exit 0"]
+```
+
+```bash {caption="[Shell 3] Sidecar Container Liveness Probe Test Example", linenos=table}
+$ kubectl get pod
+NAME                                      READY   STATUS    RESTARTS      AGE
+sidecar-container-liveness-fail-example   2/2     Running   1 (60s ago)   2m1s
+
+$ kubectl describe pod sidecar-container-liveness-fail-example
+Events:
+  Type     Reason     Age                 From               Message
+  ----     ------     ----                ----               -------
+  Normal   Scheduled  117s                default-scheduler  Successfully assigned default/sidecar-container-liveness-fail-example to dp-worker-6
+  Normal   Pulled     116s                kubelet            Container image "nicolaka/netshoot:v0.14" already present on machine
+  Normal   Created    116s                kubelet            Created container app
+  Normal   Started    116s                kubelet            Started container app
+  Normal   Pulled     57s (x2 over 117s)  kubelet            Container image "nicolaka/netshoot:v0.14" already present on machine
+  Normal   Created    57s (x2 over 117s)  kubelet            Created container sidecar
+  Normal   Started    57s (x2 over 117s)  kubelet            Started container sidecar
+  Warning  Unhealthy  27s (x6 over 108s)  kubelet            Liveness probe failed:
+  Normal   Killing    27s (x2 over 87s)   kubelet            Init container sidecar failed liveness probe
+```
+
+```yaml {caption="[File 5] Sidecar Container Readiness Probe Test Example", linenos=table}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: sidecar-container-readiness-fail-example
+spec:
+  containers:
+  - name: app
+    image: nicolaka/netshoot:v0.14
+    command: ["sleep", "infinity"]
+  initContainers:
+  - name: sidecar
+    image: nicolaka/netshoot:v0.14
+    command: ["sleep", "infinity"]
+    restartPolicy: Always
+    livenessProbe:
+      exec:
+        command: ["sh", "-c", "exit 0"]
+    readinessProbe:
+      exec:
+        command: ["sh", "-c", "exit 1"]
+```
+
+```bash {caption="[Shell 4] Sidecar Container Readiness Probe Test Example", linenos=table}
+$ kubectl get pod
+NAME                                       READY   STATUS    RESTARTS   AGE
+sidecar-container-readiness-fail-example   1/2     Running   0          106s
+
+$ kubectl describe pod sidecar-container-readiness-fail-example
+Events:
+  Type     Reason     Age                From               Message
+  ----     ------     ----               ----               -------
+  Normal   Scheduled  73s                default-scheduler  Successfully assigned default/sidecar-container-readiness-fail-example to dp-worker-6
+  Normal   Pulled     72s                kubelet            Container image "nicolaka/netshoot:v0.14" already present on machine
+  Normal   Created    72s                kubelet            Created container sidecar
+  Normal   Started    72s                kubelet            Started container sidecar
+  Normal   Pulled     71s                kubelet            Container image "nicolaka/netshoot:v0.14" already present on machine
+  Normal   Created    71s                kubelet            Created container app
+  Normal   Started    71s                kubelet            Started container app
+  Warning  Unhealthy  2s (x11 over 71s)  kubelet            Readiness probe failed:
+```
 
 ## 2. 참조
 
