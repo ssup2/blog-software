@@ -83,7 +83,7 @@ Events:
   Warning  ExceededGracePeriod  52s   kubelet            Container runtime did not kill the pod within specified grace period.
 ```
 
-[Shell 1]은 `my-shell-storage` Pod의 Ephemeral Storage가 `2Gi`를 초과되어 Pod가 Evicted 된 경우를 나타내며, [Shell 2]는 `my-shell-storage` Pod의 `emptydir-storage` Volume가 `512Mi`를 초과되어 Pod가 Evicted 된 경우를 나타낸다. Node Storage 기반의 Ephemeral Storage의 사용량은 kubelet이 주기적으로 측정하는 방식이다. 따라서 Pod가 사용하는 Node Storage 기반의 Ephemeral Storage가 Limit을 초과하자 마자 Pod는 즉시 Evicted 되지 않고 일정 시간 동안 존재할 수 있다. 일반적으로 용량이 초과되고 30~40초 정도 동안 존재할 수 있다.
+[Shell 1]은 `my-shell-storage` Pod의 Ephemeral Storage가 `2Gi`를 초과되어 Pod가 Evicted 된 경우를 나타내며, [Shell 2]는 `my-shell-storage` Pod의 `emptydir-storage` Volume가 `512Mi`를 초과되어 Pod가 Evicted 된 경우를 나타낸다. Node Storage 기반의 Ephemeral Storage의 사용량은 kubelet이 주기적으로 측정하는 방식이다. 따라서 Pod가 사용하는 Node Storage 기반의 Ephemeral Storage가 Limit을 초과하는 순간 Pod는 즉시 Evicted 되지 않고 일정 시간 동안 존재할 수 있다. 일반적으로 용량이 초과되고 30~40초 정도 동안 존재할 수 있다.
 
 ## 2. Node Memory 기반의 Ephemeral Storage
 
@@ -118,14 +118,14 @@ spec:
 
 [File 2]는 Node Memory를 기반으로 하는 Ephemeral Storage를 설정하는 `my-shell-memory` Pod의 예제를 나타낸다. `my-shell` Container는 `emptydir-memory` 이름의 emptyDir Volume를 이용하며, `512Mi`의 크기를 가지며 Memory Type의 medium Type이 설정되어 있다.
 
-Memory Type의 emptyDir Volume은 Container의 Memory 사용률에 포함된다. 따라서 Container의 Memory Request, Limit은 반드시 emptyDir Volume의 용량보다 크게 설정되어야 하고, Container 내부의 App에서 이용할 Memory 크기까지 고려되어 설정되어야 한다. [File 2]의 경우에는 `emptydir-memory` Volume이 `512Mi`이기 때문에 Container 내부의 App이 이용할 수 있는 Memory의 크기는 Request를 기준으로는 `1Gi - 512Mi = 512Mi`가 되며, Limit을 기준으로는 `2Gi - 512Mi = 1.5Gi`가 된다.
+Memory Type의 emptyDir Volume은 Container의 Memory 사용률에 포함된다. 따라서 Container의 Memory Request, Limit은 반드시 emptyDir Volume의 용량보다 크게 설정되어야 하고, Container 내부의 App에서 이용할 Memory 크기까지 고려되어 설정되어야 한다. [File 2]의 경우에는 `emptydir-memory` Volume이 `512Mi`이기 때문에 Container 내부의 App이 이용할 수 있는 Memory의 크기는 Request를 기준으로는 최소 `1Gi - 512Mi = 512Mi`가 되며, Limit을 기준으로는 최소 `2Gi - 512Mi = 1.5Gi`가 된다.
 
 ```bash {caption="[Shell 3] Memory Medium emptyDir Volume Example", linenos=table}
 $ kubectl exec -it my-shell-memory -- mount | grep /tmp
 tmpfs on /tmp type tmpfs (rw,relatime,size=524288k)
 ```
 
-[Shell 3]은 `my-shell-memory` Pod의 `my-shell` Container에서 `emptydir-memory` Volume를 마운트한 결과를 나타낸다. **tmpfs** Type의 Volume이 `/tmp`에 마운트되어 있음을 확인할 수 있다. tmpfs Volume의 크기는 `512Mi`인 것을 확인할 수 있다. 즉 Pod 내부에서는 tmpfs Volume 크기 이상으로 용량을 사용할 수 없다. Node Storage 기반의 Ephemeral Storage는 주기적으로 용량을 검사하는 방식이라 일시적으로 용량 초과가 발생할 수 있고, 이로 인해서 Pod가 Evicted 될 수 있지만, Node Memory 기반의 Ephemeral Storage는 tmpfs 크기가 제한되는 방식이라 일시적 용량 초과가 발생하지 않는다.
+[Shell 3]은 `my-shell-memory` Pod의 `my-shell` Container에서 `emptydir-memory` Volume를 마운트한 결과를 나타낸다. **tmpfs** Type의 Volume이 `/tmp`에 마운트되어 있음을 확인할 수 있다. tmpfs Volume의 크기는 `512Mi`인 것을 확인할 수 있다. 즉 Pod 내부에서는 tmpfs Volume 크기 이상으로 용량을 사용할 수 없다. Node Storage 기반의 Ephemeral Storage는 주기적으로 용량을 검사하는 방식이라 일시적으로 용량 초과가 발생할 수 있다. 이로 인해서 Pod가 Evicted 될 수 있지만, Node Memory 기반의 Ephemeral Storage는 tmpfs 크기가 제한되는 방식이라 일시적 용량 초과가 발생하지 않는다.
 
 ```yaml {caption="[File 3] Node Memory Ephemeral Storage without Size Limit Pod Example", linenos=table}
 apiVersion: v1
