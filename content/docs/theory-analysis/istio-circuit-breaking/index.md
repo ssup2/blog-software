@@ -12,35 +12,36 @@ Istio는 Sidecar Proxy (Envoy)를 활용하여 Circuit Breaking 기능을 제공
 apiVersion: networking.istio.io/v1
 kind: DestinationRule
 metadata:
-  name: httpbin
+  name: productpage
 spec:
-  host: httpbin
+  host: productpage
   trafficPolicy:
     connectionPool:
       tcp:
-        maxConnections: 1
+        maxConnections: 20
       http:
-        http1MaxPendingRequests: 1
-        maxRequestsPerConnection: 1
+        maxRetries: 20
+        http1MaxPendingRequests: 20
+        maxRequestsPerConnection: 20
     outlierDetection:
-      consecutive5xxErrors: 1
-      interval: 1s
-      baseEjectionTime: 3m
-      maxEjectionPercent: 100
+      consecutive5xxErrors: 20
+      interval: 20s
+      baseEjectionTime: 20s
+      maxEjectionPercent: 20
 ```
 
 Circuit Breaking은 주로 **Destination Rule**의 **Connection Pool** (`trafficPolicy.connectionPool`) 필드와 **Outlier Detection** (`trafficPolicy.outlierDetection`) 필드를 통해 설정한다. [File 1]은 Circuit Breaking을 위한 Destination Rule의 예제를 나타내고 있다.
 
-Connection Pool은 Client Pod의 Sidecar Proxy에서 이용할 수 있는 **최대 Connection의 개수** 또는 **최대 요청 대기 개수**를 정의한다. Connection Pool의 Client에서 많은 요청이 발생하여 설정된 최대 Connection Pool 이상으로 Connection이 필요한 경우, 또는 설정된 최대 요청 대기 개수 이상으로 요청 대기가 발생하는 경우 **Circuit Breaking이 동작**한다. Connection Pool에서 제공하는 주요 설정들은 다음과 같다.
+Connection Pool은 **하나의 Client Pod의 Sidecar Proxy**에서 이용할 수 있는 **최대 동시 Connection** 또는 **최대 동시 요청** 관련 설정을 명시하며, 명시한 설정을 초과하는 경우 Circuit Breaking이 동작한다. 각 설정값은 Destination Rule에 명시된 각각의 Host (Service)별로 적용된다. [File 1]은 `productpage` 서비스에 대한 Connection Pool에서 제공하는 주요 설정들은 다음과 같다.
 
-* `tcp.maxConnections` : TCP Connection의 최대 개수를 설정한다.
+* `tcp.maxConnections` : 최대 TCP Connection의 개수를 설정한다.
 * `tcp.connectTimeout` : TCP Connection을 맺는데 걸리는 최대 시간을 설정한다. 기본값은 10초이다.
 * `tcp.maxConnectionDuration` : TCP Connection을 유지할 수 있는 최대 시간을 설정한다. 설정하지 않으면 최대 유지 시간에 제한이 없어진다.
 * `tcp.idleTimeout` : TCP Idle Timeout 시간을 설정한다. 기본값은 1시간 이며, 0s (0초)로 설정하는 경우 제한이 없어진다.
 * `http.http1MaxPendingRequests` : HTTP 요청의 최대 대기 개수를 설정한다. 이름에는 `http1`이 포함되어 있지만, HTTP/1.1 뿐만 아니라 HTTP/2 요청에도 적용된다. 기본값은 2^31-1이다.
-* `http.http2MaxRequests` : 동시에 처리할 수 있는 최대 HTTP 요청의 개수를 설정한다. 이름에는 `http2`가 포함되어 있지만, HTTP/2 뿐만 아니라 HTTP/1.1 요청에도 적용된다. 기본값은 2^31-1이다.
+* `http.http2MaxRequests` : 최대 동시에 처리할 수 있는 최대 HTTP 요청의 개수를 설정한다. 이름에는 `http2`가 포함되어 있지만, HTTP/2 뿐만 아니라 HTTP/1.1 요청에도 적용된다. 기본값은 2^31-1이다.
 * `http.maxRequestsPerConnection` : 하나의 TCP Connection당 처리할 수 있는 최대 HTTP 요청 개수를 설정한다. 기본값은 2^31-1이며, 0으로 설정하는 경우에는 제한이 없어진다. 1로 설정하는 경우에는 하나의 TCP Connection당 최대 1개의 HTTP 요청만 처리하기 때문에 Keep Alive 기능 비활성활르 의미한다.
-* `http.maxRetries` : HTTP 최대 재시도 개수를 설정한다. 여기서 최대 재시도 횟수는 Host (Service)당 횟수를 의미한다. 기본값은 2^32-1이다.
+* `http.maxRetries` : 최대 HTTP 동시 재시도 개수를 설정한다. 기본값은 2^32-1이다.
 * `http.maxConcurrentStreams` : 하나의 HTTP/2 Connection당 처리할 수 있는 최대 Stream의 개수를 설정한다. 기본값은 2^31-1이다.
 
 Outlier Detection은 비정상 상태를 판단하는 기준을 정의하며, Outlier로 판단되면 Circuit Breaking이 동작한다. Outlier Detection에서 제공하는 주요 설정은 다음과 같다.
@@ -89,6 +90,7 @@ spec:
       tcp:
         maxConnections: 20
       http:
+        maxRetries: 20
         http1MaxPendingRequests: 20
         maxRequestsPerConnection: 20
     outlierDetection:
@@ -99,81 +101,82 @@ spec:
 ```
 
 ```text {caption="[Text 2] Global Circuit Breaking Envoy Proxy consecutive5xx Configuration Example"}
-$ istioctl pc cluster deploy/httpbin -o yaml | grep consecutive5xx -A 4 -B 3
-  name: outbound|9080||details.default.svc.cluster.local
-  outlierDetection:
-    baseEjectionTime: 20s
-    consecutive5xx: 20
-    enforcingConsecutive5xx: 100
-    enforcingSuccessRate: 0
-    interval: 20s
-    maxEjectionPercent: 20
+$ istioctl pc cluster deploy/productpage-v1 -o yaml | grep maxRetries -B 6 -A 1
 --
-  name: outbound|8080||fortio.default.svc.cluster.local
-  outlierDetection:
-    baseEjectionTime: 20s
-    consecutive5xx: 20
-    enforcingConsecutive5xx: 100
-    enforcingSuccessRate: 0
-    interval: 20s
-    maxEjectionPercent: 20
+- altStatName: outbound|9080||productpage.default.svc.cluster.local;
+  circuitBreakers:
+    thresholds:
+    - maxConnections: 20
+      maxPendingRequests: 20
+      maxRequests: 4294967295
+      maxRetries: 20
+      trackRemaining: true
 --
-  name: outbound|8000||httpbin.default.svc.cluster.local
-  outlierDetection:
-    baseEjectionTime: 20s
-    consecutive5xx: 20
-    enforcingConsecutive5xx: 100
-    enforcingSuccessRate: 0
-    interval: 20s
-    maxEjectionPercent: 20
+- altStatName: outbound|9080||ratings.default.svc.cluster.local;
+  circuitBreakers:
+    thresholds:
+    - maxConnections: 20
+      maxPendingRequests: 20
+      maxRequests: 4294967295
+      maxRetries: 20
+      trackRemaining: true
 --
-...
+- altStatName: outbound|9080||reviews.default.svc.cluster.local;
+  circuitBreakers:
+    thresholds:
+    - maxConnections: 20
+      maxPendingRequests: 20
+      maxRequests: 4294967295
+      maxRetries: 20
 
-$ istioctl pc cluster deploy/fortio -o yaml | grep consecutive5xx -A 4 -B 3
-  name: outbound|9080||details.default.svc.cluster.local
-  outlierDetection:
-    baseEjectionTime: 20s
-    consecutive5xx: 20
-    enforcingConsecutive5xx: 100
-    enforcingSuccessRate: 0
-    interval: 20s
-    maxEjectionPercent: 20
---
-  name: outbound|8080||fortio.default.svc.cluster.local
-  outlierDetection:
-    baseEjectionTime: 20s
-    consecutive5xx: 20
-    enforcingConsecutive5xx: 100
-    enforcingSuccessRate: 0
-    interval: 20s
-    maxEjectionPercent: 20
---
-  name: outbound|8000||httpbin.default.svc.cluster.local
-  outlierDetection:
-    baseEjectionTime: 20s
-    consecutive5xx: 20
-    enforcingConsecutive5xx: 100
-    enforcingSuccessRate: 0
-    interval: 20s
-    maxEjectionPercent: 20
---
+$ istioctl pc cluster deploy/productpage-v1 -o yaml | grep consecutive5xx -A 4 -B 3
 ...
+--
+  name: outbound|9080||productpage.default.svc.cluster.local
+  outlierDetection:
+    baseEjectionTime: 20s
+    consecutive5xx: 20
+    enforcingConsecutive5xx: 100
+    enforcingSuccessRate: 0
+    interval: 20s
+    maxEjectionPercent: 20
+--
+  name: outbound|9080||ratings.default.svc.cluster.local
+  outlierDetection:
+    baseEjectionTime: 20s
+    consecutive5xx: 20
+    enforcingConsecutive5xx: 100
+    enforcingSuccessRate: 0
+    interval: 20s
+    maxEjectionPercent: 20
+--
+  name: outbound|9080||reviews.default.svc.cluster.local
+  outlierDetection:
+    baseEjectionTime: 20s
+    consecutive5xx: 20
+    enforcingConsecutive5xx: 100
+    enforcingSuccessRate: 0
+    interval: 20s
+    maxEjectionPercent: 20
 ```
 
-[File 2]는 Global Circuit Breaking을 위한 Destination Rule의 예제를 나타내고 있으며, [Text 2]는 [File 2]가 적용된 Envoy Proxy의 Config에 `consecutive5xxErrors: 20` 설정이 적용된 예시를 나타내고 있다. [File 2]를 제외하고 적용된 Destination Rule이 없다면 [Text 2]에 나타난 것처럼 모든 Service에 대해서 `consecutive5xx: 20` 설정이 적용된다. [Text 2]에는 `default` Namespace에 존재하는 `httpbin`, `fortio` Deployment에 적용된 Envoy Proxy의 Config만을 보여주고 있지만, 그 외의 모든 Pod의 Envoy Proxy에 Circuit Breaking이 적용된다.
+[File 2]는 Global Circuit Breaking을 위한 Destination Rule의 예제를 나타내고 있으며, [Text 2]는 [File 2]가 적용된 Envoy Proxy의 Config에 `maxRetries: 20`과 `consecutive5xxErrors: 20` 설정이 적용된 예시를 나타내고 있다. [File 2]의 Destination Rule을 제외하고 적용된 Destination Rule이 없다면 [Text 2]에 나타난 것처럼 모든 Host(Service)에 대해서 `maxRetries: 20`과 `consecutive5xxErrors: 20` 설정이 적용된다. 즉 각 Host(Service)별로 설정값이 적용되는걸 의미한다.
+
+[Text 2]에는 `default` Namespace에 존재하는 `productpage-v1` Deployment에 적용된 Envoy Proxy의 Config만을 보여주고 있지만, 그 외의 모든 Pod의 Envoy Proxy에 동일한 Circuit Breaking 설정이 적용된다.
 
 ```yaml {caption="[File 3] Namespace Circuit Breaking Example"}
 apiVersion: networking.istio.io/v1
 kind: DestinationRule
 metadata:
-  name: httpbin
+  name: productpage
 spec:
-  host: httpbin
+  host: productpage
   trafficPolicy:
     connectionPool:
       tcp:
         maxConnections: 10
       http:
+        maxRetries: 10
         http1MaxPendingRequests: 10
         maxRequestsPerConnection: 10
     outlierDetection:
@@ -181,27 +184,11 @@ spec:
 ```
 
 ```text {caption="[Text 3] Namespace Circuit Breaking Example"}
-$ istioctl pc cluster deploy/httpbin -o yaml | grep consecutive5xx -A 4 -B 3
-  name: outbound|9080||details.default.svc.cluster.local
-  outlierDetection:
-    baseEjectionTime: 20s
-    consecutive5xx: 20
-    enforcingConsecutive5xx: 100
-    enforcingSuccessRate: 0
-    interval: 20s
-    maxEjectionPercent: 20
---
-  name: outbound|8080||fortio.default.svc.cluster.local
-  outlierDetection:
-    baseEjectionTime: 20s
-    consecutive5xx: 20
-    enforcingConsecutive5xx: 100
-    enforcingSuccessRate: 0
-    interval: 20s
-    maxEjectionPercent: 20
+$ istioctl pc cluster deploy/productpage-v1 -o yaml | grep consecutive5xx -A 4 -B 3
+...
 --
           namespace: default
-  name: outbound|8000||httpbin.default.svc.cluster.local
+  name: outbound|9080||productpage.default.svc.cluster.local
   outlierDetection:
     consecutive5xx: 10
     enforcingConsecutive5xx: 100
@@ -209,10 +196,7 @@ $ istioctl pc cluster deploy/httpbin -o yaml | grep consecutive5xx -A 4 -B 3
   transportSocketMatches:
   - match:
 --
-...
-
-$ istioctl pc cluster deploy/fortio -o yaml | grep consecutive5xx -A 4 -B 3
-  name: outbound|9080||details.default.svc.cluster.local
+  name: outbound|9080||ratings.default.svc.cluster.local
   outlierDetection:
     baseEjectionTime: 20s
     consecutive5xx: 20
@@ -221,7 +205,7 @@ $ istioctl pc cluster deploy/fortio -o yaml | grep consecutive5xx -A 4 -B 3
     interval: 20s
     maxEjectionPercent: 20
 --
-  name: outbound|8080||fortio.default.svc.cluster.local
+  name: outbound|9080||reviews.default.svc.cluster.local
   outlierDetection:
     baseEjectionTime: 20s
     consecutive5xx: 20
@@ -229,22 +213,11 @@ $ istioctl pc cluster deploy/fortio -o yaml | grep consecutive5xx -A 4 -B 3
     enforcingSuccessRate: 0
     interval: 20s
     maxEjectionPercent: 20
---
-          namespace: default
-  name: outbound|8000||httpbin.default.svc.cluster.local
-  outlierDetection:
-    consecutive5xx: 10
-    enforcingConsecutive5xx: 100
-    enforcingSuccessRate: 0
-  transportSocketMatches:
-  - match:
---
-...
 ```
 
 [File 3]는 Namespace 내부에서만 적용되는 Circuit Breaking을 위한 Destination Rule의 예제를 나타내고 있으며, [Text 3]은 [File 3]가 적용된 Envoy Proxy의 Config에 `consecutive5xxErrors: 10` 설정이 적용된 예시를 나타내고 있다. [File 3]에서는 `default` Namespace에 존재하는 `httpbin` 서비스에만 `consecutive5xxErrors: 10` 설정을 적용하고 있으며, Global Destination Rule의 우선순위가 가장 낮기 때문에 `default` Namespace에 존재하는 `httpbin` 서비스에만 `consecutive5xxErrors: 10` 설정이 적용되며, 그외 나머지 서비스에는 `consecutive5xxErrors: 20` 설정이 적용된걸 확인할 수 있다.
 
-`PILOT_ENABLE_DESTINATION_RULE_INHERITANCE`를 istiod에 설정하여 Global Destination Rule을 상속받는 기능이 존재했었지만, istio `v1.20.0` Version부터 해당 기능이 제거되었다. 따라서 현재는 각 Namespace에 개별적으로 필요한 설정들을 모두 일일히 Destination Rule을 설정해야 한다.
+과거에는 `PILOT_ENABLE_DESTINATION_RULE_INHERITANCE`를 istiod에 설정하여 Global Destination Rule을 상속받는 기능이 존재했었지만, istio `v1.20.0` Version부터 해당 기능이 제거되었다. 따라서 현재는 각 Namespace에 개별적으로 필요한 설정들을 모두 일일히 Destination Rule을 설정해야 한다.
 
 ## 2. 참조
 
