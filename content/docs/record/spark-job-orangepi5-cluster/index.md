@@ -3,7 +3,21 @@ title: Spark Job 수행 / Orange Pi 5 Max Cluster 환경
 draft: true
 ---
 
-## 1. 실습 환경 구습
+Spark를 활용해서 MinIO에 저장되어 있는 데이터 변환을 수행한다.
+
+## 1. 실습 환경 구성
+
+### 1.1. 전체 실습 환경
+
+전체 실슴 환경 구성은 다음의 링크를 참조한다.
+
+* Orange Pi 5 Max 기반 Kubernetes Cluster 구축 : [https://ssup2.github.io/blog-software/docs/record/orangepi5-cluster-build/](https://ssup2.github.io/blog-software/docs/record/orangepi5-cluster-build/)
+* Orange Pi 5 Max 기반 Kubernetes Data Platform 구축 : [https://ssup2.github.io/blog-software/docs/record/kubernetes-data-platform-orangepi5-cluster/](https://ssup2.github.io/blog-software/docs/record/kubernetes-data-platform-orangepi5-cluster/)
+* Trino MinIO Query 수행 : [https://ssup2.github.io/blog-software/docs/record/trino-minio-query-orangepi5-cluster/](https://ssup2.github.io/blog-software/docs/record/trino-minio-query-orangepi5-cluster/)
+* Dagster Workflow Github : [https://github.com/ssup2-playground/k8s-data-platform_dagster-workflows](https://github.com/ssup2-playground/k8s-data-platform_dagster-workflows)
+* Spark Job Github : [https://github.com/ssup2-playground/k8s-data-platform_spark-jobs](https://github.com/ssup2-playground/k8s-data-platform_spark-jobs)
+
+### 1.2. Spark 설치
 
 Java 11를 설치한다.
 
@@ -33,35 +47,66 @@ export SPARK_HOME=~/spark
 export PATH="$SPARK_HOME/bin:$PATH"
 ```
 
-Spark Application을 Download 한다.
+### 1.3. Hive Metastore Table 생성
 
-```shell
-uv sync
+평균 날씨 데이터를 저장하는 Parquet Table을 생성한다.
+
+```sql
+CREATE TABLE hive.weather.southkorea_daily_average_parquet (
+  branch_name VARCHAR,
+
+  temp DOUBLE,
+  rain DOUBLE,
+  snow DOUBLE,
+
+  cloud_cover_total     INT,
+  cloud_cover_lowmiddle INT,
+  cloud_lowest          INT,
+
+  humidity       INT,
+  wind_speed     DOUBLE,
+  pressure_local DOUBLE,
+  pressure_sea   DOUBLE,
+  pressure_vaper DOUBLE,
+  dew_point      DOUBLE,
+
+  year  INT,
+  month INT,
+  day   INT
+)
+WITH (
+	external_location = 's3a://weather/southkorea/daily-average-parquet',
+	format = 'PARQUET',
+	partitioned_by = ARRAY['year', 'month', 'day']
+);
+
+CALL hive.system.sync_partition_metadata('weather', 'southkorea_daily_average_parquet', 'ADD');
 ```
+
+평균 날씨 데이터를 저장하는 Iceberg Parquet Table을 생성한다.
 
 ```sql
 CREATE TABLE iceberg.weather.southkorea_daily_average_iceberg_parquet (
-    branch_name VARCHAR,
+  branch_name VARCHAR,
 
-    temp DOUBLE,
-    rain DOUBLE,
-    snow DOUBLE,
+  avg_temp DOUBLE,
+  avg_rain DOUBLE,
+  avg_snow DOUBLE,
 
-    cloud_cover_total     INT,
-    cloud_cover_lowmiddle INT,
-    cloud_lowest          INT,
+  avg_cloud_cover_total     DOUBLE,
+  avg_cloud_cover_lowmiddle DOUBLE,
+  avg_cloud_lowest          DOUBLE,
 
-    humidity       INT,
-    wind_speed     DOUBLE,
-    pressure_local DOUBLE,
-    pressure_sea   DOUBLE,
-    pressure_vaper DOUBLE,
-    dew_point      DOUBLE,
+  avg_humidity       DOUBLE,
+  avg_wind_speed     DOUBLE,
+  avg_pressure_local DOUBLE,
+  avg_pressure_sea   DOUBLE,
+  avg_pressure_vaper DOUBLE,
+  avg_dew_point      DOUBLE,
 
-    year  INT,
-    month INT,
-    day   INT,
-    hour  INT
+  year  INT,
+  month INT,
+  day   INT
 )
 WITH (
 	location = 's3a://weather/southkorea/daily-average-iceberg-parquet',
@@ -71,6 +116,12 @@ WITH (
 ```
 
 ## 2. Local 환경에서 실행
+
+Spark Application을 Download 한다.
+
+```shell
+uv sync
+```
 
 Shell을 2개 실행하여 각각 Master와 Worker로 설정하여 실행한다.
 
@@ -99,36 +150,6 @@ spark-submit \
   --executor-memory 500m \
   src/jobs/weather_southkorea_daily_average_iceberg_parquet.py \
   --date 20250601
-```
-
-```
-CREATE TABLE iceberg.weather.southkorea_daily_average_iceberg_parquet (
-    branch_name VARCHAR,
-
-    avg_temp DOUBLE,
-    avg_rain DOUBLE,
-    avg_snow DOUBLE,
-
-    avg_cloud_cover_total     DOUBLE,
-    avg_cloud_cover_lowmiddle DOUBLE,
-    avg_cloud_lowest          DOUBLE,
-
-    avg_humidity       DOUBLE,
-    avg_wind_speed     DOUBLE,
-    avg_pressure_local DOUBLE,
-    avg_pressure_sea   DOUBLE,
-    avg_pressure_vaper DOUBLE,
-    avg_dew_point      DOUBLE,
-
-    year  INT,
-    month INT,
-    day   INT
-)
-WITH (
-	location = 's3a://weather/southkorea/daily-average-iceberg-parquet',
-	format = 'PARQUET',
-	partitioning = ARRAY['year', 'month', 'day']
-);
 ```
 
 ```shell

@@ -144,29 +144,29 @@ MinIO에 저장되어 있는 Partition된 CSV Format의 Object를 기반으로 `
 
 ```sql
 CREATE TABLE hive.weather.southkorea_hourly_csv (
-    branch_name VARCHAR,
+  branch_name VARCHAR,
 
-    temp VARCHAR,
-    rain VARCHAR,
-    snow VARCHAR,
+  temp VARCHAR,
+  rain VARCHAR,
+  snow VARCHAR,
 
-    cloud_cover_total     VARCHAR,
-    cloud_cover_lowmiddle VARCHAR,
-    cloud_lowest          VARCHAR,
-    cloud_shape           VARCHAR,
+  cloud_cover_total     VARCHAR,
+  cloud_cover_lowmiddle VARCHAR,
+  cloud_lowest          VARCHAR,
+  cloud_shape           VARCHAR,
 
-    humidity       VARCHAR,
-    wind_speed     VARCHAR,
-    wind_direction VARCHAR,
-    pressure_local VARCHAR,
-    pressure_sea   VARCHAR,
-    pressure_vaper VARCHAR,
-    dew_point      VARCHAR,
+  humidity       VARCHAR,
+  wind_speed     VARCHAR,
+  wind_direction VARCHAR,
+  pressure_local VARCHAR,
+  pressure_sea   VARCHAR,
+  pressure_vaper VARCHAR,
+  dew_point      VARCHAR,
 
 	year  VARCHAR,
-    month VARCHAR,
-    day   VARCHAR,
-    hour  VARCHAR
+  month VARCHAR,
+  day   VARCHAR,
+  hour  VARCHAR
 )
 WITH (
 	external_location = 's3a://weather/southkorea/hourly-csv',
@@ -180,29 +180,29 @@ MinIO에 저장되어 있는 Partition된 Parquet Format의 Object를 기반으�
 
 ```sql
 CREATE TABLE hive.weather.southkorea_hourly_parquet (
-    branch_name VARCHAR,
+  branch_name VARCHAR,
 
-    temp DOUBLE,
-    rain DOUBLE,
-    snow DOUBLE,
+  temp DOUBLE,
+  rain DOUBLE,
+  snow DOUBLE,
 
-    cloud_cover_total     INT,
-    cloud_cover_lowmiddle INT,
-    cloud_lowest          INT,
-    cloud_shape           VARCHAR,
+  cloud_cover_total     INT,
+  cloud_cover_lowmiddle INT,
+  cloud_lowest          INT,
+  cloud_shape           VARCHAR,
 
-    humidity       INT,
-    wind_speed     DOUBLE,
-    wind_direction VARCHAR,
-    pressure_local DOUBLE,
-    pressure_sea   DOUBLE,
-    pressure_vaper DOUBLE,
-    dew_point      DOUBLE,    
+  humidity       INT,
+  wind_speed     DOUBLE,
+  wind_direction VARCHAR,
+  pressure_local DOUBLE,
+  pressure_sea   DOUBLE,
+  pressure_vaper DOUBLE,
+  dew_point      DOUBLE,    
 
-    year  INT,
-    month INT,
-    day   INT,
-    hour  INT
+  year  INT,
+  month INT,
+  day   INT,
+  hour  INT
 )
 WITH (
 	external_location = 's3a://weather/southkorea/hourly-parquet',
@@ -215,29 +215,29 @@ MinIO에 저장되어 있는 Partition된 Iceberg Parquet Format의 Object를 �
 
 ```sql
 CREATE TABLE iceberg.weather.southkorea_hourly_iceberg_parquet (
-    branch_name VARCHAR,
+  branch_name VARCHAR,
 
-    temp DOUBLE,
-    rain DOUBLE,
-    snow DOUBLE,
+  temp DOUBLE,
+  rain DOUBLE,
+  snow DOUBLE,
 
-    cloud_cover_total     INT,
-    cloud_cover_lowmiddle INT,
-    cloud_lowest          INT,
-    cloud_shape           VARCHAR,
+  cloud_cover_total     INT,
+  cloud_cover_lowmiddle INT,
+  cloud_lowest          INT,
+  cloud_shape           VARCHAR,
 
-    humidity       INT,
-    wind_speed     DOUBLE,
-    wind_direction VARCHAR,
-    pressure_local DOUBLE,
-    pressure_sea   DOUBLE,
-    pressure_vaper DOUBLE,
-    dew_point      DOUBLE,    
+  humidity       INT,
+  wind_speed     DOUBLE,
+  wind_direction VARCHAR,
+  pressure_local DOUBLE,
+  pressure_sea   DOUBLE,
+  pressure_vaper DOUBLE,
+  dew_point      DOUBLE,    
 
-    year  INT,
-    month INT,
-    day   INT,
-    hour  INT
+  year  INT,
+  month INT,
+  day   INT,
+  hour  INT
 )
 WITH (
 	location = 's3a://weather/southkorea/hourly-iceberg-parquet',
