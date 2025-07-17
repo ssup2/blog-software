@@ -278,8 +278,8 @@ mc mb dp/spark/logs
 # ArgoCD (ID/PW: default/default)
 helm upgrade --install --create-namespace --namespace argo-cd argo-cd argo-cd -f argo-cd/values.yaml
 
-# Yunikorn
-helm upgrade --install --create-namespace --namespace yunikorn yunikorn yunikorn -f yunikorn/values.yaml
+# Volcano
+helm upgrade --install --create-namespace --namespace volcano volcano volcano -f volcano/values.yaml
 
 # KEDA
 helm upgrade --install --create-namespace --namespace keda keda keda -f keda/values.yaml

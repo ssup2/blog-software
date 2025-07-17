@@ -150,6 +150,7 @@ spark-submit \
   --conf spark.jars.packages=org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262 \
   --conf spark.eventLog.enabled=true \
   --conf spark.eventLog.dir=s3a://spark/logs \
+  --conf spark.ui.prometheus.enabled=true \
   --conf spark.kubernetes.driver.annotation.prometheus.io/scrape=true \
   --conf spark.kubernetes.driver.annotation.prometheus.io/path=/metrics/executors/prometheus \
   --conf spark.kubernetes.driver.annotation.prometheus.io/port=4040 \
