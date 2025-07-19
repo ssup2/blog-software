@@ -152,7 +152,7 @@ spark-class org.apache.spark.deploy.worker.Worker spark://localhost:7077
 
 ### 2.3. Spark Job 실행
 
-구성한 Local Spark Cluster에 `daily-parquet` 데이터를 활용하여 평균 날씨 데이터를 계산하는 Spark Job을 실행한다.
+구성한 Local Spark Cluster에 `daily-parquet` 데이터를 활용하여 평균 날씨 데이터를 계산하는 Spark Job을 실행한다. Package에 `hadoop-aws`와 `aws-java-sdk-bundle`을 추가하여 MinIO에 접근할 수 있도록 설정한다.
 
 ```shell
 export PYTHONPATH=$(pwd)/src
@@ -165,7 +165,14 @@ spark-submit \
   --date 20250601
 ```
 
-구성한 Local Spark Cluster에 `daily-iceberg-parquet` 데이터를 활용하여 평균 날씨 데이터를 계산하는 Spark Job을 실행한다.
+Trino의 Partition 정보를 갱신하고, Query를 수행하여 평균 날씨 데이터를 확인한다.
+
+```sql
+CALL hive.system.sync_partition_metadata('weather', 'southkorea_daily_average_parquet', 'ADD');
+SELECT * FROM hive.weather.southkorea_daily_average_parquet;
+```
+
+구성한 Local Spark Cluster에 `daily-iceberg-parquet` 데이터를 활용하여 평균 날씨 데이터를 계산하는 Spark Job을 실행한다. Package에 `iceberg-spark3-runtime`을 추가하여 Iceberg Table을 활용한다.
 
 ```shell
 export PYTHONPATH=$(pwd)/src
@@ -176,6 +183,12 @@ spark-submit \
   --executor-memory 500m \
   src/jobs/weather_southkorea_daily_average_iceberg_parquet.py \
   --date 20250601
+```
+
+Query를 수행하여 평균 날씨 데이터를 확인한다.
+
+```sql
+SELECT * FROM iceberg.weather.southkorea_daily_average_iceberg_parquet;
 ```
 
 ## 3. Kubernetes 환경에서 실행
@@ -221,7 +234,6 @@ roleRef:
 
 Kubernetes Cluster에 `daily-parquet` 데이터를 활용하여 평균 날씨 데이터를 계산하는 Spark Job을 실행한다. 주요 설정은 다음과 같다.
 
-* `spark.jars.packages` : Spark Job 실행에 필요한 추가 패키지들을 설정한다. 
 * `eventLog` : Spark Job가 저장될 MinIO의 위치를 지정한다.
 * `spark.ui.prometheus.enabled` : Spark Job에서 Prometheus Metric을 노출시킨다.
 * `spark.kubernetes.driver.annotation.prometheus.io` : Prometheus Server가 Spark Job이 노출하는 Metric을 수집할 수 있도록 설정한다.
@@ -247,7 +259,7 @@ spark-submit \
   --date 20250601
 ```
 
-Kubernetes Cluster에 `daily-iceberg-parquet` 데이터를 활용하여 평균 날씨 데이터를 계산하는 Spark Job을 실행한다. Package에 `iceberg-spark3-runtime`을 추가하여 Iceberg Table을 활용한다.
+Kubernetes Cluster에 `daily-iceberg-parquet` 데이터를 활용하여 평균 날씨 데이터를 계산하는 Spark Job을 실행한다.
 
 ```shell
 spark-submit \
@@ -269,6 +281,10 @@ spark-submit \
   local:///app/jobs/weather_southkorea_daily_average_iceberg_parquet.py \
   --date 20250601
 ```
+
+Spark History Server를 확인하여 Spark Job의 실행 로그를 확인한다. [Figure 2]는 Spark History Server에서 Spark Job의 실행 로그를 확인하는 모습이다.
+
+{{< figure caption="[Figure 2] Spark History Server" src="images/spark-history-server.png" width="1000px" >}}
 
 ### 3.4. Volcano Scheduler를 활용한 Gang Scheduling 수행
 
