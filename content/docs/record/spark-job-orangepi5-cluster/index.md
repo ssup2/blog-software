@@ -55,20 +55,20 @@ export PATH="$SPARK_HOME/bin:$PATH"
 CREATE TABLE hive.weather.southkorea_daily_average_parquet (
   branch_name VARCHAR,
 
-  temp DOUBLE,
-  rain DOUBLE,
-  snow DOUBLE,
+  avg_temp DOUBLE,
+  avg_rain DOUBLE,
+  avg_snow DOUBLE,
 
-  cloud_cover_total     INT,
-  cloud_cover_lowmiddle INT,
-  cloud_lowest          INT,
+  avg_cloud_cover_total     DOUBLE,
+  avg_cloud_cover_lowmiddle DOUBLE,
+  avg_cloud_lowest          DOUBLE,
 
-  humidity       INT,
-  wind_speed     DOUBLE,
-  pressure_local DOUBLE,
-  pressure_sea   DOUBLE,
-  pressure_vaper DOUBLE,
-  dew_point      DOUBLE,
+  avg_humidity       DOUBLE,
+  avg_wind_speed     DOUBLE,
+  avg_pressure_local DOUBLE,
+  avg_pressure_sea   DOUBLE,
+  avg_pressure_vaper DOUBLE,
+  avg_dew_point      DOUBLE,
 
   year  INT,
   month INT,
@@ -117,18 +117,28 @@ WITH (
 
 ## 2. Local 환경에서 실행
 
-Spark Application을 Download 한다.
+### 2.1. Spark Application Download
+
+Spark Application을 Download 하고, Python 패키지를 설치한다.
 
 ```shell
+git clone https://github.com/ssup2-playground/k8s-data-platform_spark-jobs.git
+cd k8s-data-platform_spark-jobs
 uv sync
 ```
 
-Shell을 2개 실행하여 각각 Master와 Worker로 설정하여 실행한다.
+### 2.2. Spark Master와 Worker 실행
+
+Shell을 2개 실행하여 각각 Master와 Worker로 설정하여 Local Spark Cluster를 구성한다.
 
 ```shell
 spark-class org.apache.spark.deploy.master.Master -h localhost
 spark-class org.apache.spark.deploy.worker.Worker spark://localhost:7077
 ```
+
+### 2.3. Spark Job 실행
+
+구성한 Local Spark Cluster에 `daily-parquet` 데이터를 활용하여 평균 날씨 데이터를 계산하는 Spark Job을 실행한다.
 
 ```shell
 export PYTHONPATH=$(pwd)/src
@@ -141,6 +151,8 @@ spark-submit \
   --date 20250601
 ```
 
+구성한 Local Spark Cluster에 `daily-iceberg-parquet` 데이터를 활용하여 평균 날씨 데이터를 계산하는 Spark Job을 실행한다.
+
 ```shell
 export PYTHONPATH=$(pwd)/src
 spark-submit \
@@ -152,32 +164,11 @@ spark-submit \
   --date 20250601
 ```
 
-```shell
-127.0.0.1:4040
-```
+## 3. Kubernetes 환경에서 실행
 
-## 3. Kubernetes 환경에서 spark-submit 실행
+### 3.1. Service Account 설정
 
-```shell
-spark-submit \
-  --master k8s://192.168.1.71:6443 \
-  --deploy-mode cluster \
-  --name weather-southkorea-daily-average-parquet \
-  --conf spark.kubernetes.container.image=ghcr.io/ssup2-playground/k8s-data-platform_spark-jobs:0.1.6 \
-  --conf spark.kubernetes.namespace=spark \
-  --conf spark.kubernetes.authenticate.driver.serviceAccountName=spark \
-  --conf spark.executor.instances=2 \
-  --conf spark.pyspark.python=/app/.venv/bin/python3 \
-  --conf spark.jars.packages=org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262 \
-  --conf spark.eventLog.enabled=true \
-  --conf spark.eventLog.dir=s3a://spark/logs \
-  --conf spark.ui.prometheus.enabled=true \
-  --conf spark.kubernetes.driver.annotation.prometheus.io/scrape=true \
-  --conf spark.kubernetes.driver.annotation.prometheus.io/path=/metrics/executors/prometheus \
-  --conf spark.kubernetes.driver.annotation.prometheus.io/port=4040 \
-  local:///app/jobs/weather_southkorea_daily_average_parquet.py \
-  --date 20250601
-```
+Spark Job 실행을 위한 권한을 부여하기 위해서 Service Account를 설정한다.
 
 ```yaml
 ---
@@ -212,7 +203,99 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 ```
 
-## 4. Kubernetes 환경에서 Spark Operator 실행
+### 3.2. Spark Job 실행
+
+Kubernetes Cluster에 `daily-parquet` 데이터를 활용하여 평균 날씨 데이터를 계산하는 Spark Job을 실행한다.
+
+```shell
+spark-submit \
+  --master k8s://192.168.1.71:6443 \
+  --deploy-mode cluster \
+  --name weather-southkorea-daily-average-parquet \
+  --conf spark.kubernetes.container.image=ghcr.io/ssup2-playground/k8s-data-platform_spark-jobs:0.1.6 \
+  --conf spark.kubernetes.namespace=spark \
+  --conf spark.kubernetes.authenticate.driver.serviceAccountName=spark \
+  --conf spark.executor.instances=2 \
+  --conf spark.pyspark.python=/app/.venv/bin/python3 \
+  --conf spark.jars.packages=org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262 \
+  --conf spark.eventLog.enabled=true \
+  --conf spark.eventLog.dir=s3a://spark/logs \
+  local:///app/jobs/weather_southkorea_daily_average_parquet.py \
+  --date 20250601
+```
+
+Kubernetes Cluster에 `daily-iceberg-parquet` 데이터를 활용하여 평균 날씨 데이터를 계산하는 Spark Job을 실행한다.
+
+```shell
+spark-submit \
+  --master k8s://192.168.1.71:6443 \
+  --deploy-mode cluster \
+  --name weather-southkorea-daily-average-iceberg-parquet \
+  --conf spark.kubernetes.container.image=ghcr.io/ssup2-playground/k8s-data-platform_spark-jobs:0.1.6 \
+  --conf spark.kubernetes.namespace=spark \
+  --conf spark.kubernetes.authenticate.driver.serviceAccountName=spark \
+  --conf spark.executor.instances=2 \
+  --conf spark.pyspark.python=/app/.venv/bin/python3 \
+  --conf spark.jars.packages=org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262,org.apache.iceberg:iceberg-spark3-runtime:0.13.2 \
+  --conf spark.eventLog.enabled=true \
+  --conf spark.eventLog.dir=s3a://spark/logs \
+  local:///app/jobs/weather_southkorea_daily_average_iceberg_parquet.py \
+  --date 20250601
+```
+
+### 3.3. Prometheus Monitoring 활성화
+
+`spark.ui.prometheus.enabled=true` 설정과 `spark.kubernetes.driver.annotation.prometheus` 설정을 추가해서 Spark Job의 Prometheus Metric을 노출시켜 Prometheus에서 관련 Metric을 수집할 수 있도록 만든다.
+
+Kubernetes Cluster에 `daily-parquet` 데이터를 활용하여 평균 날씨 데이터를 계산하는 Spark Job을 실행한다.
+
+```shell
+spark-submit \
+  --master k8s://192.168.1.71:6443 \
+  --deploy-mode cluster \
+  --name weather-southkorea-daily-average-parquet \
+  --conf spark.kubernetes.container.image=ghcr.io/ssup2-playground/k8s-data-platform_spark-jobs:0.1.6 \
+  --conf spark.kubernetes.namespace=spark \
+  --conf spark.kubernetes.authenticate.driver.serviceAccountName=spark \
+  --conf spark.executor.instances=2 \
+  --conf spark.pyspark.python=/app/.venv/bin/python3 \
+  --conf spark.jars.packages=org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262 \
+  --conf spark.eventLog.enabled=true \
+  --conf spark.eventLog.dir=s3a://spark/logs \
+  --conf spark.ui.prometheus.enabled=true \
+  --conf spark.kubernetes.driver.annotation.prometheus.io/scrape=true \
+  --conf spark.kubernetes.driver.annotation.prometheus.io/path=/metrics/executors/prometheus \
+  --conf spark.kubernetes.driver.annotation.prometheus.io/port=4040 \
+  local:///app/jobs/weather_southkorea_daily_average_parquet.py \
+  --date 20250601
+```
+
+Kubernetes Cluster에 `daily-iceberg-parquet` 데이터를 활용하여 평균 날씨 데이터를 계산하는 Spark Job을 실행한다.
+
+```shell
+spark-submit \
+  --master k8s://192.168.1.71:6443 \
+  --deploy-mode cluster \
+  --name weather-southkorea-daily-average-iceberg-parquet \
+  --conf spark.kubernetes.container.image=ghcr.io/ssup2-playground/k8s-data-platform_spark-jobs:0.1.6 \
+  --conf spark.kubernetes.namespace=spark \
+  --conf spark.kubernetes.authenticate.driver.serviceAccountName=spark \
+  --conf spark.executor.instances=2 \
+  --conf spark.pyspark.python=/app/.venv/bin/python3 \
+  --conf spark.jars.packages=org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262,org.apache.iceberg:iceberg-spark3-runtime:0.13.2 \
+  --conf spark.eventLog.enabled=true \
+  --conf spark.eventLog.dir=s3a://spark/logs \
+  --conf spark.ui.prometheus.enabled=true \
+  --conf spark.kubernetes.driver.annotation.prometheus.io/scrape=true \
+  --conf spark.kubernetes.driver.annotation.prometheus.io/path=/metrics/executors/prometheus \
+  --conf spark.kubernetes.driver.annotation.prometheus.io/port=4040 \
+  local:///app/jobs/weather_southkorea_daily_average_iceberg_parquet.py \
+  --date 20250601
+```
+
+### 3.4. Volcano Scheduler를 활용한 Gang Scheduling 수행
+
+### 3.5. Spark Operator를 이용한 실행
 
 ```yaml
 apiVersion: "sparkoperator.k8s.io/v1beta2"
@@ -237,6 +320,7 @@ spec:
   sparkConf:
     "spark.eventLog.enabled": "true"
     "spark.eventLog.dir": "s3a://spark/logs"
+    "spark.ui.prometheus.enabled": "true"
     "spark.kubernetes.driver.annotation.prometheus.io/scrape": "true"
     "spark.kubernetes.driver.annotation.prometheus.io/path": "/metrics/executors/prometheus"
     "spark.kubernetes.driver.annotation.prometheus.io/port": "4040"
@@ -268,8 +352,6 @@ spec:
   timeToLiveSeconds: 300
 ```
 
-## 5. Dagster와 연동
-
-## 6. 참고
+## 4. 참고
 
 * Spark Local 환경 설정 : [https://bluehorn07.github.io/2024/08/18/run-spark-on-local-2/](https://bluehorn07.github.io/2024/08/18/run-spark-on-local-2/)
