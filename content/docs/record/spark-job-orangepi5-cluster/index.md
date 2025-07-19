@@ -1,6 +1,5 @@
 ---
 title: Spark Job 수행 / Orange Pi 5 Max Cluster 환경
-draft: true
 ---
 
 Spark를 활용해서 MinIO에 저장되어 있는 데이터 변환을 수행한다.
