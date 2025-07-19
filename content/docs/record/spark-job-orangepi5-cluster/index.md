@@ -205,49 +205,12 @@ roleRef:
 
 ### 3.2. Spark Job 실행
 
-Kubernetes Cluster에 `daily-parquet` 데이터를 활용하여 평균 날씨 데이터를 계산하는 Spark Job을 실행한다.
+Kubernetes Cluster에 `daily-parquet` 데이터를 활용하여 평균 날씨 데이터를 계산하는 Spark Job을 실행한다. 주요 설정은 다음과 같다.
 
-```shell
-spark-submit \
-  --master k8s://192.168.1.71:6443 \
-  --deploy-mode cluster \
-  --name weather-southkorea-daily-average-parquet \
-  --conf spark.kubernetes.container.image=ghcr.io/ssup2-playground/k8s-data-platform_spark-jobs:0.1.6 \
-  --conf spark.kubernetes.namespace=spark \
-  --conf spark.kubernetes.authenticate.driver.serviceAccountName=spark \
-  --conf spark.executor.instances=2 \
-  --conf spark.pyspark.python=/app/.venv/bin/python3 \
-  --conf spark.jars.packages=org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262 \
-  --conf spark.eventLog.enabled=true \
-  --conf spark.eventLog.dir=s3a://spark/logs \
-  local:///app/jobs/weather_southkorea_daily_average_parquet.py \
-  --date 20250601
-```
-
-Kubernetes Cluster에 `daily-iceberg-parquet` 데이터를 활용하여 평균 날씨 데이터를 계산하는 Spark Job을 실행한다.
-
-```shell
-spark-submit \
-  --master k8s://192.168.1.71:6443 \
-  --deploy-mode cluster \
-  --name weather-southkorea-daily-average-iceberg-parquet \
-  --conf spark.kubernetes.container.image=ghcr.io/ssup2-playground/k8s-data-platform_spark-jobs:0.1.6 \
-  --conf spark.kubernetes.namespace=spark \
-  --conf spark.kubernetes.authenticate.driver.serviceAccountName=spark \
-  --conf spark.executor.instances=2 \
-  --conf spark.pyspark.python=/app/.venv/bin/python3 \
-  --conf spark.jars.packages=org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262,org.apache.iceberg:iceberg-spark3-runtime:0.13.2 \
-  --conf spark.eventLog.enabled=true \
-  --conf spark.eventLog.dir=s3a://spark/logs \
-  local:///app/jobs/weather_southkorea_daily_average_iceberg_parquet.py \
-  --date 20250601
-```
-
-### 3.3. Prometheus Monitoring 활성화
-
-`spark.ui.prometheus.enabled=true` 설정과 `spark.kubernetes.driver.annotation.prometheus` 설정을 추가해서 Spark Job의 Prometheus Metric을 노출시켜 Prometheus에서 관련 Metric을 수집할 수 있도록 만든다.
-
-Kubernetes Cluster에 `daily-parquet` 데이터를 활용하여 평균 날씨 데이터를 계산하는 Spark Job을 실행한다.
+* `spark.jars.packages` : Spark Job 실행에 필요한 추가 패키지들을 설정한다. 
+* `eventLog` : Spark Job가 저장될 MinIO의 위치를 지정한다.
+* `spark.ui.prometheus.enabled` : Spark Job에서 Prometheus Metric을 노출시킨다.
+* `spark.kubernetes.driver.annotation.prometheus.io` : Prometheus Server가 Spark Job이 노출하는 Metric을 수집할 수 있도록 설정한다.
 
 ```shell
 spark-submit \
@@ -270,7 +233,7 @@ spark-submit \
   --date 20250601
 ```
 
-Kubernetes Cluster에 `daily-iceberg-parquet` 데이터를 활용하여 평균 날씨 데이터를 계산하는 Spark Job을 실행한다.
+Kubernetes Cluster에 `daily-iceberg-parquet` 데이터를 활용하여 평균 날씨 데이터를 계산하는 Spark Job을 실행한다. Package에 `iceberg-spark3-runtime`을 추가하여 Iceberg Table을 활용한다.
 
 ```shell
 spark-submit \
