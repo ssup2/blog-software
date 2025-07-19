@@ -9,6 +9,20 @@ Spark를 활용해서 MinIO에 저장되어 있는 데이터 변환을 수행한
 
 ### 1.1. 전체 실습 환경
 
+Spark를 통해서 MinIO에 저장되어 있는 데이터를 변환하는 환경은 다음과 같다.
+
+{{< figure caption="[Figure 1] Spark Job 구동 환경" src="images/environment.png" width="1000px" >}}
+
+* MinIO : Data를 저장하는 Object Storage 역할을 수행한다. South Korea Weather Data를 저장한다.
+  * South Korea Weather Data : CSV, Parquet, Iceberg 3가지 Data Format으로 날짜별로 Partition되어 저장된다.
+* Spark Job : MinIO에 저장되어 있는 South Korea Weather Data의 평균 데이터를 계산하고 다시 MinIO에 저장한다.
+* Spark History Server : Spark Job의 실행 로그를 확인하기 위한 역할을 수행한다.
+* Volcano Scheduler : Spark Job 실행을 위한 Pod들을 대상으로 Gang Scheduling을 수행한다.
+* Trino : MinIO에 저장되어 있는 Data를 조회하는 역할을 수행한다.
+* Hive Metastore : Data의 Schema 정보를 관리하며, Trino에게 Schema 정보를 제공한다.
+* Dagster : Data Pipeline을 실행하여 MinIO에 South Korea Weather Data의 저장 형태를 CSV에서 Parquet으로, Parquet에서 Iceberg로 변환한다.
+* DBeaver : Trino에 접속하고 Query를 수행하기 위한 Client 역할을 수행한다.
+
 전체 실슴 환경 구성은 다음의 링크를 참조한다.
 
 * Orange Pi 5 Max 기반 Kubernetes Cluster 구축 : [https://ssup2.github.io/blog-software/docs/record/orangepi5-cluster-build/](https://ssup2.github.io/blog-software/docs/record/orangepi5-cluster-build/)

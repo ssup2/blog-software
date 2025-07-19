@@ -17,7 +17,7 @@ Trino를 통해서 MinIO에 저장되어 있는 데이터를 조회하는 실습
   * South Korea Weather Data : CSV, Parquet, Iceberg 3가지 Data Format으로 시간별로 Partition되어 저장된다.
 * Trino : MinIO에 저장되어 있는 Data를 조회하는 역할을 수행한다.
 * Hive Metastore : Data의 Schema 정보를 관리하며, Trino에게 Schema 정보를 제공한다.
-* Dagster : Data Pipeline을 실행하여 MinIO에 South Korea Weather Data를 저장한다.
+* Dagster : Data Pipeline을 실행하여 MinIO에 South Korea Weather Data를 변환하고 다시 MinIO에 저장한다.
 * DBeaver : Trino에 접속하고 Query를 수행하기 위한 Client 역할을 수행한다.
 
 전체 실슴 환경 구성은 다음의 링크를 참조한다.
