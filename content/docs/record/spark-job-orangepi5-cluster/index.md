@@ -242,10 +242,14 @@ spark-submit \
   --master k8s://192.168.1.71:6443 \
   --deploy-mode cluster \
   --name weather-southkorea-daily-average-parquet \
-  --conf spark.kubernetes.container.image=ghcr.io/ssup2-playground/k8s-data-platform_spark-jobs:0.1.6 \
-  --conf spark.kubernetes.namespace=spark \
-  --conf spark.kubernetes.authenticate.driver.serviceAccountName=spark \
+  --driver-cores 1 \
+  --driver-memory 1g \
+  --executor-cores 1 \
+  --executor-memory 1g \
   --conf spark.executor.instances=2 \
+  --conf spark.kubernetes.namespace=spark \
+  --conf spark.kubernetes.container.image=ghcr.io/ssup2-playground/k8s-data-platform_spark-jobs:0.1.8 \
+  --conf spark.kubernetes.authenticate.driver.serviceAccountName=spark \
   --conf spark.pyspark.python=/app/.venv/bin/python3 \
   --conf spark.jars.packages=org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262 \
   --conf spark.eventLog.enabled=true \
@@ -265,10 +269,14 @@ spark-submit \
   --master k8s://192.168.1.71:6443 \
   --deploy-mode cluster \
   --name weather-southkorea-daily-average-iceberg-parquet \
-  --conf spark.kubernetes.container.image=ghcr.io/ssup2-playground/k8s-data-platform_spark-jobs:0.1.6 \
-  --conf spark.kubernetes.namespace=spark \
-  --conf spark.kubernetes.authenticate.driver.serviceAccountName=spark \
+  --driver-cores 1 \
+  --driver-memory 1g \
+  --executor-cores 1 \
+  --executor-memory 1g \
   --conf spark.executor.instances=2 \
+  --conf spark.kubernetes.namespace=spark \
+  --conf spark.kubernetes.container.image=ghcr.io/ssup2-playground/k8s-data-platform_spark-jobs:0.1.8 \
+  --conf spark.kubernetes.authenticate.driver.serviceAccountName=spark \
   --conf spark.pyspark.python=/app/.venv/bin/python3 \
   --conf spark.jars.packages=org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262,org.apache.iceberg:iceberg-spark3-runtime:0.13.2 \
   --conf spark.eventLog.enabled=true \
@@ -285,7 +293,7 @@ Spark History Server를 확인하여 Spark Job의 실행 로그를 확인한다.
 
 {{< figure caption="[Figure 2] Spark History Server" src="images/spark-history-server.png" width="1000px" >}}
 
-### 3.4. Spark Operator를 이용한 실행
+### 3.4. Spark Operator를 이용한 Spark Job 실행
 
 Spark Operator를 통해서 `daily-parquet` 데이터를 활용하여 평균 날씨 데이터를 계산하는 Spark Job을 실행한다.
 
@@ -298,7 +306,7 @@ metadata:
 spec:
   type: Python
   mode: cluster
-  image: "ghcr.io/ssup2-playground/k8s-data-platform_spark-jobs:0.1.7"
+  image: "ghcr.io/ssup2-playground/k8s-data-platform_spark-jobs:0.1.8"
   sparkVersion: "3.5.5"
   imagePullPolicy: Always
   mainApplicationFile: "local:///app/jobs/weather_southkorea_daily_average_parquet.py"
@@ -355,7 +363,7 @@ metadata:
 spec:
   type: Python
   mode: cluster
-  image: "ghcr.io/ssup2-playground/k8s-data-platform_spark-jobs:0.1.7"
+  image: "ghcr.io/ssup2-playground/k8s-data-platform_spark-jobs:0.1.8"
   sparkVersion: "3.5.5"
   imagePullPolicy: Always
   mainApplicationFile: "local:///app/jobs/weather_southkorea_daily_average_iceberg_parquet.py"
@@ -404,6 +412,73 @@ spec:
 
 ## 4. Kubernetes 환경에서 Volcano Scheduler와 함께 실행
 
+### 4.1. Volcano Scheduler Queue 설정
+
+Spark Job을 위한 Volcano Scheduler의 Queue를 설정한다.
+
+```yaml
+apiVersion: scheduling.volcano.sh/v1beta1
+kind: Queue
+metadata:
+  name: sparkqueue
+spec:
+  weight: 4
+  reclaimable: false
+  capability:
+    cpu: 10
+    memory: 20Gi
+```
+
+### 4.2. PodGroup 설정
+
+PodGroup 파일을 생성하여 Spark Job Container Image의 `/app/configs/volcano.yaml`에 복사한다. 주요 설정은 다음과 같다.
+* `queue` : 사용할 Queue 이름을 지정한다. 위에서 생성한 Queue 이름을 지정한다.
+* `minMember` : 최소 실행 가능한 Pod 수를 지정한다. Driver Pod는 단독으로 동작하기 때문에 반드시 `1`로 설정한다.
+* `minResources` : 최소 실행 가능한 Pod의 자원을 지정한다. Driver Pod와 Executor Pod의 Resource의 총합을 지정한다. Volcano Scheduler는 `minResources`를 만큼 Resource가 할당 가능할때 Spark Job Pod를 Scheduling한다.
+
+```yaml
+apiVersion: scheduling.volcano.sh/v1beta1
+kind: PodGroup
+spec:
+  queue: sparkqueue
+  minMember: 1
+  minResources:
+    cpu: "4"
+    memory: "4Gi"
+```
+
+### 4.2. Spark Job 실행
+
+`volcano` Scheduler와 PodGroup 파일인 `/app/configs/volcano.yaml`을 활용하여 Spark Job을 실행한다.
+
+```shell
+spark-submit \
+  --master k8s://192.168.1.71:6443 \
+  --deploy-mode cluster \
+  --name weather-southkorea-daily-average-parquet \
+  --driver-cores 1 \
+  --driver-memory 1g \
+  --executor-cores 1 \
+  --executor-memory 1g \
+  --conf spark.executor.instances=2 \
+  --conf spark.kubernetes.namespace=spark \
+  --conf spark.kubernetes.container.image=ghcr.io/ssup2-playground/k8s-data-platform_spark-jobs:0.1.8 \
+  --conf spark.kubernetes.authenticate.driver.serviceAccountName=spark \
+  --conf spark.pyspark.python=/app/.venv/bin/python3 \
+  --conf spark.jars.packages=org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262 \
+  --conf spark.kubernetes.scheduler.name=volcano \
+  --conf spark.kubernetes.scheduler.volcano.podGroupTemplateFile=/app/configs/volcano.yaml \
+  --conf spark.eventLog.enabled=true \
+  --conf spark.eventLog.dir=s3a://spark/logs \
+  --conf spark.ui.prometheus.enabled=true \
+  --conf spark.kubernetes.driver.annotation.prometheus.io/scrape=true \
+  --conf spark.kubernetes.driver.annotation.prometheus.io/path=/metrics/executors/prometheus \
+  --conf spark.kubernetes.driver.annotation.prometheus.io/port=4040 \
+  local:///app/jobs/weather_southkorea_daily_average_parquet.py \
+  --date 20250601
+```
+
 ## 5. 참고
 
 * Spark Local 환경 설정 : [https://bluehorn07.github.io/2024/08/18/run-spark-on-local-2/](https://bluehorn07.github.io/2024/08/18/run-spark-on-local-2/)
+* Volcano Scheduler 설정 : [https://docs.aws.amazon.com/emr/latest/EMR-on-EKS-DevelopmentGuide/tutorial-volcano.html](https://docs.aws.amazon.com/emr/latest/EMR-on-EKS-DevelopmentGuide/tutorial-volcano.html)
