@@ -449,7 +449,7 @@ spec:
 
 ### 4.2. Spark Job 실행
 
-`volcano` Scheduler와 PodGroup 파일인 `/app/configs/volcano.yaml`을 활용하여 Spark Job을 실행한다.
+Volcano Scheduler와 함께 `daily-parquet` 데이터를 활용하여 평균 날께 데이터를 계산하는 Spark Job을 실행한다. `spark.kubernetes.scheduler.name`에 `volcano`를 지정하고, `spark.kubernetes.scheduler.volcano.podGroupTemplateFile`에 `/app/configs/volcano.yaml`을 지정한다.
 
 ```shell
 spark-submit \
@@ -475,6 +475,35 @@ spark-submit \
   --conf spark.kubernetes.driver.annotation.prometheus.io/path=/metrics/executors/prometheus \
   --conf spark.kubernetes.driver.annotation.prometheus.io/port=4040 \
   local:///app/jobs/weather_southkorea_daily_average_parquet.py \
+  --date 20250601
+```
+
+Kubernetes Cluster에 `daily-iceberg-parquet` 데이터를 활용하여 평균 날씨 데이터를 계산하는 Spark Job을 실행한다.
+
+```shell
+spark-submit \
+  --master k8s://192.168.1.71:6443 \
+  --deploy-mode cluster \
+  --name weather-southkorea-daily-average-iceberg-parquet \
+  --driver-cores 1 \
+  --driver-memory 1g \
+  --executor-cores 1 \
+  --executor-memory 1g \
+  --conf spark.executor.instances=2 \
+  --conf spark.kubernetes.namespace=spark \
+  --conf spark.kubernetes.container.image=ghcr.io/ssup2-playground/k8s-data-platform_spark-jobs:0.1.8 \
+  --conf spark.kubernetes.authenticate.driver.serviceAccountName=spark \
+  --conf spark.pyspark.python=/app/.venv/bin/python3 \
+  --conf spark.jars.packages=org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262,org.apache.iceberg:iceberg-spark3-runtime:0.13.2 \
+  --conf spark.kubernetes.scheduler.name=volcano \
+  --conf spark.kubernetes.scheduler.volcano.podGroupTemplateFile=/app/configs/volcano.yaml \
+  --conf spark.eventLog.enabled=true \
+  --conf spark.eventLog.dir=s3a://spark/logs \
+  --conf spark.ui.prometheus.enabled=true \
+  --conf spark.kubernetes.driver.annotation.prometheus.io/scrape=true \
+  --conf spark.kubernetes.driver.annotation.prometheus.io/path=/metrics/executors/prometheus \
+  --conf spark.kubernetes.driver.annotation.prometheus.io/port=4040 \
+  local:///app/jobs/weather_southkorea_daily_average_iceberg_parquet.py \
   --date 20250601
 ```
 
