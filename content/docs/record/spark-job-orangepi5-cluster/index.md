@@ -285,9 +285,7 @@ Spark History Server를 확인하여 Spark Job의 실행 로그를 확인한다.
 
 {{< figure caption="[Figure 2] Spark History Server" src="images/spark-history-server.png" width="1000px" >}}
 
-### 3.4. Volcano Scheduler를 활용한 Gang Scheduling 수행
-
-### 3.5. Spark Operator를 이용한 실행
+### 3.4. Spark Operator를 이용한 실행
 
 Spark Operator를 통해서 `daily-parquet` 데이터를 활용하여 평균 날씨 데이터를 계산하는 Spark Job을 실행한다.
 
@@ -404,6 +402,8 @@ spec:
   timeToLiveSeconds: 300
 ```
 
-## 4. 참고
+## 4. Kubernetes 환경에서 Volcano Scheduler와 함께 실행
+
+## 5. 참고
 
 * Spark Local 환경 설정 : [https://bluehorn07.github.io/2024/08/18/run-spark-on-local-2/](https://bluehorn07.github.io/2024/08/18/run-spark-on-local-2/)
