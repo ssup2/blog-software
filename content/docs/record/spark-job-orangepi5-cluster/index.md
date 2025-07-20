@@ -293,6 +293,10 @@ Spark History Server를 확인하여 Spark Job의 실행 로그를 확인한다.
 
 {{< figure caption="[Figure 2] Spark History Server" src="images/spark-history-server.png" width="1000px" >}}
 
+Prometheus에서 `executors` Metric을 확인한다. [Figure 3]는 Prometheus에서 `executors` Metric을 확인하는 모습이다.
+
+{{< figure caption="[Figure 3] Prometheus" src="images/spark-prometheus-metric.png" width="550px" >}}
+
 ### 3.4. Spark Operator를 이용한 Spark Job 실행
 
 Spark Operator를 통해서 `daily-parquet` 데이터를 활용하여 평균 날씨 데이터를 계산하는 Spark Job을 실행한다.
