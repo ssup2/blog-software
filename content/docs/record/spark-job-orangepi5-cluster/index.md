@@ -289,6 +289,8 @@ Spark History Server를 확인하여 Spark Job의 실행 로그를 확인한다.
 
 ### 3.5. Spark Operator를 이용한 실행
 
+Spark Operator를 통해서 `daily-parquet` 데이터를 활용하여 평균 날씨 데이터를 계산하는 Spark Job을 실행한다.
+
 ```yaml
 apiVersion: "sparkoperator.k8s.io/v1beta2"
 kind: SparkApplication
@@ -298,7 +300,7 @@ metadata:
 spec:
   type: Python
   mode: cluster
-  image: "ghcr.io/ssup2-playground/k8s-data-platform_spark-jobs:0.1.6"
+  image: "ghcr.io/ssup2-playground/k8s-data-platform_spark-jobs:0.1.7"
   sparkVersion: "3.5.5"
   imagePullPolicy: Always
   mainApplicationFile: "local:///app/jobs/weather_southkorea_daily_average_parquet.py"
@@ -323,6 +325,64 @@ spec:
       - org.apache.hadoop:hadoop-aws:3.4.0
       - com.amazonaws:aws-java-sdk-bundle:1.12.262
   
+  # Executor configuration
+  executor:
+    instances: 2
+    cores: 1
+    memory: "1g"
+    serviceAccount: spark
+  
+  # Driver configuration
+  driver:
+    cores: 1
+    memory: "1g"
+    serviceAccount: spark
+  
+  # Restart policy
+  restartPolicy:
+    type: Never
+  
+  # TTL for automatic cleanup (1 hour after completion)
+  timeToLiveSeconds: 300
+```
+
+Spark Operator를 통해서 `daily-iceberg-parquet` 데이터를 활용하여 평균 날씨 데이터를 계산하는 Spark Job을 실행한다.
+
+```yaml
+apiVersion: "sparkoperator.k8s.io/v1beta2"
+kind: SparkApplication
+metadata:
+  namespace: spark
+  name:  weather-southkorea-daily-average-iceberg-parquet
+spec:
+  type: Python
+  mode: cluster
+  image: "ghcr.io/ssup2-playground/k8s-data-platform_spark-jobs:0.1.7"
+  sparkVersion: "3.5.5"
+  imagePullPolicy: Always
+  mainApplicationFile: "local:///app/jobs/weather_southkorea_daily_average_iceberg_parquet.py"
+  
+  # Application arguments
+  arguments:
+    - "--date"
+    - "20250601"
+  
+  # Spark configuration
+  sparkConf:
+    "spark.eventLog.enabled": "true"
+    "spark.eventLog.dir": "s3a://spark/logs"
+    "spark.ui.prometheus.enabled": "true"
+    "spark.kubernetes.driver.annotation.prometheus.io/scrape": "true"
+    "spark.kubernetes.driver.annotation.prometheus.io/path": "/metrics/executors/prometheus"
+    "spark.kubernetes.driver.annotation.prometheus.io/port": "4040"
+
+  # Spark dependencies
+  deps:
+    packages:
+      - org.apache.hadoop:hadoop-aws:3.4.0
+      - com.amazonaws:aws-java-sdk-bundle:1.12.262
+      - org.apache.iceberg:iceberg-spark3-runtime:0.13.2
+
   # Executor configuration
   executor:
     instances: 2
