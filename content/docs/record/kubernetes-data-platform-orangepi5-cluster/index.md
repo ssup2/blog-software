@@ -289,6 +289,7 @@ helm upgrade --install --create-namespace --namespace airflow airflow airflow -f
 
 # Dagster
 helm upgrade --install --create-namespace --namespace dagster dagster dagster -f dagster/values.yaml
+helm upgrade --install --create-namespace --namespace dagster dagster-workflows dagster-user-deployments -f dagster-user-deployments/values-workflows.yaml
 
 # Ranger
 helm upgrade --install --create-namespace --namespace ranger ranger ranger -f ranger/values.yaml
