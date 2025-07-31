@@ -7,11 +7,11 @@ draft: true
 
 | Long Name | Short Name | Description |
 |---|---|---|
-| NoHealthyUpstream          | UH  | Upstream Cluster에 Health 상태의 Upstream Host가 존재하지 않으며, 503 Status Code를 받음 |
-| UpstreamConnectionFailure  | UF  | Upstream Host 연결에 실패하였으며, 503 Status Code를 받음 |
-| UpstreamOverflow           | UO  | Circuit Breaker로 인해서 Upstream Host 연결에 실패하였으며, 503 Status Code를 받음 |
-| NoRouteFound               | NR  | 요청을 처리할 Route Rule 또는 Filter Chain이 존재하지 않으며, 404 Status를 받음 |
-| UpstreamRetryLimitExceeded | URX | HTTP 요청 재시도 또는 TCP 재접속 시도 횟수가 초과하여 Upstream Host 연결에 실패 |
+| NoHealthyUpstream          | UH  | Upstream Cluster에 Health 상태의 Upstream Server가 존재하지 않으며, Client는 503 Status Code를 받음 |
+| UpstreamConnectionFailure  | UF  | Upstream Server 연결에 실패하였으며, Client는 503 Status Code를 받음 |
+| UpstreamOverflow           | UO  | Circuit Breaker로 인해서 Upstream Server 연결에 실패하였으며, Client는 503 Status Code를 받음 |
+| NoRouteFound               | NR  | 요청을 처리할 Route Rule 또는 Filter Chain이 존재하지 않으며, Client는 404 Status Code를 받음 |
+| UpstreamRetryLimitExceeded | URX | HTTP 요청 재시도 또는 TCP 재접속 시도 횟수가 초과하여 Upstream Server 연결에 실패 |
 | NoClusterFound             | NC  | Upstream Cluster가 존재하지 않음 |
 | DurationTimeout            | DT  | `max_connection_duration` 또는 `max_downstream_connection_duration` 시간을 초과하는 경우 |
 
@@ -19,9 +19,9 @@ draft: true
 
 | Long Name | Short Name | Description |
 |---|---|---|
-| DownstreamConnectionTermination  | DC    | Downstream connection termination. |
+| DownstreamConnectionTermination  | DC    | Downstream Client가 연결을 종료 |
 | FailedLocalHealthCheck           | LH    | Local service failed health check request in addition to 503 response code. |
-| UpstreamRequestTimeout           | UT    | Upstream request timeout in addition to 504 response code. |
+| UpstreamRequestTimeout           | UT    | Upstream Server로 전송한 요청이 Timeout에 의해서 종료 되었으며, Client는 504 Status Code를 받음 |
 | LocalReset                       | LR    | Connection local reset in addition to 503 response code. |
 | UpstreamRemoteReset              | UR    | Upstream remote reset in addition to 503 response code. |
 | UpstreamConnectionTermination    | UC    | Upstream connection termination in addition to 503 response code. |
