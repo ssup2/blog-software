@@ -11,20 +11,20 @@ draft: true
 | UpstreamConnectionFailure  | UF  | Envoy Server는 Upstream Server와 연결에 실패하였으며, Downstream Client에게 503 Status Code를 응답 |
 | UpstreamOverflow           | UO  | Envoy Server는 Circuit Breaking으로 인해서 Upstream Server로 연결을 시도하지 않았으며, Downstream Client에게 503 Status Code를 응답 |
 | NoRouteFound               | NR  | Envoy Server는 적절한 Route Rule 또는 Filter Chain이 존재하지 않아 Upstream Server로 연결을 시도하지 못했으며, Downstream Client에게 404 Status Code를 응답 |
-| UpstreamRetryLimitExceeded | URX | Envoy Server는 설정된 HTTP 요청 재시도 또는 TCP 재접속 시도 횟수가 초과하여 잠시동안 Upstream Server로 연결을 시도하지 않음 |
+| UpstreamRetryLimitExceeded | URX | Envoy Server는 설정된 HTTP 요청 재시도 또는 TCP 재접속 시도 횟수가 초과하여 잠시동안 Upstream Server로 연결을 시결하지 않음 |
 | NoClusterFound             | NC  | Envoy Server는 요청을 처리할 Upstream Cluster를 찾지 못해 Upstream Server로 연결을 시도하지 못함 |
-| DurationTimeout            | DT  | Envoy Server는 Upstream Server와 `max_connection_duration` 시간 이상으로 Connection을 유지하거나, Downstream Client와 `max_downstream_connection_duration` 시간 이상으로 Connection을 유지할 경우 Connection을 강제로 종료하며, Downstream Client에게 504 Status Code를 응답 |
+| DurationTimeout            | DT  | Envoy Server는 Upstream Server와 `max_connection_duration` 시간 이상으로 연결을 유지하거나, Downstream Client와 `max_downstream_connection_duration` 시간 이상으로 연결을 유지할 경우 연결을 강제로 종료하며, Downstream Client에게 504 Status Code를 응답 |
 
 ## 2. HTTP Only Flag
 
 | Long Name | Short Name | Description |
 |---|---|---|
-| DownstreamConnectionTermination  | DC    | Downstream Client가 연결을 종료 |
+| DownstreamConnectionTermination  | DC    | Downstream Client가 Envoy Server와의 연결을 먼저 TCP FIN과 함께 종료 |
 | FailedLocalHealthCheck           | LH    | Local service failed health check request in addition to 503 response code. |
-| UpstreamRequestTimeout           | UT    | Upstream Cluster로 전송한 요청이 Timeout에 의해서 종료 되었으며, Client는 504 Status Code를 받음 |
-| LocalReset                       | LR    | Envoy Server가 Connection을 Reset을 통해서 먼져 끊었으며, Client는 503 Status Code를 받음 |
-| UpstreamRemoteReset              | UR    | Upstream Server가 Connection을 Reset을 통해 먼져 끊었으며, Client는 504 Status Code를 받음 |
-| UpstreamConnectionTermination    | UC    | Upstream connection termination in addition to 503 response code. |
+| UpstreamRequestTimeout           | UT    | Envoy Server는 Upstream Cluster로 전송한 요청을 Timeout에 의해서 강제로 중단하였으며, Downstream Client에게 504 Status Code를 응답 |
+| LocalReset                       | LR    | Envoy Server는 Upstream Cluster와의 연결을 TCP RST과 함께 먼저 강제로 종료하였으며, Downstream Client에게 503 Status Code를 응답 |
+| UpstreamRemoteReset              | UR    | Upstream Server는 Envoy Server와의 연결을 TCP RST과 함께 먼저 강제로 종료하였으며, Envoy Server는 Downstream Client에게 503 Status Code를 응답 |
+| UpstreamConnectionTermination    | UC    | Upstream Server는 Envoy Server와의 연결을 TCP FIN과 함께 먼저 종료 종료하였으며, Envoy Server는 Downstream Client에게 503 Status Code를 응답 |
 | DelayInjected                    | DI    | The request processing was delayed for a period specified via fault injection. |
 | FaultInjected                    | FI    | The request was aborted with a response code specified via fault injection. |
 | RateLimited                      | RL    | The request was rate-limited locally by the HTTP rate limit filter in addition to 429 response code. |
