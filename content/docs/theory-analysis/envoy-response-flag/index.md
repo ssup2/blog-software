@@ -24,7 +24,7 @@ draft: true
 | UpstreamRequestTimeout           | UT    | Envoy Server는 Upstream Cluster로 전송한 요청을 Timeout에 의해서 강제로 중단하였으며, Downstream Client에게 504 Status Code를 응답 |
 | LocalReset                       | LR    | Envoy Server는 Upstream Cluster와의 연결을 TCP RST과 함께 먼저 강제로 종료하였으며, Downstream Client에게 503 Status Code를 응답 |
 | UpstreamRemoteReset              | UR    | Upstream Server는 Envoy Server와의 연결을 TCP RST과 함께 먼저 강제로 종료하였으며, Envoy Server는 Downstream Client에게 503 Status Code를 응답 |
-| UpstreamConnectionTermination    | UC    | Upstream Server는 Envoy Server와의 연결을 TCP FIN과 함께 먼저 종료 종료하였으며, Envoy Server는 Downstream Client에게 503 Status Code를 응답 |
+| UpstreamConnectionTermination    | UC    | Upstream Server는 Envoy Server와의 연결을 TCP FIN과 함께 먼저 종료하였으며, Envoy Server는 Downstream Client에게 503 Status Code를 응답 |
 | DelayInjected                    | DI    | The request processing was delayed for a period specified via fault injection. |
 | FaultInjected                    | FI    | The request was aborted with a response code specified via fault injection. |
 | RateLimited                      | RL    | The request was rate-limited locally by the HTTP rate limit filter in addition to 429 response code. |
