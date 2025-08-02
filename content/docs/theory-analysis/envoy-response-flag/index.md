@@ -2,9 +2,13 @@
 title: "Envoy Response Flag"
 ---
 
-Enovy의 Response Flag를 정리한다. Response Flag는 HTTP, TCP와 혼용되는 Flag와, HTTP에서만 적용되는 Flag로 구분된다.
+Enovy의 Response Flag를 정리한다.
 
-## 1. HTTP, TCP Flag
+## 1. Envoy Response Flag
+
+Envoy Response Flag는 Envoy가 요청을 처리하는 과정에서 특정 Event, Error가 발생했을때 Access Log에 관련 정보를 나타내기 위해서 사용되는 Flag를 의미한다. Long Name과 Short Name이 존재하며, Envoy Access Log에는 Short Name이 기록된다. Response Flag는 HTTP, TCP와 혼용되는 Flag와, HTTP에서만 적용되는 Flag로 구분된다.
+
+### 1.1. HTTP, TCP Fla처
 
 | Long Name | Short Name | Description |
 |---|---|---|
@@ -16,12 +20,12 @@ Enovy의 Response Flag를 정리한다. Response Flag는 HTTP, TCP와 혼용되�
 | NoClusterFound             | NC  | Envoy Server는 요청을 전달할 Upstream Cluster를 찾지 못해 Upstream Server로 연결을 시도하지 못함 |
 | DurationTimeout            | DT  | Envoy Server는 Upstream Server와 `max_connection_duration` 시간 이상으로 연결을 유지하거나, Downstream Client와 `max_downstream_connection_duration` 시간 이상으로 연결을 유지할 경우 연결을 강제로 종료하며, Downstream Client에게 504 Status Code를 응답 |
 
-## 2. HTTP Only Flag
+### 1.2. HTTP Only Flag
 
 | Long Name | Short Name | Description |
 |---|---|---|
 | DownstreamConnectionTermination  | DC    | Downstream Client가 Envoy Server와의 연결을 먼저 TCP FIN과 함께 종료 |
-| FailedLocalHealthCheck           | LH    | Local service failed health check request in addition to 503 response code. |
+| FailedLocalHealthCheck           | LH    | Envoy Server는 Upstream Server로 요청을 보내기전 Health Check를 수행하였지만 실패하여 요청은 종료하고, Downstream Client에게 503 Status Code를 응답 |
 | UpstreamRequestTimeout           | UT    | Envoy Server는 Upstream Cluster로 전송한 요청을 Timeout에 의해서 강제로 중단하였으며, Downstream Client에게 504 Status Code를 응답 |
 | LocalReset                       | LR    | Envoy Server는 Upstream Cluster와의 연결을 TCP RST과 함께 먼저 강제로 종료하였으며, Downstream Client에게 503 Status Code를 응답 |
 | UpstreamRemoteReset              | UR    | Upstream Server는 Envoy Server와의 연결을 TCP RST과 함께 먼저 강제로 종료하였으며, Envoy Server는 Downstream Client에게 503 Status Code를 응답 |
@@ -44,7 +48,7 @@ Enovy의 Response Flag를 정리한다. Response Flag는 HTTP, TCP와 혼용되�
 | DownstreamRemoteReset            | DR    | Downstream Client가 Envoy Server와의 연결을 먼저 TCP RST과 함께 종료 |
 | UnconditionalDropOverload        | UDO   | Envoy Server는 과부화로 인해서 모든 신규 요청을 거절 |
 
-## 3. 참조
+## 2. 참조
 
 * [https://www.envoyproxy.io/docs/envoy/latest/configuration/observability/access_log/usage](https://www.envoyproxy.io/docs/envoy/latest/configuration/observability/access_log/usage)
 
