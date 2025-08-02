@@ -30,11 +30,11 @@ draft: true
 | RateLimited                      | RL    | Envoy Server는 HTTP Rate Limit Filter를 통해서 요청 횟수를 제한하며, Downstream Client에게 429 Status Code를 응답 |
 | UnauthorizedExternalService      | UAEX  | Envoy Server는 연동된 외부의 Authorization Service로 인해서 요청을 거부 |
 | RateLimitServiceError            | RLSE  | Envoy Server는 HTTP Rate Limit Filter로 인해서 요청을 Upstream Server에게 전달하지 않음 |
-| InvalidEnvoyRequestHeaders       | IH    | The request was rejected because it set an invalid value for a strictly-checked header in addition to 400. |
-| StreamIdleTimeout                | SI    | Stream idle timeout in addition to 408 or 504 response code. |
-| DownstreamProtocolError          | DPE   | The downstream request had an HTTP protocol error. |
-| UpstreamProtocolError            | UPE   | The upstream response had an HTTP protocol error. 부
-| UpstreamMaxStreamDurationReached | UMSDR | The upstream request reached max stream duration. |
+| InvalidEnvoyRequestHeaders       | IH    | Envoy Server는 요청에 잘못된 Header가 설정되어 있어 요청을 거부하였으며, Downstream Client에게 400 Status Code를 응답 |
+| StreamIdleTimeout                | SI    | Envoy Server는 Upstream Server 또는 Downstream Client와 특정 시간 요청을 주고 받지 않으면 연결을 종료하며, Envoy Server와 Upstream Server 사이의 요청이 없었으면 Envoy Server는 Downstream Client에게 504 Status Code를 응답하고 Envoy Server와 Downstream Client 사이의 요청이 없었으면 Envoy Server는 Downstream Client에게 408 Status Code를 응답 |
+| DownstreamProtocolError          | DPE   | Envoy Server는 Downstream Client로부터 잘못된 HTTP Protocol을 이용하는 요청을 받음 |
+| UpstreamProtocolError            | UPE   | Envoy Server는 Upstream Server로부터 잘못된 HTTP Protocol을 이용하는 응답을 받음 |
+| UpstreamMaxStreamDurationReached | UMSDR | Envoy Server는 Upstream Server에 전송한 요청의 지속시간이 최대값을 초과하면 요청을 강제로 종료 |
 | ResponseFromCacheFilter          | RFCF  | The response was served from an Envoy cache filter. |
 | NoFilterConfigFound              | NFCF  | The request is terminated because filter configuration was not received within the permitted warming deadline. |
 | OverloadManagerTerminated        | OM    | Overload Manager terminated the request. |
