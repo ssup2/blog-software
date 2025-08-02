@@ -6,9 +6,9 @@ Enovy의 Response Flag를 정리한다.
 
 ## 1. Envoy Response Flag
 
-Envoy Response Flag는 Envoy가 요청을 처리하는 과정에서 특정 Event, Error가 발생했을때 Access Log에 관련 정보를 나타내기 위해서 사용되는 Flag를 의미한다. Long Name과 Short Name이 존재하며, Envoy Access Log에는 Short Name이 기록된다. Response Flag는 HTTP, TCP와 혼용되는 Flag와, HTTP에서만 적용되는 Flag로 구분된다.
+Envoy Response Flag는 Envoy가 요청을 처리하는 과정에서 **특정 Event 또는 Error**가 발생했을때 Access Log에 관련 정보를 나타내기 위해서 사용되는 Flag를 의미한다. **Long Name**과 **Short Name**이 존재하며, Envoy Access Log에는 Short Name이 기록된다. Response Flag는 **HTTP, TCP와 혼용**되는 Flag와, **HTTP에서만 적용**되는 Flag로 구분된다.
 
-### 1.1. HTTP, TCP Fla처
+### 1.1. HTTP, TCP Flag
 
 | Long Name | Short Name | Description |
 |---|---|---|
