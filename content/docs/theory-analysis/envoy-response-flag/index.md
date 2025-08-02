@@ -12,7 +12,7 @@ draft: true
 | UpstreamOverflow           | UO  | Envoy Server는 Circuit Breaking으로 인해서 Upstream Server로 연결을 시도하지 않았으며, Downstream Client에게 503 Status Code를 응답 |
 | NoRouteFound               | NR  | Envoy Server는 적절한 Route Rule 또는 Filter Chain이 존재하지 않아 Upstream Server로 연결을 시도하지 못했으며, Downstream Client에게 404 Status Code를 응답 |
 | UpstreamRetryLimitExceeded | URX | Envoy Server는 설정된 HTTP 요청 재시도 또는 TCP 재접속 시도 횟수가 초과하여 잠시동안 Upstream Server로 연결을 시결하지 않음 |
-| NoClusterFound             | NC  | Envoy Server는 요청을 처리할 Upstream Cluster를 찾지 못해 Upstream Server로 연결을 시도하지 못함 |
+| NoClusterFound             | NC  | Envoy Server는 요청을 전달할 Upstream Cluster를 찾지 못해 Upstream Server로 연결을 시도하지 못함 |
 | DurationTimeout            | DT  | Envoy Server는 Upstream Server와 `max_connection_duration` 시간 이상으로 연결을 유지하거나, Downstream Client와 `max_downstream_connection_duration` 시간 이상으로 연결을 유지할 경우 연결을 강제로 종료하며, Downstream Client에게 504 Status Code를 응답 |
 
 ## 2. HTTP Only Flag
@@ -25,15 +25,15 @@ draft: true
 | LocalReset                       | LR    | Envoy Server는 Upstream Cluster와의 연결을 TCP RST과 함께 먼저 강제로 종료하였으며, Downstream Client에게 503 Status Code를 응답 |
 | UpstreamRemoteReset              | UR    | Upstream Server는 Envoy Server와의 연결을 TCP RST과 함께 먼저 강제로 종료하였으며, Envoy Server는 Downstream Client에게 503 Status Code를 응답 |
 | UpstreamConnectionTermination    | UC    | Upstream Server는 Envoy Server와의 연결을 TCP FIN과 함께 먼저 종료하였으며, Envoy Server는 Downstream Client에게 503 Status Code를 응답 |
-| DelayInjected                    | DI    | The request processing was delayed for a period specified via fault injection. |
-| FaultInjected                    | FI    | The request was aborted with a response code specified via fault injection. |
-| RateLimited                      | RL    | The request was rate-limited locally by the HTTP rate limit filter in addition to 429 response code. |
-| UnauthorizedExternalService      | UAEX  | The request was denied by the external authorization service. |
-| RateLimitServiceError            | RLSE  | The request was rejected because there was an error in rate limit service. |
+| DelayInjected                    | DI    | Envoy Server는 Fault Injection 설정만큼 요청을 지연하여 Upstream Server에게 전달 |
+| FaultInjected                    | FI    | Envoy Server는 Fault Injection 설정으로 인해서 요청을 Upstream Server에게 전달하지 않음 |
+| RateLimited                      | RL    | Envoy Server는 HTTP Rate Limit Filter를 통해서 요청 횟수를 제한하며, Downstream Client에게 429 Status Code를 응답 |
+| UnauthorizedExternalService      | UAEX  | Envoy Server는 연동된 외부의 Authorization Service로 인해서 요청을 거부 |
+| RateLimitServiceError            | RLSE  | Envoy Server는 HTTP Rate Limit Filter로 인해서 요청을 Upstream Server에게 전달하지 않음 |
 | InvalidEnvoyRequestHeaders       | IH    | The request was rejected because it set an invalid value for a strictly-checked header in addition to 400. |
 | StreamIdleTimeout                | SI    | Stream idle timeout in addition to 408 or 504 response code. |
 | DownstreamProtocolError          | DPE   | The downstream request had an HTTP protocol error. |
-| UpstreamProtocolError            | UPE   | The upstream response had an HTTP protocol error. |
+| UpstreamProtocolError            | UPE   | The upstream response had an HTTP protocol error. 부
 | UpstreamMaxStreamDurationReached | UMSDR | The upstream request reached max stream duration. |
 | ResponseFromCacheFilter          | RFCF  | The response was served from an Envoy cache filter. |
 | NoFilterConfigFound              | NFCF  | The request is terminated because filter configuration was not received within the permitted warming deadline. |
