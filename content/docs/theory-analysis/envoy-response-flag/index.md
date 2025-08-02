@@ -1,7 +1,8 @@
 ---
 title: "Envoy Response Flag"
-draft: true
 ---
+
+Enovy의 Response Flag를 정리한다. Response Flag는 HTTP, TCP와 혼용되는 Flag와, HTTP에서만 적용되는 Flag로 구분된다.
 
 ## 1. HTTP, TCP Flag
 
@@ -34,9 +35,9 @@ draft: true
 | StreamIdleTimeout                | SI    | Envoy Server는 Upstream Server 또는 Downstream Client와 특정 시간 요청을 주고 받지 않으면 연결을 종료하며, Envoy Server와 Upstream Server 사이의 요청이 없었으면 Envoy Server는 Downstream Client에게 504 Status Code를 응답하고 Envoy Server와 Downstream Client 사이의 요청이 없었으면 Envoy Server는 Downstream Client에게 408 Status Code를 응답 |
 | DownstreamProtocolError          | DPE   | Envoy Server는 Downstream Client로부터 잘못된 HTTP Protocol을 이용하는 요청을 받음 |
 | UpstreamProtocolError            | UPE   | Envoy Server는 Upstream Server로부터 잘못된 HTTP Protocol을 이용하는 응답을 받음 |
-| UpstreamMaxStreamDurationReached | UMSDR | Envoy Server는 Upstream Server에 전송한 요청의 지속시간이 최대값을 초과하면 요청을 강제로 종료 |
-| ResponseFromCacheFilter          | RFCF  | The response was served from an Envoy cache filter. |
-| NoFilterConfigFound              | NFCF  | The request is terminated because filter configuration was not received within the permitted warming deadline. |
+| UpstreamMaxStreamDurationReached | UMSDR | Envoy Server는 Upstream Server에 전송한 요청의  지속시간이 최대값을 초과하면 요청을 강제로 종료 |
+| ResponseFromCacheFilter          | RFCF  | Envoy Server는 요청을 Upstream Server에게 전달하지 않고 Cache Filter를 통해서 Caching된 응답을 활용 |
+| NoFilterConfigFound              | NFCF  | Envoy Server는 예열 기간동안 요청을 처리할 Filter 설정을 찾지 못함 |
 | OverloadManagerTerminated        | OM    | Overload Manager terminated the request. |
 | DnsResolutionFailed              | DF    | The request was terminated due to DNS resolution failure. |
 | DropOverload                     | DO    | The request was terminated in addition to 503 response code due to drop_overloads. |
