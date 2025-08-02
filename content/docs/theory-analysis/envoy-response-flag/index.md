@@ -38,11 +38,11 @@ Enovy의 Response Flag를 정리한다. Response Flag는 HTTP, TCP와 혼용되�
 | UpstreamMaxStreamDurationReached | UMSDR | Envoy Server는 Upstream Server에 전송한 요청의  지속시간이 최대값을 초과하면 요청을 강제로 종료 |
 | ResponseFromCacheFilter          | RFCF  | Envoy Server는 요청을 Upstream Server에게 전달하지 않고 Cache Filter를 통해서 Caching된 응답을 활용 |
 | NoFilterConfigFound              | NFCF  | Envoy Server는 예열 기간동안 요청을 처리할 Filter 설정을 찾지 못함 |
-| OverloadManagerTerminated        | OM    | Overload Manager terminated the request. |
-| DnsResolutionFailed              | DF    | The request was terminated due to DNS resolution failure. |
-| DropOverload                     | DO    | The request was terminated in addition to 503 response code due to drop_overloads. |
-| DownstreamRemoteReset            | DR    | The response details are http2.remote_reset or http2.remote_refuse. |
-| UnconditionalDropOverload        | UDO   | The request was terminated in addition to 503 response code due to drop_overloads is set to 100%. |
+| OverloadManagerTerminated        | OM    | Envoy Server의 Overload Manager에 의해서 과부하 상태를 감지하고 강제로 처리중인 요청을 종료 |
+| DnsResolutionFailed              | DF    | Envoy Server는 요청을 Upstream Server로 전송하기 위해서 DNS 조회시 조회에 실패 |
+| DropOverload                     | DO    | Envoy Server는 과부화로 인해서 일부 신규 요청을 거절하며, Downstream Client에게 503 Status Code를 응답 |
+| DownstreamRemoteReset            | DR    | Downstream Client가 Envoy Server와의 연결을 먼저 TCP RST과 함께 종료 |
+| UnconditionalDropOverload        | UDO   | Envoy Server는 과부화로 인해서 모든 신규 요청을 거절 |
 
 ## 3. 참조
 
