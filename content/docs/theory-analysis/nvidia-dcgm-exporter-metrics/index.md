@@ -8,6 +8,8 @@ NVIDIA DCGM Exporter가 노출하는 Metric을 정리한다.
 
 ### 1.1. Utilization Metrics
 
+GPU 사용률을 의미
+
 | Metric | Description | Metric Type | Value Unit |
 |---|---|---|---|
 | `DCGM_FI_DEV_GPU_UTIL` | 전반적인 GPU 사용률를 의미 | Gauge | Percentage (0 ~ 100) |
@@ -17,12 +19,16 @@ NVIDIA DCGM Exporter가 노출하는 Metric을 정리한다.
 
 ### 1.2. Memory Metrics
 
+GPU Memory 사용량을 의미
+
 | Metric | Description | Metric Type | Value Unit |
 |---|---|---|---|
 | `DCGM_FI_DEV_FB_FREE` | 이용 가능한 GPU Memory 용량 | Gauge | MB |
 | `DCGM_FI_DEV_FB_USED` | 이용중인 GPU Memory 용량 | Gauge | MB |
 
 ### 1.3. Clock Metrics
+
+GPU, GPU Memory의 Clock 상태를 의미
 
 | Metric | Description | Metric Type | Value Unit |
 |---|---|---|---|
@@ -31,11 +37,15 @@ NVIDIA DCGM Exporter가 노출하는 Metric을 정리한다.
 
 ### 1.4. NVLink Metrics
 
+NVLink Metric
+
 | Metric | Description | Metric Type | Value Unit |
 |---|---|---|---|
 | `DCGM_FI_DEV_NVLINK_BANDWIDTH_TOTAL` | NVLink의 총 Bandwidth | Counter | |
 
 ### 1.5. PCIe Metrics
+
+PCIe Metric
 
 | Metric | Description | Metric Type | Value Unit |
 |---|---|---|---|
@@ -43,15 +53,19 @@ NVIDIA DCGM Exporter가 노출하는 Metric을 정리한다.
 
 ### 1.6. DCP (Profiling) Metrics
 
+Profiling 기반 Metric
+
 | Metric | Description | Metric Type | Value Unit |
 |---|---|---|---|
 | `DCGM_FI_PROF_GR_ENGINE_ACTIVE` | SM(Streaming Multiprocessor) 내부의 CUDA Core가 특정 주기 동안 동작한 시간 비율 | Gauge | Percentage (0 ~ 1) |
 | `DCGM_FI_PROF_PIPE_TENSOR_ACTIVE` | Tensor Core가 특정 주기 동안 동작한 시간 비율 | Gauge | Percentage (0 ~ 1) |
-| `DCGM_FI_PROF_DRAM_ACTIVE` | 특정 주기 동안 GPU Memory가 동작한 시간 비율 | Gauge | Percentage (??) |
+| `DCGM_FI_PROF_DRAM_ACTIVE` | 특정 주기 동안 GPU Memory가 동작한 시간 비율 | Gauge | Percentage (0 ~ 1) |
 | `DCGM_FI_PROF_PCIE_RX_BYTES` | GPU가 PCIe로부터 수신하는 Data (Header & Payload)양 | Gauge | Bytes per second |
 | `DCGM_FI_PROF_PCIE_TX_BYTES` | GPU가 PCIe로 송신하는 Data (Header & Payload)양 | Gauge | Bytes per second |
 
 ### 1.7. Remapping Rows Metrics
+
+GPU Memory에서 수행하는 Row Remapping Metric
 
 | Metric | Description | Metric Type | Value Unit |
 |---|---|---|---|
@@ -61,11 +75,15 @@ NVIDIA DCGM Exporter가 노출하는 Metric을 정리한다.
 
 ### 1.8. Error and Violation Metrics
 
+Error 및 Violation Metric
+
 | Metric | Description | Metric Type | Value Unit |
 |---|---|---|---|
 | `DCGM_FI_DEV_XID_ERRORS` | 마지막에 발생한 XID Error Code | Gauge | |
 
 ### 1.9. Power Metrics
+
+소비 전력 Metric
 
 | Metric | Description | Metric Type | Value Unit |
 |---|---|---|---|
@@ -74,12 +92,16 @@ NVIDIA DCGM Exporter가 노출하는 Metric을 정리한다.
 
 ### 1.10. Temperature Metrics
 
+온도 Metric
+
 | Metric | Description | Metric Type | Value Unit |
 |---|---|---|---|
 | `DCGM_FI_DEV_GPU_TEMP` | GPU 온도 | Gauge | Celsius |
 | `DCGM_FI_DEV_MEMORY_TEMP` | GPU Memory 온도 | Gauge | Celsius |
 
 ### 1.11. License Metrics
+
+License 상태 Metric
 
 | Metric | Description | Metric Type | Value |
 |---|---|---|---|
@@ -102,7 +124,7 @@ NVIDIA DCGM Exporter가 노출하는 Metric을 정리한다.
 | `GPU_I_PROFILE` | GPU 프로필 | | MIG Metric |
 | `GPU_I_ID` | GPU 고유 ID | | MIG Metric |
 
-## 2. 참조
+## 3. 참조
 
 * NVIDIA DCGM Exporter : [https://raw.githubusercontent.com/NVIDIA/dcgm-exporter/main/etc/dcp-metrics-included.csv](https://raw.githubusercontent.com/NVIDIA/dcgm-exporter/main/etc/dcp-metrics-included.csv)
 * NVIDIA DCGM Exporter : [https://github.com/NVIDIA/dcgm-exporter/blob/main/deployment/templates/metrics-configmap.yaml](https://github.com/NVIDIA/dcgm-exporter/blob/main/deployment/templates/metrics-configmap.yaml)
