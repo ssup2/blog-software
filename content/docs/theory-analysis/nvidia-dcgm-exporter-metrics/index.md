@@ -4,11 +4,9 @@ title: "NVIDIA DCGM Exporter Metrics"
 
 NVIDIA DCGM Exporter가 노출하는 Metric을 정리한다.
 
-## 1. NVIDIA DCGM Exporter Metrics
+## 1. Metric 목록
 
-### 1.1. Metric 목록
-
-* Utilization Metrics
+### 1.1. Utilization Metrics
 
 | Metric | Description | Metric Type | Value Unit |
 |---|---|---|---|
@@ -17,33 +15,33 @@ NVIDIA DCGM Exporter가 노출하는 Metric을 정리한다.
 | `DCGM_FI_DEV_ENC_UTIL` | Encoder의 사용률 | Gauge | Percentage (0 ~ 1) |
 | `DCGM_FI_DEV_DEC_UTIL` | Decoder의 사용률 | Gauge | Percentage (0 ~ 1) |
 
-* Memory
+### 1.2. Memory Metrics
 
 | Metric | Description | Metric Type | Value Unit |
 |---|---|---|---|
 | `DCGM_FI_DEV_FB_FREE` | 이용 가능한 GPU Memory 용량 | Gauge | MB |
 | `DCGM_FI_DEV_FB_USED` | 이용중인 GPU Memory 용량 | Gauge | MB |
 
-* Clock
+### 1.3. Clock Metrics
 
 | Metric | Description | Metric Type | Value Unit |
 |---|---|---|---|
 | `DCGM_FI_DEV_SM_CLOCK` | SM (Streaming Multiprocessor)의 Clock | Gauge | MHz |
 | `DCGM_FI_DEV_MEM_CLOCK` | GPU Memory Clock | Gauge | MHz |
 
-* NVLink
+### 1.4. NVLink Metrics
 
 | Metric | Description | Metric Type | Value Unit |
 |---|---|---|---|
 | `DCGM_FI_DEV_NVLINK_BANDWIDTH_TOTAL` | NVLink의 총 Bandwidth | Counter | |
 
-* PCIe
+### 1.5. PCIe Metrics
 
 | Metric | Description | Metric Type | Value Unit |
 |---|---|---|---|
 | `DCGM_FI_DEV_PCIE_REPLAY_COUNTER` | PCIe에서 Packet 전송에 Error가 발생하여 재시도한 횟수 | Counter | |
 
-* DCP (Profiling)
+### 1.6. DCP (Profiling) Metrics
 
 | Metric | Description | Metric Type | Value Unit |
 |---|---|---|---|
@@ -53,7 +51,7 @@ NVIDIA DCGM Exporter가 노출하는 Metric을 정리한다.
 | `DCGM_FI_PROF_PCIE_RX_BYTES` | GPU가 PCIe로부터 수신하는 Data (Header & Payload)양 | Gauge | Bytes per second |
 | `DCGM_FI_PROF_PCIE_TX_BYTES` | GPU가 PCIe로 송신하는 Data (Header & Payload)양 | Gauge | Bytes per second |
 
-* Remapping rows
+### 1.7. Remapping Rows Metrics
 
 | Metric | Description | Metric Type | Value Unit |
 |---|---|---|---|
@@ -61,50 +59,48 @@ NVIDIA DCGM Exporter가 노출하는 Metric을 정리한다.
 | `DCGM_FI_DEV_UNCORRECTABLE_REMAPPED_ROWS` | GPU Memory에서 Row Remapping을 통해서 수정이 불가능한 Error의 갯수 | Counter | |
 | `DCGM_FI_DEV_ROW_REMAP_FAILURE` | GPU Memory에서 Row Remapping 수행 시도 실패 횟수 | Counter | |
 
-* Error and violation
+### 1.8. Error and Violation Metrics
 
 | Metric | Description | Metric Type | Value Unit |
 |---|---|---|---|
 | `DCGM_FI_DEV_XID_ERRORS` | 마지막에 발생한 XID Error Code | Gauge | |
 
-* Power
+### 1.9. Power Metrics
 
 | Metric | Description | Metric Type | Value Unit |
 |---|---|---|---|
 | `DCGM_FI_DEV_POWER_USAGE` | GPU 전력 소모량 | Gauge | Watt |
 | `DCGM_FI_DEV_TOTAL_ENERGY_CONSUMPTION` | GPU Driver가 동작한 이후에 소모한 총 에너지량 | Counter | mJ |
 
-* Temperature
+### 1.10. Temperature Metrics
 
 | Metric | Description | Metric Type | Value Unit |
 |---|---|---|---|
 | `DCGM_FI_DEV_GPU_TEMP` | GPU 온도 | Gauge | Celsius |
 | `DCGM_FI_DEV_MEMORY_TEMP` | GPU Memory 온도 | Gauge | Celsius |
 
-* License
+### 1.11. License Metrics
 
-| Metric | Description | Metric Type | Value Unit |
+| Metric | Description | Metric Type | Value |
 |---|---|---|---|
 | `DCGM_FI_DEV_VGPU_LICENSE_STATUS` | vGPU 기능 이용시 필요한 License 상태 | Gauge | 0 : vGPU License가 존재하지 않는 상태, 1 : vGPU License가 존재하는 상태 |
 
+## 2. Metric Label
 
-### 1.2. Metric Label
-
-| Label | Description | Value |
-|---|---|---|
-| `UUID` | GPU의 UUID | GPU-{UUID} |
-| `gpu` | GPU 번호 | 0, 1, 2, ... |
-| `device` | GPU Device Number | nvidia0, nvidia1, ... |
-| `Hostname` | GPU가 설치된 Host의 이름 | |
-| `modelName` | GPU 모델 이름 | |
-| `pci_bus_id` | GPU의 PCI Bus ID | |
-| `uuid` | GPU의 UUID | |
-| `exported_namespace` | GPU를 이용하는 Pod가 위치하는 Namespace 이름 | |
-| `exported_pod` | GPU를 이용하는 Pod 이름 | |
-| `exported_container` | GPU를 이용하는 Container 이름 | |
-| `DCGM_FI_DRIVER_VERSION` | GPU Driver 버전 | |
-| `GPU_I_PROFILE` | GPU 프로필 | |
-| `GPU_I_ID` | GPU 고유 ID | |
+| Label | Description | Value | Note |
+|---|---|---|---|
+| `UUID` | GPU의 UUID | GPU-{UUID} | |
+| `gpu` | GPU 번호 | 0, 1, 2, ... | |
+| `device` | GPU Device Number | nvidia0, nvidia1, ... | |
+| `Hostname` | GPU가 설치된 Host의 이름 | | |
+| `modelName` | GPU 모델 이름 | | |
+| `pci_bus_id` | GPU의 PCI Bus ID | | |
+| `exported_namespace` | GPU를 이용하는 Pod가 위치하는 Namespace 이름 | | K8s Pod Metric |
+| `exported_pod` | GPU를 이용하는 Pod 이름 | | K8s Pod Metric |
+| `exported_container` | GPU를 이용하는 Container 이름 | | K8s Pod Metric |
+| `DCGM_FI_DRIVER_VERSION` | GPU Driver 버전 | | MIG Metric |
+| `GPU_I_PROFILE` | GPU 프로필 | | MIG Metric |
+| `GPU_I_ID` | GPU 고유 ID | | MIG Metric |
 
 ## 2. 참조
 
