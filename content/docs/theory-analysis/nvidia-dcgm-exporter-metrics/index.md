@@ -41,7 +41,12 @@ NVLink Metric
 
 | Metric | Description | Metric Type | Value Unit |
 |---|---|---|---|
-| `DCGM_FI_DEV_NVLINK_BANDWIDTH_TOTAL` | NVLink의 총 Bandwidth | Counter | |
+| `DCGM_FI_DEV_NVLINK_CRC_FLIT_ERROR_COUNT_TOTAL` | NVLink에서 Flow-Control CRC Error가 발생한 횟수 | Counter | |
+| `DCGM_FI_DEV_NVLINK_CRC_DATA_ERROR_COUNT_TOTAL` | NVLink에서 Data CRC Error가 발생한 횟수 | Counter | |
+| `DCGM_FI_DEV_NVLINK_REPLAY_ERROR_COUNT_TOTAL` | NVLink에서 Retry가 발생한 횟수 | Counter | |
+| `DCGM_FI_DEV_NVLINK_RECOVERY_ERROR_COUNT_TOTAL` | NVLink에서 Recovery가 발생한 횟수 | Counter | |
+| `DCGM_FI_DEV_NVLINK_BANDWIDTH_TOTAL` | NVLink의 Bandwidth Counter | Counter | |
+| `DCGM_FI_DEV_NVLINK_BANDWIDTH_L0` | 활성화된 NVLink를 통해서 주고 받은 Data양 (Header & Payload) | Counter | Byte |
 
 ### 1.5. PCIe Metrics
 
@@ -53,19 +58,19 @@ PCIe Metric
 
 ### 1.6. DCP (Profiling) Metrics
 
-Profiling 기반 Metric
+Profiling Metric
 
 | Metric | Description | Metric Type | Value Unit |
 |---|---|---|---|
 | `DCGM_FI_PROF_GR_ENGINE_ACTIVE` | SM(Streaming Multiprocessor) 내부의 CUDA Core가 특정 주기 동안 동작한 시간 비율 | Gauge | Percentage (0 ~ 1) |
 | `DCGM_FI_PROF_PIPE_TENSOR_ACTIVE` | Tensor Core가 특정 주기 동안 동작한 시간 비율 | Gauge | Percentage (0 ~ 1) |
 | `DCGM_FI_PROF_DRAM_ACTIVE` | 특정 주기 동안 GPU Memory가 동작한 시간 비율 | Gauge | Percentage (0 ~ 1) |
-| `DCGM_FI_PROF_PCIE_RX_BYTES` | GPU가 PCIe로부터 수신하는 Data (Header & Payload)양 | Gauge | Bytes per second |
-| `DCGM_FI_PROF_PCIE_TX_BYTES` | GPU가 PCIe로 송신하는 Data (Header & Payload)양 | Gauge | Bytes per second |
+| `DCGM_FI_PROF_PCIE_RX_BYTES` | GPU가 PCIe로부터 수신하는 Data양 (Header & Payload) | Gauge | Bytes per second |
+| `DCGM_FI_PROF_PCIE_TX_BYTES` | GPU가 PCIe로 송신하는 Data양 (Header & Payload) | Gauge | Bytes per second |
 
 ### 1.7. Remapping Rows Metrics
 
-GPU Memory에서 수행하는 Row Remapping Metric
+GPU Memory에서 수행하는 Remapping Row Metric. Remapping Row는 GPU Memory에 비정상 상태의 Row가 존재할 경우, 다른 정상 상태의 Row로 치환하는 기능을 의미한다. Row는 메모리 칩 내부의 최소 저장 단위를 의미한다.
 
 | Metric | Description | Metric Type | Value Unit |
 |---|---|---|---|
@@ -73,15 +78,42 @@ GPU Memory에서 수행하는 Row Remapping Metric
 | `DCGM_FI_DEV_UNCORRECTABLE_REMAPPED_ROWS` | GPU Memory에서 Row Remapping을 통해서 수정이 불가능한 Error의 갯수 | Counter | |
 | `DCGM_FI_DEV_ROW_REMAP_FAILURE` | GPU Memory에서 Row Remapping 수행 시도 실패 횟수 | Counter | |
 
-### 1.8. Error and Violation Metrics
+### 1.8. ECC Metrics
+
+GPU Memroy의 ECC (Error-Correcting Code) Metric
+
+| Metric | Description | Metric Type | Value Unit |
+|---|---|---|---|
+| `DCGM_FI_DEV_ECC_SBE_VOL_TOTAL` | 휘발성 Single-Bit Error의 갯수 | Counter | |
+| `DCGM_FI_DEV_ECC_DBE_VOL_TOTAL` | 휘발성 Double-Bit Error의 갯수 | Counter | |
+| `DCGM_FI_DEV_ECC_SBE_AGG_TOTAL` | 영구적인 Single-Bit Error의 갯수 | Counter | |
+| `DCGM_FI_DEV_ECC_DBE_AGG_TOTAL` | 영구적인 Double-Bit Error의 갯수 | Counter | |
+
+### 1.9. Retired Pages Metrics
+
+GPU Memroy의 Retired Pages Metric. Retired Page는 비정상 상태의 Page를 삭제하여 GPU Memory의 안정성을 높이는 기능을 의미한다.
+
+| Metric | Description | Metric Type | Value Unit |
+|---|---|---|---|
+| `DCGM_FI_DEV_RETIRED_SBE` | 휘발성 Single-Bit Error로 인해서 삭제된 Page의 갯수 | Counter | |
+| `DCGM_FI_DEV_RETIRED_DBE` | 휘발성 Double-Bit Error로 인해서 삭제된 Page의 갯수 | Counter | |
+| `DCGM_FI_DEV_RETIRED_PENDING` | 삭제 대기중인 Page의 갯수 | Counter | |
+
+### 1.10. Error and Violation Metrics
 
 Error 및 Violation Metric
 
 | Metric | Description | Metric Type | Value Unit |
 |---|---|---|---|
 | `DCGM_FI_DEV_XID_ERRORS` | 마지막에 발생한 XID Error Code | Gauge | |
+| `DCGM_FI_DEV_POWER_VIOLATION` | 전력 제한에 의한 Throttling 시간 | Counter | us |
+| `DCGM_FI_DEV_THERMAL_VIOLATION` | 온도 제한에 의한 Throttling 시간 | Counter | us |
+| `DCGM_FI_DEV_SYNC_BOOST_VIOLATION` | Sync-Boost 제한에 의한 Throttling 시간 | Counter | us |
+| `DCGM_FI_DEV_BOARD_LIMIT_VIOLATION` | 보드 제한에 의한 Throttling 시간 | Counter | us |
+| `DCGM_FI_DEV_LOW_UTIL_VIOLATION` | 사용률 제한에 의한 Throttling 시간 | Counter | us |
+| `DCGM_FI_DEV_RELIABILITY_VIOLATION` | 신뢰성 제한에 의한 Throttling 시간 | Counter | us |
 
-### 1.9. Power Metrics
+### 1.11. Power Metrics
 
 소비 전력 Metric
 
@@ -90,7 +122,7 @@ Error 및 Violation Metric
 | `DCGM_FI_DEV_POWER_USAGE` | GPU 전력 소모량 | Gauge | Watt |
 | `DCGM_FI_DEV_TOTAL_ENERGY_CONSUMPTION` | GPU Driver가 동작한 이후에 소모한 총 에너지량 | Counter | mJ |
 
-### 1.10. Temperature Metrics
+### 1.12. Temperature Metrics
 
 온도 Metric
 
@@ -99,7 +131,7 @@ Error 및 Violation Metric
 | `DCGM_FI_DEV_GPU_TEMP` | GPU 온도 | Gauge | Celsius |
 | `DCGM_FI_DEV_MEMORY_TEMP` | GPU Memory 온도 | Gauge | Celsius |
 
-### 1.11. License Metrics
+### 1.13. License Metrics
 
 License 상태 Metric
 
