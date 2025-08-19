@@ -121,8 +121,8 @@ License 상태 Metric
 | `exported_pod` | GPU를 이용하는 Pod 이름 | | K8s Pod Metric |
 | `exported_container` | GPU를 이용하는 Container 이름 | | K8s Pod Metric |
 | `DCGM_FI_DRIVER_VERSION` | GPU Driver 버전 | | MIG Metric |
-| `GPU_I_PROFILE` | GPU 프로필 | | MIG Metric |
-| `GPU_I_ID` | GPU 고유 ID | | MIG Metric |
+| `GPU_I_PROFILE` | MIG Profile 이름 | | MIG Metric |
+| `GPU_I_ID` | MIG Instance ID | | MIG Metric |
 
 ## 3. 참조
 
