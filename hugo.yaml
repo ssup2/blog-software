@@ -22,9 +22,9 @@ languages:
   ko:
     languageName: Korean
     weight: 1
-  #en:
-  #  languageName: English
-  #  weight: 2
+  en:
+    languageName: English
+    weight: 2
 
 menu:
   main:
