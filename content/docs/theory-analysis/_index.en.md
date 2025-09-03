@@ -4,4 +4,4 @@ weight: 1
 comments: false
 ---
 
-이론 및 분석 내용 정리
+Summary of theory and analysis
