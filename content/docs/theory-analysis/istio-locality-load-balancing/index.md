@@ -5,6 +5,8 @@ draft: true
 
 ## 1. Istio Locality Load Balancing
 
+### 1.1. Deploy
+
 ```shell
 $ kind create cluster --config=- <<EOF                           
 kind: Cluster
@@ -162,6 +164,20 @@ helloworld-zone-c-6667db9dbd-qbfl7   2/2     Running   0          56s   10.244.1
 netshoot-b                           2/2     Running   0          33m   10.244.2.6    kind-worker2   <none>           <none>
 ```
 
+```shell
+$ istioctl proxy-config all netshoot-b | grep kr
+endpoint/10.244.3.12:5000                                 HEALTHY     kr/a         outbound|5000||helloworld-svc.default.svc.cluster.local
+endpoint/10.244.3.13:5000                                 HEALTHY     kr/a         outbound|5000||helloworld-svc.default.svc.cluster.local
+endpoint/10.244.3.14:5000                                 HEALTHY     kr/a         outbound|5000||helloworld-svc.default.svc.cluster.local
+endpoint/10.244.2.13:5000                                 HEALTHY     kr/b         outbound|5000||helloworld-svc.default.svc.cluster.local
+endpoint/10.244.2.15:5000                                 HEALTHY     kr/b         outbound|5000||helloworld-svc.default.svc.cluster.local
+endpoint/10.244.2.14:5000                                 HEALTHY     kr/b         outbound|5000||helloworld-svc.default.svc.cluster.local
+endpoint/10.244.1.13:5000                                 HEALTHY     kr/c         outbound|5000||helloworld-svc.default.svc.cluster.local
+endpoint/10.244.1.12:5000                                 HEALTHY     kr/c         outbound|5000||helloworld-svc.default.svc.cluster.local
+endpoint/10.244.1.14:5000                                 HEALTHY     kr/c         outbound|5000||helloworld-svc.default.svc.cluster.local
+...
+```
+
 ```shell {caption="[Shell 2] Locality Load Balancing Off"}
 $ kubectl exec -it netshoot-b -- bash
 (netshoot-b)# curl helloworld-svc:5000/hello
@@ -171,6 +187,27 @@ Hello version: v1, instance: helloworld-zone-b-d48b9c6cc-nzqt8
 (netshoot-b)# curl helloworld-svc:5000/hello
 Hello version: v1, instance: helloworld-zone-a-87c7fd898-wxfrw
 ```
+
+```shell
+istioctl proxy-config all netshoot-b -o json |
+jq -r '
+  .configs[] | select(."@type"=="type.googleapis.com/envoy.admin.v3.EndpointsConfigDump")
+  | .. | objects
+  | select(.cluster_name? and (.cluster_name | contains("helloworld")))
+  | .endpoints[]?
+  | [
+      ([.locality.region, .locality.zone, .locality.subzone, .locality.sub_zone] | map(. // "") | map(select(.!="")) | join("/")),
+      ((.load_balancing_weight | (.value? // .)) // (.loadBalancingWeight | (.value? // .)) // "N/A"),
+      ([.lb_endpoints[]? | .endpoint.address.socket_address.address] | join(","))
+    ]
+  | @tsv
+'
+kr/a    3       10.244.3.12,10.244.3.13,10.244.3.14
+kr/b    3       10.244.2.13,10.244.2.15,10.244.2.14
+kr/c    3       10.244.1.13,10.244.1.12,10.244.1.14
+```
+
+### 1.2. Locality Load Balancing On
 
 ```yaml {caption="[File 2] Locality Load Balancing Distribute Example"}
 apiVersion: networking.istio.io/v1beta1
@@ -198,11 +235,73 @@ spec:
 ```shell {caption="[Shell 3] Locality Load Balancing On"}
 $ kubectl exec -it netshoot-b -- bash
 (netshoot-b)# curl helloworld-svc:5000/hello
-Hello version: v1, instance: helloworld-zone-c-6667db9dbd-gpclb
-(netshoot-b)# curl helloworld-svc:5000/hello
 Hello version: v1, instance: helloworld-zone-b-d48b9c6cc-nzqt8
 (netshoot-b)# curl helloworld-svc:5000/hello
-Hello version: v1, instance: helloworld-zone-a-87c7fd898-wxfrw
+Hello version: v1, instance: helloworld-zone-b-d48b9c6cc-c9xsx
+(netshoot-b)# curl helloworld-svc:5000/hello
+Hello version: v1, instance: helloworld-zone-b-d48b9c6cc-c9xsx
+```
+
+```shell
+istioctl proxy-config all netshoot-b -o json |
+jq -r '
+  .configs[] | select(."@type"=="type.googleapis.com/envoy.admin.v3.EndpointsConfigDump")
+  | .. | objects
+  | select(.cluster_name? and (.cluster_name | contains("helloworld")))
+  | .endpoints[]?
+  | [
+      ([.locality.region, .locality.zone, .locality.subzone, .locality.sub_zone] | map(. // "") | map(select(.!="")) | join("/")),
+      ((.load_balancing_weight | (.value? // .)) // (.loadBalancingWeight | (.value? // .)) // "N/A"),
+      ([.lb_endpoints[]? | .endpoint.address.socket_address.address] | join(","))
+    ]
+  | @tsv
+'
+kr/b    100     10.244.2.13,10.244.2.15,10.244.2.14
+```
+
+```yaml {caption="[File 3] Locality Load Balancing Distribute Example"}
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: helloworld-dr
+spec:
+  host: helloworld-svc.default.svc.cluster.local
+  trafficPolicy:
+    loadBalancer:
+      localityLbSetting:
+        enabled: true
+        distribute:
+        - from: "kr/a/*"
+          to:
+            "kr/b/*": 90
+            "kr/c/*": 10
+        - from: "kr/b/*"
+          to:
+            "kr/a/*": 90
+            "kr/c/*": 10
+        - from: "kr/c/*"
+          to:
+            "kr/a/*": 90
+            "kr/b/*": 10
+```
+
+```shell
+$ istioctl proxy-config all netshoot-b -o json |
+jq -r '
+  .configs[] | select(."@type"=="type.googleapis.com/envoy.admin.v3.EndpointsConfigDump")
+  | .. | objects
+  | select(.cluster_name? and (.cluster_name | contains("helloworld")))
+  | .endpoints[]?
+  | [
+      ([.locality.region, .locality.zone, .locality.subzone, .locality.sub_zone] | map(. // "") | map(select(.!="")) | join("/")),
+      ((.load_balancing_weight | (.value? // .)) // (.loadBalancingWeight | (.value? // .)) // "N/A"),
+      ([.lb_endpoints[]? | .endpoint.address.socket_address.address] | join(","))
+    ]
+  | @tsv
+'
+kr/a    90      10.244.3.12,10.244.3.13,10.244.3.14
+kr/c    10      10.244.1.13,10.244.1.12,10.244.1.14
+...
 ```
 
 ## 2. 참조
