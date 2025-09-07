@@ -43,12 +43,12 @@ $ kubectl label node kind-worker4 topology.kubernetes.io/zone=b
 $ kubectl label namespace default istio-injection=enabled
 ```
 
-[Shell 1]은 Istio의 Locality Load Balancing을 테스트하기 위한 Kubernetes Cluster를 구성하는 Script를 나타내고 있다. kind를 활용하여 Kubernetes Cluster를 구성하고, Istio를 설치한다. 그리고 Node Label에 Topology 정보를 설정한다. Istio는 Node Label에 설정되어 있는 Topology 정보를 활용하여 Node의 Topology를 파악하기 때문에, Node Label 설정이 필수이다. Istio는 Node에 설정되어 있는 다음의 Label을 활용하여 Node의 Topology를 파악한다.
+[Shell 1]은 Istio의 Locality Load Balancing을 테스트하기 위한 Kubernetes Cluster를 구성하는 Script를 나타내고 있다. kind를 활용하여 Kubernetes Cluster를 구성하고, Istio를 설치한다. 그리고 Node Label에 Topology 정보를 설정한다. Istio는 Node Label에 설정되어 있는 Topology 정보를 활용하여 Node의 Topology를 파악하기 때문에, Node Label 설정이 필수이다. 
+
+Istio는 Node에 설정되어 있는 다음의 Label을 활용하여 Node의 Topology를 파악한다. region은 `kr`, `us` 두 가지 값을 가지고, zone은 `a`, `b` 두 가지 값을 설정하여 총 4개의 Locality를 구성한다.
 
 * `topology.kubernetes.io/region` : Region 정보
 * `topology.kubernetes.io/zone` : Zone 정보
-
-region은 `kr`, `us` 두 가지 값을 가지고, zone은 `a`, `b` 두 가지 값을 설정하여 총 4개의 Locality를 구성한다.
 
 ```yaml {caption="[File 1] 기본 Workload Manifest", linenos=table}
 apiVersion: apps/v1
@@ -196,7 +196,7 @@ spec:
     stdin: true
 ```
 
-[File 1]은 Locality Load Balancing을 테스트하기 위한 기본 Workload Manifest를 나타내고 있다. 각 
+[File 1]은 Locality Load Balancing을 테스트하기 위한 기본 Workload Manifest를 나타내고 있다. 각 Deployment의 Node Selector에 Region과 Zone 정보를 설정하여 4개의 Locality를 구성한다. 그 대신 Destination Rule과 Service, Virtual Service는 하나만 정의하여 모든 Deployment에 적용되도록 구성한다.
 
 ```shell {caption="[Shell 2] Locality Load Balancing Off"}
 $ kubectl exec -it netshoot-b -- bash
