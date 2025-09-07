@@ -7,7 +7,9 @@ draft: true
 
 ### 1.1. Test 환경 구성
 
-[그림 1]은 Istio의 Locality Load Balancing을 테스트하기 위한 Kubernetes Cluster를 나타내고 있다.
+{{< figure caption="[Figure 1] Locality Load Balancing Test Environment" src="images/test-environment.png" width="900px" >}}
+
+[Figure 1]은 Istio의 Locality Load Balancing을 테스트하기 위한 Kubernetes Cluster를 나타내고 있다. 4개의 Node로 구성되어 있고 각 Node는 `kr`, `us` 두 가지 Region과 `a`, `b` 두 가지 Zone에 한대씩 구성되어 총 4개의 Locality를 구성한다. 각 Locality에는 마다 별도의 Deployment를 통해서 2개의 Pod, 총 8개의 Pod를 구성한다. 하지만 Service, Virtual Service, Destination Rule은 하나만 정의하여 모든 Deployment의 Pod에 적용되도록 구성한다. 접근 Test를 위해서 `kr` Region의 `a` Zone에 Shell Pod의 역할을 수행하는 `myshell-kr-a` Pod도 하나 구성한다.
 
 ```shell {caption="[Shell 1] Kubernetes Cluster 구성"}
 # Create kubernetes cluster with kind
@@ -45,7 +47,7 @@ $ kubectl label namespace default istio-injection=enabled
 
 [Shell 1]은 Istio의 Locality Load Balancing을 테스트하기 위한 Kubernetes Cluster를 구성하는 Script를 나타내고 있다. kind를 활용하여 Kubernetes Cluster를 구성하고, Istio를 설치한다. 그리고 Node Label에 Topology 정보를 설정한다. Istio는 Node Label에 설정되어 있는 Topology 정보를 활용하여 Node의 Topology를 파악하기 때문에, Node Label 설정이 필수이다. 
 
-Istio는 Node에 설정되어 있는 다음의 Label을 활용하여 Node의 Topology를 파악한다. region은 `kr`, `us` 두 가지 값을 가지고, zone은 `a`, `b` 두 가지 값을 설정하여 총 4개의 Locality를 구성한다.
+Istio는 Node에 설정되어 있는 다음의 Label을 활용하여 Node의 Topology를 파악한다. [Figure 1]과 동일하게 region은 `kr`, `us` 두 가지 값을 가지고, zone은 `a`, `b` 두 가지 값을 설정하여 총 4개의 Locality를 구성한다.
 
 * `topology.kubernetes.io/region` : Region 정보
 * `topology.kubernetes.io/zone` : Zone 정보
@@ -54,9 +56,9 @@ Istio는 Node에 설정되어 있는 다음의 Label을 활용하여 Node의 Top
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: helloworld-zone-kr-a
+  name: helloworld-kr-a
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       app: helloworld
@@ -77,9 +79,9 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: helloworld-zone-kr-b
+  name: helloworld-kr-b
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       app: helloworld
@@ -100,9 +102,9 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: helloworld-zone-us-a
+  name: helloworld-us-a
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       app: helloworld
@@ -123,9 +125,9 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: helloworld-zone-us-b
+  name: helloworld-us-b
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       app: helloworld
@@ -146,7 +148,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: helloworld-svc
+  name: helloworld
 spec:
   selector:
     app: helloworld
@@ -159,33 +161,34 @@ spec:
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
-  name: helloworld-vs
+  name: helloworld
 spec:
   hosts:
-  - helloworld-svc.default.svc.cluster.local
+  - helloworld.default.svc.cluster.local
   gateways:
   - mesh
   http:
   - route:
     - destination:
-        host: helloworld-svc.default.svc.cluster.local
+        host: helloworld.default.svc.cluster.local
         port:
           number: 5000
 ---
 apiVersion: networking.istio.io/v1beta1
 kind: DestinationRule
 metadata:
-  name: helloworld-dr
+  name: helloworld
 spec:
-  host: helloworld-svc.default.svc.cluster.local
+  host: helloworld.default.svc.cluster.local
 ---
 apiVersion: v1
 kind: Pod
 metadata:
-  name: netshoot-a
+  name: my-shell-kr-a
 spec:
   nodeSelector:
-    topology.kubernetes.io/zone: b
+    topology.kubernetes.io/region: kr
+    topology.kubernetes.io/zone: a
   containers:
   - name: netshoot
     image: nicolaka/netshoot:latest
@@ -196,7 +199,7 @@ spec:
     stdin: true
 ```
 
-[File 1]은 Locality Load Balancing을 테스트하기 위한 기본 Workload Manifest를 나타내고 있다. 각 Deployment의 Node Selector에 Region과 Zone 정보를 설정하여 4개의 Locality를 구성한다. 그 대신 Destination Rule과 Service, Virtual Service는 하나만 정의하여 모든 Deployment에 적용되도록 구성한다.
+[File 1]은 Locality Load Balancing을 테스트하기 위한 기본 Workload Manifest를 나타내고 있다. [Figure 1]과 동일하게 각 Deployment는 2개의 Pod와 4개의 Locality를 구성하여 총 8개의 Pod를 구성한다. 또한 하나의 Destination Rule과 Service, Virtual Service는 하나만 정의하여 모든 Deployment에 적용되도록 구성한다.
 
 ```shell {caption="[Shell 2] Locality Load Balancing Off"}
 $ kubectl exec -it netshoot-b -- bash
