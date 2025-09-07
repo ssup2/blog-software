@@ -5,9 +5,12 @@ draft: true
 
 ## 1. Istio Locality Load Balancing
 
-### 1.1. Deploy
+### 1.1. Test 환경 구성
 
-```shell
+[그림 1]은 Istio의 Locality Load Balancing을 테스트하기 위한 Kubernetes Cluster를 나타내고 있다.
+
+```shell {caption="[Shell 1] Kubernetes Cluster 구성"}
+# Create kubernetes cluster with kind
 $ kind create cluster --config=- <<EOF                           
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
@@ -16,24 +19,42 @@ nodes:
 - role: worker
 - role: worker
 - role: worker
+- role: worker
 EOF
 
-kubectl -n istio-system patch deployment istiod --type='json' -p='[{"op": "add", "path": "/spec/template/spec/containers/0/env/-", "value": {"name": "PILOT_ENABLE_LOCALITY_LOAD_BALANCING", "value": "true"}}]'
+# Install istio
+$ istioctl install --set profile=demo -y
 
+# Enable locality load balancing
+$ kubectl -n istio-system patch deployment istiod --type='json' -p='[{"op": "add", "path": "/spec/template/spec/containers/0/env/-", "value": {"name": "PILOT_ENABLE_LOCALITY_LOAD_BALANCING", "value": "true"}}]'
+
+# Label nodes
 $ kubectl label node kind-worker topology.kubernetes.io/region=kr
 $ kubectl label node kind-worker2 topology.kubernetes.io/region=kr
-$ kubectl label node kind-worker3 topology.kubernetes.io/region=kr
+$ kubectl label node kind-worker3 topology.kubernetes.io/region=us
+$ kubectl label node kind-worker4 topology.kubernetes.io/region=us
 
 $ kubectl label node kind-worker topology.kubernetes.io/zone=a
 $ kubectl label node kind-worker2 topology.kubernetes.io/zone=b
-$ kubectl label node kind-worker3 topology.kubernetes.io/zone=c
+$ kubectl label node kind-worker3 topology.kubernetes.io/zone=a
+$ kubectl label node kind-worker4 topology.kubernetes.io/zone=b
+
+# Enable sidecar injection to default namespace
+$ kubectl label namespace default istio-injection=enabled
 ```
 
-```yaml {caption="[File 1] Locality Load Balancing Example", linenos=table}
+[Shell 1]은 Istio의 Locality Load Balancing을 테스트하기 위한 Kubernetes Cluster를 구성하는 Script를 나타내고 있다. kind를 활용하여 Kubernetes Cluster를 구성하고, Istio를 설치한다. 그리고 Node Label에 Topology 정보를 설정한다. Istio는 Node Label에 설정되어 있는 Topology 정보를 활용하여 Node의 Topology를 파악하기 때문에, Node Label 설정이 필수이다. Istio는 Node에 설정되어 있는 다음의 Label을 활용하여 Node의 Topology를 파악한다.
+
+* `topology.kubernetes.io/region` : Region 정보
+* `topology.kubernetes.io/zone` : Zone 정보
+
+region은 `kr`, `us` 두 가지 값을 가지고, zone은 `a`, `b` 두 가지 값을 설정하여 총 4개의 Locality를 구성한다.
+
+```yaml {caption="[File 1] 기본 Workload Manifest", linenos=table}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: helloworld-zone-a
+  name: helloworld-zone-kr-a
 spec:
   replicas: 3
   selector:
@@ -45,17 +66,18 @@ spec:
         app: helloworld
     spec:
       nodeSelector:
+        topology.kubernetes.io/region: kr
         topology.kubernetes.io/zone: a
       containers:
-        - name: helloworld
-          image: docker.io/istio/examples-helloworld-v1:1.0
-          ports:
-            - containerPort: 5000
+      - name: helloworld
+        image: docker.io/istio/examples-helloworld-v1:1.0
+        ports:
+        - containerPort: 5000
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: helloworld-zone-b
+  name: helloworld-zone-kr-b
 spec:
   replicas: 3
   selector:
@@ -67,17 +89,18 @@ spec:
         app: helloworld
     spec:
       nodeSelector:
+        topology.kubernetes.io/region: kr
         topology.kubernetes.io/zone: b
       containers:
-        - name: helloworld
-          image: docker.io/istio/examples-helloworld-v1:1.0
-          ports:
-            - containerPort: 5000
+      - name: helloworld
+        image: docker.io/istio/examples-helloworld-v1:1.0
+        ports:
+        - containerPort: 5000
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: helloworld-zone-c
+  name: helloworld-zone-us-a
 spec:
   replicas: 3
   selector:
@@ -89,12 +112,36 @@ spec:
         app: helloworld
     spec:
       nodeSelector:
-        topology.kubernetes.io/zone: c
+        topology.kubernetes.io/region: us
+        topology.kubernetes.io/zone: a
       containers:
-        - name: helloworld
-          image: docker.io/istio/examples-helloworld-v1:1.0
-          ports:
-            - containerPort: 5000
+      - name: helloworld
+        image: docker.io/istio/examples-helloworld-v1:1.0
+        ports:
+        - containerPort: 5000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: helloworld-zone-us-b
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: helloworld
+  template:
+    metadata:
+      labels:
+        app: helloworld
+    spec:
+      nodeSelector:
+        topology.kubernetes.io/region: us
+        topology.kubernetes.io/zone: b
+      containers:
+      - name: helloworld
+        image: docker.io/istio/examples-helloworld-v1:1.0
+        ports:
+        - containerPort: 5000
 ---
 apiVersion: v1
 kind: Service
@@ -104,9 +151,9 @@ spec:
   selector:
     app: helloworld
   ports:
-    - port: 5000
-      targetPort: 5000
-      protocol: TCP
+  - port: 5000
+    targetPort: 5000
+    protocol: TCP
   type: ClusterIP
 ---
 apiVersion: networking.istio.io/v1beta1
@@ -115,15 +162,15 @@ metadata:
   name: helloworld-vs
 spec:
   hosts:
-    - helloworld-svc.default.svc.cluster.local
+  - helloworld-svc.default.svc.cluster.local
   gateways:
-    - mesh
+  - mesh
   http:
-    - route:
-        - destination:
-            host: helloworld-svc.default.svc.cluster.local
-            port:
-              number: 5000
+  - route:
+    - destination:
+        host: helloworld-svc.default.svc.cluster.local
+        port:
+          number: 5000
 ---
 apiVersion: networking.istio.io/v1beta1
 kind: DestinationRule
@@ -135,48 +182,21 @@ spec:
 apiVersion: v1
 kind: Pod
 metadata:
-  name: netshoot-b
+  name: netshoot-a
 spec:
   nodeSelector:
     topology.kubernetes.io/zone: b
   containers:
-    - name: netshoot
-      image: nicolaka/netshoot:latest
-      command:
-        - sleep
-        - infinity
-      tty: true
-      stdin: true
+  - name: netshoot
+    image: nicolaka/netshoot:latest
+    command:
+    - sleep
+    - infinity
+    tty: true
+    stdin: true
 ```
 
-```shell
-$ kubectl get pod -o wide        
-NAME                                 READY   STATUS    RESTARTS   AGE   IP            NODE           NOMINATED NODE   READINESS GATES
-helloworld-zone-a-87c7fd898-7jdfm    2/2     Running   0          56s   10.244.3.14   kind-worker    <none>           <none>
-helloworld-zone-a-87c7fd898-cs8c9    2/2     Running   0          56s   10.244.3.12   kind-worker    <none>           <none>
-helloworld-zone-a-87c7fd898-wxfrw    2/2     Running   0          56s   10.244.3.13   kind-worker    <none>           <none>
-helloworld-zone-b-d48b9c6cc-c9xsx    2/2     Running   0          56s   10.244.2.15   kind-worker2   <none>           <none>
-helloworld-zone-b-d48b9c6cc-nzqt8    2/2     Running   0          56s   10.244.2.14   kind-worker2   <none>           <none>
-helloworld-zone-b-d48b9c6cc-sbr8z    2/2     Running   0          56s   10.244.2.13   kind-worker2   <none>           <none>
-helloworld-zone-c-6667db9dbd-gpclb   2/2     Running   0          56s   10.244.1.13   kind-worker3   <none>           <none>
-helloworld-zone-c-6667db9dbd-p964l   2/2     Running   0          56s   10.244.1.14   kind-worker3   <none>           <none>
-helloworld-zone-c-6667db9dbd-qbfl7   2/2     Running   0          56s   10.244.1.12   kind-worker3   <none>           <none>
-netshoot-b                           2/2     Running   0          33m   10.244.2.6    kind-worker2   <none>           <none>
-```
-
-```shell
-$ istioctl proxy-config all netshoot-b | grep kr
-endpoint/10.244.3.12:5000                                 HEALTHY     kr/a         outbound|5000||helloworld-svc.default.svc.cluster.local
-endpoint/10.244.3.13:5000                                 HEALTHY     kr/a         outbound|5000||helloworld-svc.default.svc.cluster.local
-endpoint/10.244.3.14:5000                                 HEALTHY     kr/a         outbound|5000||helloworld-svc.default.svc.cluster.local
-endpoint/10.244.2.13:5000                                 HEALTHY     kr/b         outbound|5000||helloworld-svc.default.svc.cluster.local
-endpoint/10.244.2.15:5000                                 HEALTHY     kr/b         outbound|5000||helloworld-svc.default.svc.cluster.local
-endpoint/10.244.2.14:5000                                 HEALTHY     kr/b         outbound|5000||helloworld-svc.default.svc.cluster.local
-endpoint/10.244.1.13:5000                                 HEALTHY     kr/c         outbound|5000||helloworld-svc.default.svc.cluster.local
-endpoint/10.244.1.12:5000                                 HEALTHY     kr/c         outbound|5000||helloworld-svc.default.svc.cluster.local
-endpoint/10.244.1.14:5000                                 HEALTHY     kr/c         outbound|5000||helloworld-svc.default.svc.cluster.local
-...
-```
+[File 1]은 Locality Load Balancing을 테스트하기 위한 기본 Workload Manifest를 나타내고 있다. 각 
 
 ```shell {caption="[Shell 2] Locality Load Balancing Off"}
 $ kubectl exec -it netshoot-b -- bash
@@ -351,16 +371,22 @@ $ kubectl scale deployment helloworld-zone-b --replicas 1
 Hello version: v1, instance: helloworld-zone-b-d48b9c6cc-d4jtx
 Hello version: v1, instance: helloworld-zone-b-d48b9c6cc-d4jtx
 Hello version: v1, instance: helloworld-zone-b-d48b9c6cc-d4jtx
+
+locality  weight  endpoints(ip|status)
+kr/b      1       10.244.2.19|HEALTHY
+kr/a      3       10.244.3.12|HEALTHY,10.244.3.13|HEALTHY,10.244.3.14|HEALTHY
+kr/c      3       10.244.1.13|HEALTHY,10.244.1.12|HEALTHY,10.244.1.14|HEALTHY
 ```
 
 ```shell
 $ kubectl exec -it netshoot-b -- bash
-(netshoot-b)# curl helloworld-svc:5000/hello
 Hello version: v1, instance: helloworld-zone-c-6667db9dbd-gpclb
-(netshoot-b)# curl helloworld-svc:5000/hello
 Hello version: v1, instance: helloworld-zone-a-87c7fd898-cs8c9
-(netshoot-b)# curl helloworld-svc:5000/hello
 Hello version: v1, instance: helloworld-zone-a-87c7fd898-cs8c9
+
+locality  weight  endpoints(ip|status)
+kr/a      3       10.244.3.12|HEALTHY,10.244.3.13|HEALTHY,10.244.3.14|HEALTHY
+kr/c      3       10.244.1.13|HEALTHY,10.244.1.12|HEALTHY,10.244.1.14|HEALTHY
 ```
 
 ## 2. 참조
