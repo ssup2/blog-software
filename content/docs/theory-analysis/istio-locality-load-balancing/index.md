@@ -52,6 +52,37 @@ Istio는 Node에 설정되어 있는 다음의 Label을 활용하여 Node의 Top
 * `topology.kubernetes.io/region` : Region 정보
 * `topology.kubernetes.io/zone` : Zone 정보
 
+```shell {caption="[Shell 2] my-shell-kr-a Pod의 Endpoint 확인 명령어"}
+$ istioctl proxy-config all my-shell-kr-a -o json \
+| jq -r '["locality","weight","endpoints(ip)"],( 
+  .configs[] 
+  | select(."@type"=="type.googleapis.com/envoy.admin.v3.EndpointsConfigDump")
+  | ..|objects
+  | select(.cluster_name? and (.cluster_name|contains("helloworld")))
+  | .endpoints[]?
+  | [
+      ([.locality.region,.locality.zone,.locality.subzone,.locality.sub_zone] 
+       | map(. // "") 
+       | map(select(.!="")) 
+       | join("/")),
+      ((.load_balancing_weight | (.value? // .)) // (.loadBalancingWeight | (.value? // .)) // "N/A"),
+      ([ .lb_endpoints[]?
+         | (.endpoint.address.socket_address.address)
+       ] | join(","))
+    ]) | @tsv' \
+| column -s $'\t' -t
+```
+
+```text {caption="[Shell 3] my-shell-kr-a Pod의 Endpoint 확인 결과"}
+locality  weight  endpoints(ip)
+kr/a      2       10.244.1.8,10.244.1.7
+kr/b      2       10.244.3.7,10.244.3.6
+us/a      2       10.244.2.7,10.244.2.6
+us/b      2       10.244.5.4,10.244.5.5
+```
+
+[Shell 2]는 my-shell-kr-a Pod의 Endpoint를 확인하는 명령어를 나타내고 있으며, [Shell 3]은 [Shell 2]의 명령어를 실행한 결과를 나타내고 있다. Locality와 Weight, Endpoint를 확인할 수 있다. 여기서 Endpoint는 Deployment의 Pod의 IP 주소를 나타낸다.
+
 ```yaml {caption="[File 1] 기본 Workload Manifest", linenos=table}
 apiVersion: apps/v1
 kind: Deployment
