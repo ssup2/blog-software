@@ -52,37 +52,6 @@ Istio는 Node에 설정되어 있는 다음의 Label을 활용하여 Node의 Top
 * `topology.kubernetes.io/region` : Region 정보
 * `topology.kubernetes.io/zone` : Zone 정보
 
-```shell {caption="[Shell 2] my-shell-kr-a Pod의 Endpoint 확인 명령어"}
-$ istioctl proxy-config all my-shell-kr-a -o json \
-| jq -r '["locality","weight","endpoints(ip)"],( 
-  .configs[] 
-  | select(."@type"=="type.googleapis.com/envoy.admin.v3.EndpointsConfigDump")
-  | ..|objects
-  | select(.cluster_name? and (.cluster_name|contains("helloworld")))
-  | .endpoints[]?
-  | [
-      ([.locality.region,.locality.zone,.locality.subzone,.locality.sub_zone] 
-       | map(. // "") 
-       | map(select(.!="")) 
-       | join("/")),
-      ((.load_balancing_weight | (.value? // .)) // (.loadBalancingWeight | (.value? // .)) // "N/A"),
-      ([ .lb_endpoints[]?
-         | (.endpoint.address.socket_address.address)
-       ] | join(","))
-    ]) | @tsv' \
-| column -s $'\t' -t
-```
-
-```text {caption="[Shell 3] my-shell-kr-a Pod의 Endpoint 확인 결과"}
-locality  weight  endpoints(ip)
-kr/a      2       10.244.1.8,10.244.1.7
-kr/b      2       10.244.3.7,10.244.3.6
-us/a      2       10.244.2.7,10.244.2.6
-us/b      2       10.244.5.4,10.244.5.5
-```
-
-[Shell 2]는 my-shell-kr-a Pod의 Endpoint를 확인하는 명령어를 나타내고 있으며, [Shell 3]은 [Shell 2]의 명령어를 실행한 결과를 나타내고 있다. Locality와 Weight, Endpoint를 확인할 수 있다. 여기서 Endpoint는 Deployment의 Pod의 IP 주소를 나타낸다.
-
 ```yaml {caption="[File 1] 기본 Workload Manifest", linenos=table}
 apiVersion: apps/v1
 kind: Deployment
@@ -232,37 +201,53 @@ spec:
 
 [File 1]은 Locality Load Balancing을 테스트하기 위한 기본 Workload Manifest를 나타내고 있다. [Figure 1]과 동일하게 각 Deployment는 2개의 Pod와 4개의 Locality를 구성하여 총 8개의 Pod를 구성한다. 또한 하나의 Destination Rule과 Service, Virtual Service는 하나만 정의하여 모든 Deployment에 적용되도록 구성한다.
 
-```shell {caption="[Shell 2] Locality Load Balancing Off"}
-$ kubectl exec -it netshoot-b -- bash
-(netshoot-b)# curl helloworld-svc:5000/hello
-Hello version: v1, instance: helloworld-zone-c-6667db9dbd-gpclb
-(netshoot-b)# curl helloworld-svc:5000/hello
-Hello version: v1, instance: helloworld-zone-b-d48b9c6cc-nzqt8
-(netshoot-b)# curl helloworld-svc:5000/hello
-Hello version: v1, instance: helloworld-zone-a-87c7fd898-wxfrw
+```shell {caption="[Shell 2] 요청 전송 명령어"}
+$ kubectl exec -it my-shell-kr-a -- bash -c '
+for i in {1..4}; do
+  curl helloworld:5000/hello 
+done
+'
 ```
 
-```shell
-$ istioctl proxy-config all netshoot-b -o json \
-| jq -r '["locality","weight","endpoints(ip|status)"],(
-    .configs[]|select(."@type"=="type.googleapis.com/envoy.admin.v3.EndpointsConfigDump")
-    | ..|objects
-    | select(.cluster_name? and (.cluster_name|contains("helloworld")))
-    | .endpoints[]?
-    | [
-        ([.locality.region,.locality.zone,.locality.subzone,.locality.sub_zone] | map(. // "") | map(select(.!="")) | join("/")),
-        ((.load_balancing_weight | (.value? // .)) // (.loadBalancingWeight | (.value? // .)) // "N/A"),
-        ([ .lb_endpoints[]?
-           | (.endpoint.address.socket_address.address) as $ip
-           | ($ip + "|" + ((.health_status // .healthStatus // "UNKNOWN") | tostring))
-         ] | join(","))
-      ]) | @tsv' \
-| column -s $'\t' -t
-locality  weight  endpoints(ip|status)
-kr/a      3       10.244.3.12|HEALTHY,10.244.3.13|HEALTHY,10.244.3.14|HEALTHY
-kr/b      3       10.244.2.13|HEALTHY,10.244.2.15|HEALTHY,10.244.2.14|HEALTHY
-kr/c      3       10.244.1.13|HEALTHY,10.244.1.12|HEALTHY,10.244.1.14|HEALTHY
+```text {caption="[Text 1] 요청 전송 결과"}
+Hello version: v1, instance: helloworld-kr-a-57cdf4d447-gwnzb
+Hello version: v1, instance: helloworld-us-a-7cfcf79cd4-grxlr
+Hello version: v1, instance: helloworld-kr-b-7b95f679bd-8z7rv
+Hello version: v1, instance: helloworld-us-b-59fd8576c5-grhkk
 ```
+
+[Shell 2]는 `my-shell-kr-a` Pod에서 `helloworld` Service에 요청을 4번 전송하는 명령어를 나타내고 있다. [Text 1]은 [Shell 2]의 명령어를 실행한 결과를 나타내고 있다. 각 요청이 각 Locality의 Pod에 한번씩 분배되어 전송되는 것을 확인할 수 있다.
+
+```shell {caption="[Shell 4] my-shell-kr-a Pod의 Endpoint 확인 명령어"}
+$ istioctl proxy-config all my-shell-kr-a -o json \
+| jq -r '["locality","weight","endpoints(ip)"],( 
+  .configs[] 
+  | select(."@type"=="type.googleapis.com/envoy.admin.v3.EndpointsConfigDump")
+  | ..|objects
+  | select(.cluster_name? and (.cluster_name|contains("helloworld")))
+  | .endpoints[]?
+  | [
+      ([.locality.region,.locality.zone,.locality.subzone,.locality.sub_zone] 
+       | map(. // "") 
+       | map(select(.!="")) 
+       | join("/")),
+      ((.load_balancing_weight | (.value? // .)) // (.loadBalancingWeight | (.value? // .)) // "N/A"),
+      ([ .lb_endpoints[]?
+         | (.endpoint.address.socket_address.address)
+       ] | join(","))
+    ]) | @tsv' \
+| column -s $'\t' -t
+```
+
+```text {caption="[Text 2] my-shell-kr-a Pod의 Endpoint 확인 결과"}
+locality  weight  endpoints(ip)
+kr/a      2       10.244.1.8,10.244.1.7
+kr/b      2       10.244.3.7,10.244.3.6
+us/a      2       10.244.2.7,10.244.2.6
+us/b      2       10.244.5.4,10.244.5.5
+```
+
+[Shell 4]은 `my-shell-kr-a` Pod의 Endpoint를 확인하는 명령어를 나타내고 있으며, [Text 2]는 [Shell 4]의 명령어를 실행한 결과를 나타내고 있다. Locality와 Weight, Endpoint를 확인할 수 있다. 여기서 Endpoint는 Deployment의 Pod의 IP 주소를 나타낸다.
 
 ### 1.2. Locality Load Balancing On
 
