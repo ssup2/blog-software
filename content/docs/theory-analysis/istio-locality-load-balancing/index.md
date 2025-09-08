@@ -218,38 +218,62 @@ Hello version: v1, instance: helloworld-us-b-59fd8576c5-grhkk
 
 [Shell 2]는 `my-shell-kr-a` Pod에서 `helloworld` Service에 요청을 4번 전송하는 명령어를 나타내고 있다. [Text 1]은 [Shell 2]의 명령어를 실행한 결과를 나타내고 있다. 각 요청이 각 Locality의 Pod에 한번씩 분배되어 전송되는 것을 확인할 수 있다.
 
-```shell {caption="[Shell 4] my-shell-kr-a Pod의 Endpoint 확인 명령어"}
-$ istioctl proxy-config all my-shell-kr-a -o json \
-| jq -r '["locality","weight","endpoints(ip)"],( 
-  .configs[] 
-  | select(."@type"=="type.googleapis.com/envoy.admin.v3.EndpointsConfigDump")
-  | ..|objects
-  | select(.cluster_name? and (.cluster_name|contains("helloworld")))
-  | .endpoints[]?
-  | [
-      ([.locality.region,.locality.zone,.locality.subzone,.locality.sub_zone] 
-       | map(. // "") 
-       | map(select(.!="")) 
-       | join("/")),
-      ((.load_balancing_weight | (.value? // .)) // (.loadBalancingWeight | (.value? // .)) // "N/A"),
-      ([ .lb_endpoints[]?
-         | (.endpoint.address.socket_address.address)
-       ] | join(","))
-    ]) | @tsv' \
-| column -s $'\t' -t
+### 1.2. Outlier Detection 설정과 함께 Locality Load Balancing 적용
+
+```yaml {caption="[File 2] Locality Load Balancing Distribute Example"}
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: helloworld
+spec:
+  host: helloworld.default.svc.cluster.local
+  trafficPolicy:
+    loadBalancer:
+      localityLbSetting:
+        enabled: true
+    outlierDetection:
+      consecutive5xxErrors: 1
+      interval: 1s
+      baseEjectionTime: 1m
+```
+Istio의 Locality Load Balancing을 가장 간단하게 활성화 할 수 있는 방법은 Destination Rule에서 `localityLbSetting.enabled` Field를 `true`로 설정과 함께 `outlierDetection` Field를 설정하는 것이다. `outlierDetection` Field를 설정하지 않으면 Locality Load Balancing이 활성화되지 않는다. [File 2]는 `outlierDetection` Field과 함께 Locality Load Balancing을 활성화하는 Destination Rule의 예제를 나타내고 있다.
+
+```text {caption="[Text 2] Outlier Detection 설정과 함께 요청 전송 결과"}
+Hello version: v1, instance: helloworld-kr-a-57cdf4d447-gwnzb
+Hello version: v1, instance: helloworld-kr-a-57cdf4d447-gvgxg
+Hello version: v1, instance: helloworld-kr-a-57cdf4d447-gwnzb
+Hello version: v1, instance: helloworld-kr-a-57cdf4d447-gwnzb
 ```
 
-```text {caption="[Text 2] my-shell-kr-a Pod의 Endpoint 확인 결과"}
-locality  weight  endpoints(ip)
-kr/a      2       10.244.1.8,10.244.1.7
-kr/b      2       10.244.3.7,10.244.3.6
-us/a      2       10.244.2.7,10.244.2.6
-us/b      2       10.244.5.4,10.244.5.5
+[Shell 2]의 명령어를 실행하면 [Text 2]과 같은 결과를 확인할 수 있다. Locality Load Balancing이 활성화되어 `my-shell-kr-a` Pod가 위치하는 `kr/a` Locality의 Pod에만 요청이 전송되는 것을 확인할 수 있다.
+
+```shell {caption="[Shell 3] helloworld-kr-a Deployment의 Replica를 1로 조정"}
+$ kubectl scale deployment helloworld-kr-a --replicas 1
 ```
 
-[Shell 4]은 `my-shell-kr-a` Pod의 Endpoint를 확인하는 명령어를 나타내고 있으며, [Text 2]는 [Shell 4]의 명령어를 실행한 결과를 나타내고 있다. Locality와 Weight, Endpoint를 확인할 수 있다. 여기서 Endpoint는 Deployment의 Pod의 IP 주소를 나타낸다.
+```text {caption="[Text 3] helloworld-kr-a Deployment의 Replica를 1로 조정 결과"}
+Hello version: v1, instance: helloworld-kr-a-57cdf4d447-gwnzb
+Hello version: v1, instance: helloworld-kr-a-57cdf4d447-gwnzb
+Hello version: v1, instance: helloworld-kr-a-57cdf4d447-gwnzb
+Hello version: v1, instance: helloworld-kr-a-57cdf4d447-gwnzb
+```
 
-### 1.2. Locality Load Balancing On
+[Shell 3]은 `helloworld-kr-a` Deployment의 Replica를 1로 조정후 요청을 전송하는 명령어를 나타내고 있다. [Text 3]은 [Shell 3]의 명령어를 실행한 결과를 나타내고 있다. `kr/a` Locality에 여전히 하나의 Pod가 존재하기 때문에, 모든 요청이 `kr/a` Locality의 Pod에 전송되는 것을 확인할 수 있다.
+
+```shell {caption="[Shell 4] helloworld-kr-a Deployment의 Replica를 0으로 조정"}
+$ kubectl scale deployment helloworld-kr-a --replicas 0
+```
+
+```text {caption="[Text 4] helloworld-kr-a Deployment의 Replica를 0으로 조정 결과"}
+Hello version: v1, instance: helloworld-kr-b-7b95f679bd-fg8q5
+Hello version: v1, instance: helloworld-kr-b-7b95f679bd-8z7rv
+Hello version: v1, instance: helloworld-kr-b-7b95f679bd-fg8q5
+Hello version: v1, instance: helloworld-kr-b-7b95f679bd-8z7rv
+```
+
+[Shell 4]는 `helloworld-kr-a` Deployment의 Replica를 0으로 조정후 요청을 전송하는 명령어를 나타내고 있다. [Text 4]은 [Shell 4]의 명령어를 실행한 결과를 나타내고 있다. `kr/a` Locality에 더이상 Pod가 존재하지 않기 때문에, 모든 요청이 `kr/b` Locality의 Pod에 전송되는 것을 확인할 수 있다.
+
+### 1.2. Locality Load Balancing with Outlier Detection
 
 ```yaml {caption="[File 2] Locality Load Balancing Distribute Example"}
 apiVersion: networking.istio.io/v1beta1
@@ -356,57 +380,7 @@ kr/c    10      10.244.1.13,10.244.1.12,10.244.1.14
 ...
 ```
 
-### 1.3. Locality Load Balancing Failover
 
-```yaml {caption="[File 2] Locality Load Balancing Distribute Example"}
-apiVersion: networking.istio.io/v1beta1
-kind: DestinationRule
-metadata:
-  name: helloworld-dr
-spec:
-  host: helloworld-svc.default.svc.cluster.local
-  trafficPolicy:
-    loadBalancer:
-      localityLbSetting:
-        enabled: true
-    outlierDetection:
-      consecutive5xxErrors: 1
-      interval: 1s
-      baseEjectionTime: 1m
-```
-
-```shell
-$ kubectl exec -it netshoot-b -- bash
-(netshoot-b)# curl helloworld-svc:5000/hello
-Hello version: v1, instance: helloworld-zone-b-d48b9c6cc-nzqt8
-(netshoot-b)# curl helloworld-svc:5000/hello
-Hello version: v1, instance: helloworld-zone-b-d48b9c6cc-nzqt8
-(netshoot-b)# curl helloworld-svc:5000/hello
-Hello version: v1, instance: helloworld-zone-b-d48b9c6cc-c9xsx
-```
-
-```shell
-$ kubectl scale deployment helloworld-zone-b --replicas 1
-Hello version: v1, instance: helloworld-zone-b-d48b9c6cc-d4jtx
-Hello version: v1, instance: helloworld-zone-b-d48b9c6cc-d4jtx
-Hello version: v1, instance: helloworld-zone-b-d48b9c6cc-d4jtx
-
-locality  weight  endpoints(ip|status)
-kr/b      1       10.244.2.19|HEALTHY
-kr/a      3       10.244.3.12|HEALTHY,10.244.3.13|HEALTHY,10.244.3.14|HEALTHY
-kr/c      3       10.244.1.13|HEALTHY,10.244.1.12|HEALTHY,10.244.1.14|HEALTHY
-```
-
-```shell
-$ kubectl exec -it netshoot-b -- bash
-Hello version: v1, instance: helloworld-zone-c-6667db9dbd-gpclb
-Hello version: v1, instance: helloworld-zone-a-87c7fd898-cs8c9
-Hello version: v1, instance: helloworld-zone-a-87c7fd898-cs8c9
-
-locality  weight  endpoints(ip|status)
-kr/a      3       10.244.3.12|HEALTHY,10.244.3.13|HEALTHY,10.244.3.14|HEALTHY
-kr/c      3       10.244.1.13|HEALTHY,10.244.1.12|HEALTHY,10.244.1.14|HEALTHY
-```
 
 ## 2. 참조
 
