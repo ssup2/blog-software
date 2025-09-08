@@ -5,6 +5,8 @@ draft: true
 
 ## 1. Istio Locality Load Balancing
 
+Istio의 **Locality Load Balancing**은 의미 그대로 같은 Locality(지역성)에 존재하는 Pod에만 요청을 전송하는 기능을 의미한다. Locality Load Balancing 기능을 잘 활용하면 Network Hop을 최소화하여 요청 처리 속도를 높일 수 있으며, Cloud 환경에서는 같은 Region 또는 Zone에 존재하는 Pod에만 요청을 전송하여 네트워크 비용을 줄일 수 있다. Kubernetes Service에서 제공하는 **Topology Aware Load Balancing** 기능과 유사한 기능이다.
+
 ### 1.1. Test 환경 구성
 
 {{< figure caption="[Figure 1] Locality Load Balancing Test Environment" src="images/test-environment.png" width="900px" >}}
@@ -216,9 +218,19 @@ Hello version: v1, instance: helloworld-kr-b-7b95f679bd-8z7rv
 Hello version: v1, instance: helloworld-us-b-59fd8576c5-grhkk
 ```
 
-[Shell 2]는 `my-shell-kr-a` Pod에서 `helloworld` Service에 요청을 4번 전송하는 명령어를 나타내고 있다. [Text 1]은 [Shell 2]의 명령어를 실행한 결과를 나타내고 있다. 각 요청이 각 Locality의 Pod에 한번씩 분배되어 전송되는 것을 확인할 수 있다.
+[Shell 2]는 `my-shell-kr-a` Pod에서 `helloworld` Service에 요청을 4번 전송하는 명령어를 나타내고 있다. [Text 1]은 [Shell 2]의 명령어를 실행한 결과를 나타내고 있다. 각 요청이 모든 Locality의 Pod에 한번씩 분배되어 전송되는 것을 확인할 수 있다.
 
-### 1.2. Outlier Detection 설정과 함께 Locality Load Balancing 적용
+### 1.2. Locality Load Balancing 적용
+
+Locality Load Balancing은 Destination Rule에서 `localityLbSetting.enabled` Field를 `true`로 설정과 함께 `outlierDetection` Field를 설정 또는 `distribute` Field를 설정하는 것으로 활성화할 수 있다. `localityLbSetting.enabled` Field를 `true`로만 단독으로 설정하는 경우에는 Locality Load Balancing이 활성화되지 않는다.
+
+#### 1.2.1. with Outlier Detection (Failover)
+
+{{< figure caption="[Figure 2] Locality Load Balancing Failover Example" src="images/locality-load-balancing-failover.png" width="900px" >}}
+
+Locality Load Balancing을 기능을 활용할 경우 고려해야할 부분중에 하나는 가용성이다. Locality Load Balancing을 이용하지 않을경우 Client의 요청은 모든 Locality의 Pod에 전송되기 때문에 높은 가용성이 보장된다. 반면에 Locality Load Balancing을 이용하는 경우에는 해당 Locality에 존재하는 Pod가 없는 경우에는 요청을 전송할 수 없기 때문에 가용성이 떨어질 수 있다.
+
+Istio에서는 이러한 가용성 문제를 해결하기 위해서 Failover 기능을 제공한다. Failover 기능은 Destination Rule에서 `outlierDetection` Field를 설정하여 활성화할 수 있다. `outlierDetection` Field를 설정되면 Client와 동일한 Locality에 존재하는 Pod가 없는 경우에는 다른 Locality의 Pod에 요청을 전송할 수 있다. `outlierDetection` Field는 Server Pod의 비정상 상태를 판단하는 기준을 정의한다.
 
 ```yaml {caption="[File 2] Locality Load Balancing Distribute Example"}
 apiVersion: networking.istio.io/v1beta1
@@ -236,7 +248,6 @@ spec:
       interval: 1s
       baseEjectionTime: 1m
 ```
-Istio의 Locality Load Balancing을 가장 간단하게 활성화 할 수 있는 방법은 Destination Rule에서 `localityLbSetting.enabled` Field를 `true`로 설정과 함께 `outlierDetection` Field를 설정하는 것이다. `outlierDetection` Field를 설정하지 않으면 Locality Load Balancing이 활성화되지 않는다. [File 2]는 `outlierDetection` Field과 함께 Locality Load Balancing을 활성화하는 Destination Rule의 예제를 나타내고 있다.
 
 ```text {caption="[Text 2] Outlier Detection 설정과 함께 요청 전송 결과"}
 Hello version: v1, instance: helloworld-kr-a-57cdf4d447-gwnzb
@@ -245,35 +256,54 @@ Hello version: v1, instance: helloworld-kr-a-57cdf4d447-gwnzb
 Hello version: v1, instance: helloworld-kr-a-57cdf4d447-gwnzb
 ```
 
-[Shell 2]의 명령어를 실행하면 [Text 2]과 같은 결과를 확인할 수 있다. Locality Load Balancing이 활성화되어 `my-shell-kr-a` Pod가 위치하는 `kr/a` Locality의 Pod에만 요청이 전송되는 것을 확인할 수 있다.
+[File 2]는 `outlierDetection` Field과 함께 Locality Load Balancing을 활성화하는 Destination Rule의 예제를 나타내고 있으며, [Shell 2]의 명령어를 실행하면 [Text 2]과 같은 결과를 확인할 수 있다. Locality Load Balancing이 활성화되어 `my-shell-kr-a` Pod가 위치하는 `kr/a` Locality의 Pod에만 요청이 전송되는 것을 확인할 수 있다.
 
-```shell {caption="[Shell 3] helloworld-kr-a Deployment의 Replica를 1로 조정"}
-$ kubectl scale deployment helloworld-kr-a --replicas 1
-```
-
-```text {caption="[Text 3] helloworld-kr-a Deployment의 Replica를 1로 조정 결과"}
-Hello version: v1, instance: helloworld-kr-a-57cdf4d447-gwnzb
-Hello version: v1, instance: helloworld-kr-a-57cdf4d447-gwnzb
-Hello version: v1, instance: helloworld-kr-a-57cdf4d447-gwnzb
-Hello version: v1, instance: helloworld-kr-a-57cdf4d447-gwnzb
-```
-
-[Shell 3]은 `helloworld-kr-a` Deployment의 Replica를 1로 조정후 요청을 전송하는 명령어를 나타내고 있다. [Text 3]은 [Shell 3]의 명령어를 실행한 결과를 나타내고 있다. `kr/a` Locality에 여전히 하나의 Pod가 존재하기 때문에, 모든 요청이 `kr/a` Locality의 Pod에 전송되는 것을 확인할 수 있다.
-
-```shell {caption="[Shell 4] helloworld-kr-a Deployment의 Replica를 0으로 조정"}
+```shell {caption="[Shell 3] helloworld-kr-a Deployment의 Replica를 0으로 조정"}
 $ kubectl scale deployment helloworld-kr-a --replicas 0
 ```
 
-```text {caption="[Text 4] helloworld-kr-a Deployment의 Replica를 0으로 조정 결과"}
+```text {caption="[Text 3] helloworld-kr-a Deployment의 Replica를 0으로 조정 결과"}
 Hello version: v1, instance: helloworld-kr-b-7b95f679bd-fg8q5
 Hello version: v1, instance: helloworld-kr-b-7b95f679bd-8z7rv
 Hello version: v1, instance: helloworld-kr-b-7b95f679bd-fg8q5
 Hello version: v1, instance: helloworld-kr-b-7b95f679bd-8z7rv
 ```
 
-[Shell 4]는 `helloworld-kr-a` Deployment의 Replica를 0으로 조정후 요청을 전송하는 명령어를 나타내고 있다. [Text 4]은 [Shell 4]의 명령어를 실행한 결과를 나타내고 있다. `kr/a` Locality에 더이상 Pod가 존재하지 않기 때문에, 모든 요청이 `kr/b` Locality의 Pod에 전송되는 것을 확인할 수 있다.
+[Shell 4]는 `helloworld-kr-a` Deployment의 Replica를 0으로 조정후 요청을 전송하는 명령어를 나타내고 있으며, [Text 4]은 [Shell 4]의 명령어를 실행한 결과를 나타내고 있다. `kr/a` Locality에 더이상 Pod가 존재하지 않기 때문에, 모든 요청이 `kr/b` Locality의 Pod에만 전송되는 것을 확인할 수 있다. 즉 Failover 기능이 활성화되어 요청이 다른 Locality의 Pod에 전송되는 것을 확인할 수 있다.
 
-### 1.2. Locality Load Balancing with Outlier Detection
+`us/a`와 `us/b` Locality에 존재하는 Pod에는 요청이 전송되지 않는 이유는, `kr/b`이 `kr/a`와 동일한 Region에 존재하기 때문에 `us/a`, `us/b` 보다 Locality가 더 높기 때문이다. 이러한 Locality 우선순위는 Destination Rule에서 `failoverPriority` Field를 통해서 설정할 수 있다.
+
+```shell {caption="[Shell 4] helloworld-kr-a Deployment의 Replica를 1로 조정"}
+$ kubectl scale deployment helloworld-kr-a --replicas 0
+$ kubectl scale deployment helloworld-kr-b --replicas 0
+```
+
+```text {caption="[Text 4] helloworld-kr-a Deployment의 Replica를 0으로 조정 결과"}
+Hello version: v1, instance: helloworld-us-a-7cfcf79cd4-grxlr
+Hello version: v1, instance: helloworld-us-b-59fd8576c5-grhkk
+Hello version: v1, instance: helloworld-us-a-7cfcf79cd4-grxlr
+Hello version: v1, instance: helloworld-us-b-59fd8576c5-qd85k
+```
+
+[Shell 4]는 `helloworld-kr-a`와 `helloworld-kr-b` Deployment의 Replica를 0으로 조정후 요청을 전송하는 명령어를 나타내고 있으며, [Text 4]은 [Shell 4]의 명령어를 실행한 결과를 나타내고 있다. `kr/a`, `kr/b` Locality에 더이상 Pod가 존재하지 않기 때문에, `us/a`, `us/b` Locality가 동일한 우선순위를 갖는다. 따라서 모든 요청이 `us/a`, `us/b` Locality의 Pod에 균등하게 분배되는 것을 확인할 수 있다.
+
+```shell {caption="[Shell 4] helloworld-kr-a Deployment의 Replica를 1로 조정"}
+$ kubectl scale deployment helloworld-kr-a --replicas 1
+$ kubectl scale deployment helloworld-kr-b --replicas 2
+```
+
+```text {caption="[Text 4] helloworld-kr-a Deployment의 Replica를 1로 조정 결과"}
+Hello version: v1, instance: helloworld-kr-a-57cdf4d447-gwnzb
+Hello version: v1, instance: helloworld-kr-a-57cdf4d447-gwnzb
+Hello version: v1, instance: helloworld-kr-a-57cdf4d447-gwnzb
+Hello version: v1, instance: helloworld-kr-a-57cdf4d447-gwnzb
+```
+
+[Shell 4]은 `helloworld-kr-a`는 Replica를 1로, `helloworld-kr-b`는 Replica를 2로 조정후 요청을 전송하는 명령어를 나타내고 있다. [Text 4]은 [Shell 4]의 명령어를 실행한 결과를 나타내고 있다. `kr/a` Locality에 여전히 하나의 Pod가 존재하기 때문에, 모든 요청이 `kr/a` Locality의 Pod에 전송되는 것을 확인할 수 있다.
+
+Istio의 Locality Load Balancing은 하나의 Server Pod라도 Client와 동일한 Locality에 존재하면 해당 Server Pod에 요청을 전송한다. 따라서 각 Locality에 존재하는 Server Pod의 개수가 다르다면, 각 Server Pod가 받는 요청도 불균형이 발생한다. 이러한 불균형을 해결하기 위해서는 Pod에 `topologySpreadConstraint`를 설정하여 각 Locality에 존재하는 Server Pod의 개수를 동일하게 유지하도록 만들어야 한다.
+
+#### 1.2.2. with Distribute
 
 ```yaml {caption="[File 2] Locality Load Balancing Distribute Example"}
 apiVersion: networking.istio.io/v1beta1
