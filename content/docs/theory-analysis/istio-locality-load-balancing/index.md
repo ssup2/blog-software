@@ -305,9 +305,9 @@ Hello version: v1, instance: helloworld-us-b-59fd8576c5-qd85k
 
 {{< figure caption="[Figure 5] Locality Load Balancing Only One Pod" src="images/locality-load-balancing-failover-zone-one-pod.png" width="900px" >}}
 
-[Figure 5]는 [Figure 2]의 상태에서 `my-shell-kr-a` Pod가 위치하는 `kr/a` Locality에 하나의 `helloworld` Pod만 존재하는 경우 동작하는 모습을 나타내고 있다. 모든 요청이 `kr/a` Locality의 단일 Pod에 전송되는 것을 확인할 수 있다. Istio의 Locality Load Balancing은 하나의 Server Pod라도 Client와 동일한 Locality에 존재하면 해당 Server Pod에 요청을 전송한다. 따라서 각 Locality에 존재하는 Server Pod의 개수가 다르다면, 각 Server Pod가 받는 요청도 불균형이 발생한다. 이러한 불균형을 해결하기 위해서는 Pod에 `topologySpreadConstraint`를 설정하여 각 Locality에 존재하는 Server Pod의 개수를 동일하게 유지하도록 만들어야 한다. 
+[Figure 5]는 [Figure 2]의 상태에서 `my-shell-kr-a` Pod가 위치하는 `kr/a` Locality에 하나의 `helloworld` Pod만 존재하는 경우 동작하는 모습을 나타내고 있다. 모든 요청이 `kr/a` Locality의 단일 Pod에 전송되는 것을 확인할 수 있다. Istio의 Locality Load Balancing은 하나의 Server Pod라도 Client와 동일한 Locality에 존재하면 해당 Server Pod에 요청을 전송한다. 
 
-Kubernetes의 Topology Aware Load Balancing은 Locality 사이의 Pod 개수가 너무 큰 차이가 발생하는 경우에는 **Guardrail**이 동작해 Locality를 고려하지 않고 Load Balancing을 수행하지 않는것과 대비된다.
+따라서 각 Locality에 존재하는 Server Pod의 개수가 다르다면, 각 Server Pod가 받는 요청도 불균형이 발생한다. 이러한 불균형을 해결하기 위해서는 Pod에 `topologySpreadConstraint`를 설정하여 각 Locality에 존재하는 Server Pod의 개수를 동일하게 유지하도록 만들어야 한다. Kubernetes Service의 Topology Aware Load Balancing은 Locality 사이의 Pod 개수가 너무 큰 차이가 발생하는 경우에는 **Guardrail**로 인해서 기능이 중지되는것과 대비되는 부분이다.
 
 ```shell {caption="[Shell 5] helloworld-kr-a Deployment의 Replica를 1로 조정"}
 $ kubectl scale deployment helloworld-kr-a --replicas 1
@@ -325,7 +325,7 @@ Hello version: v1, instance: helloworld-kr-a-57cdf4d447-gwnzb
 
 #### 1.2.2. with Distribution
 
-Locality Load Balancing은 Client Pod의 요청을 Client Pod와 동일한 Locality의 Server Pod에만 전송하는 것을 보장하는 기능이다. 하지만 동일한 Locality의 Server Pod가 아니라 다른 Locality의 Server Pod에도 명시적으로 요청을 전송하도록 만들 수 있으며, 이러한 기능을 Distribution 기능이라고 한다. Distribution 기능은 Traffic이 어느 Locality로 전송할지 명시적으로 지정하는 기능이기 때문에, Failover 기능과는 정책적 충돌로 인해서 잘 이용되지 않는다.
+Locality Load Balancing은Traffic을 Client Pod와 동일한 Locality의 Server Pod에만 전송하는 기능뿐만이 아니라, 다른 Locality의 Server Pod에도 명시적으로 요청을 전송하도록 만들 수 있는 기능도 제공한다. 이러한 기능을 Distribution 기능이라고 한다. Distribution 기능은 Destination Rule에서 `distribute` Field를 통해서 활성화할 수 있다.
 
 ```yaml {caption="[File 3] Locality Load Balancing Distribute Example"}
 apiVersion: networking.istio.io/v1beta1
