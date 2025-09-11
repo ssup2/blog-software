@@ -18,7 +18,7 @@ The Control Plane components are as follows:
 The Data Plane components are as follows:
 
 * **Envoy**: Operates in a separate container within each application pod, performing the sidecar role of receiving all packets sent by the application and transmitting them on its behalf, and receiving all packets that the application should receive before delivering them back to the application. It also performs the role of sending collected metric information to Mixer.
-* **pilot-agent**: Receives necessary information from Control Plane components and configures Envoy to perform functions such as packet load balancing, packet encapsulation/decapsulation, rate limiting, and circuit breaking. It also performs the role of sending collected metric information to Mixer.
+* **pilot-agent**: Receives necessary information from Control Plane components and configures Envoy to perform functions such as packet load balancing, packet encapsulation/decapsulation, rate limiting, and circuit breaking. It also performs the role of sending collected metric to Mixer.
 
 ### 1.1. Istio Architecture After v1.5
 
@@ -26,7 +26,7 @@ The Data Plane components are as follows:
 
 Istio's architecture changed after version 1.5. [Figure 2] shows the Istio Architecture after version 1.5. Pilot, Galley, and Citadel have been consolidated into a single component (binary) called **Istiod**, and **Mixer** has been deprecated.
 
-The packet permission policies between applications that Mixer used to handle have been replaced by Envoy's functionality and Citadel's security features. Rate limiting that Mixer used to perform has also been changed to utilize Envoy's functionality. The metric information that Mixer used to collect from pilot-agent and Envoy is now collected directly by Prometheus and Jaeger.
+The packet permission policies between applications that Mixer used to handle have been replaced by Envoy's functionality and Citadel's security features. Rate limiting that Mixer used to perform has also been changed to utilize Envoy's functionality. The metric that Mixer used to collect from pilot-agent and Envoy is now collected directly by Prometheus and Jaeger.
 
 ## 2. References
 

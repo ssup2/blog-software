@@ -1,6 +1,5 @@
 ---
 title: "Istio Locality Load Balancing"
-draft: true
 ---
 
 ## 1. Istio Locality Load Balancing
