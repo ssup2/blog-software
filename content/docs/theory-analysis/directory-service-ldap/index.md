@@ -1,5 +1,5 @@
 ---
-title: Directory Service, LDAP (Lightweight Directory Access Protocol)
+title: Directory Service, LDAP
 ---
 
 Directory Service와 Directory Service에서 이용되는 LDAP (Lightweight Directory Access Protocol)을 분석한다.
