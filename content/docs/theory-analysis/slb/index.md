@@ -1,5 +1,5 @@
 ---
-title: SLB (Server Load Balancing)
+title: SLB
 ---
 
 SLB(Server Load Balancing) 기법을 분석한다.

@@ -1,5 +1,5 @@
 ---
-title: Linux BPF (Berkeley Packet Filter) Network Program Type
+title: Linux BPF Network Program Type
 ---
 
 Network BPF Program Type의 BPF를 분석한다.

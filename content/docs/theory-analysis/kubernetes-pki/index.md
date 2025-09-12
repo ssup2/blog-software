@@ -1,5 +1,5 @@
 ---
-title: Kubernetes PKI (Public Key Infrastructure)
+title: Kubernetes PKI
 ---
 
 Kubernetes PKI (Public Key Infrastructure)를 분석한다.

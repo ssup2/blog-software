@@ -1,5 +1,5 @@
 ---
-title: BGP (Border Gateway Protocol)
+title: BGP
 ---
 
 BGP (Border Gateway Protocol)를 분석한다.

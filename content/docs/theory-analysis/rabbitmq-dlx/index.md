@@ -1,10 +1,10 @@
 ---
-title: RabbitMQ DLX (Dead Letter Exchange)
+title: RabbitMQ DLX
 ---
 
-RabbitMQ의 DLX(Dead Letter Exchange)를 분석한다.
+RabbitMQ의 DLX (Dead Letter Exchange)를 분석한다.
 
-## 1. RabbitMQ DLX(Dead Letter Exchange)
+## 1. RabbitMQ DLX (Dead Letter Exchange)
 
 RabbitMQ DLX(Dead Letter Exchange)는 Dead Letter가 된 Massage를 지정된 Exchange에 전송하는 기능이다. Message가 Dead Letter가 되는 조건은 다음의 3가지가 존재한다.
 

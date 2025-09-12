@@ -1,5 +1,5 @@
 ---
-title: MSA (Micro Service Architecture)
+title: MSA
 ---
 
 MSA (Micro Service Architecture)를 분석한다.

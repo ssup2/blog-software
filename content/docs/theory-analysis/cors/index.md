@@ -1,5 +1,5 @@
 ---
-title: CORS (Cross-Origin Resource Sharing)
+title: CORS
 ---
 
 CORS (Cross-Origin Resource Sharing) 기법을 분석한다.

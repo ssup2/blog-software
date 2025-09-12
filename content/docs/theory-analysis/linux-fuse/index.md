@@ -1,5 +1,5 @@
 ---
-title: Linux Fuse (Filesystem in Userspace)
+title: Linux Fuse
 ---
 
 Linux의 FUSE를 분석한다.

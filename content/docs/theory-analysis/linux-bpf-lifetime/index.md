@@ -1,5 +1,5 @@
 ---
-title: Linux BPF (Berkeley Packet Filter) Lifetime
+title: Linux BPF Lifetime
 ---
 
 Linux의 BPF Program 및 BPF Map의 Lifetime을 분석한다.

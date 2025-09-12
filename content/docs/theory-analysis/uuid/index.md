@@ -1,5 +1,5 @@
 ---
-title: UUID (Universally Unique IDentifier)
+title: UUID
 ---
 
 ## 1. UUID (Universally Unique IDentifier)

@@ -1,5 +1,5 @@
 ---
-title: VPN (Virtual Private Network)
+title: VPN
 ---
 
 VPN (Virtual Private Network)을 분석한다.

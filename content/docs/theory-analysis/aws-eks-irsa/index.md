@@ -1,5 +1,5 @@
 ---
-title: AWS EKS IRSA (IAM Roles for Service Accounts)
+title: AWS EKS IRSA
 ---
 
 ## 1. AWS EKS Service Account에 AWS IAM Role 부여 (IRSA)

@@ -1,5 +1,5 @@
 ---
-title: TLS ALPN (Application Layer Protocol Negotiation)
+title: TLS ALPN
 ---
 
 TLS의 ALPN (Application Layer Protocol Negotiation)을 분석한다.

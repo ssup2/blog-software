@@ -1,5 +1,5 @@
 ---
-title: TLS (Transport Layer Security), SSL (Secure Socket Layer)
+title: TLS, SSL
 ---
 
  TLS (Transport Layer Security) / SSL (Secure Socket Layer)를 분석한다.

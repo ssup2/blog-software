@@ -1,5 +1,5 @@
 ---
-title: Linux LSM (Linux Security Module)
+title: Linux LSM
 ---
 
 Linux의 Security Framework인 LSM(Linux Security Module)을 분석한다.

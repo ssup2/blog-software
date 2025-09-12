@@ -1,5 +1,5 @@
 ---
-title: OOP (Object Oriented Programming) 특징
+title: OOP 특징
 ---
 
 ## 1. 추상화(Abstraction)

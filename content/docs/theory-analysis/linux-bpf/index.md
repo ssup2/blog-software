@@ -1,5 +1,5 @@
 ---
-title: Linux BPF (Berkeley Packet Filter)
+title: Linux BPF
 ---
 
 Linux의 BPF (Berkeley Packet Filter)를 분석한다.

@@ -1,5 +1,5 @@
 ---
-title: AWS ARN (Amazon Resource Number)
+title: AWS ARN
 ---
 
 AWS의 ARN (Amazon Resource Number)을 정리한다.

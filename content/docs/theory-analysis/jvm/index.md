@@ -1,5 +1,5 @@
 ---
-title: JVM (Java Virtual Machine)
+title: JVM
 ---
 
 JVM (Java Virtual Machine)을 분석한다.

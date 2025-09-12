@@ -1,5 +1,5 @@
 ---
-title: CQRS (Command and Query Responsibility Segregation) Pattern
+title: CQRS Pattern
 ---
 
 CQRS (Command and Query Responsibility Segregation) Pattern을 분석한다.

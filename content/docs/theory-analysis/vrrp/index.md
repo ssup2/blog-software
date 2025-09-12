@@ -1,5 +1,5 @@
 ---
-title: VRRP (Virtual Router Redundancy Protocol)
+title: VRRP
 ---
 
 ## 1. VRRP (Virtual Router Redundancy Protocol)

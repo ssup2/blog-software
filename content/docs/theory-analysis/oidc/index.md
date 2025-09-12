@@ -1,5 +1,5 @@
 ---
-title: OIDC (OpenID Connect)
+title: OIDC
 ---
 
 OIDC (OpenID Connect)를 분석한다.

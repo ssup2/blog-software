@@ -1,5 +1,5 @@
 ---
-title: SNMP (Simple Network Management Protocol)
+title: SNMP
 ---
 
 ## 1. SNMP (Simple Network Management Protocol)

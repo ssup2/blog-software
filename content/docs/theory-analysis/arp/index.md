@@ -1,8 +1,8 @@
 ---
-title: ARP (Address Resolution Protocol)
+title: ARP
 ---
 
-## 1. Address Resolution Protocol (ARP)
+## 1. ARP (Address Resolution Protocol)
 
 ARP는 뜻 그대로 주소를 알아내기 위한 Protocol이다. 네트워크 프로그래밍시 대부분의 경우 Data를 보내려는 목적지의 IP 주소만을 이용할뿐 MAC 주소를 이용하지 않는다. IP는 네트워크 주소 체계를 유연하게 관리하기 위한 논리적 주소이고, MAC 주소는 실제 NIC 카드가 인지하는 물리적 주소이다. 따라서 IP 주소만 가지고는 네트워크 통신을 할 수 없다. **ARP는 IP같은 논리 주소를 가지고 MAC같은 물리 주소를 알아내기 위한 Protocol이다.**
 

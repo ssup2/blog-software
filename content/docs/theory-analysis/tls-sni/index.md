@@ -1,5 +1,5 @@
 ---
-title: TLS SNI (Server Name Indication)
+title: TLS SNI
 ---
 
 TLS의 SNI (Server Name Indication)를 분석한다.
