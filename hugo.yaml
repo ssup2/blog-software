@@ -16,7 +16,6 @@ markup:
   highlight:
     noClasses: false
 
-
 defaultContentLanguage: ko
 languages:
   ko:

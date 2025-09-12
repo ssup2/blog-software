@@ -1,5 +1,5 @@
 ---
-title: Address Resolution Protocol (ARP)
+title: ARP (Address Resolution Protocol)
 ---
 
 ## 1. Address Resolution Protocol (ARP)
