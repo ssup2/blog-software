@@ -156,6 +156,14 @@ Server가 요청을 성공적으로 수신하였지만, 요청을 처리하는 �
 
 Server가 요청을 성공적으로 수신하였지만, 요청에 HTTP Extension 내용이 포함되어 있지 않아 요청을 처리하지 못한 경우에 사용된다.
 
+#### 1.5.11. 511 Network Authentication Required
+
+Server가 요청을 성공적으로 수신하였지만, 요청을 처리하는 과정중에 네트워크 인증이 필요한 경우에 사용된다.
+
+#### 1.5.12. 599 Network Connect Timeout Error
+
+Server가 요청을 성공적으로 수신하였지만, 요청을 처리하는 과정중에 네트워크 연결이 끊어진 경우에 사용된다.
+
 ## 2. 참고
 
 * HTTP Status Code : [https://developer.mozilla.org/ko/docs/Web/HTTP/Reference/Status](https://developer.mozilla.org/ko/docs/Web/HTTP/Reference/Status)
