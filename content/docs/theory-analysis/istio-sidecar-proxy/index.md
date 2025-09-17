@@ -309,9 +309,10 @@ Sidecar Proxy는 Service에게 Traffic 전송시 kube-proxy가 설정하는 ipta
 
 Sidecar Proxy는 기본적으로 Access Log를 남기지 않지만, 별도의 설정을 통해서 Access Log 활성화하여 남기도록 설정할 수 있다. Access Log를 활성화하면 많은양의 Log가 발생하기 때문에 평상시에는 Access Log를 비활성화 하는게 좋지만, Network 관련 Trouble Shooting 시에는 Access Log를 일시적으로 활성화하여 활용할 수 있다. Access Log를 활성화 할 수 있는 방법은 **Mesh Config**에 설정하는 방법과, **Telemetry** Object를 이용하는 방법이 있다.
 
-```yaml {caption="[File 3] Set Sidecar Access Log within Mesh Config (Global)", linenos=table}
-meshConfig:
+```yaml {caption="[File 3] Set Sidecar Access Log within Mesh Config", linenos=table}
+mesh: |-
   accessLogFile: /dev/stdout
+...
 ```
 
 [File 3]은 Istio의 Mesh Config에서 Access Log를 stdout에 출력하도록 설정하는 방법이다. Access Log를 stdout에 출력하도록 설정하면 `kubectl logs` 명령어를 통해서 Sidecar의 Access Log를 확인할 수 있으며, fluentd와 같은 Log Aggregator에서도 수집할 수 있게된다. Mesh Config 방식은 **모든 Sidecar Proxy에 적용되는 Global 방식**만 지원하기 때문에, 특정 Pod의 Sidecar Proxy의 Access Log만을 남기는 설정은 불가능하며 이 경우에는 Telemetry Object를 이용하여 설정해야 한다.
@@ -344,7 +345,18 @@ spec:
 
 [Shell 3]은 Sidecar의 Access Log의 예제를 나타낸다. 기본적으로 `[%START_TIME%] \"%REQ(:METHOD)% %REQ(X-ENVOY-ORIGINAL-PATH?:PATH)% %PROTOCOL%\" %RESPONSE_CODE% %RESPONSE_FLAGS% %RESPONSE_CODE_DETAILS% %CONNECTION_TERMINATION_DETAILS%
 \"%UPSTREAM_TRANSPORT_FAILURE_REASON%\" %BYTES_RECEIVED% %BYTES_SENT% %DURATION% %RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)% \"%REQ(X-FORWARDED-FOR)%\" \"%REQ(USER-AGENT)%\" \"%REQ(X-REQUEST-ID)%\"
-\"%REQ(:AUTHORITY)%\" \"%UPSTREAM_HOST%\" %UPSTREAM_CLUSTER_RAW% %UPSTREAM_LOCAL_ADDRESS% %DOWNSTREAM_LOCAL_ADDRESS% %DOWNSTREAM_REMOTE_ADDRESS% %REQUESTED_SERVER_NAME% %ROUTE_NAME%\n` 형태로 출력하며, Telemetry Object를 이용하여 출력되는 Log의 포맷도 변경할 수 있다.
+\"%REQ(:AUTHORITY)%\" \"%UPSTREAM_HOST%\" %UPSTREAM_CLUSTER_RAW% %UPSTREAM_LOCAL_ADDRESS% %DOWNSTREAM_LOCAL_ADDRESS% %DOWNSTREAM_REMOTE_ADDRESS% %REQUESTED_SERVER_NAME% %ROUTE_NAME%\n` 형태로 출력한다.
+
+```yaml {caption="[File 5] Set Sidecar Access Log within Mesh Config (Global)", linenos=table}
+mesh: |-
+  accessLogFile: /dev/stdout
+  accessLogEncoding: TEXT
+  accessLogFormat: |
+    [%START_TIME%] "%REQ(:METHOD)% %REQ(X-ENVOY-ORIGINAL-PATH?:PATH)%" %RESPONSE_CODE% retry_attempts=%UPSTREAM_REQUEST_ATTEMPT_COUNT% resp_attempt_hdr=%RESP(X-ENVOY-ATTEMPT-COUNT)% flags=%RESPONSE_FLAGS% details=%RESPONSE_CODE_DETAILS%
+...
+```
+
+만약 Access Log의 포맷을 변경하고 싶다면 
 
 ## 2. 참조
 
