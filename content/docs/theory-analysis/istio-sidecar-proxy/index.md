@@ -352,11 +352,11 @@ mesh: |-
   accessLogFile: /dev/stdout
   accessLogEncoding: TEXT
   accessLogFormat: |
-    [%START_TIME%] "%REQ(:METHOD)% %REQ(X-ENVOY-ORIGINAL-PATH?:PATH)%" %RESPONSE_CODE% retry_attempts=%UPSTREAM_REQUEST_ATTEMPT_COUNT% resp_attempt_hdr=%RESP(X-ENVOY-ATTEMPT-COUNT)% flags=%RESPONSE_FLAGS% details=%RESPONSE_CODE_DETAILS%
+    [%START_TIME%] "%REQ(:METHOD)% %REQ(X-ENVOY-ORIGINAL-PATH?:PATH)%" %RESPONSE_CODE% retry_attempts=%UPSTREAM_REQUEST_ATTEMPT_COUNT% flags=%RESPONSE_FLAGS% details=%RESPONSE_CODE_DETAILS%
 ...
 ```
 
-만약 Access Log의 포맷을 변경하고 싶다면 
+만약 Access Log의 포맷을 변경하고 싶다면 [File 5]와 같이 Mesh Config에서 `accessLogFormat`을 설정하면 된다. [File 5]는 `UPSTREAM_REQUEST_ATTEMPT_COUNT` 필드를 추가하여 Retry 횟수를 출력하도록 설정한 예제이다.
 
 ## 2. 참조
 
