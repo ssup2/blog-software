@@ -74,11 +74,30 @@ spec:
     stdin: true
 ```
 
-### 1.2. Default Retry Policy
+### 1.2. Retry Policy 적용
 
-```
+```yaml {caption="[File 2] Retry Policy 적용"}
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: httpbin
+spec:
+  hosts:
+  - httpbin
+  http:
+  - route:
+    - destination:
+        host: httpbin
+    retries:
+      attempts: 3
+      perTryTimeout: 2s
+      retryOn: reset,connect-failure,refused-stream
+      retryRemoteLocalities: true
 ```
 
 ### 1.3. Virtual Service Retry Policy
 
 ## 2. 참고
+
+* Istio Retry Policy : [https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPRetry](https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPRetry)
+* Envoy Retry Policy : [https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/router_filter#x-envoy-retry-on](https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/router_filter#x-envoy-retry-on)
