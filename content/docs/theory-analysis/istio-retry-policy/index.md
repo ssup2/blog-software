@@ -42,7 +42,7 @@ spec:
   selector:
     app: httpbin
 ---
-apiVersion: networking.istio.io/v1beta1
+apiVersion: networking.istio.io/v1
 kind: VirtualService
 metadata:
   name: httpbin
@@ -53,6 +53,11 @@ spec:
   - route:
     - destination:
         host: httpbin
+    retries:
+      attempts: 3
+      perTryTimeout: 2s
+      retryOn: reset,connect-failure,refused-stream
+      retryRemoteLocalities: true
 ---
 apiVersion: v1
 kind: Pod
@@ -67,24 +72,6 @@ spec:
     - infinity
     tty: true
     stdin: true
----
-apiVersion: telemetry.istio.io/v1
-kind: Telemetry
-metadata:
-  name: my-shell
-spec:
-  selector:
-    matchLabels:
-      app: my-shell
-  accessLogging:
-    - providers:
-      - name: envoy
-    format:
-      text: >-
-        [%START_TIME%] "%REQ(:METHOD)% %REQ(X-ENVOY-ORIGINAL-PATH?:PATH)%"
-        %RESPONSE_CODE% retry_attempts=%UPSTREAM_REQUEST_ATTEMPT_COUNT%
-        resp_attempt_hdr=%RESP(X-ENVOY-ATTEMPT-COUNT)%
-        flags=%RESPONSE_FLAGS% details=%RESPONSE_CODE_DETAILS%
 ```
 
 ### 1.2. Default Retry Policy

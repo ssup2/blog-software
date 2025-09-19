@@ -150,7 +150,7 @@ Sidecar Object로 인해서 Endpoint가 존재하지 않더라도 Traffic은 통
 ### 1.4. Outbound 통신 제한
 
 ```yaml {caption="[File 3] Sidecar Object의 egress 설정"}
-meshConfig:
+mesh: |-
   outboundTrafficPolicy:
     mode: REGISTRY_ONLY
 ```

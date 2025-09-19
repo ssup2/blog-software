@@ -226,7 +226,20 @@ Hello version: v1, instance: helloworld-us-b-59fd8576c5-grhkk
 
 [Figure 2]는 [Figure 1] 환경에서 Locality Load Balancing을 활성화한 모습을 나타내고 있다. `my-shell-kr-a` Pod가 `kr/a` Locality에 존재하기 때문에, 모든 요청도 `kr/a` Locality의 `helloworld` Service의 Pod에만 전송되는 것을 확인할 수 있다.
 
-Locality Load Balancing은 Destination Rule에서 `localityLbSetting.enabled` Field를 `true`로 설정하여 활성화 한다. 이때 반드시 `outlierDetection` Field를 설정하여 Failover를 활성화 하거나, `distribute` Field를 설정하여 Distribution을 활성화 해야 한다. 단독으로 `localityLbSetting.enabled` Field를 `true`로 설정하는 경우에는 Locality Load Balancing이 활성화되지 않는다. 반대로 `outlierDetection` Field와 `distribute` Field를 같이 설정해도 Locality Load Balancing이 활성화 되지만, 일반적으로 `distribute` Field로 인해서 `outlierDetection` Field의 정책이 제대로 동작하지 않기 때문에 잘 이용되지 않는다.
+Locality Load Balancing은 Destination Rule에서 `localityLbSetting.enabled` Field를 `true`로 설정하여 활성화 한다. 이때 반드시 `outlierDetection` Field를 설정하여 Failover를 활성화 하거나, `localityLbSetting.distribute` Field를 설정하여 Distribution을 활성화 해야 한다. 단독으로 `localityLbSetting.enabled` Field를 `true`로 설정하는 경우에는 Locality Load Balancing이 활성화되지 않는다. 반대로 `outlierDetection` Field와 `localityLbSetting.distribute` Field를 같이 설정해도 Locality Load Balancing이 활성화 되지만, 일반적으로 `localityLbSetting.distribute` Field로 인해서 `outlierDetection` Field의 정책이 제대로 동작하지 않기 때문에 잘 이용되지 않는다.
+
+```yaml {caption="[File 2] Mesh Config에서 Locality Load Balancing 활성화"}
+mesh: |-
+  localityLbSetting:
+    enabled: true
+    distribute:
+    ...
+...
+```
+
+Mesh Config에서 `localityLbSetting` Field를 통해서 모든 Destination Rule의 `localityLbSetting` Field를 일괄 설정할 수 있다. [File 3]은 Mesh Config에서 `localityLbSetting` Field를 설정하여 전역적으로 Locality Load Balancing을 활성화하는 예제를 나타내고 있다. 또한 MeshConfig에서 명시적으로 `localityLbSetting` Field를 설정하지 않아도, `localityLbSetting.enabled` Field를 `true`는 기본적으로 설정된다.
+
+따라서 대부분의 Istio 환경에서는 Destination Rule에 `localityLbSetting.enabled` Field를 `true`로 명시하지 않고 `outlierDetection` Field 또는 `localityLbSetting.distribute` Field만 설정하면 Locality Load Balancing이 활성화된다. 혼돈을 방지하기 위해서 아래의 모든 예시에서는 `localityLbSetting.enabled` Field를 `true`로 명시적으로 설정하고 있다.
 
 #### 1.2.1. with Failover
 
@@ -234,7 +247,7 @@ Locality Load Balancing을 기능을 활용할 경우 고려해야 할 부분중
 
 Istio에서는 이러한 가용성 문제를 해결하기 위해서 Failover 기능을 제공한다. Failover 기능은 Destination Rule에서 `outlierDetection` Field를 설정하여 활성화할 수 있다. `outlierDetection` Field를 설정되면 Client와 동일한 Locality에 존재하는 Pod가 없는 경우에는 다른 Locality의 Pod에 요청을 전송할 수 있다. `outlierDetection` Field는 Server Pod의 비정상 상태를 판단하는 기준을 정의한다.
 
-```yaml {caption="[File 2] Locality Load Balancing Outlier Detection 예제"}
+```yaml {caption="[File 3] Locality Load Balancing Outlier Detection 예제"}
 apiVersion: networking.istio.io/v1beta1
 kind: DestinationRule
 metadata:
@@ -258,7 +271,7 @@ Hello version: v1, instance: helloworld-kr-a-57cdf4d447-gwnzb
 Hello version: v1, instance: helloworld-kr-a-57cdf4d447-gwnzb
 ```
 
-[File 2]는 `outlierDetection` Field과 함께 Locality Load Balancing을 활성화하는 Destination Rule의 예제를 나타내고 있으며, [Shell 2]의 명령어를 실행하면 [Text 2]과 같은 결과를 확인할 수 있다. Locality Load Balancing이 활성화되어 `my-shell-kr-a` Pod가 위치하는 `kr/a` Locality의 Pod에만 요청이 전송되는 것을 확인할 수 있다.
+[File 3]은 `outlierDetection` Field과 함께 Locality Load Balancing을 활성화하는 Destination Rule의 예제를 나타내고 있으며, [Shell 2]의 명령어를 실행하면 [Text 2]과 같은 결과를 확인할 수 있다. Locality Load Balancing이 활성화되어 `my-shell-kr-a` Pod가 위치하는 `kr/a` Locality의 Pod에만 요청이 전송되는 것을 확인할 수 있다.
 
 ##### 1.2.1.1. Zone Failover
 
@@ -306,7 +319,7 @@ Hello version: v1, instance: helloworld-us-b-59fd8576c5-qd85k
 
 [Figure 5]는 [Figure 2]의 상태에서 `my-shell-kr-a` Pod가 위치하는 `kr/a` Locality에 하나의 `helloworld` Pod만 존재하는 경우 동작하는 모습을 나타내고 있다. 모든 요청이 `kr/a` Locality의 단일 Pod에 전송되는 것을 확인할 수 있다. Istio의 Locality Load Balancing은 각 Locality 마다 Server Pod의 개수의 차이가 너무 커도 **하나의 Server Pod**라도 Client와 동일한 Locality에 존재하면 해당 Server Pod에 요청을 전송한다. Kubernetes Service의 Topology Aware Load Balancing은 Locality 사이의 Pod 개수가 너무 큰 차이가 발생하는 경우에는 **Guardrail**로 인해서 기능이 중지되는것과 대비되는 부분이다.
 
-각 Locality에 존재하는 Server Pod의 개수의 차이가 커지수록, 각 Server Pod가 받는 요청의 불균형도 커진다. 이러한 불균형을 해결하기 위해서는 Pod에 `topologySpreadConstraint`를 설정하여 각 Locality에 존재하는 Server Pod의 개수를 동일하게 유지하도록 만들어야 한다. 
+각 Locality에 존재하는 Server Pod의 개수의 차이가 커지수록, 각 Server Pod가 받는 요청의 불균형도 커진다. 이러한 불균형을 해결하기 위해서는 Pod에 `topologySpreadConstraint`를 설정하여 각 Locality에 존재하는 Server Pod의 개수를 동일하게 유지하도록 만들어야 한다.
 
 ```shell {caption="[Shell 5] helloworld-kr-a Deployment의 Replica를 1로 조정"}
 $ kubectl scale deployment helloworld-kr-a --replicas 1
@@ -324,9 +337,9 @@ Hello version: v1, instance: helloworld-kr-a-57cdf4d447-gwnzb
 
 #### 1.2.2. with Distribution
 
-Locality Load Balancing은 Traffic을 Client Pod와 동일한 Locality의 Server Pod에만 전송하는 기능뿐만이 아니라, 다른 Locality의 Server Pod에도 명시적으로 요청을 전송하도록 만들 수 있는 Distribution 기능도 제공한다. Distribution 기능은 Destination Rule에서 `distribute` Field를 통해서 활성화할 수 있다.
+Locality Load Balancing은 Traffic을 Client Pod와 동일한 Locality의 Server Pod에만 전송하는 기능뿐만이 아니라, 다른 Locality의 Server Pod에도 명시적으로 요청을 전송하도록 만들 수 있는 Distribution 기능도 제공한다. Distribution 기능은 Destination Rule에서 `localityLbSetting.distribute` Field를 통해서 활성화할 수 있다.
 
-```yaml {caption="[File 3] Locality Load Balancing Distribute 예제"}
+```yaml {caption="[File 4] Locality Load Balancing Distribute 예제"}
 apiVersion: networking.istio.io/v1beta1
 kind: DestinationRule
 metadata:
@@ -359,9 +372,9 @@ Hello version: v1, instance: helloworld-kr-a-57cdf4d447-skvgp
 Hello version: v1, instance: helloworld-kr-a-57cdf4d447-skvgp
 ```
 
-[File 3]은 `distribute` Field과 함께 Locality Load Balancing을 활성화하는 Destination Rule의 예제를 나타내고 있으며, [Shell 2]의 명령어를 실행하면 [Text 6]과 같은 결과를 확인할 수 있다. `from`과 `to`에는 `region/zone/subzone` 형태로 Traffic을 어느 Locality로 전송할지를 **Weight**과 함께 정의한다. 이때 Weight의 합은 100이어야 한다. [File 3]은 Client의 모든 요청이 동일한 Locality의 Server Pod에만 전송되도록 설정되어 있어 [Figure 1]과 같은 결과를 확인할 수 있다.
+[File 3]는 `localityLbSettingdistribute` Field과 함께 Locality Load Balancing을 활성화하는 Destination Rule의 예제를 나타내고 있으며, [Shell 2]의 명령어를 실행하면 [Text 6]과 같은 결과를 확인할 수 있다. `from`과 `to`에는 `region/zone/subzone` 형태로 Traffic을 어느 Locality로 전송할지를 **Weight**과 함께 정의한다. 이때 Weight의 합은 100이어야 한다. [File 3]은 Client의 모든 요청이 동일한 Locality의 Server Pod에만 전송되도록 설정되어 있어 [Figure 1]과 같은 결과를 확인할 수 있다.
 
-```yaml {caption="[File 4] Locality Load Balancing Distribute Cross Region 예제"}
+```yaml {caption="[File 5] Locality Load Balancing Distribute Cross Region 예제"}
 apiVersion: networking.istio.io/v1beta1
 kind: DestinationRule
 metadata:
