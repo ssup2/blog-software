@@ -21,12 +21,20 @@ spec:
   - route:
     - destination:
         host: httpbin
+    timeout: 5s
     retries:
       attempts: 3
       perTryTimeout: 2s
-      retryOn: reset,connect-failure,refused-stream
+      retryOn: 503,reset,connect-failure,refused-stream
       retryRemoteLocalities: true
 ```
+
+* `attempts` : 최대 재시도 횟수를 설정한다. 여기서 재시도 횟수는 원래 요청을 포함하지 않는다. 따라서 attempts의 값이 `3`이라면 최대 4번의 요청이 전송된다.
+* `perTryTimeout` : 각 재시도별 타임아웃을 설정한다. `1h, 1m, 1s, 1ms` 형태로 설정한다. 값을 명시하지 않으면 `http.timeout` Field와 동일한 Timeout 값이 설정된다. [File 1]의 예제에서는 `5s`가 설정된다.
+* `retryOn` : 재시도 조건을 설정한다.
+* `retryRemoteLocalities` : 다른 지역으로 재시도 허용 여부를 설정한다.
+* `retryIgnorePreviousHosts` : 이전 요청을 무시하고 재시도 여부를 설정한다.
+* `backoff` : 
 
 ### 1.2. Test 환경 구성
 
@@ -98,4 +106,5 @@ spec:
 ## 2. 참고
 
 * Istio Retry Policy : [https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPRetry](https://istio.io/latest/docs/reference/config/networking/virtual-service/#HTTPRetry)
-* Envoy Retry Policy : [https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/router_filter#x-envoy-retry-on](https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/router_filter#x-envoy-retry-on)
+* Envoy HTTP Retry Policy : [https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/router_filter#x-envoy-retry-on](https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/router_filter#x-envoy-retry-on)
+* Envoy GRPC Retry Policy : [https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/router_filter#x-envoy-retry-grpc-on](https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/router_filter#x-envoy-retry-grpc-on)
