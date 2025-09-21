@@ -30,27 +30,27 @@ spec:
       maxEjectionPercent: 20
 ```
 
-Circuit Breaking은 주로 **Destination Rule**의 **Connection Pool** (`trafficPolicy.connectionPool`) 필드와 **Outlier Detection** (`trafficPolicy.outlierDetection`) 필드를 통해 설정한다. [File 1]은 Circuit Breaking을 위한 Destination Rule의 예제를 나타내고 있다.
+Circuit Breaking은 주로 **Destination Rule**의 **Connection Pool** (`trafficPolicy.connectionPool`) Field와 **Outlier Detection** (`trafficPolicy.outlierDetection`) Field를 통해 설정한다. [File 1]은 Circuit Breaking을 위한 Destination Rule의 예제를 나타내고 있다.
 
 Connection Pool은 **하나의 Client Pod의 Sidecar Proxy**에서 이용할 수 있는 **최대 동시 Connection** 또는 **최대 동시 요청** 관련 설정을 명시하며, 명시한 설정을 초과하는 경우 Circuit Breaking이 동작한다. 각 설정값은 Destination Rule에 명시된 각각의 Host (Service)별로 적용된다. [File 1]은 `productpage` 서비스에 대한 Connection Pool에서 제공하는 주요 설정들은 다음과 같다.
 
 * `tcp.maxConnections` : 최대 TCP Connection의 개수를 설정한다.
 * `tcp.connectTimeout` : TCP Connection을 맺는데 걸리는 최대 시간을 설정한다. 기본값은 10초이다.
 * `tcp.maxConnectionDuration` : TCP Connection을 유지할 수 있는 최대 시간을 설정한다. 설정하지 않으면 최대 유지 시간에 제한이 없어진다.
-* `tcp.idleTimeout` : TCP Idle Timeout 시간을 설정한다. 기본값은 1시간 이며, 0s (0초)로 설정하는 경우 제한이 없어진다.
-* `http.http1MaxPendingRequests` : HTTP 요청의 최대 대기 개수를 설정한다. 이름에는 `http1`이 포함되어 있지만, HTTP/1.1 뿐만 아니라 HTTP/2 요청에도 적용된다. 기본값은 2^31-1이다.
-* `http.http2MaxRequests` : 최대 동시에 처리할 수 있는 최대 HTTP 요청의 개수를 설정한다. 이름에는 `http2`가 포함되어 있지만, HTTP/2 뿐만 아니라 HTTP/1.1 요청에도 적용된다. 기본값은 2^31-1이다.
-* `http.maxRequestsPerConnection` : 하나의 TCP Connection당 처리할 수 있는 최대 HTTP 요청 개수를 설정한다. 기본값은 2^31-1이며, 0으로 설정하는 경우에는 제한이 없어진다. 1로 설정하는 경우에는 하나의 TCP Connection당 최대 1개의 HTTP 요청만 처리하기 때문에 Keep Alive 기능 비활성활르 의미한다.
-* `http.maxRetries` : 최대 HTTP 동시 재시도 개수를 설정한다. 기본값은 2^32-1이다.
-* `http.maxConcurrentStreams` : 하나의 HTTP/2 Connection당 처리할 수 있는 최대 Stream의 개수를 설정한다. 기본값은 2^31-1이다.
+* `tcp.idleTimeout` : TCP Idle Timeout 시간을 설정한다. 기본값은 `1h` 이며, `0s` (0초)로 설정하는 경우 제한이 없어진다.
+* `http.http1MaxPendingRequests` : HTTP 요청의 최대 대기 개수를 설정한다. 이름에는 `http1`이 포함되어 있지만, HTTP/1.1 뿐만 아니라 HTTP/2 요청에도 적용된다. 기본값은 `2^31-1`이다.
+* `http.http2MaxRequests` : 최대 동시에 처리할 수 있는 최대 HTTP 요청의 개수를 설정한다. 이름에는 `http2`가 포함되어 있지만, HTTP/2 뿐만 아니라 HTTP/1.1 요청에도 적용된다. 기본값은 `2^31-1`이다.
+* `http.maxRequestsPerConnection` : 하나의 TCP Connection당 처리할 수 있는 최대 HTTP 요청 개수를 설정한다. 기본값은 `2^31-1`이며, `0`으로 설정하는 경우에는 제한이 없어진다. `1`로 설정하는 경우에는 하나의 TCP Connection당 최대 1개의 HTTP 요청만 처리하기 때문에 Keep Alive 기능 비활성활르 의미한다.
+* `http.maxRetries` : 최대 동시에 처리할 수 있는 HTTP 재시도 개수를 설정한다. 기본값은 `2^32-1`이다.
+* `http.maxConcurrentStreams` : 하나의 HTTP/2 Connection당 처리할 수 있는 최대 Stream의 개수를 설정한다. 기본값은 `2^31-1`이다.
 
 Outlier Detection은 비정상 상태를 판단하는 기준을 정의하며, Outlier로 판단되면 Circuit Breaking이 동작한다. Outlier Detection에서 제공하는 주요 설정은 다음과 같다.
 
-* `consecutiveGatewayErrors` : 연속적으로 발생한 502,503,504 에러의 개수를 설정한다. 0으로 설정하는 경우 제한이 없어진다.
-* `consecutive5xxErrors` : 연속적으로 발생한 5xx 에러의 개수를 설정한다. 0으로 설정하는 경우 제한이 없어진다.
-* `interval` : Outlier 상태를 판단하는데 이용되는 시간 간격을 설정한다. 기본값은 10초이다.
-* `baseEjectionTime` : Outlier 상태로 판단될 경우 최소 Circuit Breaking 시간을 설정한다. 기본값은 30초이다.
-* `maxEjectionPercent` : Circuit Breaking 적용 가능한 최대 Outlier의 비율을 설정한다. 기본값은 10%이며, 100%로 설정하는 경우 모든 Outlier에 Circuit Breaking이 적용될 수 있다.
+* `consecutiveGatewayErrors` : 연속적으로 발생한 502,503,504 에러의 개수를 설정한다. `0`으로 설정하는 경우 제한이 없어진다.
+* `consecutive5xxErrors` : 연속적으로 발생한 5xx 에러의 개수를 설정한다. `0`으로 설정하는 경우 제한이 없어진다.
+* `interval` : Outlier 상태를 판단하는데 이용되는 시간 간격을 설정한다. 기본값은 `10s`이다.
+* `baseEjectionTime` : Outlier 상태로 판단될 경우 최소 Circuit Breaking 시간을 설정한다. 기본값은 `30s`이다.
+* `maxEjectionPercent` : Circuit Breaking 적용 가능한 최대 Outlier의 비율을 설정한다. 기본값은 `10`(%) 이며, `100`(%)로 설정하는 경우 모든 Outlier에 Circuit Breaking이 적용될 수 있다.
 
 Destination Rule 규칙은 **각 Client Pod에 개별**로 적용된다. 예를들어 [File 1]에서는 `trafficPolicy.connectionPool.tcp.maxConnections: 1`이 설정되어 있는데, 이는 Client Pod의 Sidecar Proxy에서 Server Pod로 전달되는 최대 TCP Connection의 개수를 1개로 제한하는 것을 의미하며, 각 Client Pod의 Sidecar Proxy마다 별도로 적용된다. 즉 Client Pod가 5개라면 Server Pod로 전달되는 TCP Connection의 개수는 최대 5개가 된다.
 
