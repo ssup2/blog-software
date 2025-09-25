@@ -33,12 +33,23 @@ Retry Policy는 Virtual Service의 `http.retries` Field를 통해서 설정할 �
 
 * `attempts` : 최대 재시도 횟수를 설정한다. `http.timeout` Field와 `perTryTimeout` Field 값에 따라서 달라질수 있지만, 최대 요청 횟수는 `attempts` Field 값 + 1이다. 따라서 attempts의 값이 `3`이라면 최대 4번의 요청이 전송된다. 기본값은 `2`이며, `0`으로 설정하는 경우 재시도가 수행되지 않는다.
 * `perTryTimeout` : 각 재시도별 Timeout을 설정한다. `1h`, `1m`, `1s`, `1ms` 형태로 단위와 함께 설정하며, 최소값은 `1ms`이다. 값을 명시하지 않으면 `http.timeout` Field와 동일한 Timeout 값이 설정된다.
-* `retryOn` : 재시도 조건을 설정한다. Envoy에서 제공하는 다음과 같은 HTTP, GRPC Retry Policy 조건들을 설정할 수 있다. 기본값은 `connect-failure,refused-stream,unavailable,cancelled`
+* `retryOn` : 재시도 조건을 설정한다. Envoy에서 제공하는 다음과 같은 HTTP, GRPC Retry Policy 조건들을 설정할 수 있다. 기본값은 `connect-failure,refused-stream,unavailable,cancelled` 이다.
   * HTTP Retry Policy
-    * `503` : Service Unavailable
-  * `reset` : Connection Reset
-  * `connect-failure` : Connection Failure
-  * `refused-stream` : Refused Stream
+    * `<Status Code>` : 해당 Status Code 발생 시 재시도를 수행한다.
+    * `5XX` : HTTP Status Code `5XX` 발생 시 재시도를 수행한다.
+    * `gateway-error` : HTTP Status Code `502`, `503`, `504` 발생 시 재시도를 수행한다.
+    * `reset` : Server가 더 이상 응답을 보내지 못하는 상태가 되었을 때 재시도를 수행한다. Server와의 Connection이 끊어진 경우, Reset, Read Timeout 등이 발생한 경우 모두 재시도 조건에 포함한다.
+    * `reset-before-request` : Request를 전송하기 전에 Server가 더 이상 응답을 보내지 못하는 상태가 되었을 때 재시도를 수행한다. Server와의 Connection이 끊어진 경우, Reset, Read Timeout 등이 발생한 경우 모두 재시도 조건에 포함한다.
+    * `connect-failure` : Server와의 Connection이 실패한 경우 재시도를 수행한다.
+    * `envoy-ratelimited` : Server로 전달한 요청이 Envoy의 Rate Limit에 의해서 거절되는 경우, Client는 `x-envoy-ratelimited` Header를 포함하여 응답을 받는다. 이 경우 재시도를 수행한다.
+    * `retriable-4xx` : HTTP Status Code `4XX` 발생 시 재시도를 수행한다. 현재는 `409` Status Code만 재시도 조건에 포함된다.
+    * `refused-stream` : Server가 HTTP/2의 `REFUSED_STREAM` Error Code를 반환하는 경우 재시도를 수행한다.
+  * gRPC Retry Policy
+    * `cancelled` : gRPC Status Code `CANCELLED (0)` 발생 시 재시도를 수행한다. Client가 요청을 취소한 경우를 의미한다.
+    * `deadline-exceeded` : gRPC Status Code `DEADLINE_EXCEEDED (4)` 발생 시 재시도를 수행한다. 요청이 Timeout이 발생한 경우를 의미한다.
+    * `internal` : gRPC Status Code `INTERNAL (13)` 발생 시 재시도를 수행한다. Server 내부에서 오류가 발생한 경우를 의미한다.
+    * `resource-exhausted` : gRPC Status Code `RESOURCE_EXHAUSTED (8)` 발생 시 재시도를 수행한다. Client가 너무 많은 요청을 보내거나, Server가 너무 많은 요청을 받아 용량 초과, 메모리 부족 등 리소스 소진 상태를 의미한다.
+    * `unavailable` : gRPC Status Code `UNAVAILABLE (14)` 발생 시 재시도를 수행한다. Server가 다운되었거나 연결 불가.
 * `retryRemoteLocalities` : 다른 Locality의 Server Pod에 재시도 허용 여부를 설정한다. 기본값은 `false`이다.
 * `retryIgnorePreviousHosts` : 이전에 실패한 Host(Server Pod)를 제외하고 재시도를 수행할지 설정한다. 기본값은 `true`이다.
 * `backoff` : 재시도 횟수 사이의 대기 시간을 설정한다. `1h`, `1m`, `1s`, `1ms` 형태로 단위와 함께 설정하며, 기본값은 `25ms`이다.
@@ -92,7 +103,7 @@ spec:
     retries:
       attempts: 3
       perTryTimeout: 2s
-      retryOn: reset,connect-failure,refused-stream
+      retryOn: 503
       retryRemoteLocalities: true
 ---
 apiVersion: v1

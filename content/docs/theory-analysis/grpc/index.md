@@ -53,12 +53,12 @@ gRPC는 HTTP/1.1 대비 HTTP/2의 장점들을 활용하며 동작한다.
 | NOT_FOUND | 5 | 요청한 Resource를 찾을 수 없음. |
 | ALREADY_EXISTS | 6 | 요청한 Resource가 이미 존재함. (중복 생성 요청) |
 | PERMISSION_DENIED | 7 | 권한 부족으로 접근 거부. (인증, 인가 실패) |
-| RESOURCE_EXHAUSTED | 8 | 용량 초과, 메모리 부족 등 리소스 소진. |
+| RESOURCE_EXHAUSTED | 8 | 용량 초과, 메모리 부족 등 리소스 소진. (Client가 너무 많은 요청을 보내거나, Server가 너무 많은 요청을 받은 경우) |
 | FAILED_PRECONDITION | 9 | 사전 조건이 충족되지 않음. (Lock이 걸린 상태에서 작업 요청) |
 | ABORTED | 10 | 동시성 충돌로 인해 작업이 중단됨. |
 | OUT_OF_RANGE | 11 | 요청 인자가 유효한 범위를 초과함. (자료형 범위 초과) |
 | UNIMPLEMENTED | 12 | Server에 요청한 Method가 구현되어 있지 않음. |
-| INTERNAL | 13 | 내부 Server 오류. 디버깅 필요. |
+| INTERNAL | 13 | Server 내부에서 오류가 발생. 디버깅 필요. |
 | UNAVAILABLE | 14 | Server가 다운되었거나 연결 불가. 재시도 가능. |
 | DATA_LOSS | 15 | Data 손실 발생. |
 | UNAUTHENTICATED | 16 | 인증 실패. 토큰 누락 또는 유효하지 않음. |
