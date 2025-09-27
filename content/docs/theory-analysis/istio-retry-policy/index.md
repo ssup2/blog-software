@@ -32,7 +32,7 @@ Retry Policy는 Virtual Service의 `http.retries` Field를 통해서 설정할 �
 
 * `attempts` : 최대 재시도 횟수를 설정한다. `http.timeout` Field와 `perTryTimeout` Field 값에 따라서 달라질수 있지만, 최대 요청 횟수는 `attempts` Field 값 + 1이다. 따라서 attempts의 값이 `3`이라면 최대 4번의 요청이 전송된다. 기본값은 `2`이며, `0`으로 설정하는 경우 재시도가 수행되지 않는다.
 * `perTryTimeout` : 각 재시도별 Timeout을 설정한다. `1h`, `1m`, `1s`, `1ms` 형태로 단위와 함께 설정하며, 최소값은 `1ms`이다. 값을 명시하지 않으면 `http.timeout` Field와 동일한 Timeout 값이 설정된다.
-* `retryOn` : 재시도 조건을 설정한다. Envoy에서 제공하는 다음과 같은 HTTP, GRPC Retry Policy 조건들을 설정할 수 있다. 기본값은 `connect-failure,refused-stream,unavailable,cancelled` 이다.
+* `retryOn` : 재시도 조건을 설정한다. Envoy에서 제공하는 다음과 같은 HTTP, GRPC Retry Policy 조건들을 설정할 수 있다. 기본값은 `connect-failure,refused-stream,unavailable,cancelled` 이다. 주요 설정은 다음과 같다.
   * HTTP Retry Policy
     * `<Status Code>` : 해당 Status Code 발생 시 재시도를 수행한다.
     * `5XX` : HTTP Status Code `5XX` 발생 시 재시도를 수행한다.
