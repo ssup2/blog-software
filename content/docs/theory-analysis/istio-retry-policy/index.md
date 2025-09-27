@@ -54,9 +54,21 @@ Retry Policy는 Virtual Service의 `http.retries` Field를 통해서 설정할 �
 * `retryIgnorePreviousHosts` : 이전에 실패한 Host(Server Pod)를 제외하고 재시도를 수행할지 설정한다. 기본값은 `true`이다.
 * `backoff` : 재시도 횟수 사이의 대기 시간을 설정한다. `1h`, `1m`, `1s`, `1ms` 형태로 단위와 함께 설정하며, 기본값은 `25ms`이다.
 
-### 1.2. Istio Access Log
+### 1.2. Envoy Access Log
 
-```yaml {caption="[File 1] Test Environment Manifest", linenos=table}
+```yaml {caption="[File 2] Istio Access Log Format for Retry Policy", linenos=table}
+  mesh: |-
+    accessLogFile: /dev/stdout
+    accessLogEncoding: TEXT
+    accessLogFormat: |
+      [%START_TIME%] "%REQ(:METHOD)% %REQ(X-ENVOY-ORIGINAL-PATH?:PATH)%" %RESPONSE_CODE% retry_attempts=%UPSTREAM_REQUEST_ATTEMPT_COUNT% flags=%RESPONSE_FLAGS% details=%RESPONSE_CODE_DETAILS%
+```
+
+Istio의 Retry Policy로 인해서 발생한 요청 재시도 횟수는 Envoy Access Log의 `UPSTREAM_REQUEST_ATTEMPT_COUNT`에 기록된다. 다만 기본 Log Format에는 포함되어 있지 않기 때문에, 별도로 Access Log Format을 설정해야 한다. [File 2]는 요청 재시도 횟수를 포함하도록 설정한 Istio Access Log Format을 Istio Mesh Config에 적용하는 예시를 나타내고 있다.
+
+`UPSTREAM_REQUEST_ATTEMPT_COUNT` Field는 첫번째 시도도 포함한 값이기 때문에, 만약 3번의 재시도가 발생한 경우에는 `4`가 기록된다. 반면에 `0`이 남는다면 재시도 뿐만 아니라 한번도 요청 전송이 발생하지 않은 경우를 의미한다.
+
+```yaml {caption="[File 3] test-retry-policy.yaml", linenos=table}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -103,8 +115,7 @@ spec:
     retries:
       attempts: 3
       perTryTimeout: 2s
-      retryOn: 503
-      retryRemoteLocalities: true
+      retryOn: "503"
 ---
 apiVersion: v1
 kind: Pod
@@ -120,6 +131,53 @@ spec:
     tty: true
     stdin: true
 ```
+
+[File 3]은 Retry Policy Test를 위한 Kubernetes Manifest 예시를 나타내고 있다. Server 역할을 수행하는 `httpbin` Deployment와 함께 Service, Virtual Service를 구성하고 있다. `httpbin` Virtual Service에는 Retry Policy가 적용되어 있으며, `503` Status Code가 발생하는 경우에만 3번의 재시도를 수행하도록 설정되어 있다. 또한 Client 역할을 수행하는 `my-shell` Pod을 하나 구성하고 있다. 
+
+```shell {caption="[Shell 1] Retry Policy Test"}
+$ kubectl apply -f test-retry-policy.yaml
+$ kubectl exec -it my-shell -- bash
+
+(my-shell)# curl -I http://httpbin/status/501
+HTTP/1.1 501 Not Implemented
+server: envoy
+date: Sat, 27 Sep 2025 01:13:56 GMT
+content-type: text/html; charset=utf-8
+access-control-allow-origin: *
+access-control-allow-credentials: true
+content-length: 0
+x-envoy-upstream-service-time: 234
+
+(my-shell)# curl -I http://httpbin/status/502
+HTTP/1.1 502 Bad Gateway
+server: envoy
+date: Sat, 27 Sep 2025 01:14:00 GMT
+content-type: text/html; charset=utf-8
+access-control-allow-origin: *
+access-control-allow-credentials: true
+content-length: 0
+x-envoy-upstream-service-time: 24
+
+(my-shell)# curl -I http://httpbin/status/503
+HTTP/1.1 503 Service Unavailable
+server: envoy
+date: Sat, 27 Sep 2025 01:14:06 GMT
+content-type: text/html; charset=utf-8
+access-control-allow-origin: *
+access-control-allow-credentials: true
+content-length: 0
+x-envoy-upstream-service-time: 69
+```
+
+[Shell 1]은 Retry Policy Test를 위한 Kubernetes Manifest를 적용하고, `my-shell` Pod의 내부에서 `httpbin` Service에 요청을 보내는 예시를 나타내고 있다. `httpbin` Service는 `/status/{status_code}` Path에 요청을 보내면 해당 Status Code를 반환한다. 따라서 curl 명령어는 각각 `501`, `502`, `503` Status Code를 응답을 받는다.
+
+```shell {caption="[Shell 2] my-shell istio-proxy Log"}
+$ kubectl logs my-shell istio-proxy
+[2025-09-27T01:13:55.899Z] "HEAD /status/501" 501 retry_attempts=1 flags=- details=via_upstream
+[2025-09-27T01:14:00.419Z] "HEAD /status/502" 502 retry_attempts=1 flags=- details=via_upstream
+[2025-09-27T01:14:05.930Z] "HEAD /status/503" 503 retry_attempts=4 flags=URX details=via_upstream
+```
+[Shell 2]는 이후에 `my-shell` Pod의 istio-proxy Log를 확인하는 예시를 나타내고 있다. 501, 502 Status Code는 재시도가 발생하지 않았기 때문에 `retry_attempts=1`이 기록되었으며, 503 Status Code는 재시도가 발생했기 때문에 `retry_attempts=4`가 기록된걸 확인할 수 있다.
 
 ## 2. 참고
 
