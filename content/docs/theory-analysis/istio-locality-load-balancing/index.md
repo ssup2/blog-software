@@ -317,9 +317,9 @@ Hello version: v1, instance: helloworld-us-b-59fd8576c5-qd85k
 
 {{< figure caption="[Figure 5] Locality Load Balancing Only One Pod" src="images/locality-load-balancing-failover-zone-one-pod.png" width="900px" >}}
 
-[Figure 5]는 [Figure 2]의 상태에서 `my-shell-kr-a` Pod가 위치하는 `kr/a` Locality에 하나의 `helloworld` Pod만 존재하는 경우 동작하는 모습을 나타내고 있다. 모든 요청이 `kr/a` Locality의 단일 Pod에 전송되는 것을 확인할 수 있다. Istio의 Locality Load Balancing은 각 Locality 마다 Server Pod의 개수의 차이가 너무 커도 **하나의 Server Pod**라도 Client와 동일한 Locality에 존재하면 해당 Server Pod에 요청을 전송한다. Kubernetes Service의 Topology Aware Load Balancing은 Locality 사이의 Pod 개수가 너무 큰 차이가 발생하는 경우에는 **Guardrail**로 인해서 기능이 중지되는것과 대비되는 부분이다.
+[Figure 5]는 [Figure 2]의 상태에서 `my-shell-kr-a` Pod가 위치하는 `kr/a` Locality에 하나의 `helloworld` Pod만 존재하는 경우 동작하는 모습을 나타내고 있다. 모든 요청이 `kr/a` Locality의 단일 Pod에 전송되는 것을 확인할 수 있다. Istio의 Locality Load Balancing은 각 Locality 마다 Server Pod의 개수의 차이가 너무 커도 **하나의 Server Pod**라도 Client와 동일한 Locality에 존재하면 해당 Server Pod에 요청을 전송한다. 따라서 각 Locality에 존재하는 Server Pod의 개수의 차이가 커지수록, 각 Server Pod가 받는 요청의 불균형도 커진다.
 
-각 Locality에 존재하는 Server Pod의 개수의 차이가 커지수록, 각 Server Pod가 받는 요청의 불균형도 커진다. 이러한 불균형을 해결하기 위해서는 Pod에 `topologySpreadConstraint`를 설정하여 각 Locality에 존재하는 Server Pod의 개수를 동일하게 유지하도록 만들어야 한다.
+Kubernetes Service에서 제공하는 **Topology Aware Load Balancing** 기능의 경우 Locality 사이의 Pod 개수가 너무 큰 차이가 발생하는 경우 **Guardrail**이 동작하여 강제로 Locality Load Balancing 기능이 중지되는데, Istio의 Locality Load Balancing은 이러한 Guardrail 기능이 제공되지 않는다. 이러한 불균형을 해결하기 위해서는 Pod에 `topologySpreadConstraint`를 설정하여 각 Locality에 존재하는 Server Pod의 개수를 동일하게 유지하도록 만들어야 한다.
 
 ```shell {caption="[Shell 5] helloworld-kr-a Deployment의 Replica를 1로 조정"}
 $ kubectl scale deployment helloworld-kr-a --replicas 1
