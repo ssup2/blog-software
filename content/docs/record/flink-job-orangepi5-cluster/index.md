@@ -9,9 +9,9 @@ Flink를 활용해서 Kafka에 저장되어 있는 데이터를 처리한다.
 
 ### 1.1. 전체 실습 환경
 
-### 1.2. Flink 설치
+### 1.2. Flink Local 설치
 
-Java 11를 설치한다.
+Java 11 Version을 설치한다.
 
 ```shell
 brew install openjdk@17
@@ -21,6 +21,19 @@ echo 'export JAVA_HOME="/opt/homebrew/opt/openjdk@17"' >> ~/.zshrc
 echo 'export PATH="$JAVA_HOME/bin:$PATH"' >> ~/.zshrc
 export JAVA_HOME="/opt/homebrew/opt/openjdk@17"
 export PATH="$JAVA_HOME/bin:$PATH"
+```
+
+Flink 13.6 Version을 설치한다.
+
+```shell
+curl -O "https://archive.apache.org/dist/flink/flink-1.13.6/flink-1.13.6-bin-scala_2.11.tgz"
+tar -xvzf "flink-1.13.6-bin-scala_2.11.tgz"
+mv "flink-1.13.6" ~/flink
+
+echo 'export FLINK_HOME=~/flink' >> ~/.zshrc
+echo 'export PATH="$FLINK_HOME/bin:$PATH"' >> ~/.zshrc
+export FLINK_HOME=~/flink
+export PATH="$FLINK_HOME/bin:$PATH"
 ```
 
 ## 2. Local 환경에서 실행
