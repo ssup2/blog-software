@@ -38,6 +38,35 @@ export PATH="$FLINK_HOME/bin:$PATH"
 
 ## 2. Local 환경에서 실행
 
+### 2.1. Flink Application Download
+
+Spark Application을 Download 하고, Python 패키지를 설치한다.
+
+```shell
+git clone https://github.com/ssup2-playground/k8s-data-platform_spark-jobs.git
+cd k8s-data-platform_spark-jobs
+uv sync
+```
+
+### 2.2. Flink Cluster 실행
+
+Local에서 Flink Cluster를 실행한다.
+
+```shell
+$ start-cluster.sh 
+Starting cluster.
+Starting standalonesession daemon on host ssupui-MacBookPro.local.
+Starting taskexecutor daemon on host ssupui-MacBookPro.local.
+```
+
+### 2.3. Flink Job 실행
+
+Flink Job을 실행한다.
+
+```shell
+$ bin/flink run -c com.ssup2.flink.MediaWikiPageCreateCounterJob target/flink-job-1.0-SNAPSHOT.jar
+```
+
 ## 3. Kubernetes 환경에서 실행
 
 ## 4. 참고
