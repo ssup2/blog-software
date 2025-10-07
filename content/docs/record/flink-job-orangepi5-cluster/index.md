@@ -53,10 +53,19 @@ cat > $FLINK_HOME/conf/flink-conf.yaml << 'EOF'
 env.java.opts: --add-opens java.base/java.util=ALL-UNNAMED
 
 # Flink Config
+## JobManager Config
+jobmanager.rpc.address: localhost
+jobmanager.rpc.port: 6123
 jobmanager.memory.process.size: 1600m
+
+## TaskManager Config
 taskmanager.memory.process.size: 1728m
 taskmanager.numberOfTaskSlots: 2
+
+## Parallelism Config
 parallelism.default: 1
+
+## Rest Config
 rest.address: localhost
 rest.port: 8081
 
