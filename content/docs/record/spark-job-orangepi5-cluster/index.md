@@ -32,7 +32,7 @@ Spark를 통해서 MinIO에 저장되어 있는 데이터를 변환하는 환경
 
 ### 1.2. Spark Local 설치
 
-Java 11 Version을 설치한다.
+Java 17 Version을 설치한다.
 
 ```shell
 brew install openjdk@17

@@ -11,7 +11,7 @@ Flink를 활용해서 Kafka에 저장되어 있는 데이터를 처리한다.
 
 ### 1.2. Flink Local 설치
 
-Java 11 Version을 설치한다.
+Java 17 Version을 설치한다.
 
 ```shell
 brew install openjdk@17
@@ -23,17 +23,55 @@ export JAVA_HOME="/opt/homebrew/opt/openjdk@17"
 export PATH="$JAVA_HOME/bin:$PATH"
 ```
 
-Flink 13.6 Version을 설치한다.
+Flink 1.20.2 Version을 설치한다.
 
 ```shell
-curl -O "https://archive.apache.org/dist/flink/flink-1.13.6/flink-1.13.6-bin-scala_2.11.tgz"
-tar -xvzf "flink-1.13.6-bin-scala_2.11.tgz"
-mv "flink-1.13.6" ~/flink
+curl -O "https://dlcdn.apache.org/flink/flink-1.20.2/flink-1.20.2-bin-scala_2.12.tgz"
+tar -xvzf "flink-1.20.2-bin-scala_2.12.tgz"
+mv "flink-1.20.2" ~/flink
 
 echo 'export FLINK_HOME=~/flink' >> ~/.zshrc
 echo 'export PATH="$FLINK_HOME/bin:$PATH"' >> ~/.zshrc
 export FLINK_HOME=~/flink
 export PATH="$FLINK_HOME/bin:$PATH"
+```
+
+S3에 Flink Checkpoint를 저장하기 위해서 Flink S3 FS Hadoop Plugin을 설치한다.
+
+```shell
+cd $FLINK_HOME/plugins
+mkdir flink-s3-fs-hadoop
+cd flink-s3-fs-hadoop
+wget https://repo.maven.apache.org/maven2/org/apache/flink/flink-s3-fs-hadoop/1.20.2/flink-s3-fs-hadoop-1.20.2.jar
+```
+
+Flink Config 파일을 생성한다.
+
+```shell
+cat > $FLINK_HOME/conf/flink-conf.yaml << 'EOF'
+# Java Config
+env.java.opts: --add-opens java.base/java.util=ALL-UNNAMED
+
+# Flink Config
+jobmanager.memory.process.size: 1600m
+taskmanager.memory.process.size: 1728m
+taskmanager.numberOfTaskSlots: 2
+parallelism.default: 1
+rest.address: localhost
+rest.port: 8081
+
+# S3 Config
+s3.endpoint: http://192.168.1.85:9000
+s3.access-key: root
+s3.secret-key: root123!
+s3.path.style.access: true
+EOF
+```
+
+### 1.3. Flink Checkpoint Bucket 생성
+
+```shell
+mc mb dp/flink
 ```
 
 ## 2. Local 환경에서 실행
@@ -64,7 +102,7 @@ Starting taskexecutor daemon on host ssupui-MacBookPro.local.
 Flink Job을 실행한다.
 
 ```shell
-$ bin/flink run -c com.ssup2.flink.MediaWikiPageCreateCounterJob target/flink-job-1.0-SNAPSHOT.jar
+$ flink run wikimedia-page-create-counter/build/libs/wikimedia-page-create-counter-1.0-all.jar
 ```
 
 ## 3. Kubernetes 환경에서 실행
