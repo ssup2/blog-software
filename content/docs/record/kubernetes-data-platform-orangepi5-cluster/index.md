@@ -312,6 +312,9 @@ helm upgrade --install --create-namespace --namespace trino trino trino -f trino
 # Clickhouse
 helm upgrade --install --create-namespace --namespace clickhouse clickhouse clickhouse -f clickhouse/values.yaml
 
+# StarRocks
+helm upgrade --install --create-namespace --namespace kube-starrocks kube-starrocks kube-starrocks -f kube-starrocks/values.yaml
+
 # JupyterHub (ID/PW: root/root123!)
 helm upgrade --install --create-namespace --namespace jupyterhub jupyterhub jupyterhub -f jupyterhub/values.yaml
 
