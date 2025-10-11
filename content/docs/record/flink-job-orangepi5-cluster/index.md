@@ -56,10 +56,10 @@ env.java.opts: --add-opens java.base/java.util=ALL-UNNAMED
 ## JobManager Config
 jobmanager.rpc.address: localhost
 jobmanager.rpc.port: 6123
-jobmanager.memory.process.size: 1600m
+jobmanager.memory.process.size: 2048m
 
 ## TaskManager Config
-taskmanager.memory.process.size: 1728m
+taskmanager.memory.process.size: 2048m
 taskmanager.numberOfTaskSlots: 2
 
 ## Parallelism Config
@@ -81,6 +81,22 @@ EOF
 
 ```shell
 mc mb dp/flink
+```
+
+```sql
+CREATE DATABASE IF NOT EXISTS wikimedia;
+
+USE wikimedia;
+
+CREATE TABLE IF NOT EXISTS page_create_counter_1m (
+    window_end DATETIME NOT NULL COMMENT 'Window end time',
+    create_count BIGINT NOT NULL COMMENT 'Page create count'
+)
+DUPLICATE KEY(window_end)
+DISTRIBUTED BY HASH(window_end) BUCKETS 10
+PROPERTIES (
+    "replication_num" = "1"
+);
 ```
 
 ## 2. Local 환경에서 실행

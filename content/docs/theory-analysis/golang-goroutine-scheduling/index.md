@@ -16,9 +16,9 @@ Golang에서는 OS에서 제공하는 Thread보다 더 경량화된 Thread인 Go
 
 Goroutine은 실제로 더욱 다양한 상태를 가지고 있지만 간략하게 나타내면 다음의 3가지 상태로 나타낼 수 있다.
 
-* Waiting : Goroutine이 외부의 Event를 대기하고 있는 상태를 의미한다. 여기서 외부의 Event는 I/O Device 요청 처리 완료, Lock 해제와 같은 Goroutine이 실행 가능하다는걸 알려주는 OS의 Event를 의미한다.
-* Runnable : Goroutine이 실행 가능한 상태를 의미한다.
-* Executing : Goroutine이 실행되고 있는 상태를 의미한다.
+* **Waiting** : Goroutine이 외부의 Event를 대기하고 있는 상태를 의미한다. 여기서 외부의 Event는 I/O Device 요청 처리 완료, Lock 해제와 같은 Goroutine이 실행 가능하다는걸 알려주는 OS의 Event를 의미한다.
+* **Runnable** : Goroutine이 실행 가능한 상태를 의미한다.
+* **Executing** : Goroutine이 실행되고 있는 상태를 의미한다.
 
 [Figure 1]에서 Network Poller에 존재하는 Goroutine과 Blocking 상태로 존재하는 Goroutine은 Waiting 상태의 Goroutine을 의미한다. GRQ, LRQ에 존재하는 Goroutine은 Runnable 상태의 Goroutine이다. Processor(P)와 Thread(M)과 같이 존재하는 Goroutine은 Executing 상태의 Goroutine이다.
 
@@ -30,7 +30,7 @@ Goroutine은 반드시 Processor(P)와 Thread(M)과 같이 존재할 경우에�
 
 {{< figure caption="[Figure 2] LRQ" src="images/lrq.png" width="600px" >}}
 
-LRQ는 일반적인 Queue가 아닌 FIFO (First In, First Out)과 LIFO (Least In, First Out)의 결합된 형태를 가지고 있다. LIFO 부분은 Size가 "1"이기 때문에 하나의 Goroutine만 저장된다. [Figure 2]는 LRQ의 동작을 나타내고 있다. LRQ에 Goroutine Enqueue시 LIFO 부분에 먼저 Goroutine이 저장이 되고 이후에 FIFO 부분에 Goroutine이 저장된다. 반대로 LRQ에서 Goroutine Dequeue시 LIFO 부분의 Goroutine이 먼저 나오고 이후에 FIFO 부분의 Goroutine이 나온다.
+LRQ는 일반적인 Queue가 아닌 FIFO (First In, First Out)와 LIFO (Least In, First Out)의 결합된 형태를 가지고 있다. LIFO 부분은 Size가 "1"이기 때문에 하나의 Goroutine만 저장된다. [Figure 2]는 LRQ의 동작을 나타내고 있다. LRQ에 Goroutine Enqueue시 LIFO 부분에 먼저 Goroutine이 저장이 되고 이후에 FIFO 부분에 Goroutine이 저장된다. 반대로 LRQ에서 Goroutine Dequeue시 LIFO 부분의 Goroutine이 먼저 나오고 이후에 FIFO 부분의 Goroutine이 나온다.
 
 이렇게 LRQ가 설계된 이유는 Goroutine의 Locality를 부여하기 위해서이다. Goroutine에서 새로 Goroutine을 생성하고 생성한 Goroutine이 종료되기를 기다리는 경우, 새로 생성된 Goroutine이 빠르게 실행되고 종료되어야 높은 성능을 얻을 수 있다. Cache 관점까지 고려해보면 새로 생성된 Goroutine은 동일한 Processor에서 실행되야 좋다. 새로 생성된 Goroutine은 기본적으로 Goroutine을 생성한 Processor의 LRQ에 저장된다. 따라서 LRQ의 LIFO 부분을 통해서 새로 생성된 Goroutine은 동일한 Processor에서 빠르게 실행될 수 있다.
 
@@ -71,10 +71,10 @@ Golang Scheduler는 LRQ에 Goroutine이 존재하지 않을 경우 다른 곳으
 
 Goroutine Scheduling에서 중요한 요소중 하나는 모든 Goroutine이 공평하게 실행되어야 한다는 점이다. 이러한 특성을 Fairness라고 명칭한다. Golang Scheduler는 Goroutine Fairness 보장을 위해서 여러가지 기법들을 적용하고 있다.
 
-* Thread : Goroutine이 이용중인 Thread를 반환하지 않고 계속해서 이용할 수 있다. 이러한 Goroutine의 Thread 독점을 막기 위해서 Golang Scheduler는 Goroutine이 한번 실행될때 10ms이상 실행되는 경우 해당 Goroutine Timeout 시키고 선점(Premption)하여 강제로 GRQ로 이동시킨다.
-* LRQ : 2개의 Goroutine이 LRQ에 번갈아가면서 저장되고 실행된다면, LRQ의 LIFO 부분에 의해서 FIFO 부분에 들어가 있는 Goroutine이 실행되지 않을 수 있다. 이러한 문제를 막기 위해서 Golang Scheduler는 LIFO 부분에 저장되어 있는 Goroutine은 10ms Timeout이 초기화 되지 않고 상속 되도록 만들었다. 따라서 LRQ의 LIFO 부분을 하나의 Goroutine이 10ms이상 점유하지 못한다.
-* GRQ : LRQ에 존재하는 Goroutine만을 실행하면 GRQ에 존재하는 Goroutine이 실행되지 않을 수 있다. 이러한 문제를 막기 위해서 Golang Scheduler는 "61번" Goroutine Scheduling을 수행할때 LRQ보다 GRQ에 있는 Gorutine을 먼저 확인하고 실행하도록 만들었다. [Code 1]의 윗부분이 이러한 내용을 나타내고 있다. 
-* Network Poller : Network Poller는 독립된 Background Thread이다. 따라서 OS Scheduler에 따라서 동작을 보장받는다.
+* **Thread** : Goroutine이 이용중인 Thread를 반환하지 않고 계속해서 이용할 수 있다. 이러한 Goroutine의 Thread 독점을 막기 위해서 Golang Scheduler는 Goroutine이 한번 실행될때 10ms이상 실행되는 경우 해당 Goroutine Timeout 시키고 선점(Premption)하여 강제로 GRQ로 이동시킨다.
+* **LRQ** : 2개의 Goroutine이 LRQ에 번갈아가면서 저장되고 실행된다면, LRQ의 LIFO 부분에 의해서 FIFO 부분에 들어가 있는 Goroutine이 실행되지 않을 수 있다. 이러한 문제를 막기 위해서 Golang Scheduler는 LIFO 부분에 저장되어 있는 Goroutine은 10ms Timeout이 초기화 되지 않고 상속 되도록 만들었다. 따라서 LRQ의 LIFO 부분을 하나의 Goroutine이 10ms이상 점유하지 못한다.
+* **GRQ** : LRQ에 존재하는 Goroutine만을 실행하면 GRQ에 존재하는 Goroutine이 실행되지 않을 수 있다. 이러한 문제를 막기 위해서 Golang Scheduler는 "61번" Goroutine Scheduling을 수행할때 LRQ보다 GRQ에 있는 Gorutine을 먼저 확인하고 실행하도록 만들었다. [Code 1]의 윗부분이 이러한 내용을 나타내고 있다.
+* **Network Poller** : Network Poller는 독립된 Background Thread이다. 따라서 OS Scheduler에 따라서 동작을 보장받는다.
 
 ## 2. 참조
 
