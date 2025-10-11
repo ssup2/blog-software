@@ -20,9 +20,9 @@ Heap Memory 영역의 Scan 최소화를 위한 위한 Generation 기법은 Golan
 
 Golang은 `GOGC` 환경변수를 통해서 Garbarge Collector의 Garbage Collection 수행 시기를 어느정도 제어할 수 있다. `GOGC` 환경변수에 설정하는 값은 이전에 Garbage Collection 수행후에도 제거되지 않고 남아서 이용되는 Heap Memory 공간의 용량과 Heap Memory에 새롭개 할당된 공간의 용량의 비율을 나타낸다.
 
-[Figure 1]은 GOGC 환경변수에 따른 Garbage Collection 수행을 나타내고 있다. `GOGC` 환경변수 값이 100일때 Garbage Collection을 수행하고 제거되지 않고 이용되는 Heap Memory 공간이 50MB라면, 이후에 Heap Memory 공간에 50MB를 더 할당 하게되면 다시 Garbage Collection을 수행한다. 만약 `GOGC` 값이 200이라면 Heap Memory 공간에 100MB를 더 할당 하게되면 다시 Garbage Collection을 수행한다.
+[Figure 1]은 `GOGC` 환경변수에 따른 Garbage Collection 수행을 나타내고 있다. `GOGC` 환경변수 값이 100일때 Garbage Collection을 수행하고 제거되지 않고 이용되는 Heap Memory 공간이 50MB라면, 이후에 Heap Memory 공간에 50MB를 더 할당 하게되면 다시 Garbage Collection을 수행한다. 만약 `GOGC` 값이 200이라면 Heap Memory 공간에 100MB를 더 할당 하게되면 다시 Garbage Collection을 수행한다.
 
-이처럼 `GOGC` 환경변수 값이 높을수록 Garbage Collection을 수행하는 빈도는 낮아지게 된다. 만약 한번만 실행되고 종료되는 Batch Job 처럼 Garbage Collection이 불필요하다면 GOGC 환경변수를 `off`로 설정하여 Garbage Collection이 수행되지 않도록 설정할 수 있다.
+이처럼 `GOGC` 환경변수 값이 높을수록 Garbage Collection을 수행하는 빈도는 낮아지게 된다. 만약 한번만 실행되고 종료되는 Batch Job 처럼 Garbage Collection이 불필요하다면 `GOGC` 환경변수를 `off`로 설정하여 Garbage Collection이 수행되지 않도록 설정할 수 있다.
 
 ## 2. 참조
 

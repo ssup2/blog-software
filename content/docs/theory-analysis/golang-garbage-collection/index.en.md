@@ -20,9 +20,9 @@ Therefore, it is judged that even if the Generation technique is introduced to G
 
 Golang can control the timing of Garbage Collection to some extent through the `GOGC` environment variable. The value set in the `GOGC` environment variable represents the ratio between the capacity of Heap Memory space that remains and is used after the previous Garbage Collection, and the capacity of newly allocated space in Heap Memory.
 
-[Figure 1] shows Garbage Collection execution according to the GOGC environment variable. When the `GOGC` environment variable value is 100, if the Heap Memory space that remains and is used after Garbage Collection is 50MB, then when 50MB is allocated to the Heap Memory space again, Garbage Collection is performed again. If the `GOGC` value is 200, then when 100MB is allocated to the Heap Memory space, Garbage Collection is performed again.
+[Figure 1] shows Garbage Collection execution according to the `GOGC` environment variable. When the `GOGC` environment variable value is 100, if the Heap Memory space that remains and is used after Garbage Collection is 50MB, then when 50MB is allocated to the Heap Memory space again, Garbage Collection is performed again. If the `GOGC` value is 200, then when 100MB is allocated to the Heap Memory space, Garbage Collection is performed again.
 
-In this way, the higher the `GOGC` environment variable value, the lower the frequency of Garbage Collection. If Garbage Collection is unnecessary like Batch Jobs that run once and terminate, the GOGC environment variable can be set to `off` to prevent Garbage Collection from being performed.
+In this way, the higher the `GOGC` environment variable value, the lower the frequency of Garbage Collection. If Garbage Collection is unnecessary like Batch Jobs that run once and terminate, the `GOGC` environment variable can be set to `off` to prevent Garbage Collection from being performed.
 
 ## 2. References
 
