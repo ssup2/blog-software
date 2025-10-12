@@ -27,7 +27,7 @@ SASL은 Kafka에서 이용하는 인증 기법을 의미한다. 다음과 같은
 
 #### 1.2.1. Security Protocol : `PLAINTEXT`
 
-```properties
+```properties {caption="[Config 1] Kafka config for PLAINTEXT security protocol", linenos=table}
 # Listener for plain TCP connections
 listeners=PLAINTEXT://:9092
 advertised.listeners=PLAINTEXT://broker1.example.com:9092
@@ -39,14 +39,14 @@ security.inter.broker.protocol=PLAINTEXT
 # All messages are sent in plaintext without authentication
 ```
 
-```properties
+```properties {caption="[Config 2] Producer/Consumer config for PLAINTEXT security protocol", linenos=table}
 # Broker configuration
 bootstrap.servers=broker1.example.com:9092
 ```
 
 #### 1.2.2. Security Protocol : `SASL_PLAINTEXT`, SASL : `PLAIN`
 
-```properties
+```properties {caption="[Config 3] Kafka config for SASL_PLAINTEXT security protocol and PLAIN SASL", linenos=table}
 # Listener configuration for accepting client connections
 listeners=SASL_SSL://:9093
 advertised.listeners=SASL_SSL://broker1.example.com:9093
@@ -66,7 +66,7 @@ ssl.truststore.location=/etc/kafka/secrets/kafka.server.truststore.jks
 ssl.truststore.password=changeit
 ```
 
-```properties
+```properties {caption="[Config 4] Producer/Consumer config for SASL_PLAINTEXT security protocol and PLAIN SASL", linenos=table}
 # Broker configuration
 bootstrap.servers=broker1.example.com:9093
 
