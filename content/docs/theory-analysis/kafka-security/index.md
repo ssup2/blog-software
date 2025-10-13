@@ -29,7 +29,7 @@ Security Protocol과 SASL Mechanism 설정에 따른 Kafka의 Config와 Producer
 
 #### 1.2.1. Security Protocol : `PLAINTEXT`
 
-```properties {caption="[Config 1] Kafka config for PLAINTEXT security protocol", linenos=table}
+```properties {caption="[Config 1] Kafka server.properties for PLAINTEXT security protocol", linenos=table}
 # Listener
 listeners=PLAINTEXT://:9092
 advertised.listeners=PLAINTEXT://external.broker.com:9092
@@ -43,11 +43,11 @@ security.inter.broker.protocol=PLAINTEXT
 bootstrap.servers=external.broker.com:9092
 ```
 
-[Config 1]는 Kafka Config 예시를 나타내고 있다. Listener와 Inter-Broker Communication Protocol을 `PLAINTEXT`로 설정하고 있는걸 확인할 수 있다. [Config 2]는 Producer/Consumer Config 예시를 나타낸다. bootstrap.servers에 Kafka Broker의 외부 주소인 `external.broker.com:9092`로 설정하고 있는걸 확인할 수 있으며, 별도의 인증 설정이 없기 때문에 별도의 인증 정보를 전달하지 않는다.
+[Config 1]는 Kafka `server.properties` 예시를 나타내고 있다. Listener와 Inter-Broker Communication Protocol을 `PLAINTEXT`로 설정하고 있는걸 확인할 수 있다. [Config 2]는 Producer/Consumer Config 예시를 나타낸다. `bootstrap.servers`에 Kafka Broker의 외부 주소인 `external.broker.com:9092`로 설정하고 있는걸 확인할 수 있으며, 별도의 인증 설정이 없기 때문에 별도의 인증 정보를 전달하지 않는다.
 
 #### 1.2.2. Security Protocol : `SASL_PLAINTEXT`, SASL : `PLAIN`
 
-```properties {caption="[Config 3] Kafka config for SASL_PLAINTEXT security protocol and PLAIN SASL", linenos=table}
+```properties {caption="[Config 3] Kafka server.properties for SASL_PLAINTEXT security protocol and PLAIN SASL", linenos=table}
 # Listener
 listeners=SASL_PLAINTEXT://0.0.0.0:9092
 advertised.listeners=SASL_PLAINTEXT://kafka-broker:9092
@@ -67,11 +67,11 @@ listener.name.sasl_plaintext.plain.sasl.jaas.config=org.apache.kafka.common.secu
   user_serviceb="serviceb-password";
 ```
 
-[Config 3]는 Kafka Config 예시를 나타내고 있다. Listener와 Inter-Broker Communication Protocol을 `SASL_SSL`로 설정하고 있으며, SASL Mechanism을 `PLAIN`으로 설정하고 있는걸 확인할 수 있다. 또한 Username과 Password를 설정하고 있는것도 확인할 수 있다. `username`과 `password`는 Kafka Broker 사이에 인증을 위한 Admin User/Password를 의미하며, `user_[username]`은 해당 User의 Password를 의미한다.
+[Config 3]는 Kafka `server.properties` 예시를 나타내고 있다. Listener와 Inter-Broker Communication Protocol을 `SASL_SSL`로 설정하고 있으며, SASL Mechanism을 `PLAIN`으로 설정하고 있는걸 확인할 수 있다. 또한 Username과 Password를 설정하고 있는것도 확인할 수 있다. `username`과 `password`는 Kafka Broker 사이에 인증을 위한 Admin User/Password를 의미하며, `user_[username]`은 해당 User의 Password를 의미한다.
 
 ```properties {caption="[Config 4] Producer/Consumer config for SASL_PLAINTEXT security protocol and PLAIN SASL", linenos=table}
 # Broker configuration
-bootstrap.servers=broker1.example.com:9093
+bootstrap.servers=external.broker.com:9093
 
 # Specify the security protocol and mechanism
 security.protocol=SASL_SSL
@@ -83,7 +83,7 @@ sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule require
   password="servicea-password";
 ```
 
-[Config 4]는 Producer/Consumer Config 예시를 나타내고 있다. security.protocol과 sasl.mechanism을 `SASL_SSL`과 `PLAIN`으로 설정하고 있으며, Username과 Password를 설정하고 있는걸 확인할 수 있다.
+[Config 4]는 Producer/Consumer Config 예시를 나타내고 있다. `security.protocol`과 `sasl.mechanism`을 `SASL_SSL`과 `PLAIN`으로 설정하고 있으며, Username과 Password를 설정하고 있는걸 확인할 수 있다.
 
 ## 2. Kafka Authorization
 
