@@ -2,19 +2,21 @@
 title: Kafka Replication, Failover
 ---
 
-This document analyzes Kafka Replication and Failover.
+This document analyzes Kafka Replication and Failover techniques.
 
 ## 1. Kafka Replication
 
 {{< figure caption="[Figure 1] Kafka before Replication" src="images/kafka.png" width="900px" >}}
 
+Kafka configures multiple Brokers and distributes Partitions to each Broker as much as possible to increase Message throughput. However, even when using multiple Brokers and Partitions, if Replication is not applied, Message loss cannot be prevented when some Brokers die. [Figure 1] shows the Kafka Cluster before applying Replication. Since Replication is not applied, Message loss will inevitably occur when any Broker dies. For example, if `Broker C` dies, all Messages of `Topic B` and Messages of `Partition 2` of `Topic C` will be lost.
+
 {{< figure caption="[Figure 2] Kafka after Replication" src="images/kafka-replication.png" width="900px" >}}
 
-Kafka configures multiple Brokers and distributes Partitions to each Broker as much as possible to increase Message throughput. However, even when using multiple Brokers and Partitions, if Replication is not applied, Message loss cannot be prevented when some Brokers die. [Figure 1] shows the Kafka Cluster before applying Replication, and [Figure 2] shows the Kafka Cluster after applying Kafka Replication. `Topic A` and `Topic B` are set to Replica 2, and `Topic C` is set to Replica 3. When Replication is not applied, if `Broker C` dies, all Messages of `Topic B` and Messages of `Partition 2` of `Topic C` are lost, but when Replication is applied, Message loss can be prevented using replicated Partitions.
+Replication can **set a separate Replica count for each Topic**. [Figure 2] shows the Kafka Cluster after applying Replication to the Kafka Topics in [Figure 1]. `Topic A` and `Topic B` are set to Replica `2`, and `Topic C` is set to Replica `3`. Accordingly, `Topic A` and `Topic B` have one Leader Partition and one Follower Partition, and `Topic C` has one Leader Partition and two Follower Partitions.
 
 In Kafka, the Partition used by Producers and Consumers is called **Leader Partition**, and the remaining replicas are called **Follower Partition**. Even when Replication is applied, Producers and Consumers only use Leader Partitions and do not directly use Follower Partitions. Follower Partitions are only used for Failover when Leader Partitions cannot be used due to failures.
 
-The Replication synchronization method can use both Sync and Async methods depending on the Producer's ACK settings. When the Producer's ACK setting is `0`, the Producer sends Messages and does not wait for ACK from the Broker, and when it is `1`, the Producer receives ACK from the Broker only when Message transmission to the Leader Partition is completed. Therefore, from a Replication perspective, `0` and `1` correspond to Async methods. On the other hand, when the Producer's ACK setting is `all`, the Producer receives ACK from the Broker only when Message transmission to the Leader Partition is completed. Therefore, from a Replication perspective, `all` corresponds to Sync methods.
+The Replication synchronization method can use both Sync and Async methods depending on the Producer's ACK settings. When the Producer's ACK setting is `0`, the Producer sends Messages and does not wait for ACK from the Broker, and when it is `1`, the Producer receives ACK from the Broker only when Message transmission to the Leader Partition is completed. Therefore, from a Replication perspective, `0` and `1` correspond to **Async methods**. On the other hand, when the Producer's ACK setting is `all`, the Producer receives ACK from the Broker only when Message transmission to the Leader Partition is completed. Therefore, from a Replication perspective, `all` corresponds to **Sync methods**.
 
 ## 2. Kafka Failover
 

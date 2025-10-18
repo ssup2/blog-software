@@ -15,17 +15,27 @@ Kafka is a distributed Message Queue based on Publish-subscribe. Kafka is often 
 * **Kafka Broker**: This is the core Server of Kafka that receives, manages, and transmits Messages. Kafka Brokers generally operate as a Cluster on multiple Nodes for Load Balancing and HA (High Availability).
 * **Zookeeper**: It identifies the operational status of each Kafka Broker that forms the Cluster and delivers status information to Producers and Consumers. Zookeeper also serves as a storage that stores information necessary for Message management.
 * **Topic**: This is the unit for managing Messages. Topics are divided into smaller units called **Partitions**, and Kafka increases Message throughput by using multiple Partitions.
-* **Producer**: This refers to an App that sends (Publishes) Messages to Topics.
-* **Consumer**: This refers to an App that receives Messages from Topics.
+* **Producer**: This refers to an App that sends (**Publishes**) Messages to Topics.
+* **Consumer**: This refers to an App that receives (**Subscribes**) Messages from Topics. Consumers check for the existence of Messages through **Polling method** using Poll functions, and fetch Messages when they exist.
 * **Consumer Group**: As the name suggests, it groups multiple Consumers, and Kafka increases Consumer availability and Message throughput using Consumer Groups.
 
 [Figure 1] also shows the process of delivering Messages in Kafka. When a Producer sends (Publishes) a Message to a specific Topic, the Kafka Cluster sends the Message received from the Producer to all Consumer Groups that are subscribing to that Topic. In [Figure 1], since `Consumer Group B` and `Consumer Group C` are subscribing to `Topic B`, the Kafka Broker delivers the Message sent by `Producer A` to `Topic B` to `Consumer Group B` and `Consumer Group C`.
 
-### 1.1. Partition
+### 1.1. Consumer Group
 
-{{< figure caption="[Figure 2] Kafka Partition" src="images/kafka-partition.png" width="750px" >}}
+Consumer Groups bundle multiple Consumers to allow multiple Consumers to process one Topic simultaneously. In the first figure, Consumer Group C is subscribing to Topic C. Since Consumer Group C has 2 Consumers, Messages from Topic C can be processed in parallel by 2 Consumers. However, to increase the efficiency of Consumer Groups, the number of Partitions of the Topic that the Consumer Group subscribes to is important.
 
-**Partition** is a unit for distributing one Topic to multiple Kafka Brokers within the Kafka Cluster to increase Message throughput through parallel processing, and it serves as a Queue that stores Messages sequentially. [Figure 2] shows in detail the Partition that interacts with Producers and Consumers. Messages sent by Producers are stored sequentially at the end of the Partition. At this time, the Message ID increases sequentially like an Array Index. This Message ID is called **Offset** in Kafka.
+{{< figure caption="[Figure 2] Relationship between Partition and Consumer Group" src="images/kafka-partition-consumer.png" width="750px" >}}
+
+[Figure 2] shows the relationship diagram according to the number of Partitions in the same Topic and the number of Consumers in the same Consumer Group. Partition and Consumer have an N:1 relationship. Consumers in the same Consumer Group cannot use one Partition simultaneously. In other words, if there are more Consumers than Partitions, there will be Consumers that do not process Messages. Therefore, when using Consumer Groups, the number of Partitions of the Topic must also be considered together.
+
+Each Consumer Group has a **Consumer Leader** that manages the Consumers of the Consumer Group. Also, the Consumer Leader performs the task of mapping Consumers and Partitions in cooperation with the Kafka Broker. Consumer and Partition mapping is performed when various Events occur, such as when some Consumers of the Consumer Group die, when Partitions are added, or when Consumers are added to the Consumer Group.
+
+### 1.2. Partition, Offset
+
+{{< figure caption="[Figure 3] Kafka Partition" src="images/kafka-partition.png" width="750px" >}}
+
+**Partition** is a unit for distributing one Topic to multiple Kafka Brokers within the Kafka Cluster to increase Message throughput through parallel processing, and it serves as a Queue that stores Messages sequentially. [Figure 3] shows in detail the Partition that interacts with Producers and Consumers. Messages sent by Producers are stored sequentially at the end of the Partition. At this time, the Message ID increases sequentially like an Array Index. This Message ID is called **Offset** in Kafka.
 
 Separately from Producers, Consumers start from the front of the Partition and read Messages sequentially while increasing the **Consumer Offset**. Here, Consumer Offset refers to the Offset of the last Message in the Partition that the Consumer has completed processing. Therefore, Consumer Offset is stored by the Kafka Broker but is changed by Consumer requests. Consumer Offset is stored in the Kafka Broker for each Partition and Consumer Group. In [Figure 2], for `Partition 0` of `Topic B`, the Consumer Offset of `Consumer Group B` is `6`, and the Consumer Offset of `Consumer Group C` is `4`.
 
@@ -34,16 +44,6 @@ The number of Partitions can be set differently for each Topic. Generally, each 
 When a Topic has multiple Partitions, Producers basically select the Partition to deliver Messages using the **Round-robin** method. If a different Partition selection algorithm is needed, Producer developers can develop and apply Partition selection algorithms directly through the Interface provided by Kafka. For Consumers, there are **Sync method** that delivers the changed Consumer Offset to the Kafka Broker each time a Message is processed, and **Async method** that processes multiple Messages at once and delivers only the Offset of the last Message to the Kafka Broker. Generally, Async method is used to increase Message throughput.
 
 Partitions exist on **Disk** rather than Memory for Message preservation. Disks generally have lower Read/Write performance compared to Memory, and especially Random Read/Write performance is much lower for Disks compared to Memory. However, for Sequential Read/Write, Disk performance does not significantly drop compared to Memory performance, so Kafka is designed to use Sequential Read/Write as much as possible when using Partitions. Also, Kafka allows Messages in the Kernel's Disk Cache (Page Cache) to be copied directly to the Kernel's Socket Buffer without going through Kafka, minimizing Copy Overhead that occurs when delivering Messages to Consumers through the Network. Partitions are not actually stored as a single file on Disk but are divided and stored in units called **Segments**. The default size of a Segment is 1GB.
-
-### 1.2. Consumer Group
-
-Consumer Groups bundle multiple Consumers to allow multiple Consumers to process one Topic simultaneously. In the first figure, Consumer Group C is subscribing to Topic C. Since Consumer Group C has 2 Consumers, Messages from Topic C can be processed in parallel by 2 Consumers. However, to increase the efficiency of Consumer Groups, the number of Partitions of the Topic that the Consumer Group subscribes to is important.
-
-{{< figure caption="[Figure 3] Relationship between Partition and Consumer Group" src="images/kafka-partition-consumer.png" width="750px" >}}
-
-[Figure 3] shows the relationship diagram according to the number of Partitions in the same Topic and the number of Consumers in the same Consumer Group. The relationship between Partition and Consumer is N:1. Consumers in the same Consumer Group cannot use one Partition simultaneously. In other words, if there are more Consumers than Partitions, there will be Consumers that do not process Messages. Therefore, when using Consumer Groups, the number of Partitions of the Topic must also be considered together.
-
-Each Consumer Group has a **Consumer Leader** that manages the Consumers of the Consumer Group. Also, the Consumer Leader performs the task of mapping Consumers and Partitions in cooperation with the Kafka Broker. Consumer and Partition mapping is performed when various Events occur, such as when some Consumers of the Consumer Group die, when Partitions are added, or when Consumers are added to the Consumer Group.
 
 ### 1.3. ACK
 

@@ -7,7 +7,7 @@ Kafka의 인증, 인가를 분석한다.
 ## 1. Kafka Security Protocol
 
 Kafka에서 제공하는 Security Protocol은 다음과 같다. 여기서 Security Protocol은 Kafka에 접근하기 위한 **인증**과 **Network 구간 암호화** 방식을 결정한다.
-ㅇ
+
 * `PLAINTEXT` : 인증을 수행하지 않고, Network 구간 암호화를 수행하지 않는다.
 * `SSL` : 인증을 수행하지 않고, Network 구간을 SSL로 암호화한다.
 * `SASL_PLAINTEXT` : SASL을 이용하여 인증을 수행하고, Network 구간 암호화를 수행하지 않는다.
