@@ -414,104 +414,7 @@ spec:
   timeToLiveSeconds: 300
 ```
 
-## 4. Kubernetes 환경에서 Volcano Scheduler와 함께 실행
-
-### 4.1. Volcano Scheduler Queue 설정
-
-Spark Job을 위한 Volcano Scheduler의 Queue를 설정한다.
-
-```yaml
-apiVersion: scheduling.volcano.sh/v1beta1
-kind: Queue
-metadata:
-  name: sparkqueue
-spec:
-  weight: 4
-  reclaimable: false
-  capability:
-    cpu: 10
-    memory: 20Gi
-```
-
-### 4.2. PodGroup 설정
-
-PodGroup 파일을 생성하여 Spark Job Container Image의 `/app/configs/volcano.yaml`에 복사한다. 주요 설정은 다음과 같다.
-* `queue` : 사용할 Queue 이름을 지정한다. 위에서 생성한 Queue 이름을 지정한다.
-* `minMember` : 최소 실행 가능한 Pod 수를 지정한다. Driver Pod는 단독으로 동작하기 때문에 반드시 `1`로 설정한다.
-* `minResources` : 최소 실행 가능한 Pod의 자원을 지정한다. Driver Pod와 Executor Pod의 Resource의 총합을 지정한다. Volcano Scheduler는 `minResources`를 만큼 Resource가 할당 가능할때 Spark Job Pod를 Scheduling한다.
-
-```yaml
-apiVersion: scheduling.volcano.sh/v1beta1
-kind: PodGroup
-spec:
-  queue: sparkqueue
-  minMember: 1
-  minResources:
-    cpu: "4"
-    memory: "4Gi"
-```
-
-### 4.2. Spark Job 실행
-
-Volcano Scheduler와 함께 `daily-parquet` 데이터를 활용하여 평균 날께 데이터를 계산하는 Spark Job을 실행한다. `spark.kubernetes.scheduler.name`에 `volcano`를 지정하고, `spark.kubernetes.scheduler.volcano.podGroupTemplateFile`에 `/app/configs/volcano.yaml`을 지정한다.
-
-```shell
-spark-submit \
-  --master k8s://192.168.1.71:6443 \
-  --deploy-mode cluster \
-  --name weather-southkorea-daily-average-parquet \
-  --driver-cores 1 \
-  --driver-memory 1g \
-  --executor-cores 1 \
-  --executor-memory 1g \
-  --conf spark.executor.instances=2 \
-  --conf spark.kubernetes.namespace=spark \
-  --conf spark.kubernetes.container.image=ghcr.io/ssup2-playground/k8s-data-platform_spark-jobs:0.1.8 \
-  --conf spark.kubernetes.authenticate.driver.serviceAccountName=spark \
-  --conf spark.pyspark.python=/app/.venv/bin/python3 \
-  --conf spark.jars.packages=org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262 \
-  --conf spark.kubernetes.scheduler.name=volcano \
-  --conf spark.kubernetes.scheduler.volcano.podGroupTemplateFile=/app/configs/volcano.yaml \
-  --conf spark.eventLog.enabled=true \
-  --conf spark.eventLog.dir=s3a://spark/logs \
-  --conf spark.ui.prometheus.enabled=true \
-  --conf spark.kubernetes.driver.annotation.prometheus.io/scrape=true \
-  --conf spark.kubernetes.driver.annotation.prometheus.io/path=/metrics/executors/prometheus \
-  --conf spark.kubernetes.driver.annotation.prometheus.io/port=4040 \
-  local:///app/jobs/weather_southkorea_daily_average_parquet.py \
-  --date 20250601
-```
-
-Kubernetes Cluster에 `daily-iceberg-parquet` 데이터를 활용하여 평균 날씨 데이터를 계산하는 Spark Job을 실행한다.
-
-```shell
-spark-submit \
-  --master k8s://192.168.1.71:6443 \
-  --deploy-mode cluster \
-  --name weather-southkorea-daily-average-iceberg-parquet \
-  --driver-cores 1 \
-  --driver-memory 1g \
-  --executor-cores 1 \
-  --executor-memory 1g \
-  --conf spark.executor.instances=2 \
-  --conf spark.kubernetes.namespace=spark \
-  --conf spark.kubernetes.container.image=ghcr.io/ssup2-playground/k8s-data-platform_spark-jobs:0.1.8 \
-  --conf spark.kubernetes.authenticate.driver.serviceAccountName=spark \
-  --conf spark.pyspark.python=/app/.venv/bin/python3 \
-  --conf spark.jars.packages=org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262,org.apache.iceberg:iceberg-spark3-runtime:0.13.2 \
-  --conf spark.kubernetes.scheduler.name=volcano \
-  --conf spark.kubernetes.scheduler.volcano.podGroupTemplateFile=/app/configs/volcano.yaml \
-  --conf spark.eventLog.enabled=true \
-  --conf spark.eventLog.dir=s3a://spark/logs \
-  --conf spark.ui.prometheus.enabled=true \
-  --conf spark.kubernetes.driver.annotation.prometheus.io/scrape=true \
-  --conf spark.kubernetes.driver.annotation.prometheus.io/path=/metrics/executors/prometheus \
-  --conf spark.kubernetes.driver.annotation.prometheus.io/port=4040 \
-  local:///app/jobs/weather_southkorea_daily_average_iceberg_parquet.py \
-  --date 20250601
-```
-
-### 4.3. Dagster Pipeline에서 Spark Job 실행
+### 3.5. Dagster Pipeline에서 Spark Job 실행
 
 Dagster에서는 공식적으로 `spark-submit` CLI를 활용한 Spark Job 제출을 지원하지 않는다. 따라서 `execute_spark_job` 함수를 정의하여 Dagster Pipeline에서 Spark Job을 실행한다.
 
@@ -670,6 +573,103 @@ def execute_spark_job(context, job_name_prefix: str, job_script: str, job_args: 
 * 별도의 `spark-submit` CLI Pod를 생성하고, 생성한 Pod에서 `spark-submit` CLI를 활용하여 Client Mode로 Spark Job을 실행한다. 즉 `spark-submit` Pod에서 Driver가 실행된다.
 * `spark-submit` CLI Pod의 Owner는 Dagster의 Run 또는 Op/Asset의 Pod이다. 따라서 Dagster Pipeline이 종료되어 Dagster Pod가 제거되면 `spark-submit` CLI Pod도 자연스럽게 제거되고, 이후에 Executor Pod가 자동으로 제거된다.
 * `spark-submit` CLI Pod를 생성하기전에 Executor Pod에서 `spark-submit` CLI Pod에 접근하기 위한 Headless Service를 생성한다.
+
+## 4. Kubernetes 환경에서 Volcano Scheduler와 함께 실행
+
+### 4.1. Volcano Scheduler Queue 설정
+
+Spark Job을 위한 Volcano Scheduler의 Queue를 설정한다.
+
+```yaml
+apiVersion: scheduling.volcano.sh/v1beta1
+kind: Queue
+metadata:
+  name: sparkqueue
+spec:
+  weight: 4
+  reclaimable: false
+  capability:
+    cpu: 10
+    memory: 20Gi
+```
+
+### 4.2. PodGroup 설정
+
+PodGroup 파일을 생성하여 Spark Job Container Image의 `/app/configs/volcano.yaml`에 복사한다. 주요 설정은 다음과 같다.
+* `queue` : 사용할 Queue 이름을 지정한다. 위에서 생성한 Queue 이름을 지정한다.
+* `minMember` : 최소 실행 가능한 Pod 수를 지정한다. Driver Pod는 단독으로 동작하기 때문에 반드시 `1`로 설정한다.
+* `minResources` : 최소 실행 가능한 Pod의 자원을 지정한다. Driver Pod와 Executor Pod의 Resource의 총합을 지정한다. Volcano Scheduler는 `minResources`를 만큼 Resource가 할당 가능할때 Spark Job Pod를 Scheduling한다.
+
+```yaml
+apiVersion: scheduling.volcano.sh/v1beta1
+kind: PodGroup
+spec:
+  queue: sparkqueue
+  minMember: 1
+  minResources:
+    cpu: "4"
+    memory: "4Gi"
+```
+
+### 4.2. Spark Job 실행
+
+Volcano Scheduler와 함께 `daily-parquet` 데이터를 활용하여 평균 날께 데이터를 계산하는 Spark Job을 실행한다. `spark.kubernetes.scheduler.name`에 `volcano`를 지정하고, `spark.kubernetes.scheduler.volcano.podGroupTemplateFile`에 `/app/configs/volcano.yaml`을 지정한다.
+
+```shell
+spark-submit \
+  --master k8s://192.168.1.71:6443 \
+  --deploy-mode cluster \
+  --name weather-southkorea-daily-average-parquet \
+  --driver-cores 1 \
+  --driver-memory 1g \
+  --executor-cores 1 \
+  --executor-memory 1g \
+  --conf spark.executor.instances=2 \
+  --conf spark.kubernetes.namespace=spark \
+  --conf spark.kubernetes.container.image=ghcr.io/ssup2-playground/k8s-data-platform_spark-jobs:0.1.8 \
+  --conf spark.kubernetes.authenticate.driver.serviceAccountName=spark \
+  --conf spark.pyspark.python=/app/.venv/bin/python3 \
+  --conf spark.jars.packages=org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262 \
+  --conf spark.kubernetes.scheduler.name=volcano \
+  --conf spark.kubernetes.scheduler.volcano.podGroupTemplateFile=/app/configs/volcano.yaml \
+  --conf spark.eventLog.enabled=true \
+  --conf spark.eventLog.dir=s3a://spark/logs \
+  --conf spark.ui.prometheus.enabled=true \
+  --conf spark.kubernetes.driver.annotation.prometheus.io/scrape=true \
+  --conf spark.kubernetes.driver.annotation.prometheus.io/path=/metrics/executors/prometheus \
+  --conf spark.kubernetes.driver.annotation.prometheus.io/port=4040 \
+  local:///app/jobs/weather_southkorea_daily_average_parquet.py \
+  --date 20250601
+```
+
+Kubernetes Cluster에 `daily-iceberg-parquet` 데이터를 활용하여 평균 날씨 데이터를 계산하는 Spark Job을 실행한다.
+
+```shell
+spark-submit \
+  --master k8s://192.168.1.71:6443 \
+  --deploy-mode cluster \
+  --name weather-southkorea-daily-average-iceberg-parquet \
+  --driver-cores 1 \
+  --driver-memory 1g \
+  --executor-cores 1 \
+  --executor-memory 1g \
+  --conf spark.executor.instances=2 \
+  --conf spark.kubernetes.namespace=spark \
+  --conf spark.kubernetes.container.image=ghcr.io/ssup2-playground/k8s-data-platform_spark-jobs:0.1.8 \
+  --conf spark.kubernetes.authenticate.driver.serviceAccountName=spark \
+  --conf spark.pyspark.python=/app/.venv/bin/python3 \
+  --conf spark.jars.packages=org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262,org.apache.iceberg:iceberg-spark3-runtime:0.13.2 \
+  --conf spark.kubernetes.scheduler.name=volcano \
+  --conf spark.kubernetes.scheduler.volcano.podGroupTemplateFile=/app/configs/volcano.yaml \
+  --conf spark.eventLog.enabled=true \
+  --conf spark.eventLog.dir=s3a://spark/logs \
+  --conf spark.ui.prometheus.enabled=true \
+  --conf spark.kubernetes.driver.annotation.prometheus.io/scrape=true \
+  --conf spark.kubernetes.driver.annotation.prometheus.io/path=/metrics/executors/prometheus \
+  --conf spark.kubernetes.driver.annotation.prometheus.io/port=4040 \
+  local:///app/jobs/weather_southkorea_daily_average_iceberg_parquet.py \
+  --date 20250601
+```
 
 ## 5. 참고
 
