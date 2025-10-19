@@ -9,6 +9,10 @@ Kafka Connect와 JDBC Connector를 활용해서 PostgreSQL의 Table 복제를 �
 와
 ## 2. Kafka, Kafka Connect 구성
 
+### 2.1. Kafka Cluster 구성
+
+### 2.2. Kafka Connect 구성
+
 ## 3. 참고
 
 * Strimzi Kafka Operator : [https://togomi.tistory.com/66](https://togomi.tistory.com/66)
