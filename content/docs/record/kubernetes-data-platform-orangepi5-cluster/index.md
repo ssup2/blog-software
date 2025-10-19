@@ -261,6 +261,7 @@ helm upgrade --install --create-namespace --namespace redis redis redis -f redis
 
 # Kafka (ID/PW: user/user)
 helm upgrade --install --create-namespace --namespace kafka kafka kafka -f kafka/values.yaml
+helm upgrade --install --create-namespace --namespace kafka strimzi-kafka-operator strimzi-kafka-operator -f strimzi-kafka-operator/values.yaml
 helm upgrade --install --create-namespace --namespace kafka kafka-ui kafka-ui -f kafka-ui/values.yaml
 
 # OpenSearch (ID/PW: admin/Rootroot123!)
@@ -297,14 +298,12 @@ helm upgrade --install --create-namespace --namespace ranger ranger ranger -f ra
 # Hive Metastore
 helm upgrade --install --create-namespace --namespace hive-metastore hive-metastore hive-metastore -f hive-metastore/values.yaml
 
-# Spark Operator
-helm upgrade --install --create-namespace --namespace spark-operator spark-operator spark-operator -f spark-operator/values.yaml
-
-# Spark History Server
-helm upgrade --install --create-namespace --namespace spark-history-server spark-history-server spark-history-server -f spark-history-server/values.yaml
+# Spark
+helm upgrade --install --create-namespace --namespace spark spark-operator spark-operator -f spark-operator/values.yaml
+helm upgrade --install --create-namespace --namespace spark spark-history-server spark-history-server -f spark-history-server/values.yaml
 
 # Flink Kubernetes Operator
-helm upgrade --install --create-namespace --namespace flink-kubernetes-operator flink-kubernetes-operator flink-kubernetes-operator -f flink-kubernetes-operator/values.yaml
+helm upgrade --install --create-namespace --namespace flink flink-kubernetes-operator flink-kubernetes-operator -f flink-kubernetes-operator/values.yaml
 
 # Trino (ID: root)
 helm upgrade --install --create-namespace --namespace trino trino trino -f trino/values.yaml
