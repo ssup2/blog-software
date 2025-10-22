@@ -260,9 +260,10 @@ kubectl -n postgresql exec -it postgresql-0 -- bash -c 'PGPASSWORD=root123! psql
 helm upgrade --install --create-namespace --namespace redis redis redis -f redis/values.yaml
 
 # Kafka (ID/PW: user/user)
-helm upgrade --install --create-namespace --namespace kafka kafka kafka -f kafka/values.yaml
+# helm upgrade --install --create-namespace --namespace kafka kafka kafka -f kafka/values.yaml
 helm upgrade --install --create-namespace --namespace kafka strimzi-kafka-operator strimzi-kafka-operator -f strimzi-kafka-operator/values.yaml
 helm upgrade --install --create-namespace --namespace kafka kafka-ui kafka-ui -f kafka-ui/values.yaml
+kubectl apply -f strimzi-kafka-operator/kafka.yaml
 
 # OpenSearch (ID/PW: admin/Rootroot123!)
 helm upgrade --install --create-namespace --namespace opensearch opensearch opensearch -f opensearch/values.yaml
