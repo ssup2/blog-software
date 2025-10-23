@@ -7,6 +7,31 @@ Kafka Connect와 JDBC Connector를 활용해서 PostgreSQL의 Table 복제를 �
 
 ## 1. 실습 환경 구성
 
+```
+FROM quay.io/strimzi/kafka:0.48.0-kafka-4.1.0
+
+USER root
+
+# Kafka Connect 플러그인 디렉토리 생성
+RUN mkdir -p /opt/kafka/plugins/jdbc-connector
+
+# Confluent JDBC Connector 다운로드
+RUN curl -L https://packages.confluent.io/maven/io/confluent/kafka-connect-jdbc/10.7.4/kafka-connect-jdbc-10.7.4.jar \
+    -o /opt/kafka/plugins/jdbc-connector/kafka-connect-jdbc-10.7.4.jar
+
+# PostgreSQL JDBC 드라이버 다운로드
+RUN curl -L https://jdbc.postgresql.org/download/postgresql-42.7.1.jar \
+    -o /opt/kafka/plugins/jdbc-connector/postgresql-42.7.1.jar
+
+# 권한 설정
+RUN chown -R 1001:1001 /opt/kafka/plugins
+
+USER 1001
+
+# Kafka Connect 플러그인 경로 환경변수 설정
+ENV KAFKA_CONNECT_PLUGIN_PATH=/opt/kafka/plugins
+```
+
 ## 2. Kafka, Kafka Connect 구성
 
 ### 2.1. Kafka Cluster 구성
@@ -120,6 +145,7 @@ metadata:
 spec:
   version: 4.1.0
   replicas: 1
+  image: ghcr.io/ssup2-playground/k8s-data-platform_kafka-connect:0.48.0-kafka-4.1.0
   bootstrapServers: kafka-kafka-sasl-bootstrap.kafka:9092
   authentication:
     type: scram-sha-512
@@ -146,23 +172,6 @@ spec:
                 operator: In
                 values:
                 - worker
-  build:
-    output:
-      type: docker
-      image: kafka-connect-jdbc:latest
-    plugins:
-    - name: kafka-connect-jdbc
-      artifacts:
-      - type: jar
-        url: https://packages.confluent.io/maven/io/confluent/kafka-connect-jdbc/10.7.4/kafka-connect-jdbc-10.7.4.jar
-      - type: jar
-        url: https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.1/postgresql-42.7.1.jar
-      - type: jar
-        url: https://repo1.maven.org/maven2/org/apache/kafka/connect-api/3.6.1/connect-api-3.6.1.jar
-      - type: jar
-        url: https://repo1.maven.org/maven2/org/apache/kafka/kafka-clients/3.6.1/kafka-clients-3.6.1.jar
-      - type: jar
-        url: https://repo1.maven.org/maven2/org/apache/kafka/connect-json/3.6.1/connect-json-3.6.1.jar
 ```
 
 ### 2.3. Kafka Connect JDBC Connector 구성
@@ -228,18 +237,17 @@ data:
         name VARCHAR(100) NOT NULL,
         email VARCHAR(100) UNIQUE NOT NULL,
         age INTEGER,
-        city VARCHAR(50),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
     
     -- Sample data for source database
-    INSERT INTO users (name, email, age, city) VALUES 
-    ('John Doe', 'john@example.com', 30, 'Seoul'),
-    ('Jane Smith', 'jane@example.com', 25, 'Busan'),
-    ('Bob Johnson', 'bob@example.com', 35, 'Incheon'),
-    ('Alice Brown', 'alice@example.com', 28, 'Daegu'),
-    ('Charlie Wilson', 'charlie@example.com', 32, 'Gwangju');
+    INSERT INTO users (name, email, age) VALUES 
+    ('John Doe', 'john@ssup2.com', 30),
+    ('Jane Smith', 'jane@ssup2.com', 25),
+    ('Bob Johnson', 'bob@ssup2.com', 35),
+    ('Alice Brown', 'alice@ssup2.com', 28),
+    ('Charlie Wilson', 'charlie@ssup2.com', 32);
     
     -- Destination Database (kafka_connect_dst)
     CREATE DATABASE kafka_connect_dst;
@@ -252,7 +260,6 @@ data:
         name VARCHAR(100) NOT NULL,
         email VARCHAR(100) UNIQUE NOT NULL,
         age INTEGER,
-        city VARCHAR(50),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
@@ -319,40 +326,38 @@ spec:
 
 ```bash
 # Source 데이터베이스 생성
-kubectl exec -it deployment/postgresql -n kafka -- psql -U postgres -c "CREATE DATABASE kafka_connect_src;"
+kubectl exec -it postgresql-0 -n postgresql -- psql -U postgres -c "CREATE DATABASE kafka_connect_src;"
 
 # Destination 데이터베이스 생성
-kubectl exec -it deployment/postgresql -n kafka -- psql -U postgres -c "CREATE DATABASE kafka_connect_dst;"
+kubectl exec -it postgresql-0 -n postgresql -- psql -U postgres -c "CREATE DATABASE kafka_connect_dst;"
 
 # Source 데이터베이스에 users 테이블 생성
-kubectl exec -it deployment/postgresql -n kafka -- psql -U postgres -d kafka_connect_src -c "
+kubectl exec -it postgresql-0 -n postgresql -- psql -U postgres -d kafka_connect_src -c "
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     age INTEGER,
-    city VARCHAR(50),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );"
 
 # Source 데이터베이스에 샘플 데이터 삽입
-kubectl exec -it deployment/postgresql -n kafka -- psql -U postgres -d kafka_connect_src -c "
-INSERT INTO users (name, email, age, city) VALUES 
-('John Doe', 'john@example.com', 30, 'Seoul'),
-('Jane Smith', 'jane@example.com', 25, 'Busan'),
-('Bob Johnson', 'bob@example.com', 35, 'Incheon'),
-('Alice Brown', 'alice@example.com', 28, 'Daegu'),
-('Charlie Wilson', 'charlie@example.com', 32, 'Gwangju');"
+kubectl exec -it postgresql-0 -n postgresql -- psql -U postgres -d kafka_connect_src -c "
+INSERT INTO users (name, email, age) VALUES 
+('John Doe', 'john@ssup2.com', 30),
+('Jane Smith', 'jane@ssup2.com', 25),
+('Bob Johnson', 'bob@ssup2.com', 35),
+('Alice Brown', 'alice@ssup2.com', 28),
+('Charlie Wilson', 'charlie@ssup2.com', 32);"
 
 # Destination 데이터베이스에 users 테이블 생성 (Sink Connector가 자동 생성하지만 참고용)
-kubectl exec -it deployment/postgresql -n kafka -- psql -U postgres -d kafka_connect_dst -c "
+kubectl exec -it postgresql-0 -n postgresql -- psql -U postgres -d kafka_connect_dst -c "
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     age INTEGER,
-    city VARCHAR(50),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );"
@@ -362,7 +367,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 ```bash
 # PostgreSQL Pod에 접속
-kubectl exec -it deployment/postgresql -n kafka -- psql -U postgres
+kubectl exec -it postgresql-0 -n postgresql -- psql -U postgres
 
 # Source 데이터베이스 확인
 \c kafka_connect_src
@@ -404,13 +409,13 @@ kubectl exec -it kafka-kafka-0 -n kafka -- bin/kafka-console-consumer.sh --boots
 
 ```bash
 # Source 데이터베이스에 새 사용자 추가
-kubectl exec -it deployment/postgresql -n kafka -- psql -U postgres -d kafka_connect_src -c "
-INSERT INTO users (name, email, age, city) VALUES 
-('Test User', 'test@example.com', 27, 'Jeju');
+kubectl exec -it postgresql-0 -n postgresql -- psql -U postgres -d kafka_connect_src -c "
+INSERT INTO users (name, email, age) VALUES 
+('Test User', 'test@ssup2.com', 27);
 "
 
 # Destination 데이터베이스에서 변경사항 확인
-kubectl exec -it deployment/postgresql -n kafka -- psql -U postgres -d kafka_connect_dst -c "
+kubectl exec -it postgresql-0 -n postgresql -- psql -U postgres -d kafka_connect_dst -c "
 SELECT * FROM users ORDER BY id;
 "
 ```
