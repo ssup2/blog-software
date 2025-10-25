@@ -15,9 +15,13 @@ USER root
 # Kafka Connect 플러그인 디렉토리 생성
 RUN mkdir -p /opt/kafka/plugins/jdbc-connector
 
-# Confluent JDBC Connector 다운로드
-RUN curl -L https://packages.confluent.io/maven/io/confluent/kafka-connect-jdbc/10.7.4/kafka-connect-jdbc-10.7.4.jar \
-    -o /opt/kafka/plugins/jdbc-connector/kafka-connect-jdbc-10.7.4.jar
+# Confluent Hub CLI 설치 및 JDBC Connector 설치
+RUN curl -L --http1.1 https://client.hub.confluent.io/confluent-hub-client-latest.tar.gz \
+    -o /tmp/confluent-hub-client.tar.gz && \
+    tar -xzf /tmp/confluent-hub-client.tar.gz -C /tmp && \
+    /tmp/bin/confluent-hub install --no-prompt confluentinc/kafka-connect-jdbc:10.7.6 \
+        --component-dir /opt/kafka/plugins --worker-configs /dev/null && \
+    rm -rf /tmp/confluent-hub-client.tar.gz /tmp/bin
 
 # PostgreSQL JDBC 드라이버 다운로드
 RUN curl -L https://jdbc.postgresql.org/download/postgresql-42.7.1.jar \
@@ -186,15 +190,27 @@ metadata:
     strimzi.io/cluster: kafka-connect
 spec:
   class: io.confluent.connect.jdbc.JdbcSourceConnector
-  tasksMax: 2
+  tasksMax: 1
   config:
+    # DB Connection
     connection.url: jdbc:postgresql://postgresql.postgresql:5432/kafka_connect_src
     connection.user: postgres
     connection.password: root123!
+    connection.attempts: 3
+    connection.backoff.ms: 10000
+
+    # Replication
     mode: incrementing
-    incrementing.column.name: id
     table.whitelist: users
     topic.prefix: postgresql-
+    incrementing.column.name: id
+
+    # Error Handling
+    errors.retry.timeout: 300000 
+    errors.retry.delay.max.ms: 60000     
+    errors.tolerance: all                   
+    errors.log.enable: true      
+    errors.log.include.messages: true    
 ```
 
 ```yaml
@@ -207,15 +223,30 @@ metadata:
     strimzi.io/cluster: kafka-connect
 spec:
   class: io.confluent.connect.jdbc.JdbcSinkConnector
-  tasksMax: 2
+  tasksMax: 1
   config:
+    # DB Connection
     connection.url: jdbc:postgresql://postgresql.postgresql:5432/kafka_connect_dst
     connection.user: postgres
     connection.password: root123!
+    connection.attempts: 3
+    connection.backoff.ms: 10000
+
+    # Replication
     topics: postgresql-users
-    insert.mode: insert
+    table.name.format: users
+    insert.mode: upsert
+    pk.mode: record_value
+    pk.fields: id
     auto.create: true
     auto.evolve: true
+
+    # Error Handling
+    errors.retry.timeout: 300000 
+    errors.retry.delay.max.ms: 60000     
+    errors.tolerance: all                   
+    errors.log.enable: true      
+    errors.log.include.messages: true    
 ```
 
 ### 2.4. PostgreSQL 데이터베이스 구성
@@ -336,10 +367,8 @@ kubectl exec -it postgresql-0 -n postgresql -- psql -U postgres -d kafka_connect
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
-    age INTEGER,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    email VARCHAR(100) NOT NULL,
+    age INTEGER
 );"
 
 # Source 데이터베이스에 샘플 데이터 삽입
