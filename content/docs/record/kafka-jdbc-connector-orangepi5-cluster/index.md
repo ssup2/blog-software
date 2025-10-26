@@ -1,6 +1,5 @@
 ---
 title: Kafka JDBC Connector 실습 / Orange Pi 5 Max Cluster 환경
-draft: true
 ---
 
 Kafka JDBC Connector를 활용해서 PostgreSQL의 Table 복제를 수행한다.
@@ -288,7 +287,7 @@ kubectl apply -f postgresql-src-connector.yaml
 
 [File 4]의 Kafka Connector Manifest를 적용하여, Kafka Connect가 `kafka_connect_src` Source Database의 `users` Table의 Data를 Kafka로 보내도록 만든다.
 
-```yaml
+```yaml {caption="[File 5] postgresql-dst-connector.yaml Manifest" linenos=table}
 apiVersion: kafka.strimzi.io/v1beta2
 kind: KafkaConnector
 metadata:
@@ -324,27 +323,15 @@ spec:
     errors.log.include.messages: true    
 ```
 
-### 2.5. 실습 명령어
+```shell
+kubectl apply -f postgresql-dst-connector.yaml
+```
 
-#### 2.5.1. PostgreSQL 데이터베이스 및 테이블 생성
+[File 5]의 Kafka Connector Manifest를 적용하여, Kafka Connect가 Kafka의 `postgresql-users` Topic에서 가져온 Data를 `kafka_connect_dst` Destination Database의 `users` Table에 저장하도록 만든다.
+
+### 2.5. Data 복제 실습
 
 ```bash
-# Source 데이터베이스 생성
-kubectl exec -it postgresql-0 -n postgresql -- psql -U postgres -c "CREATE DATABASE kafka_connect_src;"
-
-# Destination 데이터베이스 생성
-kubectl exec -it postgresql-0 -n postgresql -- psql -U postgres -c "CREATE DATABASE kafka_connect_dst;"
-
-# Source 데이터베이스에 users 테이블 생성
-kubectl exec -it postgresql-0 -n postgresql -- psql -U postgres -d kafka_connect_src -c "
-CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL,
-    age INTEGER
-);"
-
-# Source 데이터베이스에 샘플 데이터 삽입
 kubectl exec -it postgresql-0 -n postgresql -- psql -U postgres -d kafka_connect_src -c "
 INSERT INTO users (name, email, age) VALUES 
 ('John Doe', 'john@ssup2.com', 30),
@@ -353,6 +340,23 @@ INSERT INTO users (name, email, age) VALUES
 ('Alice Brown', 'alice@ssup2.com', 28),
 ('Charlie Wilson', 'charlie@ssup2.com', 32);"
 ```
+
+`kafka_connect_src` Source Database의 `users` Table에 Data를 추가한다.
+
+```bash
+kubectl exec -it postgresql-0 -n postgresql -- psql -U postgres -d kafka_connect_dst -c "SELECT * FROM users;"
+```
+```bash
+id |      name      |       email       | age 
+----+----------------+-------------------+-----
+  1 | John Doe       | john@ssup2.com    |  30
+  2 | Jane Smith     | jane@ssup2.com    |  25
+  3 | Bob Johnson    | bob@ssup2.com     |  35
+  4 | Alice Brown    | alice@ssup2.com   |  28
+  5 | Charlie Wilson | charlie@ssup2.com |  32
+```
+
+`kafka_connect_dst` Destination Database의 `users` Table에 Data가 저장되었는지 확인한다.
 
 ## 3. 참고
 
