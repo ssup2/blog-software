@@ -12,27 +12,25 @@ Spark를 통해서 MinIO에 저장되어 있는 데이터를 변환하는 환경
 
 {{< figure caption="[Figure 1] Spark Job 구동 환경" src="images/environment.png" width="1000px" >}}
 
-* MinIO : Data를 저장하는 Object Storage 역할을 수행한다. South Korea Weather Data를 저장한다.
-  * South Korea Weather Data : CSV, Parquet, Iceberg 3가지 Data Format으로 날짜별로 Partition되어 저장된다.
-* Spark Job : MinIO에 저장되어 있는 South Korea Weather Data의 평균 데이터를 계산하고 다시 MinIO에 저장한다.
-* Spark History Server : Spark Job의 실행 로그를 확인하기 위한 역할을 수행한다.
-* Volcano Scheduler : Spark Job 실행을 위한 Pod들을 대상으로 Gang Scheduling을 수행한다.
-* Trino : MinIO에 저장되어 있는 Data를 조회하는 역할을 수행한다.
-* Hive Metastore : Data의 Schema 정보를 관리하며, Trino에게 Schema 정보를 제공한다.
-* Dagster : Data Pipeline을 실행하여 MinIO에 South Korea Weather Data의 저장 형태를 CSV에서 Parquet으로, Parquet에서 Iceberg로 변환한다.
-* DBeaver : Trino에 접속하고 Query를 수행하기 위한 Client 역할을 수행한다.
+* **MinIO** : Data를 저장하는 Object Storage 역할을 수행한다. South Korea Weather Data를 저장한다.
+  * **South Korea Weather Data** : CSV, Parquet, Iceberg 3가지 Data Format으로 날짜별로 Partition되어 저장된다.
+* **Spark Job** : MinIO에 저장되어 있는 South Korea Weather Data의 평균 데이터를 계산하고 다시 MinIO에 저장한다.
+* **Spark History Server** : Spark Job의 실행 로그를 확인하기 위한 역할을 수행한다.
+* **Volcano Scheduler** : Spark Job 실행을 위한 Pod들을 대상으로 Gang Scheduling을 수행한다.
+* **Trino** : MinIO에 저장되어 있는 Data를 조회하는 역할을 수행한다.
+* **Hive Metastore** : Data의 Schema 정보를 관리하며, Trino에게 Schema 정보를 제공한다.
+* **Dagster** : Data Pipeline을 실행하여 MinIO에 South Korea Weather Data의 저장 형태를 CSV에서 Parquet으로, Parquet에서 Iceberg로 변환한다.
+* **DBeaver** : Trino에 접속하고 Query를 수행하기 위한 Client 역할을 수행한다.
 
 전체 실슴 환경 구성은 다음의 링크를 참조한다.
 
-* Orange Pi 5 Max 기반 Kubernetes Cluster 구축 : [https://ssup2.github.io/blog-software/docs/record/orangepi5-cluster-build/](https://ssup2.github.io/blog-software/docs/record/orangepi5-cluster-build/)
-* Orange Pi 5 Max 기반 Kubernetes Data Platform 구축 : [https://ssup2.github.io/blog-software/docs/record/kubernetes-data-platform-orangepi5-cluster/](https://ssup2.github.io/blog-software/docs/record/kubernetes-data-platform-orangepi5-cluster/)
-* Trino MinIO Query 수행 : [https://ssup2.github.io/blog-software/docs/record/trino-minio-query-orangepi5-cluster/](https://ssup2.github.io/blog-software/docs/record/trino-minio-query-orangepi5-cluster/)
-* Dagster Workflow Github : [https://github.com/ssup2-playground/k8s-data-platform_dagster-workflows](https://github.com/ssup2-playground/k8s-data-platform_dagster-workflows)
-* Spark Job Github : [https://github.com/ssup2-playground/k8s-data-platform_spark-jobs](https://github.com/ssup2-playground/k8s-data-platform_spark-jobs)
+* **Orange Pi 5 Max 기반 Kubernetes Cluster 구축** : [https://ssup2.github.io/blog-software/docs/record/orangepi5-cluster-build/](https://ssup2.github.io/blog-software/docs/record/orangepi5-cluster-build/)
+* **Orange Pi 5 Max 기반 Kubernetes Data Platform 구축** : [https://ssup2.github.io/blog-software/docs/record/kubernetes-data-platform-orangepi5-cluster/](https://ssup2.github.io/blog-software/docs/record/kubernetes-data-platform-orangepi5-cluster/)
+* **Trino MinIO Query 수행** : [https://ssup2.github.io/blog-software/docs/record/trino-minio-query-orangepi5-cluster/](https://ssup2.github.io/blog-software/docs/record/trino-minio-query-orangepi5-cluster/)
+* **Dagster Workflow Github** : [https://github.com/ssup2-playground/k8s-data-platform_dagster-workflows](https://github.com/ssup2-playground/k8s-data-platform_dagster-workflows)
+* **Spark Job Github** : [https://github.com/ssup2-playground/k8s-data-platform_spark-jobs](https://github.com/ssup2-playground/k8s-data-platform_spark-jobs)
 
 ### 1.2. Spark Local 설치
-
-Java 17 Version을 설치한다.
 
 ```shell
 brew install openjdk@17
@@ -44,7 +42,7 @@ export JAVA_HOME="/opt/homebrew/opt/openjdk@17"
 export PATH="$JAVA_HOME/bin:$PATH"
 ```
 
-Spark를 설치한다.
+Java 17 Version을 설치한다.
 
 ```shell
 SPARK_VERSION="3.5.5"
@@ -60,9 +58,9 @@ export SPARK_HOME=~/spark
 export PATH="$SPARK_HOME/bin:$PATH"
 ```
 
-### 1.3. Hive Metastore Table 생성
+Spark를 설치한다.
 
-평균 날씨 데이터를 저장하는 Parquet Table을 생성한다.
+### 1.3. Hive Metastore Table 생성
 
 ```sql
 CREATE TABLE hive.weather.southkorea_daily_average_parquet (
@@ -96,7 +94,7 @@ WITH (
 CALL hive.system.sync_partition_metadata('weather', 'southkorea_daily_average_parquet', 'ADD');
 ```
 
-평균 날씨 데이터를 저장하는 Iceberg Parquet Table을 생성한다.
+평균 날씨 데이터를 저장하는 Parquet Table을 생성한다.
 
 ```sql
 CREATE TABLE iceberg.weather.southkorea_daily_average_iceberg_parquet (
@@ -128,11 +126,11 @@ WITH (
 );
 ```
 
+평균 날씨 데이터를 저장하는 Iceberg Parquet Table을 생성한다.
+
 ## 2. Local 환경에서 실행
 
 ### 2.1. Spark Application Download
-
-Spark Application을 Download 하고, Python 패키지를 설치한다.
 
 ```shell
 git clone https://github.com/ssup2-playground/k8s-data-platform_spark-jobs.git
@@ -140,18 +138,18 @@ cd k8s-data-platform_spark-jobs
 uv sync
 ```
 
-### 2.2. Spark Master와 Worker 실행
+Spark Application을 Download 하고, Python 패키지를 설치한다.
 
-Shell을 2개 실행하여 각각 Master와 Worker로 설정하여 Local Spark Cluster를 구성한다.
+### 2.2. Spark Master와 Worker 실행
 
 ```shell
 spark-class org.apache.spark.deploy.master.Master -h localhost
 spark-class org.apache.spark.deploy.worker.Worker spark://localhost:7077
 ```
 
-### 2.3. Spark Job 실행
+Shell을 2개 실행하여 각각 Master와 Worker로 설정하여 Local Spark Cluster를 구성한다.
 
-구성한 Local Spark Cluster에 `daily-parquet` 데이터를 활용하여 평균 날씨 데이터를 계산하는 Spark Job을 실행한다. Package에 `hadoop-aws`와 `aws-java-sdk-bundle`을 추가하여 MinIO에 접근할 수 있도록 설정한다.
+### 2.3. Spark Job 실행
 
 ```shell
 export PYTHONPATH=$(pwd)/src
@@ -164,14 +162,14 @@ spark-submit \
   --date 20250601
 ```
 
-Trino의 Partition 정보를 갱신하고, Query를 수행하여 평균 날씨 데이터를 확인한다.
+구성한 Local Spark Cluster에 `daily-parquet` 데이터를 활용하여 평균 날씨 데이터를 계산하는 Spark Job을 실행한다. Package에 `hadoop-aws`와 `aws-java-sdk-bundle`을 추가하여 MinIO에 접근할 수 있도록 설정한다.
 
 ```sql
 CALL hive.system.sync_partition_metadata('weather', 'southkorea_daily_average_parquet', 'ADD');
 SELECT * FROM hive.weather.southkorea_daily_average_parquet;
 ```
 
-구성한 Local Spark Cluster에 `daily-iceberg-parquet` 데이터를 활용하여 평균 날씨 데이터를 계산하는 Spark Job을 실행한다. Package에 `iceberg-spark3-runtime`을 추가하여 Iceberg Table을 활용한다.
+Trino의 Partition 정보를 갱신하고, Query를 수행하여 평균 날씨 데이터를 확인한다.
 
 ```shell
 export PYTHONPATH=$(pwd)/src
@@ -184,19 +182,19 @@ spark-submit \
   --date 20250601
 ```
 
-Query를 수행하여 평균 날씨 데이터를 확인한다.
+구성한 Local Spark Cluster에 `daily-iceberg-parquet` 데이터를 활용하여 평균 날씨 데이터를 계산하는 Spark Job을 실행한다. Package에 `iceberg-spark3-runtime`을 추가하여 Iceberg Table을 활용한다.
 
 ```sql
 SELECT * FROM iceberg.weather.southkorea_daily_average_iceberg_parquet;
 ```
 
+Query를 수행하여 평균 날씨 데이터를 확인한다.
+
 ## 3. Kubernetes 환경에서 실행
 
 ### 3.1. Service Account 설정
 
-Spark Job 실행을 위한 권한을 부여하기 위해서 Service Account를 설정한다.
-
-```yaml
+```yaml {caption="[File 1] spark-job-service-account.yaml Manifest"}
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -228,6 +226,12 @@ roleRef:
   name: spark-role
   apiGroup: rbac.authorization.k8s.io
 ```
+
+```shell
+kubectl apply -f spark-job-service-account.yaml
+```
+
+Spark Job 실행을 위한 권한을 부여하기 위해서 [File 1]의 Service Account Manifest 적용한다.
 
 ### 3.2. Spark Job 실행
 
@@ -262,7 +266,7 @@ spark-submit \
   --date 20250601
 ```
 
-Kubernetes Cluster에 `daily-iceberg-parquet` 데이터를 활용하여 평균 날씨 데이터를 계산하는 Spark Job을 실행한다.
+Kubernetes Cluster에서 `daily-parquet` 데이터를 활용하여 평균 날씨 데이터를 계산하는 Spark Job을 실행한다.
 
 ```shell
 spark-submit \
@@ -289,19 +293,19 @@ spark-submit \
   --date 20250601
 ```
 
-Spark History Server를 확인하여 Spark Job의 실행 로그를 확인한다. [Figure 2]는 Spark History Server에서 Spark Job의 실행 로그를 확인하는 모습이다.
+Kubernetes Cluster에 `daily-iceberg-parquet` 데이터를 활용하여 평균 날씨 데이터를 계산하는 Spark Job을 실행한다.
 
 {{< figure caption="[Figure 2] Spark History Server" src="images/spark-history-server.png" width="1000px" >}}
 
-Prometheus에서 `executors` Metric을 확인한다. [Figure 3]는 Prometheus에서 `executors` Metric을 확인하는 모습이다.
+Spark History Server를 확인하여 Spark Job의 실행 로그를 확인한다. [Figure 2]는 Spark History Server에서 Spark Job의 실행 로그를 확인하는 모습이다.
 
 {{< figure caption="[Figure 3] Prometheus" src="images/spark-prometheus-metric.png" width="550px" >}}
 
+Prometheus에서 `executors` Metric을 확인한다. [Figure 3]는 Prometheus에서 `executors` Metric을 확인하는 모습이다.
+
 ### 3.4. Spark Operator를 이용한 Spark Job 실행
 
-Spark Operator를 통해서 `daily-parquet` 데이터를 활용하여 평균 날씨 데이터를 계산하는 Spark Job을 실행한다.
-
-```yaml
+```yaml {caption="[File 2] spark-job-spark-application-parquet.yaml Manifest"}
 apiVersion: "sparkoperator.k8s.io/v1beta2"
 kind: SparkApplication
 metadata:
@@ -356,9 +360,13 @@ spec:
   timeToLiveSeconds: 300
 ```
 
-Spark Operator를 통해서 `daily-iceberg-parquet` 데이터를 활용하여 평균 날씨 데이터를 계산하는 Spark Job을 실행한다.
+```shell
+kubectl apply -f spark-job-spark-application-parquet.yaml
+```
 
-```yaml
+[File 2]의 Spark Application Manifest을 적용하여 `daily-parquet` 데이터를 활용하여 평균 날씨 데이터를 계산하는 Spark Job을 실행한다.
+
+```yaml {caption="[File 3] spark-job-spark-application-iceberg-parquet.yaml Manifest"}
 apiVersion: "sparkoperator.k8s.io/v1beta2"
 kind: SparkApplication
 metadata:
@@ -414,11 +422,15 @@ spec:
   timeToLiveSeconds: 300
 ```
 
+```shell
+kubectl apply -f spark-job-spark-application-iceberg-parquet.yaml
+```
+
+[File 3]의 Spark Application Manifest을 적용하여 `daily-iceberg-parquet` 데이터를 활용하여 평균 날씨 데이터를 계산하는 Spark Job을 실행한다.
+
 ### 3.5. Dagster Pipeline에서 Spark Job 실행
 
-Dagster에서는 공식적으로 `spark-submit` CLI를 활용한 Spark Job 제출을 지원하지 않는다. 따라서 `execute_spark_job` 함수를 정의하여 Dagster Pipeline에서 Spark Job을 실행한다.
-
-```python
+```python {caption="[File 4] execute_spark_job() Function"}
 def execute_spark_job(context, job_name_prefix: str, job_script: str, job_args: list, 
                      spark_image: str, jars: list, timeout_seconds: int = 600):
     """Execute a Spark job on Kubernetes"""
@@ -568,7 +580,7 @@ def execute_spark_job(context, job_name_prefix: str, job_script: str, job_args: 
         raise Exception(f"Pod '{spark_job_name}' timed out")
 ```
 
-`execute_spark_job` 함수의 주요 특징은 다음과 같다.
+Dagster에서는 공식적으로 `spark-submit` CLI를 활용한 Spark Job 제출을 지원하지 않는다. 따라서 [File 4]의 `execute_spark_job` 함수를 정의하여 Dagster Pipeline에서 Spark Job을 실행한다. `execute_spark_job` 함수의 주요 특징은 다음과 같다.
 
 * 별도의 `spark-submit` CLI Pod를 생성하고, 생성한 Pod에서 `spark-submit` CLI를 활용하여 Client Mode로 Spark Job을 실행한다. 즉 `spark-submit` Pod에서 Driver가 실행된다.
 * `spark-submit` CLI Pod의 Owner는 Dagster의 Run 또는 Op/Asset의 Pod이다. 따라서 Dagster Pipeline이 종료되어 Dagster Pod가 제거되면 `spark-submit` CLI Pod도 자연스럽게 제거되고, 이후에 Executor Pod가 자동으로 제거된다.
@@ -577,8 +589,6 @@ def execute_spark_job(context, job_name_prefix: str, job_script: str, job_args: 
 ## 4. Kubernetes 환경에서 Volcano Scheduler와 함께 실행
 
 ### 4.1. Volcano Scheduler Queue 설정
-
-Spark Job을 위한 Volcano Scheduler의 Queue를 설정한다.
 
 ```yaml
 apiVersion: scheduling.volcano.sh/v1beta1
@@ -593,12 +603,9 @@ spec:
     memory: 20Gi
 ```
 
-### 4.2. PodGroup 설정
+Spark Job을 위한 Volcano Scheduler의 Queue를 설정한다.
 
-PodGroup 파일을 생성하여 Spark Job Container Image의 `/app/configs/volcano.yaml`에 복사한다. 주요 설정은 다음과 같다.
-* `queue` : 사용할 Queue 이름을 지정한다. 위에서 생성한 Queue 이름을 지정한다.
-* `minMember` : 최소 실행 가능한 Pod 수를 지정한다. Driver Pod는 단독으로 동작하기 때문에 반드시 `1`로 설정한다.
-* `minResources` : 최소 실행 가능한 Pod의 자원을 지정한다. Driver Pod와 Executor Pod의 Resource의 총합을 지정한다. Volcano Scheduler는 `minResources`를 만큼 Resource가 할당 가능할때 Spark Job Pod를 Scheduling한다.
+### 4.2. PodGroup 설정
 
 ```yaml
 apiVersion: scheduling.volcano.sh/v1beta1
@@ -611,9 +618,14 @@ spec:
     memory: "4Gi"
 ```
 
-### 4.2. Spark Job 실행
+PodGroup 파일을 생성하여 Spark Job Container Image의 `/app/configs/volcano.yaml`에 복사한다. 주요 설정은 다음과 같다.
 
-Volcano Scheduler와 함께 `daily-parquet` 데이터를 활용하여 평균 날께 데이터를 계산하는 Spark Job을 실행한다. `spark.kubernetes.scheduler.name`에 `volcano`를 지정하고, `spark.kubernetes.scheduler.volcano.podGroupTemplateFile`에 `/app/configs/volcano.yaml`을 지정한다.
+* `queue` : 사용할 Queue 이름을 지정한다. 위에서 생성한 Queue 이름을 지정한다.
+* `minMember` : 최소 실행 가능한 Pod 수를 지정한다. Driver Pod는 단독으로 동작하기 때문에 반드시 `1`로 설정한다.
+* `minResources` : 최소 실행 가능한 Pod의 자원을 지정한다. Driver Pod와 Executor Pod의 Resource의 총합을 지정한다. Volcano Scheduler는 `minResources`를 만큼 Resource가 할당 가능할때 Spark Job Pod를 Scheduling한다.
+
+
+### 4.2. Spark Job 실행
 
 ```shell
 spark-submit \
@@ -642,7 +654,7 @@ spark-submit \
   --date 20250601
 ```
 
-Kubernetes Cluster에 `daily-iceberg-parquet` 데이터를 활용하여 평균 날씨 데이터를 계산하는 Spark Job을 실행한다.
+Volcano Scheduler와 함께 `daily-parquet` 데이터를 활용하여 평균 날께 데이터를 계산하는 Spark Job을 실행한다. `spark.kubernetes.scheduler.name`에 `volcano`를 지정하고, `spark.kubernetes.scheduler.volcano.podGroupTemplateFile`에 `/app/configs/volcano.yaml`을 지정한다.
 
 ```shell
 spark-submit \
@@ -670,6 +682,8 @@ spark-submit \
   local:///app/jobs/weather_southkorea_daily_average_iceberg_parquet.py \
   --date 20250601
 ```
+
+Kubernetes Cluster에 `daily-iceberg-parquet` 데이터를 활용하여 평균 날씨 데이터를 계산하는 Spark Job을 실행한다.
 
 ## 5. 참고
 

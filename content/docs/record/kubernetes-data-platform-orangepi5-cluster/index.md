@@ -21,19 +21,17 @@ Kubernetes Cluster 구성에 이용되는 OrangePi 5 Max 7대의 사양과, 설�
 
 ## 3. Hostname, Network 설정
 
-`root` User로 진입한다.
-
 ```shell
 sudo -s
 ```
 
-[Figure 1]를 참조하여 Hostname을 설정한다.
+`root` User로 진입한다.
 
 ```shell
 hostnamectl set-hostname dp-master
 ```
 
-[Figure 1]를 참조하여 고정 IP를 설정한다.
+[Figure 1]를 참조하여 Hostname을 설정한다.
 
 ```shell
 nmcli con mod "Wired connection 1" \
@@ -43,9 +41,9 @@ nmcli con mod "Wired connection 1" \
   ipv4.method "manual"
 ```
 
-## 4. contaienrd, kubelet 설치
+[Figure 1]를 참조하여 고정 IP를 설정한다.
 
-Kernel Module을 로드한다.
+## 4. contaienrd, kubelet 설치
 
 ```shell
 cat <<EOF | tee /etc/modules-load.d/k8s.conf
@@ -57,7 +55,7 @@ modprobe overlay
 modprobe br_netfilter
 ```
 
-sysctl Parameter를 설정한다.
+Kernel Module을 로드한다.
 
 ```shell
 cat <<EOF | tee /etc/sysctl.d/k8s.conf
@@ -69,14 +67,14 @@ EOF
 sysctl --system
 ```
 
-swap Memory를 비활성화 한다.
+sysctl Parameter를 설정한다.
 
 ```
 swapoff -a
 sed -i 's/^ENABLED=true/ENABLED=false/' "/etc/default/orangepi-zram-config"
 ```
 
-containerd를 설치한다.
+swap Memory를 비활성화 한다.
 
 ```shell
 apt update
@@ -87,7 +85,7 @@ sed -i 's/SystemdCgroup = false/SystemdCgroup = true/g' /etc/containerd/config.t
 systemctl restart containerd.service
 ```
 
-kubelet, kubeadm을 설치한다.
+containerd를 설치한다.
 
 ```shell
 apt-get update
@@ -100,17 +98,17 @@ apt-get update
 apt-get install -y kubelet=1.30.8-1.1 kubeadm=1.30.8-1.1
 ```
 
+kubelet, kubeadm을 설치한다.
+
 ## 5. Kubernetes Cluster 구성
 
 ### 5.1. Master Node
-
-kubectl을 설치한다.
 
 ```shell
 apt-get install -y kubectl=1.30.8-1.1
 ```
 
-Kubernetes Cluster를 구성한다.
+kubectl을 설치한다.
 
 ```shell
 cat <<EOF | tee kubeadm-config.yaml
@@ -129,7 +127,7 @@ kubeadm init --config kubeadm-config.yaml
 kubeadm join 192.168.1.71:6443 --token wweo8m.uyl4fgnc7j21orw5 --discovery-token-ca-cert-hash sha256:599058d317291ab64e0cc8166fe0f9cff5defcc606623fdb2c1aa1b2e2a93604
 ```
 
-kubectl config 파일을 복사한다.
+Kubernetes Cluster를 구성한다.
 
 ```shell
 mkdir -p $HOME/.kube
@@ -137,42 +135,42 @@ sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 ```
 
-core-dns가 Master Node에만 동작하도록 설정한다.
+kubectl config 파일을 복사한다.
 
 ```shell
 kubectl patch deployment coredns -n kube-system -p '{"spec":{"template":{"spec":{"nodeSelector":{"node-group.dp.ssup2":"master"}}}}}'
 ```
 
-flannel CNI Plugin을 설치한다.
+core-dns가 Master Node에만 동작하도록 설정한다.
 
 ```shell
 kubectl apply -f https://github.com/flannel-io/flannel/releases/download/v0.26.2/kube-flannel.yml
 ```
 
-NFS Server에서 이용할 Directory를 생성한다.
+flannel CNI Plugin을 설치한다.
 
 ```shell
 mkdir -p /srv/nfs
 ```
 
-### 5.2. Worker Nodes
+NFS Server에서 이용할 Directory를 생성한다.
 
-각각의 Node에 SSH로 접근하여 Kubernetes Cluster에 Join 한다.
+### 5.2. Worker Nodes
 
 ```shell
 kubeadm join 192.168.1.71:6443 --token wweo8m.uyl4fgnc7j21orw5 --discovery-token-ca-cert-hash sha256:599058d317291ab64e0cc8166fe0f9cff5defcc606623fdb2c1aa1b2e2a93604
 ```
 
-## 6. Label 설정
+각각의 Node에 SSH로 접근하여 Kubernetes Cluster에 Join 한다.
 
-Master Node의 Master Label과 Taint를 제거한다.
+## 6. Label 설정
 
 ```shell
 kubectl taint node dp-master node-role.kubernetes.io/control-plane:NoSchedule-
 kubectl label node dp-master node-role.kubernetes.io/control-plane-
 ```
 
-각각의 Node에 Role을 부여한다.
+Master Node의 Master Label과 Taint를 제거한다.
 
 ```shell
 kubectl label node dp-master node-role.kubernetes.io/master=""
@@ -192,7 +190,7 @@ kubectl label node dp-worker-5 node-group.dp.ssup2="worker"
 kubectl label node dp-worker-6 node-group.dp.ssup2="worker"
 ```
 
-Node의 Role을 확인한다.
+각각의 Node에 Role을 부여한다.
 
 ```shell
 kubectl get nodes
@@ -208,16 +206,16 @@ dp-worker-5   Ready    worker   73s     v1.30.8
 dp-worker-6   Ready    worker   70s     v1.30.8
 ```
 
-## 7. Data Component 설치
+Node의 Role을 확인한다.
 
-Helm Chart를 Download 한다.
+## 7. Data Component 설치
 
 ```shell
 git clone https://github.com/ssup2-playground/k8s-data-platform_helm-charts.git
 cd k8s-data-platform_helm-charts
 ```
 
-Helm Chart를 통해서 Data Component를 설치한다.
+Helm Chart를 Download 한다.
 
 ```shell
 # Metrics Server
@@ -321,6 +319,8 @@ helm upgrade --install --create-namespace --namespace jupyterhub jupyterhub jupy
 # MLflow (ID/PW: root/root123!)
 helm upgrade --install --create-namespace --namespace mlflow mlflow mlflow -f mlflow/values.yaml
 ```
+
+Helm Chart를 통해서 Data Component를 설치한다.
 
 ## 8. 참조
 

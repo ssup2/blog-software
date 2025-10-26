@@ -1,13 +1,42 @@
 ---
-title: Kafka Connect JDBC Connector 실습 / Orange Pi 5 Max Cluster 환경
+title: Kafka JDBC Connector 실습 / Orange Pi 5 Max Cluster 환경
 draft: true
 ---
 
-Kafka Connect와 JDBC Connector를 활용해서 PostgreSQL의 Table 복제를 수행한다.
+Kafka JDBC Connector를 활용해서 PostgreSQL의 Table 복제를 수행한다.
 
 ## 1. 실습 환경 구성
 
-```
+### 1.1. 전체 실습 환경
+
+{{< figure caption="[Figure 1] Kafka Connect JDBC Connector 실습 환경" src="images/environment.png" width="900px" >}}
+
+Spark를 통해서 MinIO에 저장되어 있는 데이터를 변환하는 환경은 [Figure 1]과 같다.
+
+* **PostgreSQL** : Data 저장소 역할을 수행한다.
+  * **kafka_connect_src Database, Users Table** : Data를 가져오기 위한 Source Table.
+  * **kafka_connect_dst Database, Users Table** : 가져온 Data를 저장하는 Destination Table.
+
+* **Kafka Connect** : Kafka와 PostgreSQL 사이에서 Data를 주고받는 역할을 수행한다.
+  * **postgresql-src-connector Source JDBC Connector** : Source Table의 Data를 Kafka로 보내는 JDBC Connector.
+  * **postgresql-dst-connector Destination JDBC Connector** : Kafka에서 가져온 Data를 Destination Table에 저장하는 JDBC Connector.
+
+* **Kafka** : JDBC Connector를 통해서 Data를 주고받는 역할을 수행한다. 또한 Kafka Connect의 작업 상태를 저장하는 역할도 수행한다.
+  * **postgresql-users Topic** : 복제된 Data를 저장하는 Topic.
+  * **connect-cluster-configs** : Kafka Connect의 설정 정보를 저장하는 Topic.
+  * **connect-cluster-offsets** : Kafka Connect의 오프셋 정보를 저장하는 Topic.
+  * **connect-cluster-status** : Kafka Connect의 상태 정보를 저장하는 Topic.
+
+* **Strimzi Kafka Operator** : Kafka와 Kafka Connect를 관리하는 Operator.
+
+전체 실슴 환경 구성은 다음의 링크를 참조한다.
+
+* **Orange Pi 5 Max 기반 Kubernetes Cluster 구축** : [https://ssup2.github.io/blog-software/docs/record/orangepi5-cluster-build/](https://ssup2.github.io/blog-software/docs/record/orangepi5-cluster-build/)
+* **Orange Pi 5 Max 기반 Kubernetes Data Platform 구축** : [https://ssup2.github.io/blog-software/docs/record/kubernetes-data-platform-orangepi5-cluster/](https://ssup2.github.io/blog-software/docs/record/kubernetes-data-platform-orangepi5-cluster/)
+
+### 1.2. Kafka Connect JDBC Connector 이미지 생성
+
+```Dockerfile {caption="[File 1] Dockerfile", linenos=table}
 FROM quay.io/strimzi/kafka:0.48.0-kafka-4.1.0
 
 USER root
@@ -36,109 +65,20 @@ USER 1001
 ENV KAFKA_CONNECT_PLUGIN_PATH=/opt/kafka/plugins
 ```
 
+[File 1]의 Dockerfile을 생성하여 Kafka JDBC Connector Container Image를 생성한다.
+
+```shell
+docker build -t ghcr.io/ssup2-playground/k8s-data-platform_kafka-connect-jdbc-connector:0.48.0-kafka-4.1.0 .
+docker push ghcr.io/ssup2-playground/k8s-data-platform_kafka-connect-jdbc-connector:0.48.0-kafka-4.1.0
+```
+ Container Image Build 및 Push를 수행한다.
+
+
 ## 2. Kafka, Kafka Connect 구성
 
-### 2.1. Kafka Cluster 구성
+### 2.1. Kafka Connect 구성
 
-```yaml
-apiVersion: kafka.strimzi.io/v1beta2
-kind: KafkaNodePool
-metadata:
-  name: broker
-  namespace: kafka
-  labels:
-    strimzi.io/cluster: kafka
-spec:
-  replicas: 1
-  roles:
-    - controller
-    - broker
-  storage:
-    type: jbod
-    volumes:
-      - id: 0
-        type: persistent-claim
-        size: 8Gi
-        deleteClaim: false
-        kraftMetadata: shared
-  template:
-    pod:
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: node-group.dp.ssup2
-                operator: In
-                values:
-                - worker
----
-apiVersion: kafka.strimzi.io/v1beta2
-kind: Kafka
-metadata:
-  name: kafka
-  namespace: kafka
-spec:
-  kafka:
-    version: 4.1.0
-    metadataVersion: 4.1-IV1
-    listeners:
-    - name: sasl
-      port: 9092
-      type: loadbalancer
-      tls: false
-      authentication:
-        type: scram-sha-512
-    config:
-      offsets.topic.replication.factor: 1
-      transaction.state.log.replication.factor: 1
-      transaction.state.log.min.isr: 1
-      default.replication.factor: 1
-      min.insync.replicas: 1
-  entityOperator:
-    template:
-      pod:
-        affinity:
-          nodeAffinity:
-            requiredDuringSchedulingIgnoredDuringExecution:
-              nodeSelectorTerms:
-              - matchExpressions:
-                - key: node-group.dp.ssup2
-                  operator: In
-                  values:
-                  - worker
-    topicOperator: {}
-    userOperator: {}
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: kafka-user-credentials
-  namespace: kafka
-type: Opaque
-data:
-  password: dXNlcg==
----
-apiVersion: kafka.strimzi.io/v1beta2
-kind: KafkaUser
-metadata:
-  name: user
-  namespace: kafka
-  labels:
-    strimzi.io/cluster: kafka
-spec:
-  authentication:
-    type: scram-sha-512
-    password:
-      valueFrom:
-        secretKeyRef:
-          name: kafka-user-credentials
-          key: password
-```
-
-### 2.2. Kafka Connect 구성
-
-```yaml
+```yaml {caption="[File 2] kafka-connect.yaml" linenos=table}
 apiVersion: kafka.strimzi.io/v1beta2
 kind: KafkaConnect
 metadata:
@@ -176,6 +116,12 @@ spec:
                 operator: In
                 values:
                 - worker
+```
+
+[File 2]의 Kafka Connect Manifest를 생성 및 적용하여, Strimzi Kafka Operator가 Kafka Connect를 구성하도록 만든다.
+
+```shell
+kubectl apply -f kafka-connect.yaml
 ```
 
 ### 2.3. Kafka Connect JDBC Connector 구성

@@ -6,11 +6,11 @@ Kubernetes 설치를 위한 Jetson Nano Cluster를 구축한다.
 
 ## 1. Jetson Nano Cluster
 
-{{< figure caption="[사진 1] Jetson Nano Cluster 구성 사진" src="images/cluster-photo.png" width="900px" >}}
+{{< figure caption="[Photo 1] Jetson Nano Cluster 구성 사진" src="images/cluster-photo.png" width="900px" >}}
 
 {{< figure caption="[Figure 1] Jetson Nano Cluster 구성" src="images/cluster.png" width="900px" >}}
 
-[사진 1]은 Jetson Nano Cluster의 실제 모습을 보여주고 있다. [Figure 1]은 Jetson Nano Cluster를 나타내고 있다. 모든 Jetson Nano의 Spec은 동일하다. Jetson Nano Cluster의 주요 사양은 아래와 같다.
+[Photo 1]은 Jetson Nano Cluster의 실제 모습을 보여주고 있다. [Figure 1]은 Jetson Nano Cluster를 나타내고 있다. 모든 Jetson Nano의 Spec은 동일하다. Jetson Nano Cluster의 주요 사양은 아래와 같다.
 
 * Jetson Nano * 4
   * CPU : 4Core ARM Cortex-A57
