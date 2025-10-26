@@ -38,3 +38,4 @@ When too much Trace information is transmitted to Storage and Storage receives t
 * [https://github.com/jaegertracing/spark-dependencies](https://github.com/jaegertracing/spark-dependencies)
 * [https://github.com/jaegertracing/jaeger-analytics-flink](https://github.com/jaegertracing/jaeger-analytics-flink)
 * [https://github.com/opentracing/specification/blob/master/specification.md](https://github.com/opentracing/specification/blob/master/specification.md)
+

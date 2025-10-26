@@ -291,3 +291,4 @@ Only the `southkorea_hourly_iceberg_parquet` table using Iceberg Parquet format 
 * Trino Qeury : [https://mjs1995.tistory.com/307](https://mjs1995.tistory.com/307)
 * Trino Partition : [https://passwd.tistory.com/entry/TrinoHive-%ED%8C%8C%ED%8B%B0%EC%85%98-%EC%A0%80%EC%9E%A5%EB%90%9C-S3-%EB%8D%B0%EC%9D%B4%ED%84%B0-%EC%BF%BC%EB%A6%AC](https://passwd.tistory.com/entry/TrinoHive-%ED%8C%8C%ED%8B%B0%EC%85%98-%EC%A0%80%EC%9E%A5%EB%90%9C-S3-%EB%8D%B0%EC%9D%B4%ED%84%B0-%EC%BF%BC%EB%A6%AC)
 * Trino Partition : [https://dev-soonieee.tistory.com/entry/TrinoHive-Jdbc-Partition-%EA%B2%80%EC%83%89](https://dev-soonieee.tistory.com/entry/TrinoHive-Jdbc-Partition-%EA%B2%80%EC%83%89)
+
