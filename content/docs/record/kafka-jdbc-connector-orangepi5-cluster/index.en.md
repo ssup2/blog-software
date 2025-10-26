@@ -191,12 +191,40 @@ spec:
           name: kafka-user-credentials
           key: password
 ```
-
 ```shell
 kubectl apply -f kafka.yaml
 ```
 
 Apply the Kafka Manifest in [File 2] to have the Strimzi Kafka Operator configure Kafka.
+
+```shell
+kubectl -n kafka describe kafkas.kafka.strimzi.io kafka
+```
+```yaml
+...
+Status:
+  Cluster Id:  QOiVXQFRRi28NTysxHFxtg
+  Conditions:
+    Last Transition Time:  2025-10-19T12:20:21.050192635Z
+    Status:                True
+    Type:                  Ready
+  Kafka Metadata State:    KRaft
+  Kafka Metadata Version:  4.1-IV1
+  Kafka Node Pools:
+    Name:         broker
+  Kafka Version:  4.1.0
+  Listeners:
+    Addresses:
+      Host:                          192.168.1.95
+      Port:                          9092
+    Bootstrap Servers:               192.168.1.95:9092
+    Name:                            sasl
+  Observed Generation:               6
+  Operator Last Successful Version:  0.48.0
+Events:                              <none>
+```
+
+Verify that Kafka has been configured successfully.
 
 ### 2.1. Kafka Connect Configuration
 
@@ -239,12 +267,46 @@ spec:
                 values:
                 - worker
 ```
-
 ```shell
 kubectl apply -f kafka-connect.yaml
 ```
 
 Apply the Kafka Connect Manifest in [File 3] to have the Strimzi Kafka Operator configure Kafka Connect. Version `4.1.0` is specified, and `connect-cluster` Group ID is used. Kafka Connect's work status is stored through `connect-cluster-offsets`, `connect-cluster-configs`, and `connect-cluster-status` topics.
+
+```shell
+kubectl -n kafka describe kafkaconnects.kafka.strimzi.io kafka-connect
+```
+```yaml
+...
+Status:
+  Conditions:
+    Last Transition Time:  2025-10-25T12:44:04.383503469Z
+    Status:                True
+    Type:                  Ready
+  Connector Plugins:
+    Class:              io.confluent.connect.jdbc.JdbcSinkConnector
+    Type:               sink
+    Version:            10.8.4
+    Class:              io.confluent.connect.jdbc.JdbcSourceConnector
+    Type:               source
+    Version:            10.8.4
+    Class:              org.apache.kafka.connect.mirror.MirrorCheckpointConnector
+    Type:               source
+    Version:            4.1.0
+    Class:              org.apache.kafka.connect.mirror.MirrorHeartbeatConnector
+    Type:               source
+    Version:            4.1.0
+    Class:              org.apache.kafka.connect.mirror.MirrorSourceConnector
+    Type:               source
+    Version:            4.1.0
+  Label Selector:       strimzi.io/cluster=kafka-connect,strimzi.io/name=kafka-connect-connect,strimzi.io/kind=KafkaConnect
+  Observed Generation:  1
+  Replicas:             1
+  URL:                  http://kafka-connect-connect-api.kafka.svc:8083
+Events:                 <none>                            <none>
+```
+
+Verify that Kafka Connect has been configured successfully.
 
 ### 2.3. Kafka Connect JDBC Connector Configuration
 
@@ -280,12 +342,39 @@ spec:
     errors.log.enable: true      
     errors.log.include.messages: true    
 ```
-
 ```shell
 kubectl apply -f postgresql-src-connector.yaml
 ```
 
 Apply the Kafka Connector Manifest in [File 4] to have Kafka Connect send data from the `users` table in the `kafka_connect_src` source database to Kafka.
+
+```shell
+kubectl -n kafka describe kafkaconnectors.kafka.strimzi.io postgresql-src-connector
+```
+```yaml
+Status:
+  Conditions:
+    Last Transition Time:  2025-10-25T12:45:17.126493757Z
+    Status:                True
+    Type:                  Ready
+  Connector Status:
+    Connector:
+      State:      RUNNING
+      Version:    10.8.4
+      worker_id:  kafka-connect-connect-0.kafka-connect-connect.kafka.svc:8083
+    Name:         postgresql-src-connector
+    Tasks:
+      Id:               0
+      State:            RUNNING
+      Version:          10.8.4
+      worker_id:        kafka-connect-connect-0.kafka-connect-connect.kafka.svc:8083
+    Type:               source
+  Observed Generation:  1
+  Tasks Max:            1
+  Topics:
+    postgresql-users
+Events:  <none>
+```
 
 ```yaml {caption="[File 5] postgresql-dst-connector.yaml Manifest" linenos=table}
 apiVersion: kafka.strimzi.io/v1beta2
@@ -322,12 +411,39 @@ spec:
     errors.log.enable: true      
     errors.log.include.messages: true    
 ```
-
 ```shell
 kubectl apply -f postgresql-dst-connector.yaml
 ```
 
 Apply the Kafka Connector Manifest in [File 5] to have Kafka Connect store data retrieved from the `postgresql-users` topic in Kafka into the `users` table in the `kafka_connect_dst` destination database.
+
+```shell
+kubectl -n kafka describe kafkaconnectors.kafka.strimzi.io postgresql-dst-connector
+```
+```yaml
+Status:
+  Conditions:
+    Last Transition Time:  2025-10-25T12:47:17.436842640Z
+    Status:                True
+    Type:                  Ready
+  Connector Status:
+    Connector:
+      State:      RUNNING
+      Version:    10.8.4
+      worker_id:  kafka-connect-connect-0.kafka-connect-connect.kafka.svc:8083
+    Name:         postgresql-dst-connector
+    Tasks:
+      Id:               0
+      State:            RUNNING
+      Version:          10.8.4
+      worker_id:        kafka-connect-connect-0.kafka-connect-connect.kafka.svc:8083
+    Type:               sink
+  Observed Generation:  1
+  Tasks Max:            1
+  Topics:
+    postgresql-users
+Events:  <none>
+```
 
 ### 2.5. Data Replication Practice
 

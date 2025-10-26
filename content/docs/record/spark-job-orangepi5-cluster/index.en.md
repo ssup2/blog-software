@@ -226,7 +226,6 @@ roleRef:
   name: spark-role
   apiGroup: rbac.authorization.k8s.io
 ```
-
 ```shell
 kubectl apply -f spark-job-service-account.yaml
 ```
@@ -359,7 +358,6 @@ spec:
   # TTL for automatic cleanup (1 hour after completion)
   timeToLiveSeconds: 300
 ```
-
 ```shell
 kubectl apply -f spark-job-spark-application-parquet.yaml
 ```
@@ -421,7 +419,6 @@ spec:
   # TTL for automatic cleanup (1 hour after completion)
   timeToLiveSeconds: 300
 ```
-
 ```shell
 kubectl apply -f spark-job-spark-application-iceberg-parquet.yaml
 ```
