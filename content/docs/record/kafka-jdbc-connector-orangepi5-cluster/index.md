@@ -29,7 +29,7 @@ Spark를 통해서 MinIO에 저장되어 있는 데이터를 변환하는 환경
 
 * **Strimzi Kafka Operator** : Kafka와 Kafka Connect를 관리하는 Operator.
 
-전체 실슴 환경 구성은 다음의 링크를 참조한다.
+전체 실습 환경 구성은 다음의 링크를 참조한다.
 
 * **Orange Pi 5 Max 기반 Kubernetes Cluster 구축** : [https://ssup2.github.io/blog-software/docs/record/orangepi5-cluster-build/](https://ssup2.github.io/blog-software/docs/record/orangepi5-cluster-build/)
 * **Orange Pi 5 Max 기반 Kubernetes Data Platform 구축** : [https://ssup2.github.io/blog-software/docs/record/kubernetes-data-platform-orangepi5-cluster/](https://ssup2.github.io/blog-software/docs/record/kubernetes-data-platform-orangepi5-cluster/)
@@ -41,10 +41,10 @@ FROM quay.io/strimzi/kafka:0.48.0-kafka-4.1.0
 
 USER root
 
-# Kafka Connect 플러그인 디렉토리 생성
+# Create Kafka Connect Plugin Directory
 RUN mkdir -p /opt/kafka/plugins/jdbc-connector
 
-# Confluent Hub CLI 설치 및 JDBC Connector 설치
+# Install Confluent Hub CLI and JDBC Connector
 RUN curl -L --http1.1 https://client.hub.confluent.io/confluent-hub-client-latest.tar.gz \
     -o /tmp/confluent-hub-client.tar.gz && \
     tar -xzf /tmp/confluent-hub-client.tar.gz -C /tmp && \
@@ -52,33 +52,156 @@ RUN curl -L --http1.1 https://client.hub.confluent.io/confluent-hub-client-lates
         --component-dir /opt/kafka/plugins --worker-configs /dev/null && \
     rm -rf /tmp/confluent-hub-client.tar.gz /tmp/bin
 
-# PostgreSQL JDBC 드라이버 다운로드
+# Download PostgreSQL JDBC Driver
 RUN curl -L https://jdbc.postgresql.org/download/postgresql-42.7.1.jar \
     -o /opt/kafka/plugins/jdbc-connector/postgresql-42.7.1.jar
 
-# 권한 설정
+# Set Permissions
 RUN chown -R 1001:1001 /opt/kafka/plugins
 
 USER 1001
 
-# Kafka Connect 플러그인 경로 환경변수 설정
+# Kafka Connect Plugin Path Environment Variable
 ENV KAFKA_CONNECT_PLUGIN_PATH=/opt/kafka/plugins
 ```
-
-[File 1]의 Dockerfile을 생성하여 Kafka JDBC Connector Container Image를 생성한다.
 
 ```shell
 docker build -t ghcr.io/ssup2-playground/k8s-data-platform_kafka-connect-jdbc-connector:0.48.0-kafka-4.1.0 .
 docker push ghcr.io/ssup2-playground/k8s-data-platform_kafka-connect-jdbc-connector:0.48.0-kafka-4.1.0
 ```
- Container Image Build 및 Push를 수행한다.
 
+[File 1]의 Dockerfile을 활용하여 Kafka JDBC Connector가 포함된 Container Image를 Build 및 Push한다.
+
+### 1.3. PostgreSQL 구성
+
+```bash
+# Create Source Database
+kubectl exec -it postgresql-0 -n postgresql -- psql -U postgres -c "CREATE DATABASE kafka_connect_src;"
+
+# Create Destination Database
+kubectl exec -it postgresql-0 -n postgresql -- psql -U postgres -c "CREATE DATABASE kafka_connect_dst;"
+
+# Create users Table in Source Database
+kubectl exec -it postgresql-0 -n postgresql -- psql -U postgres -d kafka_connect_src -c "
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    age INTEGER
+);"
+```
+
+PostgreSQL에서 `kafka_connect_src` Source Database 및 `kafka_connect_dst` Destination Database를 생성하고, `kafka_connect_src` Source Database에 `users` Table을 생성한다.
 
 ## 2. Kafka, Kafka Connect 구성
 
+### 2.1. Kafka 구성
+
+```yaml {caption="[File 2] kafka.yaml Manifest" linenos=table}
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaNodePool
+metadata:
+  name: broker
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: kafka
+spec:
+  replicas: 1
+  roles:
+    - controller
+    - broker
+  storage:
+    type: jbod
+    volumes:
+      - id: 0
+        type: persistent-claim
+        size: 8Gi
+        deleteClaim: false
+        kraftMetadata: shared
+  template:
+    pod:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node-group.dp.ssup2
+                operator: In
+                values:
+                - worker
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: kafka
+spec:
+  kafka:
+    version: 4.1.0
+    metadataVersion: 4.1-IV1
+    listeners:
+    - name: sasl
+      port: 9092
+      type: loadbalancer
+      tls: false
+      authentication:
+        type: scram-sha-512
+    config:
+      offsets.topic.replication.factor: 1
+      transaction.state.log.replication.factor: 1
+      transaction.state.log.min.isr: 1
+      default.replication.factor: 1
+      min.insync.replicas: 1
+  entityOperator:
+    template:
+      pod:
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+              - matchExpressions:
+                - key: node-group.dp.ssup2
+                  operator: In
+                  values:
+                  - worker
+    topicOperator: {}
+    userOperator: {}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: kafka-user-credentials
+  namespace: kafka
+type: Opaque
+data:
+  password: dXNlcg==
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaUser
+metadata:
+  name: user
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: kafka
+spec:
+  authentication:
+    type: scram-sha-512
+    password:
+      valueFrom:
+        secretKeyRef:
+          name: kafka-user-credentials
+          key: password
+```
+
+```shell
+kubectl apply -f kafka.yaml
+```
+
+[File 2]의 Kafka Manifest를 적용하여, Strimzi Kafka Operator가 Kafka를 구성하도록 만든다.
+
 ### 2.1. Kafka Connect 구성
 
-```yaml {caption="[File 2] kafka-connect.yaml" linenos=table}
+```yaml {caption="[File 3] kafka-connect.yaml" linenos=table}
 apiVersion: kafka.strimzi.io/v1beta2
 kind: KafkaConnect
 metadata:
@@ -118,15 +241,15 @@ spec:
                 - worker
 ```
 
-[File 2]의 Kafka Connect Manifest를 생성 및 적용하여, Strimzi Kafka Operator가 Kafka Connect를 구성하도록 만든다.
-
 ```shell
 kubectl apply -f kafka-connect.yaml
 ```
 
+[File 3]의 Kafka Connect Manifest를 적용하여, Strimzi Kafka Operator가 Kafka Connect를 구성하도록 만든다. `4.1.0` Version을 명시하고 있고, `connect-cluster` Group ID를 사용한다. `connect-cluster-offsets`, `connect-cluster-configs`, `connect-cluster-status` Topic을 통해서 Kafka Connect의 작업 상태를 저장한다.
+
 ### 2.3. Kafka Connect JDBC Connector 구성
 
-```yaml
+```yaml {caption="[File 4] postgresql-src-connector.yaml Manifest" linenos=table}
 apiVersion: kafka.strimzi.io/v1beta2
 kind: KafkaConnector
 metadata:
@@ -158,6 +281,12 @@ spec:
     errors.log.enable: true      
     errors.log.include.messages: true    
 ```
+
+```shell
+kubectl apply -f postgresql-src-connector.yaml
+```
+
+[File 4]의 Kafka Connector Manifest를 적용하여, Kafka Connect가 `kafka_connect_src` Source Database의 `users` Table의 Data를 Kafka로 보내도록 만든다.
 
 ```yaml
 apiVersion: kafka.strimzi.io/v1beta2
@@ -195,108 +324,6 @@ spec:
     errors.log.include.messages: true    
 ```
 
-### 2.4. PostgreSQL 데이터베이스 구성
-
-```yaml
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: postgresql-init-script
-  namespace: kafka
-data:
-  init.sql: |
-    -- Source Database (kafka_connect_src)
-    CREATE DATABASE kafka_connect_src;
-    \c kafka_connect_src;
-    
-    CREATE TABLE users (
-        id SERIAL PRIMARY KEY,
-        name VARCHAR(100) NOT NULL,
-        email VARCHAR(100) UNIQUE NOT NULL,
-        age INTEGER,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-    
-    -- Sample data for source database
-    INSERT INTO users (name, email, age) VALUES 
-    ('John Doe', 'john@ssup2.com', 30),
-    ('Jane Smith', 'jane@ssup2.com', 25),
-    ('Bob Johnson', 'bob@ssup2.com', 35),
-    ('Alice Brown', 'alice@ssup2.com', 28),
-    ('Charlie Wilson', 'charlie@ssup2.com', 32);
-    
-    -- Destination Database (kafka_connect_dst)
-    CREATE DATABASE kafka_connect_dst;
-    \c kafka_connect_dst;
-    
-    -- Destination table will be auto-created by Kafka Connect Sink Connector
-    -- But we can create it manually for reference:
-    CREATE TABLE IF NOT EXISTS users (
-        id SERIAL PRIMARY KEY,
-        name VARCHAR(100) NOT NULL,
-        email VARCHAR(100) UNIQUE NOT NULL,
-        age INTEGER,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: postgresql
-  namespace: kafka
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: postgresql
-  template:
-    metadata:
-      labels:
-        app: postgresql
-    spec:
-      containers:
-      - name: postgresql
-        image: postgres:15
-        env:
-        - name: POSTGRES_DB
-          value: postgres
-        - name: POSTGRES_USER
-          value: postgres
-        - name: POSTGRES_PASSWORD
-          value: root123!
-        - name: PGDATA
-          value: /var/lib/postgresql/data/pgdata
-        ports:
-        - containerPort: 5432
-        volumeMounts:
-        - name: postgresql-storage
-          mountPath: /var/lib/postgresql/data
-        - name: init-script
-          mountPath: /docker-entrypoint-initdb.d
-      volumes:
-      - name: postgresql-storage
-        emptyDir: {}
-      - name: init-script
-        configMap:
-          name: postgresql-init-script
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: postgresql-service
-  namespace: kafka
-spec:
-  selector:
-    app: postgresql
-  ports:
-  - port: 5432
-    targetPort: 5432
-    protocol: TCP
-  type: ClusterIP
-```
-
 ### 2.5. 실습 명령어
 
 #### 2.5.1. PostgreSQL 데이터베이스 및 테이블 생성
@@ -325,74 +352,6 @@ INSERT INTO users (name, email, age) VALUES
 ('Bob Johnson', 'bob@ssup2.com', 35),
 ('Alice Brown', 'alice@ssup2.com', 28),
 ('Charlie Wilson', 'charlie@ssup2.com', 32);"
-
-# Destination 데이터베이스에 users 테이블 생성 (Sink Connector가 자동 생성하지만 참고용)
-kubectl exec -it postgresql-0 -n postgresql -- psql -U postgres -d kafka_connect_dst -c "
-CREATE TABLE IF NOT EXISTS users (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
-    age INTEGER,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);"
-```
-
-#### 2.5.2. PostgreSQL 연결 및 테이블 확인
-
-```bash
-# PostgreSQL Pod에 접속
-kubectl exec -it postgresql-0 -n postgresql -- psql -U postgres
-
-# Source 데이터베이스 확인
-\c kafka_connect_src
-\dt
-SELECT * FROM users;
-
-# Destination 데이터베이스 확인
-\c kafka_connect_dst
-\dt
-SELECT * FROM users;
-```
-
-#### 2.5.3. Kafka Connect 상태 확인
-
-```bash
-# Kafka Connect Pod 상태 확인
-kubectl get pods -n kafka | grep connect
-
-# Kafka Connect 로그 확인
-kubectl logs -f deployment/kafka-connect-connect -n kafka
-
-# Connector 상태 확인
-kubectl get kafkaconnector -n kafka
-kubectl describe kafkaconnector postgresql-src-connector -n kafka
-kubectl describe kafkaconnector postgresql-dst-connector -n kafka
-```
-
-#### 2.5.4. Kafka 토픽 확인
-
-```bash
-# Kafka 토픽 목록 확인
-kubectl exec -it kafka-kafka-0 -n kafka -- bin/kafka-topics.sh --bootstrap-server localhost:9092 --list
-
-# postgresql-users 토픽 메시지 확인
-kubectl exec -it kafka-kafka-0 -n kafka -- bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic postgresql-users --from-beginning
-```
-
-#### 2.5.5. 데이터 변경 테스트
-
-```bash
-# Source 데이터베이스에 새 사용자 추가
-kubectl exec -it postgresql-0 -n postgresql -- psql -U postgres -d kafka_connect_src -c "
-INSERT INTO users (name, email, age) VALUES 
-('Test User', 'test@ssup2.com', 27);
-"
-
-# Destination 데이터베이스에서 변경사항 확인
-kubectl exec -it postgresql-0 -n postgresql -- psql -U postgres -d kafka_connect_dst -c "
-SELECT * FROM users ORDER BY id;
-"
 ```
 
 ## 3. 참고
