@@ -7,21 +7,25 @@ Kafka Connect에 대해서 분석한다.
 
 ## 1. Kafka Connect
 
-{{< figure caption="[Figure 1] Kafka Connect" src="images/kafka-connect-architecture.png" width="900px" >}}
+{{< figure caption="[Figure 1] Kafka Connect" src="images/kafka-connect-architecture.png" width="1000px" >}}
 
 Kafka Connect는 Kafka를 기반으로 외부의 Data 저장소와 연동하여 Data Stream 구축을 도와주는 도구이다. [Figure 1]은 Kafka Connect의 Architecture를 나타내고 있으며 다음과 같은 구성요소로 이루어져 있다.
 
 * **Data Source** : Data Stream의 출발점이 되는 Data 저장소.
 * **Data Destination** : Data Stream의 도착점이 되는 Data 저장소.
-* **Kafka Cluster, Topic** : Data Stream을 저장하는 Kafka Cluster 내부의 Topic.
 * **Kafka Connect Cluster** : Data 저장소와 Kakfa 사이에서 Data Stream을 주고받는 Kafka Connect, Transform, Converter를 관리한다. **Rest API**를 통해서 원격에서 관리가 가능하다. 하나 또는 다수의 **Worker**로 구성되어 있다.
   * **Connector** : Data 저장소와 Converter 사이에서 실제로 Data Stream을 주고받는 역할을 수행한다. Data Source와 연동되는 Connector를 **Source Connector**, Data Destination와 연동되는 Connector를 **Destination Connector**라고 명칭한다.
   * **Converter** : Connector와 Kafka 사이에서 Data Format(JSON, Protobuf, Avro...)을 변환하는 역할을 수행한다.
   * **Transform** : Connector와 Converter 사이에서 간단한 Data 변환을 수행하는 역할을 수행한다. 필수 요소는 아니며, 선택적으로 사용할 수 있다.
+* **Kafka Cluster, Data Stream Topic** : Connector가 처리한 Data Stream을 저장하는 Kafka Topic.
+* **Kafka Cluster, Connect Topic** : 
+  * **Config** : Kafka Connect Cluster의 설정 정보를 저장하는 Topic.
+  * **Offset** : Kafka Connect Cluster이 Data Stream을 어디까지 처리했는지를 나타내는 오프셋 정보를 저장하는 Topic.
+  * **Status** : Kafka Connect Cluster의 상태 정보를 저장하는 Topic.
 
 ### 1.1. Worker
 
-{{< figure caption="[Figure 2] Kafka Connect Worker Standalone Mode" src="images/kafka-connect-worker-standalone.png" width="700px" >}}
+{{< figure caption="[Figure 2] Kafka Connect Worker Standalone Mode" src="images/kafka-connect-worker-standalone.png" width="550px" >}}
 
 Kafka Connect Cluster는 하나의 Worker로만 구성하는 **Standalone Mode**와 다수의 Worker로 구성하는 **Distributed Mode**로 구성될 수 있다. [Figure 2]는 **Standalone Mode**를 나타내고 있으며, Worker에서 동작하는 Connector, Converter, Transform도 같이 나타내고 있다. Connector는 다시 **Connector Instance**와 **Connector Task**로 구성되며, 다음의 역할을 수행한다.
 
@@ -36,7 +40,7 @@ Kafka Connect Cluster는 설정/상태 관련 정보를 저장하기 위헤 별�
 * **Offset** : Kafka Connect Cluster이 Data Stream을 어디까지 처리했는지를 나타내는 오프셋 정보를 저장하는 Topic.
 * **Status** : Kafka Connect Cluster의 상태 정보를 저장하는 Topic.
 
-{{< figure caption="[Figure 3] Kafka Connect Worker Distributed Mode" src="images/kafka-connect-worker-distributed.png" width="700px" >}}
+{{< figure caption="[Figure 3] Kafka Connect Worker Distributed Mode" src="images/kafka-connect-worker-distributed.png" width="550px" >}}
 
 Standalone Mode는 하나의 Worker로만 구성되어 있기 때문에 Scale-out이 불가능하며, 가용성이 떨어지는 단점을 가지고 있다. 따라서 일반적으로 Standalone Mode를 사용하는 경우는 개발 환경이나 테스트 환경에서 사용되며, Production 환경에서는 다수의 Worker로 구성된 **Distributed Mode**를 사용하는 것이 일반적이다. [Figure 3]는 **Distributed Mode**를 나타내고 있다.
 
@@ -46,28 +50,41 @@ Distributed Mode로 동작하는 경우에는 하나의 Worker는 **Leader Worke
 
 ### 1.2. Rest API
 
-Kafka Connect Cluster는 Rest API를 통해서 외부에서 제어가 가능하다. Kafka Connect Cluster에서 제공하는 대표적인 Rest API는 다음과 같다.
+{{< table caption="[Table 1] Kafka Connect Rest API" >}}
+| URI | Method | Description |
+| --- | --- | --- |
+| /connectors | GET | 현재 등록된 모든 Connector를 조회한다. |
+| /connectors | POST | 새로운 Connector를 등록한다. |
+| /connectors/{connector-name} | GET | 특정 Connector의 정보를 조회한다. |
+| /connectors/{connector-name} | PUT | 특정 Connector의 정보를 수정한다. |
+| /connectors/{connector-name} | DELETE | 특정 Connector를 삭제한다. |
+| /connectors/{connector-name}/config | GET | 특정 Connector의 설정 정보를 조회한다. |
+| /connectors/{connector-name}/config | PUT | 특정 Connector의 설정 정보를 수정한다. |
+| /connectors/{connector-name}/status | GET | 특정 Connector의 상태 정보를 조회한다. |
+| /connectors/{connector-name}/pause | GET | 특정 Connector를 일시 정지한다. |
+| /connectors/{connector-name}/resume | GET | 특정 Connector를 재시작한다. |
+| /connectors/{connector-name}/tasks | GET | 특정 Connector의 모든 Task 정보를 조회한다. |
+| /connectors/{connector-name}/tasks/{taskId} | GET | 특정 Connector의 특정 Task 정보를 조회한다. |
+| /connectors/{connector-name}/tasks/{taskId}/status | PUT | 특정 Connector의 특정 Task의 상태를 수정한다. |
+| /connectors/{connector-name}/tasks/{taskId}/restart | GET | 특정 Connector의 특정 Task를 재시작한다. |
+{{< /table >}}
 
-* **GET /connectors** : 현재 등록된 모든 Connector를 조회한다.
-* **GET /connectors/{connector-name}** : 특정 Connector의 정보를 조회한다.
-* **POST /connectors** : 새로운 Connector를 등록한다.
-* **PUT /connectors/{connector-name}** : 특정 Connector의 정보를 수정한다.
-* **DELETE /connectors/{connector-name}** : 특정 Connector를 삭제한다.
-* **GET /connectors/{connector-name}/config** : 특정 Connector의 설정 정보를 조회한다.
-* **PUT /connectors/{connector-name}/config** : 특정 Connector의 설정 정보를 수정한다.
-* **GET /connectors/{connector-name}/status** : 특정 Connector의 상태 정보를 조회한다.
-* **GET /connectors/{connector-name}/pause** : 특정 Connector를 일시 정지한다.
-* **GET /connectors/{connector-name}/resume** : 특정 Connector를 재시작한다.
-* **GET /connectors/{connector-name}/tasks** : 특정 Connector의 모든 Task 정보를 조회한다.
-* **GET /connectors/{connector-name}/tasks/{taskId}** : 특정 Connector의 특정 Task 정보를 조회한다.
-* **PUT /connectors/{connector-name}/tasks/{taskId}/status** : 특정 Connector의 특정 Task의 상태를 수정한다.
-* **GET /connectors/{connector-name}/tasks/{taskId}/restart** : 특정 Connector의 특정 Task를 재시작한다.
+Kafka Connect Cluster는 Rest API를 통해서 외부에서 제어가 가능하다. [Table 1]은 Kafka Connect Cluster에서 제공하는 Rest API를 나타내고 있다. Connector를 등록, 조회, 삭제, 정지, 재시작 하거나 Connector의 세부설정 또는 Task 상태 정보를 조회 할 수 있는걸 확인할 수 있다.
 
 Distributed Mode로 동작하는 경우에도 Leader Worker 뿐만 아니라 모든 Worker는 Rest API를 통해서 요청을 받을수 있다. 설정/상태 정보를 변경하지 않는 GET Rest API 요청을 받은 Worker는 받은 요청을 공유 Kafka Topic으로 부터 직접 설정/상태 정보를 받아 응답한다. 반면에 설정/상태 정보를 변경하는 POST, PUT, DELETE Rest API 요청을 받은 Worker는 받은 요청을 공유 Kafka Topic에 저장만 하는 역할을 수행한다. 이후에 Leader Worker는 공유 Kafka Topic을 통해서 변경된 설정/상태 정보를 얻어와 요청을 처리한다.
 
 ### 1.2. Converter
 
+Converter는 Connector와 Kafka 사이에서 Data Format을 변환하는 역할을 수행한다. [Figure 1]에서 확인할 수 있는것 처럼 Data Source 쪽의 Converter는 구조화된 Data를 Byte Array로 변환하는 역할을 수행하며, Data Destination 쪽의 Converter는 Byte Array를 구조화된 Data로 변환하는 역할을 수행한다. Converter는 Class Instance로 존재하며, 기본적으로 지원하는 Data Format과 관련 Class는 다음과 같다.
+
+* **org.apache.kafka.connect.json.JsonConverter** : JSON 형식의 변환을 지원.
+* **org.apache.kafka.connect.avro.AvroConverter** : Avro 형식의 변환을 지원.
+* **org.apache.kafka.connect.protobuf.ProtobufConverter** : Protobuf 형식의 변환을 지원.
+
 ### 1.3. Transform
+
+* **org.apache.kafka.connect.transforms.ExtractField$Value** : 특정 Field를 추출하여 변환을 지원.
+* **org.apache.kafka.connect.transforms.ExtractField$Key** : 특정 Field를 추출하여 변환을 지원.
 
 ### 1.4. Exactly Once
 
