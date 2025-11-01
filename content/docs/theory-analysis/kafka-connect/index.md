@@ -7,7 +7,7 @@ Kafka Connect에 대해서 분석한다.
 
 ## 1. Kafka Connect
 
-{{< figure caption="[Figure 1] Kafka Connect" src="images/kafka-connect-architecture.png" width="1000px" >}}
+{{< figure caption="[Figure 1] Kafka Connect" src="images/kafka-connect-architecture.png" width="900px" >}}
 
 Kafka Connect는 Kafka를 기반으로 외부의 Data 저장소와 연동하여 Data Stream 구축을 도와주는 도구이다. [Figure 1]은 Kafka Connect의 Architecture를 나타내고 있으며 다음과 같은 구성요소로 이루어져 있다.
 
@@ -15,30 +15,25 @@ Kafka Connect는 Kafka를 기반으로 외부의 Data 저장소와 연동하여 
 * **Data Destination** : Data Stream의 도착점이 되는 Data 저장소.
 * **Kafka Connect Cluster** : Data 저장소와 Kakfa 사이에서 Data Stream을 주고받는 Kafka Connect, Transform, Converter를 관리한다. **Rest API**를 통해서 원격에서 관리가 가능하다. 하나 또는 다수의 **Worker**로 구성되어 있다.
   * **Connector** : Data 저장소와 Converter 사이에서 실제로 Data Stream을 주고받는 역할을 수행한다. Data Source와 연동되는 Connector를 **Source Connector**, Data Destination와 연동되는 Connector를 **Destination Connector**라고 명칭한다.
-  * **Converter** : Connector와 Kafka 사이에서 Data Format(JSON, Protobuf, Avro...)을 변환하는 역할을 수행한다.
-  * **Transform** : Connector와 Converter 사이에서 간단한 Data 변환을 수행하는 역할을 수행한다. 필수 요소는 아니며, 선택적으로 사용할 수 있다.
+  * **Converter** : Connector와 Kafka 사이에서 Data 직렬화/역직렬화를 수행한다.
+  * **Transform** : Connector와 Converter 사이에서 간단한 Data 변환을 수행한다. 필수 요소는 아니며 선택적으로 사용할 수 있다.
 * **Kafka Cluster, Data Stream Topic** : Connector가 처리한 Data Stream을 저장하는 Kafka Topic.
-* **Kafka Cluster, Connect Topic** : 
+* **Kafka Cluster, Connect Topic** : Kafka Connect의 설정/상태 정보를 저장하는 Kafka Topic. Kafka Connect Cluster는 설정/상태 정보를 저장하기 위해서 Database를 이용하지 않으며 Kafka Topic을 이용하여 이를 구현하고 있다. 각 Kafka Connect Cluster는 별도의 Config, Offset, Status Kafka Topic을 이용한다.
   * **Config** : Kafka Connect Cluster의 설정 정보를 저장하는 Topic.
   * **Offset** : Kafka Connect Cluster이 Data Stream을 어디까지 처리했는지를 나타내는 오프셋 정보를 저장하는 Topic.
   * **Status** : Kafka Connect Cluster의 상태 정보를 저장하는 Topic.
+* **Kafka Schema Registry** : Converter에서 Data 직렬화/역직렬화를 수행하기 위해서 필요한 Schema 정보를 저장하고 관리한다.
 
 ### 1.1. Worker
 
 {{< figure caption="[Figure 2] Kafka Connect Worker Standalone Mode" src="images/kafka-connect-worker-standalone.png" width="550px" >}}
 
-Kafka Connect Cluster는 하나의 Worker로만 구성하는 **Standalone Mode**와 다수의 Worker로 구성하는 **Distributed Mode**로 구성될 수 있다. [Figure 2]는 **Standalone Mode**를 나타내고 있으며, Worker에서 동작하는 Connector, Converter, Transform도 같이 나타내고 있다. Connector는 다시 **Connector Instance**와 **Connector Task**로 구성되며, 다음의 역할을 수행한다.
+Kafka Connect Cluster는 하나 또는 다수의 **Worker**로 구성된다. 하나의 Worker로 구성되는 경우 **Standalone Mode**로 동작하며, 다수의 Worker로 구성되는 경우 **Distributed Mode**로 동작한다. [Figure 2]는 **Standalone Mode**를 나타내고 있으며, Worker에서 동작하는 Connector, Converter, Transform도 같이 나타내고 있다. Connector는 다시 **Connector Instance**와 **Connector Task**로 구성되며, 다음의 역할을 수행한다.
 
 * **Connector Instance** : 다수의 Data Stream을 설정에 따라서 다수의 Task로 분배하여 생성하는 역할을 수행한다. 또한 Data 저장소의 상태를 모니터링하며 이에 따라서 Task를 적절하게 재구성 하는 역할도 수행한다. 일반적으로 각 Task마다 고유의 **Partition**을 할당받아 별도의 Data Stream을 구성하여 동작하며, [Figure 2]에서도 Task마다 할당된 Partition을 확인할 수 있다.
 * **Connector Task** : Connector Instance에 의해서 생성되며, 실제로 Data 저장소에 접근하여 Data Stream을 주고받는 역할을 수행한다.
 
-Worker는 하나의 **Process**를 의미하며, Connector Instance와 Connector Task는 각각 별도의 **Thread**를 할당받아 동작한다. 따라서 하나의 Worker에서 다수의 Connector Instance와 Connector Task가 동작 가능하다. Converter와 Transform은 **Class Instance**이며 Connector Task에서 Method를 통해서 호출되어 동작한다.
-
-Kafka Connect Cluster는 설정/상태 관련 정보를 저장하기 위헤 별도의 Database를 사용하지 않고 Kafka Topic에 저장하여 이용한다. Kafka Connect Cluster가 이용하는 Kafka Topic은 다음과 같다.
-
-* **Config** : Kafka Connect Cluster의 설정 정보를 저장하는 Topic.
-* **Offset** : Kafka Connect Cluster이 Data Stream을 어디까지 처리했는지를 나타내는 오프셋 정보를 저장하는 Topic.
-* **Status** : Kafka Connect Cluster의 상태 정보를 저장하는 Topic.
+Worker는 하나의 **Process**로 동작하며, Connector Instance와 Connector Task는 각각 별도의 **Thread**를 할당받아 동작한다. 따라서 하나의 Worker에서 다수의 Connector Instance와 Connector Task가 동작 가능하다. Converter와 Transform은 **Class Instance**이며 Connector Task에서 Method를 통해서 호출되어 동작한다.
 
 {{< figure caption="[Figure 3] Kafka Connect Worker Distributed Mode" src="images/kafka-connect-worker-distributed.png" width="550px" >}}
 
@@ -75,11 +70,14 @@ Distributed Mode로 동작하는 경우에도 Leader Worker 뿐만 아니라 모
 
 ### 1.2. Converter
 
-Converter는 Connector와 Kafka 사이에서 Data Format을 변환하는 역할을 수행한다. [Figure 1]에서 확인할 수 있는것 처럼 Data Source 쪽의 Converter는 구조화된 Data를 Byte Array로 변환하는 역할을 수행하며, Data Destination 쪽의 Converter는 Byte Array를 구조화된 Data로 변환하는 역할을 수행한다. Converter는 Class Instance로 존재하며, 기본적으로 지원하는 Data Format과 관련 Class는 다음과 같다.
+Converter는 Connector와 Kafka 사이에서 Data 직렬화/역직렬화를 수행한다. [Figure 1]에서 확인할 수 있는것 처럼 Data Source 쪽의 Converter는 Serializer, 즉 구조화된 Data를 Byte Array로 변환하는 역할을 수행하며, Data Destination 쪽의 Converter는 Deserializer, 즉 Byte Array를 구조화된 Data로 변환하는 역할을 수행한다. Converter는 Class Instance로 존재하며, 기본적으로 지원하는 Data Format과 관련 Class는 다음과 같다. Kafka Schema Registry를 이용하는 Converter와 이용하지 않는 Converter로 구분할 수 있다.
 
-* **org.apache.kafka.connect.json.JsonConverter** : JSON 형식의 변환을 지원.
-* **org.apache.kafka.connect.avro.AvroConverter** : Avro 형식의 변환을 지원.
-* **org.apache.kafka.connect.protobuf.ProtobufConverter** : Protobuf 형식의 변환을 지원.
+| Converter | Kafka Schema Registry | Description |
+| --- | --- | --- |
+| io.confluent.connect.avro.AvroConverter | Yes | Avro 형식의 변환을 지원. |
+| io.confluent.connect.protobuf.ProtobufConverter | Yes | Protobuf 형식의 변환을 지원. |
+| io.confluent.connect.json.JsonSchemaConverter |
+| org.apache.kafka.connect.json.JsonConverter | No | JSON 형식의 변환을 지원. |
 
 ### 1.3. Transform
 
