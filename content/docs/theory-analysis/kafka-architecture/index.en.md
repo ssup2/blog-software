@@ -2,62 +2,99 @@
 title: Kafka Architecture
 ---
 
-This document analyzes the Architecture of Kafka, a distributed Message Queue.
+Analyze the architecture of Kafka, a distributed message queue.
 
 ## 1. Kafka Architecture
 
-Kafka is a distributed Message Queue based on Publish-subscribe. Kafka is often used as an **Event Bus** for Event Driven Architecture because it has the characteristic of storing received Messages for a specific period and allowing reprocessing. It also has the characteristic of high Message throughput, and based on this, it is also widely used as a **Data Stream Queue** for big data processing platforms like Storm.
+Kafka is a distributed message queue based on publish-subscribe. Kafka has the characteristic of storing received messages for a certain period and allowing reprocessing, so it is generally used as an **Event Bus** in Event Driven Architecture. It also has the characteristic of high message throughput, and based on this, it is also used as a **Data Stream Queue** for big data processing platforms like Storm.
 
-{{< figure caption="[Figure 1] Kafka Architecture" src="images/kafka-architecture.png" width="750px" >}}
+{{< figure caption="[Figure 1] Kafka Architecture" src="images/kafka-architecture.png" width="1000px" >}}
 
-[Figure 1] shows the components of Kafka.
+[Figure 1] shows the components of Kafka along with the process of delivering messages in Kafka. When a **Producer** sends (Publishes) a message to a specific **Topic**, all **Consumers** of **Consumer Groups** that subscribe to that Topic check for the existence of messages in that Topic, and if there is a message, they fetch the message. The roles of each component are as follows.
 
-* **Kafka Broker**: This is the core Server of Kafka that receives, manages, and transmits Messages. Kafka Brokers generally operate as a Cluster on multiple Nodes for Load Balancing and HA (High Availability).
-* **Zookeeper**: It identifies the operational status of each Kafka Broker that forms the Cluster and delivers status information to Producers and Consumers. Zookeeper also serves as a storage that stores information necessary for Message management.
-* **Topic**: This is the unit for managing Messages. Topics are divided into smaller units called **Partitions**, and Kafka increases Message throughput by using multiple Partitions.
-* **Producer**: This refers to an App that sends (**Publishes**) Messages to Topics.
-* **Consumer**: This refers to an App that receives (**Subscribes**) Messages from Topics. Consumers check for the existence of Messages through **Polling method** using Poll functions, and fetch Messages when they exist.
-* **Consumer Group**: As the name suggests, it groups multiple Consumers, and Kafka increases Consumer availability and Message throughput using Consumer Groups.
+* **Kafka Broker** : The core server of Kafka that receives, manages, and sends messages. Kafka Brokers generally operate as a **Kafka Cluster** on multiple nodes for load balancing and HA (High Availability).
+* **Zookeeper** : Performs the role of a highly available storage for storing metadata of Kafka Cluster. Like Kafka Brokers, it operates as a cluster on multiple nodes. From Kafka version 2.8 onwards, it supports **KRaft Mode** where Kafka Brokers operating based on the Raft algorithm perform the storage role themselves. When operating in KRaft Mode, Zookeeper is not used separately.
+* **Topic** : Unit for managing messages. Topics are divided into smaller units called **Partitions**, and Kafka increases message throughput using multiple Partitions. Partitions are composed of a collection of **Records**, where Record means the message unit defined in Kafka.
+* **Producer** : App that sends (**Publishes**) messages to Topics.
+* **Consumer** : App that receives (**Subscribes**) messages from Topics. Consumers check for the existence of messages through Poll functions in a **Polling manner**, and if there is a message, they fetch it. That is, messages are delivered from Topics to Consumers, but the entity that fetches messages is the Consumer.
+* **Consumer Group** : As the name implies, it performs the role of grouping multiple Consumers, and Kafka uses Consumer Groups to increase the availability and message throughput of Consumers.
 
-[Figure 1] also shows the process of delivering Messages in Kafka. When a Producer sends (Publishes) a Message to a specific Topic, the Kafka Cluster sends the Message received from the Producer to all Consumer Groups that are subscribing to that Topic. In [Figure 1], since `Consumer Group B` and `Consumer Group C` are subscribing to `Topic B`, the Kafka Broker delivers the Message sent by `Producer A` to `Topic B` to `Consumer Group B` and `Consumer Group C`.
+### 1.1. Record
 
-### 1.1. Consumer Group
+### 1.2. Consumer Group
 
-Consumer Groups bundle multiple Consumers to allow multiple Consumers to process one Topic simultaneously. In the first figure, Consumer Group C is subscribing to Topic C. Since Consumer Group C has 2 Consumers, Messages from Topic C can be processed in parallel by 2 Consumers. However, to increase the efficiency of Consumer Groups, the number of Partitions of the Topic that the Consumer Group subscribes to is important.
+Consumer Group groups multiple Consumers so that multiple Consumers can process one Topic simultaneously, increasing the availability and message throughput of Consumers. In [Figure 1], you can see that `Consumer Group A` has one Consumer, `Consumer Group B` has 2 Consumers, and `Consumer Group C` has 3 Consumers.
 
-{{< figure caption="[Figure 2] Relationship between Partition and Consumer Group" src="images/kafka-partition-consumer.png" width="750px" >}}
+{{< figure caption="[Figure 3] Kafka Architecture with Wrong Consumer Group" src="images/kafka-architecture-wrong-consumer-group.png" width="1000px" >}}
 
-[Figure 2] shows the relationship diagram according to the number of Partitions in the same Topic and the number of Consumers in the same Consumer Group. Partition and Consumer have an N:1 relationship. Consumers in the same Consumer Group cannot use one Partition simultaneously. In other words, if there are more Consumers than Partitions, there will be Consumers that do not process Messages. Therefore, when using Consumer Groups, the number of Partitions of the Topic must also be considered together.
+However, having more Consumers does not necessarily increase throughput, and an appropriate number of Partitions for Topics is also important. In [Figure 1], since the number of Consumers matches the number of Partitions, all Consumers can process messages efficiently, but as in [Figure 3], when the number of Partitions and Consumers differ, all Consumers cannot process messages efficiently.
 
-Each Consumer Group has a **Consumer Leader** that manages the Consumers of the Consumer Group. Also, the Consumer Leader performs the task of mapping Consumers and Partitions in cooperation with the Kafka Broker. Consumer and Partition mapping is performed when various Events occur, such as when some Consumers of the Consumer Group die, when Partitions are added, or when Consumers are added to the Consumer Group.
+Partitions and Consumers must have an **N:1** relationship. Therefore, as with `Consumer Group B`, when the number of Partitions is less than the number of Consumers, idle Consumers occur. On the other hand, as with `Consumer Group A` or `Consumer Group C`, when the number of Partitions is greater than the number of Consumers, there is no problem with operation, but some Consumers process more messages, causing throughput asymmetry. For this reason, it is best to set the number of Partitions and Consumers to be exactly the same.
 
-### 1.2. Partition, Offset
+### 1.3. Partition, Offset
 
-{{< figure caption="[Figure 3] Kafka Partition" src="images/kafka-partition.png" width="750px" >}}
+{{< figure caption="[Figure 4] Kafka Partition" src="images/kafka-partition.png" width="1000px" >}}
 
-**Partition** is a unit for distributing one Topic to multiple Kafka Brokers within the Kafka Cluster to increase Message throughput through parallel processing, and it serves as a Queue that stores Messages sequentially. [Figure 3] shows in detail the Partition that interacts with Producers and Consumers. Messages sent by Producers are stored sequentially at the end of the Partition. At this time, the Message ID increases sequentially like an Array Index. This Message ID is called **Offset** in Kafka.
+Partition is a unit for distributing one Topic to multiple Kafka Brokers within a Kafka Cluster for parallel processing to increase message throughput, and also performs the role of a Queue that stores messages sequentially. Each Topic can have a different number of Partitions. [Figure 4] shows Partitions interacting with Producers and Consumers. You can see that `Topic A` is composed of one Partition operating on one Broker, and `Topic B` is composed of 3 Partitions operating on multiple Brokers.
 
-Separately from Producers, Consumers start from the front of the Partition and read Messages sequentially while increasing the **Consumer Offset**. Here, Consumer Offset refers to the Offset of the last Message in the Partition that the Consumer has completed processing. Therefore, Consumer Offset is stored by the Kafka Broker but is changed by Consumer requests. Consumer Offset is stored in the Kafka Broker for each Partition and Consumer Group. In [Figure 2], for `Partition 0` of `Topic B`, the Consumer Offset of `Consumer Group B` is `6`, and the Consumer Offset of `Consumer Group C` is `4`.
+Producer converts messages to be sent into **Records** and stores them sequentially at the end of the Partition. At this time, the ID of the Record increases sequentially like an Array's Index. This ID of the Record is called **Offset** in Kafka. Separately from Producers, Consumers start from the beginning of the Partition and read Records sequentially while increasing the **Consumer Offset**. Here, Consumer Offset means the Offset of the last Record in the Partition that the Consumer has finished processing. Consumer Offset is stored in Kafka Broker for each Partition and Consumer Group. For example, in [Figure 4], for `Partition 0` of `Topic A`, the Consumer Offset of `Consumer Group B` is `6`, and the Consumer Offset of `Consumer Group B` is `4`.
 
-The number of Partitions can be set differently for each Topic. Generally, each Partition is placed on different Kafka Brokers to process Messages in parallel. In [Figure 2], since `Topic C` consists of 3 Partitions, each Partition is distributed to 3 different Kafka Brokers. Since `Topic C` uses 3 Kafka Brokers, it can process Messages up to 3 times faster than `Topic B` which uses only one Topic. However, using 3 Partitions means dividing Messages into 3 Queues for storage, so the order of Messages sent by Producers and the order of Messages received by Consumers may differ. `Topic B` maintains Message order because it uses only one Partition.
+When multiple Partitions exist in a Topic, if there is no Key in the Record being sent, Producer selects the Partition to deliver the Record using **Round-robin** by default. In this case, the order of Records is not guaranteed, but the advantage is that Records are evenly distributed across multiple Partitions. On the other hand, if a Key exists in the Record, it is determined which Partition to store it in based on the Key. Therefore, order guarantee is possible based on Key, but the problem of Records concentrating on specific Partitions may occur.
 
-When a Topic has multiple Partitions, Producers basically select the Partition to deliver Messages using the **Round-robin** method. If a different Partition selection algorithm is needed, Producer developers can develop and apply Partition selection algorithms directly through the Interface provided by Kafka. For Consumers, there are **Sync method** that delivers the changed Consumer Offset to the Kafka Broker each time a Message is processed, and **Async method** that processes multiple Messages at once and delivers only the Offset of the last Message to the Kafka Broker. Generally, Async method is used to increase Message throughput.
+Partitions exist on **Disk**, not in Memory, for Record retention. Disk generally has lower Read/Write performance compared to Memory, and especially, Random Read/Write performance is much lower for Disk compared to Memory. However, for Sequential Read/Write, Disk performance does not significantly lag behind Memory performance, so Kafka is designed to use Sequential Read/Write as much as possible when using Partitions.
 
-Partitions exist on **Disk** rather than Memory for Message preservation. Disks generally have lower Read/Write performance compared to Memory, and especially Random Read/Write performance is much lower for Disks compared to Memory. However, for Sequential Read/Write, Disk performance does not significantly drop compared to Memory performance, so Kafka is designed to use Sequential Read/Write as much as possible when using Partitions. Also, Kafka allows Messages in the Kernel's Disk Cache (Page Cache) to be copied directly to the Kernel's Socket Buffer without going through Kafka, minimizing Copy Overhead that occurs when delivering Messages to Consumers through the Network. Partitions are not actually stored as a single file on Disk but are divided and stored in units called **Segments**. The default size of a Segment is 1GB.
+Also, Kafka is designed so that Records in the Kernel's Disk Cache (Page Cache) are directly copied to the Kernel's Socket Buffer without going through Kafka, minimizing Copy Overhead that occurs when delivering Records to Consumers through the Network. Partitions are not actually stored on Disk as a single file, but are divided and stored in units called **Segments**. The default size of a Segment is 1GB.
 
-### 1.3. ACK
+### 1.4. ACK
 
-Kafka provides ACK-related Options for Producers. Producers can not only check whether their sent Messages have been properly delivered to Brokers using ACK but also minimize Message loss. It provides 3 Options: `0`, `1`, and `all`. Each Producer can set different ACK Options.
+Kafka provides ACK-related options for Producers. Producers can use ACK to check whether the Records they sent were properly delivered to Brokers, as well as minimize Record loss. It provides three options: `0`, `1`, and `all`. Each Producer can set a different ACK option.
 
-* `0`: Producers do not check ACK.
-* `1`: Producers wait for ACK. Here, ACK means that the Message has been delivered to only one Kafka Broker. Therefore, if the Kafka Broker that received the Message from the Producer dies before copying the Message to other Kafka Brokers according to Replica settings, Message loss may occur. This is the default setting.
-* `all` (-1): Producers wait for ACK. Here, ACK means that the Message has been copied to multiple Kafka Brokers as much as the set Replicas. Therefore, even if the Kafka Broker that received the Message from the Producer dies, the Message is maintained if the Kafka Broker that has the copied Message is alive.
+* `0` : Producer does not check for ACK.
+* `1` : Producer waits for ACK. Here, ACK means that the Record has been delivered to only one Kafka Broker. Therefore, if the Kafka Broker that received the Record from the Producer dies before copying the Record to another Kafka Broker according to Replica settings, Record loss can occur. This is the default setting.
+* `all (-1)` : Producer waits for ACK. Here, ACK means that the Record has been copied to as many Kafka Brokers as the configured Replicas. Therefore, even if the Kafka Broker that received the Record from the Producer dies, the Record is maintained if Kafka Brokers that have the copied Record are alive.
 
-Kafka does not provide separate ACK Options for Consumers. As mentioned above, Consumers deliver the Offset of processed Messages to the Kafka Broker. In other words, **the Offset of Messages delivered by Consumers serves as ACK to the Kafka Broker**. Generally, Apps that perform Consumer roles use the Auto Commit function (`enable.auto.commit=true`) of the Consumer Library to deliver the Offset of received Messages to the Kafka Broker at specific intervals without App intervention, or use a method of directly delivering the Offset after completing Message processing in the App.
+Kafka does not provide separate ACK options for Consumers. As mentioned above, Consumers deliver the Offset of Records that have been processed to Kafka Broker. That is, **the Offset of Records delivered by Consumers performs the role of ACK to Kafka Broker**. Generally, Apps performing the Consumer role use the Auto Commit feature (`enable.auto.commit=true`) of the Consumer Library to deliver the Offset of received Records to Kafka Broker at certain intervals without App intervention, or directly deliver the Offset after completing Record processing in the App.
 
-### 1.4. Message Retention
+### 1.5. Record Retention
 
-Kafka preserves Messages stored in Partitions according to certain criteria, which is called **Message Retention** policy in Kafka. The Message Retention policy first has a method of preserving only Messages within a specific period. If the period is set to 7 days, Messages are preserved for 7 days after arriving at Kafka, and preservation is not guaranteed after that. Second, there is a method of preserving so that the Partition size does not exceed a specific capacity. If the Partition becomes larger than the set capacity due to Message Write, it maintains the Partition capacity by deleting Messages from the front of the Partition.
+Kafka preserves Records stored in Partitions according to certain criteria, which is expressed as **Record Retention** policy in Kafka. The Record Retention policy first includes a method of preserving only Records within a specific period. If the period is set to 7 days, Records are preserved in Kafka for 7 days after arrival, and preservation is not guaranteed after that. The second method is to preserve so that Partition size does not exceed a specific capacity. If Partition becomes larger than the configured capacity due to Record Write, Records at the front of the Partition are deleted to maintain the configured Partition capacity.
+
+```properties {caption="[Config 1] Kafka Record Retention Properties Example for Broker", linenos=table}
+# by Duration (Default: 7 days)
+log.retention.hours=168
+log.retention.minutes=10080
+log.retention.ms=604800000
+
+# by Size (Default: Infinite)
+log.retention.bytes=-1
+```
+
+```shell {caption="[Shell 1] Kafka Record Retention Command Example for Topic", linenos=table}
+kafka-configs.sh --bootstrap-server kafka-broker-host:9092 --entity-type topics --entity-name topic-name --alter --add-config log.retention.hours=168
+kafka-configs.sh --bootstrap-server kafka-broker-host:9092 --entity-type topics --entity-name topic-name --alter --add-config log.retention.bytes=-1
+```
+
+Record Retention can be set globally on Brokers or for each Topic. [Config 1] shows examples of Record Retention settings based on duration and capacity for Brokers, and [Shell 1] shows examples of Record Retention settings based on duration or capacity for each Topic.
+
+### 1.6. Replication, Failover
+
+Even when using multiple Brokers and Partitions, if Replication is not applied, Record loss cannot be prevented when some Brokers die. For example, in [Figure 1], if `Broker C` dies, Record loss occurs for all Records of `Topic B` and `Partition 0` of `Topic C`. To prevent such Record loss, it is necessary to apply Replication to duplicate Partitions.
+
+{{< figure caption="[Figure 5] Kafka Replication" src="images/kafka-replication.png" width="1000px" >}}
+
+[Figure 5] shows Kafka with Replication applied from [Figure 1]. `Topic A` and `Topic B` are set to Replica `2`, and `Topic C` is set to Replica `3`. Therefore, `Topic A` and `Topic B` have one duplicate Partition, and `Topic C` has two duplicate Partitions.
+
+The original Partition is called **Leader Partition**, and duplicate Partitions are called **Follower Partitions**. Producers and Consumers use only Leader Partitions and do not directly use Follower Partitions. Follower Partitions are used only for Failover when Leader Partitions cannot be used due to failure. Replication can be set separately for each Topic.
+
+The Replication synchronization method can use both Sync and Async methods depending on the Producer's ACK settings. Only in the case of `all (-1)` ACK settings, since Producer receives ACK only after Record replication is complete, from a Replication perspective, `all (-1)` corresponds to **Sync method**. On the other hand, in the case of `0`, `1` ACK settings, since Producer receives ACK even if Record is not replicated, from a Replication perspective, `0`, `1` corresponds to **Async method**, and Record loss can occur when performing Failover.
+
+{{< figure caption="[Figure 6] Kafka Failover" src="images/kafka-replication-failover.png" width="1000px" >}}
+
+[Figure 6] shows the Failover operation when `Broker C` dies in [Figure 5]. You can see that the Leader Partition of `Topic B` moves to `Broker A`, and the Leader Partition of `Topic C` moves to `Broker B`. Kafka promotes an arbitrary Follower Partition among Follower Partitions that are completely synchronized with Leader Partition (**ISR**, In-Sync Replicas) to Leader Partition. Partitions of the failed Broker become **Offline** status, and when the Broker recovers, they become Follower Partitions.
+
+Even if Replication of a Message is complete, due to Broker failure, Producer may not receive ACK. This means that Producer can send Messages stored in Partitions redundantly, meaning that Message duplication can occur. To prevent such Message duplication, **Kafka's idempotence** setting (`enable.idempotence`) can be used to prevent Message duplication.
+
+Consumers may also send the Offset of Messages that have been processed to Broker, but may not receive ACK due to Broker failure. Therefore, Consumers can also receive the same Message redundantly, and Consumers must implement idempotence logic so that there is no problem even if they receive the same Message, or use Kafka Transaction to prevent processing the same Message.
 
 ## 2. References
 
