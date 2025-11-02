@@ -74,7 +74,7 @@ kafka-configs.sh --bootstrap-server kafka-broker-host:9092 --entity-type topics 
 kafka-configs.sh --bootstrap-server kafka-broker-host:9092 --entity-type topics --entity-name topic-name --alter --add-config log.retention.bytes=-1
 ```
 
-Record Retention은 Broker에 설정하여 전역 설정 방법과, 각 Topic별로 설정하는 방법이 있다. [Config 1]은 Broker에 기간, 용량을 기준으로 Record Retention 설정 예시를 나타내고 있으며, [Shell 1]은 Topic 별로 기간 또는 용량을 기준으로 Record Retention 설정 예시를 나타내고 있다.
+Record Retention은 **Broker에 설정**하여 전역 설정 방법과, 각 **Topic별로 설정**하는 방법이 있다. [Config 1]은 Broker에 기간, 용량을 기준으로 Record Retention 설정 예시를 나타내고 있으며, [Shell 1]은 Topic 별로 기간 또는 용량을 기준으로 Record Retention 설정 예시를 나타내고 있다.
 
 ### 1.6. Replication, Failover
 
@@ -92,9 +92,9 @@ Replication 동기 방식은 Producer의 ACK 설정에 따라서 Sync 방식, As
 
 [Figure 6]는 [Figure 5]에서 `Broker C`가 죽을경우 동작하는 Failover의 모습을 나타내고 있다. `Topic B`의 Leader Partition이 `Broker A`로 넘어가고, `Topic C`의 Leader Partition이 `Broker B`로 넘어가는 것을 확인할 수 있다. Kafka는 Leader Partition과 완전히 동기화된 Follower Partition (**ISR**, In-Sync Replicas)중에서 임의의 Follower Partition을 Leader Partition으로 승격한다. 장애가 발생한 Broker의 Partition들은 **Offline** 상태가 되며, Broker가 복구되면 Follower Partition이 된다.
 
-Message가 Replication이 완료되었지만 Broker의 장애로 Producer는 ACK만 수신하지 못할 수 있다. 이는 Producer가 Parition에 저장된 Message를 중복해서 전송할 수 있다는걸 의미하며, Message 중복이 발생할 수 있다는걸 의미한다. 이러한 Message 중복을 방지하기 위해서 **Kafka의 멱등성** 설정 (`enable.idempotence`)을 통해서 Message 중복을 방지할 수 있다.
+Record가 Replication이 완료되었지만 Broker의 장애로 Producer는 ACK만 수신하지 못할 수 있다. 이는 Producer가 Parition에 저장된 Record를 중복해서 전송할 수 있다는걸 의미하며, Record 중복이 발생할 수 있다는걸 의미한다. 이러한 Record 중복을 방지하기 위해서 **Kafka의 멱등성** 설정 (`enable.idempotence`)을 통해서 Record 중복을 방지할 수 있다.
 
-Consumer도 처리가 완료된 Message의 Offset을 Broker에게 전송했지만 Broker의 장애로 ACK를 수신하지 못할 수 있다. 따라서 Consumer도 동일한 Message를 중복해서 받을 수 있으며, Consumer는 반드시 동일한 Message를 받더라도 문제가 없도록 멱등성 Logic을 구현하거나, Kafka Transaction을 이용하여 동일한 Message를 처리하지 못하도록 만들어야 한다.
+Consumer도 처리가 완료된 Record의 Offset을 Broker에게 전송했지만 Broker의 장애로 ACK를 수신하지 못할 수 있다. 따라서 Consumer도 동일한 Record를 중복해서 받을 수 있으며, Consumer는 반드시 동일한 Record를 받더라도 문제가 없도록 멱등성 Logic을 구현하거나, Kafka Transaction을 이용하여 동일한 Record를 처리하지 못하도록 만들어야 한다.
 
 ## 2. 참조
 

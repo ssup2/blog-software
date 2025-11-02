@@ -74,7 +74,7 @@ kafka-configs.sh --bootstrap-server kafka-broker-host:9092 --entity-type topics 
 kafka-configs.sh --bootstrap-server kafka-broker-host:9092 --entity-type topics --entity-name topic-name --alter --add-config log.retention.bytes=-1
 ```
 
-Record Retention can be set globally on Brokers or for each Topic. [Config 1] shows examples of Record Retention settings based on duration and capacity for Brokers, and [Shell 1] shows examples of Record Retention settings based on duration or capacity for each Topic.
+Record Retention can be set by **configuring on Brokers** for global settings, or **setting for each Topic**. [Config 1] shows examples of Record Retention settings based on duration and capacity for Brokers, and [Shell 1] shows examples of Record Retention settings based on duration or capacity for each Topic.
 
 ### 1.6. Replication, Failover
 
@@ -92,9 +92,9 @@ The Replication synchronization method can use both Sync and Async methods depen
 
 [Figure 6] shows the Failover operation when `Broker C` dies in [Figure 5]. You can see that the Leader Partition of `Topic B` moves to `Broker A`, and the Leader Partition of `Topic C` moves to `Broker B`. Kafka promotes an arbitrary Follower Partition among Follower Partitions that are completely synchronized with Leader Partition (**ISR**, In-Sync Replicas) to Leader Partition. Partitions of the failed Broker become **Offline** status, and when the Broker recovers, they become Follower Partitions.
 
-Even if Replication of a Message is complete, due to Broker failure, Producer may not receive ACK. This means that Producer can send Messages stored in Partitions redundantly, meaning that Message duplication can occur. To prevent such Message duplication, **Kafka's idempotence** setting (`enable.idempotence`) can be used to prevent Message duplication.
+Even if Replication of a Record is complete, due to Broker failure, Producer may not receive ACK. This means that Producer can send Records stored in Partitions redundantly, meaning that Record duplication can occur. To prevent such Record duplication, **Kafka's idempotence** setting (`enable.idempotence`) can be used to prevent Record duplication.
 
-Consumers may also send the Offset of Messages that have been processed to Broker, but may not receive ACK due to Broker failure. Therefore, Consumers can also receive the same Message redundantly, and Consumers must implement idempotence logic so that there is no problem even if they receive the same Message, or use Kafka Transaction to prevent processing the same Message.
+Consumers may also send the Offset of Records that have been processed to Broker, but may not receive ACK due to Broker failure. Therefore, Consumers can also receive the same Record redundantly, and Consumers must implement idempotence logic so that there is no problem even if they receive the same Record, or use Kafka Transaction to prevent processing the same Record.
 
 ## 2. References
 
