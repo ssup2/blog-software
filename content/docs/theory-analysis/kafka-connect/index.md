@@ -1,6 +1,5 @@
 ---
 title: Kafka Connect
-draft: true
 ---
 
 Kafka Connect에 대해서 분석한다.
@@ -169,8 +168,6 @@ transforms.insertValue.value.static.value=my-value
 ```
 
 [File 6]는 Kafka Connect의 Chaining Transform 설정 예시를 나타내고 있다. `insertKey`와 `insertValue` Transform을 순차적으로 적용하여 Record의 Key와 Value에 `my-field`라는 Field를 `my-value`로 추가하는 것을 확인할 수 있다.
-
-### 1.5. Exactly Once
 
 ## 2. 참조
 
