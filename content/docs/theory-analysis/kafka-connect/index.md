@@ -37,7 +37,7 @@ Kafka Connect Cluster는 하나 또는 다수의 **Worker**로 구성된다. 하
 * **Connector Instance** : 다수의 Data Stream을 설정에 따라서 다수의 Task로 분배하여 생성하는 역할을 수행한다. 또한 Data 저장소의 상태를 모니터링하며 이에 따라서 Task를 적절하게 재구성 하는 역할도 수행한다.
 * **Connector Task** : Connector Instance에 의해서 생성되며, 실제로 Data 저장소에 접근하여 Data Stream을 주고받는 역할을 수행한다. 일반적으로 각 Task마다 고유의 **Partition**을 할당받아 별도의 Data Stream을 구성하여 동작하며, [Figure 2]에서도 Task마다 할당된 Partition을 확인할 수 있다.
 
-Converter와 Transform은 **Class Instance**로 존재하며 Connector Task에서 Method를 통해서 호출되어 동작한다. Standalone Mode에서 Worker는 모든 설정/상태 정보를 **Host**에 저장하고 이용한다. Config 정보는 Host의 Properties 파일, Offset 상태 정보는 Host의 파일, Status 상태 정보는 Host의 Memory에 저장하고 이용한다. 모두 Host 환경에서 동작하기 때문에 가용성이 떨어지는 단점을 가지고 있으며, Local 환경에서 사용되는 경우가 일반적이다.
+Converter와 Transform은 **Class Instance**로 존재하며 Connector Task에서 Method를 통해서 호출되어 동작한다. Standalone Mode에서 Worker는 모든 설정/상태 정보를 **Host**에 저장하고 이용한다. Config 정보는 Host의 Properties 파일, Offset 정보는 Host의 파일, Status 정보는 Host의 Memory를 이용한다. 모두 단일 Host에 위치하기 때문에 가용성 확보가 어렵다. 따라서 Standalone Mode는 개발 환경에서 사용되는 경우가 일반적이다.
 
 #### 1.1.2. Distributed Mode
 
@@ -45,21 +45,21 @@ Converter와 Transform은 **Class Instance**로 존재하며 Connector Task에�
 
 일반적으로 Alpha 환경이나 Production 환경에서는 다수의 Worker로 구성되어 높은 가용성 확보가 가능하고, Scale-out도 가능한 **Distributed Mode**를 사용한다. [Figure 3]는 Distributed Mode를 나타내고 있다. Connector Instance와 Connector Task가 다수의 Worker로 분산되어 동작하는 것을 확인할 수 있으며, Class Instance로 존재하는 Converter와 Transform의 경우에는 각 Worker마다 별도로 위치하는 것도 확인할 수 있다.
 
-Distributed Mode로 동작하는 경우에는 하나의 Worker는 **Leader Worker**로 동작하며, 다수의 Worker는 공유하는 Config, Offset, Status Kafka Topic을 이용하여 설정/상태 정보를 공유하며 동작한다. 공유 Topic은 
-
-Leader Worker는 공유 Kafka Topic을 통해서 Kafka Connect Cluster의 모든 Connector Instance, Connector Task, Worker 정보를 얻어와 Connector Instance와 Connector Task를 어느 Worker에게 할당할지 결정하는 Scheduler 역할을 수행한다. 또한 Worker가 죽었을 경우에 Task Rebalancing 역할도 수행한다. 만약 Leader Worker가 죽었을 경우에는 다른 Worker 중에서 새로운 Leader Worker로 선출되어 동작한다.
-
-하나의 Worker는 하나의 Process이기 때문에, Class Instance로 존재하는 Converter와 Transform의 경우에는 각 Worker마다 별도로 위치하게 된다. Kafka Connect Cluster를 Kubernetes 위에서 동작시킬 경우에는 Worker가 하나의 Pod로 동작하게 된다.
-
-```properties
+```properties {caption="[File 1] Kafka Connect Cluster Topic Properties Example" linenos=table}
 config.storage.topic=connect-configs
 offset.storage.topic=connect-offsets
 status.storage.topic=connect-status
 
-config.storage.replication.factor=1
-offset.storage.replication.factor=1
-status.storage.replication.factor=1
+config.storage.replication.factor=-1
+offset.storage.replication.factor=-1
+status.storage.replication.factor=-1
 ```
+
+Distributed Mode로 동작하는 경우 다수의 Worker들은 Worker 사이에 공유가 필요한 설정/상태 정보는 공유 Kafka Topic(Config, Offset, Status)에 저장하고 이용하며, 그외 공유가 필요하지 않거나 Worker 초기화에 필요한 설정 정보는 동일 Host의 Properties 파일을 이용한다. 따라서 Host의 Properties 파일에는 Kafka의 어느 Topic을 공용 Topic으로 이용할지 설정되어 있으며, [File 1]은 예시를 나타내고 있다. Config, Offset, Status 별로 Topic이 지정되어 있는걸 확인할 수 있으며, Replication Factor는 `-1`로 설정되어 있어 해당 Topic의 Replication Factor는 Kafka Cluster의 Replication Factor와 동일하게 설정하고 있다.
+
+다수의 Worker중에 하나의 Worker는 **Leader Worker**로 동작한다. Leader Worker는 공유 Kafka Topic을 통해서 Kafka Connect Cluster의 모든 Connector Instance, Connector Task, Worker 정보를 얻어와 Connector Instance와 Connector Task를 어느 Worker에게 할당할지 결정하는 Scheduler 역할을 수행한다. 또한 Worker가 죽었을 경우에 Task Rebalancing 역할도 수행한다. 만약 Leader Worker가 죽었을 경우에는 다른 Worker 중에서 새로운 Leader Worker로 선출되어 동작한다.
+
+Kafka Connect Cluster를 Kubernetes 위에서 동작시킬 경우에는 하나의 Host가 하나의 Pod로 동작하게 되며, Properties 파일은 Kubernetes ConfigMap에 저장되고 모든 Pod에서 공유되어 이용된다.
 
 ### 1.2. Rest API
 
@@ -84,14 +84,17 @@ status.storage.replication.factor=1
 
 Kafka Connect Cluster는 Rest API를 통해서 외부에서 제어가 가능하다. [Table 1]은 Kafka Connect Cluster에서 제공하는 Rest API를 나타내고 있다. Connector를 등록, 조회, 삭제, 정지, 재시작 하거나 Connector의 세부설정 또는 Task 상태 정보를 조회 할 수 있는걸 확인할 수 있다.
 
-Standalone Mode에서는 Worker는 설정 정보를 Local의 Properties 파일을 이용하기 때문에 PUT, POST, DELETE Rest API를 통해서 설정 정보를 변경할 수 없으며, 설정 정보를 변경하기 위해서는 Local의 Properties 파일을 직접 변경하고 Worker를 재시작해야 한다. 정보를 조회하는 GET Rest API는 정상적으로 이용할 수 있다. 반면에 Distributed Mode에서는 모든 Rest API를 통해서 설정/상태 정보를 변경하거나 조회할 수 있다.
+Standalone Mode에서는 Worker는 설정 정보를 Local의 Properties 파일을 이용하기 때문에 `PUT`, `POST`, `DELETE` Rest API를 통해서 설정 정보를 변경할 수 없으며, 설정 정보를 변경하기 위해서는 Local의 Properties 파일을 직접 변경하고 Worker를 재시작해야 한다. 정보를 조회하는 `GET` Rest API는 정상적으로 이용할 수 있다. 반면에 Distributed Mode에서는 모든 `GET`, `PUT`, `POST`, `DELETE` Rest API를 통해서 설정/상태 정보를 변경하거나 조회할 수 있다.
 
-Distributed Mode로 동작하는 경우에도 Leader Worker 뿐만 아니라 모든 Worker는 Rest API를 통해서 요청을 받을수 있다. 설정/상태 정보를 변경하지 않는 GET Rest API 요청을 받은 Worker는 받은 요청을 공유 Kafka Topic으로 부터 직접 설정/상태 정보를 받아 응답한다. 반면에 설정/상태 정보를 변경하는 POST, PUT, DELETE Rest API 요청을 받은 Worker는 받은 요청을 공유 Kafka Topic에 저장만 하는 역할을 수행한다. 이후에 Leader Worker는 공유 Kafka Topic을 통해서 변경된 설정/상태 정보를 얻어와 요청을 처리한다.
+Distributed Mode로 동작하는 경우에도 Leader Worker 뿐만 아니라 모든 Worker는 Rest API를 통해서 요청을 받을수 있다. 설정/상태 정보를 변경하지 않는 `GET` Rest API 요청을 받은 Worker는 받은 요청을 공유 Kafka Topic으로 부터 직접 설정/상태 정보를 받아 응답한다. 반면에 설정/상태 정보를 변경하는 `POST`, `PUT`, `DELETE` Rest API 요청을 받은 Worker는 받은 요청을 공유 Kafka Topic에 저장만 하는 역할을 수행한다. 이후에 Leader Worker는 공유 Kafka Topic을 통해서 변경된 설정/상태 정보를 얻어와 요청을 처리한다.
 
-```properties {caption="[File 1] Kafka Connect Properties Configuration" linenos=table}
-rest.port=8083
-rest.advertised.host.name=localhost
+```properties {caption="[File 2] Kafka Connect Rest API Properties Example" linenos=table}
+rest.advertised.listener=https
+rest.advertised.host.name=ssup2.local
+rest.advertised.port=8083
 ```
+
+Rest API는 Properties 파일을 통해서 설정할 수 있으며, [File 2]는 Kafka Connect Cluster의 Rest API 설정 예시를 나타내고 있다. 예시의 내용에 따라서 `https://ssup2.local:8083` 형태의 URI를 통해서 Rest API를 이용할 수 있다.
 
 ### 1.3. Converter
 
@@ -106,6 +109,8 @@ Converter는 Connector와 Kafka 사이에서 Data 직렬화/역직렬화를 수�
 | IntegerConverter | org.apache.kafka.connect.converters.IntegerConverter | X | Integer 형식의 변환을 지원. |
 | LongConverter | org.apache.kafka.connect.converters.LongConverter | X | Long 형식의 변환을 지원. |
 | ShortConverter | org.apache.kafka.connect.converters.ShortConverter | X | Short 형식의 변환을 지원. |
+| StringConverter | org.apache.kafka.connect.storage.StringConverter | X | String 형식의 변환을 지원. |
+| JsonConverter | org.apache.kafka.connect.json.JsonConverter | X | JSON 형식의 변환을 지원. |
 | AvroConverter | io.confluent.connect.avro.AvroConverter | O | Avro 형식의 변환을 지원. |
 | ProtobufConverter | io.confluent.connect.protobuf.ProtobufConverter | O | Protobuf 형식의 변환을 지원. |
 | JsonSchemaConverter | io.confluent.connect.json.JsonSchemaConverter | O | JSON 형식의 변환을 지원. |
@@ -113,21 +118,59 @@ Converter는 Connector와 Kafka 사이에서 Data 직렬화/역직렬화를 수�
 
 Converter는 Class Instance로 존재하며, [Table 2]는 기본적으로 지원하는 Converter 목록을 나타내고 있다. Kafka Schema Registry를 이용하는 Converter와 이용하지 않는 Converter로 구분할 수 있다.
 
-```properties {caption="[File 1] Kafka Connect Converter Configuration" linenos=table}
+```properties {caption="[File 3] Kafka Connect Converter Properties Example" linenos=table}
 key.converter=org.apache.kafka.connect.json.JsonConverter
 value.converter=org.apache.kafka.connect.json.JsonConverter
 key.converter.schemas.enable=false
 value.converter.schemas.enable=false
 ```
 
-### 1.3. Transform
+[File 3]은 Kafka Connect Cluster의 Converter 설정 예시를 나타내고 있다. 예시의 내용에 따라서 `JsonConverter`를 이용하여 Data를 직렬화/역직렬화하고 있으며, Schema Registry를 이용하지 않는 것을 확인할 수 있다.
 
-* **org.apache.kafka.connect.transforms.ExtractField$Value** : 특정 Field를 추출하여 변환을 지원.
-* **org.apache.kafka.connect.transforms.ExtractField$Key** : 특정 Field를 추출하여 변환을 지원.
+### 1.4. Transform
 
-Transform은 Connector와 Converter 사이에서 간단한 Data 변환을 수행한다. [Table 3]는 기본적으로 지원하는 Transform 목록을 나타내고 있다.
+Transform은 Connector와 Converter 사이에서 간단한 Data 변환을 수행한다. **단일 Record 단위로 변환**만 수행이 가능하며, 다수의 Record를 대상으로 수행하는 복잡한 변환의 경우 Kafka Streams 또는 Flink와 같은 별도의 Framework를 이용하는 것이 일반적이다. **Chaining**을 통해서 다수의 Transform을 순차적으로 적용한 변환도 지원한다.
 
-### 1.4. Exactly Once
+{{< table caption="[Table 3] Kafka Connect Transform" >}}
+| Transform | Class | Description |
+| --- | --- | --- |
+| InsertField | org.apache.kafka.connect.transforms.InsertField | 특정 Field를 추가. |
+| ExtractField | org.apache.kafka.connect.transforms.ExtractField | 특정 Field만 추출. |
+| ReplaceField | org.apache.kafka.connect.transforms.ReplaceField | 특정 Field를 변경. |
+| MaskField | org.apache.kafka.connect.transforms.MaskField | 특정 Field를 숨김. |
+{{< /table >}}
+
+[Table 3]는 기본적으로 지원하는 Transform 목록을 나타내고 있으며, Record의 Key와 Value에 독립적으로 적용이 가능하다.
+
+```properties {caption="[File 4] Kafka Connect InsertField Transform Key Properties Example" linenos=table}
+transforms=insertKey
+transforms.insertKey.type=org.apache.kafka.connect.transforms.InsertField$Key
+transforms.insertKey.value.static.field=my-field
+transforms.insertKey.value.static.value=my-value
+```
+
+```properties {caption="[File 5] Kafka Connect InsertField Transform Value Properties Example" linenos=table}
+transforms=insertValue
+transforms.insertValue.type=org.apache.kafka.connect.transforms.InsertField$Value
+transforms.insertValue.value.static.field=my-field
+transforms.insertValue.value.static.value=my-value
+```
+
+[File 4]와 [File 5]는 Kafka Connect의 InsertField Transform 설정 예시를 나타내고 있다. [File 4]는 Record의 Key에 `my-field`라는 Field를 `my-value`로 추가하는 `insertKey` Transform을 정의하고 있으며, 이와 유사하게 [File 5]는 Record의 Value에 `my-field`라는 Field를 `my-value`로 추가하는 `insertValue` Transform을 정의하고 있는 것을 확인할 수 있다.
+
+```properties {caption="[File 6] Kafka Connect Chaining Transform Properties Example" linenos=table}
+transforms=insertKey,insertValue
+transforms.insertKey.type=org.apache.kafka.connect.transforms.InsertField$Key
+transforms.insertKey.value.static.field=my-field
+transforms.insertKey.value.static.value=my-value
+transforms.insertValue.type=org.apache.kafka.connect.transforms.InsertField$Value
+transforms.insertValue.value.static.field=my-field
+transforms.insertValue.value.static.value=my-value
+```
+
+[File 6]는 Kafka Connect의 Chaining Transform 설정 예시를 나타내고 있다. `insertKey`와 `insertValue` Transform을 순차적으로 적용하여 Record의 Key와 Value에 `my-field`라는 Field를 `my-value`로 추가하는 것을 확인할 수 있다.
+
+### 1.5. Exactly Once
 
 ## 2. 참조
 
