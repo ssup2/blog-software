@@ -14,30 +14,77 @@ Kafka는 Publish-subscribe 기반의 분산 Message Queue이다. Kafka는 수신
 
 * **Kafka Broker** : Message를 수신, 관리, 전송하는 Kafka의 핵심 Server이다. Kafka Broker는 일반적으로 Load Balancing 및 HA (High Availability)를 위해서 다수의 Node 위에서 **Kafka Cluster**를 이루어 동작한다.
 * **Zookeeper** : Kafka Cluster의 Metadata를 저장하기 위한 고가용성을 제공하는 저장소 역할을 수행한다. Kafka Broker와 같이 다수의 Node 위에서 Cluster를 이루어 동작한다. Kafka 2.8 Version 이후에는 Raft 알고리즘을 기반으로 동작하는 Kafka Broker가 스스로 저장소 역할을 수행하는 **KRaft Mode**를 지원한다. KRaft Mode로 동작하는 경우 Zookeeper를 별도로 이용하지 않는다.
-* **Topic** : Message를 관리하는 단위이다. Topic은 다시 **Partition**이라는 작은 단위로 쪼개지며, Kafka는 다수의 Partiton을 이용하여 Message 처리량을 높인다. Partition은 다시 **Record**의 집합으로 구성되며, 여기서 Record는 Kafka에서 정의하는 Message 단위를 의미한다.
+* **Topic** : Message를 관리하는 단위이다. Topic은 다시 **Partition**이라는 작은 단위로 쪼개지며, Kafka는 다수의 Partiton을 이용하여 Message 처리량을 높인다. Partition은 다시 **Record**의 집합으로 구성되며, 여기서 Record는 Kafka에서 정의하는 최소 전송 단위를 의미한다.
 * **Producer** : Topic에게 Message를 전송(**Publish**)하는 App을 의미한다.
 * **Consumer** : Topic으로부터 Message를 전달 받는(**Subscribe**) App을 의미한다. Consumer는 Poll 함수를 통해서 **Polling 방식**으로 Message의 존재 여부를 확인하고, Message가 있을경우 Message를 가져온다. 즉 Message는 Topic에서 Consumer로 전달되지만, Message를 가져오는 주체는 Consumer이다.
 * **Consumer Group** : 의미 그대로 다수의 Consumer 묶는 역할을 수행하며, Kafka는 Consumer Group을 이용하여 Consumer의 가용성 및 Message 처리량을 높인다.
 
 ### 1.1. Record
 
+Record는 Kafka에서 정의하는 **최소 전송 단위**를 의미한다. Producer가 Record를 생성해 Topic에 전달하고, Consumer는 Topic에 저장된 Record를 가져와 처리한다. Producer Record와 Consumer Record는 각각 다음과 같다.
+
+#### 1.1.1. Producer Record
+
+{{< table caption="[Table 1] Producer Record" >}}
+| Field | Optional | Description |
+|---|---|---|
+| **Topic** | X | Record가 전달되어야 하는 Topic을 의미한다. |
+| **Key** | O | Record의 Key를 의미하며, Key를 기준으로 Record를 저장할 Partition을 결정한다. Key가 없을 경우 Round-robin 방식으로 Partition을 결정한다. |
+| **Value** | O | 실제 전달할 Message를 의미한다. |
+| **Partition** | O | Record를 전달할 Partition을 지정한다. |
+| **Headers** | O | Record의 부가적인 정보를 담고 있다. |
+| **Timestamp** | O | Record가 생성된 시간을 의미한다. 명시하지 않을 경우 기본적으로 `System.currentTimeMillis` 값으로 설정된다. |
+{{< /table >}}
+
+[Table 1]은 Producer가 전달하는 Record의 Field를 설명하고 있다. Topic을 제외한 나머지 Field는 Optional 필드이다.
+
+{{< table caption="[Table 2] Producer Record Partition Decision" >}}
+| Key | Partition | Description |
+|---|---|---|
+| X | X | Round-robin 방식으로 Partition을 결정한다. |
+| O | X | Key를 기준으로 Partition을 결정한다. |
+| O | O | 명시된 Partition에 저장한다. |
+{{< /table >}}
+
+Record가 저장되는 Partition은 Key와 Partition 값에 따라서 결정되며, [Table 2]는 각 경우에 따라경 Partition을 결정하는 방식을 나타내고 있다.
+
+#### 1.1.2. Consumer Record
+
+{{< table caption="[Table 3] Consumer Record" >}}
+| Field | Optional | Description |
+|---|---|---|
+| **Topic** | X | Record가 저장되었던 Topic을 의미한다. |
+| **Partition** | X | Record가 저장되었던 Partition을 의미한다. |
+| **Key** | O | Record의 Key를 의미한다. |
+| **Value** | O | 실제 전달된 Message를 의미한다.|
+| **Offset** | X | Partition에 저장된 Record의 Offset을 의미한다. |
+| **Headers** | X | Record의 부가적인 정보를 담고 있다. |
+| **Timestamp** | X | Record의 Timestamp를 의미한다. |
+| **Timestamp Type** | X | Record의 Timestamp 타입을 의미한다. `CreateTime`, `LogAppendTime` 2가지 타입을 지원하며 `CreateTime`은 Producer가 전송한 Record의 Timestamp, 즉 Record가 생성한 시간을 의미하며, `LogAppendTime`은 Record가 Kafka Broker에 저장된 시간을 의미한다. 명시하지 않을 경우 기본적으로 `CreateTime` 값으로 설정된다. |
+| **Serialized Key Size** | X | Record의 Key를 직렬화한 크기를 의미한다. Key가 없을 경우 `-1`로 설정된다. |
+| **Serialized Value Size** | X | Record의 Value를 직렬화한 크기를 의미한다. Value가 없을 경우 `-1`로 설정된다. |
+| **Leader Epoch** | X | Record가 저장되었던 Leader Partition의 Epoch을 의미한다. |
+{{< /table >}}
+
+[Table 3]은 Consumer가 수신하는 Record의 Field를 설명하고 있다. Topic과 Partition을 제외한 나머지 Field는 Optional 필드이다.
+
 ### 1.2. Consumer Group
 
 Consumer Group은 다수의 Consumer를 묶어 하나의 Topic을 다수의 Consumer가 동시에 처리할 수 있도록 만들어 Consumer의 가용성 및 Message 처리량을 높인다. [Figure 1]에서 `Consumer Group A`는 하나의 Consumer, `Consumer Group B`는 2개의 Consumer, `Consumer Group C`는 3개의 Consumer를 가지고 있는것을 확인할 수 있다.
 
-{{< figure caption="[Figure 3] Kafka Architecture with Wrong Consumer Group" src="images/kafka-architecture-wrong-consumer-group.png" width="1000px" >}}
+{{< figure caption="[Figure 2] Kafka Architecture with Wrong Consumer Group" src="images/kafka-architecture-wrong-consumer-group.png" width="1000px" >}}
 
-다만 Consumer의 개수만 많다고 해서 처리량이 높아지는것은 아니며, 적절한 Topic의 Partition의 개수도 중요하다. [Figure 1]에서는 Partition의 개수와 동일하게 Consumer의 개수가 동일하기 때문에 모든 Consumer가 효율적으로 Message를 처리할 수 있지만, [Figure 3] 처럼 Partition의 개수와 Consumer의 개수가 다른 경우에는 모든 Consumer가 효율적으로 Message를 처리할 수 없다.
+다만 Consumer의 개수만 많다고 해서 처리량이 높아지는것은 아니며, 적절한 Topic의 Partition의 개수도 중요하다. [Figure 1]에서는 Partition의 개수와 동일하게 Consumer의 개수가 동일하기 때문에 모든 Consumer가 효율적으로 Message를 처리할 수 있지만, [Figure 2] 처럼 Partition의 개수와 Consumer의 개수가 다른 경우에는 모든 Consumer가 효율적으로 Message를 처리할 수 없다.
 
 Partition과 Consumer는 반드시 **N:1**의 관계를 가져아한다. 따라서 `Consumer Group B`와 같이 Partition의 개수가 Consumer 개수보다 적은 경우 유휴 Consumer가 발생하게 된다. 반면에 `Consumer Group A` 또는 `Consumer Group C`와 같이 Partition의 개수가 Consumer 개수보다 많은 경우, 동작에는 문제가 없지만 일부 Consumer에 더 많은 Message를 처리하게 되어 처리량 비대칭이 발생하게 된다. 이러한 이유 때문에 Partition의 개수와 Consumer의 개수는 반드시 동일하게 설정하는게 좋다.
 
 ### 1.3. Partition, Offset
 
-{{< figure caption="[Figure 4] Kafka Partition" src="images/kafka-partition.png" width="1000px" >}}
+{{< figure caption="[Figure 3] Kafka Partition" src="images/kafka-partition.png" width="1000px" >}}
 
-Partition은 병렬처리로 Message의 처리량을 높이기 위해서 하나의 Topic을 Kafka Cluster 내부의 다수의 Kafka Broker에게 분산하기 위한 단위이자, Message를 순차적으로 저장하는 Queue 역할을 수행한다. 각 Topic 별로 다른 개수의 Partition을 가질 수 있다. [Figure 4]는 Producer 및 Consumer와 상호작용을 하는 Partition을 나타내고 있다. `Topic A`는 하나의 Broker에서 동작하는 하나의 Partition로 구성되어 있고, `Topic B`는 다수의 Broker에서 동작하는 3개의 Partition으로 구성되어 있는것을 확인할 수 있다.
+Partition은 병렬처리로 Message의 처리량을 높이기 위해서 하나의 Topic을 Kafka Cluster 내부의 다수의 Kafka Broker에게 분산하기 위한 단위이자, Message를 순차적으로 저장하는 Queue 역할을 수행한다. 각 Topic 별로 다른 개수의 Partition을 가질 수 있다. [Figure 3]은 Producer 및 Consumer와 상호작용을 하는 Partition을 나타내고 있다. `Topic A`는 하나의 Broker에서 동작하는 하나의 Partition로 구성되어 있고, `Topic B`는 다수의 Broker에서 동작하는 3개의 Partition으로 구성되어 있는것을 확인할 수 있다.
 
-Producer는 전송할 Message를 **Record**로 전환하여 Partition의 끝에 차례대로 저장한다. 이때 Record의 ID는 Array의 Index처럼 순차적으로 증가한다. 이러한 Record의 ID를 Kafka에서는 **Offset**이라고 한다. Producer와 별개로 Consumer는 Partition의 앞부분부터 시작하여 **Consumer Offset**을 증가시키며 차례대로 Record를 읽는다. 여기서 Consumer Offset은 Consumer가 처리를 완료한 Partition의 가장 마지막 Record의 Offset을 의미한다. Consumer Offset은 각 Partition, Consumer Group 별로 Kafka Broker에 저장된다. 예를들어 [Figure 4]에서 `Topic A`의 `Partition 0`의 경우 `Consumer Group B`의 Consumer Offset은 `6`, `Consumer Group B`의 Consumer Offset은 `4`를 나타내고 있다.
+Producer는 전송할 Message를 **Record**로 전환하여 Partition의 끝에 차례대로 저장한다. 이때 Record의 ID는 Array의 Index처럼 순차적으로 증가한다. 이러한 Record의 ID를 Kafka에서는 **Offset**이라고 한다. Producer와 별개로 Consumer는 Partition의 앞부분부터 시작하여 **Consumer Offset**을 증가시키며 차례대로 Record를 읽는다. 여기서 Consumer Offset은 Consumer가 처리를 완료한 Partition의 가장 마지막 Record의 Offs은t을 의미한다. Consumer Offset은 각 Partition, Consumer Group 별로 Kafka Broker에 저장된다. 예를들어 [Figure 3]에서 `Topic A`의 `Partition 0`의 경우 `Consumer Group B`의 Consumer Offset은 `6`, `Consumer Group B`의 Consumer Offset은 `4`를 나타내고 있다.
 
 Topic에 다수의 Partition이 존재할 때 Producer는 전송하는 Record에 Key가 존재하지 않을 경우 기본적으로 **Round-robin** 방식으로 Record를 전달할 Partiton 선택한다. 이 경우 Record의 순서가 보장되지는 않지만, 다수의 Partition에 균등하게 Record가 분배된다는 장점을 얻을 수 있다. 반면에 Record에 Key가 존재할 경우 Key를 기반으로 어떤 Partition에 저장될지 결정된다. 따라서 Key를 기준으로는 Record의 순서 보장이 가능하지만, 특정 Partition에만 Record가 쏠리는 문제가 발생할 수 있다.
 
@@ -80,17 +127,17 @@ Record Retention은 **Broker에 설정**하여 전역 설정 방법과, 각 **To
 
 다수의 Broker와 Partition을 이용하여도 Replication이 적용되지 않은 상태에서는 일부 Broker가 죽으면 Record 손실을 막을 수 없다. 예를 들어 [Figure 1]에서 `Broker C`가 죽을경우 `Topic B`의 모든 Record와 `Topic C`의 `Partition 0`의 Record 손실이 발생하게 된다. 이러한 Record 손실을 방지하기 위해서는 Replication을 적용하여 Parition을 복제하는 것이 필요하다. 
 
-{{< figure caption="[Figure 5] Kafka Replication" src="images/kafka-replication.png" width="1000px" >}}
+{{< figure caption="[Figure 4] Kafka Replication" src="images/kafka-replication.png" width="1000px" >}}
 
-[Figure 5]는 [Figure 1]에서 Replication 적용된 Kafka를 나타내고 있다. `Topic A`와 `Topic B`는 Replica `2`, `Topic C`는 Replica `3`으로 설정한 상태이다. 따라서 `Topic A`와 `Topic B`는 한개의 복제본 Partition을 가지며, `Topic C`는 두개의 복제본 Partition을 갖게 된다.
+[Figure 4]는 [Figure 1]에서 Replication 적용된 Kafka를 나타내고 있다. `Topic A`와 `Topic B`는 Replica `2`, `Topic C`는 Replica `3`으로 설정한 상태이다. 따라서 `Topic A`와 `Topic B`는 한개의 복제본 Partition을 가지며, `Topic C`는 두개의 복제본 Partition을 갖게 된다.
 
 원본 Partition은 **Leader Partition**이라고 부르며 복제본 Partition은 **Follower Partition**이라고 부른다. Producer와 Consumer는 Leader Partition만을 이용하며, Follower Partition을 직접 이용하지 않는다. Follower Partition은 오직 Leader Partition이 장애로 인해서 이용하지 못할경우 Failover를 위해서 이용된다. Replication은 각 Topic마다 별도로 설정할 수 있다.
 
 Replication 동기 방식은 Producer의 ACK 설정에 따라서 Sync 방식, Async 방식 둘다 이용이 가능하다. `all (-1)` ACK 설정이 경우에만 Producer가 Record가 복제까지 완료되어야 ACK를 수신하기 때문에, Replication 관점에서 `all (-1)`은 **Sync 방식**에 해당된다. 반면에 `0`, `1` ACK 설정이 경우에는 Producer가 Record가 복제되지 않아도  ACK를 수신하기 때문에, Replication 관점에서 `0`, `1`은 **Async 방식**에 해당되며 Failover 수행시 Record 손실이 발생할 수 있다.
 
-{{< figure caption="[Figure 6] Kafka Failover" src="images/kafka-replication-failover.png" width="1000px" >}}
+{{< figure caption="[Figure 5] Kafka Failover" src="images/kafka-replication-failover.png" width="1000px" >}}
 
-[Figure 6]는 [Figure 5]에서 `Broker C`가 죽을경우 동작하는 Failover의 모습을 나타내고 있다. `Topic B`의 Leader Partition이 `Broker A`로 넘어가고, `Topic C`의 Leader Partition이 `Broker B`로 넘어가는 것을 확인할 수 있다. Kafka는 Leader Partition과 완전히 동기화된 Follower Partition (**ISR**, In-Sync Replicas)중에서 임의의 Follower Partition을 Leader Partition으로 승격한다. 장애가 발생한 Broker의 Partition들은 **Offline** 상태가 되며, Broker가 복구되면 Follower Partition이 된다.
+[Figure 5]는 [Figure 4]에서 `Broker C`가 죽을경우 동작하는 Failover의 모습을 나타내고 있다. `Topic B`의 Leader Partition이 `Broker A`로 넘어가고, `Topic C`의 Leader Partition이 `Broker B`로 넘어가는 것을 확인할 수 있다. Kafka는 Leader Partition과 완전히 동기화된 Follower Partition (**ISR**, In-Sync Replicas)중에서 임의의 Follower Partition을 Leader Partition으로 승격한다. 장애가 발생한 Broker의 Partition들은 **Offline** 상태가 되며, Broker가 복구되면 Follower Partition이 된다.
 
 Record가 Replication이 완료되었지만 Broker의 장애로 Producer는 ACK만 수신하지 못할 수 있다. 이는 Producer가 Parition에 저장된 Record를 중복해서 전송할 수 있다는걸 의미하며, Record 중복이 발생할 수 있다는걸 의미한다. 이러한 Record 중복을 방지하기 위해서 **Kafka의 멱등성** 설정 (`enable.idempotence`)을 통해서 Record 중복을 방지할 수 있다.
 
@@ -98,12 +145,12 @@ Consumer도 처리가 완료된 Record의 Offset을 Broker에게 전송했지만
 
 ## 2. 참조
 
-* [https://fizalihsan.github.io/technology/bigdata-frameworks.html](https://fizalihsan.github.io/technology/bigdata-frameworks.html)
-* [https://en.wikipedia.org/wiki/Apache-Kafka](https://en.wikipedia.org/wiki/Apache-Kafka)
-* [https://www.quora.com/What-is-Apache-Kafka](https://www.quora.com/What-is-Apache-Kafka)
-* [https://sookocheff.com/post/kafka/kafka-in-a-nutshell/](https://sookocheff.com/post/kafka/kafka-in-a-nutshell/)
-* [https://epicdevs.com/17](https://epicdevs.com/17)
-* [https://medium.freecodecamp.org/what-makes-apache-kafka-so-fast-a8d4f94ab145](https://medium.freecodecamp.org/what-makes-apache-kafka-so-fast-a8d4f94ab145)
+* Kafka :[https://fizalihsan.github.io/technology/bigdata-frameworks.html](https://fizalihsan.github.io/technology/bigdata-frameworks.html)
+* Kafka : [https://en.wikipedia.org/wiki/Apache-Kafka](https://en.wikipedia.org/wiki/Apache-Kafka)
+* Kafka : [https://www.quora.com/What-is-Apache-Kafka](https://www.quora.com/What-is-Apache-Kafka)
+* Kafka : [https://sookocheff.com/post/kafka/kafka-in-a-nutshell/](https://sookocheff.com/post/kafka/kafka-in-a-nutshell/)
+* Kafka ACK : [https://medium.freecodecamp.org/what-makes-apache-kafka-so-fast-a8d4f94ab145](https://medium.freecodecamp.org/what-makes-apache-kafka-so-fast-a8d4f94ab145)
 * [https://www.popit.kr/kafka-%EC%9A%B4%EC%98%81%EC%9E%90%EA%B0%80-%EB%A7%90%ED%95%98%EB%8A%94-producer-acks/](https://www.popit.kr/kafka-%EC%9A%B4%EC%98%81%EC%9E%90%EA%B0%80-%EB%A7%90%ED%95%98%EB%8A%94-producer-acks/)
-
+* Kafka Record : [https://lankydan.dev/intro-to-kafka-consumers](https://lankydan.dev/intro-to-kafka-consumers)
+* Kafka Record : [https://zzzzseong.tistory.com/107](https://zzzzseong.tistory.com/107)
 
