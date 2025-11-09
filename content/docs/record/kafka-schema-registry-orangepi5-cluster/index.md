@@ -9,7 +9,14 @@ Kafka Schema Registry를 활용해서 Schema를 관리하는 실습을 수행한
 
 ### 1.1. 전체 실습 환경
 
-### 1.2. Python 패키지 설치
+### 1.2. Producer, Consumer 구동을 위한 Python 패키지 설치
+
+```bash
+mkdir -p ~/kafka-schema-registry
+cd ~/kafka-schema-registry
+uv init
+uv add "confluent-kafka[avro,registry]" avro-python3
+```
 
 ## 2. Kafka Schema Registry 이용
 
@@ -17,11 +24,7 @@ Kafka Schema Registry를 활용하여 Avro 스키마를 관리하고, Python Pro
 
 ### 2.1. Schema 등록
 
-Schema Registry에 Avro 스키마를 등록하는 방법은 두 가지가 있다. 첫 번째는 REST API를 사용하는 방법이고, 두 번째는 Kafka UI를 사용하는 방법이다.
-
-#### 2.1.1. REST API를 사용한 Schema 등록
-
-Schema Registry에 Avro 스키마를 등록한다. 예제로 사용자 정보를 담는 `User` 스키마를 등록한다.
+Kafka Schema의 Endpoint를 환경변수로 설정하고, 확인한다.
 
 ```bash
 SCHEMA_REGISTRY_EXTERNAL_IP=$(kubectl get service -n kafka schema-registry -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
@@ -34,75 +37,29 @@ echo "Schema Registry URL: ${SCHEMA_REGISTRY_URL}"
 Schema Registry URL: http://192.168.1.99:8081
 ```
 
+Schema Registry에 Avro 스키마를 등록한다. 사용자 정보를 담는 `User` 스키마를 등록한다.
+
 ```bash
-# Schema Registry에 스키마 등록
+SCHEMA='{
+  "type": "record",
+  "name": "User",
+  "namespace": "ssup2.com",
+  "fields": [
+    {"name": "id", "type": "int"},
+    {"name": "name", "type": "string"},
+    {"name": "email", "type": "string"}
+  ]
+}'
+
 curl -X POST ${SCHEMA_REGISTRY_URL}/subjects/user-value/versions \
   -H "Content-Type: application/vnd.schemaregistry.v1+json" \
-  -d '{
-    "schema": "{\"type\":\"record\",\"name\":\"User\",\"namespace\":\"com.example\",\"fields\":[{\"name\":\"id\",\"type\":\"int\"},{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"email\",\"type\":\"string\"}]}"
-  }'
+  -d "{
+    \"schema\": $(echo "$SCHEMA" | jq -c tojson)
+  }"
 ```
 ```bash
-{"id":2,"version":2,"guid":"b157942d-73b9-472c-ff5c-10a0dc1bde6c","schemaType":"AVRO","schema":"{\"type\":\"record\",\"name\":\"User\",\"namespace\":\"com.example\",\"fields\":[{\"name\":\"id\",\"type\":\"int\"},{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"email\",\"type\":\"string\"}]}"}
+{"id":3,"version":3,"guid":"e06655b8-8d49-9800-f924-ea691503f834","schemaType":"AVRO","schema":"{\"type\":\"record\",\"name\":\"User\",\"namespace\":\"ssup2.com\",\"fields\":[{\"name\":\"id\",\"type\":\"int\"},{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"email\",\"type\":\"string\"}]}"}
 ```
-
-등록된 스키마를 확인한다.
-
-```bash
-# 등록된 스키마 조회
-curl ${SCHEMA_REGISTRY_URL}/subjects/user-value/versions/latest
-```
-
-#### 2.1.2. Kafka UI를 사용한 Schema 등록
-
-Kafka UI는 웹 인터페이스를 통해 Schema Registry를 쉽게 관리할 수 있게 해준다. Kafka UI에 Schema Registry를 연결하려면 Kafka UI 설정에 Schema Registry URL을 추가해야 한다.
-
-```yaml {caption="[File 1] kafka-ui-values.yaml - Schema Registry 설정 추가", linenos=table}
-yamlApplicationConfig:
-  kafka:
-    clusters:
-      - name: kafka
-        bootstrapServers: kafka-kafka-sasl-bootstrap.kafka:9092
-        properties:
-          security.protocol: SASL_PLAINTEXT
-          sasl.mechanism: SCRAM-SHA-512
-          sasl.jaas.config: "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"user\" password=\"user\";"
-        schemaRegistry: http://schema-registry.schema-registry.svc.cluster.local:8081
-    auth:
-      type: disabled
-```
-
-Kafka UI Helm Chart를 업데이트한다.
-
-```bash
-# Kafka UI Helm Chart 업데이트
-helm upgrade kafka-ui kafka-ui \
-  --namespace kafka-ui \
-  --values kafka-ui-values.yaml
-```
-
-Kafka UI에 접속하여 Schema Registry를 관리한다.
-
-```bash
-# Kafka UI Service 확인
-kubectl get svc -n kafka-ui kafka-ui
-
-# Kafka UI 접속 (LoadBalancer IP 사용)
-# 브라우저에서 http://<LOADBALANCER_IP> 접속
-```
-
-Kafka UI 웹 인터페이스에서 Schema Registry를 사용하는 방법:
-
-1. **Schema Registry 탭 접근**: Kafka UI 메인 화면에서 왼쪽 메뉴의 "Schema Registry" 탭을 클릭한다.
-2. **Schema 등록**: "Create Schema" 버튼을 클릭하여 새로운 스키마를 등록한다.
-   - **Subject**: 스키마의 Subject 이름을 입력한다 (예: `user-value`).
-   - **Schema Type**: 스키마 타입을 선택한다 (예: `AVRO`).
-   - **Schema**: Avro 스키마 JSON을 입력한다.
-3. **Schema 조회**: 등록된 스키마 목록을 확인하고, 각 스키마의 버전 및 상세 정보를 조회할 수 있다.
-4. **Schema 수정**: 기존 스키마의 새 버전을 등록하거나, 스키마 호환성 검사를 수행할 수 있다.
-5. **Schema 삭제**: 더 이상 사용하지 않는 스키마를 삭제할 수 있다.
-
-Kafka UI를 사용하면 REST API를 직접 호출하지 않고도 웹 인터페이스를 통해 Schema Registry를 쉽게 관리할 수 있다.
 
 ### 2.2. Producer 실행
 
