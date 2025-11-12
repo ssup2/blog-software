@@ -7,9 +7,9 @@ draft: true
 
 {{< figure caption="[Figure 1] Kafka Schema Registry Architecture" src="images/kafka-schema-registry-architecture.png" width="900px" >}}
 
-Kafka Schema Registry는 Kafka Producer와 Kafka Consumer 사이에서 Kafka Message의 Schema를 관리하는 역할을 수행한다. [Figure 1]은 Kafka Schema Registry의 Architecture를 나타내고 있다. Kafka Schema Registry는 상태 정보를 유지하기 위해서 별도의 Database를 이용하지 않고, Kafka의 `_schema_` Topic을 이용한다. 
+Kafka Schema Registry performs the role of managing the Schema of Kafka Messages between Kafka Producer and Kafka Consumer. [Figure 1] shows the Architecture of Kafka Schema Registry. Kafka Schema Registry uses Kafka's `_schema_` Topic instead of a separate Database to maintain state information.
 
-모든 Schema 관련 정보는 `_schema_` Topic에 기록되기 때문에 Kafka Schema Registry는 Stateless한 특징을 갖으며, 부하 분산을 위해서 손쉽게 Scale-out을 수행할 수 있다. 단 Topic에 저장된 Schema 정보는 Memory에도 Caching되어 있기 때문에 Kafka Schema Registry가 Topic에 직접 접근하는 빈도는 낮으며, 일반적으로 Schema가 등록/변경/삭제되거나 Kafka Schema Registry가 초기화 되는 경우에만 Topic에 접근한다.
+Since all Schema-related information is recorded in the `_schema_` Topic, Kafka Schema Registry has a Stateless characteristic and can easily perform Scale-out for load balancing. However, since Schema information stored in the Topic is also cached in Memory, the frequency of Kafka Schema Registry directly accessing the Topic is low, and generally accesses the Topic only when Schema is registered/changed/deleted or when Kafka Schema Registry is initialized.
 
 ```json {caption="[Schema Key 1] _schema_ Topic Key Example", linenos=table}
 {
@@ -30,25 +30,25 @@ Kafka Schema Registry는 Kafka Producer와 Kafka Consumer 사이에서 Kafka Mes
 }
 ```
 
-`_schema_` Topic에는 [Schema Key 1], [Schema Value 1]와 같은 Key, Value 형식으로 Schema 관련 정보가 기록된다. Key는 Schema의 고유 식별자로 사용되며, Value는 Schema의 정보를 담고 있다. [Figure 1]에서는 Kafka Schema Registry의 동작 과정도 나타내고 있으며, Kafka Producer가 Kafka Message를 전송하는 과정과, Kafka Consumer가 Kafka Message를 수신하는 과정을 나타내고 있다.
+The `_schema_` Topic records Schema-related information in Key, Value format like [Schema Key 1] and [Schema Value 1]. Key is used as a unique identifier for Schema, and Value contains Schema information. [Figure 1] also shows the operation process of Kafka Schema Registry, showing the process of Kafka Producer sending Kafka Messages and Kafka Consumer receiving Kafka Messages.
 
-### 1.1. Schema 등록 과정
+### 1.1. Schema Registration Process
 
-Kafka Schema Registry는 Rest API를 통해서 Schema를 등록할 수 있으며 다음과 같은 과정을 수행한다.
+Kafka Schema Registry can register Schemas through REST API and performs the following process:
 
-1. Rest API를 통해서 Schema를 등록 요청을 Kafka Schema Registry에 전송한다.
-2. Kafka Schema Registry는 Schema를 `_schema_` Topic에 기록한다.
-3. Kafka Schema Registry는 이후에 Schema를 Memory에 Caching하며 Producer, Consumer가 Schema를 요청할때 캐시된 Schema를 반환한다.
+1. Send a Schema registration request to Kafka Schema Registry through REST API.
+2. Kafka Schema Registry records the Schema in the `_schema_` Topic.
+3. Kafka Schema Registry then caches the Schema in Memory and returns the cached Schema when Producer or Consumer requests the Schema.
 
-### 1.2. Schema를 통한 Message 직렬화 및 역직렬화 과정
+### 1.2. Message Serialization and Deserialization Process Using Schema
 
-Producer와 Consumer가 Schema를 이용하는 과정은 다음과 같다.
+The process of Producer and Consumer using Schema is as follows:
 
-1. Producer는 Kafka Schema Registry에 등록된 Schema를 요청하고 이름과 Version을 통해서 요청하여 Schema와 Schema ID를 반환받는다.
-2. Producer는 받은 Schema를 기반으로 Message를 직렬화하고, 직렬화한 Message와 함께 Schema ID를 Kafka Topic에 전송한다.
-3. Consumer는 Kafka Topic에서 직렬화됨 Message와 함께 전달된 Schema ID를 수신한다.
-4. Consumer는 수신한 Schema ID를 기반으로 Kafka Schema Registry에서 Schema를 요청한다.
-5. Consumer는 수신한 Schema를 기반으로 Message를 역직렬화한다.
+1. Producer requests a Schema registered in Kafka Schema Registry and receives Schema and Schema ID by requesting with name and Version.
+2. Producer serializes the Message based on the received Schema and sends the serialized Message along with Schema ID to Kafka Topic.
+3. Consumer receives the serialized Message along with the Schema ID passed from Kafka Topic.
+4. Consumer requests Schema from Kafka Schema Registry based on the received Schema ID.
+5. Consumer deserializes the Message based on the received Schema.
 
 ```python {caption="[Code 1] Producer Python Example", linenos=table}\
 import os
@@ -126,7 +126,7 @@ producer.flush()
 print("All messages sent")
 ```
 
-[Code 1]은 Producer가 Schema를 요청하고, Schema를 기반으로 Message를 직렬화하고, 직렬화한 Message와 함께 Schema ID를 Kafka Topic에 전송하는 Python 예제 Code를 나타내고 있다. 이러한 과정들은 `confluent_kafka.schema_registry` Python Package를 통해서 손쉽게 구현할 수 있다.
+[Code 1] shows Python example code where Producer requests Schema, serializes Message based on Schema, and sends the serialized Message along with Schema ID to Kafka Topic. These processes can be easily implemented through the `confluent_kafka.schema_registry` Python Package.
 
 ```python {caption="[Code 2] Consumer Example", linenos=table}
 import os
@@ -190,8 +190,9 @@ finally:
     consumer.close()
 ```
 
-[Code 2]은 Consumer가 Kafka Topic에서 직렬화된 Message와 함께 전달된 Schema ID를 수신하고, 수신한 Schema ID를 기반으로 Kafka Schema Registry에서 Schema를 요청하고, 요청한 Schema를 기반으로 Message를 역직렬화하는 Python 예제 Code를 나타내고 있다. 마찬가지로 `confluent_kafka.schema_registry` Python Package를 통해서 손쉽게 구현할 수 있다.
+[Code 2] shows Python example code where Consumer receives the serialized Message along with Schema ID passed from Kafka Topic, requests Schema from Kafka Schema Registry based on the received Schema ID, and deserializes Message based on the requested Schema. Similarly, it can be easily implemented through the `confluent_kafka.schema_registry` Python Package.
 
-## 2. 참고
+## 2. References
 
 * Kafka Schema Registry : [https://medium.com/@tlsrid1119/kafka-schema-registry-feat-confluent-example-cde8a276f76c](https://medium.com/@tlsrid1119/kafka-schema-registry-feat-confluent-example-cde8a276f76c)
+

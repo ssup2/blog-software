@@ -112,7 +112,7 @@ print("Retrieving schema from Schema Registry")
 schema = schema_registry_client.get_latest_version("user")
 avro_schema_str = schema.schema.schema_str
 
-# Create Avro Serializer (automatically registers schema in Schema Registry and uses schema ID)
+# Create Avro Serializer (uses the retrieved schema from Schema Registry and embeds its schema ID in serialized messages)
 avro_serializer = AvroSerializer(
     schema_registry_client,
     avro_schema_str,
