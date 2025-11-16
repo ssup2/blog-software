@@ -6,7 +6,7 @@ title: Ceph
 
 ## 1. Ceph
 
-{{< figure caption="[Figure 1] Ceph Architecture" src="images/ceph-architecture.png" width="900px" >}}
+{{< figure caption="[Figure 1] Ceph Architecture" src="images/ceph-architecture.png" width="800px" >}}
 
 Ceph는 Ojbect Storage 기반 분산 Storage이다. Object Storage이지만 File Storage, Block Storage 기능도 제공하고 있다. 따라서 다양한 환경에서 Ceph가 이용되고 있다. Ceph의 가장 큰 특징은 **Single Point of Failure** 문제를 고려한 Achitecture를 채택하고 있다는 점이다. 즉 Ceph는 중앙처리 방식이 아닌 분산처리 방식을 이용하고 있고, 특정 Node에 문제가 발생하더라도 Ceph 동작에는 문제가 없도록 설계되어 있다.
 
@@ -62,7 +62,7 @@ MDS는 POSIX 호환 File System를 제공하기 위해 필요한 Meta Data를 �
 
 **CRUSH**는 Object를 어느 OSD에 배치할지 결정하는 알고리즘이다. Replica 설정시 Replica의 위치까지 CRUSH를 통해 결정된다. [Figure 4]는 Object가 OSD에 할당되는 과정을 나타내고 있다. Object는 Object ID의 Hashing을 통해 특정 PG (Placement Group)에 할당된다. 그리고 PG는 다시 PG ID와 CRUSH를 통해서 특정 OSD에 할당된다. [Figure 4]는 Replica가 3으로 설정되어 있다고 가정하고 있다. 따라서 CRUSH는 Object 하나당 3개의 OSD를 할당한다.
 
-{{< figure caption="[Figure 5] Ceph CRUSH Map" src="images/ceph-crush-map.png" width="900px" >}}
+{{< figure caption="[Figure 5] Ceph CRUSH Map" src="images/ceph-crush-map.png" width="800px" >}}
 
 CRUSH는 **CRUSH Map**이라는 Storage Topology를 이용한다. [Figure 5]는 CRUSH Map 나타내고 있다. CRUSH Map은 **Bucket**이라는 논리적 단위의 계층으로 구성된다. Bucket은 root, region, datacentor, room, pod, pdu, row, rack, chassis, host, osd 11가지 type으로 구성되어 있다. CRUSH Map의 Leaf는 반드시 osd bucket이어야 한다.
 

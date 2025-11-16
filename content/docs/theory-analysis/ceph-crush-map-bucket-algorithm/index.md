@@ -10,7 +10,7 @@ Ceph에서 Storage Topology를 나타내는 CRUSH Map을 분석하고 CRUSH Map�
 
 Ceph는 RADOS Cluster의 OSD (Object Storage Daemon)에 Object를 배치하는 알고리즘으로 **CRUSH**를 이용한다. [Figure 1]은 CRUSH를 통해서 Object가 OSD에 배치되는 과정을 나타내고 있다. Object는 Object ID의 Hashing을 통해 특정 PG (Placement Group)에 할당된다. 그리고 PG는 다시 PG ID와 CRUSH를 통해서 특정 OSD에 할당된다. [Figure 1]은 Replica가 3으로 설정되어 있다고 가정하고 있다. 따라서 CRUSH는 Object 하나당 3개의 OSD를 할당한다.
 
-{{< figure caption="[Figure 2] Ceph CRUSH Map" src="images/ceph-crush-map.png" width="900px" >}}
+{{< figure caption="[Figure 2] Ceph CRUSH Map" src="images/ceph-crush-map.png" width="800px" >}}
 
 CRUSH는 **CRUSH Map**이라고 불리는 Storage Topology를 이용한다. [Figure 2]은 CRUSH Map을 나타내고 있다. CRUSH Map은 **Bucket**이라는 논리적 단위의 계층으로 구성된다. Bucket은 root, region, datacentor, room, pod, pdu, row, rack, chassis, host, osd 11가지 type으로 구성되어 있다. CRUSH Map의 Leaf는 반드시 osd bucket이어야 한다.
 
@@ -95,7 +95,7 @@ cbucket list(bucket, pg_id, replica) {
 
 ### 2.3. Tree
 
-{{< figure caption="[Figure 6] Tree 알고리즘에 이용되는 Binary Tree" src="images/crush-tree.png" width="900px" >}}
+{{< figure caption="[Figure 6] Tree 알고리즘에 이용되는 Binary Tree" src="images/crush-tree.png" width="800px" >}}
 
 Tree 알고리즘은 하위 Bucket을 Binary Tree 형태로 관리한다. [Figure 6]은 Tree 알고리즘에서 이용되는 Binary Tree를 나타내고 있다. 배열을 이용하여 Tree를 구성하지만 일반적인 Binary Search Tree처럼 구성되지는 않는다. 각 Tree의 Level의 Index는 **(Odd) * (2 ^ Level)**를 갖는다. Tree의 각 Leaf에는 하위 Bucket이 존재한다. 각 Tree의 Node는 자신의 모든 하위 Node에 존재하는 Weight의 합을 저장하고 있다.
 
@@ -155,7 +155,7 @@ cbucket straw2(bucket, pg_id, replica) {
 
 straw2 알고리즘은 모든 하위 Bucket을 대상으로 하위 Bucket ID를 **dist()** 함수를 이용하여 얻은 값과 하위 Bucket의 Weight를 곱한 값을 구한다. 구한 값중에서 가장 값이 큰 Bucket에 PG를 할당한다. dist() 함수는 hash() 함수처럼 Random 값을 생성하지만, Weight 값이 클수록 큰 Random 값이 나올확률이 높아지는 함수이다. [Code 5]는 Straw2 알고리즘을 수행하는 straw2() 함수를 나타내고 있다. Hashing을 하위 Bucket의 개수만큼 수행해야하기 때문에 하위 Bucket을 찾는데 O(N) 시간이 걸린다.
 
-{{< figure caption="[Figure 8] Straw2에 하위 Bucket이 추가되는 경우" src="images/crush-straw2-add.png" width="800px" >}}
+{{< figure caption="[Figure 8] Straw2에 하위 Bucket이 추가되는 경우" src="images/crush-straw2-add.png" width="700px" >}}
 
 [Figure 8]은 Straw2에 하위 Bucket이 추가되는 경우를 나타내고 있다. 하위 Bucket이 추가되어도 **PG는 새로운 Bucket에 배치되거나 기존의 Bucket에 그대로 배치된다.** 따라서 적은 수의 Object들만 Rebalancing된다. 기존의 Bucket이 삭제되어도 삭제된 Bucket에 배치되었던 PG들만 재배치되고 기존의 PG는 그대로 유지되기 때문에 적은 수의 Object들만 Rebalancing된다. Bucket의 Weight를 변경하면 Weight를 변경한 Bucket에 배치된 PG가 다른 Bucket으로 재배치되거나, 다른 Bucket에 배치되었던 PG가 Weight를 변경한 PG로 재배치 될 수 있다. 하지만 PG는 Weight를 변경하지 않은 Bucket 사이에서는 재배치 되지않기 때문에, Bucket의 Weight를 변경하여도 적은 수의 Object들만 Rebalancing된다.
 
