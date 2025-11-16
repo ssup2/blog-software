@@ -9,7 +9,7 @@ title: LeetCode / Container With Most Water
 * Description
   * 가장 많은 양의 물이 달길 Container 찾기
 * Type
-  * 완전 탐색
+  * Two Pointers Pattern
 
 ## Solution 1
 
