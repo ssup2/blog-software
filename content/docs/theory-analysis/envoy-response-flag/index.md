@@ -10,6 +10,7 @@ Envoy Response Flag는 Envoy가 요청을 처리하는 과정에서 **특정 Eve
 
 ### 1.1. HTTP, TCP Flag
 
+{{< table caption="[Table 1] Envoy HTTP, TCP Flag" >}}
 | Long Name | Short Name | Description |
 |---|---|---|
 | NoHealthyUpstream          | UH  | Envoy Server는 Upstream Cluster에 Healthy 상태의 Upstream Server가 존재하지 않아 Upstream Server와 연결에 실패하였으며, Downstream Client에게 503 Status Code를 응답 |
@@ -19,9 +20,11 @@ Envoy Response Flag는 Envoy가 요청을 처리하는 과정에서 **특정 Eve
 | UpstreamRetryLimitExceeded | URX | Envoy Server는 설정된 HTTP 요청 재시도 또는 TCP 재접속 시도 횟수가 초과하여 잠시동안 Upstream Server로 연결을 시결하지 않음 |
 | NoClusterFound             | NC  | Envoy Server는 요청을 전달할 Upstream Cluster를 찾지 못해 Upstream Server로 연결을 시도하지 못함 |
 | DurationTimeout            | DT  | Envoy Server는 Upstream Server와 `max_connection_duration` 시간 이상으로 연결을 유지하거나, Downstream Client와 `max_downstream_connection_duration` 시간 이상으로 연결을 유지할 경우 연결을 강제로 종료하며, Downstream Client에게 504 Status Code를 응답 |
+{{</ table >}}
 
 ### 1.2. HTTP Only Flag
 
+{{< table caption="[Table 2] Envoy HTTP Only Flag" >}}
 | Long Name | Short Name | Description |
 |---|---|---|
 | DownstreamConnectionTermination  | DC    | Downstream Client가 Envoy Server와의 연결을 먼저 TCP FIN과 함께 종료 |
@@ -47,6 +50,7 @@ Envoy Response Flag는 Envoy가 요청을 처리하는 과정에서 **특정 Eve
 | DropOverload                     | DO    | Envoy Server는 과부화로 인해서 일부 신규 요청을 거절하며, Downstream Client에게 503 Status Code를 응답 |
 | DownstreamRemoteReset            | DR    | Downstream Client가 Envoy Server와의 연결을 먼저 TCP RST과 함께 종료 |
 | UnconditionalDropOverload        | UDO   | Envoy Server는 과부화로 인해서 모든 신규 요청을 거절 |
+{{</ table >}}
 
 ## 2. 참조
 
