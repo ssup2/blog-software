@@ -21,12 +21,12 @@ CRUSH starts from CRUSH Map's root Bucket, selects subordinate Buckets as many a
 ## 2. Bucket Algorithm
 
 {{< table caption="[Table 1] Bucket Algorithm Performance Comparison" >}}
-|| | Uniform | List | Tree | Straw | Straw2 |
-||----|----|----|----|----|----|
-|| Object Allocation | O(1) | O(n) | O(log n) | O (n) | O (n) |
-|| Subordinate Bucket Addition | Poor | Optimal | Good | Good | Optimal |
-|| Subordinate Bucket Deletion | Poor | Poor | Good | Good | Optimal |
-|| Subordinate Bucket Weight Change | X | Poor | Good | Good | Optimal |
+| | Uniform | List | Tree | Straw | Straw2 |
+|----|----|----|----|----|----|
+| Object Allocation | O(1) | O(n) | O(log n) | O (n) | O (n) |
+| Subordinate Bucket Addition | Poor | Optimal | Good | Good | Optimal |
+| Subordinate Bucket Deletion | Poor | Poor | Good | Good | Optimal |
+| Subordinate Bucket Weight Change | X | Poor | Good | Good | Optimal |
 {{< /table >}}
 
 Bucket can select a Bucket algorithm to select its subordinate Buckets. Algorithms include Uniform, List, Tree, Straw, and Straw2, and each algorithm has advantages and disadvantages. The default algorithm uses Straw2. [Table 1] compares the performance of each algorithm.
