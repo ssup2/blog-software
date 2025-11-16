@@ -6,7 +6,7 @@ Elasticsearch의 Shard, Replica 관련 내용을 분석한다.
 
 ## 1. Elasticsearch Shard, Replica
 
-{{< figure caption="[Figure 1] Shard, Replica Recovery" src="images/elasticsearch-shard-replica.png" width="600px" >}}
+{{< figure caption="[Figure 1] Shard, Replica Recovery" src="images/elasticsearch-shard-replica.png" width="550px" >}}
 
 [Figure 1]는 Elastic Search에서 관리하는 Shard와 Replica를 나타낸다. 원본 Shard를 Primary Shard 라고 명칭하며 Primary Shard의 복제본을 Replica라고 명칭한다. [Figure 1]에서는 Shard의 개수는 5개, Replica의 개수는 1개인 Index를 나타내고 있다. Shard와 Replica는 모두 **Index 단위**로 설정이 가능하며, Shard의 개수는 Index가 생성 될때만 설정이 가능하고 Index가 생성된 이후에는 변경이 불가능하다. Replica의 개수는 자유롭게 변경이 가능하다. Elasticsearch 6.0 이하 Version에서는 Default Shard는 5이고 Default Replica는 1이다. Elasticsearch 7.0 이상 Version에서는 Default Shard는 1이고 Default Replica는 1이다.
 

@@ -6,7 +6,7 @@ ELK (Elasticsearch, Logstash, Kibana)를 분석한다.
 
 ## 1. ELK Stack
 
-{{< figure caption="[Figure 1] ELK Stack" src="images/elk-stack.png" width="900px" >}}
+{{< figure caption="[Figure 1] ELK Stack" src="images/elk-stack.png" width="700px" >}}
 
 ELK Stack은 Elasticsearch, Logstash, Kibana를 조합을 의미한다. ELK Stack을 이용하여 Data를 수집하고 분석하는 Platform을 쉽게 구축할 수 있다. [Figure 1]은 ELK Stack을 나타내고 있다.
 

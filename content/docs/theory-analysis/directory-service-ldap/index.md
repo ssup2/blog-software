@@ -12,18 +12,18 @@ Directory Service는 거의 번화가 발생하지 않는 물리적 Resource를 
 
 ## 2. LDAP (Lightweight Directory Access Protocol)
 
-{{< figure caption="[Figure 1] LDAP Schema" src="images/ldap-schema.png" width="500px" >}}
+{{< figure caption="[Figure 1] LDAP Schema" src="images/ldap-schema.png" width="450px" >}}
 
 LDAP은 의미 그대로 경량화된 Directory Service를 위한 Protocol이다. LDAP Server는 Tree 형태로 Data를 관리한다. [Figure 1]은 Tree 형태를 갖고 있는 LDAP의 Schema를 나타내고 있다. Tree의 각 Node에는 하나의 속성이 저장되어 있는것을 확인할 수 있다. 이용할 수 있는 속성은 [링크](https://docs.bmc.com/docs/fpsc121/ldap-attributes-and-associated-fields-495323340.html)에서 확인할 수 있다. 많이 이용되는 속성은 다음과 같다.
 
-* uid : User ID
-* cn : Common Name
-* l : Location
-* ou : Organisational Unit
-* o : Organisation
-* dc : Domain Component
-* st : State
-* c : Country
+* **uid** : User ID
+* **cn** : Common Name
+* **l** : Location
+* **ou** : Organisational Unit
+* **o** : Organisation
+* **dc** : Domain Component
+* **st** : State
+* **c** : Country
 
 LDAP은 Transaction, Rollback을 지원하지 않는다. LDAP은 Data Write 보다는 Data Read에 특화되어 있다. LDAP Server가 갖고 있는 Data는 일반적으로 Binary 형태로 저장되지만, LDIF (LDAP Data Interchange Format)를 통해서 사람이 읽을수 있는 형태로 변환가능하다.
 

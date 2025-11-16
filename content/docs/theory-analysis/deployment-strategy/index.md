@@ -12,7 +12,7 @@ App Availability가 문제되지 않는 개발 환경이나, Local PC에 설치�
 
 ## 2. Blue-green Deployment
 
-{{< figure caption="[Figure 1] Blue-green Deployment" src="images/blue-green.png" width="900px" >}}
+{{< figure caption="[Figure 1] Blue-green Deployment" src="images/blue-green.png" width="800px" >}}
 
 [Figure 1]은 Blue-green Deployment를 나타내고 있다. Blue-green Deployment는 App이 구동될 수 있는 동일한 2개의 환경이 필요하다. 하나의 환경에는 Old App을 구동시키고, 나머지 환경에는 New App을 구동시키기 위해서이다. New App이 배포되기전에 LB는 모든 Packet을 Old App으로만 Routing하여 모든 User가 Old App만 이용하도록 한다. New App이 배포 및 구동 준비가 완료되면 LB를 조작하여 모든 User가 New App을 이용하도록 만든다.
 
@@ -32,7 +32,7 @@ A/B Test는 다수의 동일한 환경에서 설정 또는 Version이 다른 App
 
 ## 4. Rolling Deployment
 
-{{< figure caption="[Figure 3] Rolling Deployment" src="images/rolling.png" width="900px" >}}
+{{< figure caption="[Figure 3] Rolling Deployment" src="images/rolling.png" width="800px" >}}
 
 [Figure 3]은 Rolling Deployment를 나타내고 있다. Rolling Deployment는 하나씩 Old App을 New App으로 Update해 나가는 기법이다. 하나씩 Update하는 기법이기 때문에 Update로 인한 App 구동 중단이 User에게는 큰영향을 주지 않는다는 장점을 갖고 있다. 하지만 App이 많을수록 New App으로 전환 및 Old App으로 Rollback 시간이 오래걸린다는 단점을 갖고 있다. 일반적으로 Canary Deployment로 검증된 New App을 Rolling Deployment로 배포하여 New App을 적용하는 방식을 많이 이용한다.
 

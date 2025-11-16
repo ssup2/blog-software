@@ -28,7 +28,7 @@ Elasticsearch의 Data Structure를 분석한다.
 }
 ```
 
-[Data 1]은 Elasticsearch로 부터 얻은 Document의 정보를 나타내고 있다. -index, -type은 Document가 소속되어 있는 Index, Type을 나타낸다. -id는 Document의 ID를 나타낸다. -version은 Document의 Version을 나타내며 Document가 Update 될때마다 -version의 값은 증가한다. -source는 Document의 실제 Data를 나타낸다.
+[Data 1]은 Elasticsearch로 부터 얻은 Document의 정보를 나타내고 있다. `-index`, `-type`은 Document가 소속되어 있는 Index, Type을 나타낸다. `-id`는 Document의 ID를 나타낸다. `-version`은 Document의 Version을 나타내며 Document가 Update 될때마다 `-version`의 값은 증가한다. `-source`는 Document의 실제 Data를 나타낸다.
 
 ## 2. 참조
 
