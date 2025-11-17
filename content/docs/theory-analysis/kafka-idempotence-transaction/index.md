@@ -7,6 +7,10 @@ Kafka의 Idempotence과 Transaction에 대해서 분석한다.
 
 ## 1. Kafka Idempotence
 
+* Producer ID :
+* Producer Epoch : 
+* Sequence Number : 
+
 ## 2. Kafka Transaction
 
 * `ENABLE_IDEMPOTENCE_CONFIG` : Kafka의 Idempotence 기능을 활성화 하기 위한 설정 값이다.
@@ -18,6 +22,7 @@ Kafka의 Idempotence과 Transaction에 대해서 분석한다.
 ## 2. 참조
 
 * Kafka Idempotence, Transaction : [https://stackoverflow.com/questions/58894281/difference-between-idempotence-and-exactly-once-in-kafka-stream](https://stackoverflow.com/questions/58894281/difference-between-idempotence-and-exactly-once-in-kafka-stream)
+* Understanding Kafka Producer Part 2 : [https://github.com/AutoMQ/automq/wiki/Understanding-Kafka-Producer-Part-2](https://github.com/AutoMQ/automq/wiki/Understanding-Kafka-Producer-Part-2)
 * Kafka Guarantee : [https://developer.confluent.io/courses/architecture/guarantees/](https://developer.confluent.io/courses/architecture/guarantees/)
 * Kafka Transaction : [https://baebalja.tistory.com/627](https://baebalja.tistory.com/627)
 * Kafka Idempotence, Transaction : [https://www.confluent.io/blog/exactly-once-semantics-are-possible-heres-how-apache-kafka-does-it/](https://www.confluent.io/blog/exactly-once-semantics-are-possible-heres-how-apache-kafka-does-it/)
