@@ -1,6 +1,5 @@
 ---
 title: Kafka Schema Registry
-draft: true
 ---
 
 ## 1. Kafka Schema Registry
