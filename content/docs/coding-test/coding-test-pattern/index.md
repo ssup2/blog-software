@@ -28,6 +28,9 @@ title: Coding Test Pattern
 
 ## 7. Sliding Window
 
+* 연속적인 부분 배열을 찾는데 유용한 패턴
+* 완전 탐색대비 시간의 복잡도를 `O(n * k)`에서 `O(n)`으로 감소 가능 (`k`는 부분 배열의 크기)
+* 일반적으로 `start_index`와 `end_index`를 이용하여 Window의 시작과 끝을 표현
 * Example Problems
   * [LeetCode / Longest Substring Without Repeating Characters](../../coding-test/leetcode-longest-substring-without-repeating-characters/)
 
