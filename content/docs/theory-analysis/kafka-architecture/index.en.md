@@ -95,7 +95,7 @@ However, having more Consumers does not necessarily increase throughput, and an 
 
 Partitions and Consumers must have an **N:1** relationship. Therefore, as with `Consumer Group B`, when the number of Partitions is less than the number of Consumers, idle Consumers occur. On the other hand, as with `Consumer Group A` or `Consumer Group C`, when the number of Partitions is greater than the number of Consumers, there is no problem with operation, but some Consumers process more messages, causing throughput asymmetry. For this reason, it is best to set the number of Partitions and Consumers to be exactly the same.
 
-### 1.5. Producer ACK
+### 1.5. ACK
 
 Kafka provides ACK-related options for Producers. Producers can use ACK to check whether the Records they sent were properly delivered to Brokers, as well as minimize Record loss. It provides three options: `0`, `1`, and `all`. Each Producer can set a different ACK option.
 

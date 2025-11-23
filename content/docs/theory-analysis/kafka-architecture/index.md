@@ -95,7 +95,7 @@ Consumer Group은 다수의 Consumer를 묶어 하나의 Topic을 다수의 Cons
 
 Partition과 Consumer는 반드시 **N:1**의 관계를 가져아한다. 따라서 `Consumer Group B`와 같이 Partition의 개수가 Consumer 개수보다 적은 경우 유휴 Consumer가 발생하게 된다. 반면에 `Consumer Group A` 또는 `Consumer Group C`와 같이 Partition의 개수가 Consumer 개수보다 많은 경우, 동작에는 문제가 없지만 일부 Consumer에 더 많은 Message를 처리하게 되어 처리량 비대칭이 발생하게 된다. 이러한 이유 때문에 Partition의 개수와 Consumer의 개수는 반드시 동일하게 설정하는게 좋다.
 
-### 1.5. Producer ACK
+### 1.5. ACK
 
 Kafka는 Producer를 위한 ACK 관련 Option을 제공한다. Producer는 ACK를 이용하여 자신이 전송한 Record가 Broker에게 잘 전달되었는지 확인할 수 있을 뿐만 아니라 Record 유실도 최소화 할 수 있다. `0`, `1`, `all` 3가지 Option을 제공한다. Producer마다 각각 다른 ACK Option을 설정할 수 있다.
 
