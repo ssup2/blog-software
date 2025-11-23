@@ -15,7 +15,7 @@ Kafka is a distributed message queue based on publish-subscribe. Kafka has the c
 * **Kafka Broker** : The core server of Kafka that receives, manages, and sends messages. Kafka Brokers generally operate as a **Kafka Cluster** on multiple nodes for load balancing and HA (High Availability).
 * **Zookeeper** : Performs the role of a highly available storage for storing metadata of Kafka Cluster. Like Kafka Brokers, it operates as a cluster on multiple nodes. From Kafka version 2.8 onwards, it supports **KRaft Mode** where Kafka Brokers operating based on the Raft algorithm perform the storage role themselves. When operating in KRaft Mode, Zookeeper is not used separately.
 * **Topic** : Unit for managing messages. Topics are divided into smaller units called **Partitions**, and Kafka increases message throughput using multiple Partitions. Partitions are composed of a collection of **Records**, where Record means the **minimum transmission unit** defined in Kafka.
-* **Producer** : App that sends (**Publishes**) messages to Topics.
+* **Producer** : App that sends (**Publishes**) messages to Topics. When multiple Partitions exist, it determines which Partition to store Records in through **Partitioner**.
 * **Consumer** : App that receives (**Subscribes**) messages from Topics. Consumers check for the existence of messages through Poll functions in a **Polling manner**, and if there is a message, they fetch it. That is, messages are delivered from Topics to Consumers, but the entity that fetches messages is the Consumer.
 * **Consumer Group** : As the name implies, it performs the role of grouping multiple Consumers, and Kafka uses Consumer Groups to increase the availability and message throughput of Consumers.
 
@@ -38,20 +38,9 @@ Record means the **minimum transmission unit** defined in Kafka. Producer create
 
 [Table 1] describes the Fields of Records delivered by Producers. All Fields except Topic are Optional fields.
 
-{{< table caption="[Table 2] Producer Record Partition Decision" >}}
-| Key | Partition | Description |
-|---|---|---|
-| X | X | Partition is determined using Round-robin method. |
-| O | X | Partition is determined based on Key. |
-| X | O | Stored in the specified Partition. |
-| O | O | Stored in the specified Partition. |
-{{< /table >}}
-
-The Partition where Records are stored is determined based on the Key and Partition values, and [Table 2] shows how Partition is determined for each case. If both are not specified, Partition is determined using Round-robin method. If only Key is specified without Partition, Partition is determined based on Key. If Partition is specified, Records are stored in the specified Partition regardless of Key. When Key or Partition is specified, Records may concentrate on specific Partitions, so it is important to set appropriate Key or Partition.
-
 #### 1.1.2. Consumer Record
 
-{{< table caption="[Table 3] Consumer Record" >}}
+{{< table caption="[Table 2] Consumer Record" >}}
 | Field | Optional | Description |
 |---|---|---|
 | **Topic** | X | Topic where the Record was stored. |
@@ -67,31 +56,46 @@ The Partition where Records are stored is determined based on the Key and Partit
 | **Leader Epoch** | X | Epoch of the Leader Partition where the Record was stored. |
 {{< /table >}}
 
-[Table 3] describes the Fields of Records received by Consumers. All Fields except Topic and Partition are Optional fields.
+[Table 2] describes the Fields of Records received by Consumers. All Fields except Topic and Partition are Optional fields.
 
-### 1.2. Consumer Group
+### 1.2. Partition, Offset
 
-Consumer Group groups multiple Consumers so that multiple Consumers can process one Topic simultaneously, increasing the availability and message throughput of Consumers. In [Figure 1], you can see that `Consumer Group A` has one Consumer, `Consumer Group B` has 2 Consumers, and `Consumer Group C` has 3 Consumers.
+{{< figure caption="[Figure 2] Kafka Partition" src="images/kafka-partition.png" width="1000px" >}}
 
-{{< figure caption="[Figure 2] Kafka Architecture with Wrong Consumer Group" src="images/kafka-architecture-wrong-consumer-group.png" width="1000px" >}}
+Partition is a unit for distributing one Topic to multiple Kafka Brokers within a Kafka Cluster for parallel processing to increase message throughput, and also performs the role of a Queue that stores messages sequentially. Each Topic can have a different number of Partitions. [Figure 2] shows Partitions interacting with Producers and Consumers. You can see that `Topic A` is composed of one Partition operating on one Broker, and `Topic B` is composed of 3 Partitions operating on multiple Brokers.
 
-However, having more Consumers does not necessarily increase throughput, and an appropriate number of Partitions for Topics is also important. In [Figure 1], since the number of Consumers matches the number of Partitions, all Consumers can process messages efficiently, but as in [Figure 2], when the number of Partitions and Consumers differ, all Consumers cannot process messages efficiently.
-
-Partitions and Consumers must have an **N:1** relationship. Therefore, as with `Consumer Group B`, when the number of Partitions is less than the number of Consumers, idle Consumers occur. On the other hand, as with `Consumer Group A` or `Consumer Group C`, when the number of Partitions is greater than the number of Consumers, there is no problem with operation, but some Consumers process more messages, causing throughput asymmetry. For this reason, it is best to set the number of Partitions and Consumers to be exactly the same.
-
-### 1.3. Partition, Offset
-
-{{< figure caption="[Figure 3] Kafka Partition" src="images/kafka-partition.png" width="1000px" >}}
-
-Partition is a unit for distributing one Topic to multiple Kafka Brokers within a Kafka Cluster for parallel processing to increase message throughput, and also performs the role of a Queue that stores messages sequentially. Each Topic can have a different number of Partitions. [Figure 3] shows Partitions interacting with Producers and Consumers. You can see that `Topic A` is composed of one Partition operating on one Broker, and `Topic B` is composed of 3 Partitions operating on multiple Brokers.
-
-Producer converts messages to be sent into **Records** and stores them sequentially at the end of the Partition. At this time, the ID of the Record increases sequentially like an Array's Index. This ID of the Record is called **Offset** in Kafka. Separately from Producers, Consumers start from the beginning of the Partition and read Records sequentially while increasing the **Consumer Offset**. Here, Consumer Offset means the Offset of the last Record in the Partition that the Consumer has finished processing. Consumer Offset is stored in Kafka Broker for each Partition and Consumer Group. For example, in [Figure 3], for `Partition 0` of `Topic A`, the Consumer Offset of `Consumer Group B` is `6`, and the Consumer Offset of `Consumer Group B` is `4`.
+Producer converts messages to be sent into **Records** and stores them sequentially at the end of the Partition. At this time, the ID of the Record increases sequentially like an Array's Index. This ID of the Record is called **Offset** in Kafka. Separately from Producers, Consumers start from the beginning of the Partition and read Records sequentially while increasing the **Consumer Offset**. Here, Consumer Offset means the Offset of the last Record in the Partition that the Consumer has finished processing. Consumer Offset is stored in Kafka Broker for each Partition and Consumer Group. For example, in [Figure 2], for `Partition 0` of `Topic A`, the Consumer Offset of `Consumer Group B` is `6`, and the Consumer Offset of `Consumer Group B` is `4`.
 
 Partitions exist on **Disk**, not in Memory, for Record retention. Disk generally has lower Read/Write performance compared to Memory, and especially, Random Read/Write performance is much lower for Disk compared to Memory. However, for Sequential Read/Write, Disk performance does not significantly lag behind Memory performance, so Kafka is designed to use Sequential Read/Write as much as possible when using Partitions.
 
 Also, Kafka is designed so that Records in the Kernel's Disk Cache (Page Cache) are directly copied to the Kernel's Socket Buffer without going through Kafka, minimizing Copy Overhead that occurs when delivering Records to Consumers through the Network. Partitions are not actually stored on Disk as a single file, but are divided and stored in units called **Segments**. The default size of a Segment is 1GB.
 
-### 1.4. ACK
+### 1.3. Producer Partitioner
+
+{{< table caption="[Table 3] Producer Partitioner" >}}
+| Key | Partition | Partitioner | Description |
+|---|---|---|---|
+| X | X | Sticky Partitioner | Partition is determined using Round-robin method. |
+| O | X | Hash Partitioner | Partition is determined based on Key. |
+| X | O | X | Stored in the specified Partition. |
+| O | O | X | Stored in the specified Partition. |
+{{< /table >}}
+
+When multiple Partitions exist in a Topic, Producer Partitioner determines which Partition to send Records to. Default Partitioners exist depending on the Key and Partition values of Records sent by Producers. [Table 3] shows the Default Partitioners used depending on Key and Partition values for each case. When Key and Partition are not specified, Sticky Partitioner is used. Sticky Partitioner is a method that distributes Records as evenly as possible to Partitions in Record Batch units.
+
+When only Key is specified in Records, Hash Partitioner is used. Hash Partitioner is a method that determines Partition using a Hashing function based on Key. When Partition is specified in Records, Records are stored in the specified Partition regardless of Key, and in this case, Partitioner is not used. When Key or Partition is specified, Records may concentrate on specific Partitions, so it is important to set appropriate Key or Partition. In addition to Default Partitioners, Custom Partitioners can be used to allow users to implement and use their own Partitioners.
+
+### 1.4. Consumer Group
+
+Consumer Group groups multiple Consumers so that multiple Consumers can process one Topic simultaneously, increasing the availability and message throughput of Consumers. In [Figure 1], you can see that `Consumer Group A` has one Consumer, `Consumer Group B` has 2 Consumers, and `Consumer Group C` has 3 Consumers.
+
+{{< figure caption="[Figure 3] Kafka Architecture with Wrong Consumer Group" src="images/kafka-architecture-wrong-consumer-group.png" width="1000px" >}}
+
+However, having more Consumers does not necessarily increase throughput, and an appropriate number of Partitions for Topics is also important. In [Figure 1], since the number of Consumers matches the number of Partitions, all Consumers can process messages efficiently, but as in [Figure 3], when the number of Partitions and Consumers differ, all Consumers cannot process messages efficiently.
+
+Partitions and Consumers must have an **N:1** relationship. Therefore, as with `Consumer Group B`, when the number of Partitions is less than the number of Consumers, idle Consumers occur. On the other hand, as with `Consumer Group A` or `Consumer Group C`, when the number of Partitions is greater than the number of Consumers, there is no problem with operation, but some Consumers process more messages, causing throughput asymmetry. For this reason, it is best to set the number of Partitions and Consumers to be exactly the same.
+
+### 1.5. Producer ACK
 
 Kafka provides ACK-related options for Producers. Producers can use ACK to check whether the Records they sent were properly delivered to Brokers, as well as minimize Record loss. It provides three options: `0`, `1`, and `all`. Each Producer can set a different ACK option.
 
@@ -101,7 +105,7 @@ Kafka provides ACK-related options for Producers. Producers can use ACK to check
 
 Kafka does not provide separate ACK options for Consumers. As mentioned above, Consumers deliver the Offset of Records that have been processed to Kafka Broker. That is, **the Offset of Records delivered by Consumers performs the role of ACK to Kafka Broker**. Generally, Apps performing the Consumer role use the Auto Commit feature (`enable.auto.commit=true`) of the Consumer Library to deliver the Offset of received Records to Kafka Broker at certain intervals without App intervention, or directly deliver the Offset after completing Record processing in the App.
 
-### 1.5. Record Retention
+### 1.6. Record Retention
 
 Kafka preserves Records stored in Partitions according to certain criteria, which is expressed as **Record Retention** policy in Kafka. The Record Retention policy first includes a method of preserving only Records within a specific period. If the period is set to 7 days, Records are preserved in Kafka for 7 days after arrival, and preservation is not guaranteed after that. The second method is to preserve so that Partition size does not exceed a specific capacity. If Partition becomes larger than the configured capacity due to Record Write, Records at the front of the Partition are deleted to maintain the configured Partition capacity.
 
@@ -122,7 +126,7 @@ kafka-configs.sh --bootstrap-server kafka-broker-host:9092 --entity-type topics 
 
 Record Retention can be set by **configuring on Brokers** for global settings, or **setting for each Topic**. [Config 1] shows examples of Record Retention settings based on duration and capacity for Brokers, and [Shell 1] shows examples of Record Retention settings based on duration or capacity for each Topic.
 
-### 1.6. Replication, Failover
+### 1.7. Replication, Failover
 
 Even when using multiple Brokers and Partitions, if Replication is not applied, Record loss cannot be prevented when some Brokers die. For example, in [Figure 1], if `Broker C` dies, Record loss occurs for all Records of `Topic B` and `Partition 0` of `Topic C`. To prevent such Record loss, it is necessary to apply Replication to duplicate Partitions.
 
@@ -152,4 +156,3 @@ Consumers may also send the Offset of Records that have been processed to Broker
 * [https://www.popit.kr/kafka-%EC%9A%B4%EC%98%81%EC%9E%90%EA%B0%80-%EB%A7%90%ED%95%98%EB%8A%94-producer-acks/](https://www.popit.kr/kafka-%EC%9A%B4%EC%98%81%EC%9E%90%EA%B0%80-%EB%A7%90%ED%95%98%EB%8A%94-producer-acks/)
 * Kafka Record : [https://lankydan.dev/intro-to-kafka-consumers](https://lankydan.dev/intro-to-kafka-consumers)
 * Kafka Record : [https://zzzzseong.tistory.com/107](https://zzzzseong.tistory.com/107)
-

@@ -15,7 +15,7 @@ Kafka는 Publish-subscribe 기반의 분산 Message Queue이다. Kafka는 수신
 * **Kafka Broker** : Message를 수신, 관리, 전송하는 Kafka의 핵심 Server이다. Kafka Broker는 일반적으로 Load Balancing 및 HA (High Availability)를 위해서 다수의 Node 위에서 **Kafka Cluster**를 이루어 동작한다.
 * **Zookeeper** : Kafka Cluster의 Metadata를 저장하기 위한 고가용성을 제공하는 저장소 역할을 수행한다. Kafka Broker와 같이 다수의 Node 위에서 Cluster를 이루어 동작한다. Kafka 2.8 Version 이후에는 Raft 알고리즘을 기반으로 동작하는 Kafka Broker가 스스로 저장소 역할을 수행하는 **KRaft Mode**를 지원한다. KRaft Mode로 동작하는 경우 Zookeeper를 별도로 이용하지 않는다.
 * **Topic** : Message를 관리하는 단위이다. Topic은 다시 **Partition**이라는 작은 단위로 쪼개지며, Kafka는 다수의 Partiton을 이용하여 Message 처리량을 높인다. Partition은 다시 **Record**의 집합으로 구성되며, 여기서 Record는 Kafka에서 정의하는 최소 전송 단위를 의미한다.
-* **Producer** : Topic에게 Message를 전송(**Publish**)하는 App을 의미한다.
+* **Producer** : Topic에게 Message를 전송(**Publish**)하는 App을 의미한다. 다수의 Partition이 존재하는 경우 **Partitioner**를 통해서 Record를 저장할 Partition을 결정한다.
 * **Consumer** : Topic으로부터 Message를 전달 받는(**Subscribe**) App을 의미한다. Consumer는 Poll 함수를 통해서 **Polling 방식**으로 Message의 존재 여부를 확인하고, Message가 있을경우 Message를 가져온다. 즉 Message는 Topic에서 Consumer로 전달되지만, Message를 가져오는 주체는 Consumer이다.
 * **Consumer Group** : 의미 그대로 다수의 Consumer 묶는 역할을 수행하며, Kafka는 Consumer Group을 이용하여 Consumer의 가용성 및 Message 처리량을 높인다.
 
@@ -38,20 +38,9 @@ Record는 Kafka에서 정의하는 **최소 전송 단위**를 의미한다. Pro
 
 [Table 1]은 Producer가 전달하는 Record의 Field를 설명하고 있다. Topic을 제외한 나머지 Field는 Optional 필드이다.
 
-{{< table caption="[Table 2] Producer Record Partition Decision" >}}
-| Key | Partition | Description |
-|---|---|---|
-| X | X | Round-robin 방식으로 Partition을 결정한다. |
-| O | X | Key를 기준으로 Partition을 결정한다. |
-| X | O | 명시된 Partition에 저장한다. |
-| O | O | 명시된 Partition에 저장한다. |
-{{< /table >}}
-
-Record가 저장되는 Partition은 Key와 Partition 값에 따라서 결정되며, [Table 2]는 각 경우에 따라경 Partition을 결정하는 방식을 나타내고 있다. 둘다 명시되어 있지 않은 경우 Round-robin 방식으로 Partition을 결정한다. Partition 없이 Key만 명시되어 있는 경우 Key를 기준으로 Partition을 결정한다. Partition이 명시되어 있는 경우 Key에 관계없이 명시된 Partition에 저장된다. Key나 Partition을 명시하는 경우에는 특정 Partition으로만 Record가 몸릴수 있기 때문에 적절한 Key 또는 Partition을 설정하는 것이 중요하다.
-
 #### 1.1.2. Consumer Record
 
-{{< table caption="[Table 3] Consumer Record" >}}
+{{< table caption="[Table 2] Consumer Record" >}}
 | Field | Optional | Description |
 |---|---|---|
 | **Topic** | X | Record가 저장되었던 Topic을 의미한다. |
@@ -67,23 +56,13 @@ Record가 저장되는 Partition은 Key와 Partition 값에 따라서 결정되�
 | **Leader Epoch** | X | Record가 저장되었던 Leader Partition의 Epoch을 의미한다. |
 {{< /table >}}
 
-[Table 3]은 Consumer가 수신하는 Record의 Field를 설명하고 있다. Topic과 Partition을 제외한 나머지 Field는 Optional 필드이다.
+[Table 2]는 Consumer가 수신하는 Record의 Field를 설명하고 있다. Topic과 Partition을 제외한 나머지 Field는 Optional 필드이다.
 
-### 1.2. Consumer Group
+### 1.2. Partition, Offset
 
-Consumer Group은 다수의 Consumer를 묶어 하나의 Topic을 다수의 Consumer가 동시에 처리할 수 있도록 만들어 Consumer의 가용성 및 Message 처리량을 높인다. [Figure 1]에서 `Consumer Group A`는 하나의 Consumer, `Consumer Group B`는 2개의 Consumer, `Consumer Group C`는 3개의 Consumer를 가지고 있는것을 확인할 수 있다.
+{{< figure caption="[Figure 2] Kafka Partition" src="images/kafka-partition.png" width="1000px" >}}
 
-{{< figure caption="[Figure 2] Kafka Architecture with Wrong Consumer Group" src="images/kafka-architecture-wrong-consumer-group.png" width="1000px" >}}
-
-다만 Consumer의 개수만 많다고 해서 처리량이 높아지는것은 아니며, 적절한 Topic의 Partition의 개수도 중요하다. [Figure 1]에서는 Partition의 개수와 동일하게 Consumer의 개수가 동일하기 때문에 모든 Consumer가 효율적으로 Message를 처리할 수 있지만, [Figure 2] 처럼 Partition의 개수와 Consumer의 개수가 다른 경우에는 모든 Consumer가 효율적으로 Message를 처리할 수 없다.
-
-Partition과 Consumer는 반드시 **N:1**의 관계를 가져아한다. 따라서 `Consumer Group B`와 같이 Partition의 개수가 Consumer 개수보다 적은 경우 유휴 Consumer가 발생하게 된다. 반면에 `Consumer Group A` 또는 `Consumer Group C`와 같이 Partition의 개수가 Consumer 개수보다 많은 경우, 동작에는 문제가 없지만 일부 Consumer에 더 많은 Message를 처리하게 되어 처리량 비대칭이 발생하게 된다. 이러한 이유 때문에 Partition의 개수와 Consumer의 개수는 반드시 동일하게 설정하는게 좋다.
-
-### 1.3. Partition, Offset
-
-{{< figure caption="[Figure 3] Kafka Partition" src="images/kafka-partition.png" width="1000px" >}}
-
-Partition은 병렬처리로 Message의 처리량을 높이기 위해서 하나의 Topic을 Kafka Cluster 내부의 다수의 Kafka Broker에게 분산하기 위한 단위이자, Message를 순차적으로 저장하는 Queue 역할을 수행한다. 각 Topic 별로 다른 개수의 Partition을 가질 수 있다. [Figure 3]은 Producer 및 Consumer와 상호작용을 하는 Partition을 나타내고 있다. `Topic A`는 하나의 Broker에서 동작하는 하나의 Partition로 구성되어 있고, `Topic B`는 다수의 Broker에서 동작하는 3개의 Partition으로 구성되어 있는것을 확인할 수 있다.
+Partition은 병렬처리로 Message의 처리량을 높이기 위해서 하나의 Topic을 Kafka Cluster 내부의 다수의 Kafka Broker에게 분산하기 위한 단위이자, Message를 순차적으로 저장하는 Queue 역할을 수행한다. 각 Topic 별로 다른 개수의 Partition을 가질 수 있다. [Figure 2]는 Producer 및 Consumer와 상호작용을 하는 Partition을 나타내고 있다. `Topic A`는 하나의 Broker에서 동작하는 하나의 Partition로 구성되어 있고, `Topic B`는 다수의 Broker에서 동작하는 3개의 Partition으로 구성되어 있는것을 확인할 수 있다.
 
 Producer는 전송할 Message를 **Record**로 전환하여 Partition의 끝에 차례대로 저장한다. 이때 Record의 ID는 Array의 Index처럼 순차적으로 증가한다. 이러한 Record의 ID를 Kafka에서는 **Offset**이라고 한다. Producer와 별개로 Consumer는 Partition의 앞부분부터 시작하여 **Consumer Offset**을 증가시키며 차례대로 Record를 읽는다. 여기서 Consumer Offset은 Consumer가 처리를 완료한 Partition의 가장 마지막 Record의 Offset을 의미한다. Consumer Offset은 각 Partition, Consumer Group 별로 Kafka Broker에 저장된다. 예를들어 [Figure 3]에서 `Topic A`의 `Partition 0`의 경우 `Consumer Group B`의 Consumer Offset은 `6`, `Consumer Group B`의 Consumer Offset은 `4`를 나타내고 있다.
 
@@ -91,7 +70,32 @@ Partition은 Record 보존을 위해서 Memory가 아닌 **Disk**에 존재한�
 
 또한 Kafka는 Kernel의 Disk Cache (Page Cache)에 있는 Record가 Kafka를 거치지 않고 Kernel의 Socket Buffer로 바로 복사되도록 만들어, Record를 Network를 통해 Consumer로 전달시 발생하는 Copy Overhead를 최소한으로 줄였다. Partition은 실제로 하나의 파일로 Disk에 저장되지 않고 **Segment** 불리는 단위로 쪼개져서 저장된다. Segment의 기본 크기값은 1GB이다.
 
-### 1.4. ACK
+### 1.3. Producer Partitioner
+
+{{< table caption="[Table 3] Producer Partitioner" >}}
+| Key | Partition | Partitioner | Description |
+|---|---|---|---|
+| X | X | Sticky Partitioner | Round-robin 방식으로 Partition을 결정한다. |
+| O | X | Hash Partitioner | Key를 기준으로 Partition을 결정한다. |
+| X | O | X | 명시된 Partition에 저장한다. |
+| O | O | X | 명시된 Partition에 저장한다. |
+{{< /table >}}
+
+Topic에 다수의 Partition이 존재할 경우 Producer Partitioner는 어느 Partition에 Record를 전송할지를 결정한다. Producer가 전송하는 Record의 Key와 Partition 값에 따라서 이용하는 Default Partitioner가 존재한다. [Table 3]은 각 경우에 Key와 Partition 값에 따라서 이용하는 Default Partitioner를 나타내고 있다. Key와 Partition이 명시되어 있지 않은 경우에는 Sticky Partitioner가 이용된다. Sticky Partitioner는 Record Batch 단위로 가능한 균등하게 Partition에 분배하는 방식이다.
+
+Record에 Key만 명시되어 있는 경우에는 Hash Partitioner가 이용된다. Hash Partitioner는 Key를 기준으로 Hashing 함수를 이용하여 Partition을 결정하는 방식이다. Partition에 Partition이 명시되어 있는 경우에는 Key에 관계없이 명시된 Partition Record가 저장되며, 이 경우 Partitioner는 이용되지 않는다. Key나 Partition을 명시하는 경우에는 특정 Partition으로만 Record가 몸릴수 있기 때문에 적절한 Key 또는 Partition을 설정하는 것이 중요하다. Default Partitioner 뿐만 아니라 Custom Partitioner를 이용하여 사용자가 직접 Partitioner를 구현하여 이용할 수 있다.
+
+### 1.4. Consumer Group
+
+Consumer Group은 다수의 Consumer를 묶어 하나의 Topic을 다수의 Consumer가 동시에 처리할 수 있도록 만들어 Consumer의 가용성 및 Message 처리량을 높인다. [Figure 1]에서 `Consumer Group A`는 하나의 Consumer, `Consumer Group B`는 2개의 Consumer, `Consumer Group C`는 3개의 Consumer를 가지고 있는것을 확인할 수 있다.
+
+{{< figure caption="[Figure 3] Kafka Architecture with Wrong Consumer Group" src="images/kafka-architecture-wrong-consumer-group.png" width="1000px" >}}
+
+다만 Consumer의 개수만 많다고 해서 처리량이 높아지는것은 아니며, 적절한 Topic의 Partition의 개수도 중요하다. [Figure 1]에서는 Partition의 개수와 동일하게 Consumer의 개수가 동일하기 때문에 모든 Consumer가 효율적으로 Message를 처리할 수 있지만, [Figure 3]처럼 Partition의 개수와 Consumer의 개수가 다른 경우에는 모든 Consumer가 효율적으로 Message를 처리할 수 없다.
+
+Partition과 Consumer는 반드시 **N:1**의 관계를 가져아한다. 따라서 `Consumer Group B`와 같이 Partition의 개수가 Consumer 개수보다 적은 경우 유휴 Consumer가 발생하게 된다. 반면에 `Consumer Group A` 또는 `Consumer Group C`와 같이 Partition의 개수가 Consumer 개수보다 많은 경우, 동작에는 문제가 없지만 일부 Consumer에 더 많은 Message를 처리하게 되어 처리량 비대칭이 발생하게 된다. 이러한 이유 때문에 Partition의 개수와 Consumer의 개수는 반드시 동일하게 설정하는게 좋다.
+
+### 1.5. Producer ACK
 
 Kafka는 Producer를 위한 ACK 관련 Option을 제공한다. Producer는 ACK를 이용하여 자신이 전송한 Record가 Broker에게 잘 전달되었는지 확인할 수 있을 뿐만 아니라 Record 유실도 최소화 할 수 있다. `0`, `1`, `all` 3가지 Option을 제공한다. Producer마다 각각 다른 ACK Option을 설정할 수 있다.
 
@@ -101,7 +105,7 @@ Kafka는 Producer를 위한 ACK 관련 Option을 제공한다. Producer는 ACK�
 
 Kafka는 Consumer를 위한 별도의 ACK Option을 제공하지 않는다. 위에서 언급한것 처럼 Consumer는 처리가 완료된 Record의 Offset을 Kafka Broker에게 전달한다. 즉 **Consumer가 전달하는 Record의 Offset이 Kafka Broker에게 ACK의 역할**을 수행한다. 일반적으로 Consumer 역할을 수행하는 App은 Consumer Library의 Auto Commit 기능(`enable.auto.commit=true`)을 통해서 특정 주기마다 App의 간섭없이 수신 완료한 Record의 Offset을 Kafka Broker에게 전달하거나, App에서 Record 처리까지 완료한 이후에 직접 Offset을 전달하는 방식을 이용한다.
 
-### 1.5. Record Retention
+### 1.6. Record Retention
 
 Kafka는 Partition에 저장되어있는 Record를 일정한 기준에 따라서 보존하며 이를 Kafka에서는 **Record Retention** 정책이라고 표현한다. Record Retention 정책에는 먼져 특정 기간안의 Record만 보존하는 방법이 있다. 기간을 7일로 설정해 준다면 Record는 Kakfka에 도착한뒤 7일까지 보존되며 그 이후에는 보존을 보장하지 않는다. 두번째로는 Partition 사이즈가 특정 용량을 초과하지 않게 보존하는 방법이 있다. Record Write로 인해서 Partition이 설정한 용량보다 커지게 되면 Partition 앞의 Record를 지원 Partition 용량을 유지한다.
 
@@ -122,7 +126,7 @@ kafka-configs.sh --bootstrap-server kafka-broker-host:9092 --entity-type topics 
 
 Record Retention은 **Broker에 설정**하여 전역 설정 방법과, 각 **Topic별로 설정**하는 방법이 있다. [Config 1]은 Broker에 기간, 용량을 기준으로 Record Retention 설정 예시를 나타내고 있으며, [Shell 1]은 Topic 별로 기간 또는 용량을 기준으로 Record Retention 설정 예시를 나타내고 있다.
 
-### 1.6. Replication, Failover
+### 1.7. Replication, Failover
 
 다수의 Broker와 Partition을 이용하여도 Replication이 적용되지 않은 상태에서는 일부 Broker가 죽으면 Record 손실을 막을 수 없다. 예를 들어 [Figure 1]에서 `Broker C`가 죽을경우 `Topic B`의 모든 Record와 `Topic C`의 `Partition 0`의 Record 손실이 발생하게 된다. 이러한 Record 손실을 방지하기 위해서는 Replication을 적용하여 Parition을 복제하는 것이 필요하다. 
 
