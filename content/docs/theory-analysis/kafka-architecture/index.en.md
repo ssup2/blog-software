@@ -72,18 +72,18 @@ Also, Kafka is designed so that Records in the Kernel's Disk Cache (Page Cache) 
 
 ### 1.3. Producer Partitioner
 
-{{< table caption="[Table 3] Producer Partitioner" >}}
-| Key | Partition | Partitioner | Description |
-|---|---|---|---|
-| X | X | Sticky Partitioner | Partition is determined using Round-robin method. |
-| O | X | Hash Partitioner | Partition is determined based on Key. |
-| X | O | X | Stored in the specified Partition. |
-| O | O | X | Stored in the specified Partition. |
+{{< table caption="[Table 3] Producer Default Partitioner" >}}
+| Key | Partition | Description |
+|---|---|---|
+| X | X | Before Kafka 2.4 Version : Partition is determined using Round-robin method for each Record. After Kafka 2.4 Version : Partition is determined by distributing Partitions as evenly as possible in Record Batch units. (Sticky Partitioner) |
+| O | X | Partition is determined using a Hashing function based on Key. |
+| X | O | Stored in the specified Partition, and Partitioner is not used. |
+| O | O | Stored in the specified Partition, and Partitioner is not used. |
 {{< /table >}}
 
-When multiple Partitions exist in a Topic, Producer Partitioner determines which Partition to send Records to. Default Partitioners exist depending on the Key and Partition values of Records sent by Producers. [Table 3] shows the Default Partitioners used depending on Key and Partition values for each case. When Key and Partition are not specified, Sticky Partitioner is used. Sticky Partitioner is a method that distributes Records as evenly as possible to Partitions in Record Batch units.
+When multiple Partitions exist in a Topic, Producer Partitioner determines which Partition to send Records to. When Partitioner is not specified in Producer, **Default Partitioner** is used. Default Partitioner, when Key and Partition are not specified in Records, determines Partition using Round-robin method for each Record before Kafka 2.4 Version, and uses **Sticky Partitioner** method that distributes Partitions as evenly as possible in Batch units after Kafka 2.4 Version.
 
-When only Key is specified in Records, Hash Partitioner is used. Hash Partitioner is a method that determines Partition using a Hashing function based on Key. When Partition is specified in Records, Records are stored in the specified Partition regardless of Key, and in this case, Partitioner is not used. When Key or Partition is specified, Records may concentrate on specific Partitions, so it is important to set appropriate Key or Partition. In addition to Default Partitioners, Custom Partitioners can be used to allow users to implement and use their own Partitioners.
+When only Key is specified in Records, Partition is determined using a Hashing function, and when Partition is specified in Records, Records are stored in the specified Partition regardless of Key. In this case, Partitioner is not used. When Key or Partition is specified, Records may concentrate on specific Partitions, so it is important to set appropriate Key or Partition. In addition to Default Partitioner, Custom Partitioner can be used to allow users to implement and use their own Partitioner.
 
 ### 1.4. Consumer Group
 

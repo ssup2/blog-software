@@ -72,18 +72,18 @@ Partition은 Record 보존을 위해서 Memory가 아닌 **Disk**에 존재한�
 
 ### 1.3. Producer Partitioner
 
-{{< table caption="[Table 3] Producer Partitioner" >}}
-| Key | Partition | Partitioner | Description |
+{{< table caption="[Table 3] Producer Default Partitioner" >}}
+| Key | Partition | Description |
 |---|---|---|---|
-| X | X | Sticky Partitioner | Round-robin 방식으로 Partition을 결정한다. |
-| O | X | Hash Partitioner | Key를 기준으로 Partition을 결정한다. |
-| X | O | X | 명시된 Partition에 저장한다. |
-| O | O | X | 명시된 Partition에 저장한다. |
+| X | X | Kafka 2.4 Version 이전 : 각 Record 마다 Round-robin 방식으로 Partition을 결정한다. Kafka 2.4 Version 이후 : Record Batch 단위로 가능한 균등하게 Partition을 분배하는 방식으로 Partition을 결정한다. (Sticky Partitioner) |
+| O | X | Key를 기준으로 Hashing 함수를 이용하여 Partition을 결정한다. |
+| X | O | 명시된 Partition에 저장하며, Partitioner는 이용되지 않는다. |
+| O | O | 명시된 Partition에 저장하며, Partitioner는 이용되지 않는다. |
 {{< /table >}}
 
-Topic에 다수의 Partition이 존재할 경우 Producer Partitioner는 어느 Partition에 Record를 전송할지를 결정한다. Producer가 전송하는 Record의 Key와 Partition 값에 따라서 이용하는 Default Partitioner가 존재한다. [Table 3]은 각 경우에 Key와 Partition 값에 따라서 이용하는 Default Partitioner를 나타내고 있다. Key와 Partition이 명시되어 있지 않은 경우에는 Sticky Partitioner가 이용된다. Sticky Partitioner는 Record Batch 단위로 가능한 균등하게 Partition에 분배하는 방식이다.
+Topic에 다수의 Partition이 존재할 경우 Producer Partitioner는 어느 Partition에 Record를 전송할지를 결정한다. Producer에 Partitioner를 명시하지 않을 경우에는 **Default Partitioner**가 이용된다. Default Partitioner는 Record에 Key와 Partition이 명시되어 있지 않은 경우, Kafka 2.4 Version 이전에는 각 Record 마다 Round-robin 방식으로 Partition을 결정하며, Kafka 2.4 Version 이후에는 Batch 단위로 가능한 균등하게 Partition을 분배하는 **Sticky Partitioner** 방식을 이용한다.
 
-Record에 Key만 명시되어 있는 경우에는 Hash Partitioner가 이용된다. Hash Partitioner는 Key를 기준으로 Hashing 함수를 이용하여 Partition을 결정하는 방식이다. Partition에 Partition이 명시되어 있는 경우에는 Key에 관계없이 명시된 Partition Record가 저장되며, 이 경우 Partitioner는 이용되지 않는다. Key나 Partition을 명시하는 경우에는 특정 Partition으로만 Record가 몸릴수 있기 때문에 적절한 Key 또는 Partition을 설정하는 것이 중요하다. Default Partitioner 뿐만 아니라 Custom Partitioner를 이용하여 사용자가 직접 Partitioner를 구현하여 이용할 수 있다.
+Record에 Key만 명시되어 있는 경우에는 Hashing 함수를 이용하여 Partition을 결정하며, Record에 Partition이 명시되어 있는 경우에는 Key에 관계없이 명시된 Partition에 저장된다. 이 경우 Partitioner는 이용되지 않는다. Key나 Partition을 명시하는 경우에는 특정 Partition으로만 Record가 몰릴수 있기 때문에 적절한 Key 또는 Partition을 설정하는 것이 중요하다. Default Partitioner 뿐만 아니라 Custom Partitioner를 이용하여 사용자가 직접 Partitioner를 구현하여 이용할 수 있다.
 
 ### 1.4. Consumer Group
 
