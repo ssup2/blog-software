@@ -56,7 +56,7 @@ Record는 Kafka에서 정의하는 **최소 전송 단위**를 의미한다. Pro
 | **Leader Epoch** | X | Record가 저장되었던 Leader Partition의 Epoch을 의미한다. |
 {{< /table >}}
 
-[Table 2]는 Consumer가 수신하는 Record의 Field를 설명하고 있다. Topic과 Partition을 제외한 나머지 Field는 Optional 필드이다.
+[Table 2]는 Consumer가 가져오는 Record의 Field를 설명하고 있다. Topic과 Partition을 제외한 나머지 Field는 Optional 필드이다.
 
 #### 1.1.3. Record Retention
 
@@ -120,7 +120,7 @@ Producer Buffer는 Producer가 Record를 전송하기 전에 임시로 저장하
 
 #### 1.3.3. Producer Batch
 
-Kafka에서는 효율적인 Record 송수신을 위해서 Producer가 한번에 다수의 Record를 전송하는 Batch 기능을 제공한다. 다음과 같은 Producer Batch 관련 설정이 존재한다.
+Kafka에서는 Producer가 효율적으로 많은양의 Record를 전송할 수 있도록, 한번에 다수의 Record를 전송하는 Batch 기능을 제공한다. 일반적으로 Batch 기능을 활용하는 경우가 많다. 다음과 같은 Producer Batch 관련 설정이 존재한다.
 
 * `batch.size` : Producer가 한번에 전송할 수 있는 최대 Record 크기(Bytes)를 설정한다. 기본값은 `16384B` 이다.
 * `linger.ms` : Producer가 Batch 단위로 전송하기 위해서 대기할 수 있는 최대 시간(ms)을 설정한다. 기본값은 `0ms` 이며, 이는 Batch 기능을 사용하지 않는 것을 의미하지는 않으며, 최소한의 대기시간과 함께 Batch 기능을 사용하는 것을 의미한다.
@@ -149,7 +149,7 @@ Partition과 Consumer는 반드시 **N:1**의 관계를 가져아한다. 따라�
 
 Consumer는 Producer와 동일하게 다수의 Record를 한번에 가져오는 Batch 기능을 제공한다. 다음과 같은 Consumer Batch 관련 설정이 존재한다.
 
-* `fetch.min.bytes` : Consumer가 한번에 가져올 수 있는 최소 Record 크기(Bytes)를 설정한다. 만약 `fetch.min.bytes` 설정값보다 작은 Record를 수신하려고 하면 Consumer의 `poll()` Method는 Blocking되며, 최대 `fetch.max.wait.ms` 시간동안 대기한다. 기본값은 `1B` 이다.
+* `fetch.min.bytes` : Consumer가 한번에 가져올 수 있는 최소 Record 크기(Bytes)를 설정한다. 만약 `fetch.min.bytes` 설정값보다 작은 Record만 Topic에서 존재하는 상태라면 Kafka Broker는 Record를 반환하지 않아 Consumer의 `poll()` Method는 Blocking되며, 최대 `fetch.max.wait.ms` 시간동안 대기한다. 기본값은 `1B` 이다.
 * `fetch.max.bytes` : Consumer가 한번에 가져올 수 있는 최대 Record 크기(Bytes)를 설정한다. 기본값은 `5242880B (50MB)` 이다.
 * `fetch.max.wait.ms` : Consumer가 한번에 가져올 수 있는 최대 시간(ms)을 설정한다. 기본값은 `500ms` 이다.
 * `max.partition.fetch.bytes` : Consumer가 한번에 수신할 수 있는 최대 Partition 크기(Bytes)를 설정한다. 기본값은 `1048576B (1MB)` 이다.
@@ -157,7 +157,7 @@ Consumer는 Producer와 동일하게 다수의 Record를 한번에 가져오는 
 
 #### 1.4.3. Consumer ACK
 
-Kafka는 Consumer를 위한 별도의 ACK Option을 제공하지 않는다. Consumer는 처리가 완료된 Record의 Offset을 Kafka Broker에게 전달한다. 즉 **Consumer가 전달하는 Record의 Offset이 Kafka Broker에게 ACK의 역할**을 수행한다. 일반적으로 Consumer 역할을 수행하는 App은 Consumer Library의 Auto Commit 기능(`enable.auto.commit=true`)을 통해서 특정 주기마다 App의 간섭없이 수신 완료한 Record의 Offset을 Kafka Broker에게 전달하거나, App에서 Record 처리까지 완료한 이후에 직접 Offset을 전달하는 방식을 이용한다.
+Kafka는 Consumer를 위한 별도의 ACK Option을 제공하지 않는다. Consumer는  처리가 완료된 Record의 Offset을 Kafka Broker에게 전달하며, **Consumer가 전달하는 Record의 Offset이 Kafka Broker에게 ACK의 역할**을 수행한다. 일반적으로 Consumer 역할을 수행하는 App은 Consumer Library의 Auto Commit 기능(`enable.auto.commit=true`)을 통해서 특정 주기마다 App의 간섭없이 수신 완료한 Record의 Offset을 Kafka Broker에게 전달하거나, App에서 Record 처리까지 완료한 이후에 직접 Offset을 전달하는 방식을 이용한다.
 
 ### 1.5. Replication, Failover
 

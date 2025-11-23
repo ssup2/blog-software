@@ -120,7 +120,7 @@ Producer Buffer means the Memory space where Producer temporarily stores Records
 
 #### 1.3.3. Producer Batch
 
-Kafka provides Batch functionality where Producer sends multiple Records at once for efficient Record transmission and reception. The following Producer Batch-related settings exist.
+Kafka provides Batch functionality where Producer sends multiple Records at once so that Producer can efficiently send large amounts of Records. Generally, Batch functionality is often utilized. The following Producer Batch-related settings exist.
 
 * `batch.size` : Sets the maximum Record size (Bytes) that Producer can send at once. The default value is `16384B`.
 * `linger.ms` : Sets the maximum time (ms) that Producer can wait to send in Batch units. The default value is `0ms`, which does not mean that Batch functionality is not used, but means that Batch functionality is used with a minimum wait time.
@@ -149,7 +149,7 @@ Partitions and Consumers must have an **N:1** relationship. Therefore, as with `
 
 Consumers provide Batch functionality to fetch multiple Records at once, similar to Producers. The following Consumer Batch-related settings exist.
 
-* `fetch.min.bytes` : Sets the minimum Record size (Bytes) that Consumer can fetch at once. If trying to receive Records smaller than the `fetch.min.bytes` setting value, Consumer's `poll()` Method blocks and waits for up to `fetch.max.wait.ms` time. The default value is `1B`.
+* `fetch.min.bytes` : Sets the minimum Record size (Bytes) that Consumer can fetch at once. If only Records smaller than the `fetch.min.bytes` setting value exist in the Topic, Kafka Broker does not return Records, so Consumer's `poll()` Method blocks and waits for up to `fetch.max.wait.ms` time. The default value is `1B`.
 * `fetch.max.bytes` : Sets the maximum Record size (Bytes) that Consumer can fetch at once. The default value is `5242880B (50MB)`.
 * `fetch.max.wait.ms` : Sets the maximum time (ms) that Consumer can fetch at once. The default value is `500ms`.
 * `max.partition.fetch.bytes` : Sets the maximum Partition size (Bytes) that Consumer can receive at once. The default value is `1048576B (1MB)`.
@@ -157,7 +157,7 @@ Consumers provide Batch functionality to fetch multiple Records at once, similar
 
 #### 1.4.3. Consumer ACK
 
-Kafka does not provide separate ACK options for Consumers. As mentioned above, Consumers deliver the Offset of Records that have been processed to Kafka Broker. That is, **the Offset of Records delivered by Consumers performs the role of ACK to Kafka Broker**. Generally, Apps performing the Consumer role use the Auto Commit feature (`enable.auto.commit=true`) of the Consumer Library to deliver the Offset of received Records to Kafka Broker at certain intervals without App intervention, or directly deliver the Offset after completing Record processing in the App.
+Kafka does not provide separate ACK options for Consumers. Consumers deliver the Offset of Records that have been processed to Kafka Broker, and **the Offset of Records delivered by Consumers performs the role of ACK to Kafka Broker**. Generally, Apps performing the Consumer role use the Auto Commit feature (`enable.auto.commit=true`) of the Consumer Library to deliver the Offset of received Records to Kafka Broker at certain intervals without App intervention, or directly deliver the Offset after completing Record processing in the App.
 
 ### 1.5. Replication, Failover
 
