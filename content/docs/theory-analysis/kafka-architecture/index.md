@@ -15,7 +15,7 @@ Kafka는 Publish-subscribe 기반의 분산 Message Queue이다. Kafka는 수신
 * **Kafka Broker** : Message를 수신, 관리, 전송하는 Kafka의 핵심 Server이다. Kafka Broker는 일반적으로 Load Balancing 및 HA (High Availability)를 위해서 다수의 Node 위에서 **Kafka Cluster**를 이루어 동작한다.
 * **Zookeeper** : Kafka Cluster의 Metadata를 저장하기 위한 고가용성을 제공하는 저장소 역할을 수행한다. Kafka Broker와 같이 다수의 Node 위에서 Cluster를 이루어 동작한다. Kafka 2.8 Version 이후에는 Raft 알고리즘을 기반으로 동작하는 Kafka Broker가 스스로 저장소 역할을 수행하는 **KRaft Mode**를 지원한다. KRaft Mode로 동작하는 경우 Zookeeper를 별도로 이용하지 않는다.
 * **Topic** : Message를 관리하는 단위이다. Topic은 다시 **Partition**이라는 작은 단위로 쪼개지며, Kafka는 다수의 Partiton을 이용하여 Message 처리량을 높인다. Partition은 다시 **Record**의 집합으로 구성되며, 여기서 Record는 Kafka에서 정의하는 최소 전송 단위를 의미한다.
-* **Producer** : Topic에게 Message를 전송(**Publish**)하는 App을 의미한다. 다수의 Partition이 존재하는 경우 **Partitioner**를 통해서 Record를 저장할 Partition을 결정한다.
+* **Producer** : Topic에게 Message를 전송(**Publish**)하는 App을 의미한다. 다수의 Partition이 존재하는 경우 Producer에 내장된 **Partitioner**를 통해서 Record를 저장할 Partition을 결정한다.
 * **Consumer** : Topic으로부터 Message를 전달 받는(**Subscribe**) App을 의미한다. Consumer는 Poll 함수를 통해서 **Polling 방식**으로 Message의 존재 여부를 확인하고, Message가 있을경우 Message를 가져온다. 즉 Message는 Topic에서 Consumer로 전달되지만, Message를 가져오는 주체는 Consumer이다.
 * **Consumer Group** : 의미 그대로 다수의 Consumer 묶는 역할을 수행하며, Kafka는 Consumer Group을 이용하여 Consumer의 가용성 및 Message 처리량을 높인다.
 
@@ -81,7 +81,7 @@ Partition은 Record 보존을 위해서 Memory가 아닌 **Disk**에 존재한�
 | O | O | 명시된 Partition에 저장하며, Partitioner는 이용되지 않는다. |
 {{< /table >}}
 
-Topic에 다수의 Partition이 존재할 경우 Producer Partitioner는 어느 Partition에 Record를 전송할지를 결정한다. Producer에 Partitioner를 명시하지 않을 경우에는 **Default Partitioner**가 이용된다. Default Partitioner는 Record에 Key와 Partition이 명시되어 있지 않은 경우, Kafka 2.4 Version 이전에는 각 Record 마다 Round-robin 방식으로 Partition을 결정하며, Kafka 2.4 Version 이후에는 Batch 단위로 가능한 균등하게 Partition을 분배하는 **Sticky Partitioner** 방식을 이용한다.
+Topic에 다수의 Partition이 존재할 경우 Producer에 내장된 Partitioner는 어느 Partition에 Record를 전송할지를 결정한다. Producer에 Partitioner를 명시하지 않을 경우에는 **Default Partitioner**가 기본적으로 이용된다. Default Partitioner는 Record에 Key와 Partition이 명시되어 있지 않은 경우, Kafka 2.4 Version 이전에는 각 Record 마다 Round-robin 방식으로 Partition을 결정하며, Kafka 2.4 Version 이후에는 Batch 단위로 가능한 균등하게 Partition을 분배하는 **Sticky Partitioner** 방식을 이용한다.
 
 Record에 Key만 명시되어 있는 경우에는 Hashing 함수를 이용하여 Partition을 결정하며, Record에 Partition이 명시되어 있는 경우에는 Key에 관계없이 명시된 Partition에 저장된다. 이 경우 Partitioner는 이용되지 않는다. Key나 Partition을 명시하는 경우에는 특정 Partition으로만 Record가 몰릴수 있기 때문에 적절한 Key 또는 Partition을 설정하는 것이 중요하다. Default Partitioner 뿐만 아니라 Custom Partitioner를 이용하여 사용자가 직접 Partitioner를 구현하여 이용할 수 있다.
 

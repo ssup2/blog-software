@@ -15,7 +15,7 @@ Kafka is a distributed message queue based on publish-subscribe. Kafka has the c
 * **Kafka Broker** : The core server of Kafka that receives, manages, and sends messages. Kafka Brokers generally operate as a **Kafka Cluster** on multiple nodes for load balancing and HA (High Availability).
 * **Zookeeper** : Performs the role of a highly available storage for storing metadata of Kafka Cluster. Like Kafka Brokers, it operates as a cluster on multiple nodes. From Kafka version 2.8 onwards, it supports **KRaft Mode** where Kafka Brokers operating based on the Raft algorithm perform the storage role themselves. When operating in KRaft Mode, Zookeeper is not used separately.
 * **Topic** : Unit for managing messages. Topics are divided into smaller units called **Partitions**, and Kafka increases message throughput using multiple Partitions. Partitions are composed of a collection of **Records**, where Record means the **minimum transmission unit** defined in Kafka.
-* **Producer** : App that sends (**Publishes**) messages to Topics. When multiple Partitions exist, it determines which Partition to store Records in through **Partitioner**.
+* **Producer** : App that sends (**Publishes**) messages to Topics. When multiple Partitions exist, it determines which Partition to store Records in through **Partitioner** built into Producer.
 * **Consumer** : App that receives (**Subscribes**) messages from Topics. Consumers check for the existence of messages through Poll functions in a **Polling manner**, and if there is a message, they fetch it. That is, messages are delivered from Topics to Consumers, but the entity that fetches messages is the Consumer.
 * **Consumer Group** : As the name implies, it performs the role of grouping multiple Consumers, and Kafka uses Consumer Groups to increase the availability and message throughput of Consumers.
 
@@ -81,7 +81,7 @@ Also, Kafka is designed so that Records in the Kernel's Disk Cache (Page Cache) 
 | O | O | Stored in the specified Partition, and Partitioner is not used. |
 {{< /table >}}
 
-When multiple Partitions exist in a Topic, Producer Partitioner determines which Partition to send Records to. When Partitioner is not specified in Producer, **Default Partitioner** is used. Default Partitioner, when Key and Partition are not specified in Records, determines Partition using Round-robin method for each Record before Kafka 2.4 Version, and uses **Sticky Partitioner** method that distributes Partitions as evenly as possible in Batch units after Kafka 2.4 Version.
+When multiple Partitions exist in a Topic, Partitioner built into Producer determines which Partition to send Records to. When Partitioner is not specified in Producer, **Default Partitioner** is used by default. Default Partitioner, when Key and Partition are not specified in Records, determines Partition using Round-robin method for each Record before Kafka 2.4 Version, and uses **Sticky Partitioner** method that distributes Partitions as evenly as possible in Batch units after Kafka 2.4 Version.
 
 When only Key is specified in Records, Partition is determined using a Hashing function, and when Partition is specified in Records, Records are stored in the specified Partition regardless of Key. In this case, Partitioner is not used. When Key or Partition is specified, Records may concentrate on specific Partitions, so it is important to set appropriate Key or Partition. In addition to Default Partitioner, Custom Partitioner can be used to allow users to implement and use their own Partitioner.
 
