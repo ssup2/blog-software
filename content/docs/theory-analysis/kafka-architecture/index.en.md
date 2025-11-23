@@ -43,10 +43,11 @@ Record means the **minimum transmission unit** defined in Kafka. Producer create
 |---|---|---|
 | X | X | Partition is determined using Round-robin method. |
 | O | X | Partition is determined based on Key. |
+| X | O | Stored in the specified Partition. |
 | O | O | Stored in the specified Partition. |
 {{< /table >}}
 
-The Partition where Records are stored is determined based on the Key and Partition values, and [Table 2] shows how Partition is determined for each case.
+The Partition where Records are stored is determined based on the Key and Partition values, and [Table 2] shows how Partition is determined for each case. If both are not specified, Partition is determined using Round-robin method. If only Key is specified without Partition, Partition is determined based on Key. If Partition is specified, Records are stored in the specified Partition regardless of Key. When Key or Partition is specified, Records may concentrate on specific Partitions, so it is important to set appropriate Key or Partition.
 
 #### 1.1.2. Consumer Record
 
@@ -85,8 +86,6 @@ Partitions and Consumers must have an **N:1** relationship. Therefore, as with `
 Partition is a unit for distributing one Topic to multiple Kafka Brokers within a Kafka Cluster for parallel processing to increase message throughput, and also performs the role of a Queue that stores messages sequentially. Each Topic can have a different number of Partitions. [Figure 3] shows Partitions interacting with Producers and Consumers. You can see that `Topic A` is composed of one Partition operating on one Broker, and `Topic B` is composed of 3 Partitions operating on multiple Brokers.
 
 Producer converts messages to be sent into **Records** and stores them sequentially at the end of the Partition. At this time, the ID of the Record increases sequentially like an Array's Index. This ID of the Record is called **Offset** in Kafka. Separately from Producers, Consumers start from the beginning of the Partition and read Records sequentially while increasing the **Consumer Offset**. Here, Consumer Offset means the Offset of the last Record in the Partition that the Consumer has finished processing. Consumer Offset is stored in Kafka Broker for each Partition and Consumer Group. For example, in [Figure 3], for `Partition 0` of `Topic A`, the Consumer Offset of `Consumer Group B` is `6`, and the Consumer Offset of `Consumer Group B` is `4`.
-
-When multiple Partitions exist in a Topic, if there is no Key in the Record being sent, Producer selects the Partition to deliver the Record using **Round-robin** by default. In this case, the order of Records is not guaranteed, but the advantage is that Records are evenly distributed across multiple Partitions. On the other hand, if a Key exists in the Record, it is determined which Partition to store it in based on the Key. Therefore, order guarantee is possible based on Key, but the problem of Records concentrating on specific Partitions may occur.
 
 Partitions exist on **Disk**, not in Memory, for Record retention. Disk generally has lower Read/Write performance compared to Memory, and especially, Random Read/Write performance is much lower for Disk compared to Memory. However, for Sequential Read/Write, Disk performance does not significantly lag behind Memory performance, so Kafka is designed to use Sequential Read/Write as much as possible when using Partitions.
 

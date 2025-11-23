@@ -43,10 +43,11 @@ Record는 Kafka에서 정의하는 **최소 전송 단위**를 의미한다. Pro
 |---|---|---|
 | X | X | Round-robin 방식으로 Partition을 결정한다. |
 | O | X | Key를 기준으로 Partition을 결정한다. |
+| X | O | 명시된 Partition에 저장한다. |
 | O | O | 명시된 Partition에 저장한다. |
 {{< /table >}}
 
-Record가 저장되는 Partition은 Key와 Partition 값에 따라서 결정되며, [Table 2]는 각 경우에 따라경 Partition을 결정하는 방식을 나타내고 있다.
+Record가 저장되는 Partition은 Key와 Partition 값에 따라서 결정되며, [Table 2]는 각 경우에 따라경 Partition을 결정하는 방식을 나타내고 있다. 둘다 명시되어 있지 않은 경우 Round-robin 방식으로 Partition을 결정한다. Partition 없이 Key만 명시되어 있는 경우 Key를 기준으로 Partition을 결정한다. Partition이 명시되어 있는 경우 Key에 관계없이 명시된 Partition에 저장된다. Key나 Partition을 명시하는 경우에는 특정 Partition으로만 Record가 몸릴수 있기 때문에 적절한 Key 또는 Partition을 설정하는 것이 중요하다.
 
 #### 1.1.2. Consumer Record
 
@@ -85,8 +86,6 @@ Partition과 Consumer는 반드시 **N:1**의 관계를 가져아한다. 따라�
 Partition은 병렬처리로 Message의 처리량을 높이기 위해서 하나의 Topic을 Kafka Cluster 내부의 다수의 Kafka Broker에게 분산하기 위한 단위이자, Message를 순차적으로 저장하는 Queue 역할을 수행한다. 각 Topic 별로 다른 개수의 Partition을 가질 수 있다. [Figure 3]은 Producer 및 Consumer와 상호작용을 하는 Partition을 나타내고 있다. `Topic A`는 하나의 Broker에서 동작하는 하나의 Partition로 구성되어 있고, `Topic B`는 다수의 Broker에서 동작하는 3개의 Partition으로 구성되어 있는것을 확인할 수 있다.
 
 Producer는 전송할 Message를 **Record**로 전환하여 Partition의 끝에 차례대로 저장한다. 이때 Record의 ID는 Array의 Index처럼 순차적으로 증가한다. 이러한 Record의 ID를 Kafka에서는 **Offset**이라고 한다. Producer와 별개로 Consumer는 Partition의 앞부분부터 시작하여 **Consumer Offset**을 증가시키며 차례대로 Record를 읽는다. 여기서 Consumer Offset은 Consumer가 처리를 완료한 Partition의 가장 마지막 Record의 Offset을 의미한다. Consumer Offset은 각 Partition, Consumer Group 별로 Kafka Broker에 저장된다. 예를들어 [Figure 3]에서 `Topic A`의 `Partition 0`의 경우 `Consumer Group B`의 Consumer Offset은 `6`, `Consumer Group B`의 Consumer Offset은 `4`를 나타내고 있다.
-
-Topic에 다수의 Partition이 존재할 때 Producer는 전송하는 Record에 Key가 존재하지 않을 경우 기본적으로 **Round-robin** 방식으로 Record를 전달할 Partiton 선택한다. 이 경우 Record의 순서가 보장되지는 않지만, 다수의 Partition에 균등하게 Record가 분배된다는 장점을 얻을 수 있다. 반면에 Record에 Key가 존재할 경우 Key를 기반으로 어떤 Partition에 저장될지 결정된다. 따라서 Key를 기준으로는 Record의 순서 보장이 가능하지만, 특정 Partition에만 Record가 쏠리는 문제가 발생할 수 있다.
 
 Partition은 Record 보존을 위해서 Memory가 아닌 **Disk**에 존재한다. Disk는 일반적으로 Memory에 비해서 Read/Write 성능이 떨어지며, 특히 Random Read/Write의 성능은 Disk가 Memory에 비해서 많이 떨어진다. 하지만 Sequential Read/Write의 경우 Disk의 성능이 Memory의 성능에 비해서 크게 떨어지지 않기 때문에, Kafka는 Partition 이용시 최대한 Sequential Read/Write를 많이 이용하도록 설계되어 있다.
 
