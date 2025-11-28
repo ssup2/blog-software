@@ -120,7 +120,9 @@ Producer Buffer means the Memory space where Producer temporarily stores Records
 
 #### 1.3.3. Producer Batch
 
-Kafka provides Batch functionality where Producer sends multiple Records at once so that Producer can efficiently send large amounts of Records. Generally, Batch functionality is often utilized. The following Producer Batch-related settings exist.
+{{< figure caption="[Figure 3] Kafka Producer Batch" src="images/kafka-producer-batch.png" width="900px" >}}
+
+Kafka provides Batch functionality where Producer sends multiple Records at once so that Producer can efficiently send large amounts of Records, and generally, Batch functionality is often utilized. [Figure 3] shows Producer sending Records using Batch functionality. You can see that Records are collected by Topic and Partition in one Request and sent in Batch units. The following Producer Batch-related settings exist.
 
 * `batch.size` : Sets the maximum Record size (Bytes) that Producer can send at once. The default value is `16384B`.
 * `linger.ms` : Sets the maximum time (ms) that Producer can wait to send in Batch units. The default value is `0ms`, which does not mean that Batch functionality is not used, but means that Batch functionality is used with a minimum wait time.

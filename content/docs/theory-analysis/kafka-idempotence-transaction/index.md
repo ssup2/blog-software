@@ -7,7 +7,7 @@ Kafka의 Idempotence과 Transaction에 대해서 분석한다.
 
 ## 1. Kafka Idempotence
 
-* Producer ID :
+* Producer ID : 
 * Producer Epoch : 
 * Sequence Number : 
 
