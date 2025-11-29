@@ -122,7 +122,7 @@ Producer Buffer는 Producer가 Record를 전송하기 전에 임시로 저장하
 
 {{< figure caption="[Figure 3] Kafka Producer Batch" src="images/kafka-producer-batch.png" width="900px" >}}
 
-Kafka에서는 Producer가 효율적으로 많은양의 Record를 전송할 수 있도록, 한번에 다수의 Record를 전송하는 Batch 기능을 제공하며, 일반적으로 Batch 기능을 활용하는 경우가 많다. [Figure 3]는 Producer가 Batch 기능을 활용하여 Record를 전송하는 모습을 나타내고 있다. 하나의 Request에 Topic, Partition별로 Record를 모아서 Batch 단위로 전송하는 것을 확인할 수 있다. 다음과 같은 Producer Batch 관련 설정이 존재한다.
+Kafka에서는 Producer가 효율적으로 많은양의 Record를 전송할 수 있도록 한번에 다수의 Record를 전송하는 Batch 기능을 제공하며, 일반적으로 Batch 기능을 활용하는 경우가 많다. [Figure 3]는 Producer가 Batch 기능을 활용하여 Record를 전송하는 모습을 나타내고 있다. 일반적으로 Producer가 다수의 Topic, Partition에 Record를 전송하는 경우에도 Producer는 Kafka Broker와 하나의 Connection만을 유지하며, 하나의 Producer Request에 Topic, Partition별로 Record를 모아서 Batch 단위로 전송하는 것을 확인할 수 있다. 다음과 같은 Producer Batch 관련 설정이 존재한다.
 
 * `batch.size` : Producer가 한번에 전송할 수 있는 최대 Record 크기(Bytes)를 설정한다. 기본값은 `16384B` 이다.
 * `linger.ms` : Producer가 Batch 단위로 전송하기 위해서 대기할 수 있는 최대 시간(ms)을 설정한다. 기본값은 `0ms` 이며, 이는 Batch 기능을 사용하지 않는 것을 의미하지는 않으며, 최소한의 대기시간과 함께 Batch 기능을 사용하는 것을 의미한다.
