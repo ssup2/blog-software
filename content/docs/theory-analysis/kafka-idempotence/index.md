@@ -31,13 +31,15 @@ Kafka Broker는 Idempotence 기능이 활성화 됬을때, 각 PID 마다 Topic/
 
 Kafka Idempotence 기능은 모든 경우에 대해서 중복 Record를 방지하지는 못하며, 다음의 경우에는 중복 Record가 발생할 수 있다.
 
-* Producer가 Record Batch를 전송한 다음에, Producer가 재시작되어 PID가 변경된 이후에 다시 동일한 Record Batch를 전송하는 경우에는 중복 Record가 발생할 수 있다. Kafka Broker는 PID를 기준으로 SEQ Cache를 관리하기 때문에 PID가 변경되면 새로운 Producer라 간주하기 때문이다.
-* Producer가 전송한 Record Batch를 동일한 Paritition이 아닌 다른 Paritition에 전송하는 경우에는 중복 Record가 발생할 수 있다. Kafka Broker는 각 Partition별로 SEQ Cache를 관리하기 때문이다.
+* Producer가 Record Batch를 전송한 다음에, Producer가 재시작되어 PID가 변경된 이후에 다시 동일한 Record Batch를 전송하는 경우에는 중복 Record가 발생할 수 있다. Kafka Broker는 PID를 기준으로 Sequence Number Cache를 관리하기 때문에 PID가 변경되면 새로운 Producer라 간주하기 때문이다.
+* Producer가 전송한 Record Batch를 동일한 Paritition이 아닌 다른 Paritition에 전송하는 경우에는 중복 Record가 발생할 수 있다. Kafka Broker는 각 Partition별로 Sequence Number Cache를 관리하기 때문이다.
 * Producer가 `inflight.requests.per.connection` 설정 값을 **6개** 이상으로 설정하여, Producer가 한꺼번에 6개 이상의 Request를 전송하는 경우에는 중복 Record가 발생할 수 있다. 각 Partition별로 최대 5개의 Record Batch의 시작/끝 Sequence Number만 Caching할 수 있기 때문이다. 5개는 Hard-code로 설정된 값이다. 따라서 Kafka Idempotence 기능을 이용하기 위해서는 `inflight.requests.per.connection` 설정 값은 반드시 **5개** 이하로 설정해야 한다.
 
 ### 1.1. Sequence Flow with Success
 
 {{< figure caption="[Figure 2] Sequence Flow with Success" src="images/kafka-idempotence-sequence-flow-success.png" width="900px" >}}
+
+[Figure 2]는 Kafka Idempotence 기능이 활성화 됬을때, 정상적으로 Record가 저장되는 경우의 Sequence Flow를 나타내고 있다. 단일 Topic/Partition이라고 가정하고 Sequence Number만 나타내고 있다. `120~114`, `124~121`, `132~125` 3개의 Record Batch와 `142~133`, `150~143` 2개의 Record Batch가 나누어 전송되었고, 이후에 Kafka Broker는 Record Batch 처리 이후에 차례대로 ACK를 Producer에 전송하는 것을 확인할 수 있다.
 
 ### 1.2. Sequence Flow with Missing ACKs
 
