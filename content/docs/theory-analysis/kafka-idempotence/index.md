@@ -39,11 +39,13 @@ Kafka Idempotence 기능은 모든 경우에 대해서 중복 Record를 방지�
 
 {{< figure caption="[Figure 2] Sequence Flow with Success" src="images/kafka-idempotence-sequence-flow-success.png" width="900px" >}}
 
-[Figure 2]는 Kafka Idempotence 기능이 활성화 됬을때, 정상적으로 Record가 저장되는 경우의 Sequence Flow를 나타내고 있다. 단일 Topic/Partition이라고 가정하고 Sequence Number만 나타내고 있다. `120~114`, `124~121`, `132~125` 3개의 Record Batch와 `142~133`, `150~143` 2개의 Record Batch가 나누어 전송되었고, 이후에 Kafka Broker는 Record Batch 처리 이후에 차례대로 ACK를 Producer에 전송하는 것을 확인할 수 있다.
+[Figure 2]는 Kafka Idempotence 기능이 활성화 됬을때 정상적으로 Record가 저장되는 경우의 Sequence Flow를 나타내고 있다. 단일 Topic/Partition이라고 가정하고 Sequence Number만 나타내고 있다. `120~114`, `124~121`, `132~125` 3개의 Record Batch와 `142~133`, `150~143` 2개의 Record Batch가 나누어 전송되었고, 이후에 Kafka Broker는 Record Batch 처리 이후에 차례대로 ACK를 Producer에 전송하는 것을 확인할 수 있다.
 
 ### 1.2. Sequence Flow with Missing ACKs
 
 {{< figure caption="[Figure 3] Sequence Flow with Missing ACKs" src="images/kafka-idempotence-sequence-flow-missing-acks.png" width="900px" >}}
+
+[Figure 3]는 Kafka Idempotence 기능이 활성화 됬을때 ACK가 유실되었을 경우에도 Record Batch가 중복으로 저장되는 것을 방지되는 Sequence Flow를 나타내고 있다. `120~114`, `124~121`, `132~125`, `142~133`, `150~143`
 
 ### 1.3. Sequence Flow with Missing Records
 
