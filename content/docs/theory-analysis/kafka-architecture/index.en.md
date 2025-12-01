@@ -118,11 +118,15 @@ Producer Buffer means the Memory space where Producer temporarily stores Records
 * `buffer.memory` : Sets the maximum size (Bytes) of Producer Buffer. The default value is `32MB`.
 * `max.block.ms` : Sets the maximum time (ms) that Producer's `send()` Method can be blocked when Buffer is full. If Buffer remains full even after `max.block.ms` time has passed, Producer's `send()` Method throws an Exception. The default value is `60000ms`.
 
-#### 1.3.3. Producer Batch
+#### 1.3.3. Producer Request
 
-{{< figure caption="[Figure 3] Kafka Producer Batch" src="images/kafka-producer-batch.png" width="900px" >}}
+{{< figure caption="[Figure 3] Kafka Producer Request" src="images/kafka-producer-request.png" width="1000px" >}}
 
-Kafka provides Batch functionality where Producer sends multiple Records at once so that Producer can efficiently send large amounts of Records, and generally, Batch functionality is often utilized. [Figure 3] shows Producer sending Records using Batch functionality. Generally, even when Producer sends Records to multiple Topics and Partitions, Producer maintains only one Connection with Kafka Broker, and you can see that Records are collected by Topic and Partition in one Producer Request and sent in Batch units. The following Producer Batch-related settings exist.
+[Figure 3] shows the Request that Producer sends to Kafka Broker. You can see that one Request contains all multiple Records that need to be sent to each Topic and Partition. That is, Producer does not send each Record one by one to Kafka Broker, but sends multiple Records at once in **Batch form**.
+
+Producer manages Requests as **In-flight Requests** after sending Requests until ACK for the corresponding Request is received from Kafka Broker. The maximum number of In-flight Requests can be limited through the `max.in.flight.requests.per.connection` setting, and the default value is **5**. That is, by default, up to 5 Requests can be managed in In-flight state. Since In-flight Requests can be retransmitted at any time as needed, Producer stores all information necessary for Request retransmission. In-flight Requests are removed when ACK is received since retransmission is no longer needed.
+
+Each **Producer Request has a unique ID (Collector ID)**, and the following Batch transmission-related settings exist.
 
 * `batch.size` : Sets the maximum Record size (Bytes) that Producer can send at once. The default value is `16384B`.
 * `linger.ms` : Sets the maximum time (ms) that Producer can wait to send in Batch units. The default value is `0ms`, which does not mean that Batch functionality is not used, but means that Batch functionality is used with a minimum wait time.
@@ -134,6 +138,8 @@ Kafka provides ACK-related options for Producers. Producers can use ACK to check
 * `0` : Producer does not check for ACK.
 * `1` : Producer waits for ACK. Here, ACK means that the Record has been delivered to only one Kafka Broker. Therefore, if the Kafka Broker that received the Record from the Producer dies before copying the Record to another Kafka Broker according to Replica settings, Record loss can occur. This is the default setting.
 * `all (-1)` : Producer waits for ACK. Here, ACK means that the Record has been copied to as many Kafka Brokers as the configured Replicas. Therefore, even if the Kafka Broker that received the Record from the Producer dies, the Record is maintained if Kafka Brokers that have the copied Record are alive.
+
+ACK includes **Request ID** and **Topic, Partition, Offset information where Records are stored**, so Producer can identify which Request the ACK is for.
 
 ### 1.4. Consumer
 

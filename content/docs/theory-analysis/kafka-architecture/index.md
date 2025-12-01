@@ -118,11 +118,15 @@ Producer Buffer는 Producer가 Record를 전송하기 전에 임시로 저장하
 * `buffer.memory` : Producer Buffer의 최대 크기(Bytes)를 설정한다. 기본값은 `32MB`이다.
 * `max.block.ms` : Buffer가 가득찰 경우 Producer의 `send()` Method가 Blocking될 수 있는 최대 시간(ms)을 설정한다. 만약 `max.block.ms` 시간이 지나도 Buffer가 계속 가득차있다면 Producer의 `send()` Method는 Exception을 발생시킨다. 기본값은 `60000ms`이다.
 
-#### 1.3.3. Producer Batch
+#### 1.3.3. Producer Request
 
-{{< figure caption="[Figure 3] Kafka Producer Batch" src="images/kafka-producer-batch.png" width="900px" >}}
+{{< figure caption="[Figure 3] Kafka Producer Request" src="images/kafka-producer-request.png" width="1000px" >}}
 
-Kafka에서는 Producer가 효율적으로 많은양의 Record를 전송할 수 있도록 한번에 다수의 Record를 전송하는 Batch 기능을 제공하며, 일반적으로 Batch 기능을 활용하는 경우가 많다. [Figure 3]는 Producer가 Batch 기능을 활용하여 Record를 전송하는 모습을 나타내고 있다. 일반적으로 Producer가 다수의 Topic, Partition에 Record를 전송하는 경우에도 Producer는 Kafka Broker와 하나의 Connection만을 유지하며, 하나의 Producer Request에 Topic, Partition별로 Record를 모아서 Batch 단위로 전송하는 것을 확인할 수 있다. 다음과 같은 Producer Batch 관련 설정이 존재한다.
+[Figure 3]는 Producer가 Kafka Broker에게 전송하는 Request를 나타내고 있다. 하나의 Request에는 각 Topic, Partition에 전송해야하는 다수의 Record가 모두 포함되어 있는걸 확인할 수 있다. 즉 Producer는 각각의 Record를 하나씩 Kafka Broker에게 전송하지 않고, 다수의 여러 Record를 **Batch 형태**로 한꺼번에 전송한다.
+
+Producer는 Request를 전송한 후 Kafka Broker로부터 해당 Request에 대한 ACK를 받기 전까지 **In-flight Request**로 관리한다. 최대 In-flight Request의 개수는 `max.in.flight.requests.per.connection` 설정을 통해서 제한할 수 있으며, 기본값은 **5개**이다. 즉 기본적으로 최대 5개까지의 Request를 In-flight 상태로 관리할 수 있다. In-flight Request는 필요에 따라 언제든지 재전송될 수 있기 때문에, Producer는 Request 재전송에 필요한 모든 정보를 저장하고 있다. In-flight Request는 ACK를 수신하면 더 이상 재전송이 필요 없으므로 제거된다.
+
+각 **Producer Request는 고유의 ID (Collector ID)**를 가지며, 다음과 같은 Batch 전송 관련 설정이 존재한다.
 
 * `batch.size` : Producer가 한번에 전송할 수 있는 최대 Record 크기(Bytes)를 설정한다. 기본값은 `16384B` 이다.
 * `linger.ms` : Producer가 Batch 단위로 전송하기 위해서 대기할 수 있는 최대 시간(ms)을 설정한다. 기본값은 `0ms` 이며, 이는 Batch 기능을 사용하지 않는 것을 의미하지는 않으며, 최소한의 대기시간과 함께 Batch 기능을 사용하는 것을 의미한다.
@@ -134,6 +138,8 @@ Kafka는 Producer를 위한 ACK 관련 Option을 제공한다. Producer는 ACK�
 * `0` : Producer는 ACK를 확인하지 않는다.
 * `1` : Producer는 ACK를 기다린다. 여기서 ACK는 Record가 하나의 Kafka Broker에게만 전달되었다는 것을 의미한다. 따라서 Producer로부터 Record를 전달받은 Kafka Broker가 Replica 설정에 따라서 Record를 다른 Kafka Broker에게 복사하기전에 죽는다면 Record 손실이 발생할 수 있다. 기본 설정값이다.
 * `all (-1)` : Producer는 ACK를 기다린다. 여기서 ACK는 Record가 설정한 Replica만큼 여러 Kafka Broker들에게 복사가 완료되었다는 의미이다. 따라서 Producer로부터 Record를 전달받은 Kafka Broker가 죽어도 복사한 Record를 갖고있는 Kafka Broker가 살아있다면 Record는 유지된다.
+
+ACK에는 **Request ID**, **Record가 저장된 Topic, Partition, Offset** 정보가 포함되어 있으며, 따라서 Producer는 어떤 Request에 대한 ACK인지 확인할 수 있다.
 
 ### 1.4. Consumer
 
@@ -147,9 +153,9 @@ Consumer Group은 다수의 Consumer를 묶어 하나의 Topic을 다수의 Cons
 
 Partition과 Consumer는 반드시 **N:1**의 관계를 가져아한다. 따라서 `Consumer Group B`와 같이 Partition의 개수가 Consumer 개수보다 적은 경우 유휴 Consumer가 발생하게 된다. 반면에 `Consumer Group A` 또는 `Consumer Group C`와 같이 Partition의 개수가 Consumer 개수보다 많은 경우, 동작에는 문제가 없지만 일부 Consumer에 더 많은 Message를 처리하게 되어 처리량 비대칭이 발생하게 된다. 이러한 이유 때문에 Partition의 개수와 Consumer의 개수는 반드시 동일하게 설정하는게 좋다.
 
-#### 1.4.2. Consumer Batch
+#### 1.4.2. Consumer Request
 
-Consumer는 Producer와 동일하게 다수의 Record를 한번에 가져오는 Batch 기능을 제공한다. 다음과 같은 Consumer Batch 관련 설정이 존재한다.
+Consumer의 Request는 Producer의 Request와 동일하게 한번의 Request에 다수의 Record를 한번에 가져오도록 Batch 형태로 동작한다. 다음과 같은 Consumer Request 관련 설정이 존재한다.
 
 * `fetch.min.bytes` : Consumer가 한번에 가져올 수 있는 최소 Record 크기(Bytes)를 설정한다. 만약 `fetch.min.bytes` 설정값보다 작은 Record만 Topic에서 존재하는 상태라면 Kafka Broker는 Record를 반환하지 않아 Consumer의 `poll()` Method는 Blocking되며, 최대 `fetch.max.wait.ms` 시간동안 대기한다. 기본값은 `1B` 이다.
 * `fetch.max.bytes` : Consumer가 한번에 가져올 수 있는 최대 Record 크기(Bytes)를 설정한다. 기본값은 `5242880B (50MB)` 이다.
@@ -163,7 +169,7 @@ Kafka는 Consumer를 위한 별도의 ACK Option을 제공하지 않는다. Cons
 
 ### 1.5. Replication, Failover
 
-다수의 Broker와 Partition을 이용하여도 Replication이 적용되지 않은 상태에서는 일부 Broker가 죽으면 Record 손실을 막을 수 없다. 예를 들어 [Figure 1]에서 `Broker C`가 죽을경우 `Topic B`의 모든 Record와 `Topic C`의 `Partition 0`의 Record 손실이 발생하게 된다. 이러한 Record 손실을 방지하기 위해서는 Replication을 적용하여 Parition을 복제하는 것이 필요하다. 
+다수의 Broker와 Partition을 이용하여도 Replication이 적용되지 않은 상태에서는 일부 Broker가 죽으면 Record 손실을 막을 수 없다. 예를 들어 [Figure 1]에서 `Broker C`가 죽을경우 `Topic B`의 모든 Record와 `Topic C`의 `Partition 0`의 Record 손실이 발생하게 된다. 이러한 Record 손실을 방지하기 위해서는 Replication을 적용하여 Parition을 복제하는 것이 필요하다.
 
 {{< figure caption="[Figure 4] Kafka Replication" src="images/kafka-replication.png" width="1000px" >}}
 
