@@ -1,6 +1,5 @@
 ---
 title: Kafka Idempotence
-draft: true
 ---
 
 Kafka의 Idempotence 기능을 분석한다.
@@ -32,21 +31,27 @@ Kafka Broker는 Idempotence 기능이 활성화 됬을때, 각 PID 마다 Topic/
 Producer는 필요에 따른 Request 재전송을 위해서, 전송한 Request를 Kafka Broker로부터 ACK를 받기 전까지는 **In-flight Request**로 관리되며 다음과 같은 특징을 갖는다.
 
 * In-flight Request는 Kafka Broker로부터 ACK를 받으면 사라진다.
+* In-flight Request는 Request 재전송을 위한 모든 Metadata를 포함하고 있다.
+* In-flight Request가 재전송되는 경우 반드시 **동일한 Sequence Number를 가진** Request로 재전송된다. 즉 Request 재전송시 Sequence Number를 재구성하지 않는다.
 * 각 Producer마다 관리할 수 있는 최대 In-flight Request의 개수는 `max.in.flight.requests.per.connection` 설정을 통해서 제한할 수 있으며, 기본값은 **5개** 이다. 즉 기본적으로 최대 5개까지의 Request를 In-flight 상태로 관리할 수 있다.
 
 Kafka Idempotence 기능은 모든 경우에 대해서 중복 Record를 방지하지는 못하며, 다음의 경우에는 중복 Record가 발생할 수 있다.
 
 * Producer가 Record Batch를 전송한 다음에, Producer가 재시작되어 PID가 변경된 이후에 다시 동일한 Record Batch를 전송하는 경우에는 중복 Record가 발생할 수 있다. Kafka Broker는 PID를 기준으로 Sequence Number Cache를 관리하기 때문에 PID가 변경되면 새로운 Producer라 간주하기 때문이다.
 * Producer가 전송한 Record Batch를 동일한 Paritition이 아닌 다른 Paritition에 전송하는 경우에는 중복 Record가 발생할 수 있다. Kafka Broker는 각 Partition별로 Sequence Number Cache를 관리하기 때문이다.
-* Producer가 `inflight.requests.per.connection` 설정 값을 **6개** 이상으로 설정하여, Producer가 한꺼번에 6개 이상의 Request를 전송하는 경우에는 중복 Record가 발생할 수 있다. 각 Partition별로 최대 5개의 Record Batch의 시작/끝 Sequence Number만 Caching할 수 있기 때문이다. 5개는 Hard-code로 설정된 값이다. 따라서 Kafka Idempotence 기능을 이용하기 위해서는 `inflight.requests.per.connection` 설정 값은 반드시 **5개** 이하로 설정해야 한다.
+* Producer가 `inflight.requests.per.connection` 설정 값을 **6개** 이상으로 설정하여, Producer가 동시에 6개 이상의 Request를 전송하는 경우에는 중복 Record가 발생할 수 있다. 이는 Kafka Broker가 각 Partition별로 최대 5개의 Record Batch의 시작/끝 Sequence Number만 Caching할 수 있기 때문이다. 이 5개는 Hard-code로 설정된 값이며, 변경할 수 없다. 따라서 Kafka Idempotence 기능을 제대로 활용하기 위해서는 `inflight.requests.per.connection` 설정 값을 반드시 **5개** 이하로 설정해야 한다.
 
-### 1.1. Sequence Flow with Success
+## 2. Sequence Flow with Kafka Idempotence
+
+Kafka Idempotence 기능을 활성화 했을때 발생할 수 있는 다양한 Sequence Flow를 정리한다.
+
+### 2.1. Sequence Flow with Success
 
 {{< figure caption="[Figure 2] Sequence Flow with Success" src="images/kafka-idempotence-sequence-flow-success.png" width="900px" >}}
 
 [Figure 2]는 Kafka Idempotence 기능이 활성화 됬을때 정상적으로 Record가 저장되는 경우의 Sequence Flow를 나타내고 있다. 단일 Topic/Partition이라고 가정하고 Sequence Number만 나타내고 있다. `120~114`, `124~121`, `132~125` 3개의 Record Batch와 `142~133`, `150~143` 2개의 Record Batch가 나누어 전송되었고, 이후에 Kafka Broker는 Record Batch 처리 이후에 차례대로 ACK를 Producer에 전송하는 것을 확인할 수 있다.
 
-### 1.2. Sequence Flow with Missing ACKs
+### 2.2. Sequence Flow with Missing ACKs
 
 {{< figure caption="[Figure 3] Sequence Flow with Missing ACKs" src="images/kafka-idempotence-sequence-flow-missing-acks.png" width="900px" >}}
 
@@ -54,19 +59,23 @@ Kafka Idempotence 기능은 모든 경우에 대해서 중복 Record를 방지�
 
 `142~133`, `150~143` 2개의 ACK를 받지 못한 Producer는 `request.timeout.ms` 시간만큼 대기한 이후에 다시 동일한 Record Batch를 전송하게 된다. 이때 Kafka Broker는 이미 수신한 Record Batch라고 간주하여 Topic/Partition에 저장하지 않는다. 그리고 ACK만 Producer에 전송하여 Producer가 다시 동일한 Record Batch를 전송하지 않도록 만든다.
 
-### 1.3. Sequence Flow with Missing Records
+### 2.3. Sequence Flow with Missing Records
 
 {{< figure caption="[Figure 4] Sequence Flow with Missing Records" src="images/kafka-idempotence-sequence-flow-missing-records.png" width="900px" >}}
 
-[Figure 4]는 Kafka Idempotence 기능이 활성화 됬을때 Batch Record가 유실되었을때의 Sequence Flow를 나타내고 있다. Producer가 전송한 `120~114`, `124~121`, `132~125`, `142~133`, `150~143` 5개의 Batch Record 중에서 `132~125` Batch Record가 유실된 경우를 나타내고 있다. Kafka Broker는 `132~125` Batch Record를 건너뛴 채로 다음 Batch Record인 `142~133`, `150~143` Batch Record를 수신하기 때문에 `OutOfOrderSequenceException` Exception을 Producer에게 전송한다. 
+[Figure 4]는 Kafka Idempotence 기능이 활성화 됬을때 Batch Record가 유실되었을때의 Sequence Flow를 나타내고 있다. Producer가 전송한 `120~114`, `124~121`, `132~125`, `142~133`, `150~143` 5개의 Batch Record 중에서 `132~125` Batch Record가 유실된 경우를 나타내고 있다. Kafka Broker는 `132~125` Batch Record를 건너뛴 채로 다음 Batch Record인 `142~133`, `150~143` Batch Record를 수신하기 때문에 `OutOfOrderSequenceException` Exception을 Producer에게 전송한다.
 
 `OutOfOrderSequenceException` Exception을 받은 Producer는 마지막 ACK를 받은 Batch Record의 다음 Batch Record부터 재전송을 시작하게 된다. 이처럼 Idempotence 기능을 활용하면 Sequence Number를 기반으로 Batch Record의 순서가 바뀌는 현상도 방지할 수 있다.
 
-### 1.4. Sequence Flow with Sequence Cache Missed
+### 2.4. Sequence Flow with Sequence Cache Missed
 
 {{< figure caption="[Figure 5] Sequence Flow with Sequence Cache Missed" src="images/kafka-idempotence-sequence-flow-cache-missed.png" width="900px" >}}
 
-## 2. 참조
+[Figure 5]는 `inflight.requests.per.connection` 설정값을 6개로 설정할 경우 중복 Record가 발생하는 Sequence Flow를 나타내고 있다. Producer가 전송한 `120~114`, `124~121`, `132~125`, `142~133`, `150~143`, `155~151` 6개의 Batch Record가 잘 처리되었지만, 가장 첫번째 Batch Record인 `120~114`가 유실되는 경우를 나타내고 있다.
+
+`120~114` Batch Record에 대한 ACK를 받지못한 Producer는 `request.timeout.ms` 시간만큼 대기한 이후에 다시 동일한 Record Batch를 전송하게 된다. 이때 Kafka Broker에는 마지막으로 받은 5개의 Batch Record만 Caching 되어있고, 가장 첫번째 `120~114` Batch Record는 Caching 되어있지 않다. 따라서 Kafka Broker는 `120~114` Batch Record가 이미 저장된 Batch Record라고 인지하지 못하고 중복 저장을 수행한다.
+
+## 3. 참조
 
 * Kafka Idempotence, Transaction : [https://stackoverflow.com/questions/58894281/difference-between-idempotence-and-exactly-once-in-kafka-stream](https://stackoverflow.com/questions/58894281/difference-between-idempotence-and-exactly-once-in-kafka-stream)
 * Understanding Kafka Producer Part 2 : [https://github.com/AutoMQ/automq/wiki/Understanding-Kafka-Producer-Part-2](https://github.com/AutoMQ/automq/wiki/Understanding-Kafka-Producer-Part-2)
