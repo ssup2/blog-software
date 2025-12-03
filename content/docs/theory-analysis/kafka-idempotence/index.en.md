@@ -17,16 +17,17 @@ Kafka Idempotence, as the name suggests, is a functionality to prevent duplicate
 
 When Idempotence functionality is enabled, Producer's Request includes **PID (Producer ID)**, **Epoch**, and **Sequence Number** information.
 
-* **PID (Producer ID)** : Unique ID of Producer assigned by Kafka. When Producer connects to Kafka, Producer ID is issued and delivered to Producer, and thereafter Producer sends Records along with the assigned PID. If Kafka Transaction technique is not used, Producer receives a new PID when Producer restarts. If Producer sends a PID that Broker has not issued, `UnknownProducerIdException` Exception occurs.
-* **Epoch (Producer Epoch)** : Represents Producer's unique Epoch. When Idempotence functionality is enabled, Epoch is always added to Records. However, when Kafka Transaction technique is not used, Records always have `0` value set, and it does not have significant meaning.
+* **PID (Producer ID)** : Unique ID of Producer assigned by Kafka. When Producer connects to Kafka, Producer ID is issued and delivered to Producer, and thereafter Producer sends Records along with the assigned PID. If Kafka Transaction technique is not used, Producer receives a new PID when Producer restarts. If Producer sends a PID that Broker has not issued, Producer receives `UnknownProducerIdException` Exception from Kafka Broker.
+* **Epoch (Producer Epoch)** : Represents Producer's unique Epoch. Epoch value starts at 0 and increases by 1 each time Producer receives `OutOfOrderSequenceException` Exception from Kafka Broker.
 * **Sequence Number** : Unique sequential number of Records assigned by Producer. Generally, one Producer Request contains Record Batches by Partition/Topic, and each Record Batch contains **Base Sequence Number** that represents the start of Records and **Offset** that represents the difference from Base Sequence Number to the last Record.
 
-When Idempotence functionality is enabled, Kafka Broker **Caches up to 5** Sequence Numbers of processed Record Batches by Topic/Partition for each PID, and through the following operations, it **prevents duplicate Record storage** as well as **prevents Records from being stored in incorrect order**.
+When Idempotence functionality is enabled, Kafka Broker **Caches up to 5** Sequence Numbers of processed Record Batches by Topic/Partition **for each PID and Epoch**, and through the following operations, it **prevents duplicate Record storage** as well as **prevents Records from being stored in incorrect order**.
 
 * When Broker receives a Record Batch, it first checks whether the Record Batch's Sequence Number is already Cached.
 * If the Record Batch's Sequence Number is Cached, Kafka Broker considers it as an already received Record Batch and does not store it in Topic/Partition. And it only sends ACK to Producer.
 * If the Record Batch's Sequence Number is not Cached, Kafka Broker removes the Sequence Number of the first Cached Record Batch and Caches the Sequence Number of the received Record Batch. And it stores the received Record Batch in Topic/Partition and sends ACK to Producer.
 * Even if the Record Batch's Sequence Number is not Cached, if the Sequence Number of the received Record Batch is not the next number after the Sequence Number of the previously received Batch, Kafka Broker does not store the received Record Batch in Topic/Partition and makes Broker raise `OutOfOrderSequenceException` Exception.
+* When Producer receives `OutOfOrderSequenceException` Exception, Producer increases Epoch value by 1 and then retries transmission. When Kafka Broker receives Batch Record with increased Epoch value, it removes the previously Cached Sequence Number and Caches the new Sequence Number.
 
 Producer manages sent Requests as **In-flight Requests** until ACK is received from Kafka Broker for necessary Request retransmission, and has the following characteristics.
 
@@ -49,31 +50,33 @@ Summarizes various Sequence Flows that can occur when Kafka Idempotence function
 
 {{< figure caption="[Figure 2] Sequence Flow with Success" src="images/kafka-idempotence-sequence-flow-success.png" width="900px" >}}
 
-[Figure 2] shows the Sequence Flow when Records are stored normally with Kafka Idempotence functionality enabled. Assuming a single Topic/Partition, only Sequence Numbers are shown. Three Record Batches `120~114`, `124~121`, `132~125` and two Record Batches `142~133`, `150~143` were sent separately, and thereafter Kafka Broker sends ACK to Producer sequentially after processing Record Batches.
+[Figure 2] shows the Sequence Flow when Records are stored normally with Kafka Idempotence functionality enabled. Assuming a single Topic/Partition, only Sequence Numbers are shown. Three Record Batches `A/120~114`, `B/124~121`, `C/132~125` and two Record Batches `D/142~133`, `E/150~143` were sent separately, and thereafter Kafka Broker sends ACK to Producer sequentially after processing Record Batches.
 
 ### 2.2. Sequence Flow with Missing ACKs
 
 {{< figure caption="[Figure 3] Sequence Flow with Missing ACKs" src="images/kafka-idempotence-sequence-flow-missing-acks.png" width="900px" >}}
 
-[Figure 3] shows the Sequence Flow where duplicate storage of Record Batches is prevented even when ACKs are lost with Kafka Idempotence functionality enabled. It shows a case where 5 Batch Records `120~114`, `124~121`, `132~125`, `142~133`, `150~143` sent by Producer were processed well, but ACKs for 2 Batch Records `142~133`, `150~143` were lost.
+[Figure 3] shows the Sequence Flow where duplicate storage of Record Batches is prevented even when ACKs are lost with Kafka Idempotence functionality enabled. It shows a case where 5 Batch Records `A/120~114`, `B/124~121`, `C/132~125`, `D/142~133`, `E/150~143` sent by Producer were processed well, but ACKs for 2 Batch Records `D/142~133`, `E/150~143` were lost.
 
-Producer that did not receive ACKs for `142~133`, `150~143` waits for `request.timeout.ms` time and then sends the same Record Batches again. At this time, Kafka Broker considers them as already received Record Batches and does not store them in Topic/Partition. And it only sends ACK to Producer to prevent Producer from sending the same Record Batches again.
+Producer that did not receive ACKs for `D/142~133`, `E/150~143` waits for `request.timeout.ms` time and then sends the same Record Batches again. At this time, Kafka Broker considers them as already received Record Batches and does not store them in Topic/Partition. And it only sends ACK to Producer to prevent Producer from sending the same Record Batches again.
 
 ### 2.3. Sequence Flow with Missing Records
 
 {{< figure caption="[Figure 4] Sequence Flow with Missing Records" src="images/kafka-idempotence-sequence-flow-missing-records.png" width="900px" >}}
 
-[Figure 4] shows the Sequence Flow when Batch Records are lost with Kafka Idempotence functionality enabled. It shows a case where among 5 Batch Records `120~114`, `124~121`, `132~125`, `142~133`, `150~143` sent by Producer, the `132~125` Batch Record was lost. Kafka Broker receives the next Batch Records `142~133`, `150~143` after skipping the `132~125` Batch Record, so it sends `OutOfOrderSequenceException` Exception to Producer.
+[Figure 4] shows the Sequence Flow when Batch Records are lost with Kafka Idempotence functionality enabled. It shows a case where among 5 Batch Records `A/120~114`, `B/124~121`, `C/132~125`, `D/142~133`, `E/150~143` sent by Producer, the `C/132~125` Batch Record was lost. Kafka Broker receives the next Batch Records `D/142~133`, `E/150~143` after skipping the `C/132~125` Batch Record, so it sends `OutOfOrderSequenceException` Exception to Producer.
 
-Producer that received `OutOfOrderSequenceException` Exception starts retransmission from the next Batch Record after the last Batch Record that received ACK. In this way, utilizing Idempotence functionality can also prevent the phenomenon where the order of Batch Records changes based on Sequence Number.
+Producer that received `OutOfOrderSequenceException` Exception increases Epoch value by 1 and then starts retransmission from the next Batch Record after the last Batch Record that received ACK. In this way, utilizing Idempotence functionality can also prevent the phenomenon where the order of Batch Records changes based on Sequence Number.
 
 ### 2.4. Sequence Flow with Sequence Cache Missed
 
 {{< figure caption="[Figure 5] Sequence Flow with Sequence Cache Missed" src="images/kafka-idempotence-sequence-flow-cache-missed.png" width="900px" >}}
 
-[Figure 5] shows the Sequence Flow where duplicate Records occur when the `inflight.requests.per.connection` setting value is set to 6. It shows a case where 6 Batch Records `120~114`, `124~121`, `132~125`, `142~133`, `150~143`, `155~151` sent by Producer were processed well, but the first Batch Record `120~114` was lost.
+[Figure 5] shows the Sequence Flow where duplicate Records occur when the `inflight.requests.per.connection` setting value is set to 6. It shows a case where 6 Batch Records `A/120~114`, `B/124~121`, `C/132~125`, `D/142~133`, `E/150~143`, `F/155~151` sent by Producer were processed well, but ACK for the first Batch Record `A/120~114` was lost.
 
-Producer that did not receive ACK for the `120~114` Batch Record waits for `request.timeout.ms` time and then sends the same Record Batch again. At this time, Kafka Broker has only the last 5 Batch Records Cached, and the first `120~114` Batch Record is not Cached. Therefore, Kafka Broker does not recognize that the `120~114` Batch Record is an already stored Batch Record and performs duplicate storage.
+Producer that did not receive ACK for the `A/120~114` Batch Record waits for `request.timeout.ms` time and then sends the same Record Batch again. At this time, Kafka Broker has only the last 5 Batch Records Cached, and the first `A/120~114` Batch Record is not Cached. Therefore, Kafka Broker does not recognize that the `A/120~114` Batch Record is an already stored Batch Record and raises `OutOfOrderSequenceException` Exception.
+
+Producer that received `OutOfOrderSequenceException` Exception increases Epoch value by 1 and then retransmits the `A/120~114` Batch Record that did not receive ACK, and Kafka Broker that received the `A/120~114` Batch Record with increased Epoch value performs duplicate storage.
 
 ## 3. References
 
