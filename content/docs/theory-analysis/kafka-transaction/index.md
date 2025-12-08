@@ -19,6 +19,91 @@ Kafka의 Idempotence과 Transaction에 대해서 분석한다.
 * `RETRIES_CONFIG` : Kafka의 재시도 횟수 설정 값이다.
 * `TRANSACTIONAL_ID_CONFIG` : Kafka의 Transaction 기능을 활성화 하기 위한 설정 값이다.
 
+```python
+from confluent_kafka import Consumer, Producer
+
+# Configuration
+consumer = Consumer({
+    'bootstrap.servers': 'localhost:9092',
+    'group.id': 'my-group',
+    'enable.auto.commit': False  # Manual commit
+})
+consumer.subscribe(['orders'])
+
+producer = Producer({
+    'bootstrap.servers': 'localhost:9092'
+})
+
+while True:
+    # 1. Fetch message
+    msg = consumer.poll(timeout=1.0)
+    
+    if msg is None or msg.error():
+        continue
+    
+    # 2. Process & produce
+    result = process(msg.value().decode('utf-8'))
+    producer.produce('processed-orders', value=result.encode('utf-8'))
+    producer.flush()
+    
+    # 3. Commit offset (separately!)
+    consumer.commit()
+```
+
+```python
+from confluent_kafka import Consumer, Producer, TopicPartition
+
+# Consumer configuration
+consumer = Consumer({
+    'bootstrap.servers': 'localhost:9092',
+    'group.id': 'my-group',
+    'enable.auto.commit': False,
+    'isolation.level': 'read_committed'  # Read only committed messages
+})
+consumer.subscribe(['orders'])
+
+# Producer configuration (for Transaction)
+producer = Producer({
+    'bootstrap.servers': 'localhost:9092',
+    'transactional.id': 'my-transactional-id',  # Required!
+    'enable.idempotence': True
+})
+
+# Initialize transaction (once at startup)
+producer.init_transactions()
+
+while True:
+    # 1. Fetch message (outside Transaction!)
+    msg = consumer.poll(timeout=1.0)
+    
+    if msg is None or msg.error():
+        continue
+    
+    # 2. Begin transaction
+    producer.begin_transaction()
+    
+    try:
+        # 3. Process & produce
+        result = process(msg.value().decode('utf-8'))
+        producer.produce('processed-orders', value=result.encode('utf-8'))
+        
+        # 4. Build offset information
+        offsets = [TopicPartition(msg.topic(), msg.partition(), msg.offset() + 1)]
+        
+        # 5. Include offset commit in transaction
+        producer.send_offsets_to_transaction(
+            offsets,
+            consumer.consumer_group_metadata()
+        )
+        
+        # 6. Commit together (produce + offset)
+        producer.commit_transaction()
+        
+    except Exception as e:
+        print(f"Transaction failed: {e}")
+        producer.abort_transaction()  # Rollback both
+```
+
 ## 2. 참조
 
 * Kafka Transaction : [https://developer.confluent.io/courses/architecture/transactions/](https://developer.confluent.io/courses/architecture/transactions/)
