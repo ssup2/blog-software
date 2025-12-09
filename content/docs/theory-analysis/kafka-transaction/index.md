@@ -20,6 +20,54 @@ Kafka의 Idempotence과 Transaction에 대해서 분석한다.
 * `TRANSACTIONAL_ID_CONFIG` : Kafka의 Transaction 기능을 활성화 하기 위한 설정 값이다.
 
 ```python
+from confluent_kafka import Producer
+
+producer = Producer({
+    'bootstrap.servers': 'localhost:9092'
+})
+
+try:
+    # 여러 토픽, 여러 파티션에 전송
+    producer.produce('orders', partition=0, value=b'order-1')
+    producer.produce('orders', partition=1, value=b'order-2')
+    producer.produce('payments', partition=0, value=b'payment-1')
+    producer.produce('notifications', partition=0, value=b'notify-1')
+    
+    producer.flush()  # 전송 완료 대기
+    print("All messages sent")
+    
+except Exception as e:
+    print(f"Send failed: {e}")
+```
+
+```python
+from confluent_kafka import Producer
+
+producer = Producer({
+    'bootstrap.servers': 'localhost:9092',
+    'transactional.id': 'multi-partition-tx'
+})
+
+producer.init_transactions()
+
+producer.begin_transaction()
+
+try:
+    # 여러 토픽, 여러 파티션에 전송
+    producer.produce('orders', partition=0, value=b'order-1')
+    producer.produce('orders', partition=1, value=b'order-2')
+    producer.produce('payments', partition=0, value=b'payment-1')
+    producer.produce('notifications', partition=0, value=b'notify-1')
+    
+    producer.commit_transaction()
+    print("All messages committed atomically")
+    
+except Exception as e:
+    producer.abort_transaction()
+    print(f"Transaction aborted: {e}")
+```
+
+```python
 from confluent_kafka import Consumer, Producer
 
 # Configuration
