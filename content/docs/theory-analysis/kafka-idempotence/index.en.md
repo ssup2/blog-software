@@ -40,7 +40,7 @@ Kafka Idempotence functionality does not prevent duplicate Records in all cases,
 
 * When Producer sends a Record Batch and then Producer restarts, changing PID, and then sends the same Record Batch again, duplicate Records can occur. This is because Kafka Broker manages Sequence Number Cache based on PID, so when PID changes, it is considered as a new Producer.
 * When Producer sends a Record Batch to a different Partition instead of the same Partition, duplicate Records can occur. This is because Kafka Broker manages Sequence Number Cache by each Partition.
-* When Producer sets the `inflight.requests.per.connection` setting value to **6 or more**, and Producer sends 6 or more Requests simultaneously, duplicate Records can occur. This is because Kafka Broker can only Cache the start/end Sequence Numbers of up to 5 Record Batches per Partition. This 5 is a Hard-coded value and cannot be changed. Therefore, to properly utilize Kafka Idempotence functionality, the `inflight.requests.per.connection` setting value must be set to **5 or less**.
+* When Producer sets the `inflight.requests.per.connection` setting value to **6 or more**, and Producer sends 6 or more Requests simultaneously, duplicate Records can occur. This is because Kafka Broker can only Cache Sequence Numbers of up to 5 Record Batches per Partition. This 5 is a Hard-coded value and cannot be changed. Therefore, to properly utilize Kafka Idempotence functionality, the `inflight.requests.per.connection` setting value must be set to **5 or less**.
 
 ## 2. Sequence Flow with Kafka Idempotence
 
