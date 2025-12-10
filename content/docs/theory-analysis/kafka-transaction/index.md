@@ -9,6 +9,8 @@ Kafka의 Transaction 기법을 분석한다.
 
 ### 1.1. Producer-only Transaction
 
+{{< figure caption="[Figure 1] Producer-only Transaction" src="images/producer-only-transaction.png" width="700px" >}}
+
 ```python {caption="[Code 1] Producing to multiple topics and partitions without transaction", linenos=table}
 from confluent_kafka import Producer
 
@@ -57,6 +59,8 @@ except Exception as e:
 ```
 
 ### 1.2. Consume-Produce Transaction
+
+{{< figure caption="[Figure 2] Consume-Produce Transaction" src="images/consume-produce-transaction.png" width="850px" >}}
 
 ```python {caption="[Code 3] Consuming and producing without transaction", linenos=table}
 from confluent_kafka import Consumer, Producer
