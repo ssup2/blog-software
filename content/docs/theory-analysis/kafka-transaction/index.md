@@ -7,15 +7,23 @@ Kafka의 Transaction 기법을 분석한다.
 
 ## 1. Kafka Transaction
 
-### 1.1. Producer-only Transaction
+Kafka Transaction은 의미에서 유추할 수 있는것 처럼 **Producer가 Kafka로 보내는 다량의 Record를 하나의 Transaction으로 묶어서 처리하는 기법**을 의미한다. 여기서 다량의 Record들은 다수의 Topic, Partition에 전달되는 경우에도 하나의 Transaction으로 묶어서 처리될 수 있는 특징이 있다.
 
-{{< figure caption="[Figure 1] Producer-only Transaction" src="images/producer-only-transaction.png" width="700px" >}}
+반면에 Kafka Transaction은 Consumer가 다수의 Record를 하나의 Transaction으로 묶어서 처리하는 기법은 Kafka에서 지원하지 않는다. 즉 Kafka Transaction은 Producer 중심의 Transaction 기법이다. Kafka Transaction은 크게 **Produce-only Transaction**과 **Consume-Produce Transaction** 2가지 방식으로 나누어진다.
+
+### 1.1. Produce-only Transaction
+
+{{< figure caption="[Figure 1] Produce-only Transaction" src="images/produce-only-transaction.png" width="700px" >}}
+
+Produce-only Transaction은 의미 그대로 다수의 Topic, Partition에 전달되는 다량의 Record를 하나의 Transaction으로 묶어서 처리하는 기법을 의미한다. [Figure 1]은 Produce-only Transaction의 동작 과정을 나타내고 있다. Producer는 `Topic A`의 `Partition 0,1`과 `Topic B`의 `Partition 0,1,2`에 하나의 Transaction으로 묶어서 Record를 전달한다. 하나의 Transaction으로 묶여 있는 Record들은 모두 Kafka에 저장되거나 모두 저장되지 않는 **Atomicity** 특징을 갖는다.
+
+Produce-only Transaction을 이용하는 경우는 주로 Kafka를 Event Bus가 아닌 Event Store로 활용하는 경우에 많이 이용된다. 즉 Kafka에 저장되는 Event의 정합성을 보장하기 위해서 Producer가 전송하는 다수의 Record들 중에서 일부 Record만 저장되는 것을 방지하기 위해서 사용된다.
 
 ```python {caption="[Code 1] Producing to multiple topics and partitions without transaction", linenos=table}
 from confluent_kafka import Producer
 
 producer = Producer({
-    'bootstrap.servers': 'localhost:9092'
+    'bootstrap.servers': 'kafka-server:9092'
 })
 
 try:
@@ -25,7 +33,8 @@ try:
     producer.produce('payments', partition=0, value=b'payment-1')
     producer.produce('notifications', partition=0, value=b'notify-1')
     
-    producer.flush()  # Wait for delivery
+    # Wait for delivery
+    producer.flush()
     print("All messages sent")
     
 except Exception as e:
@@ -36,11 +45,14 @@ except Exception as e:
 from confluent_kafka import Producer
 
 producer = Producer({
-    'bootstrap.servers': 'localhost:9092',
-    'transactional.id': 'multi-partition-tx'
+    'bootstrap.servers': 'kafka-server:9092',
+    'transactional.id': 'producer-id'
 })
 
+# Initialize transaction (once at startup)
 producer.init_transactions()
+
+# Begin transaction
 producer.begin_transaction()
 
 try:
@@ -50,11 +62,13 @@ try:
     producer.produce('payments', partition=0, value=b'payment-1')
     producer.produce('notifications', partition=0, value=b'notify-1')
     
-    producer.commit_transaction()  # Commit all atomically
+    # Commit all atomically
+    producer.commit_transaction()  
     print("All messages committed atomically")
     
 except Exception as e:
-    producer.abort_transaction()  # Rollback all
+    # Rollback all
+    producer.abort_transaction()
     print(f"Transaction aborted: {e}")
 ```
 
