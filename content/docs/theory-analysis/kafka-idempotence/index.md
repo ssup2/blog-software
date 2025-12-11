@@ -19,7 +19,7 @@ Idempotence 기능이 활성화되면 Producer의 Request에는 **PID (Producer 
 
 * **PID (Producer ID)** : Kafka가 할당한 Producer의 고유 ID이다. Producer가 Kafka에 접속하면 Producer ID가 발급되어 Producer에 전달되며, 이후에 Producer는 Record에 할당받은 PID를 같이 전송한다. Kafka Transaction 기법을 이용하지 않는다면 Producer가 재시작 되는 경우 새로운 PID를 할당받는다. 만약 Producer가 Broker가 발급하지 않은 PID를 전송하는 경우에는 Kafka Broker로부터 `UnknownProducerIdException` Exception을 받는다.
 * **Epoch (Producer Epoch)** : Producer의 고유 Epoch를 나타낸다. Epoch 값은 0에서 시작하며, Producer가 Kafka Broker로부터 `OutOfOrderSequenceException` Exception이 수신할때마다 1씩 증가한다.
-* **Sequence Number** : Producer가 할당한 Record의 고유의 순서 번호이다. 일반적으로 하나의 Producer Request에는 Partition/Topic별로 Record Batch가 존재하며, 각 Record Batch에는 Record의 시작을 나타내는 **Base Sequence Number**와 Base Sequence Number에서 마지막 Record까지의 차이를 나타내는 **Offset**이 존재한다.
+* **Sequence Number** : Producer가 할당한 Record의 고유의 순서 번호이다. 일반적으로 하나의 Producer Request에는 Partition/Topic별로 Record Batch가 존재하며, 각 Record Batch에는 Record의 시작을 나타내는 **Base Sequence Number**와 Base Sequence Number에서 마지막 Record까지의 차이를 나타내는 **Offset Sequence Number**가 존재한다. Sequence Number는 Consumer가 이용하는 Offset과는 별개의 값이다. Sequence Number는 Producer가 부여하고 Kafka Broker가 이용하는 값이라면, Offset은 Kafka Broker가 부여하고 Consumer가 이용하는 값이다.
 
 Kafka Broker는 Idempotence 기능이 활성화 됬을때, **각 PID, Epoch 마다** Topic/Partition별 처리가 완료된 Record Batch의 Sequence Number를 **5개까지 Caching**하며 다음과 같은 동작을 통해서 **중복 Record 저장을 방지**할 뿐만 아니라 **잘못된 순서로 Record가 저장되는 것도 방지**한다.
 

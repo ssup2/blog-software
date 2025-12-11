@@ -1,6 +1,5 @@
 ---
 title: Kafka Transaction
-draft: true
 ---
 
 Kafka의 Transaction 기법을 분석한다.
