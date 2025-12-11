@@ -72,6 +72,12 @@ except Exception as e:
     print(f"Transaction aborted: {e}")
 ```
 
+[Code 1]은 Transaction 적용 전의 Producer Code를 나타내고 있으며, [Code 2]는 Transaction 적용 후의 Producer Code를 나타내고 있다. Kafka Transaction을 이용하는 경우 DB Transaction과 마찬가지로 Transaction을 시작하기 전에 Transaction을 초기화하고, Transaction을 시작하고, Transaction을 종료하는 과정을 거쳐야 한다.
+
+[Code 2]에서는 `producer.init_transactions()`를 통해서 Transaction을 초기화하고, `producer.begin_transaction()`를 통해서 Transaction을 시작하고, `producer.commit_transaction()`를 통해서 Transaction을 종료한다. 만약 Transaction 중에 에러가 발생하면 `producer.abort_transaction()`를 통해서 Transaction을 중단한다.
+
+Transaction을 이용하기 위해서는 반드시 `transactional.id` 설정 값을 설정해야 한다. `transactional.id` 각 Producer마다 고유의 ID를 설정해야 한다. 일반적으로 Hostname을 이용하여 고유의 ID를 설정한다.
+
 ### 1.2. Consume-Produce Transaction
 
 {{< figure caption="[Figure 2] Consume-Produce Transaction" src="images/consume-produce-transaction.png" width="850px" >}}
