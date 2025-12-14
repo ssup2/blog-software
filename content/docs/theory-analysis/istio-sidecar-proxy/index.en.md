@@ -247,7 +247,7 @@ When a Pod-related Object creation request is sent to the Kubernetes API Server 
 
 ### 1.2. Packet Capture
 
-```console {caption="[Shell 2] Pod iptables NAT Table with Istio Sidecar", linenos=table}
+```shell {caption="[Shell 2] Pod iptables NAT Table with Istio Sidecar", linenos=table}
 # iptables -t nat -nvL
 Chain PREROUTING (policy ACCEPT 11729 packets, 704K bytes)
  pkts bytes target     prot opt in     out     source               destination

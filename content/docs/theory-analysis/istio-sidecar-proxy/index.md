@@ -247,8 +247,8 @@ Admission Controller의 Mutating Webhook 기능을 통해서 Pod 관련 Object �
 
 ### 1.2. Packet Capture
 
-```console {caption="[Shell 2] Pod iptables NAT Table with Istio Sidecar", linenos=table}
-# iptables -t nat -nvL
+```shell {caption="[Shell 2] Pod iptables NAT Table with Istio Sidecar", linenos=table}
+$ iptables -t nat -nvL
 Chain PREROUTING (policy ACCEPT 11729 packets, 704K bytes)
  pkts bytes target     prot opt in     out     source               destination
 11729  704K ISTIO-INBOUND  tcp  --  *      *       0.0.0.0/0            0.0.0.0/0
