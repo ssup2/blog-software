@@ -40,8 +40,7 @@ data:
         "grpc_status": "%GRPC_STATUS%",
         "upstream_request_attempt_count": "%UPSTREAM_REQUEST_ATTEMPT_COUNT%",
         "request_duration": "%REQUEST_DURATION%",
-        "response_duration": "%RESPONSE_DURATION%",
-        "response_tx_duration": "%RESPONSE_TX_DURATION%"
+        "response_duration": "%RESPONSE_DURATION%"
       }
 ```
 
@@ -84,8 +83,7 @@ $ curl -s http://mock-server:8080/status/200
   "grpc_status": "-",
   "upstream_request_attempt_count": "1",
   "request_duration": "0",
-  "response_duration": "10",
-  "response_tx_duration": "0"
+  "response_duration": "10"
 }
 ```
 
@@ -118,8 +116,7 @@ $ curl -s http://mock-server:8080/status/200
   "grpc_status": "-",
   "upstream_request_attempt_count": "1",
   "request_duration": "0",
-  "response_duration": "4",
-  "response_tx_duration": "0"
+  "response_duration": "4"
 }
 ```
 
