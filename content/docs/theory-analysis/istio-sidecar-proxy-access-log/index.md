@@ -7,4 +7,8 @@ draft: true
 
 ### 1.1. HTTP Cases
 
+#### 1.1.1. 200 OK Success Case
+
+#### 1.1.2. 202 Accepted Success Case
+
 ### 1.2. GRPC Cases
