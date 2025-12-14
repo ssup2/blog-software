@@ -226,7 +226,20 @@ Hello version: v1, instance: helloworld-us-b-59fd8576c5-grhkk
 
 [Figure 2] shows the state when Locality Load Balancing is activated in the [Figure 1] environment. Since the `my-shell-kr-a` Pod exists in the `kr/a` Locality, you can see that all requests are sent only to Pods of the `helloworld` Service in the `kr/a` Locality.
 
-Locality Load Balancing is activated by setting the `localityLbSetting.enabled` Field to `true` in the Destination Rule. At this time, you must set the `outlierDetection` Field to activate Failover or set the `distribute` Field to activate Distribution. If you set only the `localityLbSetting.enabled` Field to `true`, Locality Load Balancing will not be activated. Conversely, even if you set both the `outlierDetection` Field and the `distribute` Field, Locality Load Balancing will be activated, but it is rarely used because the policy of the `outlierDetection` Field does not work properly due to the `distribute` Field.
+Locality Load Balancing is activated by setting the `localityLbSetting.enabled` Field to `true` in the Destination Rule. At this time, you must set the `outlierDetection` Field to activate Failover or set the `localityLbSetting.distribute` Field to activate Distribution. If you set only the `localityLbSetting.enabled` Field to `true`, Locality Load Balancing will not be activated. Even if you set both the `outlierDetection` Field and the `localityLbSetting.distribute` Field, Locality Load Balancing will be activated, but it is rarely used because the policy of the `outlierDetection` Field does not work properly due to the `localityLbSetting.distribute` Field.
+
+```yaml {caption="[File 2] Enable Locality Load Balancing in Mesh Config"}
+mesh: |-
+  localityLbSetting:
+    enabled: true
+    distribute:
+    ...
+...
+```
+
+You can set all Destination Rule's `localityLbSetting` Field at once through the `localityLbSetting` Field in Mesh Config. [File 2] shows an example of globally activating Locality Load Balancing by setting the `localityLbSetting` Field in Mesh Config. Also, even if you do not explicitly set the `localityLbSetting` Field in MeshConfig, the `localityLbSetting.enabled` Field is set to `true` by default.
+
+Therefore, in most Istio environments, Locality Load Balancing is activated by setting only the `outlierDetection` Field or the `localityLbSetting.distribute` Field without explicitly setting the `localityLbSetting.enabled` Field to `true` in the Destination Rule. To avoid confusion, all examples below explicitly set the `localityLbSetting.enabled` Field to `true`.
 
 #### 1.2.1. with Failover
 
@@ -234,7 +247,7 @@ One of the considerations when utilizing the Locality Load Balancing feature is 
 
 Istio provides a Failover function to solve this availability problem. The Failover function can be activated by setting the `outlierDetection` Field in the Destination Rule. When the `outlierDetection` Field is set, if there are no Pods in the same locality as the client, requests can be sent to Pods in other localities. The `outlierDetection` Field defines criteria for determining the abnormal state of Server Pods.
 
-```yaml {caption="[File 2] Locality Load Balancing Outlier Detection Example"}
+```yaml {caption="[File 3] Locality Load Balancing Outlier Detection Example"}
 apiVersion: networking.istio.io/v1beta1
 kind: DestinationRule
 metadata:
@@ -258,7 +271,7 @@ Hello version: v1, instance: helloworld-kr-a-57cdf4d447-gwnzb
 Hello version: v1, instance: helloworld-kr-a-57cdf4d447-gwnzb
 ```
 
-[File 2] shows an example of a Destination Rule that activates Locality Load Balancing along with the `outlierDetection` Field, and when you execute the command in [Shell 2], you can see the same result as [Text 2]. You can see that Locality Load Balancing is activated and requests are sent only to Pods in the `kr/a` Locality where the `my-shell-kr-a` Pod is located.
+[File 3] shows an example of a Destination Rule that activates Locality Load Balancing along with the `outlierDetection` Field, and when you execute the command in [Shell 2], you can see the same result as [Text 2]. You can see that Locality Load Balancing is activated and requests are sent only to Pods in the `kr/a` Locality where the `my-shell-kr-a` Pod is located.
 
 ##### 1.2.1.1. Zone Failover
 
@@ -326,7 +339,7 @@ Hello version: v1, instance: helloworld-kr-a-57cdf4d447-gwnzb
 
 Locality Load Balancing not only sends traffic only to Server Pods in the same Locality as the Client Pod, but also provides a Distribution function that allows explicit requests to be sent to Server Pods in other localities. The Distribution function can be activated through the `distribute` Field in the Destination Rule.
 
-```yaml {caption="[File 3] Locality Load Balancing Distribute Example"}
+```yaml {caption="[File 4] Locality Load Balancing Distribute Example"}
 apiVersion: networking.istio.io/v1beta1
 kind: DestinationRule
 metadata:
@@ -359,9 +372,9 @@ Hello version: v1, instance: helloworld-kr-a-57cdf4d447-skvgp
 Hello version: v1, instance: helloworld-kr-a-57cdf4d447-skvgp
 ```
 
-[File 3] shows an example of a Destination Rule that activates Locality Load Balancing along with the `distribute` Field, and when you execute the command in [Shell 2], you can see the same result as [Text 6]. In `from` and `to`, you define which Locality to send traffic to in the form of `region/zone/subzone` along with **Weight**. At this time, the sum of weights must be 100. [File 3] is configured so that all client requests are sent only to Server Pods in the same Locality, so you can see the same result as [Figure 1].
+[File 4] shows an example of a Destination Rule that activates Locality Load Balancing along with the `localityLbSetting.distribute` Field, and when you execute the command in [Shell 2], you can see the same result as [Text 6]. In `from` and `to`, you define which Locality to send traffic to in the form of `region/zone/subzone` along with **Weight**. At this time, the sum of weights must be 100. [File 4] is configured so that all client requests are sent only to Server Pods in the same Locality, so you can see the same result as [Figure 2].
 
-```yaml {caption="[File 4] Locality Load Balancing Distribute Cross Region Example"}
+```yaml {caption="[File 5] Locality Load Balancing Distribute Cross Region Example"}
 apiVersion: networking.istio.io/v1beta1
 kind: DestinationRule
 metadata:
@@ -391,7 +404,7 @@ spec:
             "kr/b/*": 20
 ```
 
-[File 4] shows an example of configuring Cross Region through the Distribution function. You can see that requests sent from the `kr` Region are sent to Pods in the `us` Region, and conversely, requests sent from the `us` Region are sent to Pods in the `kr` Region. You can also see that traffic between Zones is distributed in an 80:20 ratio.
+[File 5] shows an example of configuring Cross Region through the Distribution function. You can see that requests sent from the `kr` Region are sent to Pods in the `us` Region, and conversely, requests sent from the `us` Region are sent to Pods in the `kr` Region. You can also see that traffic between Zones is distributed in an 80:20 ratio.
 
 {{< figure caption="[Figure 6] Locality Load Balancing Distribute Cross Region Example" src="images/locality-load-balancing-distribution-cross-region.png" width="900px" >}}
 
@@ -402,7 +415,7 @@ Hello version: v1, instance: helloworld-us-b-59fd8576c5-grhkk
 Hello version: v1, instance: helloworld-us-a-7cfcf79cd4-grxlr
 ```
 
-[Figure 6] and [Text 7] show the result of executing the command in [File 4]. You can see that all traffic is sent to Pods in the `us` Region.
+[Figure 6] and [Text 7] show the result of executing the command in [File 5]. You can see that all traffic is sent to Pods in the `us` Region.
 
 ## 2. References
 
