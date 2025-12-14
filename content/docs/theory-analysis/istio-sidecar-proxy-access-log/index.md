@@ -151,10 +151,11 @@ $ curl -s mock-server:8080/status/200
 }
 ```
 
-#### 2.1.2. Timeout Case
+#### 2.1.2. Downstream Remote Disconnect Case
 
 ```shell {caption="[Shell 5] Timeout Case / curl Command", linenos=table}
 $ curl -s mock-server:8080/delay/10000
+^C
 ```
 
 ```json {caption="[Text 6] Timeout Case / curl Client", linenos=table}
@@ -221,6 +222,13 @@ $ curl -s mock-server:8080/delay/10000
   "request_duration": "0",
   "response_duration": "-"
 }
+```
+
+#### 2.1.3. Upstream Remote Disconnect Case
+
+```shell {caption="[Shell 8] Upstream Remote Disconnect Case / curl Command", linenos=table}
+$ curl -s mock-server:8080/delay/10000
+^C
 ```
 
 ### 2.2. GRPC Cases
