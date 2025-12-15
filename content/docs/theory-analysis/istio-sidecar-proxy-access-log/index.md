@@ -233,7 +233,7 @@ upstream connect error or disconnect/reset before headers. reset reason: connect
 
 ```json {caption="[Text 9] Upstream Remote Disconnect Case / curl Client", linenos=table}
 {
-  "start_time": "2025-12-15T15:01:20.363Z",
+  "start_time": "2025-12-15T16:19:32.636Z",
   "method": "GET",
   "path": "/disconnect/1000",
   "protocol": "HTTP/1.1",
@@ -244,56 +244,56 @@ upstream connect error or disconnect/reset before headers. reset reason: connect
   "upstream_transport_failure_reason": "-",
   "bytes_received": "0",
   "bytes_sent": "95",
-  "duration": "1009",
-  "upstream_service_time": "1007",
+  "duration": "1085",
+  "upstream_service_time": "1077",
   "x_forwarded_for": "-",
   "user_agent": "curl/8.14.1",
-  "request_id": "6789ed9b-c2f6-9862-8c91-5da2e2101d68",
+  "request_id": "d4f9a535-98b1-962f-a739-c9ceb8f4b6a9",
   "authority": "mock-server:8080",
   "upstream_host": "10.244.1.4:8080",
   "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
-  "upstream_local_address": "10.244.2.3:52860",
+  "upstream_local_address": "10.244.2.3:48284",
   "downstream_local_address": "10.96.191.168:8080",
-  "downstream_remote_address": "10.244.2.3:49066",
+  "downstream_remote_address": "10.244.2.3:37140",
   "requested_server_name": "-",
   "route_name": "-",
   "grpc_status": "-",
   "upstream_request_attempt_count": "1",
   "request_duration": "0",
-  "response_duration": "1009"
+  "response_duration": "1085"
 }
 ```
 
 ```json {caption="[Text 10] Upstream Remote Disconnect Case / Mock Server", linenos=table}
 {
-  "start_time": "2025-12-15T15:01:20.363Z",
+  "start_time": "2025-12-15T16:19:32.654Z",
   "method": "GET",
   "path": "/disconnect/1000",
   "protocol": "HTTP/1.1",
   "response_code": "503",
-  "response_flags": "-",
-  "response_code_details": "via_upstream",
+  "response_flags": "UC",
+  "response_code_details": "upstream_reset_before_response_started{connection_termination}",
   "connection_termination_details": "-",
   "upstream_transport_failure_reason": "-",
   "bytes_received": "0",
   "bytes_sent": "95",
-  "duration": "1009",
-  "upstream_service_time": "1007",
+  "duration": "1052",
+  "upstream_service_time": "-",
   "x_forwarded_for": "-",
   "user_agent": "curl/8.14.1",
-  "request_id": "6789ed9b-c2f6-9862-8c91-5da2e2101d68",
+  "request_id": "d4f9a535-98b1-962f-a739-c9ceb8f4b6a9",
   "authority": "mock-server:8080",
   "upstream_host": "10.244.1.4:8080",
-  "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
-  "upstream_local_address": "10.244.2.3:52860",
-  "downstream_local_address": "10.96.191.168:8080",
-  "downstream_remote_address": "10.244.2.3:49066",
-  "requested_server_name": "-",
-  "route_name": "-",
+  "upstream_cluster": "inbound|8080||",
+  "upstream_local_address": "127.0.0.6:60795",
+  "downstream_local_address": "10.244.1.4:8080",
+  "downstream_remote_address": "10.244.2.3:48284",
+  "requested_server_name": "outbound_.8080_._.mock-server.default.svc.cluster.local",
+  "route_name": "default",
   "grpc_status": "-",
   "upstream_request_attempt_count": "1",
-  "request_duration": "0",
-  "response_duration": "1009"
+  "request_duration": "6",
+  "response_duration": "-"
 }
 ```
 
