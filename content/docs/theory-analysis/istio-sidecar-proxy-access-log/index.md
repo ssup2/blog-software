@@ -227,8 +227,88 @@ $ curl -s mock-server:8080/delay/10000
 #### 2.1.3. Upstream Remote Disconnect Case
 
 ```shell {caption="[Shell 8] Upstream Remote Disconnect Case / curl Command", linenos=table}
-$ curl -s mock-server:8080/delay/10000
-^C
+$ curl mock-server:8080/disconnect/1000
+upstream connect error or disconnect/reset before headers. reset reason: connection termination
+```
+
+```json {caption="[Text 9] Upstream Remote Disconnect Case / curl Client", linenos=table}
+{
+  "start_time": "2025-12-15T15:01:20.363Z",
+  "method": "GET",
+  "path": "/disconnect/1000",
+  "protocol": "HTTP/1.1",
+  "response_code": "503",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "95",
+  "duration": "1009",
+  "upstream_service_time": "1007",
+  "x_forwarded_for": "-",
+  "user_agent": "curl/8.14.1",
+  "request_id": "6789ed9b-c2f6-9862-8c91-5da2e2101d68",
+  "authority": "mock-server:8080",
+  "upstream_host": "10.244.1.4:8080",
+  "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "10.244.2.3:52860",
+  "downstream_local_address": "10.96.191.168:8080",
+  "downstream_remote_address": "10.244.2.3:49066",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "1009"
+}
+```
+
+```json {caption="[Text 10] Upstream Remote Disconnect Case / Mock Server", linenos=table}
+{
+  "start_time": "2025-12-15T15:01:20.363Z",
+  "method": "GET",
+  "path": "/disconnect/1000",
+  "protocol": "HTTP/1.1",
+  "response_code": "503",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "95",
+  "duration": "1009",
+  "upstream_service_time": "1007",
+  "x_forwarded_for": "-",
+  "user_agent": "curl/8.14.1",
+  "request_id": "6789ed9b-c2f6-9862-8c91-5da2e2101d68",
+  "authority": "mock-server:8080",
+  "upstream_host": "10.244.1.4:8080",
+  "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "10.244.2.3:52860",
+  "downstream_local_address": "10.96.191.168:8080",
+  "downstream_remote_address": "10.244.2.3:49066",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "1009"
+}
+```
+
+#### 2.1.4. Upstream Request Retry Case
+
+```shell {caption="[Shell 11] Upstream Request Retry Case / curl Command", linenos=table}
+$ curl mock-server:8080/status/200
+```
+
+```json {caption="[Text 12] Upstream Request Retry Case / curl Client", linenos=table}
+
+```
+
+```json {caption="[Text 13] Upstream Request Retry Case / Mock Server", linenos=table}
+
 ```
 
 ### 2.2. GRPC Cases
