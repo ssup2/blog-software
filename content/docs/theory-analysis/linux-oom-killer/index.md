@@ -85,7 +85,7 @@ $ System Out of Memory
 [ 2826.635944] oom-reaper: reaped process 4070 (stress), now anon-rss:0kB, file-rss:0kB, shmem-rss:0kB
 ```
 
-OOM Killer가 Process를 죽일경우, 죽인 Process의 정보는 Kernel Log에 기록된다. Kernel Log는 "dmesg" 명령어 또는 "/var/log/syslog" 파일에서 확인할 수있다. [Shell 3]은 OOM Killer의 Log를 나타내고 있다.
+OOM Killer가 Process를 죽일경우, 죽인 Process의 정보는 Kernel Log에 기록된다. Kernel Log는 `dmesg` 명령어 또는 `/var/log/syslog` 파일에서 확인할 수있다. [Shell 3]은 OOM Killer의 Log를 나타내고 있다.
 
 ### 1.1. with Cgroup
 

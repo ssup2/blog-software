@@ -20,7 +20,7 @@ LSM 위에 올라가는 Security Module은 lsmod 명령으로 조회 가능한 L
 
 {{< figure caption="[Figure 3] System Call 처리 과정중 LSM Hook의 위치" src="images/linux-lsm-system-call.png" width="900px" >}}
 
-LSM의 Hook은 System Call을 처리하면서 가장 많이 만나게 된다. [Figure 3]은 Linux Kernel의 System Call을 처리 과정중 LSM의 Hook의 처리 위치를 나타내고 있다. LSM의 Hook은 System Call 함수안에 위치한다. 또한 open(), read(), write() System Call 처럼 파일의 Owner, Group을 따지는 DAC(Discretionary Access Control)은 LSM의 Hook전에 수행한다.
+LSM의 Hook은 System Call을 처리하면서 가장 많이 만나게 된다. [Figure 3]은 Linux Kernel의 System Call을 처리 과정중 LSM의 Hook의 처리 위치를 나타내고 있다. LSM의 Hook은 System Call 함수안에 위치한다. 또한 `open()`, `read()`, `write()` System Call 처럼 파일의 Owner, Group을 따지는 DAC(Discretionary Access Control)은 LSM의 Hook전에 수행한다.
 
 ### 1.2. LSM Module Stack, Hook Head
 
@@ -30,11 +30,11 @@ LSM 위에 다양한 Security Module들을 동시에 올릴 수 있다. 이러�
 
 {{< figure caption="[Figure 5] LSM security-hook-heads 구조체" src="images/linux-lsm-function-pointer.png" width="900px" >}}
 
-[Figure 5]는 여러개의 Security Module들이 실제로 LSM 위에 어떤 방법으로 올라가는지를 나타내고 있다. LSM은 **security-hook-heads**라는 Struct를 가지고 있다. security-hook-heads는 각 Security Module의 Hook Function으로 연결되는 Linked List의 Head(Hook Head)들을 가지고 있다. 그림에서는 task-ptr, task-free, ptrace-access-check같은 몇개의 Hook Head만을 나타냈지만 실제로 security-hook-heads는 LSM의 Hook 개수만큼의 Hook Head를 가지고 있다.
+[Figure 5]는 여러개의 Security Module들이 실제로 LSM 위에 어떤 방법으로 올라가는지를 나타내고 있다. LSM은 **security-hook-heads**라는 Struct를 가지고 있다. `security-hook-heads`는 각 Security Module의 Hook Function으로 연결되는 Linked List의 Head(Hook Head)들을 가지고 있다. 그림에서는 `task-ptr`, `task-free`, `ptrace-access-check`같은 몇개의 Hook Head만을 나타냈지만 실제로 `security-hook-heads`는 LSM의 Hook 개수만큼의 Hook Head를 가지고 있다.
 
-LSM에 올라온 Security Module의 순서대로 Security Module의 Hook Function들이 Hook Head에 연결된다. Capability Module, Yama Module, AppArmor Module 순으로 LSM에 올라갔기 때문에 ptrace-access-check Hook Head에 Capabilty, Yama, AppArmor의 ptrace-access-check Hook Function이 순서대로 연결된다. task-ptr Hook Head에는 Capability와 Yama의 Hook Function만 연결되어 있는데 AppArmor는 task-ptr Hook Function을 구현하지 않았기 때문이다.
+LSM에 올라온 Security Module의 순서대로 Security Module의 Hook Function들이 Hook Head에 연결된다. Capability Module, Yama Module, AppArmor Module 순으로 LSM에 올라갔기 때문에 `ptrace-access-check` Hook Head에 Capabilty, Yama, AppArmor의 `ptrace-access-check` Hook Function이 순서대로 연결된다. `task-ptr` Hook Head에는 Capability와 Yama의 Hook Function만 연결되어 있는데 AppArmor는 `task-ptr` Hook Function을 구현하지 않았기 때문이다.
 
-먼저 LSM에 올라온 Security Module의 Hook Function이 먼져 수행되고 중간 Hook Function의 결과가 No라면 그 즉시 다음 Hook Function을 수행하지 않고 중단한다. [Figure 5]처럼 Security Module이 설정되어 있는 상태에서 ptrace-access-check hook이 발생하면 가장 먼져 Capability의 ptrace-access-check Hook Function이 실행된다. Capability의 ptrace-access-check Hook Function의 결과가 Yes라면 Yama의 ptrace-access-check Hook Function이 수행된다. 만약 결과가 No라면 다음 Yama의 Hook Function을 수행하지 않고 바로 LSM을 빠져 나온다.
+먼저 LSM에 올라온 Security Module의 Hook Function이 먼져 수행되고 중간 Hook Function의 결과가 No라면 그 즉시 다음 Hook Function을 수행하지 않고 중단한다. [Figure 5]처럼 Security Module이 설정되어 있는 상태에서 `ptrace-access-check` hook이 발생하면 가장 먼져 Capability의 `ptrace-access-check` Hook Function이 실행된다. Capability의 `ptrace-access-check` Hook Function의 결과가 Yes라면 Yama의 `ptrace-access-check` Hook Function이 수행된다. 만약 결과가 No라면 다음 Yama의 Hook Function을 수행하지 않고 바로 LSM을 빠져 나온다.
 
 ```c linenos {caption="[Code 1] security-init() 함수", linenos=table}
 /**

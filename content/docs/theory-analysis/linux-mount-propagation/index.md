@@ -14,7 +14,7 @@ Mount Propagation은 Linux Kernel의 Mount NS(Namespace)으로 인해 발생하�
 
 Mount Propagation을 이해하기 위해서는 Shared Subtree의 개념을 알아야 한다. 여기서 Subtree는 Filesystem Tree의 일부를 구성하는 Filesystem을 의미한다. [Figure 1]에서 왼쪽은 Filesystem Tree는 Root에 Mount된 Filesystem과 /A Directory에 Mount된 Filesystem, 2개의 Subtree로 구성되어 있는 Filesystem을 나타내고 있다. 이러한 Subtree를 Share(공유)하면 Shared Subtree가 된다.
 
-Subtree를 공유하는 방법은 Mount NS를 Clone(복제)하는 방법과 Bind Mount를 이용하는 방법 2가지가 존재한다. [Figure 1]은 Mount NS를 Clone하여 Shared Subtree를 생성하는 방법을 나타내고 있다. Clone() System Call을 이용하여 Mount NS를 복제할 경우 Mount NS안에 저장되어 있던 Mount 정보도 그대로 복제된다. Subtree도 그대로 복제되기 Subtree는 Mount NS 사이에서 공유된다. [Figure 1]에서는 2개의 Subtree가 있기 때문에, 2개의 Subtree가 그대로 복제되는 모습을 나타내고 있다. 원본 Mount NS의 Subtree를 Master라고 하고, 복제된 Mount NS의 Subtree를 Slave라고 한다.
+Subtree를 공유하는 방법은 Mount NS를 Clone(복제)하는 방법과 Bind Mount를 이용하는 방법 2가지가 존재한다. [Figure 1]은 Mount NS를 Clone하여 Shared Subtree를 생성하는 방법을 나타내고 있다. `clone()` System Call을 이용하여 Mount NS를 복제할 경우 Mount NS안에 저장되어 있던 Mount 정보도 그대로 복제된다. Subtree도 그대로 복제되기 Subtree는 Mount NS 사이에서 공유된다. [Figure 1]에서는 2개의 Subtree가 있기 때문에, 2개의 Subtree가 그대로 복제되는 모습을 나타내고 있다. 원본 Mount NS의 Subtree를 Master라고 하고, 복제된 Mount NS의 Subtree를 Slave라고 한다.
 
 {{< figure caption="[Figure 2] Bind Mount" src="images/bind-mount.png" width="700px" >}}
 
@@ -28,17 +28,17 @@ Mount Propagation은 의미 그대로 변경된 Mount 정보를 전파하는 기
 
 [Figure 3]은 Mount NS 사이의 Shared Subtree에서 Forward Propagation이 발생하는 과정을 나타내고 있다. 순서는 다음과 같다.
 
-* 원본 Mount NS의 Subtree는 Clone() System Call을 공유상태가 된다.
-* Master Subtree의 /A Directory에 sdb Block Device를 Mount 하였다.
-* Forward Propagation이 발생하여 Slave Subtree의 /A Directory에도 sdb Block Device가 Mount 된다.
+* 원본 Mount NS의 Subtree는 `clone()` System Call을 공유상태가 된다.
+* Master Subtree의 `/A` Directory에 sdb Block Device를 Mount 하였다.
+* Forward Propagation이 발생하여 Slave Subtree의 `/A` Directory에도 sdb Block Device가 Mount 된다.
 
 {{< figure caption="[Figure 4] Receive Propagation" src="images/receive-propagation.png" width="700px" >}}
 
 [Figure 4]는 Mount NS 사이의 Shared Substree에서 Receive Propagation이 발생하는 과정을 나타내고 있다. 순서는 다음과 같다.
 
-* 원본 Mount NS의 Subtree는 Clone() System Call을 공유상태가 된다.
-* Slave Subtree의 /A Directory에 sdb Block Device를 Mount 하였다.
-* Receive Propagation이 발생하여 Master Subtree의 /A Directory에도 sdb Block Device가 Mount 된다.
+* 원본 Mount NS의 Subtree는 `clone()` System Call을 공유상태가 된다.
+* Slave Subtree의 `/A` Directory에 sdb Block Device를 Mount 하였다.
+* Receive Propagation이 발생하여 Master Subtree의 `/A` Directory에도 sdb Block Device가 Mount 된다.
 
 ### 1.3. Mount Option
 
