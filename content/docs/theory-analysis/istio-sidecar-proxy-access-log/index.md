@@ -299,16 +299,147 @@ upstream connect error or disconnect/reset before headers. reset reason: connect
 
 #### 2.1.4. Upstream Request Retry Case
 
-```shell {caption="[Shell 11] Upstream Request Retry Case / curl Command", linenos=table}
+```shell {caption="[Shell 9] Upstream Request Retry Case / iptables Command", linenos=table}
+$ SHELL_IP=$(kubectl get pod shell -o jsonpath='{.status.podIP}')
+$ kubectl exec mock-server -c mock-server -- iptables -A INPUT -s ${SHELL_IP} -j DROP
+```
+
+```shell {caption="[Shell 10] Upstream Request Retry Case / curl Command", linenos=table}
 $ curl mock-server:8080/status/200
+upstream connect error or disconnect/reset before headers. retried and the latest reset reason: connection timeout
+$ curl mock-server:8080/status/200
+no healthy upstream
+$ curl mock-server:8080/status/200
+no healthy upstream
+$ curl mock-server:8080/status/200
+no healthy upstream
 ```
 
 ```json {caption="[Text 12] Upstream Request Retry Case / curl Client", linenos=table}
-
+{
+  "start_time": "2025-12-21T07:17:42.331Z",
+  "method": "GET",
+  "path": "/status/200",
+  "protocol": "HTTP/1.1",
+  "response_code": "503",
+  "response_flags": "URX,UF",
+  "response_code_details": "upstream_reset_before_response_started{connection_timeout}",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "114",
+  "duration": "30066",
+  "upstream_service_time": "-",
+  "x_forwarded_for": "-",
+  "user_agent": "curl/8.14.1",
+  "request_id": "78343cc2-d6f2-9a5d-8dff-84c7ea3596c3",
+  "authority": "mock-server:8080",
+  "upstream_host": "10.244.1.12:8080",
+  "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "-",
+  "downstream_local_address": "10.96.225.216:8080",
+  "downstream_remote_address": "10.244.2.5:35248",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "3",
+  "request_duration": "0",
+  "response_duration": "-"
+}
+{
+  "start_time": "2025-12-21T07:18:15.580Z",
+  "method": "GET",
+  "path": "/status/200",
+  "protocol": "HTTP/1.1",
+  "response_code": "503",
+  "response_flags": "UH",
+  "response_code_details": "no_healthy_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "19",
+  "duration": "20062",
+  "upstream_service_time": "-",
+  "x_forwarded_for": "-",
+  "user_agent": "curl/8.14.1",
+  "request_id": "575b956c-0e96-9471-a21f-0555763492ab",
+  "authority": "mock-server:8080",
+  "upstream_host": "10.244.1.12:8080",
+  "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "-",
+  "downstream_local_address": "10.96.225.216:8080",
+  "downstream_remote_address": "10.244.2.5:46700",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "3",
+  "request_duration": "0",
+  "response_duration": "-"
+}
+{
+  "start_time": "2025-12-21T07:18:38.162Z",
+  "method": "GET",
+  "path": "/status/200",
+  "protocol": "HTTP/1.1",
+  "response_code": "503",
+  "response_flags": "UH",
+  "response_code_details": "no_healthy_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "19",
+  "duration": "0",
+  "upstream_service_time": "-",
+  "x_forwarded_for": "-",
+  "user_agent": "curl/8.14.1",
+  "request_id": "24be226c-274c-9948-bb96-88df90492bdf",
+  "authority": "mock-server:8080",
+  "upstream_host": "-",
+  "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "-",
+  "downstream_local_address": "10.96.225.216:8080",
+  "downstream_remote_address": "10.244.2.5:33536",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "-"
+}
+{
+  "start_time": "2025-12-21T07:18:43.287Z",
+  "method": "GET",
+  "path": "/status/200",
+  "protocol": "HTTP/1.1",
+  "response_code": "503",
+  "response_flags": "UH",
+  "response_code_details": "no_healthy_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "19",
+  "duration": "0",
+  "upstream_service_time": "-",
+  "x_forwarded_for": "-",
+  "user_agent": "curl/8.14.1",
+  "request_id": "2881d791-2b45-9f9a-810b-500a2219edc9",
+  "authority": "mock-server:8080",
+  "upstream_host": "-",
+  "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "-",
+  "downstream_local_address": "10.96.225.216:8080",
+  "downstream_remote_address": "10.244.2.5:54704",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "-"
+}
 ```
 
 ```json {caption="[Text 13] Upstream Request Retry Case / Mock Server", linenos=table}
-
+X
 ```
 
 #### 2.1.5. 
