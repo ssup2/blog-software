@@ -75,6 +75,8 @@ data:
 | `request_duration` | The duration of the request. |
 | `response_duration` | The duration of the response. |
 
+
+
 ## 2. Istio Sidecar Proxy Access Log
 
 ### 2.1. HTTP Cases
@@ -305,14 +307,36 @@ $ kubectl exec mock-server -c mock-server -- iptables -A INPUT -s ${SHELL_IP} -j
 ```
 
 ```shell {caption="[Shell 10] Upstream Request Retry Case / curl Command", linenos=table}
-$ curl mock-server:8080/status/200
+$ kubectl exec -it shell -- curl mock-server:8080/status/200
 upstream connect error or disconnect/reset before headers. retried and the latest reset reason: connection timeout
-$ curl mock-server:8080/status/200
+$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
+{
+  "edsHealthStatus": "HEALTHY"
+}
+
+$ kubectl exec -it shell -- curl mock-server:8080/status/200
 no healthy upstream
-$ curl mock-server:8080/status/200
+$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
+{
+  "failedOutlierCheck": true,
+  "edsHealthStatus": "HEALTHY"
+}
+
+$ kubectl exec -it shell -- curl mock-server:8080/status/200
 no healthy upstream
-$ curl mock-server:8080/status/200
+$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
+{
+  "failedOutlierCheck": true,
+  "edsHealthStatus": "HEALTHY"
+}
+
+$ kubectl exec -it shell -- curl mock-server:8080/status/200
 no healthy upstream
+$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
+{
+  "failedOutlierCheck": true,
+  "edsHealthStatus": "HEALTHY"
+}
 ```
 
 ```json {caption="[Text 12] Upstream Request Retry Case / curl Client", linenos=table}
@@ -441,6 +465,15 @@ no healthy upstream
 ```json {caption="[Text 13] Upstream Request Retry Case / Mock Server", linenos=table}
 X
 ```
+
+```shell {caption="[Shell 11] Upstream Request Retry Case / istioctl Command", linenos=table}
+$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
+{
+  "edsHealthStatus": "HEALTHY"
+}
+```
+
+`consecutive5xxErrors` : 5이기 때문에
 
 #### 2.1.5. 
 
