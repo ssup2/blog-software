@@ -299,12 +299,11 @@ upstream connect error or disconnect/reset before headers. reset reason: connect
 }
 ```
 
-#### 2.1.4. Upstream Request Retry Case
+#### 2.1.4. Upstream Request Retry Case with Timeout
 
 ```shell {caption="[Shell 9] Upstream Request Retry Case / iptables Command", linenos=table}
 $ SHELL_IP=$(kubectl get pod shell -o jsonpath='{.status.podIP}')
 $ kubectl exec mock-server -c mock-server -- iptables -A INPUT -s ${SHELL_IP} -j DROP
-$ kubectl exec mock-server -c mock-server -- iptables-legacy -A INPUT -p tcp -s ${SHELL_IP} -j REJECT --reject-with tcp-reset
 ```
 
 ```shell {caption="[Shell 10] Upstream Request Retry Case / curl Command", linenos=table}
@@ -475,6 +474,139 @@ $ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contai
 ```
 
 `consecutive5xxErrors` : 5이기 때문에
+
+#### 2.1.4. Upstream Request Retry Case with TCP Reset
+
+```shell {caption="[Shell 9] Upstream Request Retry Case / iptables Command", linenos=table}
+$ SHELL_IP=$(kubectl get pod shell -o jsonpath='{.status.podIP}')
+$ kubectl exec mock-server -c mock-server -- iptables-legacy -A INPUT -p tcp -s ${SHELL_IP} -j REJECT --reject-with tcp-reset
+```
+
+```shell {caption="[Shell 10] Upstream Request Retry Case / curl Command", linenos=table}
+$ kubectl exec -it shell -- curl mock-server:8080/status/200
+upstream connect error or disconnect/reset before headers. retried and the latest reset reason: remote connection failure, transport failure reason: delayed connect error: Connection refused
+$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
+{
+  "edsHealthStatus": "HEALTHY"
+}
+
+$ kubectl exec -it shell -- curl mock-server:8080/status/200
+no healthy upstream
+$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
+{
+  "failedOutlierCheck": true,
+  "edsHealthStatus": "HEALTHY"
+}
+
+$ kubectl exec -it shell -- curl mock-server:8080/status/200
+no healthy upstream
+$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
+{
+  "failedOutlierCheck": true,
+  "edsHealthStatus": "HEALTHY"
+}
+
+$ kubectl exec -it shell -- curl mock-server:8080/status/200
+no healthy upstream
+$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
+{
+  "failedOutlierCheck": true,
+  "edsHealthStatus": "HEALTHY"
+}
+```
+
+```json {caption="[Text 12] Upstream Request Retry Case / curl Client", linenos=table}
+{
+  "start_time": "2025-12-22T17:09:54.276Z",
+  "method": "GET",
+  "path": "/status/200",
+  "protocol": "HTTP/1.1",
+  "response_code": "503",
+  "response_flags": "URX,UF",
+  "response_code_details": "upstream_reset_before_response_started{remote_connection_failure|delayed_connect_error:_Connection_refused}",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "delayed_connect_error:_Connection_refused",
+  "bytes_received": "0",
+  "bytes_sent": "190",
+  "duration": "63",
+  "upstream_service_time": "-",
+  "x_forwarded_for": "-",
+  "user_agent": "curl/8.14.1",
+  "request_id": "6e0d7462-2323-9e73-8dcf-43701a368edb",
+  "authority": "mock-server:8080",
+  "upstream_host": "10.244.2.4:8080",
+  "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "-",
+  "downstream_local_address": "10.96.90.250:8080",
+  "downstream_remote_address": "10.244.1.3:36360",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "3",
+  "request_duration": "0",
+  "response_duration": "-"
+}
+{
+  "start_time": "2025-12-22T17:09:56.768Z",
+  "method": "GET",
+  "path": "/status/200",
+  "protocol": "HTTP/1.1",
+  "response_code": "503",
+  "response_flags": "UH",
+  "response_code_details": "no_healthy_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "delayed_connect_error:_Connection_refused",
+  "bytes_received": "0",
+  "bytes_sent": "19",
+  "duration": "17",
+  "upstream_service_time": "-",
+  "x_forwarded_for": "-",
+  "user_agent": "curl/8.14.1",
+  "request_id": "af1888dc-b298-9c53-8d44-ed21a0da304f",
+  "authority": "mock-server:8080",
+  "upstream_host": "10.244.2.4:8080",
+  "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "-",
+  "downstream_local_address": "10.96.90.250:8080",
+  "downstream_remote_address": "10.244.1.3:36368",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "3",
+  "request_duration": "0",
+  "response_duration": "-"
+}
+{
+  "start_time": "2025-12-22T17:10:00.420Z",
+  "method": "GET",
+  "path": "/status/200",
+  "protocol": "HTTP/1.1",
+  "response_code": "503",
+  "response_flags": "UH",
+  "response_code_details": "no_healthy_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "19",
+  "duration": "0",
+  "upstream_service_time": "-",
+  "x_forwarded_for": "-",
+  "user_agent": "curl/8.14.1",
+  "request_id": "9b901845-b436-95f3-89d1-868d9acd05ac",
+  "authority": "mock-server:8080",
+  "upstream_host": "-",
+  "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "-",
+  "downstream_local_address": "10.96.90.250:8080",
+  "downstream_remote_address": "10.244.1.3:36370",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "-"
+}
+```
 
 #### 2.1.5. No Healthy Upstream Case
 
@@ -1140,6 +1272,8 @@ $ kubectl exec shell -- curl -s mock-server:8080/delay/5000 &
 ```
 
 ### 2.2. GRPC Cases
+
+
 
 ## 3. 참조
 
