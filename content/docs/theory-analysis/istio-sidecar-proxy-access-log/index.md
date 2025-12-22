@@ -975,6 +975,170 @@ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains
 }
 ```
 
+#### 2.1.7. Upstream Overflow Case
+
+```shell {caption="[Shell 14] Upstream Overflow Case / curl Command", linenos=table}
+$ kubectl exec shell -- curl -s mock-server:8080/delay/5000 &
+$ kubectl exec shell -- curl -s mock-server:8080/delay/5000 &
+$ kubectl exec shell -- curl -s mock-server:8080/delay/5000 &
+```
+
+```json {caption="[Shell 15] Upstream Overflow Case / istioctl Command", linenos=table}
+{
+  "start_time": "2025-12-22T16:08:03.507Z",
+  "method": "GET",
+  "path": "/delay/5000",
+  "protocol": "HTTP/1.1",
+  "response_code": "503",
+  "response_flags": "UO",
+  "response_code_details": "upstream_reset_before_response_started{overflow}",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "81",
+  "duration": "2",
+  "upstream_service_time": "-",
+  "x_forwarded_for": "-",
+  "user_agent": "curl/8.14.1",
+  "request_id": "4c299e03-e57f-9613-8817-6682e9deb675",
+  "authority": "mock-server:8080",
+  "upstream_host": "-",
+  "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "-",
+  "downstream_local_address": "10.96.90.250:8080",
+  "downstream_remote_address": "10.244.1.3:55486",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "-"
+}
+{
+  "start_time": "2025-12-22T16:08:02.442Z",
+  "method": "GET",
+  "path": "/delay/5000",
+  "protocol": "HTTP/1.1",
+  "response_code": "200",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "83",
+  "duration": "5011",
+  "upstream_service_time": "5010",
+  "x_forwarded_for": "-",
+  "user_agent": "curl/8.14.1",
+  "request_id": "8d667b79-534b-9d95-a3a7-4b2fa17263e6",
+  "authority": "mock-server:8080",
+  "upstream_host": "10.244.2.4:8080",
+  "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "10.244.1.3:58132",
+  "downstream_local_address": "10.96.90.250:8080",
+  "downstream_remote_address": "10.244.1.3:55470",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "5011"
+}
+{
+  "start_time": "2025-12-22T16:08:02.847Z",
+  "method": "GET",
+  "path": "/delay/5000",
+  "protocol": "HTTP/1.1",
+  "response_code": "200",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "83",
+  "duration": "9615",
+  "upstream_service_time": "9615",
+  "x_forwarded_for": "-",
+  "user_agent": "curl/8.14.1",
+  "request_id": "afe67ad1-54bd-9a82-b947-6fe65a1dfe69",
+  "authority": "mock-server:8080",
+  "upstream_host": "10.244.2.4:8080",
+  "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "10.244.1.3:58134",
+  "downstream_local_address": "10.96.90.250:8080",
+  "downstream_remote_address": "10.244.1.3:55472",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "9615"
+}
+```
+
+```json {caption="[Text 16] Upstream Overflow Case / Mock Server", linenos=table}
+{
+  "start_time": "2025-12-22T16:08:02.443Z",
+  "method": "GET",
+  "path": "/delay/5000",
+  "protocol": "HTTP/1.1",
+  "response_code": "200",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "83",
+  "duration": "5008",
+  "upstream_service_time": "5008",
+  "x_forwarded_for": "-",
+  "user_agent": "curl/8.14.1",
+  "request_id": "8d667b79-534b-9d95-a3a7-4b2fa17263e6",
+  "authority": "mock-server:8080",
+  "upstream_host": "10.244.2.4:8080",
+  "upstream_cluster": "inbound|8080||",
+  "upstream_local_address": "127.0.0.6:52515",
+  "downstream_local_address": "10.244.2.4:8080",
+  "downstream_remote_address": "10.244.1.3:58132",
+  "requested_server_name": "outbound_.8080_._.mock-server.default.svc.cluster.local",
+  "route_name": "default",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "5008"
+}
+{
+  "start_time": "2025-12-22T16:08:07.456Z",
+  "method": "GET",
+  "path": "/delay/5000",
+  "protocol": "HTTP/1.1",
+  "response_code": "200",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "83",
+  "duration": "5004",
+  "upstream_service_time": "5003",
+  "x_forwarded_for": "-",
+  "user_agent": "curl/8.14.1",
+  "request_id": "afe67ad1-54bd-9a82-b947-6fe65a1dfe69",
+  "authority": "mock-server:8080",
+  "upstream_host": "10.244.2.4:8080",
+  "upstream_cluster": "inbound|8080||",
+  "upstream_local_address": "127.0.0.6:49425",
+  "downstream_local_address": "10.244.2.4:8080",
+  "downstream_remote_address": "10.244.1.3:58134",
+  "requested_server_name": "outbound_.8080_._.mock-server.default.svc.cluster.local",
+  "route_name": "default",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "5004"
+}
+```
+
 ### 2.2. GRPC Cases
 
 ## 3. 참조
