@@ -75,19 +75,17 @@ data:
 | `request_duration` | The duration of the request. |
 | `response_duration` | The duration of the response. |
 
-
-
 ## 2. Istio Sidecar Proxy Access Log
 
 ### 2.1. HTTP Cases
 
-#### 2.1.1. 200 OK Success Case
+#### 2.1.1. Success Case
 
-```shell {caption="[Shell 2] 200 OK Success Case / curl Command", linenos=table}
+```shell {caption="[Shell 2] Success Case / curl Command", linenos=table}
 $ curl -s mock-server:8080/status/200
 ```
 
-```json {caption="[Text 2] 200 OK Success Case / curl Client", linenos=table}
+```json {caption="[Text 2] Success Case / curl Client", linenos=table}
 {
   "start_time": "2025-12-14T15:04:12.558Z",
   "method": "GET",
@@ -299,130 +297,38 @@ upstream connect error or disconnect/reset before headers. reset reason: connect
 }
 ```
 
-#### 2.1.4. Upstream Request Retry Case with Timeout
+#### 2.1.4. Upstream Overflow Case
 
-```shell {caption="[Shell 9] Upstream Request Retry Case / iptables Command", linenos=table}
-$ SHELL_IP=$(kubectl get pod shell -o jsonpath='{.status.podIP}')
-$ kubectl exec mock-server -c mock-server -- iptables -A INPUT -s ${SHELL_IP} -j DROP
+```shell {caption="[Shell 14] Upstream Overflow Case / curl Command", linenos=table}
+$ kubectl exec shell -- curl -s mock-server:8080/delay/5000 &
+$ kubectl exec shell -- curl -s mock-server:8080/delay/5000 &
+$ kubectl exec shell -- curl -s mock-server:8080/delay/5000 &
 ```
 
-```shell {caption="[Shell 10] Upstream Request Retry Case / curl Command", linenos=table}
-$ kubectl exec -it shell -- curl mock-server:8080/status/200
-upstream connect error or disconnect/reset before headers. retried and the latest reset reason: connection timeout
-$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
+```json {caption="[Shell 15] Upstream Overflow Case / istioctl Command", linenos=table}
 {
-  "edsHealthStatus": "HEALTHY"
-}
-
-$ kubectl exec -it shell -- curl mock-server:8080/status/200
-no healthy upstream
-$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
-{
-  "failedOutlierCheck": true,
-  "edsHealthStatus": "HEALTHY"
-}
-
-$ kubectl exec -it shell -- curl mock-server:8080/status/200
-no healthy upstream
-$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
-{
-  "failedOutlierCheck": true,
-  "edsHealthStatus": "HEALTHY"
-}
-
-$ kubectl exec -it shell -- curl mock-server:8080/status/200
-no healthy upstream
-$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
-{
-  "failedOutlierCheck": true,
-  "edsHealthStatus": "HEALTHY"
-}
-```
-
-```json {caption="[Text 12] Upstream Request Retry Case / curl Client", linenos=table}
-{
-  "start_time": "2025-12-21T07:17:42.331Z",
+  "start_time": "2025-12-22T16:08:03.507Z",
   "method": "GET",
-  "path": "/status/200",
+  "path": "/delay/5000",
   "protocol": "HTTP/1.1",
   "response_code": "503",
-  "response_flags": "URX,UF",
-  "response_code_details": "upstream_reset_before_response_started{connection_timeout}",
+  "response_flags": "UO",
+  "response_code_details": "upstream_reset_before_response_started{overflow}",
   "connection_termination_details": "-",
   "upstream_transport_failure_reason": "-",
   "bytes_received": "0",
-  "bytes_sent": "114",
-  "duration": "30066",
+  "bytes_sent": "81",
+  "duration": "2",
   "upstream_service_time": "-",
   "x_forwarded_for": "-",
   "user_agent": "curl/8.14.1",
-  "request_id": "78343cc2-d6f2-9a5d-8dff-84c7ea3596c3",
-  "authority": "mock-server:8080",
-  "upstream_host": "10.244.1.12:8080",
-  "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
-  "upstream_local_address": "-",
-  "downstream_local_address": "10.96.225.216:8080",
-  "downstream_remote_address": "10.244.2.5:35248",
-  "requested_server_name": "-",
-  "route_name": "-",
-  "grpc_status": "-",
-  "upstream_request_attempt_count": "3",
-  "request_duration": "0",
-  "response_duration": "-"
-}
-{
-  "start_time": "2025-12-21T07:18:15.580Z",
-  "method": "GET",
-  "path": "/status/200",
-  "protocol": "HTTP/1.1",
-  "response_code": "503",
-  "response_flags": "UH",
-  "response_code_details": "no_healthy_upstream",
-  "connection_termination_details": "-",
-  "upstream_transport_failure_reason": "-",
-  "bytes_received": "0",
-  "bytes_sent": "19",
-  "duration": "20062",
-  "upstream_service_time": "-",
-  "x_forwarded_for": "-",
-  "user_agent": "curl/8.14.1",
-  "request_id": "575b956c-0e96-9471-a21f-0555763492ab",
-  "authority": "mock-server:8080",
-  "upstream_host": "10.244.1.12:8080",
-  "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
-  "upstream_local_address": "-",
-  "downstream_local_address": "10.96.225.216:8080",
-  "downstream_remote_address": "10.244.2.5:46700",
-  "requested_server_name": "-",
-  "route_name": "-",
-  "grpc_status": "-",
-  "upstream_request_attempt_count": "3",
-  "request_duration": "0",
-  "response_duration": "-"
-}
-{
-  "start_time": "2025-12-21T07:18:38.162Z",
-  "method": "GET",
-  "path": "/status/200",
-  "protocol": "HTTP/1.1",
-  "response_code": "503",
-  "response_flags": "UH",
-  "response_code_details": "no_healthy_upstream",
-  "connection_termination_details": "-",
-  "upstream_transport_failure_reason": "-",
-  "bytes_received": "0",
-  "bytes_sent": "19",
-  "duration": "0",
-  "upstream_service_time": "-",
-  "x_forwarded_for": "-",
-  "user_agent": "curl/8.14.1",
-  "request_id": "24be226c-274c-9948-bb96-88df90492bdf",
+  "request_id": "4c299e03-e57f-9613-8817-6682e9deb675",
   "authority": "mock-server:8080",
   "upstream_host": "-",
   "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
   "upstream_local_address": "-",
-  "downstream_local_address": "10.96.225.216:8080",
-  "downstream_remote_address": "10.244.2.5:33536",
+  "downstream_local_address": "10.96.90.250:8080",
+  "downstream_remote_address": "10.244.1.3:55486",
   "requested_server_name": "-",
   "route_name": "-",
   "grpc_status": "-",
@@ -431,224 +337,131 @@ $ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contai
   "response_duration": "-"
 }
 {
-  "start_time": "2025-12-21T07:18:43.287Z",
+  "start_time": "2025-12-22T16:08:02.442Z",
   "method": "GET",
-  "path": "/status/200",
+  "path": "/delay/5000",
   "protocol": "HTTP/1.1",
-  "response_code": "503",
-  "response_flags": "UH",
-  "response_code_details": "no_healthy_upstream",
+  "response_code": "200",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
   "connection_termination_details": "-",
   "upstream_transport_failure_reason": "-",
   "bytes_received": "0",
-  "bytes_sent": "19",
-  "duration": "0",
-  "upstream_service_time": "-",
+  "bytes_sent": "83",
+  "duration": "5011",
+  "upstream_service_time": "5010",
   "x_forwarded_for": "-",
   "user_agent": "curl/8.14.1",
-  "request_id": "2881d791-2b45-9f9a-810b-500a2219edc9",
-  "authority": "mock-server:8080",
-  "upstream_host": "-",
-  "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
-  "upstream_local_address": "-",
-  "downstream_local_address": "10.96.225.216:8080",
-  "downstream_remote_address": "10.244.2.5:54704",
-  "requested_server_name": "-",
-  "route_name": "-",
-  "grpc_status": "-",
-  "upstream_request_attempt_count": "1",
-  "request_duration": "0",
-  "response_duration": "-"
-}
-```
-
-```json {caption="[Text 13] Upstream Request Retry Case / Mock Server", linenos=table}
-X
-```
-
-```shell {caption="[Shell 11] Upstream Request Retry Case / istioctl Command", linenos=table}
-$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
-{
-  "edsHealthStatus": "HEALTHY"
-}
-```
-
-`consecutive5xxErrors` : 5이기 때문에
-
-#### 2.1.4. Upstream Request Retry Case with TCP Reset
-
-```shell {caption="[Shell 9] Upstream Request Retry Case / iptables Command", linenos=table}
-$ SHELL_IP=$(kubectl get pod shell -o jsonpath='{.status.podIP}')
-$ kubectl exec mock-server -c mock-server -- iptables-legacy -A INPUT -p tcp -s ${SHELL_IP} -j REJECT --reject-with tcp-reset
-```
-
-```shell {caption="[Shell 10] Upstream Request Retry Case / curl Command", linenos=table}
-$ kubectl exec -it shell -- curl mock-server:8080/status/200
-upstream connect error or disconnect/reset before headers. retried and the latest reset reason: remote connection failure, transport failure reason: delayed connect error: Connection refused
-$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
-{
-  "edsHealthStatus": "HEALTHY"
-}
-
-$ kubectl exec -it shell -- curl mock-server:8080/status/200
-no healthy upstream
-$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
-{
-  "failedOutlierCheck": true,
-  "edsHealthStatus": "HEALTHY"
-}
-
-$ kubectl exec -it shell -- curl mock-server:8080/status/200
-no healthy upstream
-$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
-{
-  "failedOutlierCheck": true,
-  "edsHealthStatus": "HEALTHY"
-}
-
-$ kubectl exec -it shell -- curl mock-server:8080/status/200
-no healthy upstream
-$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
-{
-  "failedOutlierCheck": true,
-  "edsHealthStatus": "HEALTHY"
-}
-```
-
-```json {caption="[Text 12] Upstream Request Retry Case / curl Client", linenos=table}
-{
-  "start_time": "2025-12-22T17:09:54.276Z",
-  "method": "GET",
-  "path": "/status/200",
-  "protocol": "HTTP/1.1",
-  "response_code": "503",
-  "response_flags": "URX,UF",
-  "response_code_details": "upstream_reset_before_response_started{remote_connection_failure|delayed_connect_error:_Connection_refused}",
-  "connection_termination_details": "-",
-  "upstream_transport_failure_reason": "delayed_connect_error:_Connection_refused",
-  "bytes_received": "0",
-  "bytes_sent": "190",
-  "duration": "63",
-  "upstream_service_time": "-",
-  "x_forwarded_for": "-",
-  "user_agent": "curl/8.14.1",
-  "request_id": "6e0d7462-2323-9e73-8dcf-43701a368edb",
+  "request_id": "8d667b79-534b-9d95-a3a7-4b2fa17263e6",
   "authority": "mock-server:8080",
   "upstream_host": "10.244.2.4:8080",
   "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
-  "upstream_local_address": "-",
+  "upstream_local_address": "10.244.1.3:58132",
   "downstream_local_address": "10.96.90.250:8080",
-  "downstream_remote_address": "10.244.1.3:36360",
+  "downstream_remote_address": "10.244.1.3:55470",
   "requested_server_name": "-",
   "route_name": "-",
   "grpc_status": "-",
-  "upstream_request_attempt_count": "3",
+  "upstream_request_attempt_count": "1",
   "request_duration": "0",
-  "response_duration": "-"
+  "response_duration": "5011"
 }
 {
-  "start_time": "2025-12-22T17:09:56.768Z",
+  "start_time": "2025-12-22T16:08:02.847Z",
   "method": "GET",
-  "path": "/status/200",
+  "path": "/delay/5000",
   "protocol": "HTTP/1.1",
-  "response_code": "503",
-  "response_flags": "UH",
-  "response_code_details": "no_healthy_upstream",
+  "response_code": "200",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
   "connection_termination_details": "-",
-  "upstream_transport_failure_reason": "delayed_connect_error:_Connection_refused",
+  "upstream_transport_failure_reason": "-",
   "bytes_received": "0",
-  "bytes_sent": "19",
-  "duration": "17",
-  "upstream_service_time": "-",
+  "bytes_sent": "83",
+  "duration": "9615",
+  "upstream_service_time": "9615",
   "x_forwarded_for": "-",
   "user_agent": "curl/8.14.1",
-  "request_id": "af1888dc-b298-9c53-8d44-ed21a0da304f",
+  "request_id": "afe67ad1-54bd-9a82-b947-6fe65a1dfe69",
   "authority": "mock-server:8080",
   "upstream_host": "10.244.2.4:8080",
   "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
-  "upstream_local_address": "-",
+  "upstream_local_address": "10.244.1.3:58134",
   "downstream_local_address": "10.96.90.250:8080",
-  "downstream_remote_address": "10.244.1.3:36368",
-  "requested_server_name": "-",
-  "route_name": "-",
-  "grpc_status": "-",
-  "upstream_request_attempt_count": "3",
-  "request_duration": "0",
-  "response_duration": "-"
-}
-{
-  "start_time": "2025-12-22T17:10:00.420Z",
-  "method": "GET",
-  "path": "/status/200",
-  "protocol": "HTTP/1.1",
-  "response_code": "503",
-  "response_flags": "UH",
-  "response_code_details": "no_healthy_upstream",
-  "connection_termination_details": "-",
-  "upstream_transport_failure_reason": "-",
-  "bytes_received": "0",
-  "bytes_sent": "19",
-  "duration": "0",
-  "upstream_service_time": "-",
-  "x_forwarded_for": "-",
-  "user_agent": "curl/8.14.1",
-  "request_id": "9b901845-b436-95f3-89d1-868d9acd05ac",
-  "authority": "mock-server:8080",
-  "upstream_host": "-",
-  "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
-  "upstream_local_address": "-",
-  "downstream_local_address": "10.96.90.250:8080",
-  "downstream_remote_address": "10.244.1.3:36370",
+  "downstream_remote_address": "10.244.1.3:55472",
   "requested_server_name": "-",
   "route_name": "-",
   "grpc_status": "-",
   "upstream_request_attempt_count": "1",
   "request_duration": "0",
-  "response_duration": "-"
+  "response_duration": "9615"
 }
 ```
 
-#### 2.1.5. No Healthy Upstream Case
-
-```shell {caption="[Shell 12] No Healthy Upstream Case / curl Command", linenos=table}
-$ kubectl exec -it shell -- curl mock-server:8080/status/200          
-no healthy upstream
-```
-
-```json {caption="[Text 14] No Healthy Upstream Case / curl Client", linenos=table}
+```json {caption="[Text 16] Upstream Overflow Case / Mock Server", linenos=table}
 {
-  "start_time": "2025-12-21T08:20:10.288Z",
+  "start_time": "2025-12-22T16:08:02.443Z",
   "method": "GET",
-  "path": "/status/200",
+  "path": "/delay/5000",
   "protocol": "HTTP/1.1",
-  "response_code": "503",
-  "response_flags": "UH",
-  "response_code_details": "no_healthy_upstream",
+  "response_code": "200",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
   "connection_termination_details": "-",
   "upstream_transport_failure_reason": "-",
   "bytes_received": "0",
-  "bytes_sent": "19",
-  "duration": "0",
-  "upstream_service_time": "-",
+  "bytes_sent": "83",
+  "duration": "5008",
+  "upstream_service_time": "5008",
   "x_forwarded_for": "-",
   "user_agent": "curl/8.14.1",
-  "request_id": "3860e4b1-1bd2-908b-8673-af357e4296d6",
+  "request_id": "8d667b79-534b-9d95-a3a7-4b2fa17263e6",
   "authority": "mock-server:8080",
-  "upstream_host": "-",
-  "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
-  "upstream_local_address": "-",
-  "downstream_local_address": "10.96.225.216:8080",
-  "downstream_remote_address": "10.244.2.5:37982",
-  "requested_server_name": "-",
-  "route_name": "-",
+  "upstream_host": "10.244.2.4:8080",
+  "upstream_cluster": "inbound|8080||",
+  "upstream_local_address": "127.0.0.6:52515",
+  "downstream_local_address": "10.244.2.4:8080",
+  "downstream_remote_address": "10.244.1.3:58132",
+  "requested_server_name": "outbound_.8080_._.mock-server.default.svc.cluster.local",
+  "route_name": "default",
   "grpc_status": "-",
   "upstream_request_attempt_count": "1",
   "request_duration": "0",
-  "response_duration": "-"
+  "response_duration": "5008"
+}
+{
+  "start_time": "2025-12-22T16:08:07.456Z",
+  "method": "GET",
+  "path": "/delay/5000",
+  "protocol": "HTTP/1.1",
+  "response_code": "200",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "83",
+  "duration": "5004",
+  "upstream_service_time": "5003",
+  "x_forwarded_for": "-",
+  "user_agent": "curl/8.14.1",
+  "request_id": "afe67ad1-54bd-9a82-b947-6fe65a1dfe69",
+  "authority": "mock-server:8080",
+  "upstream_host": "10.244.2.4:8080",
+  "upstream_cluster": "inbound|8080||",
+  "upstream_local_address": "127.0.0.6:49425",
+  "downstream_local_address": "10.244.2.4:8080",
+  "downstream_remote_address": "10.244.1.3:58134",
+  "requested_server_name": "outbound_.8080_._.mock-server.default.svc.cluster.local",
+  "route_name": "default",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "5004"
 }
 ```
 
-#### 2.1.6. Circuit Breaking Case
+#### 2.1.5. Circuit Breaking Case
 
 ```shell {caption="[Shell 12] No Healthy Upstream Case / curl Command", linenos=table}
 $ kubectl exec -it shell -- curl mock-server:8080/status/503
@@ -1107,201 +920,306 @@ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains
 }
 ```
 
-#### 2.1.7. Upstream Overflow Case
+#### 2.1.6. Upstream Request Retry Case with Timeout
 
-```shell {caption="[Shell 14] Upstream Overflow Case / curl Command", linenos=table}
-$ kubectl exec shell -- curl -s mock-server:8080/delay/5000 &
-$ kubectl exec shell -- curl -s mock-server:8080/delay/5000 &
-$ kubectl exec shell -- curl -s mock-server:8080/delay/5000 &
+```shell {caption="[Shell 9] Upstream Request Retry Case / iptables Command", linenos=table}
+$ SHELL_IP=$(kubectl get pod shell -o jsonpath='{.status.podIP}')
+$ kubectl exec mock-server -c mock-server -- iptables -A INPUT -s ${SHELL_IP} -j DROP
 ```
 
-```json {caption="[Shell 15] Upstream Overflow Case / istioctl Command", linenos=table}
+```shell {caption="[Shell 10] Upstream Request Retry Case / curl Command", linenos=table}
+$ kubectl exec -it shell -- curl mock-server:8080/status/200
+upstream connect error or disconnect/reset before headers. retried and the latest reset reason: connection timeout
+$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
 {
-  "start_time": "2025-12-22T16:08:03.507Z",
+  "edsHealthStatus": "HEALTHY"
+}
+
+$ kubectl exec -it shell -- curl mock-server:8080/status/200
+no healthy upstream
+$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
+{
+  "failedOutlierCheck": true,
+  "edsHealthStatus": "HEALTHY"
+}
+
+$ kubectl exec -it shell -- curl mock-server:8080/status/200
+no healthy upstream
+$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
+{
+  "failedOutlierCheck": true,
+  "edsHealthStatus": "HEALTHY"
+}
+
+$ kubectl exec -it shell -- curl mock-server:8080/status/200
+no healthy upstream
+$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
+{
+  "failedOutlierCheck": true,
+  "edsHealthStatus": "HEALTHY"
+}
+```
+
+```json {caption="[Text 12] Upstream Request Retry Case / curl Client", linenos=table}
+{
+  "start_time": "2025-12-21T07:17:42.331Z",
   "method": "GET",
-  "path": "/delay/5000",
+  "path": "/status/200",
   "protocol": "HTTP/1.1",
   "response_code": "503",
-  "response_flags": "UO",
-  "response_code_details": "upstream_reset_before_response_started{overflow}",
+  "response_flags": "URX,UF",
+  "response_code_details": "upstream_reset_before_response_started{connection_timeout}",
   "connection_termination_details": "-",
   "upstream_transport_failure_reason": "-",
   "bytes_received": "0",
-  "bytes_sent": "81",
-  "duration": "2",
+  "bytes_sent": "114",
+  "duration": "30066",
   "upstream_service_time": "-",
   "x_forwarded_for": "-",
   "user_agent": "curl/8.14.1",
-  "request_id": "4c299e03-e57f-9613-8817-6682e9deb675",
+  "request_id": "78343cc2-d6f2-9a5d-8dff-84c7ea3596c3",
+  "authority": "mock-server:8080",
+  "upstream_host": "10.244.1.12:8080",
+  "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "-",
+  "downstream_local_address": "10.96.225.216:8080",
+  "downstream_remote_address": "10.244.2.5:35248",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "3",
+  "request_duration": "0",
+  "response_duration": "-"
+}
+{
+  "start_time": "2025-12-21T07:18:15.580Z",
+  "method": "GET",
+  "path": "/status/200",
+  "protocol": "HTTP/1.1",
+  "response_code": "503",
+  "response_flags": "UH",
+  "response_code_details": "no_healthy_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "19",
+  "duration": "20062",
+  "upstream_service_time": "-",
+  "x_forwarded_for": "-",
+  "user_agent": "curl/8.14.1",
+  "request_id": "575b956c-0e96-9471-a21f-0555763492ab",
+  "authority": "mock-server:8080",
+  "upstream_host": "10.244.1.12:8080",
+  "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "-",
+  "downstream_local_address": "10.96.225.216:8080",
+  "downstream_remote_address": "10.244.2.5:46700",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "3",
+  "request_duration": "0",
+  "response_duration": "-"
+}
+{
+  "start_time": "2025-12-21T07:18:38.162Z",
+  "method": "GET",
+  "path": "/status/200",
+  "protocol": "HTTP/1.1",
+  "response_code": "503",
+  "response_flags": "UH",
+  "response_code_details": "no_healthy_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "19",
+  "duration": "0",
+  "upstream_service_time": "-",
+  "x_forwarded_for": "-",
+  "user_agent": "curl/8.14.1",
+  "request_id": "24be226c-274c-9948-bb96-88df90492bdf",
+  "authority": "mock-server:8080",
+  "upstream_host": "-",
+  "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "-",
+  "downstream_local_address": "10.96.225.216:8080",
+  "downstream_remote_address": "10.244.2.5:33536",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "-"
+}
+{
+  "start_time": "2025-12-21T07:18:43.287Z",
+  "method": "GET",
+  "path": "/status/200",
+  "protocol": "HTTP/1.1",
+  "response_code": "503",
+  "response_flags": "UH",
+  "response_code_details": "no_healthy_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "19",
+  "duration": "0",
+  "upstream_service_time": "-",
+  "x_forwarded_for": "-",
+  "user_agent": "curl/8.14.1",
+  "request_id": "2881d791-2b45-9f9a-810b-500a2219edc9",
+  "authority": "mock-server:8080",
+  "upstream_host": "-",
+  "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "-",
+  "downstream_local_address": "10.96.225.216:8080",
+  "downstream_remote_address": "10.244.2.5:54704",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "-"
+}
+```
+
+```json {caption="[Text 13] Upstream Request Retry Case / Mock Server", linenos=table}
+X
+```
+
+```shell {caption="[Shell 11] Upstream Request Retry Case / istioctl Command", linenos=table}
+$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
+{
+  "edsHealthStatus": "HEALTHY"
+}
+```
+
+`consecutive5xxErrors` : 5이기 때문에
+
+#### 2.1.7. Upstream Request Retry Case with TCP Reset
+
+```shell {caption="[Shell 9] Upstream Request Retry Case / iptables Command", linenos=table}
+$ SHELL_IP=$(kubectl get pod shell -o jsonpath='{.status.podIP}')
+$ kubectl exec mock-server -c mock-server -- iptables-legacy -A INPUT -p tcp -s ${SHELL_IP} -j REJECT --reject-with tcp-reset
+```
+
+```shell {caption="[Shell 10] Upstream Request Retry Case / curl Command", linenos=table}
+$ kubectl exec -it shell -- curl mock-server:8080/status/200
+upstream connect error or disconnect/reset before headers. retried and the latest reset reason: remote connection failure, transport failure reason: delayed connect error: Connection refused
+$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
+{
+  "edsHealthStatus": "HEALTHY"
+}
+
+$ kubectl exec -it shell -- curl mock-server:8080/status/200
+no healthy upstream
+$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
+{
+  "failedOutlierCheck": true,
+  "edsHealthStatus": "HEALTHY"
+}
+
+$ kubectl exec -it shell -- curl mock-server:8080/status/200
+no healthy upstream
+$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
+{
+  "failedOutlierCheck": true,
+  "edsHealthStatus": "HEALTHY"
+}
+
+$ kubectl exec -it shell -- curl mock-server:8080/status/200
+no healthy upstream
+$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
+{
+  "failedOutlierCheck": true,
+  "edsHealthStatus": "HEALTHY"
+}
+```
+
+```json {caption="[Text 12] Upstream Request Retry Case / curl Client", linenos=table}
+{
+  "start_time": "2025-12-22T17:09:54.276Z",
+  "method": "GET",
+  "path": "/status/200",
+  "protocol": "HTTP/1.1",
+  "response_code": "503",
+  "response_flags": "URX,UF",
+  "response_code_details": "upstream_reset_before_response_started{remote_connection_failure|delayed_connect_error:_Connection_refused}",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "delayed_connect_error:_Connection_refused",
+  "bytes_received": "0",
+  "bytes_sent": "190",
+  "duration": "63",
+  "upstream_service_time": "-",
+  "x_forwarded_for": "-",
+  "user_agent": "curl/8.14.1",
+  "request_id": "6e0d7462-2323-9e73-8dcf-43701a368edb",
+  "authority": "mock-server:8080",
+  "upstream_host": "10.244.2.4:8080",
+  "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "-",
+  "downstream_local_address": "10.96.90.250:8080",
+  "downstream_remote_address": "10.244.1.3:36360",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "3",
+  "request_duration": "0",
+  "response_duration": "-"
+}
+{
+  "start_time": "2025-12-22T17:09:56.768Z",
+  "method": "GET",
+  "path": "/status/200",
+  "protocol": "HTTP/1.1",
+  "response_code": "503",
+  "response_flags": "UH",
+  "response_code_details": "no_healthy_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "delayed_connect_error:_Connection_refused",
+  "bytes_received": "0",
+  "bytes_sent": "19",
+  "duration": "17",
+  "upstream_service_time": "-",
+  "x_forwarded_for": "-",
+  "user_agent": "curl/8.14.1",
+  "request_id": "af1888dc-b298-9c53-8d44-ed21a0da304f",
+  "authority": "mock-server:8080",
+  "upstream_host": "10.244.2.4:8080",
+  "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "-",
+  "downstream_local_address": "10.96.90.250:8080",
+  "downstream_remote_address": "10.244.1.3:36368",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "3",
+  "request_duration": "0",
+  "response_duration": "-"
+}
+{
+  "start_time": "2025-12-22T17:10:00.420Z",
+  "method": "GET",
+  "path": "/status/200",
+  "protocol": "HTTP/1.1",
+  "response_code": "503",
+  "response_flags": "UH",
+  "response_code_details": "no_healthy_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "19",
+  "duration": "0",
+  "upstream_service_time": "-",
+  "x_forwarded_for": "-",
+  "user_agent": "curl/8.14.1",
+  "request_id": "9b901845-b436-95f3-89d1-868d9acd05ac",
   "authority": "mock-server:8080",
   "upstream_host": "-",
   "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
   "upstream_local_address": "-",
   "downstream_local_address": "10.96.90.250:8080",
-  "downstream_remote_address": "10.244.1.3:55486",
-  "requested_server_name": "-",
-  "route_name": "-",
-  "grpc_status": "-",
-  "upstream_request_attempt_count": "1",
-  "request_duration": "0",
-  "response_duration": "-"
-}
-{
-  "start_time": "2025-12-22T16:08:02.442Z",
-  "method": "GET",
-  "path": "/delay/5000",
-  "protocol": "HTTP/1.1",
-  "response_code": "200",
-  "response_flags": "-",
-  "response_code_details": "via_upstream",
-  "connection_termination_details": "-",
-  "upstream_transport_failure_reason": "-",
-  "bytes_received": "0",
-  "bytes_sent": "83",
-  "duration": "5011",
-  "upstream_service_time": "5010",
-  "x_forwarded_for": "-",
-  "user_agent": "curl/8.14.1",
-  "request_id": "8d667b79-534b-9d95-a3a7-4b2fa17263e6",
-  "authority": "mock-server:8080",
-  "upstream_host": "10.244.2.4:8080",
-  "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
-  "upstream_local_address": "10.244.1.3:58132",
-  "downstream_local_address": "10.96.90.250:8080",
-  "downstream_remote_address": "10.244.1.3:55470",
-  "requested_server_name": "-",
-  "route_name": "-",
-  "grpc_status": "-",
-  "upstream_request_attempt_count": "1",
-  "request_duration": "0",
-  "response_duration": "5011"
-}
-{
-  "start_time": "2025-12-22T16:08:02.847Z",
-  "method": "GET",
-  "path": "/delay/5000",
-  "protocol": "HTTP/1.1",
-  "response_code": "200",
-  "response_flags": "-",
-  "response_code_details": "via_upstream",
-  "connection_termination_details": "-",
-  "upstream_transport_failure_reason": "-",
-  "bytes_received": "0",
-  "bytes_sent": "83",
-  "duration": "9615",
-  "upstream_service_time": "9615",
-  "x_forwarded_for": "-",
-  "user_agent": "curl/8.14.1",
-  "request_id": "afe67ad1-54bd-9a82-b947-6fe65a1dfe69",
-  "authority": "mock-server:8080",
-  "upstream_host": "10.244.2.4:8080",
-  "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
-  "upstream_local_address": "10.244.1.3:58134",
-  "downstream_local_address": "10.96.90.250:8080",
-  "downstream_remote_address": "10.244.1.3:55472",
-  "requested_server_name": "-",
-  "route_name": "-",
-  "grpc_status": "-",
-  "upstream_request_attempt_count": "1",
-  "request_duration": "0",
-  "response_duration": "9615"
-}
-```
-
-```json {caption="[Text 16] Upstream Overflow Case / Mock Server", linenos=table}
-{
-  "start_time": "2025-12-22T16:08:02.443Z",
-  "method": "GET",
-  "path": "/delay/5000",
-  "protocol": "HTTP/1.1",
-  "response_code": "200",
-  "response_flags": "-",
-  "response_code_details": "via_upstream",
-  "connection_termination_details": "-",
-  "upstream_transport_failure_reason": "-",
-  "bytes_received": "0",
-  "bytes_sent": "83",
-  "duration": "5008",
-  "upstream_service_time": "5008",
-  "x_forwarded_for": "-",
-  "user_agent": "curl/8.14.1",
-  "request_id": "8d667b79-534b-9d95-a3a7-4b2fa17263e6",
-  "authority": "mock-server:8080",
-  "upstream_host": "10.244.2.4:8080",
-  "upstream_cluster": "inbound|8080||",
-  "upstream_local_address": "127.0.0.6:52515",
-  "downstream_local_address": "10.244.2.4:8080",
-  "downstream_remote_address": "10.244.1.3:58132",
-  "requested_server_name": "outbound_.8080_._.mock-server.default.svc.cluster.local",
-  "route_name": "default",
-  "grpc_status": "-",
-  "upstream_request_attempt_count": "1",
-  "request_duration": "0",
-  "response_duration": "5008"
-}
-{
-  "start_time": "2025-12-22T16:08:07.456Z",
-  "method": "GET",
-  "path": "/delay/5000",
-  "protocol": "HTTP/1.1",
-  "response_code": "200",
-  "response_flags": "-",
-  "response_code_details": "via_upstream",
-  "connection_termination_details": "-",
-  "upstream_transport_failure_reason": "-",
-  "bytes_received": "0",
-  "bytes_sent": "83",
-  "duration": "5004",
-  "upstream_service_time": "5003",
-  "x_forwarded_for": "-",
-  "user_agent": "curl/8.14.1",
-  "request_id": "afe67ad1-54bd-9a82-b947-6fe65a1dfe69",
-  "authority": "mock-server:8080",
-  "upstream_host": "10.244.2.4:8080",
-  "upstream_cluster": "inbound|8080||",
-  "upstream_local_address": "127.0.0.6:49425",
-  "downstream_local_address": "10.244.2.4:8080",
-  "downstream_remote_address": "10.244.1.3:58134",
-  "requested_server_name": "outbound_.8080_._.mock-server.default.svc.cluster.local",
-  "route_name": "default",
-  "grpc_status": "-",
-  "upstream_request_attempt_count": "1",
-  "request_duration": "0",
-  "response_duration": "5004"
-}
-```
-
-#### 2.1.8. Downstream Remote Disconnect Case
-
-```shell {caption="[Shell 17] Downstream Remote Disconnect Case / curl Command", linenos=table}
-$ kubectl exec -it shell -- curl -s mock-server:8080/delay/10000
-^Ccommand terminated with exit code 130
-```
-
-```json {caption="[Text 18] Downstream Remote Disconnect Case / curl Client", linenos=table}
-{
-  "start_time": "2025-12-23T15:07:59.264Z",
-  "method": "GET",
-  "path": "/delay/10000",
-  "protocol": "HTTP/1.1",
-  "response_code": "0",
-  "response_flags": "DC",
-  "response_code_details": "downstream_remote_disconnect",
-  "connection_termination_details": "-",
-  "upstream_transport_failure_reason": "-",
-  "bytes_received": "0",
-  "bytes_sent": "0",
-  "duration": "1081",
-  "upstream_service_time": "-",
-  "x_forwarded_for": "-",
-  "user_agent": "curl/8.14.1",
-  "request_id": "d89eba2e-9621-9839-938b-83c8d86eb58f",
-  "authority": "mock-server:8080",
-  "upstream_host": "10.244.2.5:8080",
-  "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
-  "upstream_local_address": "10.244.1.4:59866",
-  "downstream_local_address": "10.96.90.250:8080",
-  "downstream_remote_address": "10.244.1.4:35700",
+  "downstream_remote_address": "10.244.1.3:36370",
   "requested_server_name": "-",
   "route_name": "-",
   "grpc_status": "-",
@@ -1311,32 +1229,39 @@ $ kubectl exec -it shell -- curl -s mock-server:8080/delay/10000
 }
 ```
 
-```shell {caption="[Shell 19] Downstream Remote Disconnect Case / istioctl Command", linenos=table}
+#### 2.1.8. No Healthy Upstream Case
+
+```shell {caption="[Shell 12] No Healthy Upstream Case / curl Command", linenos=table}
+$ kubectl exec -it shell -- curl mock-server:8080/status/200          
+no healthy upstream
+```
+
+```json {caption="[Text 14] No Healthy Upstream Case / curl Client", linenos=table}
 {
-  "start_time": "2025-12-23T15:07:59.281Z",
+  "start_time": "2025-12-21T08:20:10.288Z",
   "method": "GET",
-  "path": "/delay/10000",
+  "path": "/status/200",
   "protocol": "HTTP/1.1",
-  "response_code": "0",
-  "response_flags": "DC",
-  "response_code_details": "downstream_remote_disconnect",
+  "response_code": "503",
+  "response_flags": "UH",
+  "response_code_details": "no_healthy_upstream",
   "connection_termination_details": "-",
   "upstream_transport_failure_reason": "-",
   "bytes_received": "0",
-  "bytes_sent": "0",
-  "duration": "1084",
+  "bytes_sent": "19",
+  "duration": "0",
   "upstream_service_time": "-",
   "x_forwarded_for": "-",
   "user_agent": "curl/8.14.1",
-  "request_id": "d89eba2e-9621-9839-938b-83c8d86eb58f",
+  "request_id": "3860e4b1-1bd2-908b-8673-af357e4296d6",
   "authority": "mock-server:8080",
-  "upstream_host": "10.244.2.5:8080",
-  "upstream_cluster": "inbound|8080||",
-  "upstream_local_address": "127.0.0.6:45897",
-  "downstream_local_address": "10.244.2.5:8080",
-  "downstream_remote_address": "10.244.1.4:59866",
-  "requested_server_name": "outbound_.8080_._.mock-server.default.svc.cluster.local",
-  "route_name": "default",
+  "upstream_host": "-",
+  "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "-",
+  "downstream_local_address": "10.96.225.216:8080",
+  "downstream_remote_address": "10.244.2.5:37982",
+  "requested_server_name": "-",
+  "route_name": "-",
   "grpc_status": "-",
   "upstream_request_attempt_count": "1",
   "request_duration": "0",
