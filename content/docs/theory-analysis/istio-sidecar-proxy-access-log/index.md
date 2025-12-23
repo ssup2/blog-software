@@ -1271,6 +1271,79 @@ $ kubectl exec shell -- curl -s mock-server:8080/delay/5000 &
 }
 ```
 
+#### 2.1.8. Downstream Remote Disconnect Case
+
+```shell {caption="[Shell 17] Downstream Remote Disconnect Case / curl Command", linenos=table}
+$ kubectl exec -it shell -- curl -s mock-server:8080/delay/10000
+^Ccommand terminated with exit code 130
+```
+
+```json {caption="[Text 18] Downstream Remote Disconnect Case / curl Client", linenos=table}
+{
+  "start_time": "2025-12-23T15:07:59.264Z",
+  "method": "GET",
+  "path": "/delay/10000",
+  "protocol": "HTTP/1.1",
+  "response_code": "0",
+  "response_flags": "DC",
+  "response_code_details": "downstream_remote_disconnect",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "0",
+  "duration": "1081",
+  "upstream_service_time": "-",
+  "x_forwarded_for": "-",
+  "user_agent": "curl/8.14.1",
+  "request_id": "d89eba2e-9621-9839-938b-83c8d86eb58f",
+  "authority": "mock-server:8080",
+  "upstream_host": "10.244.2.5:8080",
+  "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "10.244.1.4:59866",
+  "downstream_local_address": "10.96.90.250:8080",
+  "downstream_remote_address": "10.244.1.4:35700",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "-"
+}
+```
+
+```shell {caption="[Shell 19] Downstream Remote Disconnect Case / istioctl Command", linenos=table}
+{
+  "start_time": "2025-12-23T15:07:59.281Z",
+  "method": "GET",
+  "path": "/delay/10000",
+  "protocol": "HTTP/1.1",
+  "response_code": "0",
+  "response_flags": "DC",
+  "response_code_details": "downstream_remote_disconnect",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "0",
+  "duration": "1084",
+  "upstream_service_time": "-",
+  "x_forwarded_for": "-",
+  "user_agent": "curl/8.14.1",
+  "request_id": "d89eba2e-9621-9839-938b-83c8d86eb58f",
+  "authority": "mock-server:8080",
+  "upstream_host": "10.244.2.5:8080",
+  "upstream_cluster": "inbound|8080||",
+  "upstream_local_address": "127.0.0.6:45897",
+  "downstream_local_address": "10.244.2.5:8080",
+  "downstream_remote_address": "10.244.1.4:59866",
+  "requested_server_name": "outbound_.8080_._.mock-server.default.svc.cluster.local",
+  "route_name": "default",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "-"
+}
+```
+
 ### 2.2. GRPC Cases
 
 
