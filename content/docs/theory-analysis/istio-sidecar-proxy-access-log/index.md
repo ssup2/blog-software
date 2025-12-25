@@ -75,6 +75,10 @@ data:
 | `request_duration` | The duration of the request. |
 | `response_duration` | The duration of the response. |
 
+```
+$ kubectl cp proto/mock.proto shell:mock.proto
+```
+
 ## 2. Istio Sidecar Proxy Access Log
 
 ### 2.1. HTTP Cases
@@ -1271,7 +1275,306 @@ no healthy upstream
 
 ### 2.2. GRPC Cases
 
+#### 2.2.1. Success Case
 
+```shell {caption="[Shell 16] Success Case / curl Command", linenos=table}
+$ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 0}' mock-server:9090 mock.MockService.Status
+{
+  "service": "mock-server",
+  "message": "OK"
+}
+```
+
+```json {caption="[Text 15] Success Case / curl Client", linenos=table}
+{
+  "start_time": "2025-12-25T11:18:51.880Z",
+  "method": "POST",
+  "path": "/mock.MockService/Status",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "5",
+  "bytes_sent": "22",
+  "duration": "2",
+  "upstream_service_time": "1",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "7eb9994b-2491-9e41-9094-7664914a3692",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.2.8:9090",
+  "upstream_cluster": "outbound|9090||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "10.244.1.5:58590",
+  "downstream_local_address": "10.96.186.69:9090",
+  "downstream_remote_address": "10.244.1.5:53152",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "OK",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "2"
+}
+```
+
+```json {caption="[Text 16] Success Case / istioctl Command", linenos=table}
+{
+  "start_time": "2025-12-25T11:18:51.881Z",
+  "method": "POST",
+  "path": "/mock.MockService/Status",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "5",
+  "bytes_sent": "22",
+  "duration": "1",
+  "upstream_service_time": "0",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "7eb9994b-2491-9e41-9094-7664914a3692",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.2.8:9090",
+  "upstream_cluster": "inbound|9090||",
+  "upstream_local_address": "127.0.0.6:43691",
+  "downstream_local_address": "10.244.2.8:9090",
+  "downstream_remote_address": "10.244.1.5:58590",
+  "requested_server_name": "outbound_.9090_._.mock-server.default.svc.cluster.local",
+  "route_name": "default",
+  "grpc_status": "OK",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "1"
+}
+```
+
+#### 2.2.2. Internal Server Error Case
+
+```shell {caption="[Shell 17] Internal Server Error Case / curl Command", linenos=table}
+$ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 13}' mock-server:9090 mock.MockService.Status
+ERROR:
+  Code: Internal
+  Message: Simulated error with gRPC code 13 (Internal)
+command terminated with exit code 77
+```
+
+```json {caption="[Text 17] Internal Server Error Case / curl Client", linenos=table}
+{
+  "start_time": "2025-12-25T11:35:39.358Z",
+  "method": "POST",
+  "path": "/mock.MockService/Status",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "7",
+  "bytes_sent": "0",
+  "duration": "50",
+  "upstream_service_time": "27",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "796e0dd3-a85f-9d2b-8350-53c022d0880d",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.2.8:9090",
+  "upstream_cluster": "outbound|9090||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "10.244.1.5:36738",
+  "downstream_local_address": "10.96.186.69:9090",
+  "downstream_remote_address": "10.244.1.5:58154",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "Internal",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "14",
+  "response_duration": "42"
+}
+```
+
+```json {caption="[Text 18] Internal Server Error Case / istioctl Command", linenos=table}
+{
+  "start_time": "2025-12-25T11:35:39.378Z",
+  "method": "POST",
+  "path": "/mock.MockService/Status",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "7",
+  "bytes_sent": "0",
+  "duration": "16",
+  "upstream_service_time": "5",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "796e0dd3-a85f-9d2b-8350-53c022d0880d",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.2.8:9090",
+  "upstream_cluster": "inbound|9090||",
+  "upstream_local_address": "127.0.0.6:43023",
+  "downstream_local_address": "10.244.2.8:9090",
+  "downstream_remote_address": "10.244.1.5:36738",
+  "requested_server_name": "outbound_.9090_._.mock-server.default.svc.cluster.local",
+  "route_name": "default",
+  "grpc_status": "Internal",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "7",
+  "response_duration": "12"
+}
+```
+
+#### 2.2.3. Downstream Disconnect Case
+
+```shell {caption="[Shell 17] Downstream Remote Disconnect Case / curl Command", linenos=table}
+$ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 10000}' mock-server:9090 mock.MockService.Delay
+^C
+```
+
+```json {caption="[Text 17] Downstream Remote Disconnect Case / curl Client", linenos=table}
+{
+  "start_time": "2025-12-25T11:26:57.849Z",
+  "method": "POST",
+  "path": "/mock.MockService/Delay",
+  "protocol": "HTTP/2",
+  "response_code": "0",
+  "response_flags": "DC",
+  "response_code_details": "downstream_remote_disconnect",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "8",
+  "bytes_sent": "0",
+  "duration": "6627",
+  "upstream_service_time": "-",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "6604fb4f-9d82-9617-bbd9-a7a849695692",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.2.8:9090",
+  "upstream_cluster": "outbound|9090||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "10.244.1.5:58590",
+  "downstream_local_address": "10.96.186.69:9090",
+  "downstream_remote_address": "10.244.1.5:40966",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "-"
+}
+```
+
+```json {caption="[Text 18] Downstream Remote Disconnect Case / istioctl Command", linenos=table} 
+{
+  "start_time": "2025-12-25T11:26:57.850Z",
+  "method": "POST",
+  "path": "/mock.MockService/Delay",
+  "protocol": "HTTP/2",
+  "response_code": "0",
+  "response_flags": "DR",
+  "response_code_details": "http2.remote_reset",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "8",
+  "bytes_sent": "0",
+  "duration": "6634",
+  "upstream_service_time": "-",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "6604fb4f-9d82-9617-bbd9-a7a849695692",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.2.8:9090",
+  "upstream_cluster": "inbound|9090||",
+  "upstream_local_address": "127.0.0.6:43691",
+  "downstream_local_address": "10.244.2.8:9090",
+  "downstream_remote_address": "10.244.1.5:58590",
+  "requested_server_name": "outbound_.9090_._.mock-server.default.svc.cluster.local",
+  "route_name": "default",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "-"
+}
+```
+
+#### 2.2.4. Upstream Disconnect Case
+
+```shell {caption="[Shell 18] Upstream Disconnect Case / curl Command", linenos=table}
+$ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 1000}' mock-server:9090 mock.MockService.Disconnect
+RROR:
+  Code: Unavailable
+  Message: connection closed by server
+command terminated with exit code 78
+```
+
+```json {caption="[Text 19] Upstream Disconnect Case / curl Client", linenos=table}
+{
+  "start_time": "2025-12-25T11:47:17.883Z",
+  "method": "POST",
+  "path": "/mock.MockService/Disconnect",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "URX",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "8",
+  "bytes_sent": "0",
+  "duration": "3136",
+  "upstream_service_time": "3131",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "3f9b6820-408e-9e38-a7f6-8eed233a9457",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.2.8:9090",
+  "upstream_cluster": "outbound|9090||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "10.244.1.5:58590",
+  "downstream_local_address": "10.96.186.69:9090",
+  "downstream_remote_address": "10.244.1.5:46598",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "Unavailable",
+  "upstream_request_attempt_count": "3",
+  "request_duration": "4",
+  "response_duration": "3135"
+}
+```
+
+```json {caption="[Text 20] Upstream Disconnect Case / istioctl Command", linenos=table}
+{
+  "start_time": "2025-12-25T11:47:20.014Z",
+  "method": "POST",
+  "path": "/mock.MockService/Disconnect",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "8",
+  "bytes_sent": "0",
+  "duration": "1004",
+  "upstream_service_time": "1003",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "3f9b6820-408e-9e38-a7f6-8eed233a9457",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.2.8:9090",
+  "upstream_cluster": "inbound|9090||",
+  "upstream_local_address": "127.0.0.6:43691",
+  "downstream_local_address": "10.244.2.8:9090",
+  "downstream_remote_address": "10.244.1.5:58590",
+  "requested_server_name": "outbound_.9090_._.mock-server.default.svc.cluster.local",
+  "route_name": "default",
+  "grpc_status": "Unavailable",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "1004"
+}
+```
 
 ## 3. 참조
 
