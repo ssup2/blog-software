@@ -470,42 +470,42 @@ $ kubectl exec shell -- curl -s mock-server:8080/delay/5000 &
 ```shell {caption="[Shell 12] No Healthy Upstream Case / curl Command", linenos=table}
 $ kubectl exec -it shell -- curl mock-server:8080/status/503
 {"message":"Service Unavailable","service":"mock-server","status_code":503}
-istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
+$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
 {
   "edsHealthStatus": "HEALTHY"
 }
 
 $ kubectl exec -it shell -- curl mock-server:8080/status/503 
 {"message":"Service Unavailable","service":"mock-server","status_code":503}
-istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
+$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
 {
   "edsHealthStatus": "HEALTHY"
 }
 
 $ kubectl exec -it shell -- curl mock-server:8080/status/503 
 {"message":"Service Unavailable","service":"mock-server","status_code":503}
-istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
+$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
 {
   "edsHealthStatus": "HEALTHY"
 }
 
 $ kubectl exec -it shell -- curl mock-server:8080/status/503 
 {"message":"Service Unavailable","service":"mock-server","status_code":503}
-istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
+$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
 {
   "edsHealthStatus": "HEALTHY"
 }
 
 $ kubectl exec -it shell -- curl mock-server:8080/status/503 
 {"message":"Service Unavailable","service":"mock-server","status_code":503}
-istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
+$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
 {
   "edsHealthStatus": "HEALTHY"
 }
 
 $ kubectl exec -it shell -- curl mock-server:8080/status/503 
 no healthy upstream
-istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
+$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
 {
   "failedOutlierCheck": true,
   "edsHealthStatus": "HEALTHY"
@@ -513,7 +513,7 @@ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains
 
 $ kubectl exec -it shell -- curl mock-server:8080/status/503 
 no healthy upstream
-istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
+$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
 {
   "failedOutlierCheck": true,
   "edsHealthStatus": "HEALTHY"
@@ -521,7 +521,7 @@ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains
 
 $ kubectl exec -it shell -- curl mock-server:8080/status/200
 no healthy upstream
-istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
+$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
 {
   "failedOutlierCheck": true,
   "edsHealthStatus": "HEALTHY"
@@ -1573,6 +1573,631 @@ command terminated with exit code 78
   "upstream_request_attempt_count": "1",
   "request_duration": "0",
   "response_duration": "1004"
+}
+```
+
+#### 2.2.5. Upstream Overflow Case
+
+```shell {caption="[Shell 21] Upstream Overflow Case / curl Command", linenos=table}
+$ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 5000}' mock-server:9090 mock.MockService.Delay &
+$ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 5000}' mock-server:9090 mock.MockService.Delay &
+ERROR:
+  Code: Unavailable
+  Message: upstream connect error or disconnect/reset before headers. reset reason: overflow
+command terminated with exit code 78
+$ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 5000}' mock-server:9090 mock.MockService.Delay &
+ERROR:
+  Code: Unavailable
+  Message: upstream connect error or disconnect/reset before headers. reset reason: overflow
+command terminated with exit code 78
+```
+
+```json {caption="[Text 21] Upstream Overflow Case / curl Client", linenos=table}
+{
+  "start_time": "2025-12-25T14:45:01.595Z",
+  "method": "POST",
+  "path": "/mock.MockService/Delay",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "UO",
+  "response_code_details": "upstream_reset_before_response_started{overflow}",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "0",
+  "duration": "0",
+  "upstream_service_time": "-",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "82f56865-fa1b-9fbe-8367-205fcae1dafd",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.2.8:9090",
+  "upstream_cluster": "outbound|9090||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "-",
+  "downstream_local_address": "10.96.186.69:9090",
+  "downstream_remote_address": "10.244.1.5:42196",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "Unavailable",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "-",
+  "response_duration": "-"
+}
+{
+  "start_time": "2025-12-25T14:45:01.927Z",
+  "method": "POST",
+  "path": "/mock.MockService/Delay",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "UO",
+  "response_code_details": "upstream_reset_before_response_started{overflow}",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "0",
+  "duration": "0",
+  "upstream_service_time": "-",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "0277cd35-3680-914d-9b1b-e402076d3838",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.2.8:9090",
+  "upstream_cluster": "outbound|9090||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "-",
+  "downstream_local_address": "10.96.186.69:9090",
+  "downstream_remote_address": "10.244.1.5:42212",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "Unavailable",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "-",
+  "response_duration": "-"
+}
+{
+  "start_time": "2025-12-25T14:45:01.235Z",
+  "method": "POST",
+  "path": "/mock.MockService/Delay",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "8",
+  "bytes_sent": "49",
+  "duration": "5032",
+  "upstream_service_time": "5027",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "69957e0b-65a5-97fa-baba-dcc3943f6b67",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.2.8:9090",
+  "upstream_cluster": "outbound|9090||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "10.244.1.5:46834",
+  "downstream_local_address": "10.96.186.69:9090",
+  "downstream_remote_address": "10.244.1.5:42190",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "OK",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "3",
+  "response_duration": "5030"
+}
+```
+
+```json {caption="[Text 22] Upstream Overflow Case / istioctl Command", linenos=table}
+{
+  "start_time": "2025-12-25T14:45:01.241Z",
+  "method": "POST",
+  "path": "/mock.MockService/Delay",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "8",
+  "bytes_sent": "49",
+  "duration": "5020",
+  "upstream_service_time": "5013",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "69957e0b-65a5-97fa-baba-dcc3943f6b67",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.2.8:9090",
+  "upstream_cluster": "inbound|9090||",
+  "upstream_local_address": "127.0.0.6:60721",
+  "downstream_local_address": "10.244.2.8:9090",
+  "downstream_remote_address": "10.244.1.5:46834",
+  "requested_server_name": "outbound_.9090_._.mock-server.default.svc.cluster.local",
+  "route_name": "default",
+  "grpc_status": "OK",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "4",
+  "response_duration": "5018"
+}
+```
+
+#### 2.2.6. Circuit Breaking Case
+
+```shell {caption="[Shell 23] Circuit Breaking Case / curl Command", linenos=table}
+$ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 13}' mock-server:9090 mock.MockService.Status
+ERROR:
+  Code: Internal
+  Message: Simulated error with gRPC code 13 (Internal)
+command terminated with exit code 77
+$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("9090||mock-server")) | .hostStatuses[].healthStatus'
+{
+  "edsHealthStatus": "HEALTHY"
+}
+
+$ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 13}' mock-server:9090 mock.MockService.Status
+ERROR:
+  Code: Internal
+  Message: Simulated error with gRPC code 13 (Internal)
+command terminated with exit code 77
+$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("9090||mock-server")) | .hostStatuses[].healthStatus'
+{
+  "edsHealthStatus": "HEALTHY"
+}
+
+$ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 13}' mock-server:9090 mock.MockService.Status
+ERROR:
+  Code: Internal
+  Message: Simulated error with gRPC code 13 (Internal)
+command terminated with exit code 77
+$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("9090||mock-server")) | .hostStatuses[].healthStatus'
+{
+  "edsHealthStatus": "HEALTHY"
+}
+
+$ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 13}' mock-server:9090 mock.MockService.Status
+ERROR:
+  Code: Internal
+  Message: Simulated error with gRPC code 13 (Internal)
+command terminated with exit code 77
+$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("9090||mock-server")) | .hostStatuses[].healthStatus'
+{
+  "edsHealthStatus": "HEALTHY"
+}
+
+$ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 13}' mock-server:9090 mock.MockService.Status
+ERROR:
+  Code: Internal
+  Message: Simulated error with gRPC code 13 (Internal)
+command terminated with exit code 77
+$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("9090||mock-server")) | .hostStatuses[].healthStatus'
+{
+  "edsHealthStatus": "HEALTHY"
+}
+
+$ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 13}' mock-server:9090 mock.MockService.Status
+ERROR:
+  Code: Unavailable
+  Message: no healthy upstream
+command terminated with exit code 78
+$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("9090||mock-server")) | .hostStatuses[].healthStatus'
+{
+  "failedOutlierCheck": true,
+  "edsHealthStatus": "HEALTHY"
+}
+
+$ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 13}' mock-server:9090 mock.MockService.Status
+ERROR:
+  Code: Unavailable
+  Message: no healthy upstream
+command terminated with exit code 78
+$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("9090||mock-server")) | .hostStatuses[].healthStatus'
+{
+  "failedOutlierCheck": true,
+  "edsHealthStatus": "HEALTHY"
+}
+
+$ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 13}' mock-server:9090 mock.MockService.Status
+ERROR:
+  Code: Unavailable
+  Message: no healthy upstream
+command terminated with exit code 78
+$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("9090||mock-server")) | .hostStatuses[].healthStatus'
+{
+  "failedOutlierCheck": true,
+  "edsHealthStatus": "HEALTHY"
+}
+```
+
+```json {caption="[Text 23] Circuit Breaking Case / curl Client", linenos=table}
+{
+  "start_time": "2025-12-25T15:37:14.685Z",
+  "method": "POST",
+  "path": "/mock.MockService/Status",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "7",
+  "bytes_sent": "0",
+  "duration": "41",
+  "upstream_service_time": "22",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "b218f327-fc35-9b50-bbb6-5852f71f8d71",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.2.8:9090",
+  "upstream_cluster": "outbound|9090||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "10.244.1.5:33370",
+  "downstream_local_address": "10.96.186.69:9090",
+  "downstream_remote_address": "10.244.1.5:51102",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "Internal",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "19",
+  "response_duration": "41"
+}
+{
+  "start_time": "2025-12-25T15:37:15.505Z",
+  "method": "POST",
+  "path": "/mock.MockService/Status",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "7",
+  "bytes_sent": "0",
+  "duration": "2",
+  "upstream_service_time": "1",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "9286020f-bdec-917d-b5e5-39c14fba1c16",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.2.8:9090",
+  "upstream_cluster": "outbound|9090||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "10.244.1.5:55516",
+  "downstream_local_address": "10.96.186.69:9090",
+  "downstream_remote_address": "10.244.1.5:51110",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "Internal",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "1"
+}
+{
+  "start_time": "2025-12-25T15:37:16.355Z",
+  "method": "POST",
+  "path": "/mock.MockService/Status",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "7",
+  "bytes_sent": "0",
+  "duration": "1",
+  "upstream_service_time": "0",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "67e5cd39-27d9-9619-abcf-16be12daeb47",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.2.8:9090",
+  "upstream_cluster": "outbound|9090||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "10.244.1.5:33370",
+  "downstream_local_address": "10.96.186.69:9090",
+  "downstream_remote_address": "10.244.1.5:51120",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "Internal",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "1"
+}
+{
+  "start_time": "2025-12-25T15:37:17.237Z",
+  "method": "POST",
+  "path": "/mock.MockService/Status",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "7",
+  "bytes_sent": "0",
+  "duration": "1",
+  "upstream_service_time": "1",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "579df252-3830-985e-8af4-00cf68e88d03",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.2.8:9090",
+  "upstream_cluster": "outbound|9090||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "10.244.1.5:33370",
+  "downstream_local_address": "10.96.186.69:9090",
+  "downstream_remote_address": "10.244.1.5:51132",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "Internal",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "1"
+}
+{
+  "start_time": "2025-12-25T15:37:18.048Z",
+  "method": "POST",
+  "path": "/mock.MockService/Status",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "7",
+  "bytes_sent": "0",
+  "duration": "1",
+  "upstream_service_time": "0",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "b9e570c0-e5b3-9258-a381-d8c1879c1d34",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.2.8:9090",
+  "upstream_cluster": "outbound|9090||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "10.244.1.5:55516",
+  "downstream_local_address": "10.96.186.69:9090",
+  "downstream_remote_address": "10.244.1.5:55648",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "Internal",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "1"
+}
+{
+  "start_time": "2025-12-25T15:37:18.879Z",
+  "method": "POST",
+  "path": "/mock.MockService/Status",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "UH",
+  "response_code_details": "no_healthy_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "0",
+  "duration": "0",
+  "upstream_service_time": "-",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "1cba5671-b265-994b-aef3-2c1f00b25a86",
+  "authority": "mock-server:9090",
+  "upstream_host": "-",
+  "upstream_cluster": "outbound|9090||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "-",
+  "downstream_local_address": "10.96.186.69:9090",
+  "downstream_remote_address": "10.244.1.5:55654",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "Unavailable",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "-",
+  "response_duration": "-"
+}
+{
+  "start_time": "2025-12-25T15:37:19.572Z",
+  "method": "POST",
+  "path": "/mock.MockService/Status",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "UH",
+  "response_code_details": "no_healthy_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "0",
+  "duration": "0",
+  "upstream_service_time": "-",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "b937b48e-0823-9759-8499-5ba6b70aab6d",
+  "authority": "mock-server:9090",
+  "upstream_host": "-",
+  "upstream_cluster": "outbound|9090||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "-",
+  "downstream_local_address": "10.96.186.69:9090",
+  "downstream_remote_address": "10.244.1.5:55656",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "Unavailable",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "-",
+  "response_duration": "-"
+}
+{
+  "start_time": "2025-12-25T15:37:20.465Z",
+  "method": "POST",
+  "path": "/mock.MockService/Status",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "UH",
+  "response_code_details": "no_healthy_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "0",
+  "duration": "0",
+  "upstream_service_time": "-",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "d5b22aac-eb55-9c1e-969d-f2fa3c953447",
+  "authority": "mock-server:9090",
+  "upstream_host": "-",
+  "upstream_cluster": "outbound|9090||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "-",
+  "downstream_local_address": "10.96.186.69:9090",
+  "downstream_remote_address": "10.244.1.5:55670",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "Unavailable",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "-",
+  "response_duration": "-"
+}
+```
+
+```json {caption="[Text 24] Circuit Breaking Case / istioctl Command", linenos=table}
+{
+  "start_time": "2025-12-25T15:37:14.715Z",
+  "method": "POST",
+  "path": "/mock.MockService/Status",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "7",
+  "bytes_sent": "0",
+  "duration": "9",
+  "upstream_service_time": "6",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "b218f327-fc35-9b50-bbb6-5852f71f8d71",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.2.8:9090",
+  "upstream_cluster": "inbound|9090||",
+  "upstream_local_address": "127.0.0.6:60721",
+  "downstream_local_address": "10.244.2.8:9090",
+  "downstream_remote_address": "10.244.1.5:33370",
+  "requested_server_name": "outbound_.9090_._.mock-server.default.svc.cluster.local",
+  "route_name": "default",
+  "grpc_status": "Internal",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "2",
+  "response_duration": "8"
+}
+{
+  "start_time": "2025-12-25T15:37:15.505Z",
+  "method": "POST",
+  "path": "/mock.MockService/Status",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "7",
+  "bytes_sent": "0",
+  "duration": "1",
+  "upstream_service_time": "0",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "9286020f-bdec-917d-b5e5-39c14fba1c16",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.2.8:9090",
+  "upstream_cluster": "inbound|9090||",
+  "upstream_local_address": "127.0.0.6:40643",
+  "downstream_local_address": "10.244.2.8:9090",
+  "downstream_remote_address": "10.244.1.5:55516",
+  "requested_server_name": "outbound_.9090_._.mock-server.default.svc.cluster.local",
+  "route_name": "default",
+  "grpc_status": "Internal",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "1"
+}
+{
+  "start_time": "2025-12-25T15:37:16.355Z",
+  "method": "POST",
+  "path": "/mock.MockService/Status",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "7",
+  "bytes_sent": "0",
+  "duration": "0",
+  "upstream_service_time": "0",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "67e5cd39-27d9-9619-abcf-16be12daeb47",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.2.8:9090",
+  "upstream_cluster": "inbound|9090||",
+  "upstream_local_address": "127.0.0.6:60721",
+  "downstream_local_address": "10.244.2.8:9090",
+  "downstream_remote_address": "10.244.1.5:33370",
+  "requested_server_name": "outbound_.9090_._.mock-server.default.svc.cluster.local",
+  "route_name": "default",
+  "grpc_status": "Internal",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "0"
+}
+{
+  "start_time": "2025-12-25T15:37:17.238Z",
+  "method": "POST",
+  "path": "/mock.MockService/Status",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "7",
+  "bytes_sent": "0",
+  "duration": "0",
+  "upstream_service_time": "0",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "579df252-3830-985e-8af4-00cf68e88d03",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.2.8:9090",
+  "upstream_cluster": "inbound|9090||",
+  "upstream_local_address": "127.0.0.6:60721",
+  "downstream_local_address": "10.244.2.8:9090",
+  "downstream_remote_address": "10.244.1.5:33370",
+  "requested_server_name": "outbound_.9090_._.mock-server.default.svc.cluster.local",
+  "route_name": "default",
+  "grpc_status": "Internal",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "0"
+}
+{
+  "start_time": "2025-12-25T15:37:18.048Z",
+  "method": "POST",
+  "path": "/mock.MockService/Status",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "7",
+  "bytes_sent": "0",
+  "duration": "0",
+  "upstream_service_time": "0",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "b9e570c0-e5b3-9258-a381-d8c1879c1d34",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.2.8:9090",
+  "upstream_cluster": "inbound|9090||",
+  "upstream_local_address": "127.0.0.6:40643",
+  "downstream_local_address": "10.244.2.8:9090",
+  "downstream_remote_address": "10.244.1.5:55516",
+  "requested_server_name": "outbound_.9090_._.mock-server.default.svc.cluster.local",
+  "route_name": "default",
+  "grpc_status": "Internal",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "0"
 }
 ```
 
