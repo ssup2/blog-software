@@ -2201,6 +2201,147 @@ $ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contai
 }
 ```
 
+#### 2.2.7. Upstream Request Retry Case with Timeout
+
+```shell {caption="[Shell 13] Upstream Request Retry Case with Timeout / curl Command", linenos=table}
+$ SHELL_IP=$(kubectl get pod shell -o jsonpath='{.status.podIP}')
+$ kubectl exec mock-server -c mock-server -- iptables -A INPUT -s ${SHELL_IP} -j DROP
+$ kubectl exec mock-server -c mock-server -- iptables -D INPUT 1
+```
+
+```shell {caption="[Shell 13] Upstream Request Retry Case with Timeout / istioctl Command", linenos=table}
+$ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto  -d '{"code": 0}' mock-server:9090 mock.MockService.Status
+ERROR:
+  Code: Unavailable
+  Message: upstream connect error or disconnect/reset before headers. retried and the latest reset reason: connection timeout
+command terminated with exit code 78
+```
+
+```json {caption="[Text 24] Upstream Request Retry Case with Timeout / curl Client", linenos=table}
+{
+  "start_time": "2025-12-25T16:35:14.398Z",
+  "method": "POST",
+  "path": "/mock.MockService/Status",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "URX,UF",
+  "response_code_details": "upstream_reset_before_response_started{connection_timeout}",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "5",
+  "bytes_sent": "0",
+  "duration": "30020",
+  "upstream_service_time": "-",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "46114f69-2363-9551-8c57-23ede0c5d5ba",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.2.10:9090",
+  "upstream_cluster": "outbound|9090||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "-",
+  "downstream_local_address": "10.96.208.157:9090",
+  "downstream_remote_address": "10.244.1.6:46706",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "Unavailable",
+  "upstream_request_attempt_count": "3",
+  "request_duration": "2",
+  "response_duration": "-"
+}
+```
+
+#### 2.2.8. Upstream Request Retry Case with TCP Reset
+
+```shell {caption="[Shell 13] Upstream Request Retry Case with TCP Reset / curl Command", linenos=table}
+$ SHELL_IP=$(kubectl get pod shell -o jsonpath='{.status.podIP}')
+$ kubectl exec mock-server -c mock-server -- iptables-legacy -A INPUT -p tcp -s ${SHELL_IP} -j REJECT --reject-with tcp-reset
+$ kubectl exec mock-server -c mock-server -- iptables-legacy -D INPUT 1
+```
+
+```shell {caption="[Shell 13] Upstream Request Retry Case with TCP Reset / istioctl Command", linenos=table}
+$ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 0}' mock-server:9090 mock.MockService.Status
+ERROR:
+  Code: Unavailable
+  Message: upstream connect error or disconnect/reset before headers. retried and the latest reset reason: remote connection failure, transport failure reason: delayed connect error: Connection refused
+command terminated with exit code 78
+```
+
+```json {caption="[Text 24] Upstream Request Retry Case with TCP Reset / curl Client", linenos=table}
+{
+  "start_time": "2025-12-25T17:04:21.454Z",
+  "method": "POST",
+  "path": "/mock.MockService/Status",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "URX,UF",
+  "response_code_details": "upstream_reset_before_response_started{remote_connection_failure|delayed_connect_error:_Connection_refused}",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "delayed_connect_error:_Connection_refused",
+  "bytes_received": "5",
+  "bytes_sent": "0",
+  "duration": "65",
+  "upstream_service_time": "-",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "4dff590e-6373-932c-b380-d4316d1deabb",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.2.10:9090",
+  "upstream_cluster": "outbound|9090||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "-",
+  "downstream_local_address": "10.96.208.157:9090",
+  "downstream_remote_address": "10.244.1.6:33962",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "Unavailable",
+  "upstream_request_attempt_count": "3",
+  "request_duration": "2",
+  "response_duration": "-"
+}
+```
+
+#### 2.2.9. No Healthy Upstream Case
+
+```shell {caption="[Shell 13] No Healthy Upstream Case / curl Command", linenos=table}
+$ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 0}' mock-server:9090 mock.MockService.Status
+ERROR:
+  Code: Unavailable
+  Message: no healthy upstream
+command terminated with exit code 78
+```
+
+```json {caption="[Text 24] No Healthy Upstream Case / curl Client", linenos=table}
+{
+  "start_time": "2025-12-25T15:52:08.991Z",
+  "method": "POST",
+  "path": "/mock.MockService/Status",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "UH",
+  "response_code_details": "no_healthy_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "0",
+  "duration": "7",
+  "upstream_service_time": "-",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "8a3edf54-2988-9bd2-8014-b36b23c84796",
+  "authority": "mock-server:9090",
+  "upstream_host": "-",
+  "upstream_cluster": "outbound|9090||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "-",
+  "downstream_local_address": "10.96.186.69:9090",
+  "downstream_remote_address": "10.244.1.5:47090",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "Unavailable",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "-",
+  "response_duration": "-"
+}
+```
+
 ## 3. 참조
 
 * Istio Access Log : [https://istio.io/latest/docs/tasks/observability/logs/access-log/](https://istio.io/latest/docs/tasks/observability/logs/access-log/)
