@@ -934,22 +934,14 @@ $ kubectl exec mock-server -c mock-server -- iptables -A INPUT -s ${SHELL_IP} -j
 ```shell {caption="[Shell 10] Upstream Request Retry Case / curl Command", linenos=table}
 $ kubectl exec -it shell -- curl mock-server:8080/status/200
 upstream connect error or disconnect/reset before headers. retried and the latest reset reason: connection timeout
-$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
+$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("8080||mock-server")) | .hostStatuses[].healthStatus'
 {
   "edsHealthStatus": "HEALTHY"
 }
 
 $ kubectl exec -it shell -- curl mock-server:8080/status/200
 no healthy upstream
-$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
-{
-  "failedOutlierCheck": true,
-  "edsHealthStatus": "HEALTHY"
-}
-
-$ kubectl exec -it shell -- curl mock-server:8080/status/200
-no healthy upstream
-$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
+$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("8080||mock-server")) | .hostStatuses[].healthStatus'
 {
   "failedOutlierCheck": true,
   "edsHealthStatus": "HEALTHY"
@@ -957,7 +949,7 @@ $ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contai
 
 $ kubectl exec -it shell -- curl mock-server:8080/status/200
 no healthy upstream
-$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
+$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("8080||mock-server")) | .hostStatuses[].healthStatus'
 {
   "failedOutlierCheck": true,
   "edsHealthStatus": "HEALTHY"
@@ -1055,40 +1047,6 @@ $ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contai
   "request_duration": "0",
   "response_duration": "-"
 }
-{
-  "start_time": "2025-12-21T07:18:43.287Z",
-  "method": "GET",
-  "path": "/status/200",
-  "protocol": "HTTP/1.1",
-  "response_code": "503",
-  "response_flags": "UH",
-  "response_code_details": "no_healthy_upstream",
-  "connection_termination_details": "-",
-  "upstream_transport_failure_reason": "-",
-  "bytes_received": "0",
-  "bytes_sent": "19",
-  "duration": "0",
-  "upstream_service_time": "-",
-  "x_forwarded_for": "-",
-  "user_agent": "curl/8.14.1",
-  "request_id": "2881d791-2b45-9f9a-810b-500a2219edc9",
-  "authority": "mock-server:8080",
-  "upstream_host": "-",
-  "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
-  "upstream_local_address": "-",
-  "downstream_local_address": "10.96.225.216:8080",
-  "downstream_remote_address": "10.244.2.5:54704",
-  "requested_server_name": "-",
-  "route_name": "-",
-  "grpc_status": "-",
-  "upstream_request_attempt_count": "1",
-  "request_duration": "0",
-  "response_duration": "-"
-}
-```
-
-```json {caption="[Text 13] Upstream Request Retry Case / Mock Server", linenos=table}
-X
 ```
 
 ```shell {caption="[Shell 11] Upstream Request Retry Case / istioctl Command", linenos=table}
@@ -1110,22 +1068,14 @@ $ kubectl exec mock-server -c mock-server -- iptables-legacy -A INPUT -p tcp -s 
 ```shell {caption="[Shell 10] Upstream Request Retry Case / curl Command", linenos=table}
 $ kubectl exec -it shell -- curl mock-server:8080/status/200
 upstream connect error or disconnect/reset before headers. retried and the latest reset reason: remote connection failure, transport failure reason: delayed connect error: Connection refused
-$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
+$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("8080||mock-server")) | .hostStatuses[].healthStatus'
 {
   "edsHealthStatus": "HEALTHY"
 }
 
 $ kubectl exec -it shell -- curl mock-server:8080/status/200
 no healthy upstream
-$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
-{
-  "failedOutlierCheck": true,
-  "edsHealthStatus": "HEALTHY"
-}
-
-$ kubectl exec -it shell -- curl mock-server:8080/status/200
-no healthy upstream
-$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
+$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("8080||mock-server")) | .hostStatuses[].healthStatus'
 {
   "failedOutlierCheck": true,
   "edsHealthStatus": "HEALTHY"
@@ -1133,7 +1083,7 @@ $ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contai
 
 $ kubectl exec -it shell -- curl mock-server:8080/status/200
 no healthy upstream
-$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
+$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("8080||mock-server")) | .hostStatuses[].healthStatus'
 {
   "failedOutlierCheck": true,
   "edsHealthStatus": "HEALTHY"
