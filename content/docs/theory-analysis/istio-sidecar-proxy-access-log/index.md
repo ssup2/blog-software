@@ -231,17 +231,20 @@ $ kubectl cp mock.proto shell:mock.proto
 
 [File 2]는 `shell` Pod의 Manifest를 나타내고 있다. netshoot Image를 이용하여 `shell` Pod을 생성하며, Network Admin 권한을 부여하여 `iptables` 명령어를 이용할 수 있도록 한다. [File 3]은 `grpcurl` 명령어를 이용하여 `mock-server` gRPC Service를 호출하기 위한 Proto 파일을 나타내고 있다. [Shell 2]은 Proto 파일을 `shell` Pod에 복사하는 예시를 나타내고 있다.
 
-## 2. Istio Sidecar Proxy Access Log
-
-### 2.1. HTTP Cases
+### 1.2. HTTP Cases
 
 #### 2.1.1. Success Case
 
-```shell {caption="[Shell 2] Success Case / curl Command", linenos=table}
-$ curl -s mock-server:8080/status/200
+{{< figure caption="[Figure 2] HTTP Success Case" src="images/http-success-case.png" width="700px" >}}
+
+```shell {caption="[Shell 3] HTTP Success Case / curl Command", linenos=table}
+$ kubectl exec -it shell -- curl mock-server:8080/status/200
+{"message":"OK","service":"mock-server","status_code":200}
 ```
 
-```json {caption="[Text 2] Success Case / curl Client", linenos=table}
+[Figure 2]는 HTTP Success Case를 나타내고 있다. [Shell 3]의 내용처럼 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/status/200` Endpoint에 접근하는 경우를 나타내고 있다.
+
+```json {caption="[Text 2] HTTP Success Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2025-12-14T15:04:12.558Z",
   "method": "GET",
@@ -274,7 +277,7 @@ $ curl -s mock-server:8080/status/200
 }
 ```
 
-```json {caption="[Text 3] 200 OK Success Case / Mock Server", linenos=table}
+```json {caption="[Text 3] HTTP Success Case / mock-server Access Log", linenos=table}
 {
   "start_time": "2025-12-14T15:04:12.563Z",
   "method": "GET",
@@ -306,6 +309,8 @@ $ curl -s mock-server:8080/status/200
   "response_duration": "4"
 }
 ```
+
+[Text 2]는 `shell` Pod의 Access Log를 나타내고 있으며, [Text 3]는 `mock-server`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/status/200` Endpoint에 접근하는 내역와 `200 OK` 응답도 확인이 가능하다.
 
 #### 2.1.2. Downstream Remote Disconnect Case
 
