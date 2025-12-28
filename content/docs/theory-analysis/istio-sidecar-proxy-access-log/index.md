@@ -9,7 +9,31 @@ Istio 환경에서 다양한 Case에 따른 Sidecar Proxy의 Access Log를 살�
 
 ### 1.1. Test 환경 구성
 
-### 1.1.1. Kubernetes, Istio 환경 구성
+{{< figure caption="[Figure 1] Test Environment" src="images/test-environment.png" width="700px" >}}
+
+[Figure 1]은 Istio Sidecar Proxy Access Log Test 환경을 나타내고 있다. 2개의 Worker Node로 구성되어 있고 각각의 Node에 Client 역할을 수행하는 `shell` Pod와 Server 역할을 수행하는 `mock-server` Pod가 위치한다. `shell` Pod는 `mock-server` Pod와 같이 설정된 Service, Destination Rule, Virtual Service를 통해서 접근한다. HTTP Protocol을 통해서 접근하는 경우에는 `shell` Pod 내부에서 `curl` 명령어를 이용하여 접근하고, gRPC Protocol을 통해서 접근하는 경우에는 `shell` Pod 내부에서 `grpcurl` 명령어를 이용하여 접근한다.
+
+#### 1.1.1. Kubernetes, Istio 환경 구성
+
+```shell {caption="[Shell 1] Kubernetes, Istio 환경 구성"}
+# Create kubernetes cluster with kind
+$ kind create cluster --config=- <<EOF                           
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+- role: control-plane
+- role: worker
+- role: worker
+EOF
+
+# Install istio
+$ istioctl install --set profile=demo -y
+
+# Enable sidecar injection to default namespace
+$ kubectl label namespace default istio-injection=enabled
+```
+
+[Shell 1]은 Kubernetes, Istio 환경을 구성하는 Script를 나타내고 있다. `kind`를 활용하여 Kubernetes Cluster를 구성하고 Istio를 설치한다. 그리고 default Namespace에 Sidecar Injection을 활성화한다.
 
 ```yaml {caption="[Text 1] Set Mesh Config", linenos=table}
 apiVersion: v1
@@ -50,42 +74,117 @@ data:
       }
 ```
 
-| Field | Description |
-|-------|-------------|
-| `start_time` | The time the request started. |
-| `method` | The HTTP method of the request. |
-| `path` | The path of the request. |
-| `protocol` | The protocol of the request. |
-| `response_code` | The HTTP status code of the response. |
-| `response_flags` | The flags of the response. |
-| `response_code_details` | The details of the response code. |
-| `connection_termination_details` | The details of the connection termination. |
-| `upstream_transport_failure_reason` | The reason for the upstream transport failure. |
-| `bytes_received` | The number of bytes received from the upstream. |
-| `bytes_sent` | The number of bytes sent to the downstream. |
-| `duration` | The duration of the request. |
-| `upstream_service_time` | The time it took for the upstream service to process the request. |
-| `x_forwarded_for` | The X-Forwarded-For header of the request. |
-| `user_agent` | The User-Agent header of the request. |
-| `request_id` | The request ID of the request. |
-| `authority` | The authority of the request. |
-| `upstream_host` | The upstream host of the request. |
-| `upstream_cluster` | The upstream cluster of the request. |
-| `upstream_local_address` | The upstream local address of the request. |
-| `downstream_local_address` | The downstream local address of the request. |
-| `downstream_remote_address` | The downstream remote address of the request. |
-| `requested_server_name` | The requested server name of the request. |
-| `route_name` | The route name of the request. |
-| `grpc_status` | The gRPC status of the request. |
-| `upstream_request_attempt_count` | The number of upstream request attempts. |
-| `request_duration` | The duration of the request. |
-| `response_duration` | The duration of the response. |
+[Text 1]은 Istio Sidecar Proxy Access Log의 Format을 변경하기 위한 Istio의 Mesh Config를 나타내고 있다. Access Log의 기본 Format은 Plain Text 형식으로 되어 있어 가독성이 좋지 않으며, JSON 형식으로 변경하기 위해서 `accessLogFormat` Field를 이용하여 설정한다.
 
-### 1.1.2. shell Pod, mock-server Pod 구성
+#### 1.1.2. Workload 구성
 
+```yaml {caption="[File 1] mock-server Pod Manifest", linenos=table}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mock-server
+  labels:
+    app: mock-server
+spec:
+  containers:
+  - name: mock-server
+    image: ghcr.io/ssup2/mock-go-server:0.1.4
+    ports:
+    - containerPort: 8080
+    - containerPort: 9090
+    securityContext:
+      capabilities:
+        add: ["NET_ADMIN"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mock-server
+spec:
+  selector:
+    app: mock-server
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+  - name: grpc
+    port: 9090
+    targetPort: 9090
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: mock-server
+spec:
+  hosts:
+  - mock-server
+  http:
+  - retries:
+      attempts: 2
+    route:
+    - destination:
+        host: mock-server
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: mock-server
+spec:
+  host: mock-server
+  trafficPolicy:
+    connectionPool:  
+      tcp: 
+        maxConnections: 1   # default value is 2^31-1
+      http:
+        http1MaxPendingRequests: 1   # default value is 2^31-1 (unlimited)
+        http2MaxRequests: 1          # default value is 2^31-1 (unlimited)
+    outlierDetection:
+      consecutive5xxErrors: 5   # default value is 5
+      interval: 10s             # default value is 10s
+      baseEjectionTime: 30s     # default value is 30s
+      maxEjectionPercent: 100   # default value is 100
 ```
+
+{{< table caption="[Table 1] mock-server HTTP Endpoints" >}}
+| Endpoint | Description |
+|---|---|
+| /status/{code} | Return specific HTTP status code |
+| /delay/{ms} | Delay response by milliseconds |
+| /disconnect/{ms} | Server closes connection after milliseconds |
+{{< /table >}}
+
+{{< table caption="[Table 2] mock-server gRPC Endpoints" >}}
+| Endpoint | Description |
+|---|---|
+| /mock.MockService.Status | Return specific gRPC status code |
+| /mock.MockService.Delay | Delay response by milliseconds |
+| /mock.MockService.Disconnect | Server closes connection after milliseconds |
+{{< /table >}}
+
+[File 1]은 mock-server Workload의 Manifest를 나타내고 있다. mock-server Image를 이용하여 mock-server Pod을 생성하며, `8080` Port를 열어서 HTTP 서비스를 제공하고, `9090` Port를 열어서 gRPC 서비스를 제공한다. [Table 1]과 [Table 2]는 `mock-server` Workload의 HTTP, gRPC Endpoint별 동작을 나타내고 있다. `mock-server`에서 제공하는 Endpoint들을 다양한 Case를 재현하기 위해서 사용한다.
+
+```yaml {caption="[File 2] shell Pod Manifest", linenos=table}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: shell
+  labels:
+    app: shell
+spec:
+  containers:
+  - name: shell
+    image: nicolaka/netshoot
+    command: ["sleep", "infinity"]
+    securityContext:
+      capabilities:
+        add: ["NET_ADMIN"]
+```
+
+```shell {caption="[Shell 2] Copy mock.proto to shell Pod", linenos=table}
 $ kubectl cp proto/mock.proto shell:mock.proto
 ```
+
+[File 2]는 `shell` Pod의 Manifest를 나타내고 있다. netshoot Image를 이용하여 `shell` Pod을 생성하며, Network Admin 권한을 부여하여 `iptables` 명령어를 이용할 수 있도록 한다. [Shell 2]는  mock.proto 파일을 shell Pod에 복사하는 Script를 나타내고 있다.
 
 ## 2. Istio Sidecar Proxy Access Log
 
