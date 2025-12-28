@@ -12,6 +12,8 @@ Istio의 **Locality Load Balancing**은 의미 그대로 같은 Locality(지역�
 
 [Figure 1]은 Istio의 Locality Load Balancing을 테스트하기 위한 Kubernetes Cluster를 나타내고 있다. 4개의 Node로 구성되어 있고 각 Node는 `kr`, `us` 두 가지 Region과 `a`, `b` 두 가지 Zone에 한대씩 구성되어 총 4개의 Locality를 구성한다. 각 Locality에는 마다 별도의 Deployment를 통해서 2개의 Pod, 총 8개의 Pod를 구성한다. 하지만 Service, Virtual Service, Destination Rule은 하나만 정의하여 모든 Deployment의 Pod에 적용되도록 구성한다. 접근 Test를 위해서 `kr` Region의 `a` Zone에 Shell Pod의 역할을 수행하는 `myshell-kr-a` Pod도 하나 구성한다.
 
+#### 1.1.1. Kubernetes, Istio 환경 구성
+
 ```shell {caption="[Shell 1] Kubernetes Cluster 구성"}
 # Create kubernetes cluster with kind
 $ kind create cluster --config=- <<EOF                           
@@ -53,6 +55,8 @@ $ kubectl label namespace default istio-injection=enabled
 * `topology.kubernetes.io/subzone` : Subzone 정보
 
 [Figure 1]과 동일하게 region은 `kr`, `us` 두 가지 값을 가지고, zone은 `a`, `b` 두 가지 값을 설정하여 총 4개의 Locality를 구성한다. subzone은 설정하지 않는다.
+
+#### 1.1.2. Workload 구성 및 동작 확인
 
 ```yaml {caption="[File 1] 기본 Workload Manifest", linenos=table}
 apiVersion: apps/v1

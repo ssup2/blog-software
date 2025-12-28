@@ -3,7 +3,13 @@ title: Istio Sidecar Proxy Access Log
 draft: true
 ---
 
-## 1. Test 환경 구성
+## 1. Istio Sidecar Proxy Access Log
+
+Istio 환경에서 다양한 Case에 따른 Sidecar Proxy의 Access Log를 살펴본다.
+
+### 1.1. Test 환경 구성
+
+### 1.1.1. Kubernetes, Istio 환경 구성
 
 ```yaml {caption="[Text 1] Set Mesh Config", linenos=table}
 apiVersion: v1
@@ -74,6 +80,8 @@ data:
 | `upstream_request_attempt_count` | The number of upstream request attempts. |
 | `request_duration` | The duration of the request. |
 | `response_duration` | The duration of the response. |
+
+### 1.1.2. shell Pod, mock-server Pod 구성
 
 ```
 $ kubectl cp proto/mock.proto shell:mock.proto
