@@ -180,11 +180,56 @@ spec:
         add: ["NET_ADMIN"]
 ```
 
-```shell {caption="[Shell 2] Copy mock.proto to shell Pod", linenos=table}
-$ kubectl cp proto/mock.proto shell:mock.proto
+```proto {caption="[File 3] mock-server gRPC Service Definition", linenos=table}
+syntax = "proto3";
+
+package mock;
+
+option go_package = "mock-go-server/proto";
+
+service MockService {
+  // Return specific status code
+  rpc Status(StatusRequest) returns (StatusResponse);
+
+  // Delay response
+  rpc Delay(DelayRequest) returns (DelayResponse);
+
+  // Server closes connection after delay
+  rpc Disconnect(DisconnectRequest) returns (Empty);
+}
+
+message Empty {}
+
+message StatusRequest {
+  int32 code = 1;
+}
+
+message StatusResponse {
+  int32 status_code = 1;
+  string service = 2;
+  string message = 3;
+}
+
+message DelayRequest {
+  int32 milliseconds = 1;
+}
+
+message DelayResponse {
+  string service = 1;
+  int32 delayed_ms = 2;
+  string message = 3;
+}
+
+message DisconnectRequest {
+  int32 milliseconds = 1;
+}
 ```
 
-[File 2]는 `shell` Pod의 Manifest를 나타내고 있다. netshoot Image를 이용하여 `shell` Pod을 생성하며, Network Admin 권한을 부여하여 `iptables` 명령어를 이용할 수 있도록 한다. [Shell 2]는  mock.proto 파일을 shell Pod에 복사하는 Script를 나타내고 있다.
+```shell {caption="[Shell 2] Copy mock.proto to shell Pod", linenos=table}
+$ kubectl cp mock.proto shell:mock.proto
+```
+
+[File 2]는 `shell` Pod의 Manifest를 나타내고 있다. netshoot Image를 이용하여 `shell` Pod을 생성하며, Network Admin 권한을 부여하여 `iptables` 명령어를 이용할 수 있도록 한다. [File 3]은 `grpcurl` 명령어를 이용하여 `mock-server` gRPC Service를 호출하기 위한 Proto 파일을 나타내고 있다. [Shell 2]은 Proto 파일을 `shell` Pod에 복사하는 예시를 나타내고 있다.
 
 ## 2. Istio Sidecar Proxy Access Log
 
