@@ -9,7 +9,7 @@ Istio 환경에서 다양한 Case에 따른 Sidecar Proxy의 Access Log를 살�
 
 ### 1.1. Test 환경 구성
 
-{{< figure caption="[Figure 1] Test Environment" src="images/test-environment.png" width="700px" >}}
+{{< figure caption="[Figure 1] Test Environment" src="images/test-environment.png" width="800px" >}}
 
 [Figure 1]은 Istio Sidecar Proxy Access Log Test 환경을 나타내고 있다. 2개의 Worker Node로 구성되어 있고 각각의 Node에 Client 역할을 수행하는 `shell` Pod와 Server 역할을 수행하는 `mock-server` Pod가 위치한다. `shell` Pod는 `mock-server` Pod와 같이 설정된 Service, Destination Rule, Virtual Service를 통해서 접근한다. HTTP Protocol을 통해서 접근하는 경우에는 `shell` Pod 내부에서 `curl` 명령어를 이용하여 접근하고, gRPC Protocol을 통해서 접근하는 경우에는 `shell` Pod 내부에서 `grpcurl` 명령어를 이용하여 접근한다.
 
@@ -148,11 +148,15 @@ spec:
       maxEjectionPercent: 100 # default value
 ```
 
-[File 1]은 mock-server Workload의 Manifest를 나타내고 있다. mock-server Image를 이용하여 mock-server Pod을 생성하며, `8080` Port를 열어서 HTTP 서비스를 제공하고, `9090` Port를 열어서 gRPC 서비스를 제공한다. Timeout은 `5s`로 설정되어 있고, 재시도는 기본값과 동일하게 2번 재시도를 설정하여 최대 3번 요청을 시도하도록 설정되어 있다. 또한 기본값과 동일하게 `connect-failure`, `refused-stream`, `unavailable`, `cancelled` 4가지 Error가 발생하면 재시도를 수행하도록 설정되어 있다.
+[File 1]은 `mock-server` Workload의 Manifest를 나타내고 있다. `mock-server` Image를 이용하여 `mock-server` Pod을 생성하며, `8080` Port를 열어서 HTTP 서비스를 제공하고, `9090` Port를 열어서 gRPC 서비스를 제공한다. Virtual Service에는 Timeout은 `5s`로 설정되어 있고, 재시도는 기본값과 동일하게 2번 재시도를 설정하여 최대 3번 요청을 시도하도록 설정되어 있다. 또한 기본값과 동일하게 `connect-failure`, `refused-stream`, `unavailable`, `cancelled` 4가지 Error가 발생하면 재시도를 수행하도록 설정되어 있다.
 
-손쉽게 Upstream Overflow를 발생시키기 위해서 Connection Pool은 동시에 한개의 요청만 처리할 수 있도록 TCP Connection의 개수와 HTTP의 요청 
+Circuit Breaking을 Test를 위해서 Destination Rule이 설정되어 있다. `outlierDetection` Field는 비정상 상태를 판단하는 기준을 정의하며 기본값으로 구성되어 있다. 5번 연속으로 10초 간격으로 5xx 에러가 발생하면 Circuit Breaking이 동작하며, Circuit Breaking 적용 시간은 30초로 설정되어 있다. `connectionPool` Field는 HTTP/GRPC 요청의 동시 처리 개수를 제한하는 설정을 명시하며, 동시에 한개의 요청만 처리할 수 있도록 설정되어 있다.
 
-  Connection Pool은 `1`개로 설정되어 있고, Outlier Detection은 `5`번 연속으로 5xx 에러가 발생하면 Circuit Breaking을 적용한다.
+동시 처리 개수를 제한하는 방법은 크게 최대 TCP Connection의 개수를 제한하는 방법과 최대 동시 HTTP/GRPC 요청 처리의 개수를 제한하는 방법이 있다. 최대 TCP Connection의 개수를 제한하는 방법은 `tcp.maxConnections` Field를 이용하여 최대 TCP Connection의 개수를 제한하는 방법이다. [File 1]에서는 `tcp.maxConnections` Field를 `1`로 설정하여 최대 TCP Connection의 개수를 1개로 제한하고 있으며, `http.http1MaxPendingRequests` Field를 `1`로 설정하여 Queueing 할 수 있는 TCP Connection의 개수도 최대 1개까지로 제한하고 있다.
+
+GRPC의 경우에는 하나의 TCP Connection에서 HTTP/2의 Stream 기능을 활용하여 다수의 요청을 동시에 처리할 수 있다. 따라서 `http.maxConcurrentStreams` Field를 `1`로 설정하여 하나의 TCP Connection에서 최대 1개의 Stream만 처리할 대 있도록 강제하여 손쉽게 GRPC 요청 Queueing을 발생시킬 수 있도록 설정되어 있다. 만약에 `http.maxConcurrentStreams` Field가 명시되어 있지 않으면 하나의 TCP Connection에서 무제한으로 Stream 처리가 가능하기 때문에 GRPC 요청 Queueing이 발생하지 않는다.
+
+HTTP/GRPC 요청의 최대 동시 처리 개수를 제한하는 방법은 `http.http2MaxRequests` Field를 이용하면 된다. [File 1]에서는 `http.http2MaxRequests` Field를 주석처리 하여 최대 HTTP/GRPC 요청 처리의 개수는 제한되지 않도록 설정되어 있지만, 주석을 제거하면 최대 동시 HTTP/GRPC 요청 처리의 개수를 1개로 제한하도록 설정되어 있다.
 
 {{< table caption="[Table 1] mock-server HTTP Endpoints" >}}
 | Endpoint | Description |
