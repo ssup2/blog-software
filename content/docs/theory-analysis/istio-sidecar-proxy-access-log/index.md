@@ -119,7 +119,7 @@ spec:
   hosts:
   - mock-server
   http:
-  - timeout: 5s # default is disabled
+  - timeout: 10s # default is disabled
     retries:
       attempts: 2                                                     # default value
       retryOn: "connect-failure,refused-stream,unavailable,cancelled" # default value
@@ -139,13 +139,20 @@ spec:
         maxConnections: 1 # default value is 2^31-1
       http:
         http1MaxPendingRequests: 1   # default value is 2^31-1 (unlimited)
-        http2MaxRequests: 1          # default value is 2^31-1 (unlimited)
+        maxConcurrentStreams: 1      # default value is 2^31-1 (unlimited)
+        #http2MaxRequests: 1         # default value is 2^31-1 (unlimited)
     outlierDetection:
       consecutive5xxErrors: 5 # default value
       interval: 10s           # default value
       baseEjectionTime: 30s   # default value
       maxEjectionPercent: 100 # default value
 ```
+
+[File 1]은 mock-server Workload의 Manifest를 나타내고 있다. mock-server Image를 이용하여 mock-server Pod을 생성하며, `8080` Port를 열어서 HTTP 서비스를 제공하고, `9090` Port를 열어서 gRPC 서비스를 제공한다. Timeout은 `5s`로 설정되어 있고, 재시도는 기본값과 동일하게 2번 재시도를 설정하여 최대 3번 요청을 시도하도록 설정되어 있다. 또한 기본값과 동일하게 `connect-failure`, `refused-stream`, `unavailable`, `cancelled` 4가지 Error가 발생하면 재시도를 수행하도록 설정되어 있다.
+
+손쉽게 Upstream Overflow를 발생시키기 위해서 Connection Pool은 동시에 한개의 요청만 처리할 수 있도록 TCP Connection의 개수와 HTTP의 요청 
+
+  Connection Pool은 `1`개로 설정되어 있고, Outlier Detection은 `5`번 연속으로 5xx 에러가 발생하면 Circuit Breaking을 적용한다.
 
 {{< table caption="[Table 1] mock-server HTTP Endpoints" >}}
 | Endpoint | Description |
@@ -163,7 +170,7 @@ spec:
 | /mock.MockService.Disconnect | Server closes connection after milliseconds |
 {{< /table >}}
 
-[File 1]은 mock-server Workload의 Manifest를 나타내고 있다. mock-server Image를 이용하여 mock-server Pod을 생성하며, `8080` Port를 열어서 HTTP 서비스를 제공하고, `9090` Port를 열어서 gRPC 서비스를 제공한다. [Table 1]과 [Table 2]는 `mock-server` Workload의 HTTP Endpoint, gRPC Function별 동작을 나타내고 있다. `mock-server`에서 제공하는 Endpoint들을 다양한 Case를 재현하기 위해서 사용한다.
+[Table 1]과 [Table 2]는 `mock-server` Workload의 HTTP Endpoint, gRPC Function별 동작을 나타내고 있다. `mock-server`에서 제공하는 Endpoint들을 다양한 Case를 재현하기 위해서 사용한다.
 
 ```yaml {caption="[File 2] shell Pod Manifest", linenos=table}
 apiVersion: v1
