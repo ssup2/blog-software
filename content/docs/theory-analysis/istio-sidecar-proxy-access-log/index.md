@@ -566,6 +566,80 @@ upstream connect error or disconnect/reset before headers. reset reason: connect
 
 #### 1.2.5. Upstream TCP RST after Response Case
 
+{{< figure caption="[Figure 6] Upstream TCP RST after Response Case" src="images/http-upstream-tcp-rst-after-response-case.png" width="1000px" >}}
+
+```shell {caption="[Shell 10] Upstream TCP RST after Response Case / curl Command", linenos=table}
+$ kubectl exec -it shell -- curl mock-server:8080/reset-after-response/1000
+curl: (18) transfer closed with outstanding read data remaining
+dummy datacommand terminated with exit code 18
+```
+
+```json {caption="[Text 10] Upstream TCP RST after Response Case / curl Client", linenos=table}
+{
+  "start_time": "2026-01-01T12:47:45.064Z",
+  "method": "GET",
+  "path": "/reset-after-response/1000",
+  "protocol": "HTTP/1.1",
+  "response_code": "200",
+  "response_flags": "UPE",
+  "response_code_details": "upstream_reset_after_response_started{protocol_error}",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "10",
+  "duration": "2023",
+  "upstream_service_time": "1006",
+  "x_forwarded_for": "-",
+  "user_agent": "curl/8.14.1",
+  "request_id": "4b388e57-8df0-9198-b9a8-3f72f0865739",
+  "authority": "mock-server:8080",
+  "upstream_host": "10.244.2.17:8080",
+  "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "10.244.1.7:52250",
+  "downstream_local_address": "10.96.188.135:8080",
+  "downstream_remote_address": "10.244.1.7:59530",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "1007"
+}
+```
+
+```json {caption="[Text 11] Upstream TCP RST after Response Case / Mock Server", linenos=table}
+{
+  "start_time": "2026-01-01T12:47:45.066Z",
+  "method": "GET",
+  "path": "/reset-after-response/1000",
+  "protocol": "HTTP/1.1",
+  "response_code": "200",
+  "response_flags": "UPE",
+  "response_code_details": "upstream_reset_after_response_started{protocol_error}",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "10",
+  "duration": "1017",
+  "upstream_service_time": "1003",
+  "x_forwarded_for": "-",
+  "user_agent": "curl/8.14.1",
+  "request_id": "4b388e57-8df0-9198-b9a8-3f72f0865739",
+  "authority": "mock-server:8080",
+  "upstream_host": "10.244.2.17:8080",
+  "upstream_cluster": "inbound|8080||",
+  "upstream_local_address": "127.0.0.6:44401",
+  "downstream_local_address": "10.244.2.17:8080",
+  "downstream_remote_address": "10.244.1.7:52250",
+  "requested_server_name": "outbound_.8080_._.mock-server.default.svc.cluster.local",
+  "route_name": "default",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "1004"
+}
+```
+
 #### 1.2.5. Upstream TCP Close Case
 
 {{< figure caption="[Figure 5] Upstream TCP Connection Close Case" src="images/http-upstream-tcp-connection-close-case.png" width="700px" >}}
