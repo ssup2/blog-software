@@ -88,7 +88,7 @@ metadata:
 spec:
   containers:
   - name: mock-server
-    image: ghcr.io/ssup2/mock-go-server:0.1.4
+    image: ghcr.io/ssup2/mock-go-server:commit-a6e81068
     ports:
     - containerPort: 8080
     - containerPort: 9090
@@ -119,8 +119,10 @@ spec:
   hosts:
   - mock-server
   http:
-  - retries:
-      attempts: 2
+  - timeout: 5s # default is disabled
+    retries:
+      attempts: 2                                                     # default value
+      retryOn: "connect-failure,refused-stream,unavailable,cancelled" # default value
     route:
     - destination:
         host: mock-server
@@ -132,17 +134,17 @@ metadata:
 spec:
   host: mock-server
   trafficPolicy:
-    connectionPool:  
-      tcp: 
-        maxConnections: 1   # default value is 2^31-1
+    connectionPool:
+      tcp:
+        maxConnections: 1 # default value is 2^31-1
       http:
         http1MaxPendingRequests: 1   # default value is 2^31-1 (unlimited)
         http2MaxRequests: 1          # default value is 2^31-1 (unlimited)
     outlierDetection:
-      consecutive5xxErrors: 5   # default value is 5
-      interval: 10s             # default value is 10s
-      baseEjectionTime: 30s     # default value is 30s
-      maxEjectionPercent: 100   # default value is 100
+      consecutive5xxErrors: 5 # default value
+      interval: 10s           # default value
+      baseEjectionTime: 30s   # default value
+      maxEjectionPercent: 100 # default value
 ```
 
 {{< table caption="[Table 1] mock-server HTTP Endpoints" >}}
@@ -154,14 +156,14 @@ spec:
 {{< /table >}}
 
 {{< table caption="[Table 2] mock-server gRPC Endpoints" >}}
-| Endpoint | Description |
+| Function | Description |
 |---|---|
 | /mock.MockService.Status | Return specific gRPC status code |
 | /mock.MockService.Delay | Delay response by milliseconds |
 | /mock.MockService.Disconnect | Server closes connection after milliseconds |
 {{< /table >}}
 
-[File 1]은 mock-server Workload의 Manifest를 나타내고 있다. mock-server Image를 이용하여 mock-server Pod을 생성하며, `8080` Port를 열어서 HTTP 서비스를 제공하고, `9090` Port를 열어서 gRPC 서비스를 제공한다. [Table 1]과 [Table 2]는 `mock-server` Workload의 HTTP, gRPC Endpoint별 동작을 나타내고 있다. `mock-server`에서 제공하는 Endpoint들을 다양한 Case를 재현하기 위해서 사용한다.
+[File 1]은 mock-server Workload의 Manifest를 나타내고 있다. mock-server Image를 이용하여 mock-server Pod을 생성하며, `8080` Port를 열어서 HTTP 서비스를 제공하고, `9090` Port를 열어서 gRPC 서비스를 제공한다. [Table 1]과 [Table 2]는 `mock-server` Workload의 HTTP Endpoint, gRPC Function별 동작을 나타내고 있다. `mock-server`에서 제공하는 Endpoint들을 다양한 Case를 재현하기 위해서 사용한다.
 
 ```yaml {caption="[File 2] shell Pod Manifest", linenos=table}
 apiVersion: v1
@@ -233,7 +235,7 @@ $ kubectl cp mock.proto shell:mock.proto
 
 ### 1.2. HTTP Cases
 
-#### 2.1.1. Success Case
+#### 1.2.1. Success Case
 
 {{< figure caption="[Figure 2] HTTP Success Case" src="images/http-success-case.png" width="700px" >}}
 
@@ -242,7 +244,7 @@ $ kubectl exec -it shell -- curl mock-server:8080/status/200
 {"message":"OK","service":"mock-server","status_code":200}
 ```
 
-[Figure 2]는 HTTP Success Case를 나타내고 있다. [Shell 3]의 내용처럼 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/status/200` Endpoint에 접근하는 경우를 나타내고 있다.
+[Figure 2]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/status/200` Endpoint에 `GET` 요청을 전달하고, `200 OK` 응답을 받는 HTTP Success Case를 나타내고 있다. [Shell 3]은 [Figure 2]의 내용을 실행하는 예시를 나타내고 있다.
 
 ```json {caption="[Text 2] HTTP Success Case / shell Pod Access Log", linenos=table}
 {
@@ -312,14 +314,97 @@ $ kubectl exec -it shell -- curl mock-server:8080/status/200
 
 [Text 2]는 `shell` Pod의 Access Log를 나타내고 있으며, [Text 3]는 `mock-server`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/status/200` Endpoint에 접근하는 내역와 `200 OK` 응답도 확인이 가능하다.
 
-#### 2.1.2. Downstream Remote Disconnect Case
+#### 1.2.2. Failure Case
 
-```shell {caption="[Shell 5] Timeout Case / curl Command", linenos=table}
-$ curl -s mock-server:8080/delay/10000
+{{< figure caption="[Figure 3] HTTP Failure Case" src="images/http-failure-case.png" width="700px" >}}
+
+```shell {caption="[Shell 4] HTTP Failure Case / curl Command", linenos=table}
+$ kubectl exec -it shell -- curl mock-server:8080/status/503
+{"message":"Service Unavailable","service":"mock-server","status_code":503}
+```
+
+[Figure 3]은 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/status/503` Endpoint에 `GET` 요청을 전달하고, `503 Service Unavailable` 응답을 받는 HTTP Failure Case를 나타내고 있다. [Shell 4]은 [Figure 3]의 내용을 실행하는 예시를 나타내고 있다.
+
+```json {caption="[Text 4] HTTP Failure Case / shell Pod Access Log", linenos=table}
+{
+  "start_time": "2025-12-28T12:47:37.317Z",
+  "method": "GET",
+  "path": "/status/503",
+  "protocol": "HTTP/1.1",
+  "response_code": "503",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "76",
+  "duration": "56",
+  "upstream_service_time": "52",
+  "x_forwarded_for": "-",
+  "user_agent": "curl/8.14.1",
+  "request_id": "af4ab845-948b-9669-8bae-384dc22cf9f7",
+  "authority": "mock-server:8080",
+  "upstream_host": "10.244.2.11:8080",
+  "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "10.244.1.6:39692",
+  "downstream_local_address": "10.96.95.31:8080",
+  "downstream_remote_address": "10.244.1.6:52850",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "56"
+}
+```
+
+```json {caption="[Text 5] HTTP Failure Case / mock-server Access Log", linenos=table}
+{
+  "start_time": "2025-12-28T12:47:37.325Z",
+  "method": "GET",
+  "path": "/status/503",
+  "protocol": "HTTP/1.1",
+  "response_code": "503",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "76",
+  "duration": "37",
+  "upstream_service_time": "25",
+  "x_forwarded_for": "-",
+  "user_agent": "curl/8.14.1",
+  "request_id": "af4ab845-948b-9669-8bae-384dc22cf9f7",
+  "authority": "mock-server:8080",
+  "upstream_host": "10.244.2.11:8080",
+  "upstream_cluster": "inbound|8080||",
+  "upstream_local_address": "127.0.0.6:36269",
+  "downstream_local_address": "10.244.2.11:8080",
+  "downstream_remote_address": "10.244.1.6:39692",
+  "requested_server_name": "outbound_.8080_._.mock-server.default.svc.cluster.local",
+  "route_name": "default",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "2",
+  "response_duration": "36"
+}
+```
+
+[Text 4]는 `shell` Pod의 Access Log를 나타내고 있으며, [Text 5]는 `mock-server`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/status/503` Endpoint에 접근하는 내역와 `503 Service Unavailable` 응답도 확인이 가능하다.
+
+#### 1.2.3. Downstream TCP RST Case
+
+{{< figure caption="[Figure 4] Downstream TCP RST Case" src="images/http-downstream-tcp-rst-case.png" width="700px" >}}
+
+```shell {caption="[Shell 5] Downstream TCP RST Case / curl Command", linenos=table}
+$ kubectl exec -it shell -- curl mock-server:8080/delay/10000
 ^C
 ```
 
-```json {caption="[Text 6] Timeout Case / curl Client", linenos=table}
+[Figure 4]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/delay/10000` Endpoint에 `GET` 요청을 전달하고, 10000ms가 지나기 전에 `Ctrl+C` 명령어를 이용하여 요청을 강제로 종료하는 Client Disconnect Case를 나타내고 있다. [Shell 5]은 [Figure 4]의 내용을 실행하는 예시를 나타내고 있다. `curl` 명령어 동작중 강제로 종료되면 Linux Kernel은 TCP RST Flag를 `mock-server` Pod에게도 전송하여 Connection을 강제로 종료하도록 만든다.
+
+```json {caption="[Text 6] Downstream TCP RST Case / curl Client", linenos=table}
 {
   "start_time": "2025-12-14T15:31:56.209Z",
   "method": "GET",
@@ -352,7 +437,7 @@ $ curl -s mock-server:8080/delay/10000
 }
 ```
 
-```json {caption="[Text 7] Timeout Case / Mock Server", linenos=table}
+```json {caption="[Text 7] Downstream TCP RST Case / Mock Server", linenos=table}
 {
   "start_time": "2025-12-14T15:31:56.210Z",
   "method": "GET",
@@ -385,12 +470,25 @@ $ curl -s mock-server:8080/delay/10000
 }
 ```
 
-#### 2.1.3. Upstream Remote Disconnect Case
+[Text 6]는 `shell` Pod의 Access Log를 나타내고 있으며, [Text 7]는 `mock-server`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/delay/10000` Endpoint에 접근하는 내역와 `response_code`가 `0`으로 나타나는 것을 확인할 수 있다. 또한 `response_flags`가 `DC (DownstreamConnectionTermination)`로 나타나는 것을 확인할 수 있다.
 
-```shell {caption="[Shell 8] Upstream Remote Disconnect Case / curl Command", linenos=table}
-$ curl mock-server:8080/disconnect/1000
+#### 1.2.4. Upstream TCP RST Case
+
+```shell {caption="[Shell 8] Upstream TCP RST Case / curl Command", linenos=table}
+$ kubectl exec -it shell -- curl mock-server:8080/reset/1000
 upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
+
+#### 1.2.5. Upstream TCP Close Case
+
+{{< figure caption="[Figure 5] Upstream TCP Connection Close Case" src="images/http-upstream-tcp-connection-close-case.png" width="700px" >}}
+
+```shell {caption="[Shell 8] Upstream TCP Close Case / curl Command", linenos=table}
+$ kubectl exec -it shell -- curl mock-server:8080/disconnect/1000
+upstream connect error or disconnect/reset before headers. reset reason: connection termination
+```
+
+[Figure 5]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/disconnect/1000` Endpoint에 `GET` 요청을 전달하고, `1000ms` 후에 `mock-server` Pod가 Connection을 강제로 종료하는 Server Disconnect Case를 나타내고 있다. [Shell 8]은 [Figure 5]의 내용을 실행하는 예시를 나타내고 있다.
 
 ```json {caption="[Text 9] Upstream Remote Disconnect Case / curl Client", linenos=table}
 {
@@ -457,6 +555,8 @@ upstream connect error or disconnect/reset before headers. reset reason: connect
   "response_duration": "-"
 }
 ```
+
+[Text 9]는 `shell` Pod의 Access Log를 나타내고 있으며, [Text 10]는 `mock-server`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/disconnect/1000` Endpoint에 접근하는 내역와 `503 Service Unavailable` 응답도 확인이 가능하다. 또한 `response_flags`가 `UC (UpstreamConnectionTermination)`로 나타나는 것을 확인할 수 있다.
 
 #### 2.1.4. Upstream Overflow Case
 

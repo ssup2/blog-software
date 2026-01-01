@@ -27,7 +27,7 @@ Envoy Response Flag는 Envoy가 요청을 처리하는 과정에서 **특정 Eve
 {{< table caption="[Table 2] Envoy HTTP Only Flag" >}}
 | Long Name | Short Name | Description |
 |---|---|---|
-| DownstreamConnectionTermination  | DC    | Downstream Client가 Envoy Server와의 연결을 먼저 TCP FIN과 함께 종료 |
+| DownstreamConnectionTermination  | DC    | Downstream Client가 Envoy Server와의 연결을 먼저 TCP RST과 함께 종료 |
 | FailedLocalHealthCheck           | LH    | Envoy Server는 Upstream Server로 요청을 보내기전 Health Check를 수행하였지만 실패하여 요청은 종료하고, Downstream Client에게 503 Status Code를 응답 |
 | UpstreamRequestTimeout           | UT    | Envoy Server는 Upstream Cluster로 전송한 요청을 Timeout에 의해서 강제로 중단하였으며, Downstream Client에게 504 Status Code를 응답 |
 | LocalReset                       | LR    | Envoy Server는 Upstream Cluster와의 연결을 TCP RST과 함께 먼저 강제로 종료하였으며, Downstream Client에게 503 Status Code를 응답 |

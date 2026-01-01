@@ -27,7 +27,7 @@ Envoy Response Flag refers to flags used to represent related information in Acc
 {{< table caption="[Table 2] Envoy HTTP Only Flag" >}}
 || Long Name | Short Name | Description |
 |---|---|---|
-|| DownstreamConnectionTermination  | DC    | Downstream Client first terminates connection with Envoy Server with TCP FIN |
+|| DownstreamConnectionTermination  | DC    | Downstream Client first terminates connection with Envoy Server with TCP RST |
 || FailedLocalHealthCheck           | LH    | Envoy Server performed Health Check before sending request to Upstream Server but failed, terminates the request, and responds with 503 Status Code to Downstream Client |
 || UpstreamRequestTimeout           | UT    | Envoy Server forcibly aborted the request sent to Upstream Cluster due to Timeout and responds with 504 Status Code to Downstream Client |
 || LocalReset                       | LR    | Envoy Server first forcibly terminates connection with Upstream Cluster with TCP RST and responds with 503 Status Code to Downstream Client |
