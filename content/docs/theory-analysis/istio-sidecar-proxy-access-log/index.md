@@ -413,7 +413,9 @@ $ kubectl exec -it shell -- curl -s mock-server:8080/delay/5000
 ^C
 ```
 
-[Figure 4]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/delay/10000` Endpoint에 `GET` 요청을 전달하고, 5000ms가 지나기 전에 `Ctrl+C` 명령어를 이용하여 요청을 강제로 종료하는 Downstream TCP RST Case를 나타내고 있다. [Shell 5]은 [Figure 4]의 내용을 실행하는 예시를 나타내고 있다. `curl` 명령어 실행 중 강제로 종료하면 Linux Kernel은 TCP RST Flag를 `mock-server` Pod에게도 전송하여 Connection을 강제로 종료하도록 만든다.
+[Figure 4]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/delay/10000` Endpoint에 `GET` 요청을 전달하고, 5000ms가 지나기 전에 `Ctrl+C` 명령어를 이용하여 요청을 강제로 종료하는 Downstream TCP RST Case를 나타내고 있다. [Shell 5]은 [Figure 4]의 내용을 실행하는 예시를 나타내고 있다.
+
+`curl` 명령어 실행 중 강제로 종료하면 `curl` 명령어는 내부적으로 Connection을 종료하면서 TCP FIN Flag를 `istio-proxy`에게 전송한다. TCP FIN Flag를 받은 `istio-proxy`는 TCP RST Flag를 `mock-server` Pod에게 전송하며, 또한 예상치 못한 Connection 종료였기 때문에 TCP RST Flag도 TCP RST Flag 이후에 전송한다.
 
 ```json {caption="[Text 6] Downstream TCP RST Case / curl Client", linenos=table}
 {
@@ -574,6 +576,8 @@ curl: (18) transfer closed with outstanding read data remaining
 dummy datacommand terminated with exit code 18
 ```
 
+[Figure 6]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/reset-after-response/1000` Endpoint에 `GET` 요청을 전달하고, `1000ms` 후에 `mock-server` Pod가 응답을 일부 전송한 후에 TCP RST Flag를 전송하여 Connection을 강제로 종료하는 Upstream TCP RST after Response Case를 나타내고 있다. [Shell 10]은 [Figure 6]의 내용을 실행하는 예시를 나타내고 있다.
+
 ```json {caption="[Text 10] Upstream TCP RST after Response Case / curl Client", linenos=table}
 {
   "start_time": "2026-01-01T12:47:45.064Z",
@@ -635,10 +639,14 @@ dummy datacommand terminated with exit code 18
   "route_name": "default",
   "grpc_status": "-",
   "upstream_request_attempt_count": "1",
-  "request_duration": "0",
+  "request_duration": "0"한
   "response_duration": "1004"
 }
 ```
+
+[Text 10]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 11]는 `mock-server`의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/reset-after-response/1000` Endpoint에 접근하는 내역와 `200 OK` 응답도 확인이 가능하다. 또한 `response_flags`가 `UPE (UpstreamProtocolError)`로 나타나는 것을 확인할 수 있으며, `response_code_details`에 `upstream_reset_after_response_started{protocol_error}`, 즉 일부 응답 전송후에 TCP RST Flag가 Upstream에서 전송되었음을 나타내는 상세 내역도 확인할 수 있다.
+
+Protocol Error가 발생하는 이유는 완전한 HTTP 응답을 전송하기 전에 TCP RST Flag가 Upstream에서 전송되었기 때문이다. TCP RST Flag를 받은 `mock-server` Pod의 `istio-proxy`는 TCP FIN Flag를 `shell` Pod에게 전송하여 TCP Connection을 종료한다. 또한 예상치 못한 Connection 종료였기 때문에 TCP RST Flag도 TCP RST Flag 이후에 전송한다.
 
 #### 1.2.5. Upstream TCP Close Case
 
