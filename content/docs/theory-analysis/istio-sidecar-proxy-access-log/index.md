@@ -650,7 +650,7 @@ Protocol Error가 발생하는 이유는 완전한 HTTP 응답을 전송하기 �
 
 #### 1.2.6. Upstream TCP Close Case
 
-{{< figure caption="[Figure 7] Upstream TCP Connection Close Case" src="images/http-upstream-tcp-connection-close-case.png" width="1000px" >}}
+{{< figure caption="[Figure 7] Upstream TCP Connection Close Case" src="images/http-upstream-tcp-close-case.png" width="1000px" >}}
 
 ```shell {caption="[Shell 12] Upstream TCP Connection Close Case / curl Command", linenos=table}
 $ kubectl exec -it shell -- curl mock-server:8080/disconnect/1000
