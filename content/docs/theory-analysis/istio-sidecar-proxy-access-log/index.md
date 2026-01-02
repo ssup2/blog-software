@@ -648,18 +648,18 @@ dummy datacommand terminated with exit code 18
 
 Protocol Error가 발생하는 이유는 완전한 HTTP 응답을 전송하기 전에 TCP RST Flag가 Upstream에서 전송되었기 때문이다. TCP RST Flag를 받은 `mock-server` Pod의 `istio-proxy`는 TCP FIN Flag를 `shell` Pod에게 전송하여 TCP Connection을 종료한다. 또한 예상치 못한 Connection 종료였기 때문에 TCP RST Flag도 TCP RST Flag 이후에 전송한다.
 
-#### 1.2.5. Upstream TCP Close Case
+#### 1.2.6. Upstream TCP Close Case
 
-{{< figure caption="[Figure 5] Upstream TCP Connection Close Case" src="images/http-upstream-tcp-connection-close-case.png" width="700px" >}}
+{{< figure caption="[Figure 7] Upstream TCP Connection Close Case" src="images/http-upstream-tcp-connection-close-case.png" width="1000px" >}}
 
-```shell {caption="[Shell 8] Upstream TCP Close Case / curl Command", linenos=table}
+```shell {caption="[Shell 12] Upstream TCP Connection Close Case / curl Command", linenos=table}
 $ kubectl exec -it shell -- curl mock-server:8080/disconnect/1000
 upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
-[Figure 5]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/disconnect/1000` Endpoint에 `GET` 요청을 전달하고, `1000ms` 후에 `mock-server` Pod가 Connection을 강제로 종료하는 Server Disconnect Case를 나타내고 있다. [Shell 8]은 [Figure 5]의 내용을 실행하는 예시를 나타내고 있다.
+[Figure 7]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/disconnect/1000` Endpoint에 `GET` 요청을 전달하고, `1000ms` 후에 `mock-server` Pod가 Connection을 강제로 종료하는 Upstream TCP Connection Close Case를 나타내고 있다. [Shell 12]은 [Figure 7]의 내용을 실행하는 예시를 나타내고 있다.
 
-```json {caption="[Text 9] Upstream Remote Disconnect Case / curl Client", linenos=table}
+```json {caption="[Text 12] Upstream TCP Connection Close Case / curl Client", linenos=table}
 {
   "start_time": "2025-12-15T16:19:32.636Z",
   "method": "GET",
@@ -692,7 +692,7 @@ upstream connect error or disconnect/reset before headers. reset reason: connect
 }
 ```
 
-```json {caption="[Text 10] Upstream Remote Disconnect Case / Mock Server", linenos=table}
+```json {caption="[Text 13] Upstream TCP Connection Close Case / Mock Server", linenos=table}
 {
   "start_time": "2025-12-15T16:19:32.654Z",
   "method": "GET",
@@ -725,7 +725,9 @@ upstream connect error or disconnect/reset before headers. reset reason: connect
 }
 ```
 
-[Text 9]는 `shell` Pod의 Access Log를 나타내고 있으며, [Text 10]는 `mock-server`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/disconnect/1000` Endpoint에 접근하는 내역와 `503 Service Unavailable` 응답도 확인이 가능하다. 또한 `response_flags`가 `UC (UpstreamConnectionTermination)`로 나타나는 것을 확인할 수 있다.
+[Text 12]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 13]는 `mock-server`의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/disconnect/1000` Endpoint에 접근하는 내역와 `503 Service Unavailable` 응답도 확인이 가능하다. 또한 `response_flags`가 `UC (UpstreamConnectionTermination)`로 나타나는 것을 확인할 수 있다. `response_code_details`에 `upstream_reset_before_response_started{connection_termination}`, 즉 응답을 시작하기전에 TCP FIN Flag가 Upstream에서 전송되었음을 나타내는 상세 내역도 확인할 수 있으며, 이는 TCP RST Flag를 받을때와 동일한 상세 내역이다.
+
+`mock-server` Pod의 `istio-proxy`는 `mock-server` Container로부터 TCP FIN Flag를 수신하면 503 Service Unavailable 응답을 `shell` Pod에게 전송하여 Service가 비정상적으로 종료된것을 알린다.
 
 #### 2.1.4. Upstream Overflow Case
 
