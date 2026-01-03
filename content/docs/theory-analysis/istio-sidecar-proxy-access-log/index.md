@@ -152,7 +152,7 @@ spec:
 
 Circuit Breaking을 Test를 위해서 Destination Rule이 설정되어 있다. `outlierDetection` Field는 비정상 상태를 판단하는 기준을 정의하며 기본값으로 구성되어 있다. 5번 연속으로 10초 간격으로 5xx 에러가 발생하면 Circuit Breaking이 동작하며, Circuit Breaking 적용 시간은 30초로 설정되어 있다. `connectionPool` Field는 HTTP/GRPC 요청의 동시 처리 개수를 제한하는 설정을 명시하며, 동시에 한개의 요청만 처리할 수 있도록 설정되어 있다.
 
-동시 처리 개수를 제한하는 방법은 크게 최대 TCP Connection의 개수를 제한하는 방법과 최대 동시 HTTP/GRPC 요청 처리의 개수를 제한하는 방법이 있다. 최대 TCP Connection의 개수를 제한하는 방법은 `tcp.maxConnections` Field를 이용하여 최대 TCP Connection의 개수를 제한하는 방법이다. [File 1]에서는 `tcp.maxConnections` Field를 `1`로 설정하여 최대 TCP Connection의 개수를 1개로 제한하고 있으며, `http.http1MaxPendingRequests` Field를 `1`로 설정하여 Queueing 할 수 있는 TCP Connection의 개수도 최대 1개까지로 제한하고 있다.
+동시 처리 개수를 제한하는 방법은 크게 최대 TCP Connection을 기반으로 제한하는 방법과 최대 동시 HTTP/GRPC 요청 처리의 개수를 제한하는 방법이 있다. 최대 TCP Connection의 개수를 제한하는 방법은 `tcp.maxConnections` Field를 이용하여 최대 TCP Connection의 개수를 제한하는 방법이다. [File 1]에서는 `tcp.maxConnections` Field를 `1`로 설정하여 최대 TCP Connection의 개수를 1개로 제한하고 있으며, `http.http1MaxPendingRequests` Field를 `1`로 설정하여 TCP Connection이 Ready 상태가 되기전까지 Queueing 할 수 있는 요청의 개수도 최대 1개까지로 제한하고 있다.
 
 GRPC의 경우에는 하나의 TCP Connection에서 HTTP/2의 Stream 기능을 활용하여 다수의 요청을 동시에 처리할 수 있다. 따라서 `http.maxConcurrentStreams` Field를 `1`로 설정하여 하나의 TCP Connection에서 최대 1개의 Stream만 처리할 대 있도록 강제하여 손쉽게 GRPC 요청 Queueing을 발생시킬 수 있도록 설정되어 있다. 만약에 `http.maxConcurrentStreams` Field가 명시되어 있지 않으면 하나의 TCP Connection에서 무제한으로 Stream 처리가 가능하기 때문에 GRPC 요청 Queueing이 발생하지 않는다.
 
@@ -644,9 +644,9 @@ dummy datacommand terminated with exit code 18
 }
 ```
 
-[Text 10]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 11]는 `mock-server`의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/reset-after-response/1000` Endpoint에 접근하는 내역와 `200 OK` 응답도 확인이 가능하다. 또한 `response_flags`가 `UPE (UpstreamProtocolError)`로 나타나는 것을 확인할 수 있으며, `response_code_details`에 `upstream_reset_after_response_started{protocol_error}`, 즉 일부 응답 전송후에 TCP RST Flag가 Upstream에서 전송되었음을 나타내는 상세 내역도 확인할 수 있다.
+[Text 10]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 11]는 `mock-server`의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/reset-after-response/1000` Endpoint에 접근하는 내역와 `200 OK` 응답도 확인이 가능하다. 또한 `response_flags`가 `UPE (UpstreamProtocolError)`로 나타나는 것을 확인할 수 있있다. 
 
-Protocol Error가 발생하는 이유는 완전한 HTTP 응답을 전송하기 전에 TCP RST Flag가 Upstream에서 전송되었기 때문이다. TCP RST Flag를 받은 `mock-server` Pod의 `istio-proxy`는 TCP FIN Flag를 `shell` Pod에게 전송하여 TCP Connection을 종료한다. 또한 예상치 못한 Connection 종료였기 때문에 TCP RST Flag도 TCP RST Flag 이후에 전송한다.
+`response_code_details`에 `upstream_reset_after_response_started{protocol_error}`, 즉 일부 응답 전송후에 TCP RST Flag가 Upstream에서 전송되었음을 나타내는 상세 내역도 확인할 수 있다. Protocol Error가 발생하는 이유는 완전한 HTTP 응답을 전송하기 전에 TCP RST Flag가 Upstream에서 전송되었기 때문이다. TCP RST Flag를 받은 `mock-server` Pod의 `istio-proxy`는 TCP FIN Flag를 `shell` Pod에게 전송하여 TCP Connection을 종료한다. 또한 예상치 못한 Connection 종료였기 때문에 TCP RST Flag도 TCP RST Flag 이후에 전송한다.
 
 #### 1.2.6. Upstream TCP Close Case
 
@@ -725,19 +725,25 @@ upstream connect error or disconnect/reset before headers. reset reason: connect
 }
 ```
 
-[Text 12]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 13]는 `mock-server`의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/disconnect/1000` Endpoint에 접근하는 내역와 `503 Service Unavailable` 응답도 확인이 가능하다. 또한 `response_flags`가 `UC (UpstreamConnectionTermination)`로 나타나는 것을 확인할 수 있다. `response_code_details`에 `upstream_reset_before_response_started{connection_termination}`, 즉 응답을 시작하기전에 TCP FIN Flag가 Upstream에서 전송되었음을 나타내는 상세 내역도 확인할 수 있으며, 이는 TCP RST Flag를 받을때와 동일한 상세 내역이다.
+[Text 12]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 13]는 `mock-server`의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/disconnect/1000` Endpoint에 접근하는 내역와 `503 Service Unavailable` 응답도 확인이 가능하다. 또한 `response_flags`가 `UC (UpstreamConnectionTermination)`로 나타나는 것을 확인할 수 있다.
+
+`response_code_details`에 `upstream_reset_before_response_started{connection_termination}`, 즉 응답을 시작하기전에 TCP FIN Flag가 Upstream에서 전송되었음을 나타내는 상세 내역도 확인할 수 있다. 이는 TCP RST Flag를 받을때와 동일한 상세 내역이며, `mock-server` Pod의 `istio-proxy`는 응답이 전송되기 전에 TCP FIN Flag 또는 TCP RST Flag를 수신하면 동일한 `response_code_details`를 남기는것을 확인할 수 있다.
 
 `mock-server` Pod의 `istio-proxy`는 `mock-server` Container로부터 TCP FIN Flag를 수신하면 503 Service Unavailable 응답을 `shell` Pod에게 전송하여 Service가 비정상적으로 종료된것을 알린다.
 
-#### 2.1.4. Upstream Overflow Case
+#### 1.2.7. Circuit Breaking with Upstream Overflow Case
 
-```shell {caption="[Shell 14] Upstream Overflow Case / curl Command", linenos=table}
+{{< figure caption="[Figure 8] Circuit Breaking with Upstream Overflow Case" src="images/http-circuit-breaking-with-upstream-overflow-case.png" width="1000px" >}}
+
+```shell {caption="[Shell 14] Circuit Breaking with Upstream Overflow Case / curl Command", linenos=table}
 $ kubectl exec shell -- curl -s mock-server:8080/delay/5000 &
 $ kubectl exec shell -- curl -s mock-server:8080/delay/5000 &
 $ kubectl exec shell -- curl -s mock-server:8080/delay/5000 &
 ```
 
-```json {caption="[Shell 15] Upstream Overflow Case / istioctl Command", linenos=table}
+[Figure 8]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/delay/5000` Endpoint에 `GET` 요청을 3번 연속으로 전달하여 Upstream Overflow를 발생시켜 Circuit Breaking을 동작시키는 Case를 나타내고 있다. [Shell 14]은 [Figure 8]의 내용을 실행하는 예시를 나타내고 있다.
+
+```json {caption="[Text 14] Circuit Breaking with Upstream Overflow Case / istioctl Command", linenos=table}
 {
   "start_time": "2025-12-22T16:08:03.507Z",
   "method": "GET",
@@ -830,7 +836,7 @@ $ kubectl exec shell -- curl -s mock-server:8080/delay/5000 &
 }
 ```
 
-```json {caption="[Text 16] Upstream Overflow Case / Mock Server", linenos=table}
+```json {caption="[Text 15] Upstream Overflow Case / Mock Server", linenos=table}
 {
   "start_time": "2025-12-22T16:08:02.443Z",
   "method": "GET",
@@ -892,6 +898,11 @@ $ kubectl exec shell -- curl -s mock-server:8080/delay/5000 &
   "response_duration": "5004"
 }
 ```
+
+[Text 14]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 15]는 `mock-server`의 `istio-proxy`의 Access Log를 나타내고 있다. 
+
+
+두 Access Log에서 모두 `/delay/5000` Endpoint에 접근하는 내역와 `200 OK` 응답도 확인이 가능하다. 또한 `response_flags`가 `UO (UpstreamOverflow)`로 나타나는 것을 확인할 수 있다.
 
 #### 2.1.5. Circuit Breaking Case
 
