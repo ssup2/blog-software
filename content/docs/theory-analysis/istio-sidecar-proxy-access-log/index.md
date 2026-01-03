@@ -140,7 +140,6 @@ spec:
       http:
         http1MaxPendingRequests: 1   # default value is 2^31-1 (unlimited)
         maxConcurrentStreams: 1      # default value is 2^31-1 (unlimited)
-        #http2MaxRequests: 1         # default value is 2^31-1 (unlimited)
     outlierDetection:
       consecutive5xxErrors: 5 # default value
       interval: 10s           # default value
@@ -152,11 +151,29 @@ spec:
 
 Circuit Breaking을 Test를 위해서 Destination Rule이 설정되어 있다. `outlierDetection` Field는 비정상 상태를 판단하는 기준을 정의하며 기본값으로 구성되어 있다. 5번 연속으로 10초 간격으로 5xx 에러가 발생하면 Circuit Breaking이 동작하며, Circuit Breaking 적용 시간은 30초로 설정되어 있다. `connectionPool` Field는 HTTP/GRPC 요청의 동시 처리 개수를 제한하는 설정을 명시하며, 동시에 한개의 요청만 처리할 수 있도록 설정되어 있다.
 
-동시 처리 개수를 제한하는 방법은 크게 최대 TCP Connection을 기반으로 제한하는 방법과 최대 동시 HTTP/GRPC 요청 처리의 개수를 제한하는 방법이 있다. 최대 TCP Connection의 개수를 제한하는 방법은 `tcp.maxConnections` Field를 이용하여 최대 TCP Connection의 개수를 제한하는 방법이다. [File 1]에서는 `tcp.maxConnections` Field를 `1`로 설정하여 최대 TCP Connection의 개수를 1개로 제한하고 있으며, `http.http1MaxPendingRequests` Field를 `1`로 설정하여 TCP Connection이 Ready 상태가 되기전까지 Queueing 할 수 있는 요청의 개수도 최대 1개까지로 제한하고 있다.
+동시 처리 개수를 제한하는 방법은 크게 최대 TCP Connection을 기반으로 제한하는 방법과 최대 동시 HTTP/GRPC 요청 처리의 개수를 제한하는 방법이 있다. TCP Connection 기반의 방법은 `tcp.maxConnections` Field를 이용하여 최대 TCP Connection의 개수를 제한하는 방법이다. [File 1]에서는 `tcp.maxConnections` Field를 `1`로 설정하여 최대 TCP Connection의 개수를 1개로 제한하고 있으며, `http.http1MaxPendingRequests` Field를 `1`로 설정하여 TCP Connection이 Ready 상태가 되기전까지 Pending 할 수 있는 요청의 개수도 최대 1개까지로 제한하고 있다.
 
-GRPC의 경우에는 하나의 TCP Connection에서 HTTP/2의 Stream 기능을 활용하여 다수의 요청을 동시에 처리할 수 있다. 따라서 `http.maxConcurrentStreams` Field를 `1`로 설정하여 하나의 TCP Connection에서 최대 1개의 Stream만 처리할 대 있도록 강제하여 손쉽게 GRPC 요청 Queueing을 발생시킬 수 있도록 설정되어 있다. 만약에 `http.maxConcurrentStreams` Field가 명시되어 있지 않으면 하나의 TCP Connection에서 무제한으로 Stream 처리가 가능하기 때문에 GRPC 요청 Queueing이 발생하지 않는다.
+GRPC의 경우에는 하나의 TCP Connection에서 HTTP/2의 Stream 기능을 활용하여 다수의 요청을 동시에 처리할 수 있다. 따라서 `http.maxConcurrentStreams` Field를 `1`로 설정하여 하나의 TCP Connection에서 최대 1개의 Stream만 처리할 대 있도록 강제하여 손쉽게 GRPC 요청 Pending을 발생시킬 수 있도록 설정되어 있다. 만약에 `http.maxConcurrentStreams` Field가 명시되어 있지 않으면 하나의 TCP Connection에서 무제한으로 Stream 처리가 가능하기 때문에 GRPC 요청 Pending이 발생하지 않는다.
 
-HTTP/GRPC 요청의 최대 동시 처리 개수를 제한하는 방법은 `http.http2MaxRequests` Field를 이용하면 된다. [File 1]에서는 `http.http2MaxRequests` Field를 주석처리 하여 최대 HTTP/GRPC 요청 처리의 개수는 제한되지 않도록 설정되어 있지만, 주석을 제거하면 최대 동시 HTTP/GRPC 요청 처리의 개수를 1개로 제한하도록 설정되어 있다.
+```yaml {caption="[File 2] mock-server Destination Rule", linenos=table}
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: mock-server
+spec:
+  host: mock-server
+  trafficPolicy:
+    connectionPool:
+      http:
+        http2MaxRequests: 1   # default value is 2^31-1 (unlimited)
+    outlierDetection:
+      consecutive5xxErrors: 5 # default value
+      interval: 10s           # default value
+      baseEjectionTime: 30s   # default value
+      maxEjectionPercent: 100 # default value
+```
+
+HTTP/GRPC 요청의 최대 동시 처리 개수를 제한하는 방법은 `http.http2MaxRequests` Field를 이용하면 된다. [File 2]에서는 `http.http2MaxRequests` Field를 `1`로 설정하여 최대 HTTP/GRPC 요청 처리의 개수를 1개로 제한하고 있다. 또한 나머지 `connectionPool` Field는 설정하지 않아 Request가 Pending 되지 않도록 설정되어 있다. 대부분의 Case에서는 [File 1]에서 설정한 Destination Rule을 이용하며, [File 2]의 Destination Rule은 일부 Circuit Breaking Case에서 이용한다.
 
 {{< table caption="[Table 1] mock-server HTTP Endpoints" >}}
 | Endpoint | Description |
@@ -176,7 +193,7 @@ HTTP/GRPC 요청의 최대 동시 처리 개수를 제한하는 방법은 `http.
 
 [Table 1]과 [Table 2]는 `mock-server` Workload의 HTTP Endpoint, gRPC Function별 동작을 나타내고 있다. `mock-server`에서 제공하는 Endpoint들을 다양한 Case를 재현하기 위해서 사용한다.
 
-```yaml {caption="[File 2] shell Pod Manifest", linenos=table}
+```yaml {caption="[File 3] shell Pod Manifest", linenos=table}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -193,7 +210,7 @@ spec:
         add: ["NET_ADMIN"]
 ```
 
-```proto {caption="[File 3] mock-server gRPC Service Definition", linenos=table}
+```proto {caption="[File 4] mock-server gRPC Service Definition", linenos=table}
 syntax = "proto3";
 
 package mock;
@@ -242,7 +259,7 @@ message DisconnectRequest {
 $ kubectl cp mock.proto shell:mock.proto
 ```
 
-[File 2]는 `shell` Pod의 Manifest를 나타내고 있다. netshoot Image를 이용하여 `shell` Pod을 생성하며, Network Admin 권한을 부여하여 `iptables` 명령어를 이용할 수 있도록 한다. [File 3]은 `grpcurl` 명령어를 이용하여 `mock-server` gRPC Service를 호출하기 위한 Proto 파일을 나타내고 있다. [Shell 2]은 Proto 파일을 `shell` Pod에 복사하는 예시를 나타내고 있다.
+[File 3]은 `shell` Pod의 Manifest를 나타내고 있다. netshoot Image를 이용하여 `shell` Pod을 생성하며, Network Admin 권한을 부여하여 `iptables` 명령어를 이용할 수 있도록 한다. [File 4]는 `grpcurl` 명령어를 이용하여 `mock-server` gRPC Service를 호출하기 위한 Proto 파일을 나타내고 있다. [Shell 2]은 Proto 파일을 `shell` Pod에 복사하는 예시를 나타내고 있다.
 
 ### 1.2. HTTP Cases
 
@@ -417,7 +434,7 @@ $ kubectl exec -it shell -- curl -s mock-server:8080/delay/5000
 
 `curl` 명령어 실행 중 강제로 종료하면 `curl` 명령어는 내부적으로 Connection을 종료하면서 TCP FIN Flag를 `istio-proxy`에게 전송한다. TCP FIN Flag를 받은 `istio-proxy`는 TCP RST Flag를 `mock-server` Pod에게 전송하며, 또한 예상치 못한 Connection 종료였기 때문에 TCP RST Flag도 TCP RST Flag 이후에 전송한다.
 
-```json {caption="[Text 6] Downstream TCP RST Case / curl Client", linenos=table}
+```json {caption="[Text 6] Downstream TCP RST Case / curl Command", linenos=table}
 {
   "start_time": "2026-01-01T11:29:33.615Z",
   "method": "GET",
@@ -498,7 +515,7 @@ upstream connect error or disconnect/reset before headers. reset reason: connect
 
 `mock-server` Pod의 `istio-proxy`는 `mock-server` Container로부터 TCP RST Flag를 수신하면 TCP RST Flag를 `shell` Pod에게 전송하지 않고, `503 Service Unavailable` 응답을 전송하기 때문에 `shell` Pod의 `istio-proxy`의 Access Log에는 `response_flags`가 존재하지 않고 `503 Service Unavailable` 응답만 확인이 가능하다.
 
-```json {caption="[Text 8] Upstream TCP RST before Response Case / curl Client", linenos=table}
+```json {caption="[Text 8] Upstream TCP RST before Response Case / curl Command", linenos=table}
 {
   "start_time": "2026-01-01T11:58:47.152Z",
   "method": "GET",
@@ -580,7 +597,7 @@ dummy datacommand terminated with exit code 18
 
 TCP RST Flag를 받은 `mock-server` Pod의 `istio-proxy`는 TCP FIN Flag를 `shell` Pod에게 전송하여 TCP Connection을 종료한다. 또한 예상치 못한 Connection 종료였기 때문에 TCP RST Flag도 TCP RST Flag 이후에 전송한다.
 
-```json {caption="[Text 10] Upstream TCP RST after Response Case / curl Client", linenos=table}
+```json {caption="[Text 10] Upstream TCP RST after Response Case / curl Command", linenos=table}
 {
   "start_time": "2026-01-01T12:47:45.064Z",
   "method": "GET",
@@ -663,7 +680,7 @@ upstream connect error or disconnect/reset before headers. reset reason: connect
 
 `mock-server` Pod의 `istio-proxy`는 `mock-server` Container로부터 TCP FIN Flag를 수신하면 503 Service Unavailable 응답을 `shell` Pod에게 전송하여 요청이 비정상적으로 종료된것을 알린다.
 
-```json {caption="[Text 12] Upstream TCP Connection Close Case / curl Client", linenos=table}
+```json {caption="[Text 12] Upstream TCP Connection Close Case / curl Command", linenos=table}
 {
   "start_time": "2025-12-15T16:19:32.636Z",
   "method": "GET",
@@ -741,7 +758,6 @@ upstream connect error or disconnect/reset before headers. reset reason: connect
 $ kubectl exec shell -- curl -s mock-server:8080/delay/5000 &
 $ kubectl exec shell -- curl -s mock-server:8080/delay/5000 &
 $ kubectl exec shell -- curl -s mock-server:8080/delay/5000 &
-
 upstream connect error or disconnect/reset before headers. reset reason: overflow
 {"delayed_ms":5000,"message":"Response delayed by 5000ms","service":"mock-server"}
 {"delayed_ms":5000,"message":"Response delayed by 5000ms","service":"mock-server"}
@@ -749,9 +765,9 @@ upstream connect error or disconnect/reset before headers. reset reason: overflo
 
 [Figure 8]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/delay/5000` Endpoint에 `GET` 요청을 3번 연속으로 전달하여 Upstream Overflow를 발생시켜 Circuit Breaking을 동작시키는 Case를 나타내고 있다. [Shell 14]은 [Figure 8]의 내용을 실행하는 예시를 나타내고 있다.
 
-첫번째 요청은 바로 `mock-server` Pod로 전달되며, 5000ms 동안 대기 이후에 `200 OK` 응답과 함께 종료된다. 하지만 두번째 요청은 첫번째 요청이 처리중이기 때문에 Queueing되어 첫번째 요청이 끝나기 전까지 대기 이후에 `mock-server` Pod에 전달된다. 따라서 두번째 요청이 처리되는데 걸리는 시간은 5000ms + 5000ms = 10000ms가 된다. 세번째 요청은 Queueing도 불가능하기 때문에 `istio-proxy`는 Upstream Overflow라 간주하고 Circuit Breaking을 동작시키고, `503 Service Unavailable` 응답을 전송한다.
+첫번째 요청은 바로 `mock-server` Pod로 전달되며, 5000ms 동안 대기 이후에 `200 OK` 응답과 함께 종료된다. 하지만 두번째 요청은 첫번째 요청이 처리중이기 때문에 Pending되어 첫번째 요청이 끝나기 전까지 대기 이후에 `mock-server` Pod에 전달된다. 따라서 두번째 요청이 처리되는데 걸리는 시간은 5000ms + 5000ms = 10000ms가 된다. 세번째 요청은 Pending도 불가능하기 때문에 `istio-proxy`는 Upstream Overflow라 간주하고 Circuit Breaking을 동작시키고, `503 Service Unavailable` 응답을 전송한다.
 
-```json {caption="[Text 14] Circuit Breaking with Connection Pool Upstream Overflow Case / istioctl Command", linenos=table}
+```json {caption="[Text 14] Circuit Breaking with Connection Pool Upstream Overflow Case / curl Command", linenos=table}
 {
   "start_time": "2025-12-22T16:08:03.507Z",
   "method": "GET",
@@ -913,70 +929,171 @@ upstream connect error or disconnect/reset before headers. reset reason: overflo
 
 #### 1.2.8. Circuit Breaking with Request Limit Upstream Overflow Case
 
-#### 2.1.5. Circuit Breaking Case
+{{< figure caption="[Figure 9] Circuit Breaking with Request Limit Upstream Overflow Case" src="images/http-circuit-breaking-with-request-limit-upstream-overflow-case.png" width="1000px" >}}
+
+```shell {caption="[Shell 15] Circuit Breaking with Request Limit Upstream Overflow Case / curl Command", linenos=table}
+$ kubectl exec shell -- curl -s mock-server:8080/delay/5000 &
+$ kubectl exec shell -- curl -s mock-server:8080/delay/5000 &
+upstream connect error or disconnect/reset before headers. reset reason: overflow
+$ kubectl exec shell -- curl -s mock-server:8080/delay/5000 &
+upstream connect error or disconnect/reset before headers. reset reason: overflow
+{"delayed_ms":5000,"message":"Response delayed by 5000ms","service":"mock-server"}
+```
+
+[Figure 9]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/delay/5000` Endpoint에 `GET` 요청을 3번 연속으로 전달하여 Request Limit Upstream Overflow를 발생시키는 Case를 나타내고 있다. 이 Case를 재현하기 위해서는 [File 2]에서 설정한 Destination Rule을 적용해야한다. [Shell 15]은 [Figure 9]의 내용을 실행하는 예시를 나타내고 있다.
+
+[File 2]의 Destination Rule의 설정에 의해서 최대 동시에 처리할 수 있는 요청이 하나이고 요청 Pending도 불가능하기 때문에, 두번째와 세번째 요청은 Upstream Overflow로 인해서 `mock-server` Pod에 전달되지 않는다.
+
+```json {caption="[Text 16] Circuit Breaking with Request Limit Upstream Overflow Case / curl Command", linenos=table}
+{
+  "start_time": "2026-01-03T15:23:06.371Z",
+  "method": "GET",
+  "path": "/delay/5000",
+  "protocol": "HTTP/1.1",
+  "response_code": "503",
+  "response_flags": "UO",
+  "response_code_details": "upstream_reset_before_response_started{overflow}",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "81",
+  "duration": "4",
+  "upstream_service_time": "-",
+  "x_forwarded_for": "-",
+  "user_agent": "curl/8.14.1",
+  "request_id": "1f7ca280-0458-94b0-b520-f62a4d7655f7",
+  "authority": "mock-server:8080",
+  "upstream_host": "10.244.2.18:8080",
+  "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "-",
+  "downstream_local_address": "10.96.188.135:8080",
+  "downstream_remote_address": "10.244.1.7:47206",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "-"
+}
+{
+  "start_time": "2026-01-03T15:23:06.694Z",
+  "method": "GET",
+  "path": "/delay/5000",
+  "protocol": "HTTP/1.1",
+  "response_code": "503",
+  "response_flags": "UO",
+  "response_code_details": "upstream_reset_before_response_started{overflow}",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "81",
+  "duration": "0",
+  "upstream_service_time": "-",
+  "x_forwarded_for": "-",
+  "user_agent": "curl/8.14.1",
+  "request_id": "e844139f-1dd6-91f4-9acd-f3511058cc52",
+  "authority": "mock-server:8080",
+  "upstream_host": "10.244.2.18:8080",
+  "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "-",
+  "downstream_local_address": "10.96.188.135:8080",
+  "downstream_remote_address": "10.244.1.7:47210",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "-"
+}
+{
+  "start_time": "2026-01-03T15:23:06.118Z",
+  "method": "GET",
+  "path": "/delay/5000",
+  "protocol": "HTTP/1.1",
+  "response_code": "200",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "83",
+  "duration": "5017",
+  "upstream_service_time": "5016",
+  "x_forwarded_for": "-",
+  "user_agent": "curl/8.14.1",
+  "request_id": "99a50488-a899-9a8c-ab1b-07867b2ba1fd",
+  "authority": "mock-server:8080",
+  "upstream_host": "10.244.2.18:8080",
+  "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "10.244.1.7:56360",
+  "downstream_local_address": "10.96.188.135:8080",
+  "downstream_remote_address": "10.244.1.7:47198",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "5017"
+}
+```
+
+```json {caption="[Text 16] Circuit Breaking with Request Limit Upstream Overflow Case / Mock Server", linenos=table}
+{
+  "start_time": "2026-01-03T15:23:06.121Z",
+  "method": "GET",
+  "path": "/delay/5000",
+  "protocol": "HTTP/1.1",
+  "response_code": "200",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "83",
+  "duration": "5008",
+  "upstream_service_time": "5007",
+  "x_forwarded_for": "-",
+  "user_agent": "curl/8.14.1",
+  "request_id": "99a50488-a899-9a8c-ab1b-07867b2ba1fd",
+  "authority": "mock-server:8080",
+  "upstream_host": "10.244.2.18:8080",
+  "upstream_cluster": "inbound|8080||",
+  "upstream_local_address": "127.0.0.6:51333",
+  "downstream_local_address": "10.244.2.18:8080",
+  "downstream_remote_address": "10.244.1.7:56360",
+  "requested_server_name": "outbound_.8080_._.mock-server.default.svc.cluster.local",
+  "route_name": "default",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "5007"
+}
+```
+
+[Text 16]은 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 17]은 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. `shell` Pod의 `istio-proxy`의 Access Log에는 먼저 남는 Log는 Upstream Overflow로 인해서 요청과 동시에 처리에 실패한 두번째, 세번째 요청에 대한 Log이다. 첫번째 Log가 두번째 요청에 대한 Log이고, 두번째 Log가 세번째 요청에 대한 Log이다. 둘다 `respose_flags`가 `UO (UpstreamOverflow)`로 나타나는 것을 확인할 수 있다. 마지막 Log는 첫번째 요청에 대한 Log이며, 정상적으로 `mock-server` Pod에 전달되어 처리된 것을 확인할 수 있다.
+
+#### 1.2.9. Circuit Breaking with No Healthy Upstream Case
 
 ```shell {caption="[Shell 12] No Healthy Upstream Case / curl Command", linenos=table}
 $ kubectl exec -it shell -- curl mock-server:8080/status/503
 {"message":"Service Unavailable","service":"mock-server","status_code":503}
-$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
-{
-  "edsHealthStatus": "HEALTHY"
-}
-
 $ kubectl exec -it shell -- curl mock-server:8080/status/503 
 {"message":"Service Unavailable","service":"mock-server","status_code":503}
-$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
-{
-  "edsHealthStatus": "HEALTHY"
-}
-
 $ kubectl exec -it shell -- curl mock-server:8080/status/503 
 {"message":"Service Unavailable","service":"mock-server","status_code":503}
-$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
-{
-  "edsHealthStatus": "HEALTHY"
-}
-
 $ kubectl exec -it shell -- curl mock-server:8080/status/503 
 {"message":"Service Unavailable","service":"mock-server","status_code":503}
-$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
-{
-  "edsHealthStatus": "HEALTHY"
-}
-
 $ kubectl exec -it shell -- curl mock-server:8080/status/503 
 {"message":"Service Unavailable","service":"mock-server","status_code":503}
-$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
-{
-  "edsHealthStatus": "HEALTHY"
-}
-
 $ kubectl exec -it shell -- curl mock-server:8080/status/503 
 no healthy upstream
-$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
-{
-  "failedOutlierCheck": true,
-  "edsHealthStatus": "HEALTHY"
-}
-
 $ kubectl exec -it shell -- curl mock-server:8080/status/503 
 no healthy upstream
-$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
-{
-  "failedOutlierCheck": true,
-  "edsHealthStatus": "HEALTHY"
-}
-
 $ kubectl exec -it shell -- curl mock-server:8080/status/200
 no healthy upstream
-$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
-{
-  "failedOutlierCheck": true,
-  "edsHealthStatus": "HEALTHY"
-}
 ```
 
-```json {caption="[Shell 13] Circuit Breaking Case / istioctl Command", linenos=table}
+```json {caption="[Shell 13] Circuit Breaking with No Healthy Upstream Case / istioctl Command", linenos=table}
 {
   "start_time": "2025-12-22T12:23:20.109Z",
   "method": "GET",
@@ -1404,7 +1521,7 @@ $ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contai
 }
 ```
 
-```json {caption="[Text 12] Upstream Request Retry Case / curl Client", linenos=table}
+```json {caption="[Text 12] Upstream Request Retry Case / curl Command", linenos=table}
 {
   "start_time": "2025-12-21T07:17:42.331Z",
   "method": "GET",
@@ -1538,7 +1655,7 @@ $ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contai
 }
 ```
 
-```json {caption="[Text 12] Upstream Request Retry Case / curl Client", linenos=table}
+```json {caption="[Text 12] Upstream Request Retry Case / curl Command", linenos=table}
 {
   "start_time": "2025-12-22T17:09:54.276Z",
   "method": "GET",
@@ -1638,7 +1755,7 @@ $ kubectl exec -it shell -- curl mock-server:8080/status/200
 no healthy upstream
 ```
 
-```json {caption="[Text 14] No Healthy Upstream Case / curl Client", linenos=table}
+```json {caption="[Text 14] No Healthy Upstream Case / curl Command", linenos=table}
 {
   "start_time": "2025-12-21T08:20:10.288Z",
   "method": "GET",
@@ -1683,7 +1800,7 @@ $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 0}
 }
 ```
 
-```json {caption="[Text 15] Success Case / curl Client", linenos=table}
+```json {caption="[Text 15] Success Case / curl Command", linenos=table}
 {
   "start_time": "2025-12-25T11:18:51.880Z",
   "method": "POST",
@@ -1759,7 +1876,7 @@ ERROR:
 command terminated with exit code 77
 ```
 
-```json {caption="[Text 17] Internal Server Error Case / curl Client", linenos=table}
+```json {caption="[Text 17] Internal Server Error Case / curl Command", linenos=table}
 {
   "start_time": "2025-12-25T11:35:39.358Z",
   "method": "POST",
@@ -1832,7 +1949,7 @@ $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseco
 ^C
 ```
 
-```json {caption="[Text 17] Downstream Remote Disconnect Case / curl Client", linenos=table}
+```json {caption="[Text 17] Downstream Remote Disconnect Case / curl Command", linenos=table}
 {
   "start_time": "2025-12-25T11:26:57.849Z",
   "method": "POST",
@@ -1908,7 +2025,7 @@ RROR:
 command terminated with exit code 78
 ```
 
-```json {caption="[Text 19] Upstream Disconnect Case / curl Client", linenos=table}
+```json {caption="[Text 19] Upstream Disconnect Case / curl Command", linenos=table}
 {
   "start_time": "2025-12-25T11:47:17.883Z",
   "method": "POST",
@@ -1990,7 +2107,7 @@ ERROR:
 command terminated with exit code 78
 ```
 
-```json {caption="[Text 21] Upstream Overflow Case / curl Client", linenos=table}
+```json {caption="[Text 21] Upstream Overflow Case / curl Command", linenos=table}
 {
   "start_time": "2025-12-25T14:45:01.595Z",
   "method": "POST",
@@ -2203,7 +2320,7 @@ $ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contai
 }
 ```
 
-```json {caption="[Text 23] Circuit Breaking Case / curl Client", linenos=table}
+```json {caption="[Text 23] Circuit Breaking Case / curl Command", linenos=table}
 {
   "start_time": "2025-12-25T15:37:14.685Z",
   "method": "POST",
@@ -2615,7 +2732,7 @@ ERROR:
 command terminated with exit code 78
 ```
 
-```json {caption="[Text 24] Upstream Request Retry Case with Timeout / curl Client", linenos=table}
+```json {caption="[Text 24] Upstream Request Retry Case with Timeout / curl Command", linenos=table}
 {
   "start_time": "2025-12-25T16:35:14.398Z",
   "method": "POST",
@@ -2664,7 +2781,7 @@ ERROR:
 command terminated with exit code 78
 ```
 
-```json {caption="[Text 24] Upstream Request Retry Case with TCP Reset / curl Client", linenos=table}
+```json {caption="[Text 24] Upstream Request Retry Case with TCP Reset / curl Command", linenos=table}
 {
   "start_time": "2025-12-25T17:04:21.454Z",
   "method": "POST",
@@ -2707,7 +2824,7 @@ ERROR:
 command terminated with exit code 78
 ```
 
-```json {caption="[Text 24] No Healthy Upstream Case / curl Client", linenos=table}
+```json {caption="[Text 24] No Healthy Upstream Case / curl Command", linenos=table}
 {
   "start_time": "2025-12-25T15:52:08.991Z",
   "method": "POST",
