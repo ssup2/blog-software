@@ -741,6 +741,10 @@ upstream connect error or disconnect/reset before headers. reset reason: connect
 $ kubectl exec shell -- curl -s mock-server:8080/delay/5000 &
 $ kubectl exec shell -- curl -s mock-server:8080/delay/5000 &
 $ kubectl exec shell -- curl -s mock-server:8080/delay/5000 &
+
+upstream connect error or disconnect/reset before headers. reset reason: overflow
+{"delayed_ms":5000,"message":"Response delayed by 5000ms","service":"mock-server"}
+{"delayed_ms":5000,"message":"Response delayed by 5000ms","service":"mock-server"}
 ```
 
 [Figure 8]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/delay/5000` Endpoint에 `GET` 요청을 3번 연속으로 전달하여 Upstream Overflow를 발생시켜 Circuit Breaking을 동작시키는 Case를 나타내고 있다. [Shell 14]은 [Figure 8]의 내용을 실행하는 예시를 나타내고 있다.
