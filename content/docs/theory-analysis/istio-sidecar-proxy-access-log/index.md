@@ -507,7 +507,7 @@ $ kubectl exec -it shell -- curl -s mock-server:8080/delay/5000
 {{< figure caption="[Figure 5] Upstream TCP RST before Response Case" src="images/http-upstream-tcp-rst-before-response-case.png" width="1000px" >}}
 
 ```shell {caption="[Shell 8] Upstream TCP RST before Response Case / curl Command", linenos=table}
-$ kubectl exec -it shell -- curl mock-server:8080/reset-before-response/1000
+$ kubectl exec -it shell -- curl -s mock-server:8080/reset-before-response/1000
 upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
@@ -588,7 +588,7 @@ upstream connect error or disconnect/reset before headers. reset reason: connect
 {{< figure caption="[Figure 6] Upstream TCP RST after Response Case" src="images/http-upstream-tcp-rst-after-response-case.png" width="1000px" >}}
 
 ```shell {caption="[Shell 10] Upstream TCP RST after Response Case / curl Command", linenos=table}
-$ kubectl exec -it shell -- curl mock-server:8080/reset-after-response/1000
+$ kubectl exec -it shell -- curl -s mock-server:8080/reset-after-response/1000
 curl: (18) transfer closed with outstanding read data remaining
 dummy datacommand terminated with exit code 18
 ```
@@ -672,7 +672,7 @@ TCP RST Flag를 받은 `mock-server` Pod의 `istio-proxy`는 TCP FIN Flag를 `sh
 {{< figure caption="[Figure 7] Upstream TCP Connection Close Case" src="images/http-upstream-tcp-close-case.png" width="1000px" >}}
 
 ```shell {caption="[Shell 12] Upstream TCP Connection Close Case / curl Command", linenos=table}
-$ kubectl exec -it shell -- curl mock-server:8080/disconnect/1000
+$ kubectl exec -it shell -- curl -s mock-server:8080/disconnect/1000
 upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
@@ -1077,21 +1077,21 @@ upstream connect error or disconnect/reset before headers. reset reason: overflo
 {{< figure caption="[Figure 10] Circuit Breaking with No Healthy Upstream Case" src="images/http-circuit-breaking-with-no-healthy-upstream-case.png" width="1000px" >}}
 
 ```shell {caption="[Shell 16] Circuit Breaking with No Healthy Upstream Case / curl Command", linenos=table}
-$ kubectl exec -it shell -- curl mock-server:8080/status/503
+$ kubectl exec -it shell -- curl -s mock-server:8080/status/503
 {"message":"Service Unavailable","service":"mock-server","status_code":503}
-$ kubectl exec -it shell -- curl mock-server:8080/status/503 
+$ kubectl exec -it shell -- curl -s mock-server:8080/status/503 
 {"message":"Service Unavailable","service":"mock-server","status_code":503}
-$ kubectl exec -it shell -- curl mock-server:8080/status/503 
+$ kubectl exec -it shell -- curl -s mock-server:8080/status/503 
 {"message":"Service Unavailable","service":"mock-server","status_code":503}
-$ kubectl exec -it shell -- curl mock-server:8080/status/503 
+$ kubectl exec -it shell -- curl -s mock-server:8080/status/503 
 {"message":"Service Unavailable","service":"mock-server","status_code":503}
-$ kubectl exec -it shell -- curl mock-server:8080/status/503 
+$ kubectl exec -it shell -- curl -s mock-server:8080/status/503 
 {"message":"Service Unavailable","service":"mock-server","status_code":503}
-$ kubectl exec -it shell -- curl mock-server:8080/status/503 
+$ kubectl exec -it shell -- curl -s mock-server:8080/status/503 
 no healthy upstream
-$ kubectl exec -it shell -- curl mock-server:8080/status/503 
+$ kubectl exec -it shell -- curl -s mock-server:8080/status/503 
 no healthy upstream
-$ kubectl exec -it shell -- curl mock-server:8080/status/200
+$ kubectl exec -it shell -- curl -s mock-server:8080/status/200
 no healthy upstream
 ```
 
@@ -1497,36 +1497,23 @@ no healthy upstream
 
 [Text 17]은 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 18]은 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. `shell` Pod의 `istio-proxy`의 Access Log에는 마지막 3개의 요청에만 `response_flags`가 `UH (No Healthy Upstream)`와 함께 요청이 `mock-server` Pod에 전달되지 않은 것을 확인할 수 있다. 또한 `mock-server` Pod의 `istio-proxy`의 Access Log에는 처음 5개의 요청에 대한 Log만 남아있는것도 확인할 수 있다.
 
-#### 2.1.6. Upstream Request Retry Case with Timeout
+#### 1.2.10. Upstream Request Retry Case with Timeout
+
+{{< figure caption="[Figure 11] Upstream Request Retry Case with Timeout" src="images/http-upstream-request-retry-case-with-timeout.png" width="1000px" >}}
 
 ```shell {caption="[Shell 9] Upstream Request Retry Case / iptables Command", linenos=table}
 $ SHELL_IP=$(kubectl get pod shell -o jsonpath='{.status.podIP}')
 $ kubectl exec mock-server -c mock-server -- iptables -A INPUT -s ${SHELL_IP} -j DROP
+# $ kubectl exec mock-server -c mock-server -- iptables -D INPUT 1 remove rule after case execution
 ```
 
 ```shell {caption="[Shell 10] Upstream Request Retry Case / curl Command", linenos=table}
-$ kubectl exec -it shell -- curl mock-server:8080/status/200
+$ kubectl exec -it shell -- curl -s mock-server:8080/status/200
 upstream connect error or disconnect/reset before headers. retried and the latest reset reason: connection timeout
-$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("8080||mock-server")) | .hostStatuses[].healthStatus'
-{
-  "edsHealthStatus": "HEALTHY"
-}
-
-$ kubectl exec -it shell -- curl mock-server:8080/status/200
+$ kubectl exec -it shell -- curl -s mock-server:8080/status/200
 no healthy upstream
-$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("8080||mock-server")) | .hostStatuses[].healthStatus'
-{
-  "failedOutlierCheck": true,
-  "edsHealthStatus": "HEALTHY"
-}
-
-$ kubectl exec -it shell -- curl mock-server:8080/status/200
+$ kubectl exec -it shell -- curl -s mock-server:8080/status/200
 no healthy upstream
-$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("8080||mock-server")) | .hostStatuses[].healthStatus'
-{
-  "failedOutlierCheck": true,
-  "edsHealthStatus": "HEALTHY"
-}
 ```
 
 ```json {caption="[Text 12] Upstream Request Retry Case / curl Command", linenos=table}
@@ -1622,45 +1609,25 @@ $ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contai
 }
 ```
 
-```shell {caption="[Shell 11] Upstream Request Retry Case / istioctl Command", linenos=table}
-$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("mock-server")) | .hostStatuses[].healthStatus'
-{
-  "edsHealthStatus": "HEALTHY"
-}
-```
-
 `consecutive5xxErrors` : 5이기 때문에
 
-#### 2.1.7. Upstream Request Retry Case with TCP Reset
+#### 1.2.11. Upstream Request Retry Case with TCP Reset
+
+{{< figure caption="[Figure 12] Upstream Request Retry Case with TCP Reset" src="images/http-upstream-request-retry-case-with-tcp-reset.png" width="1000px" >}}
 
 ```shell {caption="[Shell 9] Upstream Request Retry Case / iptables Command", linenos=table}
 $ SHELL_IP=$(kubectl get pod shell -o jsonpath='{.status.podIP}')
 $ kubectl exec mock-server -c mock-server -- iptables-legacy -A INPUT -p tcp -s ${SHELL_IP} -j REJECT --reject-with tcp-reset
+# $ kubectl exec mock-server -c mock-server -- iptables-legacy -D INPUT 1 remove rule after case execution
 ```
 
 ```shell {caption="[Shell 10] Upstream Request Retry Case / curl Command", linenos=table}
-$ kubectl exec -it shell -- curl mock-server:8080/status/200
+$ kubectl exec -it shell -- curl -s mock-server:8080/status/200
 upstream connect error or disconnect/reset before headers. retried and the latest reset reason: remote connection failure, transport failure reason: delayed connect error: Connection refused
-$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("8080||mock-server")) | .hostStatuses[].healthStatus'
-{
-  "edsHealthStatus": "HEALTHY"
-}
-
-$ kubectl exec -it shell -- curl mock-server:8080/status/200
+$ kubectl exec -it shell -- curl -s mock-server:8080/status/200
 no healthy upstream
-$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("8080||mock-server")) | .hostStatuses[].healthStatus'
-{
-  "failedOutlierCheck": true,
-  "edsHealthStatus": "HEALTHY"
-}
-
-$ kubectl exec -it shell -- curl mock-server:8080/status/200
+$ kubectl exec -it shell -- curl -s mock-server:8080/status/200
 no healthy upstream
-$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("8080||mock-server")) | .hostStatuses[].healthStatus'
-{
-  "failedOutlierCheck": true,
-  "edsHealthStatus": "HEALTHY"
-}
 ```
 
 ```json {caption="[Text 12] Upstream Request Retry Case / curl Command", linenos=table}
@@ -1756,39 +1723,73 @@ $ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contai
 }
 ```
 
-#### 2.1.8. No Healthy Upstream Case
+#### 1.2.12. Upstream Timeout Case
 
-```shell {caption="[Shell 12] No Healthy Upstream Case / curl Command", linenos=table}
-$ kubectl exec -it shell -- curl mock-server:8080/status/200          
-no healthy upstream
+{{< figure caption="[Figure 13] Upstream Timeout Case" src="images/http-upstream-timeout-case.png" width="1000px" >}}
+
+```shell {caption="[Shell 18] Upstream Timeout Case / curl Command", linenos=table}
+$ kubectl exec -it shell -- curl -s mock-server:8080/delay/10000
 ```
 
-```json {caption="[Text 14] No Healthy Upstream Case / curl Command", linenos=table}
+```shell {caption="[Shell 18] Upstream Timeout Case / shell Pod Access Log", linenos=table}
 {
-  "start_time": "2025-12-21T08:20:10.288Z",
+  "start_time": "2026-01-04T12:28:44.275Z",
   "method": "GET",
-  "path": "/status/200",
+  "path": "/delay/10000",
   "protocol": "HTTP/1.1",
-  "response_code": "503",
-  "response_flags": "UH",
-  "response_code_details": "no_healthy_upstream",
+  "response_code": "504",
+  "response_flags": "UT",
+  "response_code_details": "response_timeout",
   "connection_termination_details": "-",
   "upstream_transport_failure_reason": "-",
   "bytes_received": "0",
-  "bytes_sent": "19",
-  "duration": "0",
+  "bytes_sent": "24",
+  "duration": "10016",
   "upstream_service_time": "-",
   "x_forwarded_for": "-",
   "user_agent": "curl/8.14.1",
-  "request_id": "3860e4b1-1bd2-908b-8673-af357e4296d6",
+  "request_id": "87a77d0f-480d-9961-b4de-e508b4814eff",
   "authority": "mock-server:8080",
-  "upstream_host": "-",
+  "upstream_host": "10.244.2.18:8080",
   "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
-  "upstream_local_address": "-",
-  "downstream_local_address": "10.96.225.216:8080",
-  "downstream_remote_address": "10.244.2.5:37982",
+  "upstream_local_address": "10.244.1.7:60908",
+  "downstream_local_address": "10.96.188.135:8080",
+  "downstream_remote_address": "10.244.1.7:37610",
   "requested_server_name": "-",
   "route_name": "-",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "-"
+}
+```
+
+```json {caption="[Text 13] Upstream Timeout Case / shell Pod Access Log", linenos=table}
+{
+  "start_time": "2026-01-04T12:28:44.371Z",
+  "method": "GET",
+  "path": "/delay/10000",
+  "protocol": "HTTP/1.1",
+  "response_code": "0",
+  "response_flags": "DC",
+  "response_code_details": "downstream_remote_disconnect",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "0",
+  "duration": "9920",
+  "upstream_service_time": "-",
+  "x_forwarded_for": "-",
+  "user_agent": "curl/8.14.1",
+  "request_id": "87a77d0f-480d-9961-b4de-e508b4814eff",
+  "authority": "mock-server:8080",
+  "upstream_host": "10.244.2.18:8080",
+  "upstream_cluster": "inbound|8080||",
+  "upstream_local_address": "127.0.0.6:41337",
+  "downstream_local_address": "10.244.2.18:8080",
+  "downstream_remote_address": "10.244.1.7:60908",
+  "requested_server_name": "outbound_.8080_._.mock-server.default.svc.cluster.local",
+  "route_name": "default",
   "grpc_status": "-",
   "upstream_request_attempt_count": "1",
   "request_duration": "0",
