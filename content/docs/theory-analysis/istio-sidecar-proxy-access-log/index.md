@@ -1613,9 +1613,9 @@ no healthy upstream
 }
 ```
 
-[Text 19]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. `shell` Pod의 요청이 `istio-proxy`에 의해서 `mock-server` Pod에 전달되지 않기 때문에 `mock-server` Pod의 `istio-proxy`의 Access Log에는 아무것도 남지 않는다. 첫번째 요청에는 `response_flags`에 `URX (UpstreamRetryLimitExceeded)`와 `UF (UpstreamConnectionFailure)`가 함께 나타나는 것을 확인할 수 있으며, `response_code_details`에 `upstream_reset_before_response_started {connection_timeout}`, 즉 Connection Timeout이 발생한 사실을 확인할 수 있다.  
+[Text 19]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. `shell` Pod의 요청이 `istio-proxy`에 의해서 `mock-server` Pod에 전달되지 않기 때문에 `mock-server` Pod의 `istio-proxy`의 Access Log에는 아무것도 남지 않는다. 첫번째 요청에는 `response_flags`에 `URX (UpstreamRetryLimitExceeded)`와 `UF (UpstreamConnectionFailure)`가 함께 나타나는 것을 확인할 수 있으며, `response_code_details`에 `upstream_reset_before_response_started {connection_timeout}`, 즉 Connection Timeout이 발생한 사실을 확인할 수 있다. `upstream_request_attempt_count`가 `3`으로 나타나는 것을 확인할 수 있다.
 
-두번째, 세번째 요청에는 Circuit Breaking에 의해서 `response_flags`에 `UH (No Healthy Upstream)`가 나타나는 것을 확인할 수 있으며, `response_code_details`에 `no_healthy_upstream`가 나타나는 것을 확인할 수 있다.
+두번째, 세번째 요청에는 Circuit Breaking에 의해서 `response_flags`에 `UH (No Healthy Upstream)`가 나타나는 것을 확인할 수 있으며, `response_code_details`에 `no_healthy_upstream`가 나타나는 것을 확인할 수 있다. 두번째 요청에는 `upstream_request_attempt_count`가 `3`으로 나타나는 것을 확인할 수 있다. 세번째 요청에는 `upstream_request_attempt_count`가 `1`으로 나타나는 것을 확인할 수 있다.
 
 #### 1.2.11. Upstream Request Retry Case with TCP Reset
 
