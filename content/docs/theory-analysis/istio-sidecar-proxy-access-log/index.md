@@ -434,7 +434,7 @@ $ kubectl exec -it shell -- curl -s mock-server:8080/delay/5000
 
 `curl` 명령어 실행 중 강제로 종료하면 `curl` 명령어는 내부적으로 Connection을 종료하면서 TCP FIN Flag를 `istio-proxy`에게 전송한다. TCP FIN Flag를 받은 `istio-proxy`는 TCP RST Flag를 `mock-server` Pod에게 전송하며, 또한 예상치 못한 Connection 종료였기 때문에 TCP RST Flag도 TCP RST Flag 이후에 전송한다.
 
-```json {caption="[Text 6] Downstream TCP RST Case / curl Command", linenos=table}
+```json {caption="[Text 6] Downstream TCP RST Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-01T11:29:33.615Z",
   "method": "GET",
@@ -467,7 +467,7 @@ $ kubectl exec -it shell -- curl -s mock-server:8080/delay/5000
 }
 ```
 
-```json {caption="[Text 7] Downstream TCP RST Case / Mock Server", linenos=table}
+```json {caption="[Text 7] Downstream TCP RST Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-01T11:29:33.616Z",
   "method": "GET",
@@ -515,7 +515,7 @@ upstream connect error or disconnect/reset before headers. reset reason: connect
 
 `mock-server` Pod의 `istio-proxy`는 `mock-server` Container로부터 TCP RST Flag를 수신하면 TCP RST Flag를 `shell` Pod에게 전송하지 않고, `503 Service Unavailable` 응답을 전송하기 때문에 `shell` Pod의 `istio-proxy`의 Access Log에는 `response_flags`가 존재하지 않고 `503 Service Unavailable` 응답만 확인이 가능하다.
 
-```json {caption="[Text 8] Upstream TCP RST before Response Case / curl Command", linenos=table}
+```json {caption="[Text 8] Upstream TCP RST before Response Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-01T11:58:47.152Z",
   "method": "GET",
@@ -548,7 +548,7 @@ upstream connect error or disconnect/reset before headers. reset reason: connect
 }
 ```
 
-```json {caption="[Text 9] Upstream TCP RST before Response Case / Mock Server", linenos=table}
+```json {caption="[Text 9] Upstream TCP RST before Response Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-01T11:58:47.167Z",
   "method": "GET",
@@ -597,7 +597,7 @@ dummy datacommand terminated with exit code 18
 
 TCP RST Flag를 받은 `mock-server` Pod의 `istio-proxy`는 TCP FIN Flag를 `shell` Pod에게 전송하여 TCP Connection을 종료한다. 또한 예상치 못한 Connection 종료였기 때문에 TCP RST Flag도 TCP RST Flag 이후에 전송한다.
 
-```json {caption="[Text 10] Upstream TCP RST after Response Case / curl Command", linenos=table}
+```json {caption="[Text 10] Upstream TCP RST after Response Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-01T12:47:45.064Z",
   "method": "GET",
@@ -630,7 +630,7 @@ TCP RST Flag를 받은 `mock-server` Pod의 `istio-proxy`는 TCP FIN Flag를 `sh
 }
 ```
 
-```json {caption="[Text 11] Upstream TCP RST after Response Case / Mock Server", linenos=table}
+```json {caption="[Text 11] Upstream TCP RST after Response Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-01T12:47:45.066Z",
   "method": "GET",
@@ -680,7 +680,7 @@ upstream connect error or disconnect/reset before headers. reset reason: connect
 
 `mock-server` Pod의 `istio-proxy`는 `mock-server` Container로부터 TCP FIN Flag를 수신하면 503 Service Unavailable 응답을 `shell` Pod에게 전송하여 요청이 비정상적으로 종료된것을 알린다.
 
-```json {caption="[Text 12] Upstream TCP Connection Close Case / curl Command", linenos=table}
+```json {caption="[Text 12] Upstream TCP Connection Close Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2025-12-15T16:19:32.636Z",
   "method": "GET",
@@ -713,7 +713,7 @@ upstream connect error or disconnect/reset before headers. reset reason: connect
 }
 ```
 
-```json {caption="[Text 13] Upstream TCP Connection Close Case / Mock Server", linenos=table}
+```json {caption="[Text 13] Upstream TCP Connection Close Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2025-12-15T16:19:32.654Z",
   "method": "GET",
@@ -765,9 +765,9 @@ upstream connect error or disconnect/reset before headers. reset reason: overflo
 
 [Figure 8]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/delay/5000` Endpoint에 `GET` 요청을 3번 연속으로 전달하여 Upstream Overflow를 발생시켜 Circuit Breaking을 동작시키는 Case를 나타내고 있다. [Shell 14]은 [Figure 8]의 내용을 실행하는 예시를 나타내고 있다.
 
-첫번째 요청은 바로 `mock-server` Pod로 전달되며, 5000ms 동안 대기 이후에 `200 OK` 응답과 함께 종료된다. 하지만 두번째 요청은 첫번째 요청이 처리중이기 때문에 Pending되어 첫번째 요청이 끝나기 전까지 대기 이후에 `mock-server` Pod에 전달된다. 따라서 두번째 요청이 처리되는데 걸리는 시간은 5000ms + 5000ms = 10000ms가 된다. 세번째 요청은 Pending도 불가능하기 때문에 `istio-proxy`는 Upstream Overflow라 간주하고 Circuit Breaking을 동작시키고, `503 Service Unavailable` 응답을 전송한다.
+[File 1]의 Destination Rule에 의해서 첫번째 요청은 바로 `mock-server` Pod로 전달되며, 5000ms 동안 대기 이후에 `200 OK` 응답과 함께 종료된다. 두번째 요청은 첫번째 요청이 처리중이기 때문에 Pending되어 첫번째 요청이 끝나기 전까지 대기 이후에 `mock-server` Pod에 전달된다. 따라서 두번째 요청이 처리되는데 걸리는 시간은 5000ms + 5000ms = 10000ms가 된다. 세번째 요청은 Pending도 불가능하기 때문에 `istio-proxy`는 Upstream Overflow라 간주하고 Circuit Breaking을 동작시키고, `503 Service Unavailable` 응답을 전송한다.
 
-```json {caption="[Text 14] Circuit Breaking with Connection Pool Upstream Overflow Case / curl Command", linenos=table}
+```json {caption="[Text 14] Circuit Breaking with Connection Pool Upstream Overflow Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2025-12-22T16:08:03.507Z",
   "method": "GET",
@@ -860,7 +860,7 @@ upstream connect error or disconnect/reset before headers. reset reason: overflo
 }
 ```
 
-```json {caption="[Text 15] Circuit Breaking with Connection Pool Upstream Overflow Case / Mock Server", linenos=table}
+```json {caption="[Text 15] Circuit Breaking with Connection Pool Upstream Overflow Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2025-12-22T16:08:02.443Z",
   "method": "GET",
@@ -944,7 +944,7 @@ upstream connect error or disconnect/reset before headers. reset reason: overflo
 
 [File 2]의 Destination Rule의 설정에 의해서 최대 동시에 처리할 수 있는 요청이 하나이고 요청 Pending도 불가능하기 때문에, 두번째와 세번째 요청은 Upstream Overflow로 인해서 `mock-server` Pod에 전달되지 않는다.
 
-```json {caption="[Text 16] Circuit Breaking with Request Limit Upstream Overflow Case / curl Command", linenos=table}
+```json {caption="[Text 16] Circuit Breaking with Request Limit Upstream Overflow Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-03T15:23:06.371Z",
   "method": "GET",
@@ -1037,7 +1037,7 @@ upstream connect error or disconnect/reset before headers. reset reason: overflo
 }
 ```
 
-```json {caption="[Text 16] Circuit Breaking with Request Limit Upstream Overflow Case / Mock Server", linenos=table}
+```json {caption="[Text 16] Circuit Breaking with Request Limit Upstream Overflow Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-03T15:23:06.121Z",
   "method": "GET",
@@ -1074,7 +1074,9 @@ upstream connect error or disconnect/reset before headers. reset reason: overflo
 
 #### 1.2.9. Circuit Breaking with No Healthy Upstream Case
 
-```shell {caption="[Shell 12] No Healthy Upstream Case / curl Command", linenos=table}
+{{< figure caption="[Figure 10] Circuit Breaking with No Healthy Upstream Case" src="images/http-circuit-breaking-with-no-healthy-upstream-case.png" width="1000px" >}}
+
+```shell {caption="[Shell 16] Circuit Breaking with No Healthy Upstream Case / curl Command", linenos=table}
 $ kubectl exec -it shell -- curl mock-server:8080/status/503
 {"message":"Service Unavailable","service":"mock-server","status_code":503}
 $ kubectl exec -it shell -- curl mock-server:8080/status/503 
@@ -1093,7 +1095,11 @@ $ kubectl exec -it shell -- curl mock-server:8080/status/200
 no healthy upstream
 ```
 
-```json {caption="[Shell 13] Circuit Breaking with No Healthy Upstream Case / istioctl Command", linenos=table}
+[Figure 10]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/status/503` Endpoint에 `GET` 요청을 8번 연속으로 전달하여 No Healthy Upstream을 통한 Circuit Breaking을 발생시키는 Case를 나타내고 있다. [Shell 17]은 [Figure 10]의 내용을 실행하는 예시를 나타내고 있다.
+
+[File 1]의 Destination Rule에 의해서 5번의 연속적인 5XX Error가 발생하면 Circuit Breaking이 동작한다. 따라서 `shell` Pod의 첫번째 5번의 요청은 모두 `mock-server` Pod에게 전달되지만, 이후에 3번의 요청은 Circuit Breaking으로 인해서 `mock-server` Pod에 전달되지 않는다.
+
+```json {caption="[Text 17] Circuit Breaking with No Healthy Upstream Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2025-12-22T12:23:20.109Z",
   "method": "GET",
@@ -1336,7 +1342,7 @@ no healthy upstream
 }
 ```
 
-```json {caption="[Text 15] Circuit Breaking Case / Mock Server", linenos=table}
+```json {caption="[Text 18] Circuit Breaking with No Healthy Upstream Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2025-12-22T12:23:20.129Z",
   "method": "GET",
@@ -1488,6 +1494,8 @@ no healthy upstream
   "response_duration": "0"
 }
 ```
+만
+[Text 17]은 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 18]은 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. `shell` Pod의 `istio-proxy`의 Access Log에는 마지막 3개의 요청에만 `UH (No Healthy Upstream)`로 나타나는 것을 확인할 수 있다. 또한 `mock-server` Pod의 `istio-proxy`의 Access Log에는 5번의 요청에 대한 Log만 남아있는것도 확인할 수 있다.
 
 #### 2.1.6. Upstream Request Retry Case with Timeout
 
