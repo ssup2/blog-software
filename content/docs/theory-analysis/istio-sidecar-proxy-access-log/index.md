@@ -1743,7 +1743,7 @@ $ kubectl exec -it shell -- curl -s mock-server:8080/delay/10000
 
 [File 1]의 Virtual Service에 의해서 `mock-server` Pod로 전송된 요청은 최대 5000ms 대기할 수 있다. 하지만 `mock-server` Pod의 `/delay/10000` Endpoint에 전송한 요청은 10000ms가 필요하기 때문에 Timeout이 발생한다. `mock-server` Pod의 `istio-proxy`는 Timeout 발생시 TCP FIN Flag와 TCP RST Flag를 차례로 전송하여, `mock-server` Pod와의 연결을 종료한다. 또한 `504 Gateway Timeout` 응답을 `shell` Container에게 전송한다.
 
-```shell {caption="[Text 21] Upstream Timeout Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 21] Upstream Timeout Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-04T12:28:44.275Z",
   "method": "GET",
