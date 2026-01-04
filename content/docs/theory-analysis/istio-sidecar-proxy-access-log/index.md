@@ -1494,8 +1494,8 @@ no healthy upstream
   "response_duration": "0"
 }
 ```
-만
-[Text 17]은 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 18]은 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. `shell` Pod의 `istio-proxy`의 Access Log에는 마지막 3개의 요청에만 `UH (No Healthy Upstream)`로 나타나는 것을 확인할 수 있다. 또한 `mock-server` Pod의 `istio-proxy`의 Access Log에는 5번의 요청에 대한 Log만 남아있는것도 확인할 수 있다.
+
+[Text 17]은 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 18]은 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. `shell` Pod의 `istio-proxy`의 Access Log에는 마지막 3개의 요청에만 `response_flags`가 `UH (No Healthy Upstream)`와 함께 요청이 `mock-server` Pod에 전달되지 않은 것을 확인할 수 있다. 또한 `mock-server` Pod의 `istio-proxy`의 Access Log에는 처음 5개의 요청에 대한 Log만 남아있는것도 확인할 수 있다.
 
 #### 2.1.6. Upstream Request Retry Case with Timeout
 
