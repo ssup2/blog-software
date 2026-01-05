@@ -1815,7 +1815,7 @@ $ kubectl exec -it shell -- curl -s mock-server:8080/delay/10000
 
 #### 2.2.1. Success Case
 
-```shell {caption="[Shell 16] Success Case / curl Command", linenos=table}
+```shell {caption="[Shell 12] Success Case / grpcurl Command", linenos=table}
 $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 0}' mock-server:9090 mock.MockService.Status
 {
   "service": "mock-server",
@@ -1823,7 +1823,7 @@ $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 0}
 }
 ```
 
-```json {caption="[Text 15] Success Case / curl Command", linenos=table}
+```json {caption="[Text 23] Success Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2025-12-25T11:18:51.880Z",
   "method": "POST",
@@ -1856,7 +1856,7 @@ $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 0}
 }
 ```
 
-```json {caption="[Text 16] Success Case / istioctl Command", linenos=table}
+```json {caption="[Text 24] Success Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2025-12-25T11:18:51.881Z",
   "method": "POST",
@@ -1891,7 +1891,7 @@ $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 0}
 
 #### 2.2.2. Internal Server Error Case
 
-```shell {caption="[Shell 17] Internal Server Error Case / curl Command", linenos=table}
+```shell {caption="[Shell 13] Internal Server Error Case / grpcurl Command", linenos=table}
 $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 13}' mock-server:9090 mock.MockService.Status
 ERROR:
   Code: Internal
@@ -1899,7 +1899,7 @@ ERROR:
 command terminated with exit code 77
 ```
 
-```json {caption="[Text 17] Internal Server Error Case / curl Command", linenos=table}
+```json {caption="[Text 25] Internal Server Error Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2025-12-25T11:35:39.358Z",
   "method": "POST",
@@ -1932,7 +1932,7 @@ command terminated with exit code 77
 }
 ```
 
-```json {caption="[Text 18] Internal Server Error Case / istioctl Command", linenos=table}
+```json {caption="[Text 26] Internal Server Error Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2025-12-25T11:35:39.378Z",
   "method": "POST",
@@ -1967,14 +1967,14 @@ command terminated with exit code 77
 
 #### 2.2.3. Downstream Disconnect Case
 
-```shell {caption="[Shell 17] Downstream Remote Disconnect Case / curl Command", linenos=table}
-$ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 10000}' mock-server:9090 mock.MockService.Delay
+```shell {caption="[Shell 14] Downstream Remote Disconnect Case / grpcurl Command", linenos=table}
+$ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 5000}' mock-server:9090 mock.MockService.Delay
 ^C
 ```
 
-```json {caption="[Text 17] Downstream Remote Disconnect Case / curl Command", linenos=table}
+```json {caption="[Text 27] Downstream Remote Disconnect Case / shell Pod Access Log", linenos=table}
 {
-  "start_time": "2025-12-25T11:26:57.849Z",
+  "start_time": "2026-01-05T14:41:20.286Z",
   "method": "POST",
   "path": "/mock.MockService/Delay",
   "protocol": "HTTP/2",
@@ -1985,29 +1985,29 @@ $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseco
   "upstream_transport_failure_reason": "-",
   "bytes_received": "8",
   "bytes_sent": "0",
-  "duration": "6627",
+  "duration": "778",
   "upstream_service_time": "-",
   "x_forwarded_for": "-",
   "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
-  "request_id": "6604fb4f-9d82-9617-bbd9-a7a849695692",
+  "request_id": "b62ed186-f4a0-9f38-b6a9-e5d351c626c9",
   "authority": "mock-server:9090",
-  "upstream_host": "10.244.2.8:9090",
+  "upstream_host": "10.244.2.19:9090",
   "upstream_cluster": "outbound|9090||mock-server.default.svc.cluster.local",
-  "upstream_local_address": "10.244.1.5:58590",
-  "downstream_local_address": "10.96.186.69:9090",
-  "downstream_remote_address": "10.244.1.5:40966",
+  "upstream_local_address": "10.244.1.8:58320",
+  "downstream_local_address": "10.96.212.50:9090",
+  "downstream_remote_address": "10.244.1.8:53602",
   "requested_server_name": "-",
   "route_name": "-",
   "grpc_status": "-",
   "upstream_request_attempt_count": "1",
-  "request_duration": "0",
+  "request_duration": "8",
   "response_duration": "-"
 }
 ```
 
-```json {caption="[Text 18] Downstream Remote Disconnect Case / istioctl Command", linenos=table} 
+```json {caption="[Text 28] Downstream Remote Disconnect Case / mock-server Pod Access Log", linenos=table} 
 {
-  "start_time": "2025-12-25T11:26:57.850Z",
+  "start_time": "2026-01-05T14:41:20.300Z",
   "method": "POST",
   "path": "/mock.MockService/Delay",
   "protocol": "HTTP/2",
@@ -2018,22 +2018,22 @@ $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseco
   "upstream_transport_failure_reason": "-",
   "bytes_received": "8",
   "bytes_sent": "0",
-  "duration": "6634",
+  "duration": "778",
   "upstream_service_time": "-",
   "x_forwarded_for": "-",
   "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
-  "request_id": "6604fb4f-9d82-9617-bbd9-a7a849695692",
+  "request_id": "b62ed186-f4a0-9f38-b6a9-e5d351c626c9",
   "authority": "mock-server:9090",
-  "upstream_host": "10.244.2.8:9090",
+  "upstream_host": "10.244.2.19:9090",
   "upstream_cluster": "inbound|9090||",
-  "upstream_local_address": "127.0.0.6:43691",
-  "downstream_local_address": "10.244.2.8:9090",
-  "downstream_remote_address": "10.244.1.5:58590",
+  "upstream_local_address": "127.0.0.6:52919",
+  "downstream_local_address": "10.244.2.19:9090",
+  "downstream_remote_address": "10.244.1.8:58320",
   "requested_server_name": "outbound_.9090_._.mock-server.default.svc.cluster.local",
   "route_name": "default",
   "grpc_status": "-",
   "upstream_request_attempt_count": "1",
-  "request_duration": "0",
+  "request_duration": "8",
   "response_duration": "-"
 }
 ```
