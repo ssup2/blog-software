@@ -2064,7 +2064,7 @@ $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseco
 
 ```shell {caption="[Shell 18] Upstream Disconnect Case / curl Command", linenos=table}
 $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 1000}' mock-server:9090 mock.MockService.Disconnect
-RROR:
+ERROR:
   Code: Unavailable
   Message: connection closed by server
 command terminated with exit code 78

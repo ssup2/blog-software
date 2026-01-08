@@ -6,11 +6,11 @@ title: Kafka Schema Registry
 
 {{< figure caption="[Figure 1] Kafka Schema Registry Architecture" src="images/kafka-schema-registry-architecture.png" width="900px" >}}
 
-Kafka Schema Registry performs the role of managing the Schema of Kafka Messages between Kafka Producer and Kafka Consumer. [Figure 1] shows the Architecture of Kafka Schema Registry. Kafka Schema Registry uses Kafka's `_schema_` Topic instead of a separate Database to maintain state information.
+Kafka Schema Registry performs the role of managing the Schema of Kafka Messages between Kafka Producer and Kafka Consumer. [Figure 1] shows the Architecture of Kafka Schema Registry. Kafka Schema Registry uses Kafka's `_schemas` Topic instead of a separate Database to maintain state information.
 
-Since all Schema-related information is recorded in the `_schema_` Topic, Kafka Schema Registry has a Stateless characteristic and can easily perform Scale-out for load balancing. However, since Schema information stored in the Topic is also cached in Memory, the frequency of Kafka Schema Registry directly accessing the Topic is low, and generally accesses the Topic only when Schema is registered/changed/deleted or when Kafka Schema Registry is initialized.
+Since all Schema-related information is recorded in the `_schemas` Topic, Kafka Schema Registry has a Stateless characteristic and can easily perform Scale-out for load balancing. However, since Schema information stored in the Topic is also cached in Memory, the frequency of Kafka Schema Registry directly accessing the Topic is low, and generally accesses the Topic only when Schema is registered/changed/deleted or when Kafka Schema Registry is initialized.
 
-```json {caption="[Schema Key 1] _schema_ Topic Key Example", linenos=table}
+```json {caption="[Schema Key 1] _schemas Topic Key Example", linenos=table}
 {
 	"keytype": "SCHEMA",
 	"subject": "user-events-value",
@@ -18,7 +18,7 @@ Since all Schema-related information is recorded in the `_schema_` Topic, Kafka 
 	"magic": 1
 }
 ```
-```json {caption="[Schema Value 1] _schema_ Topic Value Example", linenos=table}
+```json {caption="[Schema Value 1] _schemas Topic Value Example", linenos=table}
 {
 	"subject": "user-events-value",
 	"version": 1,
@@ -29,14 +29,14 @@ Since all Schema-related information is recorded in the `_schema_` Topic, Kafka 
 }
 ```
 
-The `_schema_` Topic records Schema-related information in Key, Value format like [Schema Key 1] and [Schema Value 1]. Key is used as a unique identifier for Schema, and Value contains Schema information. [Figure 1] also shows the operation process of Kafka Schema Registry, showing the process of Kafka Producer sending Kafka Messages and Kafka Consumer receiving Kafka Messages.
+The `_schemas` Topic records Schema-related information in Key, Value format like [Schema Key 1] and [Schema Value 1]. Key is used as a unique identifier for Schema, and Value contains Schema information. [Figure 1] also shows the operation process of Kafka Schema Registry, showing the process of Kafka Producer sending Kafka Messages and Kafka Consumer receiving Kafka Messages.
 
 ### 1.1. Schema Registration Process
 
 Kafka Schema Registry can register Schemas through REST API and performs the following process:
 
 1. Send a Schema registration request to Kafka Schema Registry through REST API.
-2. Kafka Schema Registry records the Schema in the `_schema_` Topic.
+2. Kafka Schema Registry records the Schema in the `_schemas` Topic.
 3. Kafka Schema Registry then caches the Schema in Memory and returns the cached Schema when Producer or Consumer requests the Schema.
 
 ### 1.2. Message Serialization and Deserialization Process Using Schema
@@ -80,12 +80,12 @@ producer_config = {
 # Retrieve schema from Schema Registry
 print("Retrieving schema from Schema Registry")
 schema = schema_registry_client.get_latest_version("user")
-avro_schema_str = schema.schema.schema_str
+avro_schemasstr = schema.schema.schema_str
 
 # Create Avro Serializer (automatically registers schema in Schema Registry and uses schema ID)
 avro_serializer = AvroSerializer(
     schema_registry_client,
-    avro_schema_str,
+    avro_schemasstr,
     lambda obj, ctx: {
         "id": obj["id"],
         "name": obj["name"],
