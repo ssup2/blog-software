@@ -432,7 +432,7 @@ $ kubectl exec -it shell -- curl -s mock-server:8080/delay/5000
 
 [Figure 4]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/delay/10000` Endpoint에 `GET` 요청을 전달하고, 5000ms가 지나기 전에 `Ctrl+C` 명령어를 이용하여 요청을 강제로 종료하는 Downstream TCP RST Case를 나타내고 있다. [Shell 5]은 [Figure 4]의 내용을 실행하는 예시를 나타내고 있다.
 
-`curl` 명령어 실행 중 강제로 종료하면 `curl` 명령어는 내부적으로 Connection을 종료하면서 TCP FIN Flag를 `istio-proxy`에게 전송한다. TCP FIN Flag를 받은 `istio-proxy`는 TCP RST Flag를 `mock-server` Pod에게 전송하며, 또한 예상치 못한 Connection 종료였기 때문에 TCP RST Flag도 TCP RST Flag 이후에 전송한다.
+`curl` 명령어 실행 중 강제로 종료하면 `curl` 명령어는 내부적으로 Connection을 종료하면서 TCP FIN Flag를 `curl` Pod의 `istio-proxy`에게 전송한며, TCP FIN Flag를 받은 `curl` Pod의 `istio-proxy`는 TCP RST Flag를 `mock-server` Pod에게 전송하여 최종적으로 `mock-server` Container에게 전달된다. 이후에 `mock-server` Pod의 `istio-proxy`는 예상치 못한 Client의  Connection 종료였기 때문에 TCP RST Flag를 TCP FIN Flag 이후에 전송한다.
 
 ```json {caption="[Text 6] Downstream TCP RST Case / shell Pod Access Log", linenos=table}
 {
@@ -1811,17 +1811,21 @@ $ kubectl exec -it shell -- curl -s mock-server:8080/delay/10000
 
 [Text 21]은 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 22]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. `shell` Pod의 `istio-proxy`에는 `response_flags`에 `UT (UpstreamTimeout)`를 확인할 수 있다. `mock-server` Pod의 `istio-proxy`에는 `response_flags`에 `DC (DownstreamConnectionTermination)`를 확인할 수 있다.
 
-### 2.2. GRPC Cases
+### 1.3. GRPC Cases
 
-#### 2.2.1. Success Case
+#### 1.3.1. Success Case
+
+{{< figure caption="[Figure 14] Success Case" src="images/grpc-success-case.png" width="1000px" >}}
 
 ```shell {caption="[Shell 12] Success Case / grpcurl Command", linenos=table}
-$ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 0}' mock-server:9090 mock.MockService.Status
+$ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 0}' mock-server:9090 mock.MockService/Status
 {
   "service": "mock-server",
   "message": "OK"
 }
 ```
+
+[Figure 14]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService.Status` 함수에 `code: 0` 요청을 전달하고, `OK` 응답을 받는 Success Case를 나타내고 있다. [Shell 12]은 [Figure 14]의 내용을 실행하는 예시를 나타내고 있다.
 
 ```json {caption="[Text 23] Success Case / shell Pod Access Log", linenos=table}
 {
@@ -1889,15 +1893,21 @@ $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 0}
 }
 ```
 
-#### 2.2.2. Internal Server Error Case
+[Text 23]은 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 24]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/mock.MockService/Status` 함수에 접근하는 내역과 `grpc_status`가 `OK`로 나타나는 것을 확인할 수 있다.
+
+#### 1.3.2. Internal Error Case
+
+{{< figure caption="[Figure 15] Internal Server Error Case" src="images/grpc-internal-server-error-case.png" width="1000px" >}}
 
 ```shell {caption="[Shell 13] Internal Server Error Case / grpcurl Command", linenos=table}
-$ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 13}' mock-server:9090 mock.MockService.Status
+$ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 13}' mock-server:9090 mock.MockService/Status
 ERROR:
   Code: Internal
   Message: Simulated error with gRPC code 13 (Internal)
 command terminated with exit code 77
 ```
+
+[Figure 15]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/Status` 함수에 `code: 13` 요청을 전달하고, `Internal` 응답을 받는 Internal Error Case를 나타내고 있다. [Shell 13]은 [Figure 15]의 내용을 실행하는 예시를 나타내고 있다.
 
 ```json {caption="[Text 25] Internal Server Error Case / shell Pod Access Log", linenos=table}
 {
@@ -1965,14 +1975,22 @@ command terminated with exit code 77
 }
 ```
 
-#### 2.2.3. Downstream Disconnect Case
+[Text 25]은 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 26]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/mock.MockService/Status` 함수에 접근하는 내역과 `grpc_status`가 `Internal`로 나타나는 것을 확인할 수 있다. 또한 `response_code`가 `200 OK`로 나타나는 것을 확인할 수 있으며, gRPC 이용시 gRPC의 결과와 상관없이 `response_code`는 항상 `200 OK`로 나타난다.
+
+#### 1.3.3. Downstream Reset Case
+
+{{< figure caption="[Figure 16] Downstream Remote Disconnect Case" src="images/grpc-downstream-reset-case.png" width="1000px" >}}
 
 ```shell {caption="[Shell 14] Downstream Remote Disconnect Case / grpcurl Command", linenos=table}
-$ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 5000}' mock-server:9090 mock.MockService.Delay
+$ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 5000}' mock-server:9090 mock.MockService/Delay
 ^C
 ```
 
-```json {caption="[Text 27] Downstream Remote Disconnect Case / shell Pod Access Log", linenos=table}
+[Figure 16]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/Delay` 함수에 `milliseconds: 5000` 요청을 전달하고, 5000ms가 지나가 전에 `Ctrl+C` 명령어를 이용하여 요청을 강제로 종료하는 Downstream Reset Case를 나타내고 있다. [Shell 14]은 [Figure 16]의 내용을 실행하는 예시를 나타내고 있다.
+
+`grpcurl` 명령어 실행 중 강제로 종료하면 `grpcurl` 명령어는 TCP FIN Flag를 `shell` Pod의 `istio-proxy`에게 전송하며, `shell` Pod의 `istio-proxy`는 TCP FIN Flag 대신 HTTP/2 RST_STREAM Frame을 `mock-server` Pod에게 전송하여 최종적으로 `mock-server` Container에게 전달하여 연결을 종료한다.
+
+```json {caption="[Text 27] Downstream Reset Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-05T14:41:20.286Z",
   "method": "POST",
@@ -2037,6 +2055,10 @@ $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseco
   "response_duration": "-"
 }
 ```
+
+[Text 27]은 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 28]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/mock.MockService/Delay` 함수에 접근하는 내역과 `response_code`가 `0`, `grpc_status`가 `-`로 나타나는 것을 확인할 수 있다.
+
+또한 `shell` Pod의 `istio-proxy`에서는 `grpcurl` 명령어로부터 TCP FIN Flag를 수신하기 때문에 `response_flags`가 `DC (DownstreamConnectionTermination)`로 나타나는 것을 확인할 수 있으며, `mock-server` Pod의 `istio-proxy`에서는 HTTP/2 RST_STREAM Frame을 수신하기 때문에 `response_flags`가 `DR (DownstreamRemoteReset)`로 나타나는 것을 확인할 수 있다.
 
 #### 2.2.4. Upstream Disconnect Case
 
