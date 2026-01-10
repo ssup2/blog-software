@@ -2062,6 +2062,8 @@ $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseco
 
 #### 1.3.4. Upstream TCP RST before Response Case
 
+{{< figure caption="[Figure 17] Upstream TCP RST before Response Case" src="images/grpc-upstream-tcp-rst-before-response-case.png" width="1000px" >}}
+
 ```shell {caption="[Shell 15] Upstream TCP RST before Response Case / grpcurl Command", linenos=table}
 $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 1000}' mock-server:9090 mock.MockService/ResetBeforeResponse
 ERROR:
@@ -2069,6 +2071,10 @@ ERROR:
   Message: upstream connect error or disconnect/reset before headers. reset reason: connection termination
 command terminated with exit code 78
 ```
+
+[Figure 17]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/ResetBeforeResponse` 함수에 `milliseconds: 1000` 요청을 전달하고, 1000ms 대기후에 TCP RST Flag를 전송하여 Connection을 강제로 종료하는 Upstream TCP RST before Response Case를는나타내고 있다. [Shell 15]은 [Figure 17]의 내용을 실행하는 예시를 나타내고 있다.
+
+TCP RST Flag를 받은 `mock-server` Pod의 `istio-proxy`는 `Unavailable` 상태 코드를 반환하여 요청이 비정상적으로 종료된것을 `shell` Pod의 `istio-proxy`에게 알린다. [File 1]의 Virtual Service에 `unavailable` 설정에 의해서 `shell` Pod의 `istio-proxy`는 2번의 재시도를 수행하여 총 3번의 요청을 전송한다.
 
 ```json {caption="[Text 29] Upstream TCP RST before Response Case / shell Pod Access Log", linenos=table}
 {
@@ -2195,6 +2201,10 @@ command terminated with exit code 78
   "response_duration": "-"
 }
 ```
+
+[Text 29]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 30]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/mock.MockService/ResetBeforeResponse` 함수에 접근하는 내역과 `response_code`가 `200`, `grpc_status`가 `Unavailable`로 나타나는 것을 확인할 수 있다. 또한 두 Access Log에서 모두 `response_flags`가 `UC (UpstreamConnectionTermination)`로 나타나는 것을 확인할 수 있다.
+
+`shell` Pod의 `istio-proxy`가 3번의 요청을 전송하기 때문에 `shell Pod`의 `istio-proxy`의 Access Log에서 `upstream_request_attempt_count`가 `3`으로 나타나는 것을 확인할 수 있다. 또한 `mock-server` Pod의 `istio-proxy`의 Access Log가 3번이 남아있는것을 확인할 수 있다.
 
 #### 1.3.5. Upstream TCP RST after Response Case
 
