@@ -1497,11 +1497,11 @@ no healthy upstream
 
 [Text 17]은 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 18]은 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. `shell` Pod의 `istio-proxy`의 Access Log에는 마지막 3개의 요청에만 `response_flags`가 `UH (No Healthy Upstream)`와 함께 요청이 `mock-server` Pod에 전달되지 않은 것을 확인할 수 있다. 또한 `mock-server` Pod의 `istio-proxy`의 Access Log에는 처음 5개의 요청에 대한 Log만 남아있는것도 확인할 수 있다.
 
-#### 1.2.10. Upstream Request Retry Case with Timeout
+#### 1.2.10. Upstream Connection Failure with Timeout
 
-{{< figure caption="[Figure 11] Upstream Request Retry Case with Timeout" src="images/http-upstream-request-retry-case-with-timeout.png" width="1000px" >}}
+{{< figure caption="[Figure 11] Upstream Connection Failure with Timeout" src="images/http-upstream-connection-failure-case-with-timeout.png" width="1000px" >}}
 
-```shell {caption="[Shell 9] Upstream Request Retry Case with Timeout / iptables & curl Command", linenos=table}
+```shell {caption="[Shell 9] Upstream Connection Failure with Timeout / iptables & curl Command", linenos=table}
 $ SHELL_IP=$(kubectl get pod shell -o jsonpath='{.status.podIP}')
 $ kubectl exec mock-server -c mock-server -- iptables -A INPUT -s ${SHELL_IP} -j DROP
 # $ kubectl exec mock-server -c mock-server -- iptables -D INPUT 1 remove rule after case execution
@@ -1514,9 +1514,9 @@ $ kubectl exec -it shell -- curl -s mock-server:8080/status/200
 no healthy upstream
 ```
 
-[Figure 11]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/status/200` Endpoint에 접속시 Timeout에 의해서 Retry되는 Upstream Request Retry Case with Timeout를 나타내고 있다. [Shell 9]은 [Figure 11]의 내용을 실행하는 예시를 나타내고 있다. Timeout을 발생시키기 위해서 `iptables` 명령어를 이용하여 `shell` Pod의 IP Address로부터 들어오는 트래픽을 `DROP`하는 Rule을 추가한 다음, `curl` 명령어를 이용하여 요청을 전송한다.
+[Figure 11]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/status/200` Endpoint에 접속시 Timeout에 의해서 연결에 실패하여 Retry되는 Upstream Connection Failure with Timeout Case를 나타내고 있다. [Shell 9]은 [Figure 11]의 내용을 실행하는 예시를 나타내고 있다. Timeout을 발생시키기 위해서 `iptables` 명령어를 이용하여 `shell` Pod의 IP Address로부터 들어오는 트래픽을 `DROP`하는 Rule을 추가한 다음, `curl` 명령어를 이용하여 요청을 전송한다.
 
-[File 1]의 Virtual Service에 의해서 2번의 재시도가 발생하여 총 3번의 요청이 전송된다. 따라서 `shell` Pod의 첫번째 요청은 `shell` Pod의 `istio-proxy`에 의해서 3번의 재시도를 수행한 다음 `connection timeout` 오류가 출력된다. `shell` Pod의 두번째 요청은 1번의 재시도가 발생하여 총 2번의 요청이 전송되는데, 이유는 [File 1]의 Destination Rule에 의해서 5번 연속적인 5XX Error가 발생하면 Circuit Breaking이 동작하기 때문이다.
+[File 1]의 Virtual Service의 `connect-failure` 의해서 2번의 재시도가 발생하여 총 3번의 요청이 전송된다. 따라서 `shell` Pod의 첫번째 요청은 `shell` Pod의 `istio-proxy`에 의해서 3번의 재시도를 수행한 다음 `connection timeout` 오류가 출력된다. `shell` Pod의 두번째 요청은 1번의 재시도가 발생하여 총 2번의 요청이 전송되는데, 이유는 [File 1]의 Destination Rule에 의해서 5번 연속적인 5XX Error가 발생하면 Circuit Breaking이 동작하기 때문이다.
 
 첫번째 요청의 3번의 요청과 두번째 요청의 2번째 요청, 총 5번의 요청이 발생했고 모두 Timeout에 의해서 실패하였기 때문에 Healthy Upstream이 없다고 판단하고 Circuit Breaking이 동작한다. 따라서 두번째 요청의 2번째 재시도는 Circuit Breaking에 의해서 `mock-server` Pod에 전송되지 않으며, 두번째 요청의 결과로 `no healthy upstream` 오류가 출력된다. 세번째 요청은 Circuit Breaking에 의해서 즉시 `no healthy upstream` 오류 출력과 함께 종료된다.
 
@@ -1617,11 +1617,11 @@ no healthy upstream
 
 두번째, 세번째 요청에는 Circuit Breaking에 의해서 `response_flags`에 `UH (No Healthy Upstream)`가 나타나는 것을 확인할 수 있으며, `response_code_details`에 `no_healthy_upstream`가 나타나는 것을 확인할 수 있다. 두번째 요청에는 `upstream_request_attempt_count`가 `3`으로 나타나는 것을 확인할 수 있다. 세번째 요청에는 `upstream_request_attempt_count`가 `1`으로 나타나는 것을 확인할 수 있다.
 
-#### 1.2.11. Upstream Request Retry Case with TCP Reset
+#### 1.2.11. Upstream Connection Failure with TCP Reset
 
-{{< figure caption="[Figure 12] Upstream Request Retry Case with TCP Reset" src="images/http-upstream-request-retry-case-with-tcp-reset.png" width="1000px" >}}
+{{< figure caption="[Figure 12] Upstream Connection Failure with TCP Reset" src="images/http-upstream-connection-failure-case-with-tcp-reset.png" width="1000px" >}}
 
-```shell {caption="[Shell 10] Upstream Request Retry Case with TCP Reset / iptables & curl Command", linenos=table}
+```shell {caption="[Shell 10] Upstream Connection Failure with TCP Reset / iptables & curl Command", linenos=table}
 $ SHELL_IP=$(kubectl get pod shell -o jsonpath='{.status.podIP}')
 $ kubectl exec mock-server -c mock-server -- iptables-legacy -A INPUT -p tcp -s ${SHELL_IP} -j REJECT --reject-with tcp-reset
 # $ kubectl exec mock-server -c mock-server -- iptables-legacy -D INPUT 1 remove rule after case execution
@@ -1634,9 +1634,9 @@ $ kubectl exec -it shell -- curl -s mock-server:8080/status/200
 no healthy upstream
 ```
 
-[Figure 12]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/status/200` Endpoint에 접속시 TCP Reset에 의해서 Retry되는 Upstream Request Retry Case with TCP Reset를 나타내고 있다. [Shell 10]은 [Figure 12]의 내용을 실행하는 예시를 나타내고 있다. TCP Reset을 발생시키기 위해서 `iptables` 명령어를 이용하여 `shell` Pod의 IP Address로부터 들어오는 트래픽을 `REJECT`하는 Rule을 추가한 다음, `curl` 명령어를 이용하여 요청을 전송한다. `Connection Refused` 오류 내용을 제외하고는 Timeout에 의해서 Retry를 수행하는 Case와 동일한 결과를 보여준다.
+[Figure 12]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/status/200` Endpoint에 접속시 TCP Reset에 의해서 연결에 실패하여 Retry되는 Upstream Connection Failure with TCP Reset Case를 나타내고 있다. [Shell 10]은 [Figure 12]의 내용을 실행하는 예시를 나타내고 있다. TCP Reset을 발생시키기 위해서 `iptables` 명령어를 이용하여 `shell` Pod의 IP Address로부터 들어오는 트래픽을 `REJECT`하는 Rule을 추가한 다음, `curl` 명령어를 이용하여 요청을 전송한다. `Connection Refused` 오류 내용을 제외하고는 Timeout에 의해서 Retry를 수행하는 Case와 동일한 결과를 보여준다.
 
-```json {caption="[Text 20] Upstream Request Retry Case with TCP Reset / shell Pod Access Log", linenos=table}
+```json {caption="[Text 20] Upstream Connection Failure with TCP Reset / shell Pod Access Log", linenos=table}
 {
   "start_time": "2025-12-22T17:09:54.276Z",
   "method": "GET",
