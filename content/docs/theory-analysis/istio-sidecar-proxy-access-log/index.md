@@ -1731,15 +1731,15 @@ no healthy upstream
 
 [Text 20]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. `shell` Pod의 요청이 `istio-proxy`에 의해서 `mock-server` Pod에 전달되지 않기 때문에 `mock-server` Pod의 `istio-proxy`의 Access Log에는 아무것도 남지 않는다. `response_code_details`에 `upstream_reset_before_response_started{remote_connection_failure|delayed_connect_error:_Connection_refused}`, 즉 Remote Connection Failure와 Delayed Connect Error가 발생한 사실을 확인할 수 있다. 이 부분을 제외하고는 Timeout에 의해서 Retry를 수행하는 Case와 동일한 결과를 보여준다.
 
-#### 1.2.12. Upstream Timeout Case
+#### 1.2.12. Upstream Request Timeout Case
 
-{{< figure caption="[Figure 13] Upstream Timeout Case" src="images/http-upstream-timeout-case.png" width="1000px" >}}
+{{< figure caption="[Figure 13] Upstream Request Timeout Case" src="images/http-upstream-request-timeout-case.png" width="1000px" >}}
 
-```shell {caption="[Shell 11] Upstream Timeout Case / curl Command", linenos=table}
+```shell {caption="[Shell 11] Upstream Request Timeout Case / curl Command", linenos=table}
 $ kubectl exec -it shell -- curl -s mock-server:8080/delay/10000
 ```
 
-[Figure 13]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/delay/10000` Endpoint에 `GET` 요청을 전달하였지만, `mock-server` Pod의 `istio-proxy`에서 5000ms 대기후에 응답이 오지 않아 Timeout 처리하는 Case를 나타내고 있다. [Shell 18]은 [Figure 13]의 내용을 실행하는 예시를 나타내고 있다.
+[Figure 13]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/delay/10000` Endpoint에 `GET` 요청을 전달하였지만, `mock-server` Pod의 `istio-proxy`에서 5000ms 대기후에 응답이 오지 않아 Request를 Timeout 처리하는 Upstream Request Timeout Case를 나타내고 있다. [Shell 18]은 [Figure 13]의 내용을 실행하는 예시를 나타내고 있다.
 
 [File 1]의 Virtual Service에 의해서 `mock-server` Pod로 전송된 요청은 최대 5000ms 대기할 수 있다. 하지만 `mock-server` Pod의 `/delay/10000` Endpoint에 전송한 요청은 10000ms가 필요하기 때문에 Timeout이 발생한다. `mock-server` Pod의 `istio-proxy`는 Timeout 발생시 TCP FIN Flag와 TCP RST Flag를 차례로 전송하여, `mock-server` Pod와의 연결을 종료한다. 또한 `504 Gateway Timeout` 응답을 `shell` Container에게 전송한다.
 
@@ -1977,16 +1977,16 @@ command terminated with exit code 77
 
 [Text 25]은 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 26]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/mock.MockService/Status` 함수에 접근하는 내역과 `grpc_status`가 `Internal`로 나타나는 것을 확인할 수 있다. 또한 `response_code`가 `200 OK`로 나타나는 것을 확인할 수 있으며, gRPC 이용시 gRPC의 결과와 상관없이 `response_code`는 항상 `200 OK`로 나타난다.
 
-#### 1.3.3. Downstream Reset Case
+#### 1.3.3. Downstream HTTP/2 RST_STREAM Case
 
-{{< figure caption="[Figure 16] Downstream Remote Disconnect Case" src="images/grpc-downstream-reset-case.png" width="1000px" >}}
+{{< figure caption="[Figure 16] Downstream HTTP/2 RST_STREAM Case" src="images/grpc-downstream-http2-rst-stream-case.png" width="1000px" >}}
 
-```shell {caption="[Shell 14] Downstream Remote Disconnect Case / grpcurl Command", linenos=table}
+```shell {caption="[Shell 14] Downstream HTTP/2 RST_STREAM Case / grpcurl Command", linenos=table}
 $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 5000}' mock-server:9090 mock.MockService/Delay
 ^C
 ```
 
-[Figure 16]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/Delay` 함수에 `milliseconds: 5000` 요청을 전달하고, 5000ms가 지나가 전에 `Ctrl+C` 명령어를 이용하여 요청을 강제로 종료하는 Downstream Reset Case를 나타내고 있다. [Shell 14]은 [Figure 16]의 내용을 실행하는 예시를 나타내고 있다.
+[Figure 16]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/Delay` 함수에 `milliseconds: 5000` 요청을 전달하고, 5000ms가 지나가 전에 `Ctrl+C` 명령어를 이용하여 요청을 강제로 종료하는 Downstream HTTP/2 RST_STREAM Case를 나타내고 있다. [Shell 14]은 [Figure 16]의 내용을 실행하는 예시를 나타내고 있다.
 
 `grpcurl` 명령어 실행 중 강제로 종료하면 `grpcurl` 명령어는 TCP FIN Flag를 `shell` Pod의 `istio-proxy`에게 전송하며, `shell` Pod의 `istio-proxy`는 TCP FIN Flag 대신 HTTP/2 RST_STREAM Frame을 `mock-server` Pod에게 전송하여 최종적으로 `mock-server` Container에게 전달하여 연결을 종료한다.
 
@@ -2059,6 +2059,144 @@ $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseco
 [Text 27]은 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 28]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/mock.MockService/Delay` 함수에 접근하는 내역과 `response_code`가 `0`, `grpc_status`가 `-`로 나타나는 것을 확인할 수 있다.
 
 또한 `shell` Pod의 `istio-proxy`에서는 `grpcurl` 명령어로부터 TCP FIN Flag를 수신하기 때문에 `response_flags`가 `DC (DownstreamConnectionTermination)`로 나타나는 것을 확인할 수 있으며, `mock-server` Pod의 `istio-proxy`에서는 HTTP/2 RST_STREAM Frame을 수신하기 때문에 `response_flags`가 `DR (DownstreamRemoteReset)`로 나타나는 것을 확인할 수 있다.
+
+#### 1.3.4. Upstream TCP RST before Response Case
+
+```shell {caption="[Shell 15] Upstream TCP RST before Response Case / grpcurl Command", linenos=table}
+$ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 1000}' mock-server:9090 mock.MockService/ResetBeforeResponse
+ERROR:
+  Code: Unavailable
+  Message: upstream connect error or disconnect/reset before headers. reset reason: connection termination
+command terminated with exit code 78
+```
+
+```json {caption="[Text 29] Upstream TCP RST before Response Case / shell Pod Access Log", linenos=table}
+{
+  "start_time": "2026-01-10T15:25:19.861Z",
+  "method": "POST",
+  "path": "/mock.MockService/ResetBeforeResponse",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "URX",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "8",
+  "bytes_sent": "0",
+  "duration": "3066",
+  "upstream_service_time": "3064",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "b195727a-1004-9084-931d-ba8c01f7b1e3",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.2.22:9090",
+  "upstream_cluster": "outbound|9090||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "10.244.1.8:55012",
+  "downstream_local_address": "10.96.211.131:9090",
+  "downstream_remote_address": "10.244.1.8:59464",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "Unavailable",
+  "upstream_request_attempt_count": "3",
+  "request_duration": "1",
+  "response_duration": "3065"
+}
+```
+
+```json {caption="[Text 30] Upstream TCP RST before Response Case / mock-server Pod Access Log", linenos=table}
+{
+  "start_time": "2026-01-10T15:25:19.863Z",
+  "method": "POST",
+  "path": "/mock.MockService/ResetBeforeResponse",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "UC",
+  "response_code_details": "upstream_reset_before_response_started{connection_termination}",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "8",
+  "bytes_sent": "0",
+  "duration": "1005",
+  "upstream_service_time": "-",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "b195727a-1004-9084-931d-ba8c01f7b1e3",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.2.22:9090",
+  "upstream_cluster": "inbound|9090||",
+  "upstream_local_address": "127.0.0.6:35179",
+  "downstream_local_address": "10.244.2.22:9090",
+  "downstream_remote_address": "10.244.1.8:55012",
+  "requested_server_name": "-",
+  "route_name": "default",
+  "grpc_status": "Unavailable",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "-"
+}
+{
+  "start_time": "2026-01-10T15:25:20.888Z",
+  "method": "POST",
+  "path": "/mock.MockService/ResetBeforeResponse",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "UC",
+  "response_code_details": "upstream_reset_before_response_started{connection_termination}",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "8",
+  "bytes_sent": "0",
+  "duration": "1002",
+  "upstream_service_time": "-",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "b195727a-1004-9084-931d-ba8c01f7b1e3",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.2.22:9090",
+  "upstream_cluster": "inbound|9090||",
+  "upstream_local_address": "127.0.0.6:53123",
+  "downstream_local_address": "10.244.2.22:9090",
+  "downstream_remote_address": "10.244.1.8:55012",
+  "requested_server_name": "-",
+  "route_name": "default",
+  "grpc_status": "Unavailable",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "-"
+}
+{
+  "start_time": "2026-01-10T15:25:21.922Z",
+  "method": "POST",
+  "path": "/mock.MockService/ResetBeforeResponse",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "UC",
+  "response_code_details": "upstream_reset_before_response_started{connection_termination}",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "8",
+  "bytes_sent": "0",
+  "duration": "1003",
+  "upstream_service_time": "-",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "b195727a-1004-9084-931d-ba8c01f7b1e3",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.2.22:9090",
+  "upstream_cluster": "inbound|9090||",
+  "upstream_local_address": "127.0.0.6:48095",
+  "downstream_local_address": "10.244.2.22:9090",
+  "downstream_remote_address": "10.244.1.8:55012",
+  "requested_server_name": "-",
+  "route_name": "default",
+  "grpc_status": "Unavailable",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "-"
+}
+```
+
+#### 1.3.5. Upstream TCP RST after Response Case
 
 #### 2.2.4. Upstream Disconnect Case
 
