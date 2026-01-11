@@ -2639,23 +2639,201 @@ command terminated with exit code 77
 
 [Text 38]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 39]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/mock.MockService/CloseAfterResponse` 함수에 접근하는 내역과 `response_code`가 `200`, `grpc_status`가 `Unknown`로 나타나는 것을 확인할 수 있다. TCP RST Flag를 받는 [Figure 18]과 동일한 과정을 수행한다는 것을 알 수 있다.
 
-#### 2.2.5. Upstream Overflow Case
+#### 1.3.8. Circuit Breaking with Upstream Connection Pool Overflow Case
 
-```shell {caption="[Shell 22] Upstream Overflow Case / grpcurl Command", linenos=table}
-$ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 5000}' mock-server:9090 mock.MockService.Delay &
-$ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 5000}' mock-server:9090 mock.MockService.Delay &
+```shell {caption="[Shell 23] Circuit Breaking with Upstream Connection Pool Overflow Case / grpcurl Command", linenos=table}
+$ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 5000}' mock-server:9090 mock.MockService/Delay &
+$ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 5000}' mock-server:9090 mock.MockService/Delay &
+$ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 5000}' mock-server:9090 mock.MockService/Delay &
 ERROR:
   Code: Unavailable
   Message: upstream connect error or disconnect/reset before headers. reset reason: overflow
 command terminated with exit code 78
-$ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 5000}' mock-server:9090 mock.MockService.Delay &
+{
+  "service": "mock-server",
+  "delayedMs": 5000,
+  "message": "Response delayed by 5000ms"
+}
+{
+  "service": "mock-server",
+  "delayedMs": 5000,
+  "message": "Response delayed by 5000ms"
+}
+```
+
+```json {caption="[Text 40] Circuit Breaking with Upstream Connection Pool Overflow Case / shell Pod Access Log", linenos=table}
+{
+  "start_time": "2026-01-11T16:00:42.913Z",
+  "method": "POST",
+  "path": "/mock.MockService/Delay",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "UO",
+  "response_code_details": "upstream_reset_before_response_started{overflow}",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "0",
+  "duration": "0",
+  "upstream_service_time": "-",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "b3f85437-be22-9083-8193-972ac2f9d0bb",
+  "authority": "mock-server:9090",
+  "upstream_host": "-",
+  "upstream_cluster": "outbound|9090||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "-",
+  "downstream_local_address": "10.96.211.131:9090",
+  "downstream_remote_address": "10.244.1.8:52054",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "Unavailable",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "-",
+  "response_duration": "-"
+}
+{
+  "start_time": "2026-01-11T16:00:42.393Z",
+  "method": "POST",
+  "path": "/mock.MockService/Delay",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "8",
+  "bytes_sent": "49",
+  "duration": "5018",
+  "upstream_service_time": "5015",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "ab76aaaf-ab05-900c-8c45-162dff809b27",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.2.22:9090",
+  "upstream_cluster": "outbound|9090||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "10.244.1.8:53896",
+  "downstream_local_address": "10.96.211.131:9090",
+  "downstream_remote_address": "10.244.1.8:52044",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "OK",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "5017"
+}
+{
+  "start_time": "2026-01-11T16:00:42.636Z",
+  "method": "POST",
+  "path": "/mock.MockService/Delay",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "8",
+  "bytes_sent": "49",
+  "duration": "9784",
+  "upstream_service_time": "9783",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "66defa5b-ae78-9fe0-8529-af5dbec52725",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.2.22:9090",
+  "upstream_cluster": "outbound|9090||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "10.244.1.8:53896",
+  "downstream_local_address": "10.96.211.131:9090",
+  "downstream_remote_address": "10.244.1.8:52052",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "OK",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "9783"
+}
+```
+
+```json {caption="[Text 41] Circuit Breaking with Upstream Connection Pool Overflow Case / mock-server Pod Access Log", linenos=table}
+{
+  "start_time": "2026-01-11T16:00:42.395Z",
+  "method": "POST",
+  "path": "/mock.MockService/Delay",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "8",
+  "bytes_sent": "49",
+  "duration": "5014",
+  "upstream_service_time": "5012",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "ab76aaaf-ab05-900c-8c45-162dff809b27",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.2.22:9090",
+  "upstream_cluster": "inbound|9090||",
+  "upstream_local_address": "127.0.0.6:49515",
+  "downstream_local_address": "10.244.2.22:9090",
+  "downstream_remote_address": "10.244.1.8:53896",
+  "requested_server_name": "-",
+  "route_name": "default",
+  "grpc_status": "OK",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "1",
+  "response_duration": "5013"
+}
+{
+  "start_time": "2026-01-11T16:00:47.412Z",
+  "method": "POST",
+  "path": "/mock.MockService/Delay",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "8",
+  "bytes_sent": "49",
+  "duration": "5006",
+  "upstream_service_time": "5004",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "66defa5b-ae78-9fe0-8529-af5dbec52725",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.2.22:9090",
+  "upstream_cluster": "inbound|9090||",
+  "upstream_local_address": "127.0.0.6:49515",
+  "downstream_local_address": "10.244.2.22:9090",
+  "downstream_remote_address": "10.244.1.8:53896",
+  "requested_server_name": "-",
+  "route_name": "default",
+  "grpc_status": "OK",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "5005"
+}
+```
+
+#### 1.3.9. Circuit Breaking with Upstream Overflow Case
+
+```shell {caption="[Shell 24] Circuit Breaking with Upstream Overflow Case / grpcurl Command", linenos=table}
+$ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 5000}' mock-server:9090 mock.MockService/Delay &
+$ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 5000}' mock-server:9090 mock.MockService/Delay &
+ERROR:
+  Code: Unavailable
+  Message: upstream connect error or disconnect/reset before headers. reset reason: overflow
+command terminated with exit code 78
+$ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 5000}' mock-server:9090 mock.MockService/Delay &
 ERROR:
   Code: Unavailable
   Message: upstream connect error or disconnect/reset before headers. reset reason: overflow
 command terminated with exit code 78
 ```
 
-```json {caption="[Text 38] Upstream Overflow Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 42] Circuit Breaking with Upstream Overflow Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2025-12-25T14:45:01.595Z",
   "method": "POST",
@@ -2748,7 +2926,7 @@ command terminated with exit code 78
 }
 ```
 
-```json {caption="[Text 39] Upstream Overflow Case / mock-server Pod Access Log", linenos=table}
+```json {caption="[Text 43] Circuit Breaking with Upstream Overflow Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2025-12-25T14:45:01.241Z",
   "method": "POST",
