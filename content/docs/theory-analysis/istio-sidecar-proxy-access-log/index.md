@@ -681,11 +681,69 @@ upstream connect error or disconnect/reset before headers. reset reason: connect
 `mock-server` Pod의 `istio-proxy`는 `mock-server` Container로부터 TCP FIN Flag를 수신하면 503 Service Unavailable 응답을 `shell` Pod에게 전송하여 요청이 비정상적으로 종료된것을 알린다.
 
 ```json {caption="[Text 12] Upstream TCP Connection Close Case / shell Pod Access Log", linenos=table}
-
+{
+  "start_time": "2026-01-11T08:00:51.487Z",
+  "method": "GET",
+  "path": "/close-before-response/1000",
+  "protocol": "HTTP/1.1",
+  "response_code": "503",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "95",
+  "duration": "1004",
+  "upstream_service_time": "1003",
+  "x_forwarded_for": "-",
+  "user_agent": "curl/8.14.1",
+  "request_id": "4fa56d4c-a9ce-9fa3-b938-9c99162e5b74",
+  "authority": "mock-server:8080",
+  "upstream_host": "10.244.2.22:8080",
+  "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "10.244.1.8:45602",
+  "downstream_local_address": "10.96.211.131:8080",
+  "downstream_remote_address": "10.244.1.8:55556",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "1004"
+}
 ```
 
 ```json {caption="[Text 13] Upstream TCP Connection Close Case / mock-server Pod Access Log", linenos=table}
-
+{
+  "start_time": "2026-01-11T08:00:51.488Z",
+  "method": "GET",
+  "path": "/close-before-response/1000",
+  "protocol": "HTTP/1.1",
+  "response_code": "503",
+  "response_flags": "UC",
+  "response_code_details": "upstream_reset_before_response_started{connection_termination}",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "95",
+  "duration": "1002",
+  "upstream_service_time": "-",
+  "x_forwarded_for": "-",
+  "user_agent": "curl/8.14.1",
+  "request_id": "4fa56d4c-a9ce-9fa3-b938-9c99162e5b74",
+  "authority": "mock-server:8080",
+  "upstream_host": "10.244.2.22:8080",
+  "upstream_cluster": "inbound|8080||",
+  "upstream_local_address": "127.0.0.6:48343",
+  "downstream_local_address": "10.244.2.22:8080",
+  "downstream_remote_address": "10.244.1.8:45602",
+  "requested_server_name": "-",
+  "route_name": "default",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "-"
+}
 ```
 
 [Text 12]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 13]는 `mock-server`의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/disconnect/1000` Endpoint에 접근하는 내역와 `503 Service Unavailable` 응답도 확인이 가능하다. 또한 `response_flags`가 `UC (UpstreamConnectionTermination)`로 나타나는 것을 확인할 수 있다.
@@ -698,13 +756,82 @@ upstream connect error or disconnect/reset before headers. reset reason: connect
 
 ```shell {caption="[Shell 9] Upstream TCP Close after Response Case / curl Command", linenos=table}
 $ kubectl exec -it shell -- curl -s mock-server:8080/close-after-response/1000
+dummy datacommand terminated with exit code 18
 ```
 
+[Figure 8]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/close-after-response/1000` Endpoint에 `GET` 요청을 전달하고, `1000ms` 후에 `mock-server` Pod가 응답을 전송한 후에 Connection을 강제로 종료하는 Upstream TCP Close after Response Case를 나타내고 있다. [Shell 9]은 [Figure 8]의 내용을 실행하는 예시를 나타내고 있다.
+
+`mock-server` Pod의 `istio-proxy`는 `mock-server` Container로부터 TCP FIN Flag를 수신하면 503 Service Unavailable 응답을 `shell` Pod에게 전송하여 요청이 비정상적으로 종료된것을 알린다.
+
 ```json {caption="[Text 14] Upstream TCP Close after Response Case / shell Pod Access Log", linenos=table}
+{
+  "start_time": "2026-01-11T08:01:36.305Z",
+  "method": "GET",
+  "path": "/close-after-response/1000",
+  "protocol": "HTTP/1.1",
+  "response_code": "200",
+  "response_flags": "UPE",
+  "response_code_details": "upstream_reset_after_response_started{protocol_error}",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "10",
+  "duration": "2110",
+  "upstream_service_time": "1008",
+  "x_forwarded_for": "-",
+  "user_agent": "curl/8.14.1",
+  "request_id": "feab8e89-b2ac-9992-add8-0c67d8624427",
+  "authority": "mock-server:8080",
+  "upstream_host": "10.244.2.22:8080",
+  "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "10.244.1.8:52206",
+  "downstream_local_address": "10.96.211.131:8080",
+  "downstream_remote_address": "10.244.1.8:33028",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "1009"
+}
 ```
 
 ```json {caption="[Text 15] Upstream TCP Close after Response Case / mock-server Pod Access Log", linenos=table}
+{
+  "start_time": "2026-01-11T08:01:36.307Z",
+  "method": "GET",
+  "path": "/close-after-response/1000",
+  "protocol": "HTTP/1.1",
+  "response_code": "200",
+  "response_flags": "UPE",
+  "response_code_details": "upstream_reset_after_response_started{protocol_error}",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "10",
+  "duration": "1109",
+  "upstream_service_time": "1002",
+  "x_forwarded_for": "-",
+  "user_agent": "curl/8.14.1",
+  "request_id": "feab8e89-b2ac-9992-add8-0c67d8624427",
+  "authority": "mock-server:8080",
+  "upstream_host": "10.244.2.22:8080",
+  "upstream_cluster": "inbound|8080||",
+  "upstream_local_address": "127.0.0.6:58855",
+  "downstream_local_address": "10.244.2.22:8080",
+  "downstream_remote_address": "10.244.1.8:52206",
+  "requested_server_name": "-",
+  "route_name": "default",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "1007"
+}
 ```
+
+[Text 14]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 15]는 `mock-server`의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/close-after-response/1000` Endpoint에 접근하는 내역과 `200 OK` 응답도 확인이 가능하다. 또한 `response_flags`가 `UPE (UpstreamProtocolError)`로 나타나는 것을 확인할 수 있다.
+
+`response_code_details`에 `upstream_reset_after_response_started {protocol_error}`, 즉 응답을 시작한 후에 Protocol Error가 발생하여 Connection을 강제로 종료한 것을 나타내는 상세 내역도 확인할 수 있다. 이는 TCP RST Flag를 받을때와 동일한 상세 내역이며, `mock-server` Pod의 `istio-proxy`는 응답을 일부 전송한 상태에서 TCP FIN Flag 또는 TCP RST Flag를 수신하면 동일한 `response_code_details`를 남기는것을 확인할 수 있다.
 
 #### 1.2.8. Circuit Breaking with Connection Pool Upstream Overflow Case
 
