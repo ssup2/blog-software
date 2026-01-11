@@ -784,7 +784,7 @@ upstream connect error or disconnect/reset before headers. reset reason: connect
 
 [Text 12]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 13]는 `mock-server`의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/disconnect/1000` Endpoint에 접근하는 내역와 `503 Service Unavailable` 응답도 확인이 가능하다. 또한 `response_flags`가 `UC (UpstreamConnectionTermination)`로 나타나는 것을 확인할 수 있다.
 
-`response_code_details`에 `upstream_reset_before_response_started {connection_termination}`, 즉 응답을 시작하기전에 TCP FIN Flag가 Upstream에서 전송되었음을 나타내는 상세 내역도 확인할 수 있다. 이는 TCP RST Flag를 받을때와 동일한 상세 내역이며, `mock-server` Pod의 `istio-proxy`는 응답이 전송되기 전에 TCP FIN Flag 또는 TCP RST Flag를 수신하면 동일한 `response_code_details`를 남기는것을 확인할 수 있다.
+`response_code_details`에 `upstream_reset_before_response_started {connection_termination}`, 즉 응답을 시작하기전에 TCP FIN Flag가 Upstream에서 전송되었음을 나타내는 상세 내역도 확인할 수 있다. 이는 [Figure 5]에서 TCP RST Flag를 받을때와 동일한 상세 내역이며, `mock-server` Pod의 `istio-proxy`는 응답이 전송되기 전에 TCP FIN Flag 또는 TCP RST Flag를 수신하면 동일한 `response_code_details`를 남기는것을 확인할 수 있다.
 
 #### 1.2.7. Upstream TCP Close after Response Case
 
@@ -867,7 +867,7 @@ dummy datacommand terminated with exit code 18
 
 [Text 14]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 15]는 `mock-server`의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/close-after-response/1000` Endpoint에 접근하는 내역과 `200 OK` 응답도 확인이 가능하다. 또한 `response_flags`가 `UPE (UpstreamProtocolError)`로 나타나는 것을 확인할 수 있다.
 
-`response_code_details`에 `upstream_reset_after_response_started {protocol_error}`, 즉 응답을 시작한 후에 Protocol Error가 발생하여 Connection을 강제로 종료한 것을 나타내는 상세 내역도 확인할 수 있다. 이는 TCP RST Flag를 받을때와 동일한 상세 내역이며, `mock-server` Pod의 `istio-proxy`는 응답을 일부 전송한 상태에서 TCP FIN Flag 또는 TCP RST Flag를 수신하면 동일한 `response_code_details`를 남기는것을 확인할 수 있다.
+`response_code_details`에 `upstream_reset_after_response_started {protocol_error}`, 즉 응답을 시작한 후에 Protocol Error가 발생하여 Connection을 강제로 종료한 것을 나타내는 상세 내역도 확인할 수 있다. 이는 [Figure 6]에서 TCP RST Flag를 받을때와 동일한 상세 내역이며, `mock-server` Pod의 `istio-proxy`는 응답을 일부 전송한 상태에서 TCP FIN Flag 또는 TCP RST Flag를 수신하면 동일한 `response_code_details`를 남기는것을 확인할 수 있다.
 
 #### 1.2.8. Circuit Breaking with Connection Pool Upstream Overflow Case
 
@@ -2343,8 +2343,6 @@ command terminated with exit code 77
 
 [Figure 18]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/ResetAfterResponse` 함수에 `milliseconds: 1000` 요청을 전달하고, `1000ms` 후에 `mock-server` Pod가 응답을 일부 전송한 후에 TCP RST Flag를 전송하여 Connection을 강제로 종료하는 Upstream TCP RST after Response Case를 나타내고 있다. [Shell 20]은 [Figure 18]의 내용을 실행하는 예시를 나타내고 있다.
 
-TCP RST Flag를 받은 `mock-server` Pod의 `istio-proxy`는 HTTP/2 RST_STREAM Frame을 `shell` Pod에게 전송하여 최종적으로 `shell` Container에게 전달하여 연결을 종료한다.
-
 ```json {caption="[Text 34] Upstream TCP RST after Response Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-11T06:37:13.914Z",
@@ -2415,6 +2413,8 @@ TCP RST Flag를 받은 `mock-server` Pod의 `istio-proxy`는 HTTP/2 RST_STREAM F
 
 #### 1.3.6. Upstream TCP Close before Response Case
 
+{{< figure caption="[Figure 19] Upstream TCP Close before Response Case" src="images/grpc-upstream-tcp-close-before-response-case.png" width="1000px" >}}
+
 ```shell {caption="[Shell 21] Upstream TCP Close before Response Case / grpcurl Command", linenos=table}
 $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 1000}' mock-server:9090 mock.MockService/CloseBeforeResponse
 ERROR:
@@ -2422,6 +2422,10 @@ ERROR:
   Message: upstream connect error or disconnect/reset before headers. reset reason: connection termination
 command terminated with exit code 78
 ```
+
+[Figure 19]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/CloseBeforeResponse` 함수에 `milliseconds: 1000` 요청을 전달하고, `1000ms` 후에 `mock-server` Pod가 Connection을 강제로 종료하는 Upstream TCP Close before Response Case를 나타내고 있다. [Shell 21]은 [Figure 19]의 내용을 실행하는 예시를 나타내고 있다.
+
+`mock-server` Container에서 TCP FIN Flag를 전송한다는 부분만 제외하고 TCP RST Flag를 받는 [Figure 17]과 동일한 과정을 수행한다는 것을 알 수 있다.
 
 ```json {caption="[Text 36] Upstream TCP Close before Response Case / shell Pod Access Log", linenos=table}
 {
@@ -2549,7 +2553,11 @@ command terminated with exit code 78
 }
 ```
 
+[Text 36]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 37]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/mock.MockService/CloseBeforeResponse` 함수에 접근하는 내역과 `response_code`가 `200`, `grpc_status`가 `Unavailable`로 나타나는 것을 확인할 수 있다. TCP RST Flag를 받는 [Figure 17]과 동일한 과정을 수행한다는 것을 알 수 있다.
+
 #### 1.3.7. Upstream TCP Close after Response Case
+
+{{< figure caption="[Figure 20] Upstream TCP Close after Response Case" src="images/grpc-upstream-tcp-close-after-response-case.png" width="1000px" >}}
 
 ```shell {caption="[Shell 22] Upstream TCP Close after Response Case / grpcurl Command", linenos=table}
 $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 1000}' mock-server:9090 mock.MockService/CloseAfterResponse
@@ -2558,6 +2566,10 @@ ERROR:
   Message: stream terminated by RST_STREAM with error code: NO_ERROR
 command terminated with exit code 77
 ```
+
+[Figure 20]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/CloseAfterResponse` 함수에 `milliseconds: 1000` 요청을 전달하고, `1000ms` 후에 `mock-server` Pod가 응답을 일부 전송한 후에 Connection을 강제로 종료하는 Upstream TCP Close after Response Case를 나타내고 있다. [Shell 22]은 [Figure 20]의 내용을 실행하는 예시를 나타내고 있다.
+
+`mock-server` Container에서 TCP FIN Flag를 전송한다는 부분만 제외하고 TCP RST Flag를 받는 [Figure 18]과 동일한 과정을 수행한다는 것을 알 수 있다.
 
 ```json {caption="[Text 38] Upstream TCP Close after Response Case / shell Pod Access Log", linenos=table}
 {
@@ -2624,6 +2636,8 @@ command terminated with exit code 77
   "response_duration": "1074"
 }
 ```
+
+[Text 38]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 39]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/mock.MockService/CloseAfterResponse` 함수에 접근하는 내역과 `response_code`가 `200`, `grpc_status`가 `Unknown`로 나타나는 것을 확인할 수 있다. TCP RST Flag를 받는 [Figure 18]과 동일한 과정을 수행한다는 것을 알 수 있다.
 
 #### 2.2.5. Upstream Overflow Case
 
