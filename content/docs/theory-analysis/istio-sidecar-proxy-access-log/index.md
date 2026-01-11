@@ -2208,6 +2208,92 @@ TCP RST Flag를 받은 `mock-server` Pod의 `istio-proxy`는 `Unavailable` 상�
 
 #### 1.3.5. Upstream TCP RST after Response Case
 
+{{< figure caption="[Figure 18] Upstream TCP RST after Response Case" src="images/grpc-upstream-tcp-rst-after-response-case.png" width="1000px" >}}
+
+```shell {caption="[Shell 16] Upstream TCP RST after Response Case / grpcurl Command", linenos=table}
+$ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 1000}' mock-server:9090 mock.MockService.ResetAfterResponse
+kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 1000}' mock-server:9090 mock.MockService.ResetAfterResponse
+{
+  "data": "ZHVtbXkgZGF0YQ=="
+}
+ERROR:
+  Code: Internal
+  Message: stream terminated by RST_STREAM with error code: NO_ERROR
+command terminated with exit code 77
+```
+
+[Figure 18]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/ResetAfterResponse` 함수에 `milliseconds: 1000` 요청을 전달하고, `1000ms` 후에 `mock-server` Pod가 응답을 일부 전송한 후에 TCP RST Flag를 전송하여 Connection을 강제로 종료하는 Upstream TCP RST after Response Case를 나타내고 있다. [Shell 16]은 [Figure 18]의 내용을 실행하는 예시를 나타내고 있다.
+
+TCP RST Flag를 받은 `mock-server` Pod의 `istio-proxy`는 HTTP/2 RST_STREAM Frame을 `shell` Pod에게 전송하여 최종적으로 `shell` Container에게 전달하여 연결을 종료한다.
+
+```json {caption="[Text 31] Upstream TCP RST after Response Case / shell Pod Access Log", linenos=table}
+{
+  "start_time": "2026-01-11T06:37:13.914Z",
+  "method": "POST",
+  "path": "/mock.MockService/ResetAfterResponse",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "UR",
+  "response_code_details": "upstream_reset_after_response_started{remote_reset}",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "8",
+  "bytes_sent": "17",
+  "duration": "1216",
+  "upstream_service_time": "1092",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "4d986174-88b0-97b1-88fb-46f493a880e5",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.2.22:9090",
+  "upstream_cluster": "outbound|9090||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "10.244.1.8:35336",
+  "downstream_local_address": "10.96.211.131:9090",
+  "downstream_remote_address": "10.244.1.8:36028",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "Unknown",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "9",
+  "response_duration": "1101"
+}
+```
+
+```json {caption="[Text 32] Upstream TCP RST after Response Case / mock-server Pod Access Log", linenos=table}
+{
+  "start_time": "2026-01-11T06:37:13.949Z",
+  "method": "POST",
+  "path": "/mock.MockService/ResetAfterResponse",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "UC",
+  "response_code_details": "upstream_reset_after_response_started{connection_termination}",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "8",
+  "bytes_sent": "17",
+  "duration": "1167",
+  "upstream_service_time": "1010",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "4d986174-88b0-97b1-88fb-46f493a880e5",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.2.22:9090",
+  "upstream_cluster": "inbound|9090||",
+  "upstream_local_address": "127.0.0.6:42975",
+  "downstream_local_address": "10.244.2.22:9090",
+  "downstream_remote_address": "10.244.1.8:35336",
+  "requested_server_name": "-",
+  "route_name": "default",
+  "grpc_status": "Unknown",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "55",
+  "response_duration": "1065"
+}
+```
+
+[Text 31]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 32]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/mock.MockService/ResetAfterResponse` 함수에 접근하는 내역과 `response_code`가 `200`, `grpc_status`가 `Unknown`로 나타나는 것을 확인할 수 있다. `shell` Pod의 `istio-proxy`의 Access Log에서 `response_flags`가 `UR (UpstreamRemoteReset)`로 나타나는 것을 확인할 수 있으며, `mock-server` Pod의 `istio-proxy`의 Access Log에서 `response_flags`가 `UC (UpstreamConnectionTermination)`로 나타나는 것을 확인할 수 있다.
+
 #### 2.2.4. Upstream Disconnect Case
 
 ```shell {caption="[Shell 18] Upstream Disconnect Case / curl Command", linenos=table}
