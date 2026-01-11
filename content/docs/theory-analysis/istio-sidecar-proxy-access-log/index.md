@@ -88,7 +88,7 @@ metadata:
 spec:
   containers:
   - name: mock-server
-    image: ghcr.io/ssup2/mock-go-server:commit-a6e81068
+    image: ghcr.io/ssup2/mock-go-server:0.1.6
     ports:
     - containerPort: 8080
     - containerPort: 9090
@@ -180,7 +180,10 @@ HTTP/GRPC 요청의 최대 동시 처리 개수를 제한하는 방법은 `http.
 |---|---|
 | /status/{code} | Return specific HTTP status code |
 | /delay/{ms} | Delay response by milliseconds |
-| /disconnect/{ms} | Server closes connection after milliseconds |
+| /reset-before-response/{ms} | Server sends TCP RST before response after delay |
+| /reset-after-response/{ms} | Server sends dummy data, then TCP RST after delay |
+| /close-before-response/{ms} | Server closes connection before response after delay |
+| /close-after-response/{ms} | Server sends dummy data, then closes connection after delay |
 {{< /table >}}
 
 {{< table caption="[Table 2] mock-server gRPC Endpoints" >}}
@@ -188,7 +191,10 @@ HTTP/GRPC 요청의 최대 동시 처리 개수를 제한하는 방법은 `http.
 |---|---|
 | /mock.MockService.Status | Return specific gRPC status code |
 | /mock.MockService.Delay | Delay response by milliseconds |
-| /mock.MockService.Disconnect | Server closes connection after milliseconds |
+| /mock.MockService.ResetBeforeResponse | Server sends TCP RST before response after delay |
+| /mock.MockService.ResetAfterResponse | Server sends dummy data, then TCP RST after delay |
+| /mock.MockService.CloseBeforeResponse | Server closes connection before response after delay |
+| /mock.MockService.CloseAfterResponse | Server sends dummy data, then closes connection after delay |
 {{< /table >}}
 
 [Table 1]과 [Table 2]는 `mock-server` Workload의 HTTP Endpoint, gRPC Function별 동작을 나타내고 있다. `mock-server`에서 제공하는 Endpoint들을 다양한 Case를 재현하기 위해서 사용한다.
@@ -224,8 +230,42 @@ service MockService {
   // Delay response
   rpc Delay(DelayRequest) returns (DelayResponse);
 
-  // Server closes connection after delay
-  rpc Disconnect(DisconnectRequest) returns (Empty);
+  // Server closes connection before response after delay
+  rpc CloseBeforeResponse(CloseRequest) returns (Empty);
+
+  // Server sends dummy data, then closes connection
+  rpc CloseAfterResponse(CloseRequest) returns (stream CloseStreamResponse);
+
+  // Server sends wrong protocol data after delay
+  rpc WrongProtocol(WrongProtocolRequest) returns (Empty);
+
+  // Server sends RST before response after delay
+  rpc ResetBeforeResponse(ResetRequest) returns (Empty);
+
+  // Server sends dummy data, then RST
+  rpc ResetAfterResponse(ResetRequest) returns (stream ResetStreamResponse);
+}
+
+message CloseRequest {
+  int32 milliseconds = 1;
+}
+
+message CloseStreamResponse {
+  int32 sequence = 1;
+  bytes data = 2;
+}
+
+message WrongProtocolRequest {
+  int32 milliseconds = 1;
+}
+
+message ResetRequest {
+  int32 milliseconds = 1;
+}
+
+message ResetStreamResponse {
+  int32 sequence = 1;        // Message sequence number
+  bytes data = 2;            // Payload data
 }
 
 message Empty {}
@@ -248,10 +288,6 @@ message DelayResponse {
   string service = 1;
   int32 delayed_ms = 2;
   string message = 3;
-}
-
-message DisconnectRequest {
-  int32 milliseconds = 1;
 }
 ```
 
@@ -2377,21 +2413,21 @@ TCP RST Flag를 받은 `mock-server` Pod의 `istio-proxy`는 HTTP/2 RST_STREAM F
 
 [Text 34]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 35]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/mock.MockService/ResetAfterResponse` 함수에 접근하는 내역과 `response_code`가 `200`, `grpc_status`가 `Unknown`로 나타나는 것을 확인할 수 있다. `shell` Pod의 `istio-proxy`의 Access Log에서 `response_flags`가 `UR (UpstreamRemoteReset)`로 나타나는 것을 확인할 수 있으며, `mock-server` Pod의 `istio-proxy`의 Access Log에서 `response_flags`가 `UC (UpstreamConnectionTermination)`로 나타나는 것을 확인할 수 있다.
 
-#### 2.2.4. Upstream Disconnect Case
+#### 1.3.6. Upstream TCP Close before Response Case
 
-```shell {caption="[Shell 21] Upstream Disconnect Case / grpcurl Command", linenos=table}
-$ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 1000}' mock-server:9090 mock.MockService.Disconnect
+```shell {caption="[Shell 21] Upstream TCP Close before Response Case / grpcurl Command", linenos=table}
+$ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 1000}' mock-server:9090 mock.MockService/CloseBeforeResponse
 ERROR:
   Code: Unavailable
-  Message: connection closed by server
+  Message: upstream connect error or disconnect/reset before headers. reset reason: connection termination
 command terminated with exit code 78
 ```
 
-```json {caption="[Text 36] Upstream Disconnect Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 36] Upstream TCP Close before Response Case / shell Pod Access Log", linenos=table}
 {
-  "start_time": "2025-12-25T11:47:17.883Z",
+  "start_time": "2026-01-11T11:55:39.852Z",
   "method": "POST",
-  "path": "/mock.MockService/Disconnect",
+  "path": "/mock.MockService/CloseBeforeResponse",
   "protocol": "HTTP/2",
   "response_code": "200",
   "response_flags": "URX",
@@ -2400,56 +2436,192 @@ command terminated with exit code 78
   "upstream_transport_failure_reason": "-",
   "bytes_received": "8",
   "bytes_sent": "0",
-  "duration": "3136",
-  "upstream_service_time": "3131",
+  "duration": "3086",
+  "upstream_service_time": "3071",
   "x_forwarded_for": "-",
   "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
-  "request_id": "3f9b6820-408e-9e38-a7f6-8eed233a9457",
+  "request_id": "196a9ef4-4383-9d02-9dbb-9752f082fba6",
   "authority": "mock-server:9090",
-  "upstream_host": "10.244.2.8:9090",
+  "upstream_host": "10.244.2.22:9090",
   "upstream_cluster": "outbound|9090||mock-server.default.svc.cluster.local",
-  "upstream_local_address": "10.244.1.5:58590",
-  "downstream_local_address": "10.96.186.69:9090",
-  "downstream_remote_address": "10.244.1.5:46598",
+  "upstream_local_address": "10.244.1.8:45386",
+  "downstream_local_address": "10.96.211.131:9090",
+  "downstream_remote_address": "10.244.1.8:38082",
   "requested_server_name": "-",
   "route_name": "-",
   "grpc_status": "Unavailable",
   "upstream_request_attempt_count": "3",
-  "request_duration": "4",
-  "response_duration": "3135"
+  "request_duration": "1",
+  "response_duration": "3073"
 }
 ```
 
-```json {caption="[Text 37] Upstream Disconnect Case / mock-server Pod Access Log", linenos=table}
+```json {caption="[Text 37] Upstream TCP Close before Response Case / mock-server Pod Access Log", linenos=table}
 {
-  "start_time": "2025-12-25T11:47:20.014Z",
+  "start_time": "2026-01-11T11:55:39.855Z",
   "method": "POST",
-  "path": "/mock.MockService/Disconnect",
+  "path": "/mock.MockService/CloseBeforeResponse",
   "protocol": "HTTP/2",
   "response_code": "200",
-  "response_flags": "-",
-  "response_code_details": "via_upstream",
+  "response_flags": "UC",
+  "response_code_details": "upstream_reset_before_response_started{connection_termination}",
   "connection_termination_details": "-",
   "upstream_transport_failure_reason": "-",
   "bytes_received": "8",
   "bytes_sent": "0",
-  "duration": "1004",
-  "upstream_service_time": "1003",
+  "duration": "1006",
+  "upstream_service_time": "-",
   "x_forwarded_for": "-",
   "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
-  "request_id": "3f9b6820-408e-9e38-a7f6-8eed233a9457",
+  "request_id": "196a9ef4-4383-9d02-9dbb-9752f082fba6",
   "authority": "mock-server:9090",
-  "upstream_host": "10.244.2.8:9090",
+  "upstream_host": "10.244.2.22:9090",
   "upstream_cluster": "inbound|9090||",
-  "upstream_local_address": "127.0.0.6:43691",
-  "downstream_local_address": "10.244.2.8:9090",
-  "downstream_remote_address": "10.244.1.5:58590",
-  "requested_server_name": "outbound_.9090_._.mock-server.default.svc.cluster.local",
+  "upstream_local_address": "127.0.0.6:60797",
+  "downstream_local_address": "10.244.2.22:9090",
+  "downstream_remote_address": "10.244.1.8:45386",
+  "requested_server_name": "-",
   "route_name": "default",
   "grpc_status": "Unavailable",
   "upstream_request_attempt_count": "1",
   "request_duration": "0",
-  "response_duration": "1004"
+  "response_duration": "-"
+}
+{
+  "start_time": "2026-01-11T11:55:40.874Z",
+  "method": "POST",
+  "path": "/mock.MockService/CloseBeforeResponse",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "UC",
+  "response_code_details": "upstream_reset_before_response_started{connection_termination}",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "8",
+  "bytes_sent": "0",
+  "duration": "1003",
+  "upstream_service_time": "-",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "196a9ef4-4383-9d02-9dbb-9752f082fba6",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.2.22:9090",
+  "upstream_cluster": "inbound|9090||",
+  "upstream_local_address": "127.0.0.6:45085",
+  "downstream_local_address": "10.244.2.22:9090",
+  "downstream_remote_address": "10.244.1.8:45386",
+  "requested_server_name": "-",
+  "route_name": "default",
+  "grpc_status": "Unavailable",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "-"
+}
+{
+  "start_time": "2026-01-11T11:55:41.921Z",
+  "method": "POST",
+  "path": "/mock.MockService/CloseBeforeResponse",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "UC",
+  "response_code_details": "upstream_reset_before_response_started{connection_termination}",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "8",
+  "bytes_sent": "0",
+  "duration": "1003",
+  "upstream_service_time": "-",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "196a9ef4-4383-9d02-9dbb-9752f082fba6",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.2.22:9090",
+  "upstream_cluster": "inbound|9090||",
+  "upstream_local_address": "127.0.0.6:58531",
+  "downstream_local_address": "10.244.2.22:9090",
+  "downstream_remote_address": "10.244.1.8:45386",
+  "requested_server_name": "-",
+  "route_name": "default",
+  "grpc_status": "Unavailable",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "-"
+}
+```
+
+#### 1.3.7. Upstream TCP Close after Response Case
+
+```shell {caption="[Shell 22] Upstream TCP Close after Response Case / grpcurl Command", linenos=table}
+$ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 1000}' mock-server:9090 mock.MockService/CloseAfterResponse
+ERROR:
+  Code: Internal
+  Message: stream terminated by RST_STREAM with error code: NO_ERROR
+command terminated with exit code 77
+```
+
+```json {caption="[Text 38] Upstream TCP Close after Response Case / shell Pod Access Log", linenos=table}
+{
+  "start_time": "2026-01-11T12:12:56.184Z",
+  "method": "POST",
+  "path": "/mock.MockService/CloseAfterResponse",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "UR",
+  "response_code_details": "upstream_reset_after_response_started{remote_reset}",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "8",
+  "bytes_sent": "17",
+  "duration": "1221",
+  "upstream_service_time": "1091",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "5352fc42-1f26-953b-8934-54be55aac934",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.2.22:9090",
+  "upstream_cluster": "outbound|9090||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "10.244.1.8:55444",
+  "downstream_local_address": "10.96.211.131:9090",
+  "downstream_remote_address": "10.244.1.8:45082",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "Unknown",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "15",
+  "response_duration": "1106"
+}
+```
+
+```json {caption="[Text 39] Upstream TCP Close before Response Case / mock-server Pod Access Log", linenos=table}
+{
+  "start_time": "2026-01-11T12:12:56.215Z",
+  "method": "POST",
+  "path": "/mock.MockService/CloseAfterResponse",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "UC",
+  "response_code_details": "upstream_reset_after_response_started{connection_termination}",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "8",
+  "bytes_sent": "17",
+  "duration": "1175",
+  "upstream_service_time": "1013",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "5352fc42-1f26-953b-8934-54be55aac934",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.2.22:9090",
+  "upstream_cluster": "inbound|9090||",
+  "upstream_local_address": "127.0.0.6:47473",
+  "downstream_local_address": "10.244.2.22:9090",
+  "downstream_remote_address": "10.244.1.8:55444",
+  "requested_server_name": "-",
+  "route_name": "default",
+  "grpc_status": "Unknown",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "61",
+  "response_duration": "1074"
 }
 ```
 
