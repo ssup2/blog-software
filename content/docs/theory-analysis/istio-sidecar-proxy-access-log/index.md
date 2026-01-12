@@ -299,18 +299,18 @@ $ kubectl cp mock.proto shell:mock.proto
 
 ### 1.2. HTTP Cases
 
-#### 1.2.1. Success Case
+#### 1.2.1. OK Case
 
-{{< figure caption="[Figure 2] HTTP Success Case" src="images/http-success-case.png" width="1000px" >}}
+{{< figure caption="[Figure 2] HTTP OK Case" src="images/http-ok-case.png" width="1000px" >}}
 
-```shell {caption="[Shell 3] HTTP Success Case / curl Command", linenos=table}
+```shell {caption="[Shell 3] HTTP OK Case / curl Command", linenos=table}
 $ kubectl exec -it shell -- curl -s mock-server:8080/status/200
 {"message":"OK","service":"mock-server","status_code":200}
 ```
 
-[Figure 2]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/status/200` Endpoint에 `GET` 요청을 전달하고, `200 OK` 응답을 받는 HTTP Success Case를 나타내고 있다. [Shell 3]은 [Figure 2]의 내용을 실행하는 예시를 나타내고 있다.
+[Figure 2]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/status/200` Endpoint에 `GET` 요청을 전달하고, `200 OK` 응답을 받는 HTTP OK Case를 나타내고 있다. [Shell 3]은 [Figure 2]의 내용을 실행하는 예시를 나타내고 있다.
 
-```json {caption="[Text 2] HTTP Success Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 2] HTTP OK Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2025-12-14T15:04:12.558Z",
   "method": "GET",
@@ -343,7 +343,7 @@ $ kubectl exec -it shell -- curl -s mock-server:8080/status/200
 }
 ```
 
-```json {caption="[Text 3] HTTP Success Case / mock-server Access Log", linenos=table}
+```json {caption="[Text 3] HTTP OK Case / mock-server Access Log", linenos=table}
 {
   "start_time": "2025-12-14T15:04:12.563Z",
   "method": "GET",
@@ -378,18 +378,18 @@ $ kubectl exec -it shell -- curl -s mock-server:8080/status/200
 
 [Text 2]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 3]는 `mock-server`의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/status/200` Endpoint에 접근하는 내역와 `200 OK` 응답도 확인이 가능하다.
 
-#### 1.2.2. Failure Case
+#### 1.2.2. Service Unavailable Case
 
-{{< figure caption="[Figure 3] HTTP Failure Case" src="images/http-failure-case.png" width="1000px" >}}
+{{< figure caption="[Figure 3] HTTP Service Unavailable Case" src="images/http-service-unavailable-case.png" width="1000px" >}}
 
-```shell {caption="[Shell 4] HTTP Failure Case / curl Command", linenos=table}
+```shell {caption="[Shell 4] HTTP Service Unavailable Case / curl Command", linenos=table}
 $ kubectl exec -it shell -- curl -s mock-server:8080/status/503
 {"message":"Service Unavailable","service":"mock-server","status_code":503}
 ```
 
-[Figure 3]은 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/status/503` Endpoint에 `GET` 요청을 전달하고, `503 Service Unavailable` 응답을 받는 HTTP Failure Case를 나타내고 있다. [Shell 4]은 [Figure 3]의 내용을 실행하는 예시를 나타내고 있다.
+[Figure 3]은 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/status/503` Endpoint에 `GET` 요청을 전달하고, `503 Service Unavailable` 응답을 받는 HTTP Service Unavailable Case를 나타내고 있다. [Shell 4]은 [Figure 3]의 내용을 실행하는 예시를 나타내고 있다.
 
-```json {caption="[Text 4] HTTP Failure Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 4] HTTP Service Unavailable Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2025-12-28T12:47:37.317Z",
   "method": "GET",
@@ -422,7 +422,7 @@ $ kubectl exec -it shell -- curl -s mock-server:8080/status/503
 }
 ```
 
-```json {caption="[Text 5] HTTP Failure Case / mock-server Access Log", linenos=table}
+```json {caption="[Text 5] HTTP Service Unavailable Case / mock-server Access Log", linenos=table}
 {
   "start_time": "2025-12-28T12:47:37.325Z",
   "method": "GET",
@@ -1932,11 +1932,11 @@ $ kubectl exec -it shell -- curl -s mock-server:8080/delay/10000
 
 ### 1.3. GRPC Cases
 
-#### 1.3.1. Success Case
+#### 1.3.1. OK Case
 
-{{< figure caption="[Figure 14] Success Case" src="images/grpc-success-case.png" width="1000px" >}}
+{{< figure caption="[Figure 14] OK Case" src="images/grpc-ok-case.png" width="1000px" >}}
 
-```shell {caption="[Shell 16] Success Case / grpcurl Command", linenos=table}
+```shell {caption="[Shell 16] OK Case / grpcurl Command", linenos=table}
 $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 0}' mock-server:9090 mock.MockService/Status
 {
   "service": "mock-server",
@@ -1944,9 +1944,9 @@ $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 0}
 }
 ```
 
-[Figure 14]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService.Status` 함수에 `code: 0` 요청을 전달하고, `OK` 응답을 받는 Success Case를 나타내고 있다. [Shell 16]은 [Figure 14]의 내용을 실행하는 예시를 나타내고 있다.
+[Figure 14]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService.Status` 함수에 `code: 0` 요청을 전달하고, `OK` 응답을 받는 OK Case를 나타내고 있다. [Shell 16]은 [Figure 14]의 내용을 실행하는 예시를 나타내고 있다.
 
-```json {caption="[Text 26] Success Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 26] OK Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2025-12-25T11:18:51.880Z",
   "method": "POST",
@@ -1979,7 +1979,7 @@ $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 0}
 }
 ```
 
-```json {caption="[Text 27] Success Case / mock-server Pod Access Log", linenos=table}
+```json {caption="[Text 27] OK Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2025-12-25T11:18:51.881Z",
   "method": "POST",
@@ -2014,56 +2014,56 @@ $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 0}
 
 [Text 26]은 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 27]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/mock.MockService/Status` 함수에 접근하는 내역과 `grpc_status`가 `OK`로 나타나는 것을 확인할 수 있다.
 
-#### 1.3.2. Internal Error Case
+#### 1.3.2. Unavailable Case
 
-{{< figure caption="[Figure 15] Internal Server Error Case" src="images/grpc-internal-server-error-case.png" width="1000px" >}}
+{{< figure caption="[Figure 15] Unavailable Case" src="images/grpc-unavailable-case.png" width="1000px" >}}
 
-```shell {caption="[Shell 17] Internal Server Error Case / grpcurl Command", linenos=table}
-$ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 13}' mock-server:9090 mock.MockService/Status
+```shell {caption="[Shell 17] Unavailable Case / grpcurl Command", linenos=table}
+$ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 14}' mock-server:9090 mock.MockService/Status
 ERROR:
-  Code: Internal
-  Message: Simulated error with gRPC code 13 (Internal)
-command terminated with exit code 77
+  Code: Unavailable
+  Message: Simulated error with gRPC code 14 (Unavailable)
+command terminated with exit code 78
 ```
 
-[Figure 15]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/Status` 함수에 `code: 13` 요청을 전달하고, `Internal` 응답을 받는 Internal Error Case를 나타내고 있다. [Shell 17]은 [Figure 15]의 내용을 실행하는 예시를 나타내고 있다.
+[Figure 15]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/Status` 함수에 `code: 14` 요청을 전달하고, `Unavailable` 응답을 받는 Unavailable Case를 나타내고 있다. [Shell 17]은 [Figure 15]의 내용을 실행하는 예시를 나타내고 있다.
 
-```json {caption="[Text 28] Internal Server Error Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 28] Unavailable Case / shell Pod Access Log", linenos=table}
 {
-  "start_time": "2025-12-25T11:35:39.358Z",
+  "start_time": "2026-01-12T14:38:10.298Z",
   "method": "POST",
   "path": "/mock.MockService/Status",
   "protocol": "HTTP/2",
   "response_code": "200",
-  "response_flags": "-",
-  "response_code_details": "via_upstream",
+  "response_flags": "UH",
+  "response_code_details": "no_healthy_upstream",
   "connection_termination_details": "-",
   "upstream_transport_failure_reason": "-",
   "bytes_received": "7",
   "bytes_sent": "0",
-  "duration": "50",
-  "upstream_service_time": "27",
+  "duration": "347",
+  "upstream_service_time": "-",
   "x_forwarded_for": "-",
   "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
-  "request_id": "796e0dd3-a85f-9d2b-8350-53c022d0880d",
+  "request_id": "36a44aa4-990b-9db5-8c98-d00d5b7acbf8",
   "authority": "mock-server:9090",
-  "upstream_host": "10.244.2.8:9090",
+  "upstream_host": "10.244.2.22:9090",
   "upstream_cluster": "outbound|9090||mock-server.default.svc.cluster.local",
-  "upstream_local_address": "10.244.1.5:36738",
-  "downstream_local_address": "10.96.186.69:9090",
-  "downstream_remote_address": "10.244.1.5:58154",
+  "upstream_local_address": "10.244.1.8:46440",
+  "downstream_local_address": "10.96.211.131:9090",
+  "downstream_remote_address": "10.244.1.8:33238",
   "requested_server_name": "-",
   "route_name": "-",
-  "grpc_status": "Internal",
-  "upstream_request_attempt_count": "1",
-  "request_duration": "14",
-  "response_duration": "42"
+  "grpc_status": "Unavailable",
+  "upstream_request_attempt_count": "3",
+  "request_duration": "46",
+  "response_duration": "304"
 }
 ```
 
-```json {caption="[Text 29] Internal Server Error Case / mock-server Pod Access Log", linenos=table}
+```json {caption="[Text 29] Unavailable Case / mock-server Pod Access Log", linenos=table}
 {
-  "start_time": "2025-12-25T11:35:39.378Z",
+  "start_time": "2026-01-12T14:38:10.601Z",
   "method": "POST",
   "path": "/mock.MockService/Status",
   "protocol": "HTTP/2",
@@ -2074,27 +2074,27 @@ command terminated with exit code 77
   "upstream_transport_failure_reason": "-",
   "bytes_received": "7",
   "bytes_sent": "0",
-  "duration": "16",
-  "upstream_service_time": "5",
+  "duration": "1",
+  "upstream_service_time": "1",
   "x_forwarded_for": "-",
   "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
-  "request_id": "796e0dd3-a85f-9d2b-8350-53c022d0880d",
+  "request_id": "36a44aa4-990b-9db5-8c98-d00d5b7acbf8",
   "authority": "mock-server:9090",
-  "upstream_host": "10.244.2.8:9090",
+  "upstream_host": "10.244.2.22:9090",
   "upstream_cluster": "inbound|9090||",
-  "upstream_local_address": "127.0.0.6:43023",
-  "downstream_local_address": "10.244.2.8:9090",
-  "downstream_remote_address": "10.244.1.5:36738",
-  "requested_server_name": "outbound_.9090_._.mock-server.default.svc.cluster.local",
+  "upstream_local_address": "127.0.0.6:42649",
+  "downstream_local_address": "10.244.2.22:9090",
+  "downstream_remote_address": "10.244.1.8:46440",
+  "requested_server_name": "-",
   "route_name": "default",
-  "grpc_status": "Internal",
+  "grpc_status": "Unavailable",
   "upstream_request_attempt_count": "1",
-  "request_duration": "7",
-  "response_duration": "12"
+  "request_duration": "0",
+  "response_duration": "1"
 }
 ```
 
-[Text 28]은 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 29]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/mock.MockService/Status` 함수에 접근하는 내역과 `grpc_status`가 `Internal`로 나타나는 것을 확인할 수 있다. 또한 `response_code`가 `200 OK`로 나타나는 것을 확인할 수 있으며, gRPC 이용시 gRPC의 결과와 상관없이 `response_code`는 항상 `200 OK`로 나타난다.
+[Text 28]은 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 29]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/mock.MockService/Status` 함수에 접근하는 내역과 `grpc_status`가 `Unavailable`로 나타나는 것을 확인할 수 있다. 또한 `response_code`가 `200 OK`로 나타나는 것을 확인할 수 있으며, gRPC 이용시 gRPC의 결과와 상관없이 `response_code`는 항상 `200 OK`로 나타난다.
 
 #### 1.3.3. Downstream HTTP/2 RST_STREAM Case
 
@@ -2979,83 +2979,41 @@ ERROR:
   Code: Internal
   Message: Simulated error with gRPC code 13 (Internal)
 command terminated with exit code 77
-$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("9090||mock-server")) | .hostStatuses[].healthStatus'
-{
-  "edsHealthStatus": "HEALTHY"
-}
-
 $ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 13}' mock-server:9090 mock.MockService.Status
 ERROR:
   Code: Internal
   Message: Simulated error with gRPC code 13 (Internal)
 command terminated with exit code 77
-$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("9090||mock-server")) | .hostStatuses[].healthStatus'
-{
-  "edsHealthStatus": "HEALTHY"
-}
-
 $ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 13}' mock-server:9090 mock.MockService.Status
 ERROR:
   Code: Internal
   Message: Simulated error with gRPC code 13 (Internal)
 command terminated with exit code 77
-$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("9090||mock-server")) | .hostStatuses[].healthStatus'
-{
-  "edsHealthStatus": "HEALTHY"
-}
-
 $ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 13}' mock-server:9090 mock.MockService.Status
 ERROR:
   Code: Internal
   Message: Simulated error with gRPC code 13 (Internal)
 command terminated with exit code 77
-$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("9090||mock-server")) | .hostStatuses[].healthStatus'
-{
-  "edsHealthStatus": "HEALTHY"
-}
-
 $ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 13}' mock-server:9090 mock.MockService.Status
 ERROR:
   Code: Internal
   Message: Simulated error with gRPC code 13 (Internal)
 command terminated with exit code 77
-$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("9090||mock-server")) | .hostStatuses[].healthStatus'
-{
-  "edsHealthStatus": "HEALTHY"
-}
-
 $ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 13}' mock-server:9090 mock.MockService.Status
 ERROR:
   Code: Unavailable
   Message: no healthy upstream
 command terminated with exit code 78
-$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("9090||mock-server")) | .hostStatuses[].healthStatus'
-{
-  "failedOutlierCheck": true,
-  "edsHealthStatus": "HEALTHY"
-}
-
 $ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 13}' mock-server:9090 mock.MockService.Status
 ERROR:
   Code: Unavailable
   Message: no healthy upstream
 command terminated with exit code 78
-$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("9090||mock-server")) | .hostStatuses[].healthStatus'
-{
-  "failedOutlierCheck": true,
-  "edsHealthStatus": "HEALTHY"
-}
-
 $ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 13}' mock-server:9090 mock.MockService.Status
 ERROR:
   Code: Unavailable
   Message: no healthy upstream
 command terminated with exit code 78
-$ istioctl proxy-config endpoint shell -o json | jq '.[] | select(.name | contains("9090||mock-server")) | .hostStatuses[].healthStatus'
-{
-  "failedOutlierCheck": true,
-  "edsHealthStatus": "HEALTHY"
-}
 ```
 
 ```json {caption="[Text 40] Circuit Breaking Case / shell Pod Access Log", linenos=table}
