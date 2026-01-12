@@ -2641,6 +2641,8 @@ command terminated with exit code 77
 
 #### 1.3.8. Circuit Breaking with Upstream Connection Pool Overflow Case
 
+{{< figure caption="[Figure 21] Circuit Breaking with Upstream Connection Pool Overflow Case" src="images/grpc-circuit-breaking-with-upstream-connection-pool-overflow-case.png" width="1000px" >}}
+
 ```shell {caption="[Shell 23] Circuit Breaking with Upstream Connection Pool Overflow Case / grpcurl Command", linenos=table}
 $ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 5000}' mock-server:9090 mock.MockService/Delay &
 $ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 5000}' mock-server:9090 mock.MockService/Delay &
@@ -2660,6 +2662,8 @@ command terminated with exit code 78
   "message": "Response delayed by 5000ms"
 }
 ```
+
+[Figure 21]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/Delay` 함수에 `milliseconds: 5000` 요청을 3번 연속으로 전달하여 Upstream Connection Pool Overflow를 발생시키는 Case를 나타내고 있다. [Shell 23]은 [Figure 21]의 내용을 실행하는 예시를 나타내고 있다. GRPC로 요청과 응답이 온다는 부분을 제외하고는 [Figure 9]에서 설명한 것과 동일한 과정을 수행한다.
 
 ```json {caption="[Text 40] Circuit Breaking with Upstream Connection Pool Overflow Case / shell Pod Access Log", linenos=table}
 {
@@ -2817,7 +2821,11 @@ command terminated with exit code 78
 }
 ```
 
+[Text 40]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 41]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. GRPC로 요청과 응답이 발생한다는 부분을 제외하고 [Text 16], [Text 17]과 동일한 과정을 수행한다는 것을 알 수 있다.
+
 #### 1.3.9. Circuit Breaking with Upstream Overflow Case
+
+{{< figure caption="[Figure 22] Circuit Breaking with Upstream Overflow Case" src="images/grpc-circuit-breaking-with-upstream-overflow-case.png" width="1000px" >}}
 
 ```shell {caption="[Shell 24] Circuit Breaking with Upstream Overflow Case / grpcurl Command", linenos=table}
 $ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 5000}' mock-server:9090 mock.MockService/Delay &
@@ -2832,6 +2840,8 @@ ERROR:
   Message: upstream connect error or disconnect/reset before headers. reset reason: overflow
 command terminated with exit code 78
 ```
+
+[Figure 22]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/Delay` 함수에 `milliseconds: 5000` 요청을 3번 연속으로 전달하여 Upstream Overflow를 발생시키는 Case를 나타내고 있다. [Shell 24]은 [Figure 22]의 내용을 실행하는 예시를 나타내고 있다. GRPC로 요청과 응답이 발생한다는 부분을 제외하고는 [Figure 9]에서 설명한 것과 동일한 과정을 수행한다.
 
 ```json {caption="[Text 42] Circuit Breaking with Upstream Overflow Case / shell Pod Access Log", linenos=table}
 {
@@ -2958,6 +2968,8 @@ command terminated with exit code 78
   "response_duration": "5018"
 }
 ```
+
+[Text 42]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 43]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. GRPC로 요청과 응답이 발생한다는 부분을 제외하고 [Text 18], [Text 19]과 동일한 과정을 수행한다는 것을 알 수 있다.
 
 #### 2.2.6. Circuit Breaking Case
 
