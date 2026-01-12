@@ -1,6 +1,5 @@
 ---
 title: Istio Sidecar Proxy Access Log
-draft: true
 ---
 
 ## 1. Istio Sidecar Proxy Access Log
@@ -1858,7 +1857,7 @@ no healthy upstream
 $ kubectl exec -it shell -- curl -s mock-server:8080/delay/70000
 ```
 
-[Figure 13]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/delay/70000` Endpoint에 `GET` 요청을 전달하였지만, `mock-server` Pod의 `istio-proxy`에서 70000ms 대기후에 응답이 오지 않아 Request를 Timeout 처리하는 Upstream Request Timeout Case를 나타내고 있다. [Shell 15]은 [Figure 13]의 내용을 실행하는 예시를 나타내고 있다.
+[Figure 13]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/delay/70000` Endpoint에 `GET` 요청을 전달하였지만, `mock-server` Pod의 `istio-proxy`에서 60000ms 대기후에 응답이 오지 않아 Request를 Timeout 처리하는 Upstream Request Timeout Case를 나타내고 있다. [Shell 15]은 [Figure 13]의 내용을 실행하는 예시를 나타내고 있다.
 
 [File 1]의 Virtual Service에 의해서 `mock-server` Pod로 전송된 요청은 최대 60000ms 대기할 수 있다. 하지만 `mock-server` Pod의 `/delay/70000` Endpoint에 전송한 요청은 70000ms가 필요하기 때문에 Timeout이 발생한다. `mock-server` Pod의 `istio-proxy`는 Timeout 발생시 TCP FIN Flag와 TCP RST Flag를 차례로 전송하여, `mock-server` Pod와의 연결을 종료한다. 또한 `504 Gateway Timeout` 응답을 `shell` Container에게 전송한다.
 
@@ -3446,6 +3445,8 @@ ERROR:
 command terminated with exit code 78
 ```
 
+[Figure 24]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/Status` 함수에 `code: 0` 요청을 3번 연속으로 전달하여 Timeout에 의해서 Retry되는 Upstream Request Retry Case with Timeout를 나타내고 있다. [Shell 24]은 [Figure 24]의 내용을 실행하는 예시를 나타내고 있다. GRPC로 요청과 응답이 발생한다는 부분을 제외하고는 [Figure 11]에서 설명한 것과 동일한 과정을 수행한다.
+
 ```json {caption="[Text 42] Upstream Request Retry Case with Timeout / shell Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-12T16:03:05.367Z",
@@ -3539,6 +3540,8 @@ command terminated with exit code 78
 }
 ```
 
+[Text 42]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 43]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. GRPC로 요청과 응답이 발생한다는 부분을 제외하고는 [Text 22]와 동일한 과정을 수행한다.
+
 #### 1.3.12. Upstream Request Retry Case with TCP Reset
 
 {{< figure caption="[Figure 25] Upstream Request Retry Case with TCP Reset" src="images/grpc-upstream-request-retry-case-with-tcp-reset.png" width="1000px" >}}
@@ -3564,6 +3567,8 @@ ERROR:
   Message: no healthy upstream
 command terminated with exit code 78
 ```
+
+[Figure 25]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/Status` 함수에 `code: 0` 요청을 3번 연속으로 전달하여 TCP Reset에 의해서 Retry되는 Upstream Request Retry Case with TCP Reset를 나타내고 있다. [Shell 26]은 [Figure 25]의 내용을 실행하는 예시를 나타내고 있다. GRPC로 요청과 응답이 발생한다는 부분을 제외하고는 [Figure 12]에서 설명한 것과 동일한 과정을 수행한다.
 
 ```json {caption="[Text 43] Upstream Request Retry Case with TCP Reset / shell Pod Access Log", linenos=table}
 {
@@ -3658,6 +3663,8 @@ command terminated with exit code 78
 }
 ```
 
+[Text 43]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 44]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. GRPC로 요청과 응답이 발생한다는 부분을 제외하고는 [Text 23]와 동일한 과정을 수행한다.
+
 #### 1.3.13. Upstream Request Timeout Case
 
 {{< figure caption="[Figure 26] Upstream Request Timeout Case" src="images/grpc-upstream-request-timeout-case.png" width="1000px" >}}
@@ -3665,6 +3672,10 @@ command terminated with exit code 78
 ```shell {caption="[Shell 27] Upstream Request Timeout Case / grpcurl Command", linenos=table}
 $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 70000}' mock-server:9090 mock.MockService/Delay
 ```
+
+[Figure 26]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/Delay` 함수에 `milliseconds: 70000` 요청을 전달하였지만 `mock-server` Pod의 `istio-proxy`에서 60000ms 대기후에 응답이 오지 않아 Request를 Timeout 처리하는 Upstream Request Timeout Case를 나타내고 있다. 
+
+[File 1]의 Virtual Service에 의해서 `mock-server` Pod로 전송된 요청은 최대 60000ms 대기할 수 있다. 하지만 `mock-server` Pod의 `/mock.MockService/Delay` 함수에 `milliseconds: 70000`과 함께 전달할 요청은 70000ms가 필요하기 때문에 Timeout이 발생한다. `mock-server` Pod의 `istio-proxy`는 Timeout 발생시 HTTP/2 RST_STREAM Frame을 전송하여, `mock-server` Pod와의 연결을 종료한다. 또한 `Unavailable` 상태 코드를 반환하여 요청이 비정상적으로 종료된것을 `shell` Pod의 `istio-proxy`에게 알린다.
 
 ```json {caption="[Text 44] Upstream Request Timeout Case / shell Pod Access Log", linenos=table}
 {
@@ -3731,6 +3742,8 @@ $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseco
   "response_duration": "-"
 }
 ```
+
+[Text 44]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 45]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. `shell` Pod의 `istio-proxy`에는 `response_flags`에 `UT (UpstreamTimeout)`를 확인할 수 있다. `mock-server` Pod의 `istio-proxy`에는 `response_flags`에 `DR (DownstreamRemoteReset)`를 확인할 수 있다.
 
 ## 2. 참조
 
