@@ -1614,7 +1614,7 @@ no healthy upstream
 }
 ```
 
-[Text 20]은 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 21]은 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. `shell` Pod의 `istio-proxy`의 Access Log에는 마지막 3개의 요청에만 `response_flags`가 `UH (No Healthy Upstream)`와 함께 요청이 `mock-server` Pod에 전달되지 않은 것을 확인할 수 있다. 또한 `mock-server` Pod의 `istio-proxy`의 Access Log에는 처음 5개의 요청에 대한 Log만 남아있는것도 확인할 수 있다.
+[Text 20]은 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 21]은 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. `shell` Pod의 `istio-proxy`의 Access Log에는 마지막 3개의 요청에만 `response_flags`가 `UH (NoHealthyUpstream)`와 함께 요청이 `mock-server` Pod에 전달되지 않은 것을 확인할 수 있다. 또한 `mock-server` Pod의 `istio-proxy`의 Access Log에는 처음 5개의 요청에 대한 Log만 남아있는것도 확인할 수 있다.
 
 #### 1.2.11. Upstream Connection Failure with Timeout
 
@@ -1734,7 +1734,7 @@ no healthy upstream
 
 [Text 22]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. `shell` Pod의 요청이 `istio-proxy`에 의해서 `mock-server` Pod에 전달되지 않기 때문에 `mock-server` Pod의 `istio-proxy`의 Access Log에는 아무것도 남지 않는다. 첫번째 요청에는 `response_flags`에 `URX (UpstreamRetryLimitExceeded)`와 `UF (UpstreamConnectionFailure)`가 함께 나타나는 것을 확인할 수 있으며, `response_code_details`에 `upstream_reset_before_response_started {connection_timeout}`, 즉 Connection Timeout이 발생한 사실을 확인할 수 있다. `upstream_request_attempt_count`가 `3`으로 나타나는 것을 확인할 수 있다.
 
-두번째, 세번째 요청에는 Circuit Breaking에 의해서 `response_flags`에 `UH (No Healthy Upstream)`가 나타나는 것을 확인할 수 있으며, `response_code_details`에 `no_healthy_upstream`가 나타나는 것을 확인할 수 있다. 두번째 요청에는 `upstream_request_attempt_count`가 `3`으로 나타나는 것을 확인할 수 있다. 세번째 요청에는 `upstream_request_attempt_count`가 `1`으로 나타나는 것을 확인할 수 있다.
+두번째, 세번째 요청에는 Circuit Breaking에 의해서 `response_flags`에 `UH (NoHealthyUpstream)`가 나타나는 것을 확인할 수 있으며, `response_code_details`에 `no_healthy_upstream`가 나타나는 것을 확인할 수 있다. 두번째 요청에는 `upstream_request_attempt_count`가 `3`으로 나타나는 것을 확인할 수 있다. 세번째 요청에는 `upstream_request_attempt_count`가 `1`으로 나타나는 것을 확인할 수 있다.
 
 #### 1.2.12. Upstream Connection Failure with TCP Reset
 
@@ -2841,7 +2841,7 @@ ERROR:
 command terminated with exit code 78
 ```
 
-[Figure 22]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/Delay` 함수에 `milliseconds: 5000` 요청을 3번 연속으로 전달하여 Upstream Overflow를 발생시키는 Case를 나타내고 있다. [Shell 24]은 [Figure 22]의 내용을 실행하는 예시를 나타내고 있다. GRPC로 요청과 응답이 발생한다는 부분을 제외하고는 [Figure 9]에서 설명한 것과 동일한 과정을 수행한다.
+[Figure 22]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/Delay` 함수에 `milliseconds: 5000` 요청을 3번 연속으로 전달하여 Upstream Overflow를 발생시키는 Case를 나타내고 있다. 이 Case를 재현하기 위해서는 [File 2]에서 설정한 Destination Rule을 적용해야한다. [Shell 24]은 [Figure 22]의 내용을 실행하는 예시를 나타내고 있다. GRPC로 요청과 응답이 발생한다는 부분을 제외하고는 [Figure 9]에서 설명한 것과 동일한 과정을 수행한다.
 
 ```json {caption="[Text 42] Circuit Breaking with Upstream Overflow Case / shell Pod Access Log", linenos=table}
 {
@@ -2971,9 +2971,11 @@ command terminated with exit code 78
 
 [Text 42]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 43]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. GRPC로 요청과 응답이 발생한다는 부분을 제외하고 [Text 18], [Text 19]과 동일한 과정을 수행한다는 것을 알 수 있다.
 
-#### 2.2.6. Circuit Breaking Case
+#### 1.3.10. Circuit Breaking with No Healthy Upstream Case
 
-```shell {caption="[Shell 23] Circuit Breaking Case / grpcurl Command", linenos=table}
+{{< figure caption="[Figure 23] Circuit Breaking with No Healthy Upstream Case" src="images/grpc-circuit-breaking-with-no-healthy-upstream-case.png" width="1000px" >}}
+
+```shell {caption="[Shell 23] Circuit Breaking with No Healthy Upstream Case / grpcurl Command", linenos=table}
 $ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 13}' mock-server:9090 mock.MockService.Status
 ERROR:
   Code: Internal
@@ -3016,9 +3018,13 @@ ERROR:
 command terminated with exit code 78
 ```
 
+[Figure 23]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/Status` 함수에 `code: 13` 요청을 8번 연속으로 전달하여 No Healthy Upstream을 통한 Circuit Breaking을 발생시키는 Case를 나타내고 있다. [Shell 23]은 [Figure 23]의 내용을 실행하는 예시를 나타내고 있다.
+
+[File 1]의 Destination Rule에 의해서 5번의 연속적인 5XX Error가 발생하면 Circuit Breaking이 동작한다. 따라서 `shell` Pod의 첫 5번의 요청은 모두 `mock-server` Pod에게 전달되지만, 이후에 3번의 요청은 Circuit Breaking으로 인해서 `mock-server` Pod에 전달되지 않는다. 따라서 첫번째 5번의 요청에 대한 응답은 `Internal`로 나타나고, 이후에 3번의 요청에 대한 응답은 `Unavailable`로 나타난다.
+
 ```json {caption="[Text 40] Circuit Breaking Case / shell Pod Access Log", linenos=table}
 {
-  "start_time": "2025-12-25T15:37:14.685Z",
+  "start_time": "2026-01-12T15:02:58.363Z",
   "method": "POST",
   "path": "/mock.MockService/Status",
   "protocol": "HTTP/2",
@@ -3029,26 +3035,56 @@ command terminated with exit code 78
   "upstream_transport_failure_reason": "-",
   "bytes_received": "7",
   "bytes_sent": "0",
-  "duration": "41",
-  "upstream_service_time": "22",
+  "duration": "177",
+  "upstream_service_time": "138",
   "x_forwarded_for": "-",
   "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
-  "request_id": "b218f327-fc35-9b50-bbb6-5852f71f8d71",
+  "request_id": "63a34f0f-2ba7-96fe-bf09-a9b557de9e7c",
   "authority": "mock-server:9090",
-  "upstream_host": "10.244.2.8:9090",
+  "upstream_host": "10.244.2.22:9090",
   "upstream_cluster": "outbound|9090||mock-server.default.svc.cluster.local",
-  "upstream_local_address": "10.244.1.5:33370",
-  "downstream_local_address": "10.96.186.69:9090",
-  "downstream_remote_address": "10.244.1.5:51102",
+  "upstream_local_address": "10.244.1.8:42296",
+  "downstream_local_address": "10.96.211.131:9090",
+  "downstream_remote_address": "10.244.1.8:55756",
   "requested_server_name": "-",
   "route_name": "-",
   "grpc_status": "Internal",
   "upstream_request_attempt_count": "1",
-  "request_duration": "19",
-  "response_duration": "41"
+  "request_duration": "38",
+  "response_duration": "176"
 }
 {
-  "start_time": "2025-12-25T15:37:15.505Z",
+  "start_time": "2026-01-12T15:02:59.115Z",
+  "method": "POST",
+  "path": "/mock.MockService/Status",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "7",
+  "bytes_sent": "0",
+  "duration": "1",
+  "upstream_service_time": "1",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "dfa5d9a4-205f-9ed0-b8f9-a57503eef534",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.2.22:9090",
+  "upstream_cluster": "outbound|9090||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "10.244.1.8:42296",
+  "downstream_local_address": "10.96.211.131:9090",
+  "downstream_remote_address": "10.244.1.8:55772",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "Internal",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "1"
+}
+{
+  "start_time": "2026-01-12T15:03:00.019Z",
   "method": "POST",
   "path": "/mock.MockService/Status",
   "protocol": "HTTP/2",
@@ -3063,52 +3099,22 @@ command terminated with exit code 78
   "upstream_service_time": "1",
   "x_forwarded_for": "-",
   "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
-  "request_id": "9286020f-bdec-917d-b5e5-39c14fba1c16",
+  "request_id": "3ccce983-77fe-901b-8cde-9015d2f04224",
   "authority": "mock-server:9090",
-  "upstream_host": "10.244.2.8:9090",
+  "upstream_host": "10.244.2.22:9090",
   "upstream_cluster": "outbound|9090||mock-server.default.svc.cluster.local",
-  "upstream_local_address": "10.244.1.5:55516",
-  "downstream_local_address": "10.96.186.69:9090",
-  "downstream_remote_address": "10.244.1.5:51110",
+  "upstream_local_address": "10.244.1.8:42310",
+  "downstream_local_address": "10.96.211.131:9090",
+  "downstream_remote_address": "10.244.1.8:55782",
   "requested_server_name": "-",
   "route_name": "-",
   "grpc_status": "Internal",
   "upstream_request_attempt_count": "1",
   "request_duration": "0",
-  "response_duration": "1"
+  "response_duration": "2"
 }
 {
-  "start_time": "2025-12-25T15:37:16.355Z",
-  "method": "POST",
-  "path": "/mock.MockService/Status",
-  "protocol": "HTTP/2",
-  "response_code": "200",
-  "response_flags": "-",
-  "response_code_details": "via_upstream",
-  "connection_termination_details": "-",
-  "upstream_transport_failure_reason": "-",
-  "bytes_received": "7",
-  "bytes_sent": "0",
-  "duration": "1",
-  "upstream_service_time": "0",
-  "x_forwarded_for": "-",
-  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
-  "request_id": "67e5cd39-27d9-9619-abcf-16be12daeb47",
-  "authority": "mock-server:9090",
-  "upstream_host": "10.244.2.8:9090",
-  "upstream_cluster": "outbound|9090||mock-server.default.svc.cluster.local",
-  "upstream_local_address": "10.244.1.5:33370",
-  "downstream_local_address": "10.96.186.69:9090",
-  "downstream_remote_address": "10.244.1.5:51120",
-  "requested_server_name": "-",
-  "route_name": "-",
-  "grpc_status": "Internal",
-  "upstream_request_attempt_count": "1",
-  "request_duration": "0",
-  "response_duration": "1"
-}
-{
-  "start_time": "2025-12-25T15:37:17.237Z",
+  "start_time": "2026-01-12T15:03:00.783Z",
   "method": "POST",
   "path": "/mock.MockService/Status",
   "protocol": "HTTP/2",
@@ -3123,13 +3129,13 @@ command terminated with exit code 78
   "upstream_service_time": "1",
   "x_forwarded_for": "-",
   "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
-  "request_id": "579df252-3830-985e-8af4-00cf68e88d03",
+  "request_id": "542a7709-ee30-91b3-8f94-5d98d38d7979",
   "authority": "mock-server:9090",
-  "upstream_host": "10.244.2.8:9090",
+  "upstream_host": "10.244.2.22:9090",
   "upstream_cluster": "outbound|9090||mock-server.default.svc.cluster.local",
-  "upstream_local_address": "10.244.1.5:33370",
-  "downstream_local_address": "10.96.186.69:9090",
-  "downstream_remote_address": "10.244.1.5:51132",
+  "upstream_local_address": "10.244.1.8:42296",
+  "downstream_local_address": "10.96.211.131:9090",
+  "downstream_remote_address": "10.244.1.8:55784",
   "requested_server_name": "-",
   "route_name": "-",
   "grpc_status": "Internal",
@@ -3138,7 +3144,7 @@ command terminated with exit code 78
   "response_duration": "1"
 }
 {
-  "start_time": "2025-12-25T15:37:18.048Z",
+  "start_time": "2026-01-12T15:03:01.586Z",
   "method": "POST",
   "path": "/mock.MockService/Status",
   "protocol": "HTTP/2",
@@ -3153,13 +3159,13 @@ command terminated with exit code 78
   "upstream_service_time": "0",
   "x_forwarded_for": "-",
   "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
-  "request_id": "b9e570c0-e5b3-9258-a381-d8c1879c1d34",
+  "request_id": "fffa72a1-d8ec-97fa-adb7-8ac84397d5ef",
   "authority": "mock-server:9090",
-  "upstream_host": "10.244.2.8:9090",
+  "upstream_host": "10.244.2.22:9090",
   "upstream_cluster": "outbound|9090||mock-server.default.svc.cluster.local",
-  "upstream_local_address": "10.244.1.5:55516",
-  "downstream_local_address": "10.96.186.69:9090",
-  "downstream_remote_address": "10.244.1.5:55648",
+  "upstream_local_address": "10.244.1.8:42296",
+  "downstream_local_address": "10.96.211.131:9090",
+  "downstream_remote_address": "10.244.1.8:55792",
   "requested_server_name": "-",
   "route_name": "-",
   "grpc_status": "Internal",
@@ -3168,7 +3174,7 @@ command terminated with exit code 78
   "response_duration": "1"
 }
 {
-  "start_time": "2025-12-25T15:37:18.879Z",
+  "start_time": "2026-01-12T15:03:02.459Z",
   "method": "POST",
   "path": "/mock.MockService/Status",
   "protocol": "HTTP/2",
@@ -3183,13 +3189,13 @@ command terminated with exit code 78
   "upstream_service_time": "-",
   "x_forwarded_for": "-",
   "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
-  "request_id": "1cba5671-b265-994b-aef3-2c1f00b25a86",
+  "request_id": "df1b083c-e98c-93dd-90b6-153fc4017e1e",
   "authority": "mock-server:9090",
   "upstream_host": "-",
   "upstream_cluster": "outbound|9090||mock-server.default.svc.cluster.local",
   "upstream_local_address": "-",
-  "downstream_local_address": "10.96.186.69:9090",
-  "downstream_remote_address": "10.244.1.5:55654",
+  "downstream_local_address": "10.96.211.131:9090",
+  "downstream_remote_address": "10.244.1.8:55794",
   "requested_server_name": "-",
   "route_name": "-",
   "grpc_status": "Unavailable",
@@ -3198,7 +3204,7 @@ command terminated with exit code 78
   "response_duration": "-"
 }
 {
-  "start_time": "2025-12-25T15:37:19.572Z",
+  "start_time": "2026-01-12T15:03:03.131Z",
   "method": "POST",
   "path": "/mock.MockService/Status",
   "protocol": "HTTP/2",
@@ -3213,13 +3219,13 @@ command terminated with exit code 78
   "upstream_service_time": "-",
   "x_forwarded_for": "-",
   "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
-  "request_id": "b937b48e-0823-9759-8499-5ba6b70aab6d",
+  "request_id": "6593b359-3b58-9dd2-bdb8-9b5024bd25fb",
   "authority": "mock-server:9090",
   "upstream_host": "-",
   "upstream_cluster": "outbound|9090||mock-server.default.svc.cluster.local",
   "upstream_local_address": "-",
-  "downstream_local_address": "10.96.186.69:9090",
-  "downstream_remote_address": "10.244.1.5:55656",
+  "downstream_local_address": "10.96.211.131:9090",
+  "downstream_remote_address": "10.244.1.8:55804",
   "requested_server_name": "-",
   "route_name": "-",
   "grpc_status": "Unavailable",
@@ -3228,7 +3234,7 @@ command terminated with exit code 78
   "response_duration": "-"
 }
 {
-  "start_time": "2025-12-25T15:37:20.465Z",
+  "start_time": "2026-01-12T15:03:03.863Z",
   "method": "POST",
   "path": "/mock.MockService/Status",
   "protocol": "HTTP/2",
@@ -3243,13 +3249,13 @@ command terminated with exit code 78
   "upstream_service_time": "-",
   "x_forwarded_for": "-",
   "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
-  "request_id": "d5b22aac-eb55-9c1e-969d-f2fa3c953447",
+  "request_id": "d73c7aa7-e2af-90fb-91db-c205335a979b",
   "authority": "mock-server:9090",
   "upstream_host": "-",
   "upstream_cluster": "outbound|9090||mock-server.default.svc.cluster.local",
   "upstream_local_address": "-",
-  "downstream_local_address": "10.96.186.69:9090",
-  "downstream_remote_address": "10.244.1.5:55670",
+  "downstream_local_address": "10.96.211.131:9090",
+  "downstream_remote_address": "10.244.1.8:55812",
   "requested_server_name": "-",
   "route_name": "-",
   "grpc_status": "Unavailable",
@@ -3261,7 +3267,7 @@ command terminated with exit code 78
 
 ```json {caption="[Text 41] Circuit Breaking Case / mock-server Pod Access Log", linenos=table}
 {
-  "start_time": "2025-12-25T15:37:14.715Z",
+  "start_time": "2026-01-12T15:02:58.454Z",
   "method": "POST",
   "path": "/mock.MockService/Status",
   "protocol": "HTTP/2",
@@ -3272,26 +3278,26 @@ command terminated with exit code 78
   "upstream_transport_failure_reason": "-",
   "bytes_received": "7",
   "bytes_sent": "0",
-  "duration": "9",
-  "upstream_service_time": "6",
+  "duration": "65",
+  "upstream_service_time": "26",
   "x_forwarded_for": "-",
   "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
-  "request_id": "b218f327-fc35-9b50-bbb6-5852f71f8d71",
+  "request_id": "63a34f0f-2ba7-96fe-bf09-a9b557de9e7c",
   "authority": "mock-server:9090",
-  "upstream_host": "10.244.2.8:9090",
+  "upstream_host": "10.244.2.22:9090",
   "upstream_cluster": "inbound|9090||",
-  "upstream_local_address": "127.0.0.6:60721",
-  "downstream_local_address": "10.244.2.8:9090",
-  "downstream_remote_address": "10.244.1.5:33370",
-  "requested_server_name": "outbound_.9090_._.mock-server.default.svc.cluster.local",
+  "upstream_local_address": "127.0.0.6:42649",
+  "downstream_local_address": "10.244.2.22:9090",
+  "downstream_remote_address": "10.244.1.8:42296",
+  "requested_server_name": "-",
   "route_name": "default",
   "grpc_status": "Internal",
   "upstream_request_attempt_count": "1",
-  "request_duration": "2",
-  "response_duration": "8"
+  "request_duration": "22",
+  "response_duration": "49"
 }
 {
-  "start_time": "2025-12-25T15:37:15.505Z",
+  "start_time": "2026-01-12T15:02:59.115Z",
   "method": "POST",
   "path": "/mock.MockService/Status",
   "protocol": "HTTP/2",
@@ -3306,14 +3312,14 @@ command terminated with exit code 78
   "upstream_service_time": "0",
   "x_forwarded_for": "-",
   "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
-  "request_id": "9286020f-bdec-917d-b5e5-39c14fba1c16",
+  "request_id": "dfa5d9a4-205f-9ed0-b8f9-a57503eef534",
   "authority": "mock-server:9090",
-  "upstream_host": "10.244.2.8:9090",
+  "upstream_host": "10.244.2.22:9090",
   "upstream_cluster": "inbound|9090||",
-  "upstream_local_address": "127.0.0.6:40643",
-  "downstream_local_address": "10.244.2.8:9090",
-  "downstream_remote_address": "10.244.1.5:55516",
-  "requested_server_name": "outbound_.9090_._.mock-server.default.svc.cluster.local",
+  "upstream_local_address": "127.0.0.6:42649",
+  "downstream_local_address": "10.244.2.22:9090",
+  "downstream_remote_address": "10.244.1.8:42296",
+  "requested_server_name": "-",
   "route_name": "default",
   "grpc_status": "Internal",
   "upstream_request_attempt_count": "1",
@@ -3321,7 +3327,7 @@ command terminated with exit code 78
   "response_duration": "1"
 }
 {
-  "start_time": "2025-12-25T15:37:16.355Z",
+  "start_time": "2026-01-12T15:03:00.020Z",
   "method": "POST",
   "path": "/mock.MockService/Status",
   "protocol": "HTTP/2",
@@ -3336,14 +3342,14 @@ command terminated with exit code 78
   "upstream_service_time": "0",
   "x_forwarded_for": "-",
   "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
-  "request_id": "67e5cd39-27d9-9619-abcf-16be12daeb47",
+  "request_id": "3ccce983-77fe-901b-8cde-9015d2f04224",
   "authority": "mock-server:9090",
-  "upstream_host": "10.244.2.8:9090",
+  "upstream_host": "10.244.2.22:9090",
   "upstream_cluster": "inbound|9090||",
-  "upstream_local_address": "127.0.0.6:60721",
-  "downstream_local_address": "10.244.2.8:9090",
-  "downstream_remote_address": "10.244.1.5:33370",
-  "requested_server_name": "outbound_.9090_._.mock-server.default.svc.cluster.local",
+  "upstream_local_address": "127.0.0.6:45955",
+  "downstream_local_address": "10.244.2.22:9090",
+  "downstream_remote_address": "10.244.1.8:42310",
+  "requested_server_name": "-",
   "route_name": "default",
   "grpc_status": "Internal",
   "upstream_request_attempt_count": "1",
@@ -3351,7 +3357,7 @@ command terminated with exit code 78
   "response_duration": "0"
 }
 {
-  "start_time": "2025-12-25T15:37:17.238Z",
+  "start_time": "2026-01-12T15:03:00.783Z",
   "method": "POST",
   "path": "/mock.MockService/Status",
   "protocol": "HTTP/2",
@@ -3366,14 +3372,14 @@ command terminated with exit code 78
   "upstream_service_time": "0",
   "x_forwarded_for": "-",
   "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
-  "request_id": "579df252-3830-985e-8af4-00cf68e88d03",
+  "request_id": "542a7709-ee30-91b3-8f94-5d98d38d7979",
   "authority": "mock-server:9090",
-  "upstream_host": "10.244.2.8:9090",
+  "upstream_host": "10.244.2.22:9090",
   "upstream_cluster": "inbound|9090||",
-  "upstream_local_address": "127.0.0.6:60721",
-  "downstream_local_address": "10.244.2.8:9090",
-  "downstream_remote_address": "10.244.1.5:33370",
-  "requested_server_name": "outbound_.9090_._.mock-server.default.svc.cluster.local",
+  "upstream_local_address": "127.0.0.6:42649",
+  "downstream_local_address": "10.244.2.22:9090",
+  "downstream_remote_address": "10.244.1.8:42296",
+  "requested_server_name": "-",
   "route_name": "default",
   "grpc_status": "Internal",
   "upstream_request_attempt_count": "1",
@@ -3381,7 +3387,7 @@ command terminated with exit code 78
   "response_duration": "0"
 }
 {
-  "start_time": "2025-12-25T15:37:18.048Z",
+  "start_time": "2026-01-12T15:03:01.586Z",
   "method": "POST",
   "path": "/mock.MockService/Status",
   "protocol": "HTTP/2",
@@ -3396,14 +3402,14 @@ command terminated with exit code 78
   "upstream_service_time": "0",
   "x_forwarded_for": "-",
   "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
-  "request_id": "b9e570c0-e5b3-9258-a381-d8c1879c1d34",
+  "request_id": "fffa72a1-d8ec-97fa-adb7-8ac84397d5ef",
   "authority": "mock-server:9090",
-  "upstream_host": "10.244.2.8:9090",
+  "upstream_host": "10.244.2.22:9090",
   "upstream_cluster": "inbound|9090||",
-  "upstream_local_address": "127.0.0.6:40643",
-  "downstream_local_address": "10.244.2.8:9090",
-  "downstream_remote_address": "10.244.1.5:55516",
-  "requested_server_name": "outbound_.9090_._.mock-server.default.svc.cluster.local",
+  "upstream_local_address": "127.0.0.6:42649",
+  "downstream_local_address": "10.244.2.22:9090",
+  "downstream_remote_address": "10.244.1.8:42296",
+  "requested_server_name": "-",
   "route_name": "default",
   "grpc_status": "Internal",
   "upstream_request_attempt_count": "1",
@@ -3411,6 +3417,8 @@ command terminated with exit code 78
   "response_duration": "0"
 }
 ```
+
+[Text 40]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 41]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. `shell` Pod의 `istio-proxy`의 Access Log에는 마지막 3개의 요청에만 `response_flags`가 `UH (NoHealthyUpstream)`와 함께 요청이 `mock-server` Pod에 전달되지 않은 것을 확인할 수 있다. 또한 `mock-server` Pod의 `istio-proxy`의 Access Log에는 처음 5개의 요청에 대한 Log만 남아있는것도 확인할 수 있다.
 
 #### 2.2.7. Upstream Request Retry Case with Timeout
 
