@@ -868,7 +868,7 @@ dummy datacommand terminated with exit code 18
 
 `response_code_details`에 `upstream_reset_after_response_started {protocol_error}`, 즉 응답을 시작한 후에 Protocol Error가 발생하여 Connection을 강제로 종료한 것을 나타내는 상세 내역도 확인할 수 있다. 이는 [Figure 6]에서 TCP RST Flag를 받을때와 동일한 상세 내역이며, `mock-server` Pod의 `istio-proxy`는 응답을 일부 전송한 상태에서 TCP FIN Flag 또는 TCP RST Flag를 수신하면 동일한 `response_code_details`를 남기는것을 확인할 수 있다.
 
-#### 1.2.8. Circuit Breaking with Upstream Connection PoolOverflow Case
+#### 1.2.8. Circuit Breaking with Upstream Connection Pool Overflow Case
 
 {{< figure caption="[Figure 9] Circuit Breaking with Upstream Connection Pool Overflow Case" src="images/http-circuit-breaking-with-upstream-connection-pool-overflow-case.png" width="1000px" >}}
 
