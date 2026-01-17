@@ -4,9 +4,9 @@ title: Kubernetes MetalLB Installation / Ubuntu 18.04 Environment
 
 ## 1. Installation Environment
 
-The installation environment is as follows:
+The installation environment is as follows.
 * Kubernetes 1.12
-  * Network Addon : Using cilium
+  * Network Addon : using cilium
 * Helm
   * Client : v2.13.1
   * Server : v2.13.1
@@ -16,7 +16,7 @@ The installation environment is as follows:
 
 {{< figure caption="[Figure 1] Kubernetes Network" src="images/kubernetes-network.png" width="900px" >}}
 
-The network is as follows:
+The Network is as follows.
 * Node Network : 10.0.0.0/24
 * LoadBalancer Service IP : 10.0.0.200 ~ 10.0.0.220
 
@@ -27,7 +27,7 @@ $ git clone https://github.com/helm/charts.git
 $ cd charts/stable/metallb
 ```
 
-Get Helm's Official Stable Chart. MetalLB is currently included in Helm's Official Stable Chart.
+Get the Official Stable Chart from Helm. MetalLB is currently included in Helm's Official Stable Chart.
 
 ```text {caption="[File 1] MetalLB Chart's values.yaml", linenos=table}
 ...
@@ -48,7 +48,13 @@ $ helm install --name metallb --namespace metallb .
 
 Install MetalLB.
 
-## 4. References
+## 4. MetalLB Verification
 
-* MetalLB Installation : [https://metallb.universe.tf/installation/](https://metallb.universe.tf/installation/)
-* MetalLB Configuration : [https://metallb.universe.tf/configuration/](https://metallb.universe.tf/configuration/)
+```shell
+$ root@kube01:~/charts/stable/metallb# kubectl get service --all-namespaces
+NAMESPACE     NAME                    TYPE           CLUSTER-IP       EXTERNAL-IP    PORT(S)                           AGE
+default       my-nginx-loadbalancer   LoadBalancer   10.96.98.173     10.0.0.200   80:30781/TCP                      34m
+...                                                                             
+```
+
+Create a LoadBalancer Service to verify that the External IP is properly assigned.

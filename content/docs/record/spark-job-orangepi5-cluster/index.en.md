@@ -2,9 +2,9 @@
 title: Spark Job Execution / Orange Pi 5 Max Cluster Environment
 ---
 
-Perform data transformation stored in MinIO using Spark.
+Perform data transformation on data stored in MinIO using Spark.
 
-## 1. Practice Environment Setup
+## 1. Practice Environment Configuration
 
 ### 1.1. Overall Practice Environment
 
@@ -12,20 +12,20 @@ The environment for transforming data stored in MinIO through Spark is as follow
 
 {{< figure caption="[Figure 1] Spark Job Execution Environment" src="images/environment.png" width="1000px" >}}
 
-* **MinIO** : Performs the role of Object Storage for storing data. Stores South Korea Weather Data.
-  * **South Korea Weather Data** : Stored partitioned by date in 3 data formats: CSV, Parquet, Iceberg.
+* **MinIO** : Performs the role of Object Storage for storing Data. Stores South Korea Weather Data.
+  * **South Korea Weather Data** : Stored partitioned by date in 3 Data Formats: CSV, Parquet, Iceberg.
 * **Spark Job** : Calculates average data from South Korea Weather Data stored in MinIO and stores it back in MinIO.
 * **Spark History Server** : Performs the role of checking execution logs of Spark Jobs.
-* **Volcano Scheduler** : Performs Gang Scheduling for Pods executing Spark Jobs.
-* **Trino** : Performs the role of querying data stored in MinIO.
-* **Hive Metastore** : Manages schema information of data and provides schema information to Trino.
-* **Dagster** : Executes data pipeline to transform the storage format of South Korea Weather Data in MinIO from CSV to Parquet, and from Parquet to Iceberg.
-* **DBeaver** : Performs the role of a client for connecting to Trino and executing queries.
+* **Volcano Scheduler** : Performs Gang Scheduling for Pods for Spark Job execution.
+* **Trino** : Performs the role of querying Data stored in MinIO.
+* **Hive Metastore** : Manages Schema information of Data and provides Schema information to Trino.
+* **Dagster** : Executes Data Pipeline to convert the storage format of South Korea Weather Data in MinIO from CSV to Parquet, and from Parquet to Iceberg.
+* **DBeaver** : Performs the role of Client for connecting to Trino and executing Queries.
 
-Refer to the following links for the overall practice environment setup.
+Refer to the following links for the overall practice environment configuration.
 
-* **Orange Pi 5 Max based Kubernetes Cluster Construction** : [https://ssup2.github.io/blog-software/docs/record/orangepi5-cluster-build/](https://ssup2.github.io/blog-software/docs/record/orangepi5-cluster-build/)
-* **Orange Pi 5 Max based Kubernetes Data Platform Construction** : [https://ssup2.github.io/blog-software/docs/record/kubernetes-data-platform-orangepi5-cluster/](https://ssup2.github.io/blog-software/docs/record/kubernetes-data-platform-orangepi5-cluster/)
+* **Orange Pi 5 Max based Kubernetes Cluster Setup** : [https://ssup2.github.io/blog-software/docs/record/orangepi5-cluster-build/](https://ssup2.github.io/blog-software/docs/record/orangepi5-cluster-build/)
+* **Orange Pi 5 Max based Kubernetes Data Platform Setup** : [https://ssup2.github.io/blog-software/docs/record/kubernetes-data-platform-orangepi5-cluster/](https://ssup2.github.io/blog-software/docs/record/kubernetes-data-platform-orangepi5-cluster/)
 * **Trino MinIO Query Execution** : [https://ssup2.github.io/blog-software/docs/record/trino-minio-query-orangepi5-cluster/](https://ssup2.github.io/blog-software/docs/record/trino-minio-query-orangepi5-cluster/)
 * **Dagster Workflow Github** : [https://github.com/ssup2-playground/k8s-data-platform_dagster-workflows](https://github.com/ssup2-playground/k8s-data-platform_dagster-workflows)
 * **Spark Job Github** : [https://github.com/ssup2-playground/k8s-data-platform_spark-jobs](https://github.com/ssup2-playground/k8s-data-platform_spark-jobs)
@@ -94,7 +94,7 @@ WITH (
 CALL hive.system.sync_partition_metadata('weather', 'southkorea_daily_average_parquet', 'ADD');
 ```
 
-Create a Parquet table for storing average weather data.
+Create a Parquet Table for storing average weather data.
 
 ```sql
 CREATE TABLE iceberg.weather.southkorea_daily_average_iceberg_parquet (
@@ -126,7 +126,7 @@ WITH (
 );
 ```
 
-Create an Iceberg Parquet table for storing average weather data.
+Create an Iceberg Parquet Table for storing average weather data.
 
 ## 2. Execution in Local Environment
 
@@ -138,7 +138,7 @@ cd k8s-data-platform_spark-jobs
 uv sync
 ```
 
-Download Spark Application and install Python packages.
+Download the Spark Application and install Python packages.
 
 ### 2.2. Spark Master and Worker Execution
 
@@ -147,7 +147,7 @@ spark-class org.apache.spark.deploy.master.Master -h localhost
 spark-class org.apache.spark.deploy.worker.Worker spark://localhost:7077
 ```
 
-Configure a local Spark cluster by running two shells, each set as Master and Worker.
+Open 2 shells and configure each as Master and Worker to form a Local Spark Cluster.
 
 ### 2.3. Spark Job Execution
 
@@ -162,14 +162,14 @@ spark-submit \
   --date 20250601
 ```
 
-Execute a Spark job that calculates average weather data using `daily-parquet` data on the configured local Spark cluster. Add `hadoop-aws` and `aws-java-sdk-bundle` packages to enable access to MinIO.
+Execute a Spark Job on the configured Local Spark Cluster to calculate average weather data using `daily-parquet` data. Add `hadoop-aws` and `aws-java-sdk-bundle` to Packages to enable access to MinIO.
 
 ```sql
 CALL hive.system.sync_partition_metadata('weather', 'southkorea_daily_average_parquet', 'ADD');
 SELECT * FROM hive.weather.southkorea_daily_average_parquet;
 ```
 
-Update Trino's partition information and execute a query to check the average weather data.
+Update Trino's Partition information and execute a Query to verify average weather data.
 
 ```shell
 export PYTHONPATH=$(pwd)/src
@@ -182,13 +182,13 @@ spark-submit \
   --date 20250601
 ```
 
-Execute a Spark job that calculates average weather data using `daily-iceberg-parquet` data on the configured local Spark cluster. Add `iceberg-spark3-runtime` package to utilize Iceberg tables.
+Execute a Spark Job on the configured Local Spark Cluster to calculate average weather data using `daily-iceberg-parquet` data. Add `iceberg-spark3-runtime` to Packages to utilize Iceberg Tables.
 
 ```sql
 SELECT * FROM iceberg.weather.southkorea_daily_average_iceberg_parquet;
 ```
 
-Execute a query to check the average weather data.
+Execute a Query to verify average weather data.
 
 ## 3. Execution in Kubernetes Environment
 
@@ -226,19 +226,20 @@ roleRef:
   name: spark-role
   apiGroup: rbac.authorization.k8s.io
 ```
+
 ```shell
 kubectl apply -f spark-job-service-account.yaml
 ```
 
-Apply the Service Account Manifest in [File 1] to grant permissions for Spark job execution.
+Apply the Service Account Manifest in [File 1] to grant permissions for Spark Job execution.
 
 ### 3.2. Spark Job Execution
 
-Execute a Spark job that calculates average weather data using `daily-parquet` data on the Kubernetes cluster. The main configurations are as follows.
+Execute a Spark Job on the Kubernetes Cluster to calculate average weather data using `daily-parquet` data. The main configurations are as follows.
 
-* `eventLog` : Specifies the location in MinIO where Spark jobs will be stored.
-* `spark.ui.prometheus.enabled` : Exposes Prometheus metrics from Spark jobs.
-* `spark.kubernetes.driver.annotation.prometheus.io` : Configures Prometheus server to collect metrics exposed by Spark jobs.
+* `eventLog` : Specifies the location in MinIO where Spark Jobs will be stored.
+* `spark.ui.prometheus.enabled` : Exposes Prometheus Metrics from Spark Jobs.
+* `spark.kubernetes.driver.annotation.prometheus.io` : Configures Prometheus Server to collect Metrics exposed by Spark Jobs.
 
 ```shell
 spark-submit \
@@ -265,7 +266,7 @@ spark-submit \
   --date 20250601
 ```
 
-Execute a Spark job that calculates average weather data using `daily-parquet` data on the Kubernetes cluster.
+Execute a Spark Job on the Kubernetes Cluster to calculate average weather data using `daily-parquet` data.
 
 ```shell
 spark-submit \
@@ -292,17 +293,17 @@ spark-submit \
   --date 20250601
 ```
 
-Execute a Spark job that calculates average weather data using `daily-iceberg-parquet` data on the Kubernetes cluster.
+Execute a Spark Job on the Kubernetes Cluster to calculate average weather data using `daily-iceberg-parquet` data.
 
 {{< figure caption="[Figure 2] Spark History Server" src="images/spark-history-server.png" width="1000px" >}}
 
-Check Spark History Server to view execution logs of Spark jobs. [Figure 2] shows checking execution logs of Spark jobs in Spark History Server.
+Check the Spark History Server to verify execution logs of Spark Jobs. [Figure 2] shows checking execution logs of Spark Jobs in the Spark History Server.
 
 {{< figure caption="[Figure 3] Prometheus" src="images/spark-prometheus-metric.png" width="550px" >}}
 
-Check the `executors` metric in Prometheus. [Figure 3] shows checking the `executors` metric in Prometheus.
+Check the `executors` Metric in Prometheus. [Figure 3] shows checking the `executors` Metric in Prometheus.
 
-### 3.4. Spark Job Execution using Spark Operator
+### 3.4. Spark Job Execution Using Spark Operator
 
 ```yaml {caption="[File 2] spark-job-spark-application-parquet.yaml Manifest"}
 apiVersion: "sparkoperator.k8s.io/v1beta2"
@@ -358,11 +359,12 @@ spec:
   # TTL for automatic cleanup (1 hour after completion)
   timeToLiveSeconds: 300
 ```
+
 ```shell
 kubectl apply -f spark-job-spark-application-parquet.yaml
 ```
 
-Apply the Spark Application Manifest in [File 2] to execute a Spark job that calculates average weather data using `daily-parquet` data.
+Apply the Spark Application Manifest in [File 2] to execute a Spark Job that calculates average weather data using `daily-parquet` data.
 
 ```yaml {caption="[File 3] spark-job-spark-application-iceberg-parquet.yaml Manifest"}
 apiVersion: "sparkoperator.k8s.io/v1beta2"
@@ -423,9 +425,9 @@ spec:
 kubectl apply -f spark-job-spark-application-iceberg-parquet.yaml
 ```
 
-Apply the Spark Application Manifest in [File 3] to execute a Spark job that calculates average weather data using `daily-iceberg-parquet` data.
+Apply the Spark Application Manifest in [File 3] to execute a Spark Job that calculates average weather data using `daily-iceberg-parquet` data.
 
-### 3.5. Spark Job Execution in Dagster Pipeline
+### 3.5. Spark Job Execution from Dagster Pipeline
 
 ```python {caption="[File 4] execute_spark_job() Function"}
 def execute_spark_job(context, job_name_prefix: str, job_script: str, job_args: list, 
@@ -577,11 +579,11 @@ def execute_spark_job(context, job_name_prefix: str, job_script: str, job_args: 
         raise Exception(f"Pod '{spark_job_name}' timed out")
 ```
 
-Dagster does not officially support Spark job submission using the `spark-submit` CLI. Therefore, the `execute_spark_job` function in [File 4] is defined to execute Spark jobs in Dagster pipelines. The main features of the `execute_spark_job` function are as follows.
+Dagster does not officially support Spark Job submission using the `spark-submit` CLI. Therefore, define the `execute_spark_job` function in [File 4] to execute Spark Jobs from Dagster Pipeline. The main characteristics of the `execute_spark_job` function are as follows.
 
-* Creates a separate `spark-submit` CLI pod and executes Spark jobs in client mode using the `spark-submit` CLI from the created pod. That is, the driver runs in the `spark-submit` pod.
-* The owner of the `spark-submit` CLI pod is the pod of Dagster's Run or Op/Asset. Therefore, when the Dagster pipeline ends and the Dagster pod is removed, the `spark-submit` CLI pod is naturally removed, and then the executor pods are automatically removed.
-* Creates a headless service for executor pods to access the `spark-submit` CLI pod before creating the `spark-submit` CLI pod.
+* Creates a separate `spark-submit` CLI Pod and executes Spark Jobs in Client Mode using the `spark-submit` CLI from the created Pod. That is, the Driver runs in the `spark-submit` Pod.
+* The Owner of the `spark-submit` CLI Pod is the Pod of Dagster's Run or Op/Asset. Therefore, when the Dagster Pipeline terminates and the Dagster Pod is removed, the `spark-submit` CLI Pod is also naturally removed, and then the Executor Pods are automatically removed.
+* Before creating the `spark-submit` CLI Pod, create a Headless Service for Executor Pods to access the `spark-submit` CLI Pod.
 
 ## 4. Execution with Volcano Scheduler in Kubernetes Environment
 
@@ -600,7 +602,7 @@ spec:
     memory: 20Gi
 ```
 
-Configure a Queue for Volcano Scheduler for Spark jobs.
+Configure the Queue of Volcano Scheduler for Spark Jobs.
 
 ### 4.2. PodGroup Configuration
 
@@ -615,11 +617,12 @@ spec:
     memory: "4Gi"
 ```
 
-Create a PodGroup file and copy it to `/app/configs/volcano.yaml` in the Spark job container image. The main configurations are as follows.
+Create a PodGroup file and copy it to `/app/configs/volcano.yaml` in the Spark Job Container Image. The main configurations are as follows.
 
-* `queue` : Specifies the name of the queue to use. Specify the queue name created above.
-* `minMember` : Specifies the minimum number of pods that can be executed. Must be set to `1` because the driver pod operates independently.
-* `minResources` : Specifies the minimum resources of pods that can be executed. Specify the total resources of driver pods and executor pods. Volcano Scheduler schedules Spark job pods when resources equal to `minResources` are available.
+* `queue` : Specifies the Queue name to use. Specify the Queue name created above.
+* `minMember` : Specifies the minimum number of Pods that can be executed. Must be set to `1` because Driver Pods operate independently.
+* `minResources` : Specifies the resources of the minimum Pods that can be executed. Specify the sum of Resources of Driver Pods and Executor Pods. Volcano Scheduler schedules Spark Job Pods when Resources equal to `minResources` are available.
+
 
 ### 4.2. Spark Job Execution
 
@@ -650,7 +653,7 @@ spark-submit \
   --date 20250601
 ```
 
-Execute a Spark job that calculates average weather data using `daily-parquet` data with Volcano Scheduler. Specify `volcano` in `spark.kubernetes.scheduler.name` and `/app/configs/volcano.yaml` in `spark.kubernetes.scheduler.volcano.podGroupTemplateFile`.
+Execute a Spark Job with Volcano Scheduler to calculate average weather data using `daily-parquet` data. Specify `volcano` in `spark.kubernetes.scheduler.name` and `/app/configs/volcano.yaml` in `spark.kubernetes.scheduler.volcano.podGroupTemplateFile`.
 
 ```shell
 spark-submit \
@@ -679,10 +682,9 @@ spark-submit \
   --date 20250601
 ```
 
-Execute a Spark job that calculates average weather data using `daily-iceberg-parquet` data on the Kubernetes cluster.
+Execute a Spark Job on the Kubernetes Cluster to calculate average weather data using `daily-iceberg-parquet` data.
 
 ## 5. References
 
 * Spark Local Environment Setup : [https://bluehorn07.github.io/2024/08/18/run-spark-on-local-2/](https://bluehorn07.github.io/2024/08/18/run-spark-on-local-2/)
 * Volcano Scheduler Configuration : [https://docs.aws.amazon.com/emr/latest/EMR-on-EKS-DevelopmentGuide/tutorial-volcano.html](https://docs.aws.amazon.com/emr/latest/EMR-on-EKS-DevelopmentGuide/tutorial-volcano.html)
-

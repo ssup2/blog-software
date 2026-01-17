@@ -4,7 +4,7 @@ title: Ansible Installation / Ubuntu 18.04 Environment
 
 ## 1. Installation Environment
 
-{{< figure caption="[Figure 1] Node configuration diagram for Ansible installation" src="images/node-setting.png" width="700px" >}}
+{{< figure caption="[Figure 1] Node Configuration Diagram for Ansible Installation" src="images/node-setting.png" width="700px" >}}
 
 * Ubuntu 18.04 LTS 64bit, root user
 * Ansible 2.5.1
@@ -18,7 +18,7 @@ title: Ansible Installation / Ubuntu 18.04 Environment
 (Control)$ apt-get install ansible
 ```
 
-Install Ansible on Control Node.
+Install Ansible on the Control Node.
 
 ## 3. Inventory Configuration
 
@@ -28,9 +28,9 @@ Install Ansible on Control Node.
 172.35.0.102
 ```
 
-Store Managed Node IP information in Control Node's /etc/ansible/hosts file as shown in [File 1].
+Store IP information of Managed Nodes in the /etc/ansible/hosts file of the Control Node as in [File 1].
 
-## 4. SSH Key Generation and Configuration
+## 4. SSH Key Generation and Setting
 
 ```shell
 (Control)$ ssh-keygen -t rsa
@@ -56,16 +56,16 @@ The key's randomart image is:
 +----[SHA256]-----+
 ```
 
-Generate ssh key on Control Node. Enter blank for passphrase (Password) to not set it. If set, you need to enter passphrase every time accessing Managed Node from Control Node via SSH.
+Generate an ssh key on the Control Node. Enter blank for passphrase (Password) to not set it. If set, you must enter the passphrase every time accessing Managed Nodes from the Control Node through SSH.
 
 ```shell
 (Control)$ ssh-copy-id root@172.35.0.101 
 (Control)$ ssh-copy-id root@172.35.0.102
 ```
 
-Use ssh-copy-id command from Control Node to copy generated ssh Public Key to all Managed Nodes' ~/.ssh/authorized-keys files.
+Copy the generated ssh Public Key to the ~/.ssh/authorized-keys file of all Managed Nodes using the ssh-copy-id command from the Control Node.
 
-## 5. Ansible Operation
+## 5. Ansible Execution
 
 ```shell
 (Control)$ ansible all -m ping
@@ -79,7 +79,7 @@ Use ssh-copy-id command from Control Node to copy generated ssh Public Key to al
 }
 ```
 
-Use ansible all -m ping command from Control Node to verify that SSH connection from Control Node to Managed Node is possible.
+Check if ssh connection from Control Node to Managed Nodes is possible using the ansible all -m ping command from the Control Node.
 
 ## 6. References
 

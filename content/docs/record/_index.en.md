@@ -4,4 +4,4 @@ weight: 6
 comments: false
 ---
 
-Records related to configuration, setup, and testing
+Summary of configuration, setup, and test-related records
