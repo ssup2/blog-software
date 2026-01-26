@@ -1048,7 +1048,7 @@ Spec:
           Number:  80
       Weight:      40
 
-# Promote mock-server rollout
+# Promote mock-server rollout again
 $ kubectl argo rollouts promote mock-server
 $ kubectl argo rollouts get rollout mock-server 
 Name:            mock-server
@@ -1186,7 +1186,255 @@ spec:
 
 ```shell
 # Deploy mock-server canary rollout and check status
+$ kubectl apply -f mock-server-canary-istio-virtualservice.yaml
+$ kubectl argo rollouts get rollout mock-server
+Name:            mock-server
+Namespace:       default
+Status:          ✔ Healthy
+Strategy:        Canary
+  Step:          5/5
+  SetWeight:     100
+  ActualWeight:  100
+Images:          ghcr.io/ssup2/mock-go-server:1.0.0 (stable)
+Replicas:
+  Desired:       5
+  Current:       5
+  Updated:       5
+  Ready:         5
+  Available:     5
 
+NAME                                     KIND        STATUS     AGE  INFO
+⟳ mock-server                            Rollout     ✔ Healthy  6s   
+└──# revision:1                                                      
+   └──⧉ mock-server-6579c6cc98           ReplicaSet  ✔ Healthy  6s   stable
+      ├──□ mock-server-6579c6cc98-57kmd  Pod         ✔ Running  6s   ready:1/1
+      ├──□ mock-server-6579c6cc98-7w5k4  Pod         ✔ Running  6s   ready:1/1
+      ├──□ mock-server-6579c6cc98-gxkjw  Pod         ✔ Running  6s   ready:1/1
+      ├──□ mock-server-6579c6cc98-rfzmb  Pod         ✔ Running  6s   ready:1/1
+      └──□ mock-server-6579c6cc98-xp4c4  Pod         ✔ Running  6s   ready:1/1
+
+$ kubectl describe virtualservice mock-server
+...
+Spec:
+  Hosts:
+    mock-server
+  Http:
+    Name:  primary
+    Route:
+      Destination:
+        Host:    mock-server
+        Subset:  stable
+      Weight:    100
+      Destination:
+        Host:    mock-server
+        Subset:  canary
+      Weight:    0
+
+$ kubectl describe destinationrule mock-server
+...
+Spec:
+  Host:  mock-server
+  Subsets:
+    Labels:
+      App:                               mock-server
+      Rollouts - Pod - Template - Hash:  6579c6cc98
+    Name:                                stable
+    Labels:
+      App:                               mock-server
+      Rollouts - Pod - Template - Hash:  6579c6cc98
+    Name:                                canary
+
+
+# Set mock-server image to 2.0.0 and check status
+$ kubectl argo rollouts set image mock-server mock-server=ghcr.io/ssup2/mock-go-server:2.0.0
+$ kubectl argo rollouts get rollout mock-server
+Name:            mock-server
+Namespace:       default
+Status:          ॥ Paused
+Message:         CanaryPauseStep
+Strategy:        Canary
+  Step:          1/5
+  SetWeight:     20
+  ActualWeight:  20
+Images:          ghcr.io/ssup2/mock-go-server:1.0.0 (stable)
+                 ghcr.io/ssup2/mock-go-server:2.0.0 (canary)
+Replicas:
+  Desired:       5
+  Current:       6
+  Updated:       1
+  Ready:         6
+  Available:     6
+
+NAME                                     KIND        STATUS     AGE  INFO
+⟳ mock-server                            Rollout     ॥ Paused   74s  
+├──# revision:2                                                      
+│  └──⧉ mock-server-7c6fcfb847           ReplicaSet  ✔ Healthy  11s  canary
+│     └──□ mock-server-7c6fcfb847-6mbd7  Pod         ✔ Running  10s  ready:1/1
+└──# revision:1                                                      
+   └──⧉ mock-server-6579c6cc98           ReplicaSet  ✔ Healthy  74s  stable
+      ├──□ mock-server-6579c6cc98-57kmd  Pod         ✔ Running  74s  ready:1/1
+      ├──□ mock-server-6579c6cc98-7w5k4  Pod         ✔ Running  74s  ready:1/1
+      ├──□ mock-server-6579c6cc98-gxkjw  Pod         ✔ Running  74s  ready:1/1
+      ├──□ mock-server-6579c6cc98-rfzmb  Pod         ✔ Running  74s  ready:1/1
+      └──□ mock-server-6579c6cc98-xp4c4  Pod         ✔ Running  74s  ready:1/1
+
+$ kubectl describe virtualservice mock-server
+...
+Spec:
+  Hosts:
+    mock-server
+  Http:
+    Name:  primary
+    Route:
+      Destination:
+        Host:    mock-server
+        Subset:  stable
+      Weight:    80
+      Destination:
+        Host:    mock-server
+        Subset:  canary
+      Weight:    20
+
+$ kubectl describe destinationrule mock-server
+...
+Spec:
+  Host:  mock-server
+  Subsets:
+    Labels:
+      App:                               mock-server
+      Rollouts - Pod - Template - Hash:  6579c6cc98
+    Name:                                stable
+    Labels:
+      App:                               mock-server
+      Rollouts - Pod - Template - Hash:  7c6fcfb847
+    Name:                                canary
+
+# Promote mock-server rollout
+$ kubectl argo rollouts promote mock-server
+$ kubectl argo rollouts get rollout mock-server
+kubectl argo rollouts get rollout mock-server
+Name:            mock-server
+Namespace:       default
+Status:          ॥ Paused
+Message:         CanaryPauseStep
+Strategy:        Canary
+  Step:          3/5
+  SetWeight:     40
+  ActualWeight:  40
+Images:          ghcr.io/ssup2/mock-go-server:1.0.0 (stable)
+                 ghcr.io/ssup2/mock-go-server:2.0.0 (canary)
+Replicas:
+  Desired:       5
+  Current:       7
+  Updated:       2
+  Ready:         7
+  Available:     7
+
+NAME                                     KIND        STATUS     AGE    INFO
+⟳ mock-server                            Rollout     ॥ Paused   2m16s  
+├──# revision:2                                                        
+│  └──⧉ mock-server-7c6fcfb847           ReplicaSet  ✔ Healthy  73s    canary
+│     ├──□ mock-server-7c6fcfb847-6mbd7  Pod         ✔ Running  72s    ready:1/1
+│     └──□ mock-server-7c6fcfb847-sp75c  Pod         ✔ Running  6s     ready:1/1
+└──# revision:1                                                        
+   └──⧉ mock-server-6579c6cc98           ReplicaSet  ✔ Healthy  2m16s  stable
+      ├──□ mock-server-6579c6cc98-57kmd  Pod         ✔ Running  2m16s  ready:1/1
+      ├──□ mock-server-6579c6cc98-7w5k4  Pod         ✔ Running  2m16s  ready:1/1
+      ├──□ mock-server-6579c6cc98-gxkjw  Pod         ✔ Running  2m16s  ready:1/1
+      ├──□ mock-server-6579c6cc98-rfzmb  Pod         ✔ Running  2m16s  ready:1/1
+      └──□ mock-server-6579c6cc98-xp4c4  Pod         ✔ Running  2m16s  ready:1/1
+
+$ kubectl describe virtualservice mock-server
+...
+Spec:
+  Hosts:
+    mock-server
+  Http:
+    Name:  primary
+    Route:
+      Destination:
+        Host:    mock-server
+        Subset:  stable
+      Weight:    60
+      Destination:
+        Host:    mock-server
+        Subset:  canary
+      Weight:    40
+
+$ kubectl describe destinationrule mock-server
+...
+Spec:
+  Host:  mock-server
+  Subsets:
+    Labels:
+      App:                               mock-server
+      Rollouts - Pod - Template - Hash:  6579c6cc98
+    Name:                                stable
+    Labels:
+      App:                               mock-server
+      Rollouts - Pod - Template - Hash:  7c6fcfb847
+    Name:                                canary
+
+# Promote mock-server rollout again
+$ kubectl argo rollouts promote mock-server
+$ kubectl argo rollouts get rollout mock-server
+Name:            mock-server
+Namespace:       default
+Status:          ✔ Healthy
+Strategy:        Canary
+  Step:          5/5
+  SetWeight:     100
+  ActualWeight:  100
+Images:          ghcr.io/ssup2/mock-go-server:2.0.0 (stable)
+Replicas:
+  Desired:       5
+  Current:       5
+  Updated:       5
+  Ready:         5
+  Available:     5
+
+NAME                                     KIND        STATUS        AGE    INFO
+⟳ mock-server                            Rollout     ✔ Healthy     6m40s  
+├──# revision:2                                                           
+│  └──⧉ mock-server-7c6fcfb847           ReplicaSet  ✔ Healthy     5m37s  stable
+│     ├──□ mock-server-7c6fcfb847-6mbd7  Pod         ✔ Running     5m36s  ready:1/1
+│     ├──□ mock-server-7c6fcfb847-sp75c  Pod         ✔ Running     4m30s  ready:1/1
+│     ├──□ mock-server-7c6fcfb847-mc2b2  Pod         ✔ Running     40s    ready:1/1
+│     ├──□ mock-server-7c6fcfb847-kd8cr  Pod         ✔ Running     39s    ready:1/1
+│     └──□ mock-server-7c6fcfb847-n6wrr  Pod         ✔ Running     39s    ready:1/1
+└──# revision:1                                                           
+   └──⧉ mock-server-6579c6cc98           ReplicaSet  • ScaledDown  6m40s 
+
+$ kubectl describe virtualservice mock-server
+...
+Spec:
+  Hosts:
+    mock-server
+  Http:
+    Name:  primary
+    Route:
+      Destination:
+        Host:    mock-server
+        Subset:  stable
+      Weight:    100
+      Destination:
+        Host:    mock-server
+        Subset:  canary
+      Weight:    0
+
+$ kubectl describe destinationrule mock-server
+...
+Spec:
+  Host:  mock-server
+  Subsets:
+    Labels:
+      App:                               mock-server
+      Rollouts - Pod - Template - Hash:  7c6fcfb847
+    Name:                                stable
+    Labels:
+      App:                               mock-server
+      Rollouts - Pod - Template - Hash:  7c6fcfb847
+    Name:                                canary
 ```
 
 ## 2. 참조
