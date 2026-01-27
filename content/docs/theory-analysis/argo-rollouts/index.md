@@ -5,14 +5,56 @@ draft: true
 
 ## 1. Argo Rollouts
 
-### 1.1. Test 환경 구성
+## 2. Argo Rollout Cases
 
-```yaml
+### 2.1. Test 환경 구성
+
+```shell {caption="[Shell 1] Test 환경 구성"}
+# Create kubernetes cluster with kind
+$ kind create cluster --config=- <<EOF                           
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+- role: control-plane
+- role: worker
+- role: worker
+EOF
+
+# Install istio
+$ istioctl install --set profile=demo -y
+
+# Enable sidecar injection to default namespace
+$ kubectl label namespace default istio-injection=enabled
+
+# Install argo rollouts
+$ kubectl create namespace argo-rollouts
+$ kubectl apply -n argo-rollouts -f https://github.com/argoproj/argo-rollouts/releases/latest/download/install.yaml
+
+# Install prometheus
+$ kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.28/samples/addons/prometheus.yaml
 ```
 
-### 1.2. Test Case
+[Shell 1]은 Test 환경을 구성하는 Script를 나타내고 있다. `kind`를 활용하여 Kubernetes Cluster를 구성하고 Istio를 설치한다. 그리고 default Namespace에 Sidecar Injection을 활성화한다. Argo Rollouts를 설치한다. 그리고 Prometheus를 설치한다.
 
-#### 1.2.1. Blue/Green
+```yaml {caption="[File 1] shell Pod Manifest", linenos=table}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: shell
+  labels:
+    app: shell
+spec:
+  containers:
+  - name: shell
+    image: nicolaka/netshoot
+    command: ["sleep", "infinity"]
+```
+
+[File 1]은 `shell` Pod의 Manifest를 나타내고 있다. netshoot Image를 이용하여 `shell` Pod을 생성하며, Argo Rollout으로 구성한 Service에 접근하여 istio Metric을 발생시키기 위해서 사용한다.
+
+### 2.2. Test Cases
+
+#### 2.2.1. Blue/Green
 
 ```yaml {caption="[File 1] Argo Rollouts Blue/Green Example", linenos=table}
 apiVersion: argoproj.io/v1alpha1
@@ -250,7 +292,7 @@ Annotations:              argo-rollouts.argoproj.io/managed-by-rollouts: mock-se
 Selector:                 app=mock-server,rollouts-pod-template-hash=6fcb56df9b
 ```
 
-#### 1.2.2. Canary Success
+#### 2.2.2. Canary Success
 
 ```yaml {caption="[File 2] Argo Rollouts Canary Example", linenos=table}
 apiVersion: argoproj.io/v1alpha1
@@ -547,7 +589,7 @@ Annotations:              argo-rollouts.argoproj.io/managed-by-rollouts: mock-se
 Selector:                 app=mock-server,rollouts-pod-template-hash=6fcb56df9b
 ```
 
-#### 1.2.3. Canary with Undo and Abort
+#### 2.2.3. Canary with Undo and Abort
 
 ```yaml {caption="[File 2] Argo Rollouts Canary Example", linenos=table}
 apiVersion: argoproj.io/v1alpha1
@@ -812,7 +854,7 @@ NAME                                     KIND        STATUS        AGE  INFO
       └──□ mock-server-6579c6cc98-wx576  Pod         ✔ Running     25s  ready:1/1
 ```
 
-#### 1.2.4. Canary with istio Virtual Service
+#### 2.2.4. Canary with istio Virtual Service
 
 ```yaml {caption="[File 3] Argo Rollouts Canary with istio Virtual Service Example", linenos=table}
 apiVersion: argoproj.io/v1alpha1
@@ -1098,7 +1140,7 @@ Spec:
       Weight:      0
 ```
 
-#### 1.2.5. Canary with istio Destination Rule
+#### 2.2.5. Canary with istio Destination Rule
 
 ```yaml {caption="[File 4] Argo Rollouts Canary with istio Destination Rule Example", linenos=table}
 apiVersion: argoproj.io/v1alpha1
@@ -1151,20 +1193,6 @@ spec:
     targetPort: 8080
 ---
 apiVersion: networking.istio.io/v1beta1
-kind: DestinationRule
-metadata:
-  name: mock-server
-spec:
-  host: mock-server
-  subsets:
-  - name: stable
-    labels:
-      app: mock-server
-  - name: canary
-    labels:
-      app: mock-server
----
-apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
   name: mock-server
@@ -1182,6 +1210,20 @@ spec:
         host: mock-server
         subset: canary
       weight: 0
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: mock-server
+spec:
+  host: mock-server
+  subsets:
+  - name: stable
+    labels:
+      app: mock-server
+  - name: canary
+    labels:
+      app: mock-server
 ```
 
 ```shell
@@ -1243,7 +1285,6 @@ Spec:
       App:                               mock-server
       Rollouts - Pod - Template - Hash:  6579c6cc98
     Name:                                canary
-
 
 # Set mock-server image to 2.0.0 and check status
 $ kubectl argo rollouts set image mock-server mock-server=ghcr.io/ssup2/mock-go-server:2.0.0
@@ -1437,6 +1478,123 @@ Spec:
     Name:                                canary
 ```
 
-## 2. 참조
+#### 2.2.6. Canary with istio Destination Rule and Tem
+
+```yaml {caption="[File 4] Argo Rollouts Canary with istio Destination Rule Example", linenos=table}
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: mock-server
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: mock-server
+  strategy:
+    canary:
+      steps:
+      - setWeight: 20
+      - pause: {duration: 30s}
+      - analysis:
+          templates:
+          - templateName: success-rate
+      - setWeight: 100
+      trafficRouting:
+        istio:
+          virtualService:
+            name: mock-server
+            routes:
+            - primary
+          destinationRule:
+            name: mock-server
+            stableSubsetName: stable
+            canarySubsetName: canary
+  template:
+    metadata:
+      labels:
+        app: mock-server
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "15020"
+        prometheus.io/path: "/stats/prometheus"
+    spec:
+      containers:
+      - name: mock-server
+        image: ghcr.io/ssup2/mock-go-server:1.0.0
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mock-server
+spec:
+  selector:
+    app: mock-server
+  ports:
+  - port: 80
+    targetPort: 8080
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: mock-server
+spec:
+  hosts:
+  - mock-server
+  http:
+  - name: primary
+    route:
+    - destination:
+        host: mock-server
+        subset: stable
+      weight: 100
+    - destination:
+        host: mock-server
+        subset: canary
+      weight: 0
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: mock-server
+spec:
+  host: mock-server
+  subsets:
+  - name: stable
+    labels:
+      app: mock-server
+  - name: canary
+    labels:
+      app: mock-server
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: success-rate
+spec:
+  metrics:
+  - name: success-rate
+    interval: 30s
+    count: 3
+    successCondition: result >= 0.95
+    failureLimit: 3
+    provider:
+      prometheus:
+        address: http://prometheus.istio-system.svc.cluster.local:9090
+        query: |
+          sum(rate(istio_requests_total{destination_service_name="mock-server",response_code=~"2.."}[1m])) 
+          / 
+          sum(rate(istio_requests_total{destination_service_name="mock-server"}[1m]))
+```
+
+```shell
+# Deploy mock-server canary rollout and check status
+$ kubectl apply -f mock-server-canary-istio-destinationrule-analysistemplate.yaml
+$ kubectl argo rollouts get rollout mock-server
+
+```
+
+## 3. 참조
 
 * Argo Rollouts : [https://kkamji.net/posts/argo-rollout-5w/](https://kkamji.net/posts/argo-rollout-5w/)
