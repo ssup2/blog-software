@@ -46,3 +46,4 @@ Worker Node is a node where applications deployed by Kubernetes users run.
 * [https://www.slideshare.net/harryzhang735/kubernetes-beyond-a-black-box-part-1](https://www.slideshare.net/harryzhang735/kubernetes-beyond-a-black-box-part-1)
 * [https://www.slideshare.net/harryzhang735/kubernetes-beyond-a-black-box-part-2](https://www.slideshare.net/harryzhang735/kubernetes-beyond-a-black-box-part-2)
 
+

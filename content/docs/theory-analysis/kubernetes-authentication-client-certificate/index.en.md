@@ -74,3 +74,4 @@ Client certificates can also be used in kubectl through kubeconfig settings. [Te
 * [https://kubernetes.io/docs/reference/access-authn-authz/rbac/#referring-to-subjects](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#referring-to-subjects)
 * [https://coffeewhale.com/kubernetes/authentication/x509/2020/05/02/auth01/](https://coffeewhale.com/kubernetes/authentication/x509/2020/05/02/auth01/)
 
+

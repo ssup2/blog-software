@@ -174,3 +174,4 @@ It can be seen that `MutatingWebhookConfiguration` and `ValidatingWebhookConfigu
 * [https://docs.openshift.com/container-platform/3.11/architecture/additional-concepts/dynamic-admission-controllers.html](https://docs.openshift.com/container-platform/3.11/architecture/additional-concepts/dynamic-admission-controllers.html)
 * [https://m.blog.naver.com/alice-k106/221546328906](https://m.blog.naver.com/alice-k106/221546328906)
 
+
