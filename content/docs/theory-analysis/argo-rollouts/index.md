@@ -90,7 +90,7 @@ spec:
   selector:
     app: mock-server
   ports:
-  - port: 80
+  - port: 8080
     targetPort: 8080
 ---
 apiVersion: v1
@@ -101,7 +101,7 @@ spec:
   selector:
     app: mock-server
   ports:
-  - port: 80
+  - port: 8080
     targetPort: 8080
 ```
 
@@ -333,7 +333,7 @@ spec:
   selector:
     app: mock-server
   ports:
-  - port: 80
+  - port: 8080
     targetPort: 8080
 ---
 apiVersion: v1
@@ -344,7 +344,7 @@ spec:
   selector:
     app: mock-server
   ports:
-  - port: 80
+  - port: 8080
     targetPort: 8080
 ---
 apiVersion: v1
@@ -355,7 +355,7 @@ spec:
   selector:
     app: mock-server
   ports:
-  - port: 80
+  - port: 8080
     targetPort: 8080
 ```
 
@@ -630,7 +630,7 @@ spec:
   selector:
     app: mock-server
   ports:
-  - port: 80
+  - port: 8080
     targetPort: 8080
 ---
 apiVersion: v1
@@ -641,7 +641,7 @@ spec:
   selector:
     app: mock-server
   ports:
-  - port: 80
+  - port: 8080
     targetPort: 8080
 ---
 apiVersion: v1
@@ -652,7 +652,7 @@ spec:
   selector:
     app: mock-server
   ports:
-  - port: 80
+  - port: 8080
     targetPort: 8080
 ```
 
@@ -901,7 +901,7 @@ spec:
   selector:
     app: mock-server
   ports:
-  - port: 80
+  - port: 8080
     targetPort: 8080
 ---
 apiVersion: v1
@@ -912,7 +912,7 @@ spec:
   selector:
     app: mock-server
   ports:
-  - port: 80
+  - port: 8080
     targetPort: 8080
 ---
 apiVersion: networking.istio.io/v1beta1
@@ -927,13 +927,9 @@ spec:
     route:
     - destination:
         host: mock-server-stable
-        port:
-          number: 80
       weight: 100
     - destination:
         host: mock-server-canary
-        port:
-          number: 80
       weight: 0
 ```
 
@@ -976,14 +972,10 @@ Spec:
     Route:
       Destination:
         Host:  mock-server-stable
-        Port:
-          Number:  80
-      Weight:      100
+      Weight:  100
       Destination:
         Host:  mock-server-canary
-        Port:
-          Number:  80
-      Weight:      0
+      Weight:  0
 
 # Set mock-server image to 2.0.0 and check status
 $ kubectl argo rollouts set image mock-server mock-server=ghcr.io/ssup2/mock-go-server:2.0.0
@@ -1028,14 +1020,10 @@ Spec:
     Route:
       Destination:
         Host:  mock-server-stable
-        Port:
-          Number:  80
-      Weight:      80
+      Weight:  80
       Destination:
         Host:  mock-server-canary
-        Port:
-          Number:  80
-      Weight:      20
+      Weight:  20
 
 # Promote mock-server rollout
 $ kubectl argo rollouts promote mock-server
@@ -1081,14 +1069,10 @@ Spec:
     Route:
       Destination:
         Host:  mock-server-stable
-        Port:
-          Number:  80
-      Weight:      60
+      Weight:  60
       Destination:
         Host:  mock-server-canary
-        Port:
-          Number:  80
-      Weight:      40
+      Weight:  40
 
 # Promote mock-server rollout again
 $ kubectl argo rollouts promote mock-server
@@ -1130,14 +1114,10 @@ Spec:
     Route:
       Destination:
         Host:  mock-server-stable
-        Port:
-          Number:  80
-      Weight:      100
+      Weight:  100
       Destination:
         Host:  mock-server-canary
-        Port:
-          Number:  80
-      Weight:      0
+      Weight:  0
 ```
 
 #### 2.2.5. Canary with istio Virtual Service and Analysis
@@ -1188,7 +1168,7 @@ spec:
   selector:
     app: mock-server
   ports:
-  - port: 80
+  - port: 8080
     targetPort: 8080
 ---
 apiVersion: v1
@@ -1199,7 +1179,7 @@ spec:
   selector:
     app: mock-server
   ports:
-  - port: 80
+  - port: 8080
     targetPort: 8080
 ---
 apiVersion: networking.istio.io/v1beta1
@@ -1214,13 +1194,9 @@ spec:
     route:
     - destination:
         host: mock-server-stable
-        port:
-          number: 80
       weight: 100
     - destination:
         host: mock-server-canary
-        port:
-          number: 80
       weight: 0
 ---
 apiVersion: argoproj.io/v1alpha1
@@ -1479,6 +1455,185 @@ NAME                                     KIND         STATUS        AGE    INFO
 
 #### 2.2.6. Canary with istio Virtual Service, Analysis and Experiment
 
+```yaml {caption="[File 4] Argo Rollouts Canary with istio Virtual Service, Analysis and Experiment Example", linenos=table}
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: mock-server
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: mock-server
+  strategy:
+    canary:
+      steps:
+      - experiment:
+          duration: 2m
+          templates:
+          - name: baseline
+            specRef: stable
+            weight: 20
+          - name: canary
+            specRef: canary
+            weight: 20
+          analyses:
+          - name: baseline-canary-comparison
+            templateName: baseline-canary-comparison
+            args:
+            - name: baseline-hash
+              value: "{{templates.baseline.podTemplateHash}}"
+            - name: canary-hash
+              value: "{{templates.canary.podTemplateHash}}"
+      - setWeight: 20
+      - pause: {duration: 30s}
+      - analysis:
+          templates:
+          - templateName: success-rate
+      - setWeight: 100
+      stableService: mock-server-stable
+      canaryService: mock-server-canary
+      trafficRouting:
+        istio:
+          virtualService:
+            name: mock-server
+            routes:
+            - primary
+  template:
+    metadata:
+      labels:
+        app: mock-server
+    spec:
+      containers:
+      - name: mock-server
+        image: ghcr.io/ssup2/mock-go-server:1.0.0
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mock-server-stable
+spec:
+  selector:
+    app: mock-server
+  ports:
+  - port: 8080
+    targetPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mock-server-canary
+spec:
+  selector:
+    app: mock-server
+  ports:
+  - port: 8080
+    targetPort: 8080
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: mock-server
+spec:
+  hosts:
+  - mock-server-stable
+  http:
+  - name: primary
+    route:
+    - destination:
+        host: mock-server-stable
+      weight: 100
+    - destination:
+        host: mock-server-canary
+      weight: 0
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: success-rate
+spec:
+  metrics:
+  - name: success-rate
+    interval: 30s
+    count: 3
+    successCondition: result >= 0.95
+    failureLimit: 2
+    provider:
+      prometheus:
+        address: http://prometheus.istio-system.svc.cluster.local:9090
+        query: |
+          scalar(
+            sum(rate(istio_requests_total{destination_service_name="mock-server-canary",response_code=~"2.."}[1m])) 
+            / 
+            sum(rate(istio_requests_total{destination_service_name="mock-server-canary"}[1m]))
+          )
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: baseline-canary-comparison
+spec:
+  args:
+  - name: baseline-hash
+  - name: canary-hash
+  metrics:
+  - name: baseline-success-rate
+    interval: 30s
+    count: 3
+    successCondition: result >= 0.95
+    failureLimit: 2
+    provider:
+      prometheus:
+        address: http://prometheus.istio-system.svc.cluster.local:9090
+        query: |
+          scalar(
+            sum(rate(istio_requests_total{
+              destination_service_name="mock-server-canary",
+              destination_workload=~"mock-server-{{args.baseline-hash}}.*",
+              response_code=~"2.."
+            }[1m])) 
+            / 
+            sum(rate(istio_requests_total{
+              destination_service_name="mock-server-canary",
+              destination_workload=~"mock-server-{{args.baseline-hash}}.*"
+            }[1m]))
+          )
+  - name: canary-success-rate
+    interval: 30s
+    count: 3
+    successCondition: result >= 0.95
+    failureLimit: 2
+    provider:
+      prometheus:
+        address: http://prometheus.istio-system.svc.cluster.local:9090
+        query: |
+          scalar(
+            sum(rate(istio_requests_total{
+              destination_service_name="mock-server-canary",
+              destination_workload=~"mock-server-{{args.canary-hash}}.*",
+              response_code=~"2.."
+            }[1m])) 
+            / 
+            sum(rate(istio_requests_total{
+              destination_service_name="mock-server-canary",
+              destination_workload=~"mock-server-{{args.canary-hash}}.*"
+            }[1m]))
+          )
+```
+
+```shell
+# Deploy mock-server canary rollout and check status
+$ kubectl apply -f mock-server-canary-istio-virtualservice-analysis-experiment.yaml
+$ kubectl argo rollouts get rollout mock-server
+
+# set mock-server image to 2.0.0 and check status
+$ kubectl argo rollouts set image mock-server mock-server=ghcr.io/ssup2/mock-go-server:2.0.0
+$ kubectl argo rollouts get rollout mock-server
+
+```
+
 #### 2.2.7. Canary with istio Destination Rule
 
 ```yaml {caption="[File 4] Argo Rollouts Canary with istio Destination Rule Example", linenos=table}
@@ -1528,7 +1683,7 @@ spec:
   selector:
     app: mock-server
   ports:
-  - port: 80
+  - port: 8080
     targetPort: 8080
 ---
 apiVersion: networking.istio.io/v1beta1
@@ -1605,11 +1760,11 @@ Spec:
       Destination:
         Host:    mock-server
         Subset:  stable
-      Weight:    100
+      Weight:  100
       Destination:
         Host:    mock-server
         Subset:  canary
-      Weight:    0
+      Weight:  0
 
 $ kubectl describe destinationrule mock-server
 ...
@@ -1669,11 +1824,11 @@ Spec:
       Destination:
         Host:    mock-server
         Subset:  stable
-      Weight:    80
+      Weight:  80
       Destination:
         Host:    mock-server
         Subset:  canary
-      Weight:    20
+      Weight:  20
 
 $ kubectl describe destinationrule mock-server
 ...
@@ -1735,11 +1890,11 @@ Spec:
       Destination:
         Host:    mock-server
         Subset:  stable
-      Weight:    60
+      Weight:  60
       Destination:
         Host:    mock-server
         Subset:  canary
-      Weight:    40
+      Weight:  40
 
 $ kubectl describe destinationrule mock-server
 ...
@@ -1796,11 +1951,11 @@ Spec:
       Destination:
         Host:    mock-server
         Subset:  stable
-      Weight:    100
+      Weight:  100
       Destination:
         Host:    mock-server
         Subset:  canary
-      Weight:    0
+      Weight:  0
 
 $ kubectl describe destinationrule mock-server
 ...
@@ -1871,7 +2026,7 @@ spec:
   selector:
     app: mock-server
   ports:
-  - port: 80
+  - port: 8080
     targetPort: 8080
 ---
 apiVersion: networking.istio.io/v1beta1
@@ -2120,8 +2275,8 @@ NAME                                     KIND         STATUS         AGE    INFO
       ├──□ mock-server-6579c6cc98-knl9h  Pod          ✔ Running      4m25s  ready:1/1
       └──□ mock-server-6579c6cc98-lk7m9  Pod          ✔ Running      4m25s  ready:1/1
 
-$ kubectl exec -it shell -- curl -s mock-server:80/status/200
-$ kubectl exec -it shell -- curl -s mock-server:80/status/200
+$ kubectl exec -it shell -- curl -s mock-server:8080/status/200
+$ kubectl exec -it shell -- curl -s mock-server:8080/status/200
 ...
 
 $ kubectl argo rollouts get rollout mock-server

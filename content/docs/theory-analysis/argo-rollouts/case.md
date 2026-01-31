@@ -146,13 +146,13 @@ spec:
         query: |
           scalar(
             sum(rate(istio_requests_total{
-              destination_service_name="mock-server",
+              destination_service_name="mock-server-canary",
               destination_workload=~"mock-server-{{args.baseline-hash}}.*",
               response_code=~"2.."
             }[1m])) 
             / 
             sum(rate(istio_requests_total{
-              destination_service_name="mock-server",
+              destination_service_name="mock-server-canary",
               destination_workload=~"mock-server-{{args.baseline-hash}}.*"
             }[1m]))
           )
@@ -167,13 +167,13 @@ spec:
         query: |
           scalar(
             sum(rate(istio_requests_total{
-              destination_service_name="mock-server",
+              destination_service_name="mock-server-canary",
               destination_workload=~"mock-server-{{args.canary-hash}}.*",
               response_code=~"2.."
             }[1m])) 
             / 
             sum(rate(istio_requests_total{
-              destination_service_name="mock-server",
+              destination_service_name="mock-server-canary",
               destination_workload=~"mock-server-{{args.canary-hash}}.*"
             }[1m]))
           )
