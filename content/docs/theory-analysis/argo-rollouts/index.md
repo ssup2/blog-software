@@ -2601,6 +2601,502 @@ NAME                                     KIND         STATUS        AGE    INFO
    └──⧉ mock-server-6579c6cc98           ReplicaSet   • ScaledDown  6m56s  
 ```
 
+#### 2.2.9. Canary with istio Destination Rule, Analysis and Experiment
+
+```yaml {caption="[File 5] Argo Rollouts Canary with istio Destination Rule, Analysis and Experiment Example", linenos=table}
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: mock-server
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: mock-server
+  strategy:
+    canary:
+      steps:
+      - experiment:
+          duration: 2m
+          templates:
+          - name: stable
+            specRef: stable
+            weight: 20
+            service:
+              name: mock-server-experiment-stable
+          - name: canary
+            specRef: canary
+            weight: 20
+            service:
+              name: mock-server-experiment-canary
+          analyses:
+          - name: stable-canary-comparison
+            templateName: stable-canary-comparison
+            args:
+            - name: stable-replicaset
+              value: "{{templates.stable.replicaset.name}}"
+            - name: canary-replicaset
+              value: "{{templates.canary.replicaset.name}}"
+      - setWeight: 20
+      - pause: {duration: 30s}
+      - analysis:
+          templates:
+          - templateName: success-rate
+      - setWeight: 100
+      trafficRouting:
+        istio:
+          virtualService:
+            name: mock-server
+            routes:
+            - primary
+          destinationRule:
+            name: mock-server
+            stableSubsetName: stable
+            canarySubsetName: canary
+  template:
+    metadata:
+      labels:
+        app: mock-server
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "15020"
+        prometheus.io/path: "/stats/prometheus"
+    spec:
+      containers:
+      - name: mock-server
+        image: ghcr.io/ssup2/mock-go-server:1.0.0
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mock-server
+spec:
+  selector:
+    app: mock-server
+  ports:
+  - port: 8080
+    targetPort: 8080
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: mock-server
+spec:
+  hosts:
+  - mock-server
+  http:
+  - name: primary
+    route:
+    - destination:
+        host: mock-server
+        subset: stable
+      weight: 100
+    - destination:
+        host: mock-server
+        subset: canary
+      weight: 0
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: mock-server
+spec:
+  host: mock-server
+  subsets:
+  - name: stable
+    labels:
+      app: mock-server
+  - name: canary
+    labels:
+      app: mock-server
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: success-rate
+spec:
+  metrics:
+  - name: success-rate
+    interval: 30s
+    count: 3
+    successCondition: result >= 0.95
+    failureLimit: 2
+    provider:
+      prometheus:
+        address: http://prometheus.istio-system.svc.cluster.local:9090
+        query: |
+          scalar(
+            sum(rate(istio_requests_total{destination_service_name="mock-server",response_code=~"2.."}[1m])) 
+            / 
+            sum(rate(istio_requests_total{destination_service_name="mock-server"}[1m]))
+          )
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: stable-canary-comparison
+spec:
+  args:
+  - name: stable-replicaset
+  - name: canary-replicaset
+  metrics:
+  - name: stable-success-rate
+    interval: 30s
+    count: 3
+    successCondition: result >= 0.95
+    failureLimit: 2
+    provider:
+      prometheus:
+        address: http://prometheus.istio-system.svc.cluster.local:9090
+        query: |
+          scalar(
+            sum(rate(istio_requests_total{
+              destination_service_name="mock-server-experiment-stable",
+              destination_workload="{{args.stable-replicaset}}",
+              response_code=~"2.."
+            }[1m])) 
+            / 
+            sum(rate(istio_requests_total{
+              destination_service_name="mock-server-experiment-stable,
+              destination_workload="{{args.stable-replicaset}}"
+            }[1m]))
+          )
+  - name: canary-success-rate
+    interval: 30s
+    count: 3
+    successCondition: result >= 0.95
+    failureLimit: 2
+    provider:
+      prometheus:
+        address: http://prometheus.istio-system.svc.cluster.local:9090
+        query: |
+          scalar(
+            sum(rate(istio_requests_total{
+              destination_service_name="mock-server-experiment-canary",
+              destination_workload="{{args.canary-replicaset}}",
+              response_code=~"2.."
+            }[1m])) 
+            / 
+            sum(rate(istio_requests_total{
+              destination_service_name="mock-server-experiment-canary",
+              destination_workload="{{args.canary-replicaset}}"
+            }[1m]))
+          )
+```
+
+```shell
+$ kubectl apply -f mock-server-canary-istio-destinationrule-analysistemplate-experiment.yaml
+$ kubectl argo rollouts get rollout mock-server
+Name:            mock-server
+Namespace:       default
+Status:          ✔ Healthy
+Strategy:        Canary
+  Step:          5/5
+  SetWeight:     100
+  ActualWeight:  100
+Images:          ghcr.io/ssup2/mock-go-server:1.0.0 (stable)
+Replicas:
+  Desired:       5
+  Current:       5
+  Updated:       5
+  Ready:         5
+  Available:     5
+
+NAME                                   KIND        STATUS     AGE  INFO
+⟳ mock-server                          Rollout     ✔ Healthy  8s   
+└──# revision:1                                                    
+   └──⧉ mock-server-5f59cc96           ReplicaSet  ✔ Healthy  7s   stable
+      ├──□ mock-server-5f59cc96-hqgw9  Pod         ✔ Running  7s   ready:1/1
+      ├──□ mock-server-5f59cc96-jwgdb  Pod         ✔ Running  7s   ready:1/1
+      ├──□ mock-server-5f59cc96-jwxt7  Pod         ✔ Running  7s   ready:1/1
+      ├──□ mock-server-5f59cc96-mnfpn  Pod         ✔ Running  7s   ready:1/1
+      └──□ mock-server-5f59cc96-tgcn9  Pod         ✔ Running  7s   ready:1/1
+
+# Set mock-server image to 2.0.0 and check status
+$ kubectl argo rollouts set image mock-server mock-server=ghcr.io/ssup2/mock-go-server:2.0.0
+$ kubectl argo rollouts get rollout mock-server
+Name:            mock-server
+Namespace:       default
+Status:          ◌ Progressing
+Message:         more replicas need to be updated
+Strategy:        Canary
+  Step:          0/5
+  SetWeight:     0
+  ActualWeight:  0
+Images:          ghcr.io/ssup2/mock-go-server:1.0.0 (stable, Σ:stable)
+                 ghcr.io/ssup2/mock-go-server:2.0.0 (Σ:canary)
+Replicas:
+  Desired:       5
+  Current:       5
+  Updated:       0
+  Ready:         5
+  Available:     5
+
+NAME                                                            KIND         STATUS         AGE  INFO
+⟳ mock-server                                                   Rollout      ◌ Progressing  30s  
+├──# revision:2                                                                                  
+│  ├──⧉ mock-server-789cf554d9                                  ReplicaSet   • ScaledDown   5s   canary
+│  └──Σ mock-server-789cf554d9-2-0                              Experiment   ◌ Running      5s   
+│     ├──⧉ mock-server-789cf554d9-2-0-canary                    ReplicaSet   ✔ Healthy      5s   
+│     │  └──□ mock-server-789cf554d9-2-0-canary-w6tzc           Pod          ✔ Running      5s   ready:1/1
+│     ├──⧉ mock-server-789cf554d9-2-0-stable                    ReplicaSet   ✔ Healthy      5s   
+│     │  └──□ mock-server-789cf554d9-2-0-stable-bp8cv           Pod          ✔ Running      5s   ready:1/1
+│     └──α mock-server-789cf554d9-2-0-stable-canary-comparison  AnalysisRun  ◌ Running      0s   ✖ 2
+└──# revision:1                                                                                  
+   └──⧉ mock-server-5f59cc96                                    ReplicaSet   ✔ Healthy      29s  stable
+      ├──□ mock-server-5f59cc96-hqgw9                           Pod          ✔ Running      29s  ready:1/1
+      ├──□ mock-server-5f59cc96-jwgdb                           Pod          ✔ Running      29s  ready:1/1
+      ├──□ mock-server-5f59cc96-jwxt7                           Pod          ✔ Running      29s  ready:1/1
+      ├──□ mock-server-5f59cc96-mnfpn                           Pod          ✔ Running      29s  ready:1/1
+      └──□ mock-server-5f59cc96-tgcn9                           Pod          ✔ Running      29s  ready:1/1
+
+$ kubectl describe virtualservice mock-server
+...
+Spec:
+  Hosts:
+    mock-server
+  Http:
+    Name:  primary
+    Route:
+      Destination:
+        Host:    mock-server
+        Subset:  stable
+      Weight:    60
+      Destination:
+        Host:    mock-server
+        Subset:  canary
+      Weight:    0
+      Destination:
+        Host:  mock-server-experiment-stable
+      Weight:  20
+      Destination:
+        Host:  mock-server-experiment-canary
+      Weight:  20
+
+$ kubectl describe destinationrule mock-server
+...
+Spec:
+  Host:  mock-server
+  Subsets:
+    Labels:
+      App:                               mock-server
+      Rollouts - Pod - Template - Hash:  5f59cc96
+    Name:                                stable
+    Labels:
+      App:                               mock-server
+      Rollouts - Pod - Template - Hash:  789cf554d9
+    Name:                                canary
+    Labels:
+      Rollouts - Pod - Template - Hash:  68879bfdd8
+    Name:                                mock-server-experiment-stable
+    Labels:
+      Rollouts - Pod - Template - Hash:  65c7c65dd7
+    Name:                                mock-server-experiment-canary
+
+$ kubectl argo rollouts get rollout mock-server
+Name:            mock-server
+Namespace:       default
+Status:          ✖ Degraded
+Message:         RolloutAborted: Rollout aborted update to revision 2: Metric "stable-success-rate" assessed Failed due to failed (3) > failureLimit (2)
+Strategy:        Canary
+  Step:          0/5
+  SetWeight:     0
+  ActualWeight:  0
+Images:          ghcr.io/ssup2/mock-go-server:1.0.0 (stable)
+Replicas:
+  Desired:       5
+  Current:       5
+  Updated:       0
+  Ready:         5
+  Available:     5
+
+NAME                                                            KIND         STATUS        AGE    INFO
+⟳ mock-server                                                   Rollout      ✖ Degraded    2m27s  
+├──# revision:2                                                                                   
+│  ├──⧉ mock-server-789cf554d9                                  ReplicaSet   • ScaledDown  2m2s   canary,delay:passed
+│  └──Σ mock-server-789cf554d9-2-0                              Experiment   ✖ Failed      2m2s   
+│     ├──⧉ mock-server-789cf554d9-2-0-canary                    ReplicaSet   • ScaledDown  2m2s   delay:passed
+│     ├──⧉ mock-server-789cf554d9-2-0-stable                    ReplicaSet   • ScaledDown  2m2s   delay:passed
+│     └──α mock-server-789cf554d9-2-0-stable-canary-comparison  AnalysisRun  ✖ Failed      117s   ✖ 6
+└──# revision:1                                                                                   
+   └──⧉ mock-server-5f59cc96                                    ReplicaSet   ✔ Healthy     2m26s  stable
+      ├──□ mock-server-5f59cc96-hqgw9                           Pod          ✔ Running     2m26s  ready:1/1
+      ├──□ mock-server-5f59cc96-jwgdb                           Pod          ✔ Running     2m26s  ready:1/1
+      ├──□ mock-server-5f59cc96-jwxt7                           Pod          ✔ Running     2m26s  ready:1/1
+      ├──□ mock-server-5f59cc96-mnfpn                           Pod          ✔ Running     2m26s  ready:1/1
+      └──□ mock-server-5f59cc96-tgcn9                           Pod          ✔ Running     2m26s  ready:1/1
+
+# Retry mock-server rollout
+$ kubectl argo rollouts retry rollout mock-server
+$ kubectl argo rollouts get rollout mock-server
+Name:            mock-server
+Namespace:       default
+Status:          ◌ Progressing
+Message:         more replicas need to be updated
+Strategy:        Canary
+  Step:          0/5
+  SetWeight:     0
+  ActualWeight:  0
+Images:          ghcr.io/ssup2/mock-go-server:1.0.0 (stable, Σ:stable)
+                 ghcr.io/ssup2/mock-go-server:2.0.0 (Σ:canary)
+Replicas:
+  Desired:       5
+  Current:       5
+  Updated:       0
+  Ready:         5
+  Available:     5
+
+NAME                                                              KIND         STATUS         AGE    INFO
+⟳ mock-server                                                     Rollout      ◌ Progressing  3m3s   
+├──# revision:2                                                                                      
+│  ├──⧉ mock-server-789cf554d9                                    ReplicaSet   • ScaledDown   2m38s  canary
+│  ├──Σ mock-server-789cf554d9-2-0                                Experiment   ✖ Failed       2m38s  
+│  │  ├──⧉ mock-server-789cf554d9-2-0-canary                      ReplicaSet   • ScaledDown   2m38s  delay:passed
+│  │  ├──⧉ mock-server-789cf554d9-2-0-stable                      ReplicaSet   • ScaledDown   2m38s  delay:passed
+│  │  └──α mock-server-789cf554d9-2-0-stable-canary-comparison    AnalysisRun  ✖ Failed       2m33s  ✖ 6
+│  └──Σ mock-server-789cf554d9-2-0-1                              Experiment   ◌ Running      7s     
+│     ├──⧉ mock-server-789cf554d9-2-0-1-canary                    ReplicaSet   ✔ Healthy      7s     
+│     │  └──□ mock-server-789cf554d9-2-0-1-canary-2m4l8           Pod          ✔ Running      7s     ready:1/1
+│     ├──⧉ mock-server-789cf554d9-2-0-1-stable                    ReplicaSet   ✔ Healthy      7s     
+│     │  └──□ mock-server-789cf554d9-2-0-1-stable-bw87g           Pod          ✔ Running      7s     ready:1/1
+│     └──α mock-server-789cf554d9-2-0-1-stable-canary-comparison  AnalysisRun  ◌ Running      3s     ✖ 2
+└──# revision:1                                                                                      
+   └──⧉ mock-server-5f59cc96                                      ReplicaSet   ✔ Healthy      3m2s   stable
+      ├──□ mock-server-5f59cc96-hqgw9                             Pod          ✔ Running      3m2s   ready:1/1
+      ├──□ mock-server-5f59cc96-jwgdb                             Pod          ✔ Running      3m2s   ready:1/1
+      ├──□ mock-server-5f59cc96-jwxt7                             Pod          ✔ Running      3m2s   ready:1/1
+      ├──□ mock-server-5f59cc96-mnfpn                             Pod          ✔ Running      3m2s   ready:1/1
+      └──□ mock-server-5f59cc96-tgcn9                             Pod          ✔ Running      3m2s   ready:1/1
+
+$ kubectl exec -it shell -- curl -s mock-server:8080/status/200
+$ kubectl exec -it shell -- curl -s mock-server:8080/status/200
+...
+
+$ kubectl argo rollouts get rollout mock-server
+Name:            mock-server
+Namespace:       default
+Status:          ◌ Progressing
+Message:         more replicas need to be updated
+Strategy:        Canary
+  Step:          0/5
+  SetWeight:     0
+  ActualWeight:  0
+Images:          ghcr.io/ssup2/mock-go-server:1.0.0 (stable, Σ:stable)
+                 ghcr.io/ssup2/mock-go-server:2.0.0 (Σ:canary)
+Replicas:
+  Desired:       5
+  Current:       5
+  Updated:       0
+  Ready:         5
+  Available:     5
+
+NAME                                                              KIND         STATUS         AGE    INFO
+⟳ mock-server                                                     Rollout      ◌ Progressing  4m4s   
+├──# revision:2                                                                                      
+│  ├──⧉ mock-server-789cf554d9                                    ReplicaSet   • ScaledDown   3m39s  canary
+│  ├──Σ mock-server-789cf554d9-2-0                                Experiment   ✖ Failed       3m39s  
+│  │  ├──⧉ mock-server-789cf554d9-2-0-canary                      ReplicaSet   • ScaledDown   3m39s  delay:passed
+│  │  ├──⧉ mock-server-789cf554d9-2-0-stable                      ReplicaSet   • ScaledDown   3m39s  delay:passed
+│  │  └──α mock-server-789cf554d9-2-0-stable-canary-comparison    AnalysisRun  ✖ Failed       3m34s  ✖ 6
+│  └──Σ mock-server-789cf554d9-2-0-1                              Experiment   ◌ Running      68s    
+│     ├──⧉ mock-server-789cf554d9-2-0-1-canary                    ReplicaSet   ✔ Healthy      68s    
+│     │  └──□ mock-server-789cf554d9-2-0-1-canary-2m4l8           Pod          ✔ Running      68s    ready:1/1
+│     ├──⧉ mock-server-789cf554d9-2-0-1-stable                    ReplicaSet   ✔ Healthy      68s    
+│     │  └──□ mock-server-789cf554d9-2-0-1-stable-bw87g           Pod          ✔ Running      68s    ready:1/1
+│     └──α mock-server-789cf554d9-2-0-1-stable-canary-comparison  AnalysisRun  ✔ Successful   64s    ✔ 2,✖ 4
+└──# revision:1                                                                                      
+   └──⧉ mock-server-5f59cc96                                      ReplicaSet   ✔ Healthy      4m3s   stable
+      ├──□ mock-server-5f59cc96-hqgw9                             Pod          ✔ Running      4m3s   ready:1/1
+      ├──□ mock-server-5f59cc96-jwgdb                             Pod          ✔ Running      4m3s   ready:1/1
+      ├──□ mock-server-5f59cc96-jwxt7                             Pod          ✔ Running      4m3s   ready:1/1
+      ├──□ mock-server-5f59cc96-mnfpn                             Pod          ✔ Running      4m3s   ready:1/1
+      └──□ mock-server-5f59cc96-tgcn9                             Pod          ✔ Running      4m3s   ready:1/1 
+
+# Continue mock-server rollout
+$ kubectl argo rollouts get rollout mock-server
+Name:            mock-server
+Namespace:       default
+Status:          ॥ Paused
+Message:         CanaryPauseStep
+Strategy:        Canary
+  Step:          2/5
+  SetWeight:     20
+  ActualWeight:  20
+Images:          ghcr.io/ssup2/mock-go-server:1.0.0 (stable, Σ:stable)
+                 ghcr.io/ssup2/mock-go-server:2.0.0 (canary, Σ:canary)
+Replicas:
+  Desired:       5
+  Current:       6
+  Updated:       1
+  Ready:         6
+  Available:     6
+
+NAME                                                              KIND         STATUS        AGE    INFO
+⟳ mock-server                                                     Rollout      ॥ Paused      5m11s  
+├──# revision:2                                                                                     
+│  ├──⧉ mock-server-789cf554d9                                    ReplicaSet   ✔ Healthy     4m46s  canary
+│  │  └──□ mock-server-789cf554d9-dwwxh                           Pod          ✔ Running     11s    ready:1/1
+│  ├──Σ mock-server-789cf554d9-2-0                                Experiment   ✖ Failed      4m46s  
+│  │  ├──⧉ mock-server-789cf554d9-2-0-canary                      ReplicaSet   • ScaledDown  4m46s  delay:passed
+│  │  ├──⧉ mock-server-789cf554d9-2-0-stable                      ReplicaSet   • ScaledDown  4m46s  delay:passed
+│  │  └──α mock-server-789cf554d9-2-0-stable-canary-comparison    AnalysisRun  ✖ Failed      4m41s  ✖ 6
+│  └──Σ mock-server-789cf554d9-2-0-1                              Experiment   ✔ Successful  2m15s  
+│     ├──⧉ mock-server-789cf554d9-2-0-1-canary                    ReplicaSet   ✔ Healthy     2m15s  delay:18s
+│     │  └──□ mock-server-789cf554d9-2-0-1-canary-2m4l8           Pod          ✔ Running     2m15s  ready:1/1
+│     ├──⧉ mock-server-789cf554d9-2-0-1-stable                    ReplicaSet   ✔ Healthy     2m15s  delay:18s
+│     │  └──□ mock-server-789cf554d9-2-0-1-stable-bw87g           Pod          ✔ Running     2m15s  ready:1/1
+│     └──α mock-server-789cf554d9-2-0-1-stable-canary-comparison  AnalysisRun  ✔ Successful  2m11s  ✔ 2,✖ 4
+└──# revision:1                                                                                     
+   └──⧉ mock-server-5f59cc96                                      ReplicaSet   ✔ Healthy     5m10s  stable
+      ├──□ mock-server-5f59cc96-hqgw9                             Pod          ✔ Running     5m10s  ready:1/1
+      ├──□ mock-server-5f59cc96-jwgdb                             Pod          ✔ Running     5m10s  ready:1/1
+      ├──□ mock-server-5f59cc96-jwxt7                             Pod          ✔ Running     5m10s  ready:1/1
+      ├──□ mock-server-5f59cc96-mnfpn                             Pod          ✔ Running     5m10s  ready:1/1
+      └──□ mock-server-5f59cc96-tgcn9                             Pod          ✔ Running     5m10s  ready:1/1
+
+$ kubectl argo rollouts get rollout mock-server
+Name:            mock-server
+Namespace:       default
+Status:          ◌ Progressing
+Message:         more replicas need to be updated
+Strategy:        Canary
+  Step:          3/5
+  SetWeight:     20
+  ActualWeight:  20
+Images:          ghcr.io/ssup2/mock-go-server:1.0.0 (stable)
+                 ghcr.io/ssup2/mock-go-server:2.0.0 (canary)
+Replicas:
+  Desired:       5
+  Current:       6
+  Updated:       1
+  Ready:         6
+  Available:     6
+
+NAME                                                              KIND         STATUS         AGE    INFO
+⟳ mock-server                                                     Rollout      ◌ Progressing  5m41s  
+├──# revision:2                                                                                      
+│  ├──⧉ mock-server-789cf554d9                                    ReplicaSet   ✔ Healthy      5m16s  canary
+│  │  └──□ mock-server-789cf554d9-dwwxh                           Pod          ✔ Running      41s    ready:1/1
+│  ├──Σ mock-server-789cf554d9-2-0                                Experiment   ✖ Failed       5m16s  
+│  │  ├──⧉ mock-server-789cf554d9-2-0-canary                      ReplicaSet   • ScaledDown   5m16s  delay:passed
+│  │  ├──⧉ mock-server-789cf554d9-2-0-stable                      ReplicaSet   • ScaledDown   5m16s  delay:passed
+│  │  └──α mock-server-789cf554d9-2-0-stable-canary-comparison    AnalysisRun  ✖ Failed       5m11s  ✖ 6
+│  ├──Σ mock-server-789cf554d9-2-0-1                              Experiment   ✔ Successful   2m45s  
+│  │  ├──⧉ mock-server-789cf554d9-2-0-1-canary                    ReplicaSet   • ScaledDown   2m45s  delay:passed
+│  │  ├──⧉ mock-server-789cf554d9-2-0-1-stable                    ReplicaSet   • ScaledDown   2m45s  delay:passed
+│  │  └──α mock-server-789cf554d9-2-0-1-stable-canary-comparison  AnalysisRun  ✔ Successful   2m41s  ✔ 2,✖ 4
+│  └──α mock-server-789cf554d9-2-3                                AnalysisRun  ◌ Running      7s     ✖ 1
+└──# revision:1                                                                                      
+   └──⧉ mock-server-5f59cc96                                      ReplicaSet   ✔ Healthy      5m40s  stable
+      ├──□ mock-server-5f59cc96-hqgw9                             Pod          ✔ Running      5m40s  ready:1/1
+      ├──□ mock-server-5f59cc96-jwgdb                             Pod          ✔ Running      5m40s  ready:1/1
+      ├──□ mock-server-5f59cc96-jwxt7                             Pod          ✔ Running      5m40s  ready:1/1
+      ├──□ mock-server-5f59cc96-mnfpn                             Pod          ✔ Running      5m40s  ready:1/1
+      └──□ mock-server-5f59cc96-tgcn9                             Pod          ✔ Running      5m40s  ready:1/1
+```
+
 ## 3. 참조
 
 * Argo Rollouts : [https://ojt90902.tistory.com/1596](https://ojt90902.tistory.com/1596)
