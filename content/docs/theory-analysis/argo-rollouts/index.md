@@ -685,6 +685,7 @@ NAME                                     KIND        STATUS     AGE  INFO
       ├──□ mock-server-6579c6cc98-vdjpj  Pod         ✔ Running  41s  ready:1/1
       └──□ mock-server-6579c6cc98-wxkhx  Pod         ✔ Running  41s  ready:1/1
 
+# Set mock-server image to 2.0.0 and check status
 $ kubectl argo rollouts set image mock-server mock-server=ghcr.io/ssup2/mock-go-server:2.0.0
 $ kubectl argo rollouts get rollout mock-server
 Name:            mock-server
