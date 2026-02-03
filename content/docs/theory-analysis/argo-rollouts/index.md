@@ -394,6 +394,7 @@ Namespace:                default
 Labels:                   <none>
 Annotations:              argo-rollouts.argoproj.io/managed-by-rollouts: mock-server
 Selector:                 app=mock-server,rollouts-pod-template-hash=6579c6cc98
+...
 
 $ kubectl describe service mock-server-canary
 Name:                     mock-server-canary
@@ -401,6 +402,7 @@ Namespace:                default
 Labels:                   <none>
 Annotations:              argo-rollouts.argoproj.io/managed-by-rollouts: mock-server
 Selector:                 app=mock-server,rollouts-pod-template-hash=6579c6cc98
+...
 
 # Set mock-server image to 2.0.0 and check status
 $ kubectl argo rollouts set image mock-server mock-server=ghcr.io/ssup2/mock-go-server:2.0.0
@@ -440,6 +442,7 @@ Namespace:                default
 Labels:                   <none>
 Annotations:              argo-rollouts.argoproj.io/managed-by-rollouts: mock-server
 Selector:                 app=mock-server,rollouts-pod-template-hash=6579c6cc98
+...
 
 $ kubectl describe service mock-server-canary
 Name:                     mock-server
@@ -447,6 +450,7 @@ Namespace:                default
 Labels:                   <none>
 Annotations:              argo-rollouts.argoproj.io/managed-by-rollouts: mock-server
 Selector:                 app=mock-server,rollouts-pod-template-hash=7c6fcfb847
+...
 
 # Set mock-server image to 3.0.0 and check status
 $ kubectl argo rollouts set image mock-server mock-server=ghcr.io/ssup2/mock-go-server:3.0.0
@@ -488,6 +492,7 @@ Namespace:                default
 Labels:                   <none>
 Annotations:              argo-rollouts.argoproj.io/managed-by-rollouts: mock-server
 Selector:                 app=mock-server,rollouts-pod-template-hash=6579c6cc98
+...
 
 $ kubectl describe service mock-server-canary
 Name:                     mock-server-canary
@@ -495,6 +500,7 @@ Namespace:                default
 Labels:                   <none>
 Annotations:              argo-rollouts.argoproj.io/managed-by-rollouts: mock-server
 Selector:                 app=mock-server,rollouts-pod-template-hash=6fcb56df9b
+...
 
 # Promote mock-server rollout
 $ kubectl argo rollouts promote mock-server
@@ -536,6 +542,7 @@ Namespace:                default
 Labels:                   <none>
 Annotations:              argo-rollouts.argoproj.io/managed-by-rollouts: mock-server
 Selector:                 app=mock-server,rollouts-pod-template-hash=6579c6cc98
+...
 
 $ kubectl describe service mock-server-canary
 Name:                     mock-server-canary
@@ -543,6 +550,7 @@ Namespace:                default
 Labels:                   <none>
 Annotations:              argo-rollouts.argoproj.io/managed-by-rollouts: mock-server
 Selector:                 app=mock-server,rollouts-pod-template-hash=6fcb56df9b
+...
 
 $ kubectl argo rollouts get rollout mock-server
 Name:            mock-server
@@ -580,6 +588,7 @@ Namespace:                default
 Labels:                   <none>
 Annotations:              argo-rollouts.argoproj.io/managed-by-rollouts: mock-server
 Selector:                 app=mock-server,rollouts-pod-template-hash=6fcb56df9b
+...
 
 $ kubectl describe service mock-server-canary
 Name:                     mock-server-canary
@@ -587,6 +596,7 @@ Namespace:                default
 Labels:                   <none>
 Annotations:              argo-rollouts.argoproj.io/managed-by-rollouts: mock-server
 Selector:                 app=mock-server,rollouts-pod-template-hash=6fcb56df9b
+...
 ```
 
 #### 2.2.3. Canary with Undo and Abort
@@ -978,6 +988,22 @@ Spec:
         Host:  mock-server-canary
       Weight:  0
 
+$ kubectl describe service mock-server-stable
+Name:                     mock-server-stable
+Namespace:                default
+Labels:                   <none>
+Annotations:              argo-rollouts.argoproj.io/managed-by-rollouts: mock-server
+Selector:                 app=mock-server,rollouts-pod-template-hash=6579c6cc98
+...
+
+$ kubectl describe service mock-server-canary
+Name:                     mock-server-canary
+Namespace:                default
+Labels:                   <none>
+Annotations:              argo-rollouts.argoproj.io/managed-by-rollouts: mock-server
+Selector:                 app=mock-server,rollouts-pod-template-hash=6579c6cc98
+...
+
 # Set mock-server image to 2.0.0 and check status
 $ kubectl argo rollouts set image mock-server mock-server=ghcr.io/ssup2/mock-go-server:2.0.0
 $ kubectl argo rollouts get rollout mock-server
@@ -1025,6 +1051,22 @@ Spec:
       Destination:
         Host:  mock-server-canary
       Weight:  20
+
+$ kubectl describe service mock-server-stable
+Name:                     mock-server-stable
+Namespace:                default
+Labels:                   <none>
+Annotations:              argo-rollouts.argoproj.io/managed-by-rollouts: mock-server
+Selector:                 app=mock-server,rollouts-pod-template-hash=6579c6cc98
+...
+
+$ kubectl describe service mock-server-canary
+Name:                     mock-server-canary
+Namespace:                default
+Labels:                   <none>
+Annotations:              argo-rollouts.argoproj.io/managed-by-rollouts: mock-server
+Selector:                 app=mock-server,rollouts-pod-template-hash=7c6fcfb847
+...
 
 # Promote mock-server rollout
 $ kubectl argo rollouts promote mock-server
@@ -1075,6 +1117,22 @@ Spec:
         Host:  mock-server-canary
       Weight:  40
 
+$ kubectl describe service mock-server-stable
+Name:                     mock-server-stable
+Namespace:                default
+Labels:                   <none>
+Annotations:              argo-rollouts.argoproj.io/managed-by-rollouts: mock-server
+Selector:                 app=mock-server,rollouts-pod-template-hash=6579c6cc98
+...
+
+$ kubectl describe service mock-server-canary
+Name:                     mock-server-canary
+Namespace:                default
+Labels:                   <none>
+Annotations:              argo-rollouts.argoproj.io/managed-by-rollouts: mock-server
+Selector:                 app=mock-server,rollouts-pod-template-hash=7c6fcfb847
+...
+
 # Promote mock-server rollout again
 $ kubectl argo rollouts promote mock-server
 $ kubectl argo rollouts get rollout mock-server 
@@ -1119,6 +1177,22 @@ Spec:
       Destination:
         Host:  mock-server-canary
       Weight:  0
+
+$ kubectl describe service mock-server-stable
+Name:                     mock-server-stable
+Namespace:                default
+Labels:                   <none>
+Annotations:              argo-rollouts.argoproj.io/managed-by-rollouts: mock-server
+Selector:                 app=mock-server,rollouts-pod-template-hash=6579c6cc98
+...
+
+$ kubectl describe service mock-server-canary
+Name:                     mock-server-canary
+Namespace:                default
+Labels:                   <none>
+Annotations:              argo-rollouts.argoproj.io/managed-by-rollouts: mock-server
+Selector:                 app=mock-server,rollouts-pod-template-hash=7c6fcfb847
+...
 ```
 
 #### 2.2.5. Canary with istio Virtual Service and Analysis
@@ -1844,7 +1918,7 @@ NAME                                                              KIND         S
       └──□ mock-server-6579c6cc98-mgwzp                           Pod          ✔ Running      3m43s  ready:1/1
 
 # Continue mock-server rollout
-$ kubectl argo rollouts pause rollout mock-server
+$ kubectl get rollout mock-server
 Name:            mock-server
 Namespace:       default
 Status:          ॥ Paused
@@ -1885,7 +1959,7 @@ NAME                                                              KIND         S
       ├──□ mock-server-6579c6cc98-f2zzr                           Pod          ✔ Running     4m54s  ready:1/1
       └──□ mock-server-6579c6cc98-mgwzp                           Pod          ✔ Running     4m54s  ready:1/1
 
-$ kubectl argo rollouts resume rollout mock-server
+$ kubectl argo rollouts get rollout mock-server
 Name:            mock-server
 Namespace:       default
 Status:          ◌ Progressing
