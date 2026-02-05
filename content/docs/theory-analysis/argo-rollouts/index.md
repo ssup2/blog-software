@@ -5,7 +5,9 @@ draft: true
 
 ## 1. Argo Rollouts
 
-## 2. Argo Rollout Cases
+{{< figure caption="[Figure 1] Argo Rollouts Architecture" src="images/argo-rollouts-architecture.png" width="1100px" >}}
+
+## 2. Argo Rollouts Test Cases
 
 ### 2.1. Test 환경 구성
 
@@ -55,6 +57,8 @@ spec:
 ### 2.2. Test Cases
 
 #### 2.2.1. Blue/Green
+
+{{< figure caption="[Figure 2] Argo Rollouts Blue/Green Case" src="images/argo-rollouts-case-bluegreen.png" width="800px" >}}
 
 ```yaml {caption="[File 1] Argo Rollouts Blue/Green Example", linenos=table}
 apiVersion: argoproj.io/v1alpha1
@@ -294,7 +298,9 @@ Selector:                 app=mock-server,rollouts-pod-template-hash=6fcb56df9b
 
 #### 2.2.2. Canary Success
 
-```yaml {caption="[File 2] Argo Rollouts Canary Example", linenos=table}
+{{< figure caption="[Figure 3] Argo Rollouts Canary Success Case" src="images/argo-rollouts-case-canary-success.png" width="1100px" >}}
+
+```yaml {caption="[File 2] Argo Rollouts Canary Success Example", linenos=table}
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
@@ -601,6 +607,8 @@ Selector:                 app=mock-server,rollouts-pod-template-hash=6fcb56df9b
 
 #### 2.2.3. Canary with Undo and Abort
 
+{{< figure caption="[Figure 4] Argo Rollouts Canary with Undo and Abort Case" src="images/argo-rollouts-case-canary-undo-abort.png" width="1100px" >}}
+
 ```yaml {caption="[File 2] Argo Rollouts Canary Example", linenos=table}
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
@@ -865,9 +873,11 @@ NAME                                     KIND        STATUS        AGE  INFO
       └──□ mock-server-6579c6cc98-wx576  Pod         ✔ Running     25s  ready:1/1
 ```
 
-#### 2.2.4. Canary with istio Virtual Service
+#### 2.2.4. Canary with Istio Virtual Service
 
-```yaml {caption="[File 3] Argo Rollouts Canary with istio Virtual Service Example", linenos=table}
+{{< figure caption="[Figure 5] Argo Rollouts Canary with Istio Virtual Service Case" src="images/argo-rollouts-case-canary-istio-virtualservice.png" width="800px" >}}
+
+```yaml {caption="[File 3] Argo Rollouts Canary with Istio Virtual Service Example", linenos=table}
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
@@ -1195,9 +1205,11 @@ Selector:                 app=mock-server,rollouts-pod-template-hash=7c6fcfb847
 ...
 ```
 
-#### 2.2.5. Canary with istio Virtual Service and Analysis
+#### 2.2.5. Canary with Istio Virtual Service and Analysis
 
-```yaml {caption="[File 4] Argo Rollouts Canary with istio Virtual Service and Analysis Example", linenos=table}
+{{< figure caption="[Figure 6] Argo Rollouts Canary with istio Virtual Service and Analysis Case" src="images/argo-rollouts-case-canary-istio-virtualservice-analysis.png" width="800px" >}}
+
+```yaml {caption="[File 4] Argo Rollouts Canary with Istio Virtual Service and Analysis Example", linenos=table}
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
@@ -1528,9 +1540,11 @@ NAME                                     KIND         STATUS        AGE    INFO
       └──□ mock-server-6579c6cc98-xvb8s  Pod          ✔ Running     4m57s  ready:1/1
 ```
 
-#### 2.2.6. Canary with istio Virtual Service, Analysis and Experiment
+#### 2.2.6. Canary with Istio Virtual Service, Analysis and Experiment
 
-```yaml {caption="[File 4] Argo Rollouts Canary with istio Virtual Service, Analysis and Experiment Example", linenos=table}
+{{< figure caption="[Figure 7] Argo Rollouts Canary with Istio Virtual Service, Analysis and Experiment Case" src="images/argo-rollouts-case-canary-istio-virtualservice-analysis-experiment.png" width="1000px" >}}
+
+```yaml {caption="[File 4] Argo Rollouts Canary with Istio Virtual Service, Analysis and Experiment Example", linenos=table}
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
@@ -2000,9 +2014,11 @@ NAME                                                              KIND         S
       └──□ mock-server-6579c6cc98-mgwzp                           Pod          ✔ Running      5m20s  ready:1/1
 ```
 
-#### 2.2.7. Canary with istio Destination Rule
+#### 2.2.7. Canary with Istio Destination Rule
 
-```yaml {caption="[File 4] Argo Rollouts Canary with istio Destination Rule Example", linenos=table}
+{{< figure caption="[Figure 8] Argo Rollouts Canary with Istio Destination Rule Case" src="images/argo-rollouts-case-canary-istio-destinationrule.png" width="800px" >}}
+
+```yaml {caption="[File 4] Argo Rollouts Canary with Istio Destination Rule Example", linenos=table}
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
@@ -2338,9 +2354,11 @@ Spec:
     Name:                                canary
 ```
 
-#### 2.2.8. Canary with istio Destination Rule and Analysis
+#### 2.2.8. Canary with Istio Destination Rule and Analysis
 
-```yaml {caption="[File 4] Argo Rollouts Canary with istio Destination Rule Example", linenos=table}
+{{< figure caption="[Figure 9] Argo Rollouts Canary with Istio Destination Rule and Analysis Case" src="images/argo-rollouts-case-canary-istio-destinationrule-analysistemplate.png" width="800px" >}}
+
+```yaml {caption="[File 4] Argo Rollouts Canary with Istio Destination Rule Example", linenos=table}
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
@@ -2676,9 +2694,11 @@ NAME                                     KIND         STATUS        AGE    INFO
    └──⧉ mock-server-6579c6cc98           ReplicaSet   • ScaledDown  6m56s  
 ```
 
-#### 2.2.9. Canary with istio Destination Rule, Analysis and Experiment
+#### 2.2.9. Canary with Istio Destination Rule, Analysis and Experiment
 
-```yaml {caption="[File 5] Argo Rollouts Canary with istio Destination Rule, Analysis and Experiment Example", linenos=table}
+{{< figure caption="[Figure 10] Argo Rollouts Canary with Istio Destination Rule, Analysis and Experiment Case" src="images/argo-rollouts-case-canary-istio-destinationrule-analysistemplate-experiment.png" width="1000px" >}}
+
+```yaml {caption="[File 5] Argo Rollouts Canary with Istio Destination Rule, Analysis and Experiment Example", linenos=table}
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
