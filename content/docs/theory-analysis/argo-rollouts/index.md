@@ -7,6 +7,44 @@ draft: true
 
 {{< figure caption="[Figure 1] Argo Rollouts Architecture" src="images/argo-rollouts-architecture.png" width="1100px" >}}
 
+Argo Rollouts는 Kubernetes 환경에서 Blue/Green 및 Canary 배포를 지원하는 오픈소스 프로젝트이다. Blue/Green, Canary 배포뿐만이 아니라 배포과정에 필요한 Traffic Routing, Metric 기반의 자동 Promotion 기능, 배포 상태를 기반으로 Alerting 기능 등 배포 관련 다양한 기능을 제공한다. [Figure 1]은 Argo Rollouts의 Architecture를 나타내고 있다.
+
+### 1.1. Rollout Object, Rollout Controller
+
+Rollout Object는 Blue/Green 및 Canary 배포를 위한 가장 핵심적인 Object이다. Rollout Object는 배포 과정에 필요한 다양한 설정을 담고 있으며, 배포 과정을 제어하는 역할을 수행한다. 사용자는 Rollout Manifest를 직접 작성하고 제어하거나, `kubectl argo rollouts` 명령어를 통해서 Rollout Object를 제어할 수도 있다.
+
+```yaml {caption="[File 1] Rollout Blue/Green Example", linenos=table}
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: mock-server
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: mock-server
+  template:
+    metadata:
+      labels:
+        app: mock-server
+    spec:
+      containers:
+      - name: mock-server
+        image: ghcr.io/ssup2/mock-go-server:1.0.0
+        ports:
+        - containerPort: 8080
+  strategy:
+    blueGreen:
+      activeService: mock-server-active
+      previewService: mock-server-preview
+```
+
+### 1.2. Analysis Object
+
+### 1.3. Traffic Routing
+
+### 1.4. Experiment Object
+
 ## 2. Argo Rollouts Test Cases
 
 ### 2.1. Test 환경 구성
