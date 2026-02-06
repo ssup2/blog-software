@@ -39,6 +39,10 @@ spec:
       previewService: mock-server-preview
 ```
 
+[File 1]은 Blue/Green 배포를 위한 Rollout Object를 나타내고 있다. 20~23번째 줄에서 Blue/Green 배포를 위한 설정을 하고 있다. `activeService`에는 Blue Version과 연결되는 Kubernetes Service를 지정하고, `previewService`에는 Green Version과 연결되는 Kubernetes Service를 지정한다. `kubectl argo rollouts set image` 명령어를 통해서 Rollout Object의 Image를 변경할 수 있으며, `kubectl argo rollouts promote` 명령어를 통해서 Green Version을 Blue Version로 승격시킬 수 있다.
+
+Rollout은 새로운 배포를 수행할때마다 **Revision**을 생성하며 배포를 수행할 수록 Revision 번호는 하나씩 증가한다. Rollout Controller는 각 Revision별로 ReplicaSet을 생성하고, ReplicaSet을 통해서 Blue/Green Version의 Pod 개수를 관리한다. 또한 필요에 따라서 `activeService`와 `previewService`에 지정된 Kubernetes Service를 제어하여 Blue/Green Version의 Traffic을 관리한다.
+
 ### 1.2. Analysis Object
 
 ### 1.3. Traffic Routing
