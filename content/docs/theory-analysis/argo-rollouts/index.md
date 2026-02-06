@@ -11,7 +11,7 @@ Argo Rollouts는 Kubernetes 환경에서 Blue/Green 및 Canary 배포를 지원�
 
 ### 1.1. Rollout Object, Rollout Controller
 
-Rollout Object는 Blue/Green 및 Canary 배포를 위한 가장 핵심적인 Object이다. Rollout Object는 배포 과정에 필요한 다양한 설정을 담고 있으며, 배포 과정을 제어하는 역할을 수행한다. 사용자는 Rollout Manifest를 직접 작성하고 제어하거나, `kubectl argo rollouts` 명령어를 통해서 Rollout Object를 제어할 수도 있다.
+**Rollout** Object는 Blue/Green 및 Canary 배포를 위한 가장 핵심적인 Object이다. Rollout Object는 배포 과정에 필요한 다양한 설정을 담고 있으며, 배포 과정을 제어하는 역할을 수행한다. 사용자는 Rollout Manifest를 직접 작성하고 제어하거나, `kubectl argo rollouts` 명령어를 통해서 Rollout Object를 제어할 수도 있다.
 
 ```yaml {caption="[File 1] Rollout Blue/Green Example", linenos=table}
 apiVersion: argoproj.io/v1alpha1
@@ -41,7 +41,7 @@ spec:
 
 [File 1]은 Blue/Green 배포를 위한 Rollout Object를 나타내고 있다. 20~23번째 줄에서 Blue/Green 배포를 위한 설정을 하고 있다. `activeService`에는 Blue Version과 연결되는 Kubernetes Service를 지정하고, `previewService`에는 Green Version과 연결되는 Kubernetes Service를 지정한다. `kubectl argo rollouts set image` 명령어를 통해서 Rollout Object의 Image를 변경할 수 있으며, `kubectl argo rollouts promote` 명령어를 통해서 Green Version을 Blue Version로 승격시킬 수 있다.
 
-Rollout은 새로운 배포를 수행할때마다 **Revision**을 생성하며 배포를 수행할 수록 Revision 번호는 하나씩 증가한다. Rollout Controller는 각 Revision별로 ReplicaSet을 생성하고, ReplicaSet을 통해서 Blue/Green Version의 Pod 개수를 관리한다. 또한 필요에 따라서 `activeService`와 `previewService`에 지정된 Kubernetes Service를 제어하여 Blue/Green Version의 Traffic을 관리한다.
+Rollout은 새로운 배포를 수행할때마다 **Revision**을 생성하며 배포를 수행할 수록 Revision 번호는 하나씩 증가한다. **Rollout Controller**는 각 Revision별로 ReplicaSet을 생성하고, ReplicaSet을 통해서 Blue/Green Version의 Pod 개수를 관리한다. 또한 필요에 따라서 `activeService`와 `previewService`에 지정된 Kubernetes Service를 제어하여 Blue/Green Version의 Traffic을 관리한다.
 
 ### 1.2. Analysis Object
 
