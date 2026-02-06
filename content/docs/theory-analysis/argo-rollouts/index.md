@@ -43,11 +43,118 @@ spec:
 
 Rollout은 새로운 배포를 수행할때마다 **Revision**을 생성하며 배포를 수행할 수록 Revision 번호는 하나씩 증가한다. **Rollout Controller**는 각 Revision별로 ReplicaSet을 생성하고, ReplicaSet을 통해서 Blue/Green Version의 Pod 개수를 관리한다. 또한 필요에 따라서 `activeService`와 `previewService`에 지정된 Kubernetes Service를 제어하여 Blue/Green Version의 Traffic을 관리한다.
 
-### 1.2. Analysis Object
+```yaml {caption="[File 2] Rollout Canary Example", linenos=table}
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: mock-server
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: mock-server
+  template:
+    metadata:
+      labels:
+        app: mock-server
+    spec:
+      containers:
+      - name: mock-server
+        image: ghcr.io/ssup2/mock-go-server:1.0.0
+        ports:
+        - containerPort: 8080
+  strategy:
+    canary:
+      canaryService: mock-server-canary
+      stableService: mock-server-stable
+      steps:
+      - setWeight: 10
+      - pause: {duration: 30s}
+      - setWeight: 20
+      - pause: {duration: 1m}
+      - setWeight: 50
+      - pause: {}
+      - setWeight: 80
+      - pause: {duration: 2m}
+      - setWeight: 100
+      - pause: {}
+```
 
-### 1.3. Traffic Routing
+[File 2]는 Canary 배포를 위한 Rollout Object를 나타내고 있다. 20~44번째 줄에서 Canary 배포를 위한 설정을 하고 있다. `canaryService`에는 Canary Version과 연결되는 Kubernetes Service를 지정하고, `stableService`에는 Stable Version과 연결되는 Kubernetes Service를 지정한다. Blue/Green과 다르게 Canary 배포는 `steps` 부분을 통해서 Canary Version과 Stable Version의 **Traffic 비율**을 제어할 수 있으며, [File 2]의 경우에는 Canary Version과 Stable Version의 Pod 개수를 제어하여 Traffic 비율을 제어한다.
+
+{{< table caption="[Table 1] Rollout Canary Example Steps" >}}
+| Step | Traffic | Stable Pods | Canary Pods | Duration | Description |
+|---|---|---|---|---|---|
+| 1 | 10% | 5 | 1 | 30s | Monitor with 10% traffic for 30 seconds |
+| 2 | 20% | 4 | 1 | 1m | Monitor with 20% traffic for 1 minute |
+| 3 | 50% | 2 | 3 | Manual Approval | Manual approval required at 50% |
+| 4 | 80% | 1 | 4 | 2m | Monitor with 80% traffic for 2 minutes |
+| 5 | 100% | 0 | 5 | Manual Approval | Final approval before 100% rollout |
+{{< /table >}}
+
+중간 `pause` 문법을 활용해서 Traffic 비율을 변경하기 전에 일정 시간동안 대기가 가능하다. 예를 들어 `pause: {duration: 30s}` 부분은 30초간 대기한다는 의미이며, `pause: {}` 부분은 Manual Approval이 즉 `kubectl argo rollouts promote` 명령어를 통해서 직접 Promotion 수행이 필요한 부분을 의미한다. 따라서 [Table 1]과 같은 순서로 Canary 배포가 수행된다. 
+
+```text {caption="[Formula 1] Canary Replicas and Stable Replicas Calculation Formula"}
+Canary Replicas = ceil(spec.replicas × setWeight / 100)  
+Stable Replicas = spec.replicas - Canary Replicas  
+```
+
+각 Step별로 정확한 Pod 개수를 계산하는 공식은 [Formula 1]과 같다. 만약 Canary 배포 과정중에 문제가 발생하여 이전 Step으로 돌아가고 싶다면 `kubectl argo rollouts undo` 명령어를 통해서 이전 Step으로 돌아갈 수 있으며, 만약 Canary 배포 과정중에 문제가 발생하여 배포를 중단하고 싶다면 `kubectl argo rollouts abort` 명령어를 통해서 배포를 중단할 수 있다.
+
+[File 2] 예제에서 Canary Version과 Stable Version으로 Traffic을 Weight 기반으로 분배하기 위해서는 Canary Version과 Stable Version으로 Traffic을 묶는 별도의 Kubernetes Service(`mock-server`)를 생성하고 이용하면 된다. 하지만 Pod의 개수로만 Traffic 비율을 제어하는 방식이기 때문에 정확하게 Traffic 비율을 제어하지 못한다는 한계점을 갖는다. [Table 1]에서 알 수 있는것 처럼 Traffic 10%만 Canary Version으로 보내고 싶어도, 실제로는 16.7% (1/6)가 Canary Version으로 보내게 된다.
+
+### 1.2. Traffic Routing
+
+Traffic Routing 기능은 Canary 배포시 Pod의 개수만으로 Traffic 비율을 정확하게 제어하지 못하는 한계점을 극복하기 위해서 제공되는 기능이다. Argo Rollouts는 Istio, Ingress Nginx와 같은 외부의 Traffic Routing 기능을 활용하여 정확하게 Traffic 비율을 제어할 수 있도록 지원한다. Ingress Nginx, Istio 뿐만 아니라 다양한 외부 Component를 활용하여 Traffic Routing을 구성할 수 있다.
+
+```yaml {caption="[File 3] Rollout Canary with Traffic Routing Istio Virtual Service Example", linenos=table}
+strategy:
+  canary:
+    canaryService: mock-server-canary
+    stableService: mock-server-stabl시
+    trafficRouting:
+      istio:
+        virtualService:
+          name: mock-server
+          routes:
+          - primary
+    steps:
+    - setWeight: 10
+    - pause: {duration: 30s}
+    - setWeight: 20
+    - pause: {duration: 1m}
+    - setWeight: 50
+    - pause: {}
+    - setWeight: 80
+    - pause: {duration: 2m}
+    - setWeight: 100
+    - pause: {}
+```
+
+[File 3]은 [File 2] 기반에 Istio Virtual Service를 활용하여 Traffic Routing을 구성한 Canary 배포를 위한 Rollout Object를 나타내고 있다. `trafficRouting` 부분을 통해서 Traffic Routing의 Spec을 명시하며 `istio` 부분을 통해서 Traffic Routing에 이용할 Istio Virtual Service를 지정하는 것을 확인할 수 있다. Rollout Controller는 Canary 배포를 진행하면서 Traffic Routing Reconciler를 통해서 Istio Virtual Service의 Weight를 동적으로 변경하여 Traffic 비율을 제어한다.
+
+{{< table caption="[Table 2] Rollout Canary with Traffic Routing Istio Virtual Service Example Steps" >}}
+| Step | Traffic | Stable Pods | Canary Pods | Duration | Description |
+|---|---|---|---|---|---|
+| 1 | 10% | 5 | 1 | 30s | Monitor with 10% traffic for 30 seconds |
+| 2 | 20% | 5 | 1 | 1m | Monitor with 20% traffic for 1 minute |
+| 3 | 50% | 5 | 3 | Manual Approval | Manual approval required at 50% |
+| 4 | 80% | 5 | 4 | 2m | Monitor with 80% traffic for 2 minutes |
+| 5 | 100% | 0 | 5 | Manual Approval | Final approval before 100% rollout |
+{{< /table >}}
+
+```text {caption="[Formula 2] Canary Replicas and Stable Replicas Calculation Formula with Traffic Routing"}
+Canary Replicas = ceil(spec.replicas * setWeight / 100) 
+Stable Replicas = spec.replicas
+```
+
+Traffic Routing 기능이 활성화 되면 각 [Table 2]과 같이 Step별로 다른 Pod의 개수를 가지게 된다. 가장큰 차이점은 Stable Version의 Pod 개수가 5개로 고정되어 있으며, Canary Version의 Pod 개수만 변한다는 점이다. Pod의 개수는 [Formula 2]과 같이 계산된다.
+
+### 1.3. Analysis Object
 
 ### 1.4. Experiment Object
+
+### 1.5. Notification Controller
 
 ## 2. Argo Rollouts Test Cases
 
