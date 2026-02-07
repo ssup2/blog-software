@@ -384,7 +384,7 @@ spec:
 
 {{< figure caption="[Figure 2] Argo Rollouts Blue/Green Case" src="images/argo-rollouts-case-bluegreen.png" width="800px" >}}
 
-[Figure 2]는 Argo Rollouts Blue/Green 배포를 위한 Test Case를 도식화 하고 있다. Container Image를 2번 변경한 이후에 Promotion을 진행하여, `Revision 2`를 건너뛰고 `Revision 3`으로 한번에 Promotion을 수행한다. Blue/Green 배포이기 때문에 Green의 파드의 개수는 Blue 파드의 개수와 동일하게 5개로 유지된다. Preview Kubernetes Service는 `Revision 1`, `Revision 2`, `Revision 3`을 차례대로 가리키고 있으며, Active Kubernetes Service는 `Revision 1`을 가리키고 있다가, Promotion이 완료되면 `Revision 3`을 가리키는 것을 확인할 수 있다.
+[Figure 2]는 Argo Rollouts Blue/Green 배포를 위한 Test Case를 도식화 하고 있다. Container Image를 2번 변경한 이후에 Promotion을 진행하여, `Revision 2`를 건너뛰고 `Revision 3`으로 한번에 Promotion을 수행한다. Blue/Green 배포이기 때문에 Green의 파드의 개수는 Blue 파드의 개수와 동일하게 5개로 유지된다. `Preview` Kubernetes Service는 `Revision 1`, `Revision 2`, `Revision 3`을 차례대로 가리키고 있으며, `Active` Kubernetes Service는 `Revision 1`을 가리키고 있다가, Promotion이 완료되면 `Revision 3`을 가리키는 것을 확인할 수 있다.
 
 ```yaml {caption="[Manifest 10] Blue/Green Test Case", linenos=table}
 apiVersion: argoproj.io/v1alpha1
@@ -621,17 +621,17 @@ Annotations:              argo-rollouts.argoproj.io/managed-by-rollouts: mock-se
 Selector:                 app=mock-server,rollouts-pod-template-hash=6fcb56df9b
 ```
 
-[Manifest 10]은 Blue/Green 배포를 위한 Test Case를 나타내고 있으며, [Shell 2]는 Test Case를 수행하는 과정을 나타내고 있다. [Manifest 10]의 `mock-server-active` Kubernetes Service와 `mock-server-preview` Kubernetes Service는의 Selector가 `app=mock-server`로 동일하기 설정되어 있지만, 실제 Blue/Green 배포가 수행될때는 `rollouts-pod-template-hash` Selector에 의해서 특정 Revision을 가리키는 것을 확인할 수 있으며, 이러한 Revision 지정은 Rollout Controller가 수행한다.
+[Manifest 10]은 Blue/Green 배포를 위한 Test Case를 위한 Manifest를 나타내고 있으며, [Shell 2]는 해당 Test Case를 수행하는 과정을 나타내고 있다. [Manifest 10]의 `mock-server-active` Kubernetes Service와 `mock-server-preview` Kubernetes Service는 Selector가 `app=mock-server`로 동일하기 설정되어 있지만, 실제 Blue/Green 배포가 수행될때는 `rollouts-pod-template-hash` Selector에 의해서 특정 Revision을 가리키는 것을 확인할 수 있으며, 이러한 Revision 지정은 Rollout Controller가 수행한다.
 
 #### 2.2.2. Canary Success
 
 {{< figure caption="[Figure 3] Canary Success Test Case" src="images/argo-rollouts-case-canary-success.png" width="1100px" >}}
 
-[Figure 3]는 Argo Rollouts Canary 배포를 위한 Test Case를 도식화 하고 있다. Container Image를 2번 변경한 이후에 Promotion을 진행하여, `Revision 2`를 건너뛰고 `Revision 3`으로 한번에 Promotion을 수행한다. Image를 변경한 직후에는 Weight 20% 설정으로 인해서 한개의 파드가 바로 생기며, Promotion이 수행된 이후에 Weight 40% 설정으로 인해서 파드가 2개로 증가하고, 30초 뒤에 Weight 100% 설정으로 인해서 파드가 5개로 증가하는 것을 확인할 수 있다.
+[Figure 3]는 Argo Rollouts Canary 배포 성공 Test Case를 도식화 하고 있다. Container Image를 2번 변경한 이후에 Promotion을 진행하여, `Revision 2`를 건너뛰고 `Revision 3`으로 한번에 Promotion을 수행한다. Image를 변경한 직후에는 Weight 20% 설정으로 인해서 한개의 파드가 바로 생기며, Promotion이 수행된 이후에 Weight 40% 설정으로 인해서 파드가 2개로 증가하고, 30초 뒤에 Weight 100% 설정으로 인해서 파드가 5개로 증가하는 것을 확인할 수 있다.
 
-Blue/Green 배포이기 때문에 Green의 파드의 개수는 Blue 파드의 개수와 동일하게 5개로 유지된다. Preview Kubernetes Service는 `Revision 1`, `Revision 2`, `Revision 3`을 차례대로 가리키고 있으며, Active Kubernetes Service는 `Revision 1`을 가리키고 있다가, Promotion이 완료되면 `Revision 3`을 가리키는 것을 확인할 수 있다.
+`Canary` Kubernetes Service는 `Revision 1`, `Revision 2`, `Revision 3`을 차례대로 가리키고 있으며, `Stable` Kubernetes Service는 `Revision 1`을 가리키고 있다가, Promotion이 완료되면 `Revision 3`을 가리키는 것을 확인할 수 있다. `Main` Service는 언제나 모든 Revision을 가리키며 Stable과 Canary Version에 Traffic을 분배한다.
 
-```yaml {caption="[Manifest 11] Canary Success Test Case", linenos=table}
+```yaml {caption="[Manifest 11] Canary Success Test Case"}
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
@@ -935,6 +935,8 @@ Annotations:              argo-rollouts.argoproj.io/managed-by-rollouts: mock-se
 Selector:                 app=mock-server,rollouts-pod-template-hash=6fcb56df9b
 ...
 ```
+
+[Manifest 11]은 Canary 배포 성공 Test Case를 위한 Manifest를 나타내고 있으며, [Shell 3]는 해당 Test Case를 수행하는 과정을 나타내고 있다. [Figure 3]와 동일하게 동작하는 것을 확인할 수 있다. [Manifest 11]의 `mock-server-stable` Kubernetes Service와 `mock-server-canary` Kubernetes Service는 Selector가 `app=mock-server`로 동일하기 설정되어 있지만, 실제 Canary 배포가 수행될때는 `rollouts-pod-template-hash` Selector에 의해서 특정 Revision을 가리키는 것을 확인할 수 있으며, 이러한 Revision 지정은 Rollout Controller가 수행한다.
 
 #### 2.2.3. Canary with Undo and Abort
 
