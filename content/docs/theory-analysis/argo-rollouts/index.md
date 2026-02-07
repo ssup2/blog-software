@@ -212,7 +212,58 @@ spec:
 
 [File 5]는 [File 4]의 AnalysisTemplate을 활용하여 Progressive Delivery 배포를 수행하는 Rollout Object를 나타내고 있다. `analysis` 부분을 통해서 Analysis를 수행할 AnalysisTemplate을 명시하는 것을 확인할 수 있다. Canary Version으로 20%의 Traffic을 분배하고 30초 대기 이후에 Analysis를 수행하게 된다.
 
-### 1.4. Experiment Object
+### 1.4. Experiment Object, Experiment Controller
+
+```yaml {caption="[File 6] Experiment Object Example", linenos=table}
+apiVersion: argoproj.io/v1alpha1
+kind: Experiment
+metadata:
+  name: mock-server-experiment
+spec:
+  duration: 5m
+  templates:
+  - name: baseline
+    replicas: 1
+    template:
+      metadata:
+        labels:
+          app: mock-server
+          experiment: baseline
+      spec:
+        containers:
+        - name: mock-server
+          image: ghcr.io/ssup2/mock-go-server:1.0.0
+          ports:
+          - containerPort: 8080
+  - name: canary
+    replicas: 1
+    template:
+      metadata:
+        labels:
+          app: mock-server
+          experiment: canary
+      spec:
+        containers:
+        - name: mock-server
+          image: ghcr.io/ssup2/mock-go-server:2.0.0
+          ports:
+          - containerPort: 8080
+  - name: experimental
+    replicas: 1
+    template:
+      metadata:
+        labels:
+          app: mock-server
+          experiment: experimental
+      spec:
+        containers:
+        - name: mock-server
+          image: ghcr.io/ssup2/mock-go-server:3.0.0
+          ports:
+          - containerPort: 8080
+```
+
+Experiment Object는 이름에서 알 수 있는것 처럼 임시 Test를 위한 배포를 수행할때 이용하는 Object이다. Rollout Object와 유사하지만 Duration을 명시하여 배포된 파드가 제거되는 시점을 명시할 수 있으며, 하나의 Experiment Object에서 다수의 Version을 동시에 배포할 수 있는 기능을 제공한다.
 
 ### 1.5. Notification Controller
 
