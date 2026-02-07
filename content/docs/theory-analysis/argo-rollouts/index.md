@@ -13,7 +13,7 @@ Argo Rollouts는 Kubernetes 환경에서 Blue/Green, Canary 및 Progressive Deli
 
 **Rollout** Object는 Blue/Green 및 Canary 배포를 위한 가장 핵심적인 Object이다. Rollout Object는 배포 과정에 필요한 다양한 설정을 담고 있으며, 배포 과정을 제어하는 역할을 수행한다. 사용자는 Rollout Manifest를 직접 작성하고 제어하거나, `kubectl argo rollouts` 명령어를 통해서 Rollout Object를 제어할 수도 있다.
 
-```yaml {caption="[File 1] Rollout Blue/Green Example", linenos=table}
+```yaml {caption="[Manifest 1] Rollout Blue/Green Example", linenos=table}
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
@@ -39,11 +39,11 @@ spec:
       previewService: mock-server-preview
 ```
 
-[File 1]은 Blue/Green 배포를 위한 Rollout Object를 나타내고 있다. 20~23번째 줄에서 Blue/Green 배포를 위한 설정을 하고 있다. `activeService`에는 Blue Version과 연결되는 Kubernetes Service를 지정하고, `previewService`에는 Green Version과 연결되는 Kubernetes Service를 지정한다. `kubectl argo rollouts set image` 명령어를 통해서 Rollout Object의 Image를 변경할 수 있으며, `kubectl argo rollouts promote` 명령어를 통해서 Green Version을 Blue Version로 승격시킬 수 있다.
+[Manifest 1]은 Blue/Green 배포를 위한 Rollout Object를 나타내고 있다. 20~23번째 줄에서 Blue/Green 배포를 위한 설정을 하고 있다. `activeService`에는 Blue Version과 연결되는 Kubernetes Service를 지정하고, `previewService`에는 Green Version과 연결되는 Kubernetes Service를 지정한다. `kubectl argo rollouts set image` 명령어를 통해서 Rollout Object의 Image를 변경할 수 있으며, `kubectl argo rollouts promote` 명령어를 통해서 Green Version을 Blue Version로 승격시킬 수 있다.
 
 Rollout은 새로운 배포를 수행할때마다 **Revision**을 생성하며 배포를 수행할 수록 Revision 번호는 하나씩 증가한다. **Rollout Controller**는 각 Revision별로 ReplicaSet을 생성하고, ReplicaSet을 통해서 Blue/Green Version의 Pod 개수를 관리한다. 또한 필요에 따라서 `activeService`와 `previewService`에 지정된 Kubernetes Service를 제어하여 Blue/Green Version의 Traffic을 관리한다.
 
-```yaml {caption="[File 2] Rollout Canary Example", linenos=table}
+```yaml {caption="[Manifest 2] Rollout Canary Example", linenos=table}
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
@@ -80,7 +80,7 @@ spec:
       - pause: {}
 ```
 
-[File 2]는 Canary 배포를 위한 Rollout Object를 나타내고 있다. 20~44번째 줄에서 Canary 배포를 위한 설정을 하고 있다. `canaryService`에는 Canary Version과 연결되는 Kubernetes Service를 지정하고, `stableService`에는 Stable Version과 연결되는 Kubernetes Service를 지정한다. Blue/Green과 다르게 Canary 배포는 `steps` 부분을 통해서 Canary Version과 Stable Version의 **Traffic 비율**을 제어할 수 있으며, [File 2]의 경우에는 Canary Version과 Stable Version의 Pod 개수를 제어하여 Traffic 비율을 제어한다.
+[Manifest 2]는 Canary 배포를 위한 Rollout Object를 나타내고 있다. 20~44번째 줄에서 Canary 배포를 위한 설정을 하고 있다. `canaryService`에는 Canary Version과 연결되는 Kubernetes Service를 지정하고, `stableService`에는 Stable Version과 연결되는 Kubernetes Service를 지정한다. Blue/Green과 다르게 Canary 배포는 `steps` 부분을 통해서 Canary Version과 Stable Version의 **Traffic 비율**을 제어할 수 있으며, [Manifest 2]의 경우에는 Canary Version과 Stable Version의 Pod 개수를 제어하여 Traffic 비율을 제어한다.
 
 {{< table caption="[Table 1] Rollout Canary Example Steps" >}}
 | Step | Traffic | Stable Pods | Canary Pods | Duration | Description |
@@ -101,22 +101,14 @@ Stable Replicas = spec.replicas - Canary Replicas
 
 각 Step별로 정확한 Pod 개수를 계산하는 공식은 [Formula 1]과 같다. 만약 Canary 배포 과정중에 문제가 발생하여 이전 Step으로 돌아가고 싶다면 `kubectl argo rollouts undo` 명령어를 통해서 이전 Step으로 돌아갈 수 있으며, 만약 Canary 배포 과정중에 문제가 발생하여 배포를 중단하고 싶다면 `kubectl argo rollouts abort` 명령어를 통해서 배포를 중단할 수 있다.
 
-[File 2] 예제에서 Canary Version과 Stable Version으로 Traffic을 Weight 기반으로 분배하기 위해서는 Canary Version과 Stable Version으로 Traffic을 묶는 별도의 Kubernetes Service(`mock-server`)를 생성하고 이용하면 된다. 하지만 Pod의 개수로만 Traffic 비율을 제어하는 방식이기 때문에 정확하게 Traffic 비율을 제어하지 못한다는 한계점을 갖는다. [Table 1]에서 알 수 있는것 처럼 Traffic 10%만 Canary Version으로 보내고 싶어도, 실제로는 16.7% (1/6)가 Canary Version으로 보내게 된다.
+[Manifest 2] 예제에서 Canary Version과 Stable Version으로 Traffic을 Weight 기반으로 분배하기 위해서는 Canary Version과 Stable Version으로 Traffic을 묶는 별도의 Kubernetes Service(`mock-server`)를 생성하고 이용하면 된다. 하지만 Pod의 개수로만 Traffic 비율을 제어하는 방식이기 때문에 정확하게 Traffic 비율을 제어하지 못한다는 한계점을 갖는다. [Table 1]에서 알 수 있는것 처럼 Traffic 10%만 Canary Version으로 보내고 싶어도, 실제로는 16.7% (1/6)가 Canary Version으로 보내게 된다.
 
 ### 1.2. Traffic Routing
 
 Traffic Routing 기능은 Canary 배포시 Pod의 개수만으로 Traffic 비율을 정확하게 제어하지 못하는 한계점을 극복하기 위해서 제공되는 기능이다. Argo Rollouts는 Istio, Ingress Nginx와 같은 외부의 Traffic Routing 기능을 활용하여 정확하게 Traffic 비율을 제어할 수 있도록 지원한다. Ingress Nginx, Istio 뿐만 아니라 다양한 외부 Component를 활용하여 Traffic Routing을 구성할 수 있다.
 
-```yaml {caption="[File 3] Rollout Canary with Traffic Routing Istio Virtual Service Example", linenos=table}
-apiVersion: argoproj.io/v1alpha1
-kind: Rollout
-metadata:
-  name: mock-server
-spec:
-  replicas: 5
-  selector:
-    matchLabels:
-      app: mock-server
+```yaml {caption="[Manifest 3] Rollout Canary with Traffic Routing Istio Virtual Service Example", linenos=table}
+...
   strategy:
     canary:
       canaryService: mock-server-canary
@@ -140,7 +132,7 @@ spec:
       - pause: {}
 ```
 
-[File 3]은 [File 2] 기반에 Istio Virtual Service를 활용하여 Traffic Routing을 구성한 Canary 배포를 위한 Rollout Object를 나타내고 있다. `trafficRouting` 부분을 통해서 Traffic Routing의 Spec을 명시하며 `istio` 부분을 통해서 Traffic Routing에 이용할 Istio Virtual Service를 지정하는 것을 확인할 수 있다. Rollout Controller는 Canary 배포를 진행하면서 Traffic Routing Reconciler를 통해서 Istio Virtual Service의 Weight를 동적으로 변경하여 Traffic 비율을 제어한다.
+[Manifest 3]은 [Manifest 2] 기반에 Istio Virtual Service를 활용하여 Traffic Routing을 구성한 Canary 배포를 위한 Rollout Object를 나타내고 있다. `trafficRouting` 부분을 통해서 Traffic Routing의 Spec을 명시하며 `istio` 부분을 통해서 Traffic Routing에 이용할 Istio Virtual Service를 지정하는 것을 확인할 수 있다. Rollout Controller는 Canary 배포를 진행하면서 Traffic Routing Reconciler를 통해서 Istio Virtual Service의 Weight를 동적으로 변경하여 Traffic 비율을 제어한다.
 
 {{< table caption="[Table 2] Rollout Canary with Traffic Routing Istio Virtual Service Example Steps" >}}
 | Step | Traffic | Stable Pods | Canary Pods | Duration | Description |
@@ -165,7 +157,7 @@ Traffic Routing 기능이 활성화 되면 각 [Table 2]과 같이 Step별로 �
 
 AnalysisRun Object가 생성되면 Analysis Controller에 의해서 실제 Analysis를 수행하고 결과를 반환한다. Prometheus를 포함하여 다양한 외부 시스템과 연동하여 Analysis를 수행할 수 있다.
 
-```yaml {caption="[File 4] AnalysisTemplate Object Prometheus Example", linenos=table}
+```yaml {caption="[Manifest 4] AnalysisTemplate Object Prometheus Example", linenos=table}
 apiVersion: argoproj.io/v1alpha1
 kind: AnalysisTemplate
 metadata:
@@ -188,7 +180,7 @@ spec:
           )
 ```
 
-[File 4]는 Prometheus를 활용하여 Analysis를 수행하는 AnalysisTemplate Object를 나타내고 있다. `metrics` 부분을 통해서 Analysis를 수행할 Metric을 명시하며, 수행 간격과 수행 횟수를 명시하고 성공 조건과 실패 제한을 명시하는 것을 확인할 수 있다. [File 4]의 경우에는 30초 간격으로 3번 Query를 수행하고, 2번의 실패를 허용하기 때문에 3번의 Query 중에 1번의 Query가 성공하면 Analysis가 성공한 것으로 간주한다. Query의 결과는 0.95 이상이면 성공한 것으로 간주한다. `provider` 부분을 통해서 어떤 외부 시스템과 연동하여 Analysis를 수행할지 명시한다. `prometheus` 부분을 통해서 연동할 Prometheus Endpoint와 Query를 명시하는 것을 확인할 수 있다. 
+[Manifest 4]는 Prometheus를 활용하여 Analysis를 수행하는 AnalysisTemplate Object를 나타내고 있다. `metrics` 부분을 통해서 Analysis를 수행할 Metric을 명시하며, 수행 간격과 수행 횟수를 명시하고 성공 조건과 실패 제한을 명시하는 것을 확인할 수 있다. [Manifest 4]의 경우에는 30초 간격으로 3번 Query를 수행하고, 2번의 실패를 허용하기 때문에 3번의 Query 중에 1번의 Query가 성공하면 Analysis가 성공한 것으로 간주한다. Query의 결과는 0.95 이상이면 성공한 것으로 간주한다. `provider` 부분을 통해서 어떤 외부 시스템과 연동하여 Analysis를 수행할지 명시한다. `prometheus` 부분을 통해서 연동할 Prometheus Endpoint와 Query를 명시하는 것을 확인할 수 있다. 
 
 ```yaml {caption="[File 5] Rollouts Canary with AnalysisTemplate Prometheus Example", linenos=table}
 apiVersion: argoproj.io/v1alpha1
@@ -210,11 +202,11 @@ spec:
               - templateName: success-rate
 ```
 
-[File 5]는 [File 4]의 AnalysisTemplate을 활용하여 Progressive Delivery 배포를 수행하는 Rollout Object를 나타내고 있다. `analysis` 부분을 통해서 Analysis를 수행할 AnalysisTemplate을 명시하는 것을 확인할 수 있다. Canary Version으로 20%의 Traffic을 분배하고 30초 대기 이후에 Analysis를 수행하게 된다.
+[Manifest 5]는 [Manifest 4]의 AnalysisTemplate을 활용하여 Progressive Delivery 배포를 수행하는 Rollout Object를 나타내고 있다. `analysis` 부분을 통해서 Analysis를 수행할 AnalysisTemplate을 명시하는 것을 확인할 수 있다. Canary Version으로 20%의 Traffic을 분배하고 30초 대기 이후에 Analysis를 수행하게 된다.
 
 ### 1.4. Experiment Object, Experiment Controller
 
-```yaml {caption="[File 6] Experiment Object Example", linenos=table}
+```yaml {caption="[Manifest 6] Experiment Object Example", linenos=table}
 apiVersion: argoproj.io/v1alpha1
 kind: Experiment
 metadata:
@@ -263,7 +255,63 @@ spec:
           - containerPort: 8080
 ```
 
-Experiment Object는 이름에서 알 수 있는것 처럼 임시 Test를 위한 배포를 수행할때 이용하는 Object이다. Rollout Object와 유사하지만 Duration을 명시하여 배포된 파드가 제거되는 시점을 명시할 수 있으며, 하나의 Experiment Object에서 다수의 Version을 동시에 배포할 수 있는 기능을 제공한다.
+Experiment Object는 이름에서 알 수 있는것 처럼 임시 Test를 위한 배포를 수행할때 이용하는 Object이다. Rollout Object와 유사하지만 Duration을 명시하여 배포된 Pod가 제거되는 시점을 명시할 수 있으며, 하나의 Experiment Object에서 다수의 Version을 동시에 배포할 수 있는 기능을 제공한다. [Manifest 6]은 Experiment Object 예제를 나타내고 있다. `duration` 부분을 통해서 Pod가 5분 뒤에 제거되는 것을 명시하고 있다. 또한 `templates` 부분을 통해서 `baseline`, `canary`, `experimental` 3개의 Version을 동시에 배포할 수 있는 것을 확인할 수 있다.
+
+```yaml {caption="[Manifest 7] Rollouts Canary with Experiment Object Example", linenos=table}
+...
+  strategy:
+    canary:
+      canaryService: mock-server-canary
+      stableService: mock-server-stable
+      trafficRouting:
+        istio:
+          virtualService:
+            name: mock-server
+            routes:
+            - primary
+      steps:
+      - setWeight: 10
+      - pause: {duration: 30s}
+      - experiment:
+          duration: 2m
+          templates:
+          - name: stable
+            specRef: stable
+            replicas: 2
+            weight: 50
+            service:
+              name: mock-server-experiment-stable
+          - name: canary
+            specRef: canary
+            replicas: 2
+            weight: 50
+            service:
+              name: mock-server-experiment-canary
+          analyses:
+          - name: stable-vs-canary
+            templateName: compare-success-rate
+            args:
+            - name: stable-hash
+              value: "{{templates.stable.podTemplateHash}}"
+            - name: canary-hash
+              value: "{{templates.canary.podTemplateHash}}"
+      - setWeight: 20
+      - pause: {duration: 1m}
+      - setWeight: 50
+      - pause: {}
+      - setWeight: 80
+      - pause: {duration: 2m}
+      - setWeight: 100
+      - pause: {}
+```
+
+Experiment Object의 또 다른 활용법은 Rollouts Object와 연동하여 Netflix의 **Kayenta-style** 분석을 수행할 수 있다는 점이다. Kayenta-style 분석은 일반적인 Canary 배포와는 다르게 **Production**, **Baseline**, **Canary** 3가지 Version으로 구분하여 배포 및 분석을 수행한다.
+
+* **Production Version** : 실제 운영 환경에 배포되는 Version
+* **Baseline Version** : Production Version과 동일한 Version
+* **Canary Version** : 변경하고자 하는 신규 Version
+
+Production, Baseline Version이 동일한 Version이지만 별도로 운영되는 이유는 Canary Version과 동일한양의 Traffic을 분배하고 분석하기 위해서이다. 일반적인 Canary 분석 방식은 Canary Version과 Stable Version이 받는 Traffic의 양이 다르기 때문에 동등한 분석 조건을 만족시키기 어렵다는 단점을 개선한 분석 방식이 Kayenta-style 분석 방식이다. Argo Rollouts에서 Experiment Object를 활용하는 경우 Experiment Object가 Baseline Version과 Canary Version의 역할을 수행한다. [Manifest 7]은 Experiment Object를 활용하여 Kayenta-style 분석을 수행하는 Rollouts Object 예제를 나타내고 있으며, Experiment의 Stable이 Baseline Version, Experiment의 Canary가 Canary Version의 역할을 수행한다.
 
 ### 1.5. Notification Controller
 
@@ -3456,3 +3504,4 @@ NAME                                                              KIND         S
 
 * Argo Rollouts : [https://ojt90902.tistory.com/1596](https://ojt90902.tistory.com/1596)
 * Argo Rollouts : [https://kkamji.net/posts/argo-rollout-5w/](https://kkamji.net/posts/argo-rollout-5w/)
+* Netflix Kayenta : [https://netflixtechblog.com/automated-canary-analysis-at-netflix-with-kayenta-3260bc7acc69](https://netflixtechblog.com/automated-canary-analysis-at-netflix-with-kayenta-3260bc7acc69)
