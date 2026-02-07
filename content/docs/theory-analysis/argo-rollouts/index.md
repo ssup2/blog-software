@@ -335,7 +335,7 @@ Argo Rollouts에 대한 다양한 Test Case를 통해서 Argo Rollouts의 기능
 
 ### 2.1. Test 환경 구성
 
-```shell {caption="[Shell 1] Test 환경 구성"}
+```shell {caption="[Shell 1] Test Environment Configuration"}
 # Create kubernetes cluster with kind
 $ kind create cluster --config=- <<EOF                           
 kind: Cluster
@@ -384,9 +384,9 @@ spec:
 
 {{< figure caption="[Figure 2] Argo Rollouts Blue/Green Case" src="images/argo-rollouts-case-bluegreen.png" width="800px" >}}
 
-[Figure 2]는 Argo Rollouts Blue/Green 배포를 위한 Test Case를 도식화 하고 있다. Container Image를 2번 변경한 이후에 Promotion을 진행하여, `Revision 2`를 건너뛰고 `Revision 3`으로 한번에 Promotion을 수행한다. Preview Kubernetes Service는 `Revision 2`와 `Revision 3`을 차례대로 가리키고 있으며, Active Kubernetes Service는 `Revision 1`을 가리키고 있다가, Promotion이 완료되면 `Revision 3`을 가리키는 것을 확인할 수 있다.
+[Figure 2]는 Argo Rollouts Blue/Green 배포를 위한 Test Case를 도식화 하고 있다. Container Image를 2번 변경한 이후에 Promotion을 진행하여, `Revision 2`를 건너뛰고 `Revision 3`으로 한번에 Promotion을 수행한다. Blue/Green 배포이기 때문에 Green의 파드의 개수는 Blue 파드의 개수와 동일하게 5개로 유지된다. Preview Kubernetes Service는 `Revision 1`, `Revision 2`, `Revision 3`을 차례대로 가리키고 있으며, Active Kubernetes Service는 `Revision 1`을 가리키고 있다가, Promotion이 완료되면 `Revision 3`을 가리키는 것을 확인할 수 있다.
 
-```yaml {caption="[File 1] Argo Rollouts Blue/Green Example", linenos=table}
+```yaml {caption="[Manifest 10] Blue/Green Test Case", linenos=table}
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
@@ -435,7 +435,7 @@ spec:
     targetPort: 8080
 ```
 
-```shell
+```shell {caption="[Shell 2] Blue/Green Test Case", linenos=table}
 # Deploy mock-server blue/green rollout and check status
 $ kubectl apply -f mock-server.yaml
 $ kubectl argo rollouts get rollout mock-server
@@ -526,7 +526,6 @@ Labels:                   <none>
 Annotations:              argo-rollouts.argoproj.io/managed-by-rollouts: mock-server
 Selector:                 app=mock-server,rollouts-pod-template-hash=7c6fcfb847
 ...
-
 
 $ kubectl argo rollouts set image mock-server mock-server=ghcr.io/ssup2/mock-go-server:3.0.0
 $ kubectl argo rollouts get rollout mock-server
@@ -622,7 +621,7 @@ Annotations:              argo-rollouts.argoproj.io/managed-by-rollouts: mock-se
 Selector:                 app=mock-server,rollouts-pod-template-hash=6fcb56df9b
 ```
 
-
+[Manifest 10]은 Blue/Green 배포를 위한 Test Case를 나타내고 있으며, [Shell 2]는 Test Case를 수행하는 과정을 나타내고 있다. [Manifest 10]의 `mock-server-active` Kubernetes Service와 `mock-server-preview` Kubernetes Service는의 Selector가 `app=mock-server`로 동일하기 설정되어 있지만, 실제 Blue/Green 배포가 수행될때는 `rollouts-pod-template-hash` Selector에 의해서 특정 Revision을 가리키는 것을 확인할 수 있으며, 이러한 Revision 지정은 Rollout Controller가 수행한다.
 
 #### 2.2.2. Canary Success
 
