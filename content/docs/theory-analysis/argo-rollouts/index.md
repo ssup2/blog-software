@@ -11,7 +11,7 @@ Argo Rollouts는 Kubernetes 환경에서 Blue/Green, Canary 및 Progressive Deli
 
 ### 1.1. Rollout Object, Rollout Controller
 
-**Rollout** Object는 Blue/Green 및 Canary 배포를 위한 가장 핵심적인 Object이다. Rollout Object는 배포 과정에 필요한 다양한 설정을 담고 있으며, 배포 과정을 제어하는 역할을 수행한다. 사용자는 Rollout Manifest를 직접 작성하고 제어하거나, `kubectl argo rollouts` 명령어를 통해서 Rollout Object를 제어할 수도 있다.
+**Rollout Object**는 Blue/Green 및 Canary 배포를 위한 가장 핵심적인 Object이다. Rollout Object는 배포 과정에 필요한 다양한 설정을 담고 있으며, 배포 과정을 제어하는 역할을 수행한다. 사용자는 Rollout Manifest를 직접 작성하고 제어하거나, `kubectl argo rollouts` 명령어를 통해서 Rollout Object를 제어할 수도 있다.
 
 ```yaml {caption="[Manifest 1] Rollout Blue/Green Example", linenos=table}
 apiVersion: argoproj.io/v1alpha1
@@ -105,7 +105,7 @@ Stable Replicas = spec.replicas - Canary Replicas
 
 ### 1.2. Traffic Routing
 
-Traffic Routing 기능은 Canary 배포시 Pod의 개수만으로 Traffic 비율을 정확하게 제어하지 못하는 한계점을 극복하기 위해서 제공되는 기능이다. Argo Rollouts는 Istio, Ingress Nginx와 같은 외부의 Traffic Routing 기능을 활용하여 정확하게 Traffic 비율을 제어할 수 있도록 지원한다. Ingress Nginx, Istio 뿐만 아니라 다양한 외부 Component를 활용하여 Traffic Routing을 구성할 수 있다.
+**Traffic Routing** 기능은 Canary 배포시 Pod의 개수만으로 Traffic 비율을 정확하게 제어하지 못하는 한계점을 극복하기 위해서 제공되는 기능이다. Argo Rollouts는 Istio, Ingress Nginx와 같은 외부의 Traffic Routing 기능을 활용하여 정확하게 Traffic 비율을 제어할 수 있도록 지원한다. Ingress Nginx, Istio 뿐만 아니라 다양한 외부 Component를 활용하여 Traffic Routing을 구성할 수 있다.
 
 ```yaml {caption="[Manifest 3] Rollout Canary with Traffic Routing Istio Virtual Service Example", linenos=table}
 ...
@@ -153,9 +153,9 @@ Traffic Routing 기능이 활성화 되면 각 [Table 2]과 같이 Step별로 �
 
 ### 1.3. AnalysisTemplate/AnalysisRun Object and Analysis Controller
 
-**AnalysisTemplate/AnalysisRun** Object는 Argo Rollouts에서 Progressive Delivery 배포를 위한 Object이다. AnalysisTemplate/AnalysisRun Object를 통해서 외부의 Metric, Data를 조회하고 이를 기반으로 배포를 계속 진행할지 또는 배포를 중단할지 결정할 수 있다. AnalysisTemplate Object는 이름에서 알 수 있는것 처럼 AnalysisRun Object를 생성하기 위한 Template을 정의하는 Object이며, AnalysisRun Object는 실제 분석을 수행할때마다 AnalysisTemplate를 기반으로 동적으로 생성되는 Object이다.
+**AnalysisTemplate/AnalysisRun Object**는 Argo Rollouts에서 Progressive Delivery 배포를 위한 Object이다. AnalysisTemplate/AnalysisRun Object를 통해서 외부의 Metric, Data를 조회하고 이를 기반으로 배포를 계속 진행할지 또는 배포를 중단할지 결정할 수 있다. AnalysisTemplate Object는 이름에서 알 수 있는것 처럼 AnalysisRun Object를 생성하기 위한 Template을 정의하는 Object이며, AnalysisRun Object는 실제 분석을 수행할때마다 AnalysisTemplate를 기반으로 동적으로 생성되는 Object이다.
 
-AnalysisRun Object가 생성되면 Analysis Controller에 의해서 실제 Analysis를 수행하고 결과를 반환한다. Prometheus를 포함하여 다양한 외부 시스템과 연동하여 Analysis를 수행할 수 있다.
+AnalysisRun Object가 생성되면 **Analysis Controller**에 의해서 실제 Analysis를 수행하고 결과를 반환한다. Prometheus를 포함하여 다양한 외부 시스템과 연동하여 Analysis를 수행할 수 있다.
 
 ```yaml {caption="[Manifest 4] AnalysisTemplate Object Prometheus Example", linenos=table}
 apiVersion: argoproj.io/v1alpha1
@@ -255,7 +255,7 @@ spec:
           - containerPort: 8080
 ```
 
-Experiment Object는 이름에서 알 수 있는것 처럼 임시 Test를 위한 배포를 수행할때 이용하는 Object이다. Rollout Object와 유사하지만 Duration을 명시하여 배포된 Pod가 제거되는 시점을 명시할 수 있으며, 하나의 Experiment Object에서 다수의 Version을 동시에 배포할 수 있는 기능을 제공한다. [Manifest 6]은 Experiment Object 예제를 나타내고 있다. `duration` 부분을 통해서 Pod가 5분 뒤에 제거되는 것을 명시하고 있다. 또한 `templates` 부분을 통해서 `baseline`, `canary`, `experimental` 3개의 Version을 동시에 배포할 수 있는 것을 확인할 수 있다.
+**Experiment** Object는 이름에서 알 수 있는것 처럼 임시 Test를 위한 배포를 수행할때 이용하는 Object이다. Rollout Object와 유사하지만 Duration을 명시하여 배포된 Pod가 제거되는 시점을 명시할 수 있으며, 하나의 Experiment Object에서 다수의 Version을 동시에 배포할 수 있는 기능을 제공한다. [Manifest 6]은 Experiment Object 예제를 나타내고 있다. `duration` 부분을 통해서 Pod가 5분 뒤에 제거되는 것을 명시하고 있다. 또한 `templates` 부분을 통해서 `baseline`, `canary`, `experimental` 3개의 Version을 동시에 배포할 수 있는 것을 확인할 수 있다.
 
 ```yaml {caption="[Manifest 7] Rollouts Canary with Experiment Object Example", linenos=table}
 ...
@@ -313,9 +313,25 @@ Experiment Object의 또 다른 활용법은 Rollouts Object와 연동하여 Net
 
 Production, Baseline Version이 동일한 Version이지만 별도로 운영되는 이유는 Canary Version과 동일한양의 Traffic을 분배하고 분석하기 위해서이다. 일반적인 Canary 분석 방식은 Canary Version과 Stable Version이 받는 Traffic의 양이 다르기 때문에 동등한 분석 조건을 만족시키기 어렵다는 단점을 개선한 분석 방식이 Kayenta-style 분석 방식이다. Argo Rollouts에서 Experiment Object를 활용하는 경우 Experiment Object가 Baseline Version과 Canary Version의 역할을 수행한다. [Manifest 7]은 Experiment Object를 활용하여 Kayenta-style 분석을 수행하는 Rollouts Object 예제를 나타내고 있으며, Experiment의 Stable이 Baseline Version, Experiment의 Canary가 Canary Version의 역할을 수행한다.
 
+**Experiment Controller**는 Experiment Object에 정의에 따라서 Rollout Controller와 유사하게 ReplicaSet을 생성하고 제어하며, AnalysisTemplate Object를 참고하여 AnalysisRun을 생성하고 분석 결과를 참조한다.
+
 ### 1.5. Notification Controller
 
+```yaml {caption="[Manifest 8] Notification Controller Example", linenos=table}
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: mock-server
+  annotations:
+    notifications.argoproj.io/subscribe.on-rollout-completed.slack: deployments
+...
+```
+
+**Notification Controller**는 Argo Rollouts에서 제공하는 Notification 기능을 수행하는 Controller이다. Notification Controller는 배포 결과를 메일, Slack, Webhook 등의 방식으로 알림을 전송할 수 있는 기능을 제공한다. [Manifest 8]은 Notification Controller를 활용하여 배포 결과를 Slack으로 알리는 예제를 나타내고 있다. Annotation을 통해서 Slack Channel에 배포 결과를 알리는 것을 확인할 수 있다. Slack 뿐만 아니라 Email, Webhook 등의 다양한 방식으로 알림을 전송할 수 있는 기능을 제공한다.
+
 ## 2. Argo Rollouts Test Cases
+
+Argo Rollouts에 대한 다양한 Test Case를 통해서 Argo Rollouts의 기능을 확인한다.
 
 ### 2.1. Test 환경 구성
 
@@ -330,23 +346,23 @@ nodes:
 - role: worker
 EOF
 
+# Install argo rollouts
+$ kubectl create namespace argo-rollouts
+$ kubectl apply -n argo-rollouts -f https://github.com/argoproj/argo-rollouts/releases/latest/download/install.yaml
+
 # Install istio
 $ istioctl install --set profile=demo -y
 
 # Enable sidecar injection to default namespace
 $ kubectl label namespace default istio-injection=enabled
 
-# Install argo rollouts
-$ kubectl create namespace argo-rollouts
-$ kubectl apply -n argo-rollouts -f https://github.com/argoproj/argo-rollouts/releases/latest/download/install.yaml
-
 # Install prometheus
 $ kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.28/samples/addons/prometheus.yaml
 ```
 
-[Shell 1]은 Test 환경을 구성하는 Script를 나타내고 있다. `kind`를 활용하여 Kubernetes Cluster를 구성하고 Istio를 설치한다. 그리고 default Namespace에 Sidecar Injection을 활성화한다. Argo Rollouts를 설치한다. 그리고 Prometheus를 설치한다.
+[Shell 1]은 Test 환경을 구성하는 Script를 나타내고 있다. `kind`를 활용하여 Kubernetes Cluster를 구성하고, Argo Rollouts를 설치한다. Traffic Routing을 위해서 Istio를 설치하고, default Namespace에 Sidecar Injection을 활성화한다. AnalysisTemplate/AnalysisRun을 Test하기 위한 Prometheus도 설치한다.
 
-```yaml {caption="[File 1] shell Pod Manifest", linenos=table}
+```yaml {caption="[Manifest 9] shell Pod Manifest", linenos=table}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -360,13 +376,15 @@ spec:
     command: ["sleep", "infinity"]
 ```
 
-[File 1]은 `shell` Pod의 Manifest를 나타내고 있다. netshoot Image를 이용하여 `shell` Pod을 생성하며, Argo Rollout으로 구성한 Service에 접근하여 istio Metric을 발생시키기 위해서 사용한다.
+[File 1]은 `shell` Pod의 Manifest를 나타내고 있다. `netshoot` Container Image를 이용하여 `shell` Pod을 생성하며, Argo Rollout으로 구성한 Service에 접근하여 istio Metric을 발생시키기 위해서 사용한다.
 
 ### 2.2. Test Cases
 
 #### 2.2.1. Blue/Green
 
 {{< figure caption="[Figure 2] Argo Rollouts Blue/Green Case" src="images/argo-rollouts-case-bluegreen.png" width="800px" >}}
+
+[Figure 2]는 Argo Rollouts Blue/Green 배포를 위한 Test Case를 도식화 하고 있다. Container Image를 2번 변경한 이후에 Promotion을 진행하여, `Revision 2`를 건너뛰고 `Revision 3`으로 한번에 Promotion을 수행한다. Preview Kubernetes Service는 `Revision 2`와 `Revision 3`을 차례대로 가리키고 있으며, Active Kubernetes Service는 `Revision 1`을 가리키고 있다가, Promotion이 완료되면 `Revision 3`을 가리키는 것을 확인할 수 있다.
 
 ```yaml {caption="[File 1] Argo Rollouts Blue/Green Example", linenos=table}
 apiVersion: argoproj.io/v1alpha1
@@ -603,6 +621,8 @@ Labels:                   <none>
 Annotations:              argo-rollouts.argoproj.io/managed-by-rollouts: mock-server
 Selector:                 app=mock-server,rollouts-pod-template-hash=6fcb56df9b
 ```
+
+
 
 #### 2.2.2. Canary Success
 
