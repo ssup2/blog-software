@@ -435,7 +435,7 @@ spec:
     targetPort: 8080
 ```
 
-```shell {caption="[Shell 2] Blue/Green Test Case", linenos=table}
+```shell {caption="[Shell 2] Blue/Green Test Case"}
 # Deploy mock-server blue/green rollout and check status
 $ kubectl apply -f mock-server.yaml
 $ kubectl argo rollouts get rollout mock-server
@@ -625,9 +625,13 @@ Selector:                 app=mock-server,rollouts-pod-template-hash=6fcb56df9b
 
 #### 2.2.2. Canary Success
 
-{{< figure caption="[Figure 3] Argo Rollouts Canary Success Case" src="images/argo-rollouts-case-canary-success.png" width="1100px" >}}
+{{< figure caption="[Figure 3] Canary Success Test Case" src="images/argo-rollouts-case-canary-success.png" width="1100px" >}}
 
-```yaml {caption="[File 2] Argo Rollouts Canary Success Example", linenos=table}
+[Figure 3]는 Argo Rollouts Canary 배포를 위한 Test Case를 도식화 하고 있다. Container Image를 2번 변경한 이후에 Promotion을 진행하여, `Revision 2`를 건너뛰고 `Revision 3`으로 한번에 Promotion을 수행한다. Image를 변경한 직후에는 Weight 20% 설정으로 인해서 한개의 파드가 바로 생기며, Promotion이 수행된 이후에 Weight 40% 설정으로 인해서 파드가 2개로 증가하고, 30초 뒤에 Weight 100% 설정으로 인해서 파드가 5개로 증가하는 것을 확인할 수 있다.
+
+Blue/Green 배포이기 때문에 Green의 파드의 개수는 Blue 파드의 개수와 동일하게 5개로 유지된다. Preview Kubernetes Service는 `Revision 1`, `Revision 2`, `Revision 3`을 차례대로 가리키고 있으며, Active Kubernetes Service는 `Revision 1`을 가리키고 있다가, Promotion이 완료되면 `Revision 3`을 가리키는 것을 확인할 수 있다.
+
+```yaml {caption="[Manifest 11] Canary Success Test Case", linenos=table}
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
@@ -692,7 +696,7 @@ spec:
     targetPort: 8080
 ```
 
-```shell
+```shell {caption="[Shell 3] Canary Success Test Case"}
 # Deploy mock-server canary rollout and check status
 $ kubectl apply -f mock-server-canary-success.yaml
 $ kubectl argo rollouts get rollout mock-server   
