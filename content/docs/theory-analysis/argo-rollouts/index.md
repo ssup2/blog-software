@@ -384,7 +384,7 @@ spec:
 
 {{< figure caption="[Figure 2] Argo Rollouts Blue/Green Case" src="images/argo-rollouts-case-bluegreen.png" width="800px" >}}
 
-[Figure 2]는 Argo Rollouts Blue/Green 배포를 위한 Test Case를 도식화 하고 있다. Container Image를 2번 변경한 이후에 Promotion을 진행하여, `Revision 2`를 건너뛰고 `Revision 3`으로 한번에 Promotion을 수행한다. Blue/Green 배포이기 때문에 Green의 파드의 개수는 Blue 파드의 개수와 동일하게 5개로 유지된다. `Preview` Kubernetes Service는 `Revision 1`, `Revision 2`, `Revision 3`을 차례대로 가리키고 있으며, `Active` Kubernetes Service는 `Revision 1`을 가리키고 있다가, Promotion이 완료되면 `Revision 3`을 가리키는 것을 확인할 수 있다.
+[Figure 2]는 Argo Rollouts Blue/Green 배포를 위한 Test Case를 도식화 하고 있다. Container Image를 2번 변경한 이후에 Promotion을 진행하여, `Revision 2`를 건너뛰고 `Revision 3`으로 한번에 Promotion을 수행한다. Blue/Green 배포이기 때문에 Green Version의 Pod의 개수는 Blue Version의 Pod의 개수와 동일하게 5개로 유지된다. `Preview` Kubernetes Service는 `Revision 1`, `Revision 2`, `Revision 3`을 차례대로 가리키고 있으며, `Active` Kubernetes Service는 `Revision 1`을 가리키고 있다가, Promotion이 완료되면 `Revision 3`을 가리키는 것을 확인할 수 있다.
 
 ```yaml {caption="[Manifest 10] Blue/Green Test Case", linenos=table}
 apiVersion: argoproj.io/v1alpha1
@@ -627,7 +627,7 @@ Selector:                 app=mock-server,rollouts-pod-template-hash=6fcb56df9b
 
 {{< figure caption="[Figure 3] Canary Success Test Case" src="images/argo-rollouts-case-canary-success.png" width="1100px" >}}
 
-[Figure 3]는 Argo Rollouts Canary 배포 성공 Test Case를 도식화 하고 있다. Container Image를 2번 변경한 이후에 Promotion을 진행하여, `Revision 2`를 건너뛰고 `Revision 3`으로 한번에 Promotion을 수행한다. Image를 변경한 직후에는 Weight 20% 설정으로 인해서 한개의 파드가 바로 생기며, Promotion이 수행된 이후에 Weight 40% 설정으로 인해서 파드가 2개로 증가하고, 30초 뒤에 Weight 100% 설정으로 인해서 파드가 5개로 증가하는 것을 확인할 수 있다.
+[Figure 3]는 Argo Rollouts Canary 배포 성공 Test Case를 도식화 하고 있다. Container Image를 2번 변경한 이후에 Promotion을 진행하여, `Revision 2`를 건너뛰고 `Revision 3`으로 한번에 Promotion을 수행한다. Image를 변경한 직후에는 Weight 20% 설정으로 인해서 한개의 Pod가 바로 생기며, Promotion이 수행된 이후에 Weight 40% 설정으로 인해서 Pod가 2개로 증가하고, 30초 뒤에 Weight 100% 설정으로 인해서 Pod가 5개로 증가하는 것을 확인할 수 있다.
 
 `Canary` Kubernetes Service는 `Revision 1`, `Revision 2`, `Revision 3`을 차례대로 가리키고 있으며, `Stable` Kubernetes Service는 `Revision 1`을 가리키고 있다가, Promotion이 완료되면 `Revision 3`을 가리키는 것을 확인할 수 있다. `Main` Service는 언제나 모든 Revision을 가리키며 Stable과 Canary Version에 Traffic을 분배한다.
 
@@ -1214,7 +1214,9 @@ NAME                                     KIND        STATUS        AGE  INFO
 
 {{< figure caption="[Figure 5] Canary with Istio Virtual Service Test Case" src="images/argo-rollouts-case-canary-istio-virtualservice.png" width="800px" >}}
 
-[Figure 5]는 Argo Rollouts Canary 배포 Istio Virtual Service를 활용한 Traffic Routing Test Case를 도식화 하고 있다. Container Image를 한번 변경한 이후에 두번의 Promotion을 수행한다. Image 변경을 직후에는 Weight 20% 설정으로 인해서 한개의 파드가 바로 생기며, Promotion이 수행된 이후에 Weight 40% 설정으로 인해서 파드가 2개로 증가하고, 한번더 Promotion을 수행하면 Weight 100% 설정으로 인해서 파드가 5개로 증가하는 것을 확인할 수 있다. Istio Virtual Service를 Traffic Routing에 이용하고 있기 때문에 모든 단계에서 Stable Version의 Pod 개수는 5개로 유지된다.
+[Figure 5]는 Argo Rollouts Canary 배포 Istio Virtual Service를 활용한 Traffic Routing Test Case를 도식화 하고 있다. Container Image를 한번 변경한 이후에 두번의 Promotion을 수행한다. Image 변경을 직후에는 Weight 20% 설정으로 인해서 한개의 Canary Version Pod가 바로 생기며, Promotion이 수행된 이후에 Weight 40% 설정으로 인해서 Canary Version Pod가 2개로 증가하고, 한번더 Promotion을 수행하면 Weight 100% 설정으로 인해서 Canary Version Pod가 5개로 증가하는 것을 확인할 수 있다.
+
+그리고 Weight에 맞게 **Virtual Service의 Weight**가 변경되면서 Canary Version과 Stable Version에 Traffic이 분배된다. `Canary` Kubernetes Service는 `Revision 1`, `Revision 2`을 차례대로 가리키고 있으며, `Stable` Kubernetes Service는 `Revision 1`을 가리키고 있다가, Promotion이 완료되면 `Revision 2`을 가리키는 것을 확인할 수 있다. Istio Virtual Service를 Traffic Routing에 이용하고 있기 때문에 모든 단계에서 Stable Version의 Pod 개수는 5개로 유지된다.
 
 ```yaml {caption="[Manifest 13] Canary with Istio Virtual Service Test Case"}
 apiVersion: argoproj.io/v1alpha1
@@ -1544,7 +1546,7 @@ Selector:                 app=mock-server,rollouts-pod-template-hash=7c6fcfb847
 ...
 ```
 
-[Manifest 13]은 Canary 배포 Istio Virtual Service를 활용한 Traffic Routing Test Case를 위한 Manifest를 나타내고 있으며, [Shell 5]는 해당 Test Case를 수행하는 과정을 나타내고 있다. `mock-server` Virtual Service의 가중치가 
+[Manifest 13]은 Canary 배포 Istio Virtual Service를 활용한 Traffic Routing Test Case를 위한 Manifest를 나타내고 있으며, [Shell 5]는 해당 Test Case를 수행하는 과정을 나타내고 있다. `mock-server` Virtual Service의 가중치가 `mock-server-canary`으로 증가하다가 마지막 Promotion 이후에는 다시 0으로 변경되는 것을 확인할 수 있다.
 
 #### 2.2.5. Canary with Istio Virtual Service and Analysis
 
