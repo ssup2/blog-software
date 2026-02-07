@@ -7,7 +7,7 @@ draft: true
 
 {{< figure caption="[Figure 1] Argo Rollouts Architecture" src="images/argo-rollouts-architecture.png" width="1100px" >}}
 
-Argo Rollouts는 Kubernetes 환경에서 Blue/Green 및 Canary 배포를 지원하는 오픈소스 프로젝트이다. Blue/Green, Canary 배포뿐만이 아니라 배포과정에 필요한 Traffic Routing, Metric 기반의 자동 Promotion 기능, 배포 상태를 기반으로 Alerting 기능 등 배포 관련 다양한 기능을 제공한다. [Figure 1]은 Argo Rollouts의 Architecture를 나타내고 있다.
+Argo Rollouts는 Kubernetes 환경에서 Blue/Green, Canary 및 Progressive Delivery 배포를 지원하는 오픈소스 프로젝트이다. Blue/Green, Canary 배포뿐만이 아니라 배포과정에 필요한 Traffic Routing, Metric 기반의 자동 Promotion 기능, 배포 상태를 기반으로 Alerting 기능 등 배포 관련 다양한 기능을 제공한다. [Figure 1]은 Argo Rollouts의 Architecture를 나타내고 있다.
 
 ### 1.1. Rollout Object, Rollout Controller
 
@@ -108,27 +108,36 @@ Stable Replicas = spec.replicas - Canary Replicas
 Traffic Routing 기능은 Canary 배포시 Pod의 개수만으로 Traffic 비율을 정확하게 제어하지 못하는 한계점을 극복하기 위해서 제공되는 기능이다. Argo Rollouts는 Istio, Ingress Nginx와 같은 외부의 Traffic Routing 기능을 활용하여 정확하게 Traffic 비율을 제어할 수 있도록 지원한다. Ingress Nginx, Istio 뿐만 아니라 다양한 외부 Component를 활용하여 Traffic Routing을 구성할 수 있다.
 
 ```yaml {caption="[File 3] Rollout Canary with Traffic Routing Istio Virtual Service Example", linenos=table}
-strategy:
-  canary:
-    canaryService: mock-server-canary
-    stableService: mock-server-stabl시
-    trafficRouting:
-      istio:
-        virtualService:
-          name: mock-server
-          routes:
-          - primary
-    steps:
-    - setWeight: 10
-    - pause: {duration: 30s}
-    - setWeight: 20
-    - pause: {duration: 1m}
-    - setWeight: 50
-    - pause: {}
-    - setWeight: 80
-    - pause: {duration: 2m}
-    - setWeight: 100
-    - pause: {}
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: mock-server
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: mock-server
+  strategy:
+    canary:
+      canaryService: mock-server-canary
+      stableService: mock-server-stabl시
+      trafficRouting:
+        istio:
+          virtualService:
+            name: mock-server
+            routes:
+            - primary
+      steps:
+      - setWeight: 10
+      - pause: {duration: 30s}
+      - setWeight: 20
+      - pause: {duration: 1m}
+      - setWeight: 50
+      - pause: {}
+      - setWeight: 80
+      - pause: {duration: 2m}
+      - setWeight: 100
+      - pause: {}
 ```
 
 [File 3]은 [File 2] 기반에 Istio Virtual Service를 활용하여 Traffic Routing을 구성한 Canary 배포를 위한 Rollout Object를 나타내고 있다. `trafficRouting` 부분을 통해서 Traffic Routing의 Spec을 명시하며 `istio` 부분을 통해서 Traffic Routing에 이용할 Istio Virtual Service를 지정하는 것을 확인할 수 있다. Rollout Controller는 Canary 배포를 진행하면서 Traffic Routing Reconciler를 통해서 Istio Virtual Service의 Weight를 동적으로 변경하여 Traffic 비율을 제어한다.
@@ -150,7 +159,58 @@ Stable Replicas = spec.replicas
 
 Traffic Routing 기능이 활성화 되면 각 [Table 2]과 같이 Step별로 다른 Pod의 개수를 가지게 된다. 가장큰 차이점은 Stable Version의 Pod 개수가 5개로 고정되어 있으며, Canary Version의 Pod 개수만 변한다는 점이다. Pod의 개수는 [Formula 2]과 같이 계산된다.
 
-### 1.3. Analysis Object
+### 1.3. AnalysisTemplate/AnalysisRun Object and Analysis Controller
+
+**AnalysisTemplate/AnalysisRun** Object는 Argo Rollouts에서 Progressive Delivery 배포를 위한 Object이다. AnalysisTemplate/AnalysisRun Object를 통해서 외부의 Metric, Data를 조회하고 이를 기반으로 배포를 계속 진행할지 또는 배포를 중단할지 결정할 수 있다. AnalysisTemplate Object는 이름에서 알 수 있는것 처럼 AnalysisRun Object를 생성하기 위한 Template을 정의하는 Object이며, AnalysisRun Object는 실제 분석을 수행할때마다 AnalysisTemplate를 기반으로 동적으로 생성되는 Object이다.
+
+AnalysisRun Object가 생성되면 Analysis Controller에 의해서 실제 Analysis를 수행하고 결과를 반환한다. Prometheus를 포함하여 다양한 외부 시스템과 연동하여 Analysis를 수행할 수 있다.
+
+```yaml {caption="[File 4] AnalysisTemplate Object Prometheus Example", linenos=table}
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: success-rate
+spec:
+  metrics:
+  - name: success-rate
+    interval: 30s
+    count: 3
+    successCondition: result >= 0.95
+    failureLimit: 2
+    provider:
+      prometheus:
+        address: http://prometheus.istio-system.svc.cluster.local:9090
+        query: |
+          scalar(
+            sum(rate(istio_requests_total{destination_service_name="mock-server-canary",response_code=~"2.."}[1m])) 
+            / 
+            sum(rate(istio_requests_total{destination_service_name="mock-server-canary"}[1m]))
+          )
+```
+
+[File 4]는 Prometheus를 활용하여 Analysis를 수행하는 AnalysisTemplate Object를 나타내고 있다. `metrics` 부분을 통해서 Analysis를 수행할 Metric을 명시하며, 수행 간격과 수행 횟수를 명시하고 성공 조건과 실패 제한을 명시하는 것을 확인할 수 있다. [File 4]의 경우에는 30초 간격으로 3번 Query를 수행하고, 2번의 실패를 허용하기 때문에 3번의 Query 중에 1번의 Query가 성공하면 Analysis가 성공한 것으로 간주한다. Query의 결과는 0.95 이상이면 성공한 것으로 간주한다. `provider` 부분을 통해서 어떤 외부 시스템과 연동하여 Analysis를 수행할지 명시한다. `prometheus` 부분을 통해서 연동할 Prometheus Endpoint와 Query를 명시하는 것을 확인할 수 있다. 
+
+```yaml {caption="[File 5] Rollouts Canary with AnalysisTemplate Prometheus Example", linenos=table}
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: mock-server
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: mock-server
+  strategy:
+    canary:
+      steps:
+        - setWeight: 20
+        - pause: {duration: 30s}
+        - analysis:
+            templates:
+              - templateName: success-rate
+```
+
+[File 5]는 [File 4]의 AnalysisTemplate을 활용하여 Progressive Delivery 배포를 수행하는 Rollout Object를 나타내고 있다. `analysis` 부분을 통해서 Analysis를 수행할 AnalysisTemplate을 명시하는 것을 확인할 수 있다. Canary Version으로 20%의 Traffic을 분배하고 30초 대기 이후에 Analysis를 수행하게 된다.
 
 ### 1.4. Experiment Object
 
