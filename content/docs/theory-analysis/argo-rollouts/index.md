@@ -437,7 +437,7 @@ spec:
 
 ```shell {caption="[Shell 2] Blue/Green Test Case"}
 # Deploy mock-server blue/green rollout and check status
-$ kubectl apply -f mock-server.yaml
+$ kubectl apply -f mock-server-bluegreen.yaml
 $ kubectl argo rollouts get rollout mock-server
 Name:            mock-server
 Namespace:       default
@@ -940,9 +940,11 @@ Selector:                 app=mock-server,rollouts-pod-template-hash=6fcb56df9b
 
 #### 2.2.3. Canary with Undo and Abort
 
-{{< figure caption="[Figure 4] Argo Rollouts Canary with Undo and Abort Case" src="images/argo-rollouts-case-canary-undo-abort.png" width="1100px" >}}
+{{< figure caption="[Figure 4] Canary with Undo and Abort Test Case" src="images/argo-rollouts-case-canary-undo-abort.png" width="1100px" >}}
 
-```yaml {caption="[File 2] Argo Rollouts Canary Example", linenos=table}
+[Figure 4]는 Argo Rollouts Canary 배포 Undo 및 Abort Test Case를 도식화 하고 있다. Container Image를 3번 변경한 이후에 Undo를 두번 수행하며, 마지막에는 Abort를 수행한다. 주목해야하는 점은 첫번째 Undo를 수행할때는 `Revision 2`로 되돌아가지 않고, 새로운 `Revision 4`가 생성되며 Container Image만 Version `2.0.0`으로 변경되며, 두번째 Undo를 수행할때는 새로운 `Revision 5`가 생성되며 Container Image만 Version `3.0.0`으로 변경되는 것을 확인할 수 있다. 즉 Undo 수행시 이전의 Revision을 이용하지 않고 새로운 Revision을 생성하고 Container Image만 이전의 Version으로 변경하는 것을 확인할 수 있다.
+
+```yaml {caption="[Manifest 12] Canary with Undo and Abort Test Case"}
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
@@ -1007,9 +1009,9 @@ spec:
     targetPort: 8080
 ```
 
-```shell
+```shell {caption="[Shell 4] Canary with Undo and Abort Test Case"}
 # Deploy mock-server canary rollout and check status
-$ kubectl apply -f mock-server-canary-rollback.yaml
+$ kubectl apply -f mock-server-canary-undo-abort.yaml
 $ kubectl argo rollouts get rollout mock-server
 Name:            mock-server
 Namespace:       default
@@ -1206,11 +1208,15 @@ NAME                                     KIND        STATUS        AGE  INFO
       └──□ mock-server-6579c6cc98-wx576  Pod         ✔ Running     25s  ready:1/1
 ```
 
+[Manifest 12]은 Canary 배포 Undo 및 Abort Test Case를 위한 Manifest를 나타내고 있으며, [Shell 4]는 해당 Test Case를 수행하는 과정을 나타내고 있다.
+
 #### 2.2.4. Canary with Istio Virtual Service
 
-{{< figure caption="[Figure 5] Argo Rollouts Canary with Istio Virtual Service Case" src="images/argo-rollouts-case-canary-istio-virtualservice.png" width="800px" >}}
+{{< figure caption="[Figure 5] Canary with Istio Virtual Service Test Case" src="images/argo-rollouts-case-canary-istio-virtualservice.png" width="800px" >}}
 
-```yaml {caption="[File 3] Argo Rollouts Canary with Istio Virtual Service Example", linenos=table}
+[Figure 5]는 Argo Rollouts Canary 배포 Istio Virtual Service를 활용한 Traffic Routing Test Case를 도식화 하고 있다. Container Image를 한번 변경한 이후에 두번의 Promotion을 수행한다. Image 변경을 직후에는 Weight 20% 설정으로 인해서 한개의 파드가 바로 생기며, Promotion이 수행된 이후에 Weight 40% 설정으로 인해서 파드가 2개로 증가하고, 한번더 Promotion을 수행하면 Weight 100% 설정으로 인해서 파드가 5개로 증가하는 것을 확인할 수 있다. Istio Virtual Service를 Traffic Routing에 이용하고 있기 때문에 모든 단계에서 Stable Version의 Pod 개수는 5개로 유지된다.
+
+```yaml {caption="[Manifest 13] Canary with Istio Virtual Service Test Case"}
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
@@ -1287,9 +1293,9 @@ spec:
       weight: 0
 ```
 
-```shell
+```shell {caption="[Shell 5] Canary with Istio Virtual Service Test Case"}
 # Deploy mock-server canary rollout and check status
-$ kubectl apply -f mock-server-istio-virtualservice.yaml
+$ kubectl apply -f mock-server-canary-istio-virtualservice.yaml
 $ kubectl argo rollouts get rollout mock-server
 Name:            mock-server
 Namespace:       default
@@ -1526,7 +1532,7 @@ Name:                     mock-server-stable
 Namespace:                default
 Labels:                   <none>
 Annotations:              argo-rollouts.argoproj.io/managed-by-rollouts: mock-server
-Selector:                 app=mock-server,rollouts-pod-template-hash=6579c6cc98
+Selector:                 app=mock-server,rollouts-pod-template-hash=7c6fcfb847
 ...
 
 $ kubectl describe service mock-server-canary
@@ -1537,6 +1543,8 @@ Annotations:              argo-rollouts.argoproj.io/managed-by-rollouts: mock-se
 Selector:                 app=mock-server,rollouts-pod-template-hash=7c6fcfb847
 ...
 ```
+
+[Manifest 13]은 Canary 배포 Istio Virtual Service를 활용한 Traffic Routing Test Case를 위한 Manifest를 나타내고 있으며, [Shell 5]는 해당 Test Case를 수행하는 과정을 나타내고 있다. `mock-server` Virtual Service의 가중치가 
 
 #### 2.2.5. Canary with Istio Virtual Service and Analysis
 
