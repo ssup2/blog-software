@@ -1550,7 +1550,7 @@ Selector:                 app=mock-server,rollouts-pod-template-hash=7c6fcfb847
 
 #### 2.2.5. Canary with Istio Virtual Service and AnalysisTemplate
 
-{{< figure caption="[Figure 6] Canary with Istio Virtual Service and Analysis Test Case" src="images/argo-rollouts-case-canary-istio-virtualservice-analysis.png" width="800px" >}}
+{{< figure caption="[Figure 6] Canary with Istio Virtual Service and Analysis Test Case" src="images/argo-rollouts-case-canary-istio-virtualservice-analysistemplate.png" width="1100px" >}}
 
 [Figure 6]는 Argo Rollouts Canary 배포 Istio Virtual Service와 AnalysisTemplate를 활용한 Traffic Routing Test Case를 도식화 하고 있다. Container Image를 변경한 직후에 Weight 20% 설정으로 인해서 한개의 Canary Version Pod가 바로 생기며, 30초 뒤에 분석이 수행된다. 첫번째 분석에는 실패하여 Promotion이 중단되고, 두번째 분석에는 성공하여 Promotion이 완료되면서 Weight 100% 설정으로 인해서 Canary Version Pod가 5개로 증가하는 것을 확인할 수 있다.
 
@@ -1653,7 +1653,7 @@ spec:
           )
 ```
 
-```shell
+```shell {caption="[Shell 6] Canary with Istio Virtual Service and AnalysisTemplate Test Case"}
 $ kubectl apply -f mock-server-canary-istio-virtualservice-analysis.yaml
 $ kubectl argo rollouts get rollout mock-server
 Name:            mock-server
@@ -1885,11 +1885,11 @@ NAME                                     KIND         STATUS        AGE    INFO
       └──□ mock-server-6579c6cc98-xvb8s  Pod          ✔ Running     4m57s  ready:1/1
 ```
 
-#### 2.2.6. Canary with Istio Virtual Service, Analysis and Experiment
+#### 2.2.6. Canary with Istio Virtual Service, AnalysisTemplate and Experiment
 
-{{< figure caption="[Figure 7] Argo Rollouts Canary with Istio Virtual Service, Analysis and Experiment Case" src="images/argo-rollouts-case-canary-istio-virtualservice-analysis-experiment.png" width="1000px" >}}
+{{< figure caption="[Figure 7] Canary with Istio Virtual Service, AnalysisTemplate and Experiment Test Case" src="images/argo-rollouts-case-canary-istio-virtualservice-analysistemplate-experiment.png" width="1000px" >}}
 
-```yaml {caption="[File 4] Argo Rollouts Canary with Istio Virtual Service, Analysis and Experiment Example", linenos=table}
+```yaml {caption="[Manifest 15] Canary with Istio Virtual Service, AnalysisTemplate and Experiment Test Case"}
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
@@ -2061,7 +2061,7 @@ spec:
           )
 ```
 
-```shell
+```shell {caption="[Shell 7] Canary with Istio Virtual Service, AnalysisTemplate and Experiment Test Case"}
 # Deploy mock-server canary rollout and check status
 $ kubectl apply -f mock-server-canary-istio-virtualservice-analysis-experiment.yaml
 $ kubectl argo rollouts get rollout mock-server
@@ -2361,9 +2361,9 @@ NAME                                                              KIND         S
 
 #### 2.2.7. Canary with Istio Destination Rule
 
-{{< figure caption="[Figure 8] Argo Rollouts Canary with Istio Destination Rule Case" src="images/argo-rollouts-case-canary-istio-destinationrule.png" width="800px" >}}
+{{< figure caption="[Figure 8] Canary with Istio Destination Rule Test Case" src="images/argo-rollouts-case-canary-istio-destinationrule.png" width="800px" >}}
 
-```yaml {caption="[File 4] Argo Rollouts Canary with Istio Destination Rule Example", linenos=table}
+```yaml {caption="[Manifest 16] Canary with Istio Destination Rule Test Case"}
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
@@ -2447,7 +2447,7 @@ spec:
       app: mock-server
 ```
 
-```shell
+```shell {caption="[Shell 8] Canary with Istio Destination Rule Test Case"}
 # Deploy mock-server canary rollout and check status
 $ kubectl apply -f mock-server-canary-istio-virtualservice.yaml
 $ kubectl argo rollouts get rollout mock-server
@@ -2699,11 +2699,11 @@ Spec:
     Name:                                canary
 ```
 
-#### 2.2.8. Canary with Istio Destination Rule and Analysis
+#### 2.2.8. Canary with Istio Destination Rule and AnalysisTemplate
 
-{{< figure caption="[Figure 9] Argo Rollouts Canary with Istio Destination Rule and Analysis Case" src="images/argo-rollouts-case-canary-istio-destinationrule-analysistemplate.png" width="800px" >}}
+{{< figure caption="[Figure 9] Canary with Istio Destination Rule and AnalysisTemplate Test Case" src="images/argo-rollouts-case-canary-istio-destinationrule-analysistemplate.png" width="11000px" >}}
 
-```yaml {caption="[File 4] Argo Rollouts Canary with Istio Destination Rule Example", linenos=table}
+```yaml {caption="[Manifest 17] Canary with Istio Destination Rule and AnalysisTemplate Test Case"}
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
@@ -2813,7 +2813,7 @@ spec:
           )
 ```
 
-```shell
+```shell {caption="[Shell 9] Canary with Istio Destination Rule and AnalysisTemplate Test Case"}
 # Deploy mock-server canary rollout and check status
 $ kubectl apply -f mock-server-canary-istio-destinationrule-analysistemplate.yaml
 $ kubectl argo rollouts get rollout mock-server
@@ -3041,9 +3041,9 @@ NAME                                     KIND         STATUS        AGE    INFO
 
 #### 2.2.9. Canary with Istio Destination Rule, Analysis and Experiment
 
-{{< figure caption="[Figure 10] Argo Rollouts Canary with Istio Destination Rule, Analysis and Experiment Case" src="images/argo-rollouts-case-canary-istio-destinationrule-analysistemplate-experiment.png" width="1000px" >}}
+{{< figure caption="[Figure 10] Canary with Istio Destination Rule, AnalysisTemplate and Experiment Test Case" src="images/argo-rollouts-case-canary-istio-destinationrule-analysistemplate-experiment.png" width="1000px" >}}
 
-```yaml {caption="[File 5] Argo Rollouts Canary with Istio Destination Rule, Analysis and Experiment Example", linenos=table}
+```yaml {caption="[Manifest 18] Canary with Istio Destination Rule, AnalysisTemplate and Experiment Test Case"}
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
@@ -3226,7 +3226,7 @@ spec:
           )
 ```
 
-```shell
+```shell {caption="[Shell 10] Canary with Istio Destination Rule, AnalysisTemplate and Experiment Test Case"}
 $ kubectl apply -f mock-server-canary-istio-destinationrule-analysistemplate-experiment.yaml
 $ kubectl argo rollouts get rollout mock-server
 Name:            mock-server
