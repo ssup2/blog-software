@@ -1,6 +1,5 @@
 ---
 title: Argo Rollouts
-draft: true
 ---
 
 ## 1. Argo Rollouts
@@ -2711,7 +2710,9 @@ Spec:
 
 #### 2.2.8. Canary with Istio Destination Rule and AnalysisTemplate
 
-{{< figure caption="[Figure 9] Canary with Istio Destination Rule and AnalysisTemplate Test Case" src="images/argo-rollouts-case-canary-istio-destinationrule-analysistemplate.png" width="11000px" >}}
+{{< figure caption="[Figure 9] Canary with Istio Destination Rule and AnalysisTemplate Test Case" src="images/argo-rollouts-case-canary-istio-destinationrule-analysistemplate.png" width="1100px" >}}
+
+[Figure 9]는 Istio Destination Rule, AnalysisTemplate를 활용한 Traffic Routing Test Case를 도식화 하고 있다. Destination Rule을 이용한다는 부분만 제외하고는 [Figure 6]과 동일한 과정을 수행한다.
 
 ```yaml {caption="[Manifest 17] Canary with Istio Destination Rule and AnalysisTemplate Test Case"}
 apiVersion: argoproj.io/v1alpha1
@@ -3049,9 +3050,13 @@ NAME                                     KIND         STATUS        AGE    INFO
    └──⧉ mock-server-6579c6cc98           ReplicaSet   • ScaledDown  6m56s  
 ```
 
+[Manifest 17]은 Istio Destination Rule, AnalysisTemplate를 활용한 Traffic Routing Test Case를 위한 Manifest를 나타내고 있으며, [Shell 9]는 해당 Test Case를 수행하는 과정을 나타내고 있다.
+
 #### 2.2.9. Canary with Istio Destination Rule, Analysis and Experiment
 
 {{< figure caption="[Figure 10] Canary with Istio Destination Rule, AnalysisTemplate and Experiment Test Case" src="images/argo-rollouts-case-canary-istio-destinationrule-analysistemplate-experiment.png" width="1000px" >}}
+
+[Figure 10]는 Istio Destination Rule, AnalysisTemplate 및 Experiment를 활용한 Traffic Routing Test Case를 도식화 하고 있다. Destination Rule을 이용한다는 부분만 제외하고는 [Figure 7]과 동일한 과정을 수행한다.
 
 ```yaml {caption="[Manifest 18] Canary with Istio Destination Rule, AnalysisTemplate and Experiment Test Case"}
 apiVersion: argoproj.io/v1alpha1
@@ -3546,6 +3551,8 @@ NAME                                                              KIND         S
       ├──□ mock-server-5f59cc96-mnfpn                             Pod          ✔ Running      5m40s  ready:1/1
       └──□ mock-server-5f59cc96-tgcn9                             Pod          ✔ Running      5m40s  ready:1/1
 ```
+
+[Manifest 18]은 Istio Destination Rule, AnalysisTemplate 및 Experiment를 활용한 Traffic Routing Test Case를 위한 Manifest를 나타내고 있으며, [Shell 10]는 해당 Test Case를 수행하는 과정을 나타내고 있다.
 
 ## 3. 참조
 
