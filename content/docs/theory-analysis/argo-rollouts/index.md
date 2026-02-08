@@ -1214,7 +1214,7 @@ NAME                                     KIND        STATUS        AGE  INFO
 
 {{< figure caption="[Figure 5] Canary with Istio Virtual Service Test Case" src="images/argo-rollouts-case-canary-istio-virtualservice.png" width="800px" >}}
 
-[Figure 5]는 Argo Rollouts Canary 배포 Istio Virtual Service를 활용한 Traffic Routing Test Case를 도식화 하고 있다. Container Image를 한번 변경한 이후에 두번의 Promotion을 수행한다. Container Image 변경을 직후에는 Weight 20% 설정으로 인해서 한개의 Canary Version Pod가 바로 생기며, Promotion이 수행된 이후에 Weight 40% 설정으로 인해서 Canary Version Pod가 2개로 증가하고, 한번더 Promotion을 수행하면 Weight 100% 설정으로 인해서 Canary Version Pod가 5개로 증가하는 것을 확인할 수 있다.
+[Figure 5]는 Istio Virtual Service를 활용한 Traffic Routing Test Case를 도식화 하고 있다. Container Image를 한번 변경한 이후에 두번의 Promotion을 수행한다. Container Image 변경을 직후에는 Weight 20% 설정으로 인해서 한개의 Canary Version Pod가 바로 생기며, Promotion이 수행된 이후에 Weight 40% 설정으로 인해서 Canary Version Pod가 2개로 증가하고, 한번더 Promotion을 수행하면 Weight 100% 설정으로 인해서 Canary Version Pod가 5개로 증가하는 것을 확인할 수 있다.
 
 그리고 Weight에 맞게 **Virtual Service의 Weight**가 변경되면서 Canary Version과 Stable Version에 Traffic이 분배된다. `Canary` Kubernetes Service는 `Revision 1`, `Revision 2`을 차례대로 가리키고 있으며, `Stable` Kubernetes Service는 `Revision 1`을 가리키고 있다가, Promotion이 완료되면 `Revision 2`을 가리키는 것을 확인할 수 있다. Istio Virtual Service를 Traffic Routing에 이용하고 있기 때문에 모든 단계에서 Stable Version의 Pod 개수는 5개로 유지된다.
 
@@ -1546,13 +1546,13 @@ Selector:                 app=mock-server,rollouts-pod-template-hash=7c6fcfb847
 ...
 ```
 
-[Manifest 13]은 Canary 배포 Istio Virtual Service를 활용한 Traffic Routing Test Case를 위한 Manifest를 나타내고 있으며, [Shell 5]는 해당 Test Case를 수행하는 과정을 나타내고 있다. `mock-server` Virtual Service의 가중치가 `mock-server-canary`으로 증가하다가 마지막 Promotion 이후에는 다시 0으로 변경되는 것을 확인할 수 있다.
+[Manifest 13]은 Istio Virtual Service를 활용한 Traffic Routing Test Case를 위한 Manifest를 나타내고 있으며, [Shell 5]는 해당 Test Case를 수행하는 과정을 나타내고 있다. `mock-server` Virtual Service의 가중치가 `mock-server-canary`으로 증가하다가 마지막 Promotion 이후에는 다시 0으로 변경되는 것을 확인할 수 있다.
 
 #### 2.2.5. Canary with Istio Virtual Service and AnalysisTemplate
 
 {{< figure caption="[Figure 6] Canary with Istio Virtual Service and Analysis Test Case" src="images/argo-rollouts-case-canary-istio-virtualservice-analysistemplate.png" width="1100px" >}}
 
-[Figure 6]는 Argo Rollouts Canary 배포 Istio Virtual Service와 AnalysisTemplate를 활용한 Traffic Routing Test Case를 도식화 하고 있다. Container Image를 변경한 직후에 Weight 20% 설정으로 인해서 한개의 Canary Version Pod가 바로 생기며, 30초 뒤에 분석이 수행된다. 첫번째 분석에는 실패하여 Promotion이 중단되고, 두번째 분석에는 성공하여 Promotion이 완료되면서 Weight 100% 설정으로 인해서 Canary Version Pod가 5개로 증가하는 것을 확인할 수 있다.
+[Figure 6]는 Istio Virtual Service, AnalysisTemplate를 활용한 Traffic Routing Test Case를 도식화 하고 있다. Container Image를 변경한 직후에 Weight 20% 설정으로 인해서 한개의 Canary Version Pod가 바로 생기며, 30초 뒤에 분석이 수행된다. 첫번째 분석에는 실패하여 Promotion이 중단되고, 두번째 분석에는 성공하여 Promotion이 완료되면서 Weight 100% 설정으로 인해서 Canary Version Pod가 5개로 증가하는 것을 확인할 수 있다.
 
 ```yaml {caption="[Manifest 14] Canary with Istio Virtual Service and AnalysisTemplate Test Case"}
 apiVersion: argoproj.io/v1alpha1
@@ -1885,9 +1885,13 @@ NAME                                     KIND         STATUS        AGE    INFO
       └──□ mock-server-6579c6cc98-xvb8s  Pod          ✔ Running     4m57s  ready:1/1
 ```
 
+[Manifest 14]는 Istio Virtual Service, AnalysisTemplate를 활용한 Traffic Routing Test Case를 위한 Manifest를 나타내고 있으며, [Shell 6]는 해당 Test Case를 수행하는 과정을 나타내고 있다. Istio의 `istio_requests_total` Metric을 활용하여 AnalysisTemplate을 구성하고 있으며, AnalysisRun Object가 생성되면서 분석을 진행하는 것을 확인할 수 있다.
+
 #### 2.2.6. Canary with Istio Virtual Service, AnalysisTemplate and Experiment
 
 {{< figure caption="[Figure 7] Canary with Istio Virtual Service, AnalysisTemplate and Experiment Test Case" src="images/argo-rollouts-case-canary-istio-virtualservice-analysistemplate-experiment.png" width="1000px" >}}
+
+[Figure 7]는 Istio Virtual Service, AnalysisTemplate 및 Experiment를 활용한 Traffic Routing Test Case를 도식화 하고 있다. Experiment를 통해서 Experiment Stable (Baseline) Version과 Experiment Canary Version을 배포하고 2분동안 3:1:1 비율로 Traffic을 분배하여 분석을 수행한다. 분석에 성공하면 Experiment를 성공 상태로 변경하고 다음 단계에 따라서 Canary Version의 Pod를 하나 증가시켜 4:1 비율로 Traffic을 분배한다. 이후에는 [Figure 6]과 동일한 과정을 수행한다.
 
 ```yaml {caption="[Manifest 15] Canary with Istio Virtual Service, AnalysisTemplate and Experiment Test Case"}
 apiVersion: argoproj.io/v1alpha1
@@ -2358,6 +2362,8 @@ NAME                                                              KIND         S
       ├──□ mock-server-6579c6cc98-f2zzr                           Pod          ✔ Running      5m20s  ready:1/1
       └──□ mock-server-6579c6cc98-mgwzp                           Pod          ✔ Running      5m20s  ready:1/1
 ```
+
+[Manifest 15]은 Istio Virtual Service, AnalysisTemplate 및 Experiment를 활용한 Traffic Routing Test Case를 위한 Manifest를 나타내고 있으며, [Shell 7]는 해당 Test Case를 수행하는 과정을 나타내고 있다. Istio의 `istio_requests_total` Metric을 활용하여 AnalysisTemplate을 구성하고 있으며, AnalysisRun Object가 생성되면서 분석을 진행하는 것을 확인할 수 있다.
 
 #### 2.2.7. Canary with Istio Destination Rule
 
