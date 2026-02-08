@@ -2369,6 +2369,8 @@ NAME                                                              KIND         S
 
 {{< figure caption="[Figure 8] Canary with Istio Destination Rule Test Case" src="images/argo-rollouts-case-canary-istio-destinationrule.png" width="800px" >}}
 
+[Figure 8]는 Istio Destination Rule를 활용한 Traffic Routing Test Case를 도식화 하고 있다. Argo Rollouts에서는 Istio의 Destination Rule의 Subset을 활용한 Traffic Routing도 지원하고 있다. Destination Rule을 이용한다는 부분만 제외하고는 [Figure 5]와 동일한 과정을 수행한다.
+
 ```yaml {caption="[Manifest 16] Canary with Istio Destination Rule Test Case"}
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
@@ -2704,6 +2706,8 @@ Spec:
       Rollouts - Pod - Template - Hash:  7c6fcfb847
     Name:                                canary
 ```
+
+[Manifest 16]은 Istio Destination Rule를 활용한 Traffic Routing Test Case를 위한 Manifest를 나타내고 있으며, [Shell 8]는 해당 Test Case를 수행하는 과정을 나타내고 있다. `mock-server` Virtual Service의 가중치가 Destination Rule의 Subset 단위로 지정되는 것을 확인할 수 있다. `canary` Subset의 가중치가 증가하다가 Promotion이 완료되면 다시 0으로 변경되는 것을 확인할 수 있다.
 
 #### 2.2.8. Canary with Istio Destination Rule and AnalysisTemplate
 
