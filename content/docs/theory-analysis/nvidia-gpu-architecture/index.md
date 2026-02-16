@@ -14,6 +14,7 @@ draft: true
 ## 2. 참조
 
 * GPU Architecture: [https://medium.com/ai-insights-cobet/understanding-gpu-architecture-basics-and-key-concepts-40412432812b](https://medium.com/ai-insights-cobet/understanding-gpu-architecture-basics-and-key-concepts-40412432812b)
+* NVIDIA GPU Architecture: [https://www.cantech.in/blog/gpu-architecture/](https://www.cantech.in/blog/gpu-architecture/)
 * NVIDIA GPU Architecture: [https://www.samsungsds.com/kr/insights/nvidia-gpu-architecture.html](https://www.samsungsds.com/kr/insights/nvidia-gpu-architecture.html)
 * NVIDIA NVLink : [https://www.fibermall.com/ko/blog/gpu-pcle-nvlink-nvswitch.htm?srsltid=AfmBOoq5TeDty7COMp_QFG4mxVOYMwSX2kmK5Qgn72xsPj2oAt_psYkT](https://www.fibermall.com/ko/blog/gpu-pcle-nvlink-nvswitch.htm?srsltid=AfmBOoq5TeDty7COMp_QFG4mxVOYMwSX2kmK5Qgn72xsPj2oAt_psYkT)
 * NVIDIA NVLink : [https://www.fibermall.com/ko/blog/nvidia-ai-gpu-server-pcie-vs-sxm.htm?srsltid=AfmBOoomtefnOQbNbCA5NNRsbM12jn7Zj2vCSowDdTWkT6isv0IWP3gI](https://www.fibermall.com/ko/blog/nvidia-ai-gpu-server-pcie-vs-sxm.htm?srsltid=AfmBOoomtefnOQbNbCA5NNRsbM12jn7Zj2vCSowDdTWkT6isv0IWP3gI)
