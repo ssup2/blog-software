@@ -5,15 +5,27 @@ draft: true
 
 ## 1. NVIDIA GPU Sharing
 
+GPU Sharing 기법은 다수의 Process가 하나의 GPU를 공유하여 사용하는 기법을 의미한다. 크게 **Time-Slicing**, **MPS**, **MIG** 3가지 기법이 존재한다.
+
 {{< figure caption="[Figure 1] Example Applications" src="images/example-apps.png" width="900px" >}}
 
-GPU Sharing 기법은 다수의 Process가 하나의 GPU를 공유하여 사용하는 기법을 의미한다. 크게 **Time-Slicing**, **MPS**, **MIG** 3가지 기법이 존재한다. [Figure 1]은 GPU Sharing 기법을 살펴보기 위한 예제 Application들을 나타내고 있다.
+[Figure 1]은 GPU Sharing 기법을 살펴보기 위한 예제 Application들을 나타내고 있다. CUDA App A, B, C 3가지의 Application이 존재하며 모두 2개의 CUDA Stream이 존재한다. 즉 최대 2개의 CUDA Kernel을 동시에 실행하도록 구성되어 있다.
 
-### 1.1. Time-Slicing
+CUDA App 내부에서 왼쪽에 위치한 Kernel은 오른쪽에 위치한 Kernel보다 먼저 제출된 Kernel을 의미하며, 길이가 긴 Kernel은 그만큼 더 오래 실행된 Kernel을 의미한다. 예를들어 App A의 경우에는 `A1`, `A2`, `A3` 3개의 Kernel이 먼저 제출되었으며, 이후에 `A4` Kernel이 제출되었다. 또한 `A1`, `A3` Kernel은 `A2`, `A4` Kernel 대비하여 2배정도 오래 실행된 Kernel을 의미한다.
+
+### 1.1. Time-slicing
 
 {{< figure caption="[Figure 2] Time-Slicing Architecture" src="images/time-slicing-architecture.png" width="600px" >}}
 
+**Time-slicing** 기법은 이름에서도 알 수 있는것 처럼 GPU를 **GPU Context Switch**를 통한 시분활을 기반으로 다수의 CUDA Application이 GPU를 공유하여 사용하는 기법을 의미한다. CPU를 시분활하여 다수의 Application이 하나의 CPU를 공유하여 이용하는 것과 유사하다. [Figure 2]는 Time-slicing 기법의 구조를 나타내고 있다. Process의 Context를 Memory (Stack)에 저장하는 것처럼 GPU의 Context는 GPU Memory에 저장된다.
+
+Time-slicing 기법은 가장 기본적인 GPU Sharing 기법이며, CUDA Application은 별도의 Time-slice을 위해서 별도의 Logic을 수정할 필요가 없다. 다수의 CUDA Application이 동시에 GPU에 접근하는 경우 GPU Device Driver와 GPU 내부에서 자동으로 Time-slicing 기법을 적용하여 다수의 CUDA Application이 GPU를 공유하여 사용하게 된다.
+
 {{< figure caption="[Figure 3] Time-Slicing Timeline" src="images/time-slicing-timeline.png" width="1100px" >}}
+
+[Figure 3]은 Time-slicing 기법의 동작 과정을 Timeline 형태로 나타내고 있다. GPU Context Switch 과정을 통해서 SM (Streaming Multiprocessor)가 차례대로 CUDA Application의 Kernel을 실행하는 것을 확인할 수 있다. GPU Context Switch 과정은 CPU Context Switch 과정과 다르게 비싼 비용이 소요되는 작업이다. GPU에 존재하는 수많은 Registry, Shared Memory 때문에 GPU Context의 크기는 일반적으로 수 MB 정도의 크기를 가진다. 따라서 Time-slicing 기법의 가장큰 단점은 GPU Context Switching이 발생하고 이로 인한 성능 저하가 발생한다는 점이다.
+
+GPU Context Switching 과정을 최소화하기 위해서 GPU는 **비선점형 방식**으로 GPU Scheduling을 수행한다. 즉 제출된 Kernel이 모두 처리되기 전까지 다른 Kernel은 실행되지 않는 방식으로 동작한다. [Figure 3]에서도 CUDA App에서 제출한 Kernel이 모두 처리되기 전까지 다른 Kernel은 실행되지 않는 것을 확인할 수 있다. 또한 GPU Memory는 Context Switching과 관계없이 CUDA App이 종료되기 전까지 유지되는 것을 확인할 수 있다.
 
 ### 1.2. MPS (Multi Process Service)
 
