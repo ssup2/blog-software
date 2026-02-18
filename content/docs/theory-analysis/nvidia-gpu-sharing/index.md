@@ -29,9 +29,11 @@ GPU Sharing 기법은 다수의 Process가 하나의 GPU를 공유하여 사용�
 
 {{< figure caption="[Figure 8] MIG Architecture" src="images/mig-architecture.png" width="600px" >}}
 
-{{< figure caption="[Figure 9] MIG A100 MIG Profile" src="images/mig-a100-profile.png" width="900px" >}}
+{{< figure caption="[Figure 9] MIG Timeline" src="images/mig-timeline.png" width="1100px" >}}
 
-{{< figure caption="[Figure 10] MIG Timeline" src="images/mig-timeline.png" width="1100px" >}}
+{{< figure caption="[Figure 10] MIG A100 MIG Profile" src="images/mig-a100-profile.png" width="900px" >}}
+
+{{< figure caption="[Figure 11] MIG with Time-slicing and MPS Architecture" src="images/mig-time-slicing-mps-architecture.png" width="800px" >}}
 
 ## 2. References
 
