@@ -31,11 +31,21 @@ GPU Context Switching 과정을 최소화하기 위해서 GPU는 **비선점형 
 
 {{< figure caption="[Figure 4] MPS before Volta Architecture" src="images/mps-before-volta-architecture.png" width="600px" >}}
 
+**MPS (Multi Process Service)** 기법은 Time-slicing 기법의 Context Switching 비용을 최소화하기 위해서 도입된 기법이다. 시분활 기법이 아닌 공간 분활 기법을 통해서 다수의 CUDA Application이 GPU를 공유하여 사용하는 기법이다. [Figure 4]는 Volta Architecture 이전의 MPS 기법의 구조를 나타내고 있다. MPS 기법을 이용하기 위해서는 MPS Control (`nvidia-cuda-mps-control`)과 MPS Server (`nvidia-cuda-mps-server`)가 필요하다.
+
+CUDA Application은 GPU에 직접 Kernel을 제출하지 않고, MPS Control을 통해서 MPS Server에 Kernel을 제출한다. MPS Server는 CUDA Application의 Kernel 요청을 모아서 GPU에게 제출한다. 즉 GPU 입장에서는 CUDA Application의 존재를 알지 못하며, MPS Server만 단독으로 GPU를 이용한다라고 생각한다. Volta Architecture 이전에는 다수의 CUDA Application을 대상으로 공간 분활 기법을 제공할수 없었기 때문에, MPS Server를 Proxy Server처럼 활용하여 이와같은 문제를 해결하였다.
+
 {{< figure caption="[Figure 5] MPS before Volta Timeline" src="images/mps-before-volta-timeline.png" width="1100px" >}}
+
+[Figure 5]는 Volta Architecture 이전의 MPS 기법의 동작 과정을 Timeline 형태로 나타내고 있다. 공간 분활 기법인 만큼 모든 Kernel이 동시에 실행되는 것을 확인할 수 있다. MPS 기법을 이용해도 SM의 완전한 격리를 보장할수 없으며, Volta Architecture 이전에는 Memory 격리도 제대로 제공하지 않았었다.
 
 {{< figure caption="[Figure 6] MPS after Volta Architecture" src="images/mps-after-volta-architecture.png" width="600px" >}}
 
 {{< figure caption="[Figure 7] MPS after Volta Timeline" src="images/mps-after-volta-timeline.png" width="1100px" >}}
+
+#### 1.2.1. MPS Server, MPS Control
+
+#### 1.2.2. with Multi GPU
 
 ### 1.3. MIG (Multi Instance GPU)
 
@@ -44,6 +54,8 @@ GPU Context Switching 과정을 최소화하기 위해서 GPU는 **비선점형 
 {{< figure caption="[Figure 9] MIG Timeline" src="images/mig-timeline.png" width="1100px" >}}
 
 {{< figure caption="[Figure 10] MIG A100 MIG Profile" src="images/mig-a100-profile.png" width="900px" >}}
+
+#### 1.3.1. with Time-slicing and MPS
 
 {{< figure caption="[Figure 11] MIG with Time-slicing and MPS Architecture" src="images/mig-time-slicing-mps-architecture.png" width="800px" >}}
 
