@@ -24,7 +24,21 @@ title: Coding Test Pattern
 
 ## 6. Prefix Sum
 
+* 배열의 누적 합을 계산한 배열을 사용하는 패턴
+* 배열의 부분 합을 빠르게 계산 가능
+* 문제에 따라서 원본 배열을 Prefix Sum Array로 변환하여 추가 메모리없이 Prefix Sum Array를 사용가능
+```python
+def create_prefix_sum(nums: List[int]) -> List[int]:
+    for i in range(1, len(nums)):
+        nums[i] += nums[i - 1]
+    return nums
+```
+* Example
+  * Original Array : `[1, 2, 3, 4, 5]`
+  * Prefix Sum Array : `[1, 3, 6, 10, 15]`
+  * Sum of Subarray : `sum(i, j) = prefix_sum[j] - prefix_sum[i - 1]`
 * Example Problems
+  * [LeetCode / Range Sum Query - Immutable](../../coding-test/leetcode-range-sum-query-immutable/)
 
 ## 7. Sliding Window
 
