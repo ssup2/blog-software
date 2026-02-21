@@ -49,7 +49,7 @@ CUDA App은 GPU에 직접 Kernel을 제출하지 않고, MPS Control을 통해�
 
 #### 1.2.1. MPS Control, MPS Server
 
-```shell {caption="[Shell 1] MPS Control and MPS Server", linenos=table}
+```shell {caption="[Shell 1] Run MPS Control and MPS Server", linenos=table}
 # Run MPS Control
 $ nvidia-cuda-mps-control -d
 
@@ -64,17 +64,59 @@ wait
 $ ps -ef | grep mps
 root       21389       1  0 14:37 ?        00:00:00 nvidia-cuda-mps-control -d
 root       60374   21389  0 15:00 ?        00:00:01 nvidia-cuda-mps-server
-
-# Get MPS Server List
-$ echo "get_server_list" | nvidia-cuda-mps-control
-
-# Quit MPS Control
-$ echo "quit" | nvidia-cuda-mps-control
 ```
 
-MPS Control은 MPS Server를 제어하고 관리하기 위한 Componant이며, MPS Server가 Volta Architecture에 이전에는 CUDA Context를 관리하고, Volta Architecture 이후에는 GPU Resource를 중재하는 역할을 수행한다. [Shell 1]은 MPS Control과 MPS Server를 실행하고, MPS Server List를 확인하고, MPS Control을 종료하는 방법을 나타내고 있다.
+MPS Control은 MPS Server를 제어하고 관리하기 위한 Componant이다. MPS Server는 Volta Architecture에 이전에는 CUDA Context를 관리하고, Volta Architecture 이후에는 GPU Resource를 중재하는 역할을 수행한다. MPS Control은 `nvidia-cuda-mps-control` 이름의 Binary를 통해서 실행되며, MPS Server는 `nvidia-cuda-mps-server` 이름의 Binary를 통해서 실행된다. MPS Server는 MPS Control이 실행되자마자 바로 생성되지 않으며, CUDA App이 처음 실행될때 MPS Control이 MPS Server를 생성하게 된다. [Shell 1]은 MPS Control를 실행하고 CUDA App을 제출하여 MPS Server 까지 실행하는 과정을 나타내고 있다.
 
-MPS Control은 `nvidia-cuda-mps-control` 이름의 Binary를 통해서 실행되며, MPS Server는 `nvidia-cuda-mps-server` 이름의 Binary를 통해서 실행된다. MPS Server는 MPS Control이 실행되자마자 바로 생성되지 않으며, CUDA App이 처음 실행될때 MPS Control이 MPS Server를 생성하게 된다.
+MPS Control에 명령어를 전달하기 위해서는 `echo "command" | nvidia-cuda-mps-control` 형태로 파이프를 통해서 명령어를 전달하면 된다. 다양한 명령어들이 존재하지만 대표적이 명령어들은 다음과 같다.
+
+* `get_server_list` : MPS Server List를 출력한다.
+* `get_server_status <PID>` : 지정한 PID를 갖는 MPS Server의 상태를 출력한다.
+* `get_client_list <PID>` : 지정한 PID를 갖는 MPS Server와 연결되어 있는 CUDA App의 PID List를 출력한다.
+* `quit` : MPS Control을 종료한다.
+
+Volta Architecture 이후에는 다음의 명령어들이 추가로 존재한다.
+
+* `set_default_active_thread_percentage <percentage>` : 기본 Active Thread Percentage를 설정한다.
+* `get_default_active_thread_percentage` : 기본 Active Thread Percentage를 출력한다.
+* `set_active_thread_percentage <percentage>` : 특정 MPS Server의 Active Thread Percentage를 설정한다.
+* `get_active_thread_percentage` : 특정 MPS Server의 Active Thread Percentage를 출력한다.
+* `set_active_thread_percentage_all <percentage>` : 모든 MPS Server의 Active Thread Percentage를 설정한다.
+* `get_active_thread_percentage_all` : 모든 MPS Server의 Active Thread Percentage를 출력한다.
+
+```shell {caption="[Shell 2] MPS Server Files", linenos=table}
+$ ls -l /tmp/nvidia-mps/
+total 5
+srw-rw-rw-.  1 root root   0 Feb 17 14:37 control
+-rw-rw-rw-.  1 root root   0 Feb 17 14:37 control_lock
+srwxr-xr-x.  1 root root   0 Feb 17 14:37 control_privileged
+prwxrwxrwx.  1 root root   0 Feb 17 15:04 log
+-rw-rw-rw-.  1 root root   5 Feb 17 14:37 nvidia-cuda-mps-control.pid
+
+$ lsof +c 0 /tmp/nvidia-mps/*
+COMMAND           PID USER   FD   TYPE             DEVICE SIZE/OFF  NODE NAME
+nvidia-cuda-mps 17861 root   20wW  REG               0,32        0  4523 /tmp/nvidia-mps/control_lock
+nvidia-cuda-mps 17861 root   26u  FIFO               0,32      0t0  4524 /tmp/nvidia-mps/log
+nvidia-cuda-mps 17861 root   27w  FIFO               0,32      0t0  4524 /tmp/nvidia-mps/log
+nvidia-cuda-mps 17861 root   28u  unix 0x0000000045d7a7b6      0t0 32191 /tmp/nvidia-mps/control_privileged type=SEQPACKET (LISTEN)
+nvidia-cuda-mps 17861 root   29u  unix 0x00000000cec7e4ac      0t0 32192 /tmp/nvidia-mps/control type=SEQPACKET (LISTEN)
+nvidia-cuda-mps 17861              0,32        0  4523 /tmp/nvidia-mps/control_lockroot   31u  unix 0x00000000a4b1b4c4      0t0 19294 /tmp/nvidia-mps/control type=SEQPACKET (CONNECTED)
+nvidia-cuda-mps 21810 root    3w  FIFO               0,32      0t0  4524 /tmp/nvidia-mps/log
+nvidia-cuda-mps 21810 root   20w   REG  
+
+$ ps -fp 17861 21810
+UID          PID    PPID  C STIME TTY      STAT   TIME CMD
+root       17861       1  0 02:47 ?        Ssl    0:00 nvidia-cuda-mps-control -d
+root       21810   17861  0 02:56 ?        Sl     0:01 nvidia-cuda-mps-server
+```
+
+[Shell 2]는 MPS Control과 MPS Server가 동작하면 생성되는 파일 목록들을 나타내고 있다. 파일 경로는 `CUDA_MPS_PIPE_DIRECTORY` 환경변수를 통해서 설정이 가능하며 기본 경로는 `/tmp/nvidia-mps/`이다. 각 파일의 역할은 다음과 같다.
+
+* `control` : 일반 사용자용 Unix Domain Socket. `echo "get_server_list" | nvidia-cuda-mps-control` 같은 명령이 이 소켓을 통해 전달됨.
+* `control_lock` : `control` 소켓 접근 시 동시성 제어를 위한 Lock 파일.
+* `control_privileged` : root/특권 사용자 전용 Unix Domain Socket. `set_default_active_thread_percentage` 같은 관리 명령은 이 소켓을 통해 처리됨.
+* `log` : MPS Server의 로그 출력을 위한 Named Pipe. 출력된 Log는 MPS Control가 수신하여 `CUDA_MPS_LOG_DIRECTORY` 환경변수에 설정된 경로에 저장된다. 기본 경로는 `/var/log/nvidia-mps/`이다.
+* `nvidia-cuda-mps-control.pid` : 일반 파일, MPS control daemon의 PID가 저장된 파일. 중복 실행 방지 및 프로세스 관리에 사용됨.
 
 #### 1.2.2. with Multi GPU
 
