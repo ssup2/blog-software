@@ -55,7 +55,7 @@ GPU Context Switching 과정을 최소화하기 위해서 GPU는 **비선점형 
 
 #### 1.2.3. MPS Control, MPS Server 동작 과정
 
-```shell {caption="[Shell 1] Run MPS Control and MPS Server", linenos=table}
+```shell {caption="[Shell 1] Run MPS Control and MPS Server"}
 # Run MPS Control
 $ nvidia-cuda-mps-control -d
 
@@ -90,7 +90,7 @@ Volta Architecture 이후에는 SM, Memory 최대 사용량을 제한하는 다�
 * `set_device_pinned_mem_limit <PID> <value>` : 지정한 PID를 갖는 MPS Server의 Device Pinned Memory Limit를 설정한다.
 * `get_device_pinned_mem_limit <PID>` : 지정한 PID를 갖는 MPS Server의 Device Pinned Memory Limit를 출력한다.
 
-```shell {caption="[Shell 2] MPS Server Files", linenos=table}
+```shell {caption="[Shell 2] MPS Server Files"}
 $ ls -l /tmp/nvidia-mps/
 total 5
 srw-rw-rw-.  1 root root   0 Feb 17 14:37 control
@@ -128,15 +128,427 @@ CUDA SDK는 기본적으로 `CUDA_MPS_PIPE_DIRECTORY` 환경변수를 통해 지
 
 ### 1.3. MIG (Multi Instance GPU)
 
+**MIG (Multi Instance GPU)** GPU에서 제공하는 Hardware Level GPU 격리 및 가상화 기법이다. MIG 기법은 GPU의 SM, Memory를 완전히 격리하여 vGPU(Virtual GPU)를 생성하고, 생성한 vGPU를 CUDA App에서 사용할수 있도록 제공한다. MIG 기능을 활성화 하면 Linux Kernel도 단일 GPU가 아니라 다수의 GPU 인스턴스가 존재하는것 처럼 인식하게 된다. Hardware Level 가상화 기법인 SR-IOV (Single Root I/O Virtualization)과 유사한 기법이다. Hardware Level의 가상화 기법이기 때문에 Ampere Architecture 이후의 GPU에서만 이용 가능하다.
+
 {{< figure caption="[Figure 8] MIG Architecture" src="images/mig-architecture.png" width="600px" >}}
 
-{{< figure caption="[Figure 9] MIG Timeline" src="images/mig-timeline.png" width="1100px" >}}
+[Figure 8]은 MIG 기법의 구조를 나타내고 있다. MIG에서는 **GPU Instance**와 **Compute Instance** 두가지 단위로 GPU를 가상화 한다. GPU Instance는 GPU Memory를 격리하는 역할을 수행한다. Compute Instance는 GPU Instance 내부에서 다시 SM을 격리하는 역할을 수행한다. 따라서 일반적으로 GPU Instance와 Compute Instance는 일반적으로 1:1으로 구성하지만 1:N으로 구성도 가능하다. 1:N으로 구성한 경우에는 Compute Instance의 SM은 GPU Instance의 Memroy를 공유하여 이용한다. CUDA App은 Compute Instance를 vGPU라고 간주한다.
 
-{{< figure caption="[Figure 10] MIG A100 MIG Profile" src="images/mig-a100-profile.png" width="900px" >}}
+[Figure 8]에서는 CUDA App A가 이용하는 vGPU는 GPU Instance와 Compute Instance 1:1로 구성하여 완전히 격리된 vGPU를 이용하는 예시를 나타내고 있다. 또한 App B와 App C의 vGPU는 GPU Instance와 Compute Instance 1:N으로 구성하여 GPU Instance의 Memory를 공유하여 이용하는 예시를 나타내고 있다.
 
-#### 1.3.1. with Time-slicing and MPS
+{{< figure caption="[Figure 9] MIG A100 MIG GPU Instance Profile" src="images/mig-a100-profile.png" width="900px" >}}
 
-{{< figure caption="[Figure 11] MIG with Time-slicing and MPS Architecture" src="images/mig-time-slicing-mps-architecture.png" width="800px" >}}
+MIG 기법은 vGPU 사이의 완전한 격리성을 제공하지만 vGPU에 할당하는 SM과 Memory의 크기를 자유롭게 설정할수 없으며, Profile에 따라서만 제한된 크기로만 할당할 수 있다. [Figure 9]는 40GB의 용량을 가지고 있는  A100 GPU의 MIG GPU Instance Profile을 나타내고 있다. `[X]g.[XX]gb` 형태로 Profile 이름이 정의되어 있으며, `[X]g`는 GPU Instnace에 할당할 수 있는 최대 SM Slice 개수를 의미하고, `[XX]gb`는 GPU Instance에 할당할 수 있는 최대 Memory의 크기를 의미한다.
+
+예를들어 `4g.20gb` Profile은 4개의 SM Slice을 이용할 수 있고 20GB의 Memory를 할당하여 구성하는 Profile을 의미한다. A100 GPU의 경우에는 `7g.40gb`, `4g.20gb`, `3g.20gb`, `2g.10gb`, `1g.5gb` 5가지 Profile이 존재하며, [Figure 9]의 조합으로만 Profile 구성이 가능하다. MIG 기법은 높은 격리성을 제공하지만 제한된 Profile 구성으로 인해서 각각의 vGPU의 사용률을 최적화하기 어렵다는 단점이 있다. 또한 높은 격리성으로 인해서 GPU 전체의 사용률을 높이기 어렵다라는 단점도 가지고 있다. Time-slicing 기법과 MPS 기법은 특정 CUDA App이 필요에 따라서는 GPU 전체를 활용할수 있지만, MIG 기법에서는 격리 기능만 제공할뿐 Over-committing 기능을 제공하지 않기 때문이다.
+
+{{< figure caption="[Figure 10] MIG Timeline" src="images/mig-timeline.png" width="1100px" >}}
+
+[Figure 10]은 MIG 기법의 동작 과정을 Timeline 형태로 나타내고 있다. Memory는 GPU Instance 단위로 격리되어 있으며, SM은 Compute Instance 단위로 격리되어 MPS 기법과 유사하게 다수의 Kernel이 동시에 실행되는 것을 확인할 수 있다.
+
+#### 1.3.1. MIG 설정 방법
+
+```shell {caption="[Shell 3] MIG 활성화 및 GPU Instance Profile 확인"}
+# Enable MIG for GPU 0
+$ nvidia-smi -i 0 -mig 1
+
+# Check MIG mode for GPU 0
+$ nvidia-smi -i 0 --query-gpu=mig.mode.current --format=csv,noheader
+
+# Check MIG GPU instance profiles for GPU 0
+$ nvidia-smi mig -i 0 -lgip
++-------------------------------------------------------------------------------+
+| GPU instance profiles:                                                        |
+| GPU   Name               ID    Instances   Memory     P2P    SM    DEC   ENC  |
+|                                Free/Total   GiB              CE    JPEG  OFA  |
+|===============================================================================|
+|   0  MIG 1g.5gb          19     7/7        4.75       No     14     0     0   |
+|                                                               1     0     0   |
++-------------------------------------------------------------------------------+
+|   0  MIG 1g.5gb+me       20     1/1        4.75       No     14     1     0   |
+|                                                               1     1     1   |
++-------------------------------------------------------------------------------+
+|   0  MIG 1g.10gb         15     4/4        9.75       No     14     1     0   |
+|                                                               1     0     0   |
++-------------------------------------------------------------------------------+
+|   0  MIG 2g.10gb         14     3/3        9.75       No     28     1     0   |
+|                                                               2     0     0   |
++-------------------------------------------------------------------------------+
+|   0  MIG 3g.20gb          9     2/2        19.62      No     42     2     0   |
+|                                                               3     0     0   |
++-------------------------------------------------------------------------------+
+|   0  MIG 4g.20gb          5     1/1        19.62      No     56     2     0   |
+|                                                               4     0     0   |
++-------------------------------------------------------------------------------+
+|   0  MIG 7g.40gb          0     1/1        39.38      No     98     5     0   |
+|                                                               7     1     1   |
++-------------------------------------------------------------------------------+
+```
+
+[Shell 3]은 MIG 기법을 활성화하고 GPU Instance Profile을 확인하는 과정을 나타내고 있다. 모든 과정은 `nvidia-smi` 명령어를 통해서 수행할 수 있다. `-i` Option은 특정 GPU를 지정하는 옵션이며 숫자로 GPU를 지정한다. `-mig 1` Option은 MIG 기법을 활성화하는 옵션이다. 다수의 GPU가 존재한다면 각 GPU별로 MIG 기법을 활성화 해야 한다.
+
+```shell {caption="[Shell 3] MIG GPU Instance 생성"}
+# Create GPU instance with profile 4g.20gb
+$ nvidia-smi mig -i 0 -cgi 4g.20gb
+Successfully created GPU instance ID  2 on GPU  0 using profile MIG 4g.20gb (ID  5)
+$ nvidia-smi mig -i 0 -lgip
++-------------------------------------------------------------------------------+
+| GPU instance profiles:                                                        |
+| GPU   Name               ID    Instances   Memory     P2P    SM    DEC   ENC  |
+|                                Free/Total   GiB              CE    JPEG  OFA  |
+|===============================================================================|
+|   0  MIG 1g.5gb          19     3/7        4.75       No     14     0     0   |
+|                                                               1     0     0   |
++-------------------------------------------------------------------------------+
+|   0  MIG 1g.5gb+me       20     1/1        4.75       No     14     1     0   |
+|                                                               1     1     1   |
++-------------------------------------------------------------------------------+
+|   0  MIG 1g.10gb         15     2/4        9.75       No     14     1     0   |
+|                                                               1     0     0   |
++-------------------------------------------------------------------------------+
+|   0  MIG 2g.10gb         14     1/3        9.75       No     28     1     0   |
+|                                                               2     0     0   |
++-------------------------------------------------------------------------------+
+|   0  MIG 3g.20gb          9     1/2        19.62      No     42     2     0   |
+|                                                               3     0     0   |
++-------------------------------------------------------------------------------+
+|   0  MIG 4g.20gb          5     0/1        19.62      No     56     2     0   |
+|                                                               4     0     0   |
++-------------------------------------------------------------------------------+
+|   0  MIG 7g.40gb          0     0/1        39.38      No     98     5     0   |
+|                                                               7     1     1   |
++-------------------------------------------------------------------------------+
+
+# Create GPU instance with profile 2g.10gb
+$ nvidia-smi mig -i 0 -cgi 2g.10gb
+Successfully created GPU instance ID  3 on GPU  0 using profile MIG 2g.10gb (ID 14)
+$ nvidia-smi mig -i 0 -lgip
++-------------------------------------------------------------------------------+
+| GPU instance profiles:                                                        |
+| GPU   Name               ID    Instances   Memory     P2P    SM    DEC   ENC  |
+|                                Free/Total   GiB              CE    JPEG  OFA  |
+|===============================================================================|
+|   0  MIG 1g.5gb          19     1/7        4.75       No     14     0     0   |
+|                                                               1     0     0   |
++-------------------------------------------------------------------------------+
+|   0  MIG 1g.5gb+me       20     1/1        4.75       No     14     1     0   |
+|                                                               1     1     1   |
++-------------------------------------------------------------------------------+
+|   0  MIG 1g.10gb         15     1/4        9.75       No     14     1     0   |
+|                                                               1     0     0   |
++-------------------------------------------------------------------------------+
+|   0  MIG 2g.10gb         14     0/3        9.75       No     28     1     0   |
+|                                                               2     0     0   |
++-------------------------------------------------------------------------------+
+|   0  MIG 3g.20gb          9     0/2        19.62      No     42     2     0   |
+|                                                               3     0     0   |
++-------------------------------------------------------------------------------+
+|   0  MIG 4g.20gb          5     0/1        19.62      No     56     2     0   |
+|                                                               4     0     0   |
++-------------------------------------------------------------------------------+
+|   0  MIG 7g.40gb          0     0/1        39.38      No     98     5     0   |
+|                                                               7     1     1   |
++-------------------------------------------------------------------------------+
+
+# Create GPU instance with profile 1g.5gb
+$ nvidia-smi mig -i 0 -cgi 1g.5gb
+Successfully created GPU instance ID  9 on GPU  0 using profile MIG 1g.5gb (ID 19)
+$ nvidia-smi mig -i 0 -lgip
++-------------------------------------------------------------------------------+
+| GPU instance profiles:                                                        |
+| GPU   Name               ID    Instances   Memory     P2P    SM    DEC   ENC  |
+|                                Free/Total   GiB              CE    JPEG  OFA  |
+|===============================================================================|
+|   0  MIG 1g.5gb          19     0/7        4.75       No     14     0     0   |
+|                                                               1     0     0   |
++-------------------------------------------------------------------------------+
+|   0  MIG 1g.5gb+me       20     0/1        4.75       No     14     1     0   |
+|                                                               1     1     1   |
++-------------------------------------------------------------------------------+
+|   0  MIG 1g.10gb         15     0/4        9.75       No     14     1     0   |
+|                                                               1     0     0   |
++-------------------------------------------------------------------------------+
+|   0  MIG 2g.10gb         14     0/3        9.75       No     28     1     0   |
+|                                                               2     0     0   |
++-------------------------------------------------------------------------------+
+|   0  MIG 3g.20gb          9     0/2        19.62      No     42     2     0   |
+|                                                               3     0     0   |
++-------------------------------------------------------------------------------+
+|   0  MIG 4g.20gb          5     0/1        19.62      No     56     2     0   |
+|                                                               4     0     0   |
++-------------------------------------------------------------------------------+
+|   0  MIG 7g.40gb          0     0/1        39.38      No     98     5     0   |
+|                                                               7     1     1   |
++-------------------------------------------------------------------------------+
+
+# Check MIG GPU instances
+$ nvidia-smi mig -i 0 -lgi
++---------------------------------------------------------+
+| GPU instances:                                          |
+| GPU   Name               Profile  Instance   Placement  |
+|                            ID       ID       Start:Size |
+|=========================================================|
+|   0  MIG 1g.5gb            19        9          6:1     |
++---------------------------------------------------------+
+|   0  MIG 2g.10gb           14        3          4:2     |
++---------------------------------------------------------+
+|   0  MIG 4g.20gb            5        2          0:4     |
++---------------------------------------------------------+
+```
+
+[Shell 4]는 MIG GPU Instance를 생성하고 확인하는 과정을 나타내고 있다. `4g.20gb`, `2g.10gb`, `1g.5gb` Profile을 하나씩 이용해 총 3개의 GPU Instance를 생성한 것을 확인할 수 있다. [Figure 9]의 두번째 Profile 조합인 것을 확인할 수 있다.  GPU Instance ID는 순서대로 `2`, `3`, `9`로 생성된 것도 확인할 수 있다. GPU Instance ID는 Compute Instance를 생성할 때 사용된다.
+
+```shell {caption="[Shell 5] MIG Compute Instance 생성"}
+# Check and create a compute instance profile for GPU instance ID 2 (4g.20gb GPU Instance)
+$ nvidia-smi mig -i 0 -gi 2 -lcip
++--------------------------------------------------------------------------------------+
+| Compute instance profiles:                                                           |
+| GPU     GPU       Name             Profile  Instances   Exclusive       Shared       |
+|       Instance                       ID     Free/Total     SM       DEC   ENC   OFA  |
+|         ID                                                          CE    JPEG       |
+|======================================================================================|
+|   0      2       MIG 1c.4g.20gb       0      4/4           14        2     0     0   |
+|                                                                      4     0         |
++--------------------------------------------------------------------------------------+
+|   0      2       MIG 2c.4g.20gb       1      2/2           28        2     0     0   |
+|                                                                      4     0         |
++--------------------------------------------------------------------------------------+
+|   0      2       MIG 4g.20gb          3*     1/1           56        2     0     0   |
+|                                                                      4     0         |
++--------------------------------------------------------------------------------------+
+
+$ nvidia-smi mig -i 0 -gi 2 -cci 4g.20gb
+Successfully created compute instance ID  0 on GPU  0 GPU instance ID  2 using profile MIG 4g.20gb (ID  3)
+$ nvidia-smi mig -i 0 -gi 2 -lcip
++--------------------------------------------------------------------------------------+
+| Compute instance profiles:                                                           |
+| GPU     GPU       Name             Profile  Instances   Exclusive       Shared       |
+|       Instance                       ID     Free/Total     SM       DEC   ENC   OFA  |
+|         ID                                                          CE    JPEG       |
+|======================================================================================|
+|   0      2       MIG 1c.4g.20gb       0      0/4           14        2     0     0   |
+|                                                                      4     0         |
++--------------------------------------------------------------------------------------+
+|   0      2       MIG 2c.4g.20gb       1      0/2           28        2     0     0   |
+|                                                                      4     0         |
++--------------------------------------------------------------------------------------+
+|   0      2       MIG 4g.20gb          3*     0/1           56        2     0     0   |
+|                                                                      4     0         |
++--------------------------------------------------------------------------------------+
+
+# Check and create two compute instance profiles for GPU instance ID 3 (2g.10gb GPU Instance)
+$ nvidia-smi mig -i 0 -gi 3 -lcip
++--------------------------------------------------------------------------------------+
+| Compute instance profiles:                                                           |
+| GPU     GPU       Name             Profile  Instances   Exclusive       Shared       |
+|       Instance                       ID     Free/Total     SM       DEC   ENC   OFA  |
+|         ID                                                          CE    JPEG       |
+|======================================================================================|
+|   0      3       MIG 1c.2g.10gb       0      2/2           14        1     0     0   |
+|                                                                      2     0         |
++--------------------------------------------------------------------------------------+
+|   0      3       MIG 2g.10gb          1*     1/1           28        1     0     0   |
+|                                                                      2     0         |
++--------------------------------------------------------------------------------------+
+
+$ nvidia-smi mig -i 0 -gi 3 -cci 1c.2g.10gb
+Successfully created compute instance ID  0 on GPU  0 GPU instance ID  3 using profile MIG 1c.2g.10gb (ID  0)
+$ nvidia-smi mig -i 0 -gi 3 -lcip
++--------------------------------------------------------------------------------------+
+| Compute instance profiles:                                                           |
+| GPU     GPU       Name             Profile  Instances   Exclusive       Shared       |
+|       Instance                       ID     Free/Total     SM       DEC   ENC   OFA  |
+|         ID                                                          CE    JPEG       |
+|======================================================================================|
+|   0      3       MIG 1c.2g.10gb       0      1/2           14        1     0     0   |
+|                                                                      2     0         |
++--------------------------------------------------------------------------------------+
+|   0      3       MIG 2g.10gb          1*     0/1           28        1     0     0   |
+|                                                                      2     0         |
++--------------------------------------------------------------------------------------+
+
+$ nvidia-smi mig -i 0 -gi 3 -cci 1c.2g.10gb
+Successfully created compute instance ID  0 on GPU  0 GPU instance ID  3 using profile MIG 1c.2g.10gb (ID  0)
+$ nvidia-smi mig -i 0 -gi 3 -lcip
++--------------------------------------------------------------------------------------+
+| Compute instance profiles:                                                           |
+| GPU     GPU       Name             Profile  Instances   Exclusive       Shared       |
+|       Instance                       ID     Free/Total     SM       DEC   ENC   OFA  |
+|         ID                                                          CE    JPEG       |
+|======================================================================================|
+|   0      3       MIG 1c.2g.10gb       0      0/2           14        1     0     0   |
+|                                                                      2     0         |
++--------------------------------------------------------------------------------------+
+|   0      3       MIG 2g.10gb          1*     0/1           28        1     0     0   |
+|                                                                      2     0         |
++--------------------------------------------------------------------------------------+
+
+# Check and create a compute instance profile for GPU instance ID 9 (1g.5gb GPU Instance)
+$ nvidia-smi mig -i 0 -gi 9 -lcip
++--------------------------------------------------------------------------------------+
+| Compute instance profiles:                                                           |
+| GPU     GPU       Name             Profile  Instances   Exclusive       Shared       |
+|       Instance                       ID     Free/Total     SM       DEC   ENC   OFA  |
+|         ID                                                          CE    JPEG       |
+|======================================================================================|
+|   0      9       MIG 1g.5gb           0*     1/1           14        0     0     0   |
+|                                                                      1     0         |
++--------------------------------------------------------------------------------------+
+
+$ nvidia-smi mig -i 0 -gi 9 -cci 1g.5gb
+Successfully created compute instance ID  0 on GPU  0 GPU instance ID  9 using profile MIG 1g.5gb (ID  0)
+$ nvidia-smi mig -i 0 -gi 9 -lcip
++--------------------------------------------------------------------------------------+
+| Compute instance profiles:                                                           |
+| GPU     GPU       Name             Profile  Instances   Exclusive       Shared       |
+|       Instance                       ID     Free/Total     SM       DEC   ENC   OFA  |
+|         ID                                                          CE    JPEG       |
+|======================================================================================|
+|   0      9       MIG 1g.5gb           0*     0/1           14        0     0     0   |
+|                                                                      1     0         |
++--------------------------------------------------------------------------------------+
+
+# Check GPU instances and Compute instances
+$ nvidia-smi mig -i 0 -lgi
++---------------------------------------------------------+
+| GPU instances:                                          |
+| GPU   Name               Profile  Instance   Placement  |
+|                            ID       ID       Start:Size |
+|=========================================================|
+|   0  MIG 1g.5gb            19        9          6:1     |
++---------------------------------------------------------+
+|   0  MIG 2g.10gb           14        3          4:2     |
++---------------------------------------------------------+
+|   0  MIG 4g.20gb            5        2          0:4     |
++---------------------------------------------------------+
+
+$ nvidia-smi mig -i 0 -lci
++--------------------------------------------------------------------+
+| Compute instances:                                                 |
+| GPU     GPU       Name             Profile   Instance   Placement  |
+|       Instance                       ID        ID       Start:Size |
+|         ID                                                         |
+|====================================================================|
+|   0      9       MIG 1g.5gb           0         0          0:1     |
++--------------------------------------------------------------------+
+|   0      3       MIG 1c.2g.10gb       0         0          0:1     |
++--------------------------------------------------------------------+
+|   0      3       MIG 1c.2g.10gb       0         1          1:1     |
++--------------------------------------------------------------------+
+|   0      2       MIG 4g.20gb          3         0          0:4     |
++--------------------------------------------------------------------+
+```
+
+[Shell 5]는 Compute Instance를 생성하고 확인하는 과정을 나타내고 있다. GPU Instance가 생성된 이후에는 해당 GPU Instance에 생성할 수 있는 Compute Instance Profile을 확인할 수 있다. `4g.20gb` GPU Instance의 경우에는 `1c.4g.20gb`, `2c.4g.20gb`, `4g.20gb` 3가지 Profile이 존재하며, `2g.10gb` GPU Instance의 경우에는 `1c.2g.10gb`, `2g.10gb` 2가지 Profile이 존재하고, `1g.5gb` GPU Instance의 경우에는 `1g.5gb` 1가지 Profile이 존재한다.
+의
+`4g.20gb` GPU Instance에는 `4g.20gb` Profile을 이용해 하나의 Compute Instance를 생성하고, `2g.10gb` GPU Instance에는 `1c.2g.10gb` Profile을 이용해 두개의 Compute Instance를 생성하고, `1g.5gb` GPU Instance에는 `1g.5gb` Profile을 이용해 하나의 Compute Instance를 생성한 것을 확인할 수 있다.
+
+```shell {caption="[Shell 6] MIG vGPU 확인"}
+$ nvidia-smi -i 0
+Tue Feb 17 16:58:38 2026
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.126.09             Driver Version: 580.126.09     CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA A100-SXM4-40GB          On  |   00000000:10:1C.0 Off |                   On |
+| N/A   40C    P0             43W /  400W |     249MiB /  40960MiB |     N/A      Default |
+|                                         |                        |              Enabled |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| MIG devices:                                                                            |
++------------------+----------------------------------+-----------+-----------------------+
+| GPU  GI  CI  MIG |              Shared Memory-Usage |        Vol|        Shared         |
+|      ID  ID  Dev |                Shared BAR1-Usage | SM     Unc| CE ENC  DEC  OFA  JPG |
+|                  |                                  |        ECC|                       |
+|==================+==================================+===========+=======================|
+|  0    2   0   0  |             142MiB / 20096MiB    | 56      0 |  4   0    2    0    0 |
+|                  |               0MiB / 12211MiB    |           |                       |
++------------------+----------------------------------+-----------+-----------------------+
+|  0    3   0   1  |              71MiB /  9984MiB    | 14      0 |  2   0    1    0    0 |
+|                  |               0MiB /  6105MiB    |           |                       |
++------------------+----------------------------------+-----------+-----------------------+
+|  0    3   1   2  |              71MiB /  9984MiB    | 14      0 |  2   0    1    0    0 |
+|                  |               0MiB /  6105MiB    |           |                       |
++------------------+----------------------------------+-----------+-----------------------+
+|  0    9   0   3  |              36MiB /  4864MiB    | 14      0 |  1   0    0    0    0 |
+|                  |               0MiB /  3052MiB    |           |                       |
++------------------+----------------------------------+-----------+-----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+
+$ nvidia-smi -i 0 -L
+GPU 0: NVIDIA A100-SXM4-40GB (UUID: GPU-9e4aeb94-01c0-5173-4811-4ca60f77b3a9)
+  MIG 4g.20gb     Device  0: (UUID: MIG-c42101f0-a1fa-5b68-8908-7c5c887f28bd)
+  MIG 1c.2g.10gb  Device  1: (UUID: MIG-8970491e-16e0-5140-9f8f-d561baa3c186)
+  MIG 1c.2g.10gb  Device  2: (UUID: MIG-239565ce-30e3-52d7-8197-5630d3ce21fa)
+  MIG 1g.5gb      Device  3: (UUID: MIG-20301a31-77fa-59ec-b0b8-7ef543821f29)
+```
+
+[Shell 6]은 MIG vGPU를 확인하는 과정을 나타내고 있다. `nvidia-smi` 명령어를 통해서 GPU를 조회하면 MIG vGPU의 정보를 확인할 수 있다. 또한 `-L` 명령어를 통해서 vGPU의 UUID를 확인할 수 있다. UUID는 CUDA App에서 어떤 vGPU를 이용할지 결정하는데 사용된다.
+
+```shell {caption="[Shell 7] MIG vGPU Device Files 확인"}
+# Check MIG device files
+$ ls -l /dev/nvidia-caps/
+cr--------.  1 root root 242,  0 Feb 17 16:23 nvidia-cap0
+cr--------.  1 root root 242,  1 Feb 17 16:23 nvidia-cap1
+cr--r--r--.  1 root root 242,  2 Feb 17 16:23 nvidia-cap2
+cr--r--r--.  1 root root 242, 21 Feb 17 16:24 nvidia-cap21
+cr--r--r--.  1 root root 242, 22 Feb 17 16:32 nvidia-cap22
+cr--r--r--.  1 root root 242, 30 Feb 17 16:25 nvidia-cap30
+cr--r--r--.  1 root root 242, 31 Feb 17 16:45 nvidia-cap31
+cr--r--r--.  1 root root 242, 32 Feb 17 16:45 nvidia-cap32
+cr--r--r--.  1 root root 242, 84 Feb 17 16:26 nvidia-cap84
+cr--r--r--.  1 root root 242, 85 Feb 17 16:54 nvidia-cap85
+
+# Check what cap is what GI/CI
+find /proc/driver/nvidia/capabilities/gpu0/mig/ -name access | sort | while read f; do
+    minor=$(grep DeviceFileMinor "$f" | awk '{print $2}')
+    echo "$f  →  /dev/nvidia-caps/nvidia-cap${minor}"
+done
+/proc/driver/nvidia/capabilities/gpu0/mig/gi2/access  →  /dev/nvidia-caps/nvidia-cap21
+/proc/driver/nvidia/capabilities/gpu0/mig/gi2/ci0/access  →  /dev/nvidia-caps/nvidia-cap22
+/proc/driver/nvidia/capabilities/gpu0/mig/gi3/access  →  /dev/nvidia-caps/nvidia-cap30
+/proc/driver/nvidia/capabilities/gpu0/mig/gi3/ci0/access  →  /dev/nvidia-caps/nvidia-cap31
+/proc/driver/nvidia/capabilities/gpu0/mig/gi3/ci1/access  →  /dev/nvidia-caps/nvidia-cap32
+/proc/driver/nvidia/capabilities/gpu0/mig/gi9/access  →  /dev/nvidia-caps/nvidia-cap84
+/proc/driver/nvidia/capabilities/gpu0/mig/gi9/ci0/access  →  /dev/nvidia-caps/nvidia-cap85
+```
+
+각 GPU Instance와 Compute Instance마다 Device File이 `/dev/nvidia-caps/nvidia-cap[Minor Number]` 형태로 생성된다. [Shell 7]은 GPU Instance와 Compute Instance의 Device File을 확인하는 과정을 나타내고 있으며, 어떤 Device File이 어떤 GPU Instance 또는 Compute Instance와 Mapping되는지 확인할 수 있다.
+
+#### 1.3.2. MIG vGPU 이용 방법
+
+```shell {caption="[Shell 8] MIG vGPU 이용 방법"}
+# Run with MIG UUID
+CUDA_VISIBLE_DEVICES=MIG-c42101f0-a1fa-5b68-8908-7c5c887f28bd   # 4g.20gb
+CUDA_VISIBLE_DEVICES=MIG-8970491e-16e0-5140-9f8f-d561baa3c186   # 1c.2g.10gb first
+CUDA_VISIBLE_DEVICES=MIG-239565ce-30e3-52d7-8197-5630d3ce21fa   # 1c.2g.10gb second
+CUDA_VISIBLE_DEVICES=MIG-20301a31-77fa-59ec-b0b8-7ef543821f29   # 1g.5gb
+
+# Run with MIG-GPU-<gpu-uuid>/<gi-id>/<ci-id>
+CUDA_VISIBLE_DEVICES=MIG-GPU-9e4aeb94-01c0-5173-4811-4ca60f77b3a9/2/0   # 4g.20gb
+CUDA_VISIBLE_DEVICES=MIG-GPU-9e4aeb94-01c0-5173-4811-4ca60f77b3a9/3/0   # 1c.2g.10gb first
+CUDA_VISIBLE_DEVICES=MIG-GPU-9e4aeb94-01c0-5173-4811-4ca60f77b3a9/3/1   # 1c.2g.10gb second
+CUDA_VISIBLE_DEVICES=MIG-GPU-9e4aeb94-01c0-5173-4811-4ca60f77b3a9/9/0   # 1g.5gb
+```
+
+[Shell 8]은 CUDA App에서 MIG vGPU 이용 방법을 나타내고 있다. CUDA SDK는 `CUDA_VISIBLE_DEVICES` 환경변수를 통해서 CUDA App이 이용할수 있는 GPU를 지정할 수 있으며, 따라서 동일하게 `CUDA_VISIBLE_DEVICES` 환경변수에 MIG vGPU를 지정하여 CUDA App이 MIG vGPU를 이용할 수 있도록 만들수 있다. `CUDA_VISIBLE_DEVICES` 환경변수에 MIG vGPU를 지정하는 방법은 MIG vGPU의 UUID를 통해서 지정하는 방법과 `MIG-GPU-<gpu-uuid>/<gi-id>/<ci-id>` 형태로 지정하는 방법이 있다. 다수의 MIG vGPU를 이용할 경우에는 `,`를 구분자로 사용하여 다수의 MIG vGPU를 지정하면 된다.
+
+#### 1.3.3. with Time-slicing and MPS
+
+{{< figure caption="[Figure 11] MIG with Time-slicing and MPS Architecture" src="images/mig-time-slicing-mps-architecture.png" width="800px" >}} 
+
+MIG 기법을 통해서 생성된 vGPU에 다시 Time-slicing 기법 또는 MPS 기법을 적용하여 vGPU를 Sharing하는 구조가 가능하다. [Figure 11]은 MIG 기법을 통해서 생성된 vGPU에 다시 Time-slicing 기법을 적용하여 vGPU를 Sharing하는 구조를 나타내고 있다. 첫번째 vGPU에는 Time-slicing 기법을 적용하여 vGPU를 Sharing하고, 두번째 vGPU에는 MPS 기법을 적용하여 vGPU를 Sharing하고 있다.
 
 ## 2. References
 
