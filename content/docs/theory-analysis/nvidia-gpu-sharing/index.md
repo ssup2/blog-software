@@ -1,6 +1,5 @@
 ---
 title: NVIDIA GPU Sharing
-draft: true
 ---
 
 ## 1. NVIDIA GPU Sharing
@@ -154,6 +153,7 @@ $ nvidia-smi -i 0 -mig 1
 
 # Check MIG mode for GPU 0
 $ nvidia-smi -i 0 --query-gpu=mig.mode.current --format=csv,noheader
+Enabled
 
 # Check MIG GPU instance profiles for GPU 0
 $ nvidia-smi mig -i 0 -lgip
