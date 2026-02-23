@@ -24,11 +24,11 @@ Each container has device node files to access the GPUs allocated to it. Shared 
 
 To allocate NVIDIA GPUs to containers, the **OCI Runtime Spec's Prestart Hook** feature is actively utilized. Prestart Hook refers to a command that runs before the container's entrypoint command is executed.
 
-{{< figure caption="[Figure 2] NVIDIA GPU Container OCI Runtime Spec" src="images/container-runtime-spec.png" width="900px" >}}
+{{< figure caption="[Figure 2] NVIDIA GPU Container OCI Runtime Spec" src="images/gpu-container-runtime-spec.png" width="900px" >}}
 
 [Figure 2] shows the OCI Runtime Spec generated when creating a container using Docker's GPU option. When Docker detects the GPU option, settings to execute the `nvidia-container-runtime-hook` CLI are added to the Prestart Hook of the OCI Runtime Spec. The argument for the `nvidia-container-runtime-hook` CLI is fixed to `prestart`, and NVIDIA GPU and CUDA-related environment variables are added to the container's environment variables. For example, the `NVIDIA_VISIBLE_DEVICES` environment variable specifies which NVIDIA GPUs will be exposed to the container. In [Figure 2], since Docker was configured to use all NVIDIA GPUs with `--gpu all`, the `NVIDIA_VISIBLE_DEVICES` environment variable is also set to `all`.
 
-{{< figure caption="[Figure 3] NVIDIA GPU Container Init" src="images/container-init.png" width="900px" >}}
+{{< figure caption="[Figure 3] NVIDIA GPU Container Init" src="images/gpu-container-init.png" width="900px" >}}
 
 [Figure 3] shows the process where the `runc` CLI creates a container and configures the GPU based on the OCI Runtime Spec created in [Figure 2].
 
