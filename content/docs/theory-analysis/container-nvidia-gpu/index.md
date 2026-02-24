@@ -24,11 +24,11 @@ Container A는 0,1번째 NVIDIA GPU, Container B는 0,2,3번째 NVIDIA GPU, Cont
 
 Container에게 NVIDIA GPU를 할당하기 위해서 **OCI Runtime Spec의 Prestart Hook** 기능을 적극적으로 활용한다. Prestart Hook은 Container의 Entrypoint Command가 실행되기 전에 실행되는 Command를 의미한다.
 
-{{< figure caption="[Figure 2] NVIDIA GPU Container OCI Runtime Spec" src="images/container-runtime-spec.png" width="900px" >}}
+{{< figure caption="[Figure 2] NVIDIA GPU Container OCI Runtime Spec" src="images/gpu-container-runtime-spec.png" width="900px" >}}
 
 [Figure 2]은 Docker GPU Option을 이용하여 Container를 생성시 생성되는 OCI Runtime Spec을 나타내고 있다. Docker는 GPU Option을 발견하면 OCI Runtime Spec의 Prestart Hook에 `nvidia-container-runtime-hook` CLI를 실행하기 위한 설정 내용이 추가된다. `nvidia-container-runtime-hook` CLI의 Argument는 `prestart`로 고정되며, Container의 환경 변수에는 NVIDIA GPU, CUDA 관련 환경 변수가 추가된다. 예를 들어 `NVIDIA_VISIBLE_DEVICES` 환경 변수의 경우 Container에게 노출될 NVIDIA GPU의 지정하는 환경 변수이다. [Figure 2]의 경우에서는 Docker에서 모든 NVIDIA GPU를 이용하도록 `--gpu all` 설정을 수행하였기 때문에 `NVIDIA_VISIBLE_DEVICES` 환경 변수에도 `all`이 설정된다.
 
-{{< figure caption="[Figure 3] NVIDIA GPU Container Init" src="images/container-init.png" width="900px" >}}
+{{< figure caption="[Figure 3] NVIDIA GPU Container Init" src="images/gpu-container-init.png" width="900px" >}}
 
 [Figure 3]은 [Figure 2]에 생성된 OCI Runtime Spec을 바탕으로 `runc` CLI가 Container를 생성하고 GPU를 설정하는 과정을 나타내고 있다.
 
