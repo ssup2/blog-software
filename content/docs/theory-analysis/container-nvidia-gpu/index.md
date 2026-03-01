@@ -29,7 +29,45 @@ Container에게 GPU를 할당하기 위해서는 **NVIDIA Container Toolkit**을
 
 ### 1.2. NVIDIA GPU 할당 과정
 
-Container에게 NVIDIA GPU를 할당하는 방법은 **OCI Runtime Spec의 Prestart Hook** 기능을 적극적으로 활용하는 Legacy 방법과 
+Container에 GPU를 할당하기 위해서는 `containerd`가 `containerd-shim` 대신에 `nvidia-container-runtime` CLI를 실행하도록 설정해야 한다. `nvidia-container-runtime` CLI는 `containerd-shim`이 수행하는 Container의 Stdin/Stdout/Stderr를 Named Pipe를 통해서 다른 Process에서 접근할수 있게 하고, Container Init Process의 Exit Code를 `containerd`에게 전달하는 역할을 수행할 뿐만이 아니라, Container에게 GPU를 할당하기 위한 추가 설정을 수행한다. 
+
+```toml {caption="[File 1] /etc/containerd/config.toml Example", linenos=table}
+version = 3
+root = "/var/lib/containerd"
+state = "/run/containerd"
+
+[plugins.'io.containerd.cri.v1.runtime']
+enable_cdi = true
+
+[plugins.'io.containerd.cri.v1.runtime'.containerd]
+default_runtime_name = "nvidia"
+
+[plugins.'io.containerd.cri.v1.runtime'.containerd.runtimes.nvidia]
+runtime_type = "io.containerd.runc.v2"
+base_runtime_spec = "/etc/containerd/base-runtime-spec.json"
+
+[plugins.'io.containerd.cri.v1.runtime'.containerd.runtimes.nvidia.options]
+BinaryName = "/usr/bin/nvidia-container-runtime"
+SystemdCgroup = true
+```
+
+[File 1]은 `containerd`가 `nvidia-container-runtime` CLI를 실행하도록 설정하는 방법을 나타내고 있다. `default_runtime_name` 파라미터를 `nvidia`로 설정하고, `nvidia` Runtime에 필요한 Spec 파일과 `nvidia-container-runtime` CLI의 경로를 설정하고 있는것을 확인할 수 있다.
+
+```toml {caption="[File 2] /etc/nvidia-container-runtime/config.toml Example", linenos=table}
+[nvidia-container-runtime]
+mode = "legacy | cdi | auto"
+
+[nvidia-container-runtime.cdi]
+spec-dirs = ["/etc/cdi", "/var/run/cdi"]
+```
+
+`nvidia-container-runtime` CLI는 **OCI Runtime Spec의 Prestart Hook** 기능을 활용하는 Legacy Mode과 **CDI** (Container Device Interface)를 활용하는 두 가지 Mode가 존재한다. [File 1]은 Mode를 설정하기 위한 `nvidia-container-runtime`의 설정 파일을 나타내고 있다. `mode`에 `legacy`, `cdi`, `auto` 중 하나를 설정할 수 있다. `legacy`는 OCI Runtime Spec의 Prestart Hook 기능을 활용하는 기존의 방법이고, `cdi`는 **CDI (Container Device Interface)**를 활용하는 최신 방법이다. `auto`는 시스템 설정에 따라서 `legacy` 또는 `cdi` 중 하나를 자동으로 선택하는 방법이며, `spec-dirs`에는 CDI Spec 파일이 존재하면 CDI Mode를 사용하고, 존재하지 않으면 Legacy Mode를 사용한다.
+
+#### 1.2.1. Legacy GPU 할당 과정
+
+{{< figure caption="[Figure 3] NVIDIA GPU Container Init" src="images/gpu-container-init-legacy.png" width="900px" >}}
+
+[Figure 3]은 Legacy GPU 할당 과정을 나타내고 있다. Legacy GPU 할당 과정은 **OCI Runtime Spec의 Prestart Hook** 기능을 적극적으로 활용하는 방법이다. Prestart Hook은 Container의 Entrypoint Command가 실행되기 전에 실행되는 Command를 의미한다.
 
 위해서 **OCI Runtime Spec의 Prestart Hook** 기능을 적극적으로 활용한다. Prestart Hook은 Container의 Entrypoint Command가 실행되기 전에 실행되는 Command를 의미한다.
 
