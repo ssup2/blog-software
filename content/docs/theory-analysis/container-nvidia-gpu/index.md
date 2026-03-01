@@ -10,7 +10,7 @@ Container에게 NVIDIA GPU를 할당하는 기법을 분석한다.
 
 {{< figure caption="[Figure 1] NVIDIA GPU Container Architecture" src="images/gpu-container-architecture.png" width="900px" >}}
 
-NVIDIA GPU을 Container에게 할당하여 Container가 NVIDIA GPU를 이용할 수 있는 환경을 구성할 수 있다. Docker 19.03 Version에서는 추가된 GPU Opiton (`--gpu`)을 이용하여 Container에게 NVIDIA GPU를 할당할 수 있다. [Figure 1]은 GPU Option을 통해서 NVIDIA GPU 설정이 완료된 Container들을 나타내고 있다. 각 Container는 하나의 GPU 뿐만 아니라 다수의 GPU를 이용할 수 있다. 또한 자신에게만 할당된 Dedicated GPU 뿐만 아니라, 다른 Container와 공유하는 Shared GPU를 이용할 수 있다.
+NVIDIA GPU을 Container에게 할당하여 Container가 NVIDIA GPU를 이용할 수 있는 환경을 구성할 수 있다. Docker 19.03 Version에서는 추가된 GPU Option (`--gpu`)을 이용하여 Container에게 NVIDIA GPU를 할당할 수 있다. [Figure 1]은 GPU Option을 통해서 NVIDIA GPU 설정이 완료된 Container들을 나타내고 있다. 각 Container는 하나의 GPU 뿐만 아니라 다수의 GPU를 이용할 수 있다. 또한 자신에게만 할당된 Dedicated GPU 뿐만 아니라, 다른 Container와 공유하는 Shared GPU를 이용할 수 있다.
 
 Container A는 0,1번째 NVIDIA GPU, Container B는 0,2,3번째 NVIDIA GPU, Container C는 3번째 NVIDIA GPU를 이용하고 있다. 0,1,3번째 GPU는 Shared GPU로 이용되고 있으며, 2번째 GPU는 Dedicated GPU로 이용되고 있다. 각 Container는 Docker 기준으로 다음의 명령어를 통해서 생성할 수 있다. 단일 GPU 번호 또는 다수의 GPU 번호를 `,`로 구분하여 `--gpu` Option에 전달하면 된다. 
 
@@ -20,11 +20,18 @@ Container A는 0,1번째 NVIDIA GPU, Container B는 0,2,3번째 NVIDIA GPU, Cont
 
 `--gpu all` 설정을 수행하면 Container는 모든 NVIDIA GPU를 이용할 수 있다. Shared GPU는 NVIDIA GPU에서 제공하는 **Time-Slicing** 또는 **MPS (Multi Process Service)** 기능을 활용하여 다수의 Container가 하나의 NVIDIA GPU를 공유하여 이용하게 된다.
 
-각 Container는 자신에게 할당된 GPU에 접근하기 위한 **Device File**(`/dev/nvidiaX`)을 갖는다. 또한 Container 내부의 App이 활용할수 있도록 다양한 **CUDA Library/ Tool**들도 갖는다. 이러한 Device File 및 CUDA Libary/Tool들은 NVIDIA에서 제공하는 **NVIDIA Container Toolkit**을 통해서 **Bind Mount**되어 Container 내부에 주입된다. 따라서 Container Image 내부에 CUDA Library/Tool이 존재하지 않아도 GPU를 활용할 수 있는 환경을 구성할 수 있다. NVIDIA Container Toolkit은 또한 Container 내부에서 GPU 접근을 허용하기 위한 **Cgroup**을 설정하는 역할도 수행한다.
+Container에게 GPU를 할당하기 위해서는 **NVIDIA Container Toolkit**을 활용해야 한다. NVIDIA Container Toolkit은 `nvidia-container-runtime`, `nvidia-container-runtime-hook`, `nvidia-container-cli` CLI를 제공하며, Container Runtime은 제공된 CLI를 통해서 Container에 GPU를 할당한다. NVIDIA Container Toolkit은 다음과 같은 역할을 수행한다.
+
+* Container에게 할당된 GPU를 Container 내부의 App이 접근할 수 있도록 Device File (`/dev/nvidiaX`, `/dev/nvidia-uvm`, `/dev/nvidia-uvm-tools`, `/dev/nvidiactl`)을 **Bind Mount**를 통해서 Container 내부에 주입한다.
+* Container에게 할당된 GPU를 Container 내부의 App이 활용할수 있도록 CUDA Library/Tool을 **Bind Mount**를 통해서 Container 내부에 주입한다.
+* Container에게 할당된 GPU를 Container 내부에서 접근할 수 있도록 Cgroup을 설정한다.
+* Container에게 할당된 GPU 정보를 Container 내부의 App, CUDA Library/Tool이 인지할수 있도록 `NVIDIA_VISIBLE_DEVICES` 환경 변수를 설정한다.
 
 ### 1.2. NVIDIA GPU 할당 과정
 
-Container에게 NVIDIA GPU를 할당하기 위해서 **OCI Runtime Spec의 Prestart Hook** 기능을 적극적으로 활용한다. Prestart Hook은 Container의 Entrypoint Command가 실행되기 전에 실행되는 Command를 의미한다.
+Container에게 NVIDIA GPU를 할당하는 방법은 **OCI Runtime Spec의 Prestart Hook** 기능을 적극적으로 활용하는 Legacy 방법과 
+
+위해서 **OCI Runtime Spec의 Prestart Hook** 기능을 적극적으로 활용한다. Prestart Hook은 Container의 Entrypoint Command가 실행되기 전에 실행되는 Command를 의미한다.
 
 {{< figure caption="[Figure 2] NVIDIA GPU Container OCI Runtime Spec" src="images/gpu-container-runtime-spec.png" width="900px" >}}
 
