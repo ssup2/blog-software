@@ -65,7 +65,7 @@ spec-dirs = ["/etc/cdi", "/var/run/cdi"]
 
 #### 1.2.1. Legacy Mode의 GPU 할당 과정
 
-{{< figure caption="[Figure 3] NVIDIA GPU Container Init" src="images/gpu-container-init-legacy.png" width="900px" >}}
+{{< figure caption="[Figure 3] NVIDIA GPU Container Init in Legacy Mode" src="images/gpu-container-init-legacy.png" width="900px" >}}
 
 [Figure 3]은 Legacy GPU 할당 과정을 나타내고 있다. Legacy GPU 할당 과정은 **OCI Runtime Spec의 Prestart Hook** 기능을 적극적으로 활용하는 방법이다. Prestart Hook은 Container의 Entrypoint Command가 실행되기 전에 실행되는 Command를 의미한다. [Figure 3]은 다음과 같은 과정을 수행한다.
 
@@ -82,7 +82,7 @@ spec-dirs = ["/etc/cdi", "/var/run/cdi"]
 11. Prestart Hook 작업이 완료되면 `runc` CLI는 Container Init Process에게 FIFO Named Pipe를 통해서 Prestart Hook 작업 완료 응답을 전달한다.
 12. Prestart Hook 작업이 완료를 전달받은 Container Init Process는 `pivot_root()` System Call을 통해서 Container의 Root Filesystem을 실제 Container Root Filesystem으로 변경하고, `exec()` System Call을 통해서 Container의 Entrypoint Command를 실행한다.
 
-```json {caption="[File 3] OCI Runtime Spec Example", linenos=table}
+```json {caption="[File 3] OCI Runtime Spec in Legacy Mode Example", linenos=table}
 {
     "hooks": {
         "poststart": [],
@@ -178,6 +178,90 @@ c 195:0 rw   # /dev/nvidia0
 [Shell 1]은 Container 내부에서 Bind Mount, Device File, 환경 변수를 확인하는 예시를 나타내고 있다. `mount` 명령어를 통해서 GPU Device File 및 CUDA Library/Tool을 Bind Mount를 통해서 Container 내부에 주입된걸 확인할 수 있다. 또한 `printenv` 명령어를 통해서 Container App에 `NVIDIA_VISIBLE_DEVICES` 환경 변수가 주입된 것도 확인할 수 있다. [Shell 2]는 Container 내부에서 GPU 접근을 허용하기 위한 Cgroup의 Device List 예시를 나타내고 있다.
 
 #### 1.2.2. CDI Mode의 GPU 할당 과정
+
+{{< figure caption="[Figure 4] NVIDIA GPU Container Init in CDI Mode" src="images/gpu-container-init-cdi.png" width="900px" >}}
+
+```json {caption="[File 4] OCI Runtime Spec Example in CDI Mode", linenos=table}
+{
+    "linux": {
+        "devices": [ # Injected by nvidia-container-runtime with CDI
+            {
+                "path": "/dev/nvidia0",
+                "type": "c",
+                "major": 195,
+                "minor": 0,
+                "fileMode": 438,
+                "uid": 0,
+                "gid": 0
+            },
+            {
+                "path": "/dev/nvidia1",
+                "type": "c",
+                "major": 195,
+                "minor": 1,
+                "fileMode": 438,
+                "uid": 0,
+                "gid": 0
+            },
+            {
+                "path": "/dev/nvidia2",
+                "type": "c",
+                "major": 195,
+                "minor": 2,
+                "fileMode": 438,
+                "uid": 0,
+                "gid": 0
+            },
+            {
+                "path": "/dev/nvidia3",
+                "type": "c",
+                "major": 195,
+                "minor": 3,
+                "fileMode": 438,
+                "uid": 0,
+                "gid": 0
+            },
+            {
+                "path": "/dev/nvidiactl",
+                "type": "c",
+                "major": 195,
+                "minor": 255
+            },
+            {
+                "path": "/dev/nvidia-uvm",
+                "type": "c",
+                "major": 510,
+                "minor": 0
+            }
+            ...
+        ],
+    },
+    "mounts": [ # Injected by nvidia-container-runtime with CDI
+        {
+            "source": "/usr/lib/x86_64-linux-gnu/libcuda.so.1",
+            "destination": "/usr/lib/x86_64-linux-gnu/libcuda.so.1",
+            "options": ["bind", "ro"]
+        },
+        {
+            "source": "/usr/lib/x86_64-linux-gnu/libnvidia-ml.so.1",
+            "destination": "/usr/lib/x86_64-linux-gnu/libnvidia-ml.so.1",
+            "options": ["bind", "ro"]
+        },
+        {
+            "source": "/usr/bin/nvidia-smi",
+            "destination": "/usr/bin/nvidia-smi",
+            "options": ["bind", "ro"]
+        },
+        ...
+    ],
+    "process": {
+        "env": [
+            "NVIDIA_VISIBLE_DEVICES=all"
+        ]
+    }
+...
+}
+```
 
 ## 2. 참조
 

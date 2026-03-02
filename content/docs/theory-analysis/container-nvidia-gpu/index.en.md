@@ -65,7 +65,7 @@ The `nvidia-container-runtime` CLI has two modes: Legacy Mode, which utilizes th
 
 #### 1.2.1. GPU Allocation Process in Legacy Mode
 
-{{< figure caption="[Figure 3] NVIDIA GPU Container Init" src="images/gpu-container-init-legacy.png" width="900px" >}}
+{{< figure caption="[Figure 3] NVIDIA GPU Container Init in Legacy Mode" src="images/gpu-container-init-legacy.png" width="900px" >}}
 
 [Figure 3] shows the Legacy GPU allocation process. The Legacy GPU allocation process is a method that actively utilizes the **OCI Runtime Spec's Prestart Hook** feature. Prestart Hook refers to a command that runs before the container's entrypoint command is executed. [Figure 3] performs the following process:
 
