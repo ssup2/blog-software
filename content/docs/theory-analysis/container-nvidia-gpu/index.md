@@ -179,9 +179,7 @@ c 195:0 rw   # /dev/nvidia0
 
 #### 1.2.2. CDI Mode의 GPU 할당 과정
 
-{{< figure caption="[Figure 4] NVIDIA GPU Container Init in CDI Mode" src="images/gpu-container-init-cdi.png" width="900px" >}}
-
-```yaml {caption="[File 4] CDI Spec File Example", linenos=table}
+```yaml {caption="[File 4] /etc/cdi/nvidia.yaml Example", linenos=table}
 cdiVersion: 0.5.0
 kind: nvidia.com/gpu
 devices:
@@ -366,6 +364,12 @@ containerEdits:
 ...
 ```
 
+CDI (Container Device Interface)는 GPU, NPU와 같은 특수 Device를 Container에게 할당하기 위한 Spec 파일을 위한 Interface이다. [File 4]는 NVIDIA GPU를 위한 CDI를 준수하는 Spec 파일 예시를 나타내고 있다. CDI Spec 파일은 YAML 형식으로 작성되며 Container에게 GPU를 할당하기 위한 Device 파일 및 CUDA Library/Tool을 Bind Mount 정보가 포함되어 있는것을 확인할 수 있다. NVIDIA CDI Spec 파일은 `nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml` 명령어를 통해서 생성할 수 있다.
+
+{{< figure caption="[Figure 4] NVIDIA GPU Container Init in CDI Mode" src="images/gpu-container-init-cdi.png" width="900px" >}}
+
+[Figure 4]는 CDI Mode의 GPU 할당 과정을 나타내고 있다. `nvidia-container-runtime` CLI는 CDI Mode로 동작하는 경우에 CDI Spec File을 읽어 GPU 정보를 확인하고, `NVIDIA_VISIBLE_DEVICES` 환경 변수에 따라서 OCI Runtime Spec에 GPU Device File 및 CUDA Library/Tool을 Bind Mount 정보를 주입하여 Container를 생성한다. `nvidia-container-runtime` CLI가 직접 GPU를 위한 OCI Runtiem Spec을 변경하는 방식이기 때문에, prestart hook 없이 Container를 생성할 수 있다.
+
 ```json {caption="[File 5] OCI Runtime Spec Example in CDI Mode", linenos=table}
 {
     "linux": {
@@ -447,6 +451,8 @@ containerEdits:
 ...
 }
 ```
+
+[File 5]는 `nvidia-container-runtime` CLI이 CDI Mode에서 GPU를 할당하기 위해 관련 설정을 주입한 OCI Runtime Spec의 예시를 나타내고 있다. GPU Device File 및 CUDA Library/Tool을 Bind Mount 정보가 주입된 것을 확인할 수 있다.
 
 ## 2. 참조
 

@@ -82,7 +82,7 @@ The `nvidia-container-runtime` CLI has two modes: Legacy Mode, which utilizes th
 11. When the Prestart Hook work is completed, the `runc` CLI sends a completion response to the Container Init Process through the FIFO named pipe.
 12. The Container Init Process that received the Prestart Hook completion changes the container's root filesystem to the actual container root filesystem through the `pivot_root()` system call and executes the container's entrypoint command through the `exec()` system call.
 
-```json {caption="[File 3] OCI Runtime Spec Example", linenos=table}
+```json {caption="[File 3] OCI Runtime Spec in Legacy Mode Example", linenos=table}
 {
     "hooks": {
         "poststart": [],
@@ -139,7 +139,7 @@ proc on /proc/driver/nvidia/gpus/0000:3c:00.0 type proc (ro,nosuid,nodev,noexec,
 devtmpfs on /dev/nvidia3 type devtmpfs (ro,nosuid,noexec,seclabel,size=4096k,nr_inodes=23820204,mode=755)
 proc on /proc/driver/nvidia/gpus/0000:3e:00.0 type proc (ro,nosuid,nodev,noexec,relatime)
 devtmpfs on /dev/nvidia1 type devtmpfs (ro,nosuid,noexec,seclabel,size=4096k,nr_inodes=23820204,mode=755)
-proc on /proc/driver/nvidia/gpus/0000:3a:00.0 type proc (ro,nosuid,nodev,noexec,seclabel,size=4096k,nr_inodes=23820204,mode=755)
+proc on /proc/driver/nvidia/gpus/0000:3a:00.0 type proc (ro,nosuid,noexec,seclabel,size=4096k,nr_inodes=23820204,mode=755)
 devtmpfs on /dev/nvidia0 type devtmpfs (ro,nosuid,noexec,seclabel,size=4096k,nr_inodes=23820204,mode=755)
 proc on /proc/driver/nvidia/gpus/0000:38:00.0 type proc (ro,nosuid,nodev,noexec,relatime)
 ...
@@ -178,6 +178,281 @@ c 195:0 rw   # /dev/nvidia0
 [Shell 1] shows an example of checking bind mounts, device files, and environment variables inside a container. You can see that GPU device files and CUDA libraries/tools are injected into the container through bind mount via the `mount` command. You can also see that the `NVIDIA_VISIBLE_DEVICES` environment variable is injected into the container application through the `printenv` command. [Shell 2] shows an example of the device list in the cgroup for allowing GPU access from inside the container.
 
 #### 1.2.2. GPU Allocation Process in CDI Mode
+
+```yaml {caption="[File 4] /etc/cdi/nvidia.yaml Example", linenos=table}
+cdiVersion: 0.5.0
+kind: nvidia.com/gpu
+devices:
+  - name: "0"
+    containerEdits:
+      deviceNodes:
+        - path: /dev/nvidia0
+        - path: /dev/dri/card1
+        - path: /dev/dri/renderD128
+      hooks:
+        - hookName: createContainer
+          path: /usr/bin/nvidia-cdi-hook
+          args:
+            - nvidia-cdi-hook
+            - create-symlinks
+            - --link
+            - ../card1::/dev/dri/by-path/pci-0000:38:00.0-card
+            - --link
+            - ../renderD128::/dev/dri/by-path/pci-0000:38:00.0-render
+          env:
+            - NVIDIA_CTK_DEBUG=false
+
+  - name: "1"
+    containerEdits:
+      deviceNodes:
+        - path: /dev/nvidia1
+        - path: /dev/dri/card2
+        - path: /dev/dri/renderD129
+      hooks:
+        - hookName: createContainer
+          path: /usr/bin/nvidia-cdi-hook
+          args:
+            - nvidia-cdi-hook
+            - create-symlinks
+            - --link
+            - ../card2::/dev/dri/by-path/pci-0000:3a:00.0-card
+            - --link
+            - ../renderD129::/dev/dri/by-path/pci-0000:3a:00.0-render
+          env:
+            - NVIDIA_CTK_DEBUG=false
+
+  - name: "2"
+    containerEdits:
+      deviceNodes:
+        - path: /dev/nvidia2
+        - path: /dev/dri/card3
+        - path: /dev/dri/renderD130
+      hooks:
+        - hookName: createContainer
+          path: /usr/bin/nvidia-cdi-hook
+          args:
+            - nvidia-cdi-hook
+            - create-symlinks
+            - --link
+            - ../card3::/dev/dri/by-path/pci-0000:3c:00.0-card
+            - --link
+            - ../renderD130::/dev/dri/by-path/pci-0000:3c:00.0-render
+          env:
+            - NVIDIA_CTK_DEBUG=false
+
+  - name: "3"
+    containerEdits:
+      deviceNodes:
+        - path: /dev/nvidia3
+        - path: /dev/dri/card4
+        - path: /dev/dri/renderD131
+      hooks:
+        - hookName: createContainer
+          path: /usr/bin/nvidia-cdi-hook
+          args:
+            - nvidia-cdi-hook
+            - create-symlinks
+            - --link
+            - ../card4::/dev/dri/by-path/pci-0000:3e:00.0-card
+            - --link
+            - ../renderD131::/dev/dri/by-path/pci-0000:3e:00.0-render
+          env:
+            - NVIDIA_CTK_DEBUG=false
+
+  - name: GPU-3e953d37-558d-fb20-8eca-25de8b98f5a7
+    containerEdits:
+      deviceNodes:
+        - path: /dev/nvidia0
+        - path: /dev/dri/card1
+        - path: /dev/dri/renderD128
+      hooks:
+        - hookName: createContainer
+          path: /usr/bin/nvidia-cdi-hook
+          args:
+            - nvidia-cdi-hook
+            - create-symlinks
+            - --link
+            - ../card1::/dev/dri/by-path/pci-0000:38:00.0-card
+            - --link
+            - ../renderD128::/dev/dri/by-path/pci-0000:38:00.0-render
+          env:
+            - NVIDIA_CTK_DEBUG=false
+
+  - name: GPU-78744930-b3ce-0ddd-4a63-f730116fc653
+    containerEdits:
+      deviceNodes:
+        - path: /dev/nvidia1
+        - path: /dev/dri/card2
+        - path: /dev/dri/renderD129
+      hooks:
+        - hookName: createContainer
+          path: /usr/bin/nvidia-cdi-hook
+          args:
+            - nvidia-cdi-hook
+            - create-symlinks
+            - --link
+            - ../card2::/dev/dri/by-path/pci-0000:3a:00.0-card
+            - --link
+            - ../renderD129::/dev/dri/by-path/pci-0000:3a:00.0-render
+          env:
+            - NVIDIA_CTK_DEBUG=false
+
+  - name: GPU-7c33d7b8-8cc2-676e-7678-b9a86d12cd93
+    containerEdits:
+      deviceNodes:
+        - path: /dev/nvidia3
+        - path: /dev/dri/card4
+        - path: /dev/dri/renderD131
+      hooks:
+        - hookName: createContainer
+          path: /usr/bin/nvidia-cdi-hook
+          args:
+            - nvidia-cdi-hook
+            - create-symlinks
+            - --link
+            - ../card4::/dev/dri/by-path/pci-0000:3e:00.0-card
+            - --link
+            - ../renderD131::/dev/dri/by-path/pci-0000:3e:00.0-render
+          env:
+            - NVIDIA_CTK_DEBUG=false
+
+  - name: GPU-8a73f553-110d-eaae-45ef-751617ac723c
+    containerEdits:
+      deviceNodes:
+        - path: /dev/nvidia2
+        - path: /dev/dri/card3
+        - path: /dev/dri/renderD130
+      hooks:
+        - hookName: createContainer
+          path: /usr/bin/nvidia-cdi-hook
+          args:
+            - nvidia-cdi-hook
+            - create-symlinks
+            - --link
+            - ../card3::/dev/dri/by-path/pci-0000:3c:00.0-card
+            - --link
+            - ../renderD130::/dev/dri/by-path/pci-0000:3c:00.0-render
+          env:
+            - NVIDIA_CTK_DEBUG=false
+...
+containerEdits:
+  mounts:
+    - hostPath: /usr/bin/nvidia-smi
+      containerPath: /usr/bin/nvidia-smi
+      options:
+        - ro
+        - nosuid
+        - nodev
+        - rbind
+        - rprivate
+    - hostPath: /usr/lib64/libcuda.so.580.126.09
+      containerPath: /usr/lib64/libcuda.so.580.126.09
+      options:
+        - ro
+        - nosuid
+        - nodev
+        - rbind
+        - rprivate
+    - hostPath: /usr/lib64/libnvidia-ml.so.580.126.09
+      containerPath: /usr/lib64/libnvidia-ml.so.580.126.09
+      options:
+        - ro
+        - nosuid
+        - nodev
+        - rbind
+        - rprivate
+...
+```
+
+CDI (Container Device Interface) is an interface for spec files to allocate special devices such as GPUs and NPUs to containers. [File 4] shows an example of a CDI-compliant spec file for NVIDIA GPUs. CDI spec files are written in YAML format, and you can see that they include device files and bind mount information for CUDA libraries/tools to allocate GPUs to containers. NVIDIA CDI spec files can be generated using the `nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml` command.
+
+{{< figure caption="[Figure 4] NVIDIA GPU Container Init in CDI Mode" src="images/gpu-container-init-cdi.png" width="900px" >}}
+
+[Figure 4] shows the GPU allocation process in CDI Mode. When the `nvidia-container-runtime` CLI operates in CDI Mode, it reads CDI spec files to check GPU information and injects GPU device files and bind mount information for CUDA libraries/tools into the OCI Runtime Spec according to the `NVIDIA_VISIBLE_DEVICES` environment variable to create the container. Since the `nvidia-container-runtime` CLI directly modifies the OCI Runtime Spec for GPUs, containers can be created without prestart hooks.
+
+```json {caption="[File 5] OCI Runtime Spec Example in CDI Mode", linenos=table}
+{
+    "linux": {
+        "devices": [ # Injected by nvidia-container-runtime with CDI
+            {
+                "path": "/dev/nvidia0",
+                "type": "c",
+                "major": 195,
+                "minor": 0,
+                "fileMode": 438,
+                "uid": 0,
+                "gid": 0
+            },
+            {
+                "path": "/dev/nvidia1",
+                "type": "c",
+                "major": 195,
+                "minor": 1,
+                "fileMode": 438,
+                "uid": 0,
+                "gid": 0
+            },
+            {
+                "path": "/dev/nvidia2",
+                "type": "c",
+                "major": 195,
+                "minor": 2,
+                "fileMode": 438,
+                "uid": 0,
+                "gid": 0
+            },
+            {
+                "path": "/dev/nvidia3",
+                "type": "c",
+                "major": 195,
+                "minor": 3,
+                "fileMode": 438,
+                "uid": 0,
+                "gid": 0
+            },
+            {
+                "path": "/dev/nvidiactl",
+                "type": "c",
+                "major": 195,
+                "minor": 255
+            },
+            {
+                "path": "/dev/nvidia-uvm",
+                "type": "c",
+                "major": 510,
+                "minor": 0
+            }
+            ...
+        ],
+    },
+    "mounts": [ # Injected by nvidia-container-runtime with CDI
+        {
+            "source": "/usr/lib64/libcuda.so.580.126.09",
+            "destination": "/usr/lib64/libcuda.so.580.126.09",
+            "options": ["bind", "ro"]
+        },
+        {
+            "source": "/usr/lib64/libnvidia-ml.so.580.126.09",
+            "destination": "/usr/lib64/libnvidia-ml.so.580.126.09",
+            "options": ["bind", "ro"]
+        },
+        {
+            "source": "/usr/bin/nvidia-smi",
+            "destination": "/usr/bin/nvidia-smi",
+            "options": ["bind", "ro"]
+        },
+        ...
+    ],
+    "process": {
+        "env": [
+            "NVIDIA_VISIBLE_DEVICES=all"
+        ]
+    }
+...
+}
+```
+
+[File 5] shows an example of the OCI Runtime Spec with related settings injected by the `nvidia-container-runtime` CLI in CDI Mode to allocate GPUs. You can see that GPU device files and bind mount information for CUDA libraries/tools have been injected.
 
 ## 2. References
 
