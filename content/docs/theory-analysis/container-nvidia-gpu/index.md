@@ -29,7 +29,7 @@ Container에게 GPU를 할당하기 위해서는 **NVIDIA Container Toolkit**을
 
 ### 1.2. NVIDIA GPU 할당 과정
 
-Container에 GPU를 할당하기 위해서는 `containerd`가 `containerd-shim` 대신에 `nvidia-container-runtime` CLI를 실행하도록 설정해야 한다. `nvidia-container-runtime` CLI는 `containerd-shim`이 수행하는 Container의 Stdin/Stdout/Stderr를 Named Pipe를 통해서 다른 Process에서 접근할 수 있게 하고, Container Init Process의 Exit Code를 `containerd`에게 전달하는 역할을 수행할 뿐만이 아니라, Container에게 GPU를 할당하기 위한 추가 설정을 수행한다.
+Container에 GPU를 할당하기 위해서는 `containerd`가 `runc` CLI 대신에 `nvidia-container-runtime` CLI를 실행하도록 설정해야 한다. `nvidia-container-runtime` CLI는 `containerd`가 생성한 OCI Runtime Spec에 GPU 할당을 위한 추가적인 설정을 주입하고, 이후에 `runc` CLI를 실행하는 역할을 수행한다. 즉 `containerd`와 `runc` CLI 사이에서 Cotnainer에 GPU 할당을 위한 OCI Runtime Spec을 변경하는 역할을 수행한다. OCI Runtime Spec 변경 및 `run` CLI를 실행한 다음에 `nvidia-container-runtime` CL는 종료된다.
 
 ```toml {caption="[File 1] /etc/containerd/config.toml Example", linenos=table}
 version = 3

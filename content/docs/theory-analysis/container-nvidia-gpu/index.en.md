@@ -29,7 +29,7 @@ To allocate GPUs to containers, the **NVIDIA Container Toolkit** must be utilize
 
 ### 1.2. NVIDIA GPU Allocation Process
 
-To allocate GPUs to containers, `containerd` must be configured to execute the `nvidia-container-runtime` CLI instead of `containerd-shim`. The `nvidia-container-runtime` CLI not only performs the role of making the container's stdin/stdout/stderr accessible from other processes through named pipes and delivering the container init process's exit code to `containerd`, but also performs additional configuration to allocate GPUs to containers.
+To allocate GPUs to containers, `containerd` must be configured to execute the `nvidia-container-runtime` CLI instead of `runc` CLI. The `nvidia-container-runtime` CLI injects additional settings for GPU allocation into the OCI Runtime Spec created by `containerd` and then executes the `runc` CLI. That is, it performs the role of modifying the OCI Runtime Spec for GPU allocation between `containerd` and the `runc` CLI. After modifying the OCI Runtime Spec and executing the `runc` CLI, the `nvidia-container-runtime` CLI terminates.
 
 ```toml {caption="[File 1] /etc/containerd/config.toml Example", linenos=table}
 version = 3
