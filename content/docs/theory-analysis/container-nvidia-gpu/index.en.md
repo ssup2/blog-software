@@ -18,29 +18,133 @@ Container A uses NVIDIA GPUs 0 and 1, Container B uses NVIDIA GPUs 0, 2, and 3, 
 * Container B : `docker run --gpu 0,2,3 --name b nvidia/cuda:12.4-base-ubuntu22.04`
 * Container C : `docker run --gpu 3 --name c nvidia/cuda:12.4-base-ubuntu22.04`
 
-Each container has device node files to access the GPUs allocated to it. Shared GPUs utilize **Time-Slicing** or **MPS (Multi Process Service)** features provided by NVIDIA GPUs, allowing multiple containers to share and use a single NVIDIA GPU.
+When `--gpu all` is configured, the container can use all NVIDIA GPUs. Shared GPUs utilize **Time-Slicing** or **MPS (Multi Process Service)** features provided by NVIDIA GPUs, allowing multiple containers to share and use a single NVIDIA GPU.
+
+To allocate GPUs to containers, the **NVIDIA Container Toolkit** must be utilized. The NVIDIA Container Toolkit provides `nvidia-container-runtime`, `nvidia-container-runtime-hook`, and `nvidia-container-cli` CLIs, and the container runtime allocates GPUs to containers through the provided CLIs. The NVIDIA Container Toolkit performs the following roles:
+
+* Injects device files (`/dev/nvidiaX`, `/dev/nvidia-uvm`, `/dev/nvidia-uvm-tools`, `/dev/nvidiactl`) into the container through **bind mount** so that applications inside the container can access the GPUs allocated to the container.
+* Injects CUDA libraries/tools into the container through **bind mount** so that applications inside the container can utilize the GPUs allocated to the container.
+* Configures cgroups so that GPUs allocated to the container can be accessed from inside the container.
+* Sets the `NVIDIA_VISIBLE_DEVICES` environment variable so that applications and CUDA libraries/tools inside the container can recognize the GPUs allocated to the container.
 
 ### 1.2. NVIDIA GPU Allocation Process
 
-To allocate NVIDIA GPUs to containers, the **OCI Runtime Spec's Prestart Hook** feature is actively utilized. Prestart Hook refers to a command that runs before the container's entrypoint command is executed.
+To allocate GPUs to containers, `containerd` must be configured to execute the `nvidia-container-runtime` CLI instead of `containerd-shim`. The `nvidia-container-runtime` CLI not only performs the role of making the container's stdin/stdout/stderr accessible from other processes through named pipes and delivering the container init process's exit code to `containerd`, but also performs additional configuration to allocate GPUs to containers.
 
-{{< figure caption="[Figure 2] NVIDIA GPU Container OCI Runtime Spec" src="images/gpu-container-runtime-spec.png" width="900px" >}}
+```toml {caption="[File 1] /etc/containerd/config.toml Example", linenos=table}
+version = 3
+root = "/var/lib/containerd"
+state = "/run/containerd"
 
-[Figure 2] shows the OCI Runtime Spec generated when creating a container using Docker's GPU option. When Docker detects the GPU option, settings to execute the `nvidia-container-runtime-hook` CLI are added to the Prestart Hook of the OCI Runtime Spec. The argument for the `nvidia-container-runtime-hook` CLI is fixed to `prestart`, and NVIDIA GPU and CUDA-related environment variables are added to the container's environment variables. For example, the `NVIDIA_VISIBLE_DEVICES` environment variable specifies which NVIDIA GPUs will be exposed to the container. In [Figure 2], since Docker was configured to use all NVIDIA GPUs with `--gpu all`, the `NVIDIA_VISIBLE_DEVICES` environment variable is also set to `all`.
+[plugins.'io.containerd.cri.v1.runtime']
+enable_cdi = true
 
-{{< figure caption="[Figure 3] NVIDIA GPU Container Init" src="images/gpu-container-init.png" width="900px" >}}
+[plugins.'io.containerd.cri.v1.runtime'.containerd]
+default_runtime_name = "nvidia"
 
-[Figure 3] shows the process where the `runc` CLI creates a container and configures the GPU based on the OCI Runtime Spec created in [Figure 2].
+[plugins.'io.containerd.cri.v1.runtime'.containerd.runtimes.nvidia]
+runtime_type = "io.containerd.runc.v2"
+base_runtime_spec = "/etc/containerd/base-runtime-spec.json"
 
-1. The `runc` CLI creates a Container Init Process through the `clone()` system call to create namespaces for the container and set up rootfs, and configures the container's root filesystem through OverlayFS.
-2. The Container Init Process created through the `clone()` system call requests the `runc` CLI to execute the Prestart Hook through a FIFO named pipe.
-3. In response to the Container Init Process's request, the `runc` CLI executes the `nvidia-container-runtime-hook` CLI as specified in the Prestart Hook of the OCI Runtime Spec.
-4. The `nvidia-container-runtime-hook` CLI passes container and NVIDIA GPU information as parameters to the `nvidia-container-cli` CLI based on the OCI Runtime Spec file and executes the `nvidia-container-cli` CLI. The `nvidia-container-cli` CLI is the entity that actually configures the container's NVIDIA GPU, while the `nvidia-container-runtime-hook` CLI only performs the role of an **interface** connecting the OCI Runtime Spec and the `nvidia-container-cli` CLI.
-5. The `nvidia-container-cli` CLI creates device node files based on the received information and, if necessary, also loads kernel modules required for NVIDIA GPU operation.
-6. When the Prestart Hook work is completed, the `runc` CLI sends a completion response to the Container Init Process through the FIFO named pipe.
-7. The Container Init Process that received the Prestart Hook completion changes the container's root filesystem to the actual container root filesystem through the `pivot_root()` system call and executes the container's entrypoint command through the `exec()` system call.
+[plugins.'io.containerd.cri.v1.runtime'.containerd.runtimes.nvidia.options]
+BinaryName = "/usr/bin/nvidia-container-runtime"
+SystemdCgroup = true
+```
 
-```shell {caption="[Shell 1] Device node file list in NVIDIA GPU container"}
+[File 1] shows how to configure `containerd` to execute the `nvidia-container-runtime` CLI. You can see that the `default_runtime_name` parameter is set to `nvidia`, and the spec file required for the `nvidia` runtime and the path to the `nvidia-container-runtime` CLI are configured.
+
+```toml {caption="[File 2] /etc/nvidia-container-runtime/config.toml Example", linenos=table}
+[nvidia-container-runtime]
+mode = "legacy | cdi | auto"
+
+[nvidia-container-runtime.cdi]
+spec-dirs = ["/etc/cdi", "/var/run/cdi"]
+```
+
+The `nvidia-container-runtime` CLI has two modes: Legacy Mode, which utilizes the **OCI Runtime Spec's Prestart Hook** feature, and CDI Mode, which utilizes **CDI (Container Device Interface)**. [File 2] shows the configuration file for `nvidia-container-runtime` to set the mode. You can set `mode` to one of `legacy`, `cdi`, or `auto`. `legacy` is the existing method that utilizes the OCI Runtime Spec's Prestart Hook feature, and `cdi` is the latest method that utilizes **CDI (Container Device Interface)**. `auto` automatically selects one of `legacy` or `cdi` based on system configuration, and if CDI spec files exist in `spec-dirs`, it uses CDI mode; otherwise, it uses Legacy mode.
+
+#### 1.2.1. GPU Allocation Process in Legacy Mode
+
+{{< figure caption="[Figure 3] NVIDIA GPU Container Init" src="images/gpu-container-init-legacy.png" width="900px" >}}
+
+[Figure 3] shows the Legacy GPU allocation process. The Legacy GPU allocation process is a method that actively utilizes the **OCI Runtime Spec's Prestart Hook** feature. Prestart Hook refers to a command that runs before the container's entrypoint command is executed. [Figure 3] performs the following process:
+
+1. The `ctr` CLI or `dockerd` passes a container creation request to `containerd` along with GPU information to allocate to the container set in the `NVIDIA_VISIBLE_DEVICES` environment variable.
+2. `containerd` creates an OCI Runtime Config file according to the request.
+3. Subsequently, `containerd` executes the `nvidia-container-runtime` CLI according to `containerd`'s config.
+4. The `nvidia-container-runtime` CLI adds settings to execute the `nvidia-container-runtime-hook` CLI in the Prestart Hook of the OCI Runtime Config file.
+5. Subsequently, the `nvidia-container-runtime` CLI executes the `runc` CLI to create the container.
+6. The `runc` CLI creates a Container Init Process through the `clone()` system call to set up namespaces and root filesystem for the container according to the OCI Runtime Spec, and prepares the root filesystem using OverlayFS.
+7. The Container Init Process created through the `clone()` system call requests the `runc` CLI to execute the Prestart Hook through a FIFO named pipe.
+8. The `runc` CLI executes the `nvidia-container-runtime-hook` CLI according to the OCI Runtime Spec.
+9. The `nvidia-container-runtime-hook` CLI passes container information and NVIDIA GPU information (`NVIDIA_VISIBLE_DEVICES` environment variable) to configure in the container as parameters to the `nvidia-container-cli` CLI based on the OCI Runtime Spec file and executes the `nvidia-container-cli` CLI. The `nvidia-container-cli` CLI is the entity that actually configures the container's NVIDIA GPU, while the `nvidia-container-runtime-hook` CLI only performs the role of an **interface** connecting the OCI Runtime Spec and the `nvidia-container-cli` CLI.
+10. The `nvidia-container-cli` CLI injects device files and CUDA libraries/tools into the container through bind mount via the internal `libnvidia-container` library based on the received container and NVIDIA GPU information to configure in the container. It also configures cgroups to allow GPU access from inside the container and, if necessary, loads kernel modules required for NVIDIA GPU operation.
+11. When the Prestart Hook work is completed, the `runc` CLI sends a completion response to the Container Init Process through the FIFO named pipe.
+12. The Container Init Process that received the Prestart Hook completion changes the container's root filesystem to the actual container root filesystem through the `pivot_root()` system call and executes the container's entrypoint command through the `exec()` system call.
+
+```json {caption="[File 3] OCI Runtime Spec Example", linenos=table}
+{
+    "hooks": {
+        "poststart": [],
+        "poststop": [],
+        "prestart": [{  # Modified by nvidia-container-runtime CLI
+            "args": ["/usr/bin/nvidia-container-runtime-hook", "prestart"],
+            "path": "/usr/bin/nvidia-container-runtime-hook"
+        }]
+        ...
+    },
+    "process": {
+        "env": [
+            "NVIDIA_VISIBLE_DEVICES=all"  # Requested by ctr CLI or dockerd
+        ]
+    }
+    ...
+}
+```
+
+[File 3] shows an example of the OCI Runtime Spec. When `containerd` receives a container creation request from the `ctr` CLI or `dockerd`, it sets the `NVIDIA_VISIBLE_DEVICES` environment variable, so it creates the OCI Runtime Spec with the `NVIDIA_VISIBLE_DEVICES` environment variable added to the environment variables. Subsequently, settings to execute the `nvidia-container-runtime-hook` CLI are added to the Prestart Hook of the OCI Runtime Spec by `nvidia-container-runtime`.
+
+The `nvidia-container-runtime` CLI adds settings to execute the `nvidia-container-runtime-hook` CLI in the Prestart Hook of the OCI Runtime Spec. The argument for the `nvidia-container-runtime-hook` CLI is fixed to `prestart`, and NVIDIA GPU and CUDA-related environment variables are added to the container's environment variables. For example, the `NVIDIA_VISIBLE_DEVICES` environment variable specifies which NVIDIA GPUs will be exposed to the container. In [Figure 2], since Docker was configured to use all NVIDIA GPUs with `--gpu all`, the `NVIDIA_VISIBLE_DEVICES` environment variable is also set to `all`.
+
+```shell {caption="[Shell 1] Check Bind Mount and Device File and Environment Variable in NVIDIA GPU Container"}
+# Check bind mount
+$ mount 
+...
+tmpfs on /proc/driver/nvidia type tmpfs (rw,nosuid,nodev,noexec,relatime,seclabel,mode=555)
+/dev/nvme0n1p1 on /usr/bin/nvidia-smi type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/bin/nvidia-debugdump type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/bin/nvidia-persistenced type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/bin/nv-fabricmanager type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/bin/nvidia-cuda-mps-control type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/bin/nvidia-cuda-mps-server type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-ml.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-cfg.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libcuda.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libcudadebugger.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-opencl.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-gpucomp.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-ptxjitcompiler.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-allocator.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-pkcs11.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-pkcs11-openssl3.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-nvvm.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /lib/firmware/nvidia/580.126.09/gsp_ga10x.bin type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /lib/firmware/nvidia/580.126.09/gsp_tu10x.bin type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+tmpfs on /run/nvidia-persistenced/socket type tmpfs (rw,nosuid,nodev,noexec,seclabel,size=38119072k,nr_inodes=819200,mode=755)
+devtmpfs on /dev/nvidiactl type devtmpfs (ro,nosuid,noexec,seclabel,size=4096k,nr_inodes=23820204,mode=755)
+devtmpfs on /dev/nvidia-uvm type devtmpfs (ro,nosuid,noexec,seclabel,size=4096k,nr_inodes=23820204,mode=755)
+devtmpfs on /dev/nvidia-uvm-tools type devtmpfs (ro,nosuid,noexec,seclabel,size=4096k,nr_inodes=23820204,mode=755)
+devtmpfs on /dev/nvidia2 type devtmpfs (ro,nosuid,noexec,seclabel,size=4096k,nr_inodes=23820204,mode=755)
+proc on /proc/driver/nvidia/gpus/0000:3c:00.0 type proc (ro,nosuid,nodev,noexec,relatime)
+devtmpfs on /dev/nvidia3 type devtmpfs (ro,nosuid,noexec,seclabel,size=4096k,nr_inodes=23820204,mode=755)
+proc on /proc/driver/nvidia/gpus/0000:3e:00.0 type proc (ro,nosuid,nodev,noexec,relatime)
+devtmpfs on /dev/nvidia1 type devtmpfs (ro,nosuid,noexec,seclabel,size=4096k,nr_inodes=23820204,mode=755)
+proc on /proc/driver/nvidia/gpus/0000:3a:00.0 type proc (ro,nosuid,nodev,noexec,seclabel,size=4096k,nr_inodes=23820204,mode=755)
+devtmpfs on /dev/nvidia0 type devtmpfs (ro,nosuid,noexec,seclabel,size=4096k,nr_inodes=23820204,mode=755)
+proc on /proc/driver/nvidia/gpus/0000:38:00.0 type proc (ro,nosuid,nodev,noexec,relatime)
+...
+
+# Check device files
 $ ls -l /dev
 ...
 crw-rw-rw- 1 root root 510,   0 Feb 11 15:41 nvidia-uvm
@@ -51,9 +155,12 @@ crw-rw-rw- 1 root root 195,   2 Feb 11 15:41 nvidia2
 crw-rw-rw- 1 root root 195,   3 Feb 11 15:41 nvidia3
 crw-rw-rw- 1 root root 195, 255 Feb 11 15:41 nvidiactl
 ...
-```
 
-When the `runc` CLI successfully completes the Prestart Hook work, device node files for NVIDIA GPUs are created inside the container. [Shell 1] shows the list of device node files inside a container with 4 GPUs available.
+# Check environment variable
+$ printenv | grep NVIDIA
+NVIDIA_VISIBLE_DEVICES=all
+...
+```
 
 ```shell {caption="[Shell 2] Cgroup device list in host"}
 $ ls -l /sys/fs/cgroup/[container_id]/devices/
@@ -68,7 +175,9 @@ c 195:0 rw   # /dev/nvidia0
 ...
 ```
 
-Additionally, cgroups are configured to allow GPU access from inside the container. [Shell 2] shows an example of the device list in the cgroup for allowing GPU access from inside the container.
+[Shell 1] shows an example of checking bind mounts, device files, and environment variables inside a container. You can see that GPU device files and CUDA libraries/tools are injected into the container through bind mount via the `mount` command. You can also see that the `NVIDIA_VISIBLE_DEVICES` environment variable is injected into the container application through the `printenv` command. [Shell 2] shows an example of the device list in the cgroup for allowing GPU access from inside the container.
+
+#### 1.2.2. GPU Allocation Process in CDI Mode
 
 ## 2. References
 
