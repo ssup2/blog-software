@@ -181,7 +181,192 @@ c 195:0 rw   # /dev/nvidia0
 
 {{< figure caption="[Figure 4] NVIDIA GPU Container Init in CDI Mode" src="images/gpu-container-init-cdi.png" width="900px" >}}
 
-```json {caption="[File 4] OCI Runtime Spec Example in CDI Mode", linenos=table}
+```yaml {caption="[File 4] CDI Spec File Example", linenos=table}
+cdiVersion: 0.5.0
+kind: nvidia.com/gpu
+devices:
+  - name: "0"
+    containerEdits:
+      deviceNodes:
+        - path: /dev/nvidia0
+        - path: /dev/dri/card1
+        - path: /dev/dri/renderD128
+      hooks:
+        - hookName: createContainer
+          path: /usr/bin/nvidia-cdi-hook
+          args:
+            - nvidia-cdi-hook
+            - create-symlinks
+            - --link
+            - ../card1::/dev/dri/by-path/pci-0000:38:00.0-card
+            - --link
+            - ../renderD128::/dev/dri/by-path/pci-0000:38:00.0-render
+          env:
+            - NVIDIA_CTK_DEBUG=false
+
+  - name: "1"
+    containerEdits:
+      deviceNodes:
+        - path: /dev/nvidia1
+        - path: /dev/dri/card2
+        - path: /dev/dri/renderD129
+      hooks:
+        - hookName: createContainer
+          path: /usr/bin/nvidia-cdi-hook
+          args:
+            - nvidia-cdi-hook
+            - create-symlinks
+            - --link
+            - ../card2::/dev/dri/by-path/pci-0000:3a:00.0-card
+            - --link
+            - ../renderD129::/dev/dri/by-path/pci-0000:3a:00.0-render
+          env:
+            - NVIDIA_CTK_DEBUG=false
+
+  - name: "2"
+    containerEdits:
+      deviceNodes:
+        - path: /dev/nvidia2
+        - path: /dev/dri/card3
+        - path: /dev/dri/renderD130
+      hooks:
+        - hookName: createContainer
+          path: /usr/bin/nvidia-cdi-hook
+          args:
+            - nvidia-cdi-hook
+            - create-symlinks
+            - --link
+            - ../card3::/dev/dri/by-path/pci-0000:3c:00.0-card
+            - --link
+            - ../renderD130::/dev/dri/by-path/pci-0000:3c:00.0-render
+          env:
+            - NVIDIA_CTK_DEBUG=false
+
+  - name: "3"
+    containerEdits:
+      deviceNodes:
+        - path: /dev/nvidia3
+        - path: /dev/dri/card4
+        - path: /dev/dri/renderD131
+      hooks:
+        - hookName: createContainer
+          path: /usr/bin/nvidia-cdi-hook
+          args:
+            - nvidia-cdi-hook
+            - create-symlinks
+            - --link
+            - ../card4::/dev/dri/by-path/pci-0000:3e:00.0-card
+            - --link
+            - ../renderD131::/dev/dri/by-path/pci-0000:3e:00.0-render
+          env:
+            - NVIDIA_CTK_DEBUG=false
+
+  - name: GPU-3e953d37-558d-fb20-8eca-25de8b98f5a7
+    containerEdits:
+      deviceNodes:
+        - path: /dev/nvidia0
+        - path: /dev/dri/card1
+        - path: /dev/dri/renderD128
+      hooks:
+        - hookName: createContainer
+          path: /usr/bin/nvidia-cdi-hook
+          args:
+            - nvidia-cdi-hook
+            - create-symlinks
+            - --link
+            - ../card1::/dev/dri/by-path/pci-0000:38:00.0-card
+            - --link
+            - ../renderD128::/dev/dri/by-path/pci-0000:38:00.0-render
+          env:
+            - NVIDIA_CTK_DEBUG=false
+
+  - name: GPU-78744930-b3ce-0ddd-4a63-f730116fc653
+    containerEdits:
+      deviceNodes:
+        - path: /dev/nvidia1
+        - path: /dev/dri/card2
+        - path: /dev/dri/renderD129
+      hooks:
+        - hookName: createContainer
+          path: /usr/bin/nvidia-cdi-hook
+          args:
+            - nvidia-cdi-hook
+            - create-symlinks
+            - --link
+            - ../card2::/dev/dri/by-path/pci-0000:3a:00.0-card
+            - --link
+            - ../renderD129::/dev/dri/by-path/pci-0000:3a:00.0-render
+          env:
+            - NVIDIA_CTK_DEBUG=false
+
+  - name: GPU-7c33d7b8-8cc2-676e-7678-b9a86d12cd93
+    containerEdits:
+      deviceNodes:
+        - path: /dev/nvidia3
+        - path: /dev/dri/card4
+        - path: /dev/dri/renderD131
+      hooks:
+        - hookName: createContainer
+          path: /usr/bin/nvidia-cdi-hook
+          args:
+            - nvidia-cdi-hook
+            - create-symlinks
+            - --link
+            - ../card4::/dev/dri/by-path/pci-0000:3e:00.0-card
+            - --link
+            - ../renderD131::/dev/dri/by-path/pci-0000:3e:00.0-render
+          env:
+            - NVIDIA_CTK_DEBUG=false
+
+  - name: GPU-8a73f553-110d-eaae-45ef-751617ac723c
+    containerEdits:
+      deviceNodes:
+        - path: /dev/nvidia2
+        - path: /dev/dri/card3
+        - path: /dev/dri/renderD130
+      hooks:
+        - hookName: createContainer
+          path: /usr/bin/nvidia-cdi-hook
+          args:
+            - nvidia-cdi-hook
+            - create-symlinks
+            - --link
+            - ../card3::/dev/dri/by-path/pci-0000:3c:00.0-card
+            - --link
+            - ../renderD130::/dev/dri/by-path/pci-0000:3c:00.0-render
+          env:
+            - NVIDIA_CTK_DEBUG=false
+...
+containerEdits:
+  mounts:
+    - hostPath: /usr/bin/nvidia-smi
+      containerPath: /usr/bin/nvidia-smi
+      options:
+        - ro
+        - nosuid
+        - nodev
+        - rbind
+        - rprivate
+    - hostPath: /usr/lib64/libcuda.so.580.126.09
+      containerPath: /usr/lib64/libcuda.so.580.126.09
+      options:
+        - ro
+        - nosuid
+        - nodev
+        - rbind
+        - rprivate
+    - hostPath: /usr/lib64/libnvidia-ml.so.580.126.09
+      containerPath: /usr/lib64/libnvidia-ml.so.580.126.09
+      options:
+        - ro
+        - nosuid
+        - nodev
+        - rbind
+        - rprivate
+...
+```
+
+```json {caption="[File 5] OCI Runtime Spec Example in CDI Mode", linenos=table}
 {
     "linux": {
         "devices": [ # Injected by nvidia-container-runtime with CDI
@@ -238,13 +423,13 @@ c 195:0 rw   # /dev/nvidia0
     },
     "mounts": [ # Injected by nvidia-container-runtime with CDI
         {
-            "source": "/usr/lib/x86_64-linux-gnu/libcuda.so.1",
-            "destination": "/usr/lib/x86_64-linux-gnu/libcuda.so.1",
+            "source": "/usr/lib64/libcuda.so.580.126.09",
+            "destination": "/usr/lib64/libcuda.so.580.126.09",
             "options": ["bind", "ro"]
         },
         {
-            "source": "/usr/lib/x86_64-linux-gnu/libnvidia-ml.so.1",
-            "destination": "/usr/lib/x86_64-linux-gnu/libnvidia-ml.so.1",
+            "source": "/usr/lib64/libnvidia-ml.so.580.126.09",
+            "destination": "/usr/lib64/libnvidia-ml.so.580.126.09",
             "options": ["bind", "ro"]
         },
         {
