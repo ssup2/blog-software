@@ -67,7 +67,7 @@ The `nvidia-container-runtime` CLI has two modes: Legacy Mode, which utilizes th
 
 {{< figure caption="[Figure 3] NVIDIA GPU Container Init in Legacy Mode" src="images/gpu-container-init-legacy.png" width="900px" >}}
 
-[Figure 3] shows the Legacy GPU allocation process. The Legacy GPU allocation process is a method that actively utilizes the **OCI Runtime Spec's Prestart Hook** feature. Prestart Hook refers to a command that runs before the container's entrypoint command is executed. [Figure 3] performs the following process:
+[Figure 1] precisely shows the Architecture of Legacy Mode. [Figure 3] shows the GPU allocation process in Legacy Mode. The GPU allocation process in Legacy Mode is a method that actively utilizes the **OCI Runtime Spec's Prestart Hook** feature. Prestart Hook refers to a command that runs before the container's entrypoint command is executed. [Figure 3] performs the following process:
 
 1. The `ctr` CLI or `dockerd` passes a container creation request to `containerd` along with GPU information to allocate to the container set in the `NVIDIA_VISIBLE_DEVICES` environment variable.
 2. `containerd` creates an OCI Runtime Config file according to the request.
@@ -106,7 +106,7 @@ The `nvidia-container-runtime` CLI has two modes: Legacy Mode, which utilizes th
 
 The `nvidia-container-runtime` CLI adds settings to execute the `nvidia-container-runtime-hook` CLI in the Prestart Hook of the OCI Runtime Spec. The argument for the `nvidia-container-runtime-hook` CLI is fixed to `prestart`, and NVIDIA GPU and CUDA-related environment variables are added to the container's environment variables. For example, the `NVIDIA_VISIBLE_DEVICES` environment variable specifies which NVIDIA GPUs will be exposed to the container. In [Figure 2], since Docker was configured to use all NVIDIA GPUs with `--gpu all`, the `NVIDIA_VISIBLE_DEVICES` environment variable is also set to `all`.
 
-```shell {caption="[Shell 1] Check Bind Mount and Device File and Environment Variable in NVIDIA GPU Container"}
+```shell {caption="[Shell 1] Check Bind Mount, Device File and Environment Variable in NVIDIA GPU Container with Legacy Mode"}
 # Check bind mount
 $ mount 
 ...
@@ -178,6 +178,74 @@ c 195:0 rw   # /dev/nvidia0
 [Shell 1] shows an example of checking bind mounts, device files, and environment variables inside a container. You can see that GPU device files and CUDA libraries/tools are injected into the container through bind mount via the `mount` command. You can also see that the `NVIDIA_VISIBLE_DEVICES` environment variable is injected into the container application through the `printenv` command. [Shell 2] shows an example of the device list in the cgroup for allowing GPU access from inside the container.
 
 #### 1.2.2. GPU Allocation Process in CDI Mode
+
+{{< figure caption="[Figure 4] NVIDIA GPU Container CDI Mode Architecture" src="images/gpu-container-cdi-mode-architecture.png" width="900px" >}}
+
+```shell {caption="[Shell 3] Check Bind Mount in NVIDIA GPU Container with CDI Mode"}
+$ mount
+...
+tmpfs on /run/nvidia-persistenced/socket type tmpfs (rw,nosuid,nodev,noexec,seclabel,size=3146936k,nr_inodes=819200,mode=755)
+/dev/nvme0n1p1 on /usr/bin/nvidia-cuda-mps-control type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/bin/nvidia-cuda-mps-server type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/bin/nvidia-debugdump type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/bin/nvidia-imex type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/bin/nvidia-imex-ctl type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/bin/nvidia-persistenced type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/bin/nvidia-smi type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libEGL_nvidia.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libGLESv1_CM_nvidia.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libGLESv2_nvidia.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libGLX_nvidia.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libcuda.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libcudadebugger.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvcuvid.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-allocator.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-cfg.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-egl-gbm.so.1.1.3 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-egl-wayland.so.1.1.20 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-egl-wayland.so.1.1.21 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-eglcore.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-encode.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-fbc.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-glcore.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-glsi.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-glvkspirv.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-gpucomp.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-gtk2.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-gtk3.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-ml.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-ngx.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-nvvm.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-opencl.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-opticalflow.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-pkcs11-openssl3.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-pkcs11.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-present.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-ptxjitcompiler.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-rtcore.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-sandboxutils.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-tls.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-vksc-core.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-wayland-client.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvoptix.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /etc/X11/xorg.conf.d/10-nvidia.conf type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /etc/vulkan/icd.d/nvidia_icd.json type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /etc/vulkan/icd.d/nvidia_icd.x86_64.json type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /etc/vulkan/implicit_layer.d/nvidia_layers.json type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/vdpau/libvdpau_nvidia.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/share/nvidia/nvoptix.bin type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+tmpfs on /run/secrets/kubernetes.io/serviceaccount type tmpfs (ro,relatime,seclabel,size=14717844k,noswap)
+/dev/nvme0n1p1 on /lib/firmware/nvidia/580.126.09/gsp_ga10x.bin type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /lib/firmware/nvidia/580.126.09/gsp_tu10x.bin type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/share/egl/egl_external_platform.d/10_nvidia_wayland.json type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/share/egl/egl_external_platform.d/15_nvidia_gbm.json type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/share/glvnd/egl_vendor.d/10_nvidia.json type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/xorg/modules/drivers/nvidia_drv.so type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/xorg/modules/extensions/libglxserver_nvidia.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+tmpfs on /run/nvidia-ctk-hook358549ab-23fa-497c-a9e4-9b9c0a2250ff type tmpfs (rw,relatime,seclabel,size=4k)
+tmpfs on /proc/driver/nvidia/params type tmpfs (rw,relatime,seclabel,size=4k)
+...
+```
 
 ```yaml {caption="[File 4] /etc/cdi/nvidia.yaml Example", linenos=table}
 cdiVersion: 0.5.0
@@ -366,11 +434,13 @@ containerEdits:
 
 CDI (Container Device Interface) is an interface for spec files to allocate special devices such as GPUs and NPUs to containers. [File 4] shows an example of a CDI-compliant spec file for NVIDIA GPUs. CDI spec files are written in YAML format, and you can see that they include device files and bind mount information for CUDA libraries/tools to allocate GPUs to containers. NVIDIA CDI spec files can be generated using the `nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml` command.
 
-{{< figure caption="[Figure 4] NVIDIA GPU Container Init in CDI Mode" src="images/gpu-container-init-cdi.png" width="900px" >}}
+[Figure 4] shows the Architecture of CDI Mode. The biggest difference between CDI Mode and Legacy Mode is that CDI Mode does not inject device files through bind mount, but instead utilizes a method where the `runc` CLI directly creates device files. Therefore, when checking [Shell 3] and mount information, you can see that only CUDA libraries/tools are bind mounted, and device files are not bind mounted.
 
-[Figure 4] shows the GPU allocation process in CDI Mode. When the `nvidia-container-runtime` CLI operates in CDI Mode, it reads CDI spec files to check GPU information and injects GPU device files and bind mount information for CUDA libraries/tools into the OCI Runtime Spec according to the `NVIDIA_VISIBLE_DEVICES` environment variable to create the container. Since the `nvidia-container-runtime` CLI directly modifies the OCI Runtime Spec for GPUs, containers can be created without prestart hooks.
+{{< figure caption="[Figure 5] NVIDIA GPU Container Init in CDI Mode" src="images/gpu-container-init-cdi.png" width="900px" >}}
 
-```json {caption="[File 5] OCI Runtime Spec Example in CDI Mode", linenos=table}
+[Figure 5] shows the GPU allocation process in CDI Mode. When the `nvidia-container-runtime` CLI operates in CDI Mode, it reads CDI spec files to check GPU information and injects GPU device files and bind mount information for CUDA libraries/tools into the OCI Runtime Spec according to the `NVIDIA_VISIBLE_DEVICES` environment variable to create the container. Since the `nvidia-container-runtime` CLI directly modifies the OCI Runtime Spec for GPUs, containers can be created without prestart hooks.
+
+```json {caption="[File 6] OCI Runtime Spec Example in CDI Mode", linenos=table}
 {
     "linux": {
         "devices": [ # Injected by nvidia-container-runtime with CDI
@@ -452,7 +522,7 @@ CDI (Container Device Interface) is an interface for spec files to allocate spec
 }
 ```
 
-[File 5] shows an example of the OCI Runtime Spec with related settings injected by the `nvidia-container-runtime` CLI in CDI Mode to allocate GPUs. You can see that GPU device files and bind mount information for CUDA libraries/tools have been injected.
+[File 6] shows an example of the OCI Runtime Spec with related settings injected by the `nvidia-container-runtime` CLI in CDI Mode to allocate GPUs. You can see that GPU device files and bind mount information for CUDA libraries/tools have been injected.
 
 ## 2. References
 

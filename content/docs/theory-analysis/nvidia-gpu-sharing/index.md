@@ -486,12 +486,13 @@ Tue Feb 17 16:58:38 2026
 |  No running processes found                                                             |
 +-----------------------------------------------------------------------------------------+
 
-$ nvidia-smi -i 0 -L
+$ nvidia-smi -L
 GPU 0: NVIDIA A100-SXM4-40GB (UUID: GPU-9e4aeb94-01c0-5173-4811-4ca60f77b3a9)
   MIG 4g.20gb     Device  0: (UUID: MIG-c42101f0-a1fa-5b68-8908-7c5c887f28bd)
   MIG 1c.2g.10gb  Device  1: (UUID: MIG-8970491e-16e0-5140-9f8f-d561baa3c186)
   MIG 1c.2g.10gb  Device  2: (UUID: MIG-239565ce-30e3-52d7-8197-5630d3ce21fa)
   MIG 1g.5gb      Device  3: (UUID: MIG-20301a31-77fa-59ec-b0b8-7ef543821f29)
+...
 ```
 
 [Shell 6]은 MIG vGPU를 확인하는 과정을 나타내고 있다. `nvidia-smi` 명령어를 통해서 GPU를 조회하면 MIG vGPU의 정보를 확인할 수 있다. 또한 `-L` 명령어를 통해서 vGPU의 UUID를 확인할 수 있다. UUID는 CUDA App에서 어떤 vGPU를 이용할지 결정하는데 사용된다.

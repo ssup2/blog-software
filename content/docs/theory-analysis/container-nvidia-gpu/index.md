@@ -8,7 +8,7 @@ Container에게 NVIDIA GPU를 할당하는 기법을 분석한다.
 
 ### 1.1. NVIDIA GPU Container Architecture
 
-{{< figure caption="[Figure 1] NVIDIA GPU Container Architecture" src="images/gpu-container-architecture.png" width="900px" >}}
+{{< figure caption="[Figure 1] NVIDIA GPU Container Legacy Mode Architecture" src="images/gpu-container-legacy-mode-architecture.png" width="900px" >}}
 
 NVIDIA GPU을 Container에게 할당하여 Container가 NVIDIA GPU를 이용할 수 있는 환경을 구성할 수 있다. Docker 19.03 Version에서는 추가된 GPU Option (`--gpu`)을 이용하여 Container에게 NVIDIA GPU를 할당할 수 있다. [Figure 1]은 GPU Option을 통해서 NVIDIA GPU 설정이 완료된 Container들을 나타내고 있다. 각 Container는 하나의 GPU 뿐만 아니라 다수의 GPU를 이용할 수 있다. 또한 자신에게만 할당된 Dedicated GPU 뿐만 아니라, 다른 Container와 공유하는 Shared GPU를 이용할 수 있다.
 
@@ -29,7 +29,7 @@ Container에게 GPU를 할당하기 위해서는 **NVIDIA Container Toolkit**을
 
 ### 1.2. NVIDIA GPU 할당 과정
 
-Container에 GPU를 할당하기 위해서는 `containerd`가 `runc` CLI 대신에 `nvidia-container-runtime` CLI를 실행하도록 설정해야 한다. `nvidia-container-runtime` CLI는 `containerd`가 생성한 OCI Runtime Spec에 GPU 할당을 위한 추가적인 설정을 주입하고, 이후에 `runc` CLI를 실행하는 역할을 수행한다. 즉 `containerd`와 `runc` CLI 사이에서 Cotnainer에 GPU 할당을 위한 OCI Runtime Spec을 변경하는 역할을 수행한다. OCI Runtime Spec 변경 및 `run` CLI를 실행한 다음에 `nvidia-container-runtime` CL는 종료된다.
+Container에 GPU를 할당하기 위해서는 `containerd`가 `runc` CLI 대신에 `nvidia-container-runtime` CLI를 실행하도록 설정해야 한다. `nvidia-container-runtime` CLI는 `containerd`가 생성한 OCI Runtime Spec에 GPU 할당을 위한 추가적인 설정을 주입하고, 이후에 `runc` CLI를 실행하는 역할을 수행한다. 즉 `containerd`와 `runc` CLI 사이에서 Cotnainer에 GPU 할당을 위한 OCI Runtime Spec을 변경하는 역할을 수행한다. OCI Runtime Spec 변경 및 `run` CLI를 실행한 다음에 `nvidia-container-runtime` CLI는 종료된다.
 
 ```toml {caption="[File 1] /etc/containerd/config.toml Example", linenos=table}
 version = 3
@@ -67,7 +67,7 @@ spec-dirs = ["/etc/cdi", "/var/run/cdi"]
 
 {{< figure caption="[Figure 3] NVIDIA GPU Container Init in Legacy Mode" src="images/gpu-container-init-legacy.png" width="900px" >}}
 
-[Figure 3]은 Legacy GPU 할당 과정을 나타내고 있다. Legacy GPU 할당 과정은 **OCI Runtime Spec의 Prestart Hook** 기능을 적극적으로 활용하는 방법이다. Prestart Hook은 Container의 Entrypoint Command가 실행되기 전에 실행되는 Command를 의미한다. [Figure 3]은 다음과 같은 과정을 수행한다.
+[Figure 1]은 정확히는 Legacy Mode의 Architecture를 나타내고 있다. [Figure 3]은 Legacy Mode에서의 GPU 할당 과정을 나타내고 있다. Legacy Mode에서의 GPU 할당 과정은 **OCI Runtime Spec의 Prestart Hook** 기능을 적극적으로 활용하는 방법이다. Prestart Hook은 Container의 Entrypoint Command가 실행되기 전에 실행되는 Command를 의미한다. [Figure 3]은 다음과 같은 과정을 수행한다.
 
 1. `ctr` CLI 또는 `dockerd`는 Container에게 할당할 GPU 정보를 `NVIDIA_VISIBLE_DEVICES` 환경 변수에 설정과 함께 `containerd`에게 Container 생성 요청을 전달한다.
 2. `containerd`는 요청에 따라서 OCI Runtime Config 파일을 생성한다.
@@ -106,7 +106,7 @@ spec-dirs = ["/etc/cdi", "/var/run/cdi"]
 
 `nvidia-container-runtime` CLI는 OCI Runtime Spec의 Prestart Hook에 `nvidia-container-runtime-hook` CLI를 실행하기 위한 설정을 추가한다. `nvidia-container-runtime-hook` CLI의 Argument는 `prestart`로 고정되며, Container의 환경 변수에는 NVIDIA GPU, CUDA 관련 환경 변수가 추가된다. 예를 들어 `NVIDIA_VISIBLE_DEVICES` 환경 변수의 경우 Container에게 노출될 NVIDIA GPU의 지정하는 환경 변수이다. [Figure 2]의 경우에서는 Docker에서 모든 NVIDIA GPU를 이용하도록 `--gpu all` 설정을 수행하였기 때문에 `NVIDIA_VISIBLE_DEVICES` 환경 변수에도 `all`이 설정된다.
 
-```shell {caption="[Shell 1] Check Bind Mount and Device File and Environment Variable in NVIDIA GPU Container"}
+```shell {caption="[Shell 1] Check Bind Mount, Device File and Environment Variable in NVIDIA GPU Container with Legacy Mode"}
 # Check bind mount
 $ mount 
 ...
@@ -178,6 +178,76 @@ c 195:0 rw   # /dev/nvidia0
 [Shell 1]은 Container 내부에서 Bind Mount, Device File, 환경 변수를 확인하는 예시를 나타내고 있다. `mount` 명령어를 통해서 GPU Device File 및 CUDA Library/Tool을 Bind Mount를 통해서 Container 내부에 주입된걸 확인할 수 있다. 또한 `printenv` 명령어를 통해서 Container App에 `NVIDIA_VISIBLE_DEVICES` 환경 변수가 주입된 것도 확인할 수 있다. [Shell 2]는 Container 내부에서 GPU 접근을 허용하기 위한 Cgroup의 Device List 예시를 나타내고 있다.
 
 #### 1.2.2. CDI Mode의 GPU 할당 과정
+
+{{< figure caption="[Figure 4] NVIDIA GPU Container CDI Mode Architecture" src="images/gpu-container-cdi-mode-architecture.png" width="900px" >}}
+
+```shell {caption="[Shell 3] Check Bind Mount in NVIDIA GPU Container with CDI Mode"}
+$ mount
+...
+tmpfs on /run/nvidia-persistenced/socket type tmpfs (rw,nosuid,nodev,noexec,seclabel,size=3146936k,nr_inodes=819200,mode=755)
+/dev/nvme0n1p1 on /usr/bin/nvidia-cuda-mps-control type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/bin/nvidia-cuda-mps-server type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/bin/nvidia-debugdump type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/bin/nvidia-imex type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/bin/nvidia-imex-ctl type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/bin/nvidia-persistenced type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/bin/nvidia-smi type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libEGL_nvidia.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libGLESv1_CM_nvidia.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libGLESv2_nvidia.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libGLX_nvidia.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libcuda.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libcudadebugger.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvcuvid.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-allocator.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-cfg.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-egl-gbm.so.1.1.3 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-egl-wayland.so.1.1.20 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-egl-wayland.so.1.1.21 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-eglcore.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-encode.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-fbc.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-glcore.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-glsi.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-glvkspirv.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-gpucomp.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-gtk2.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-gtk3.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-ml.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-ngx.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-nvvm.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-opencl.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-opticalflow.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-pkcs11-openssl3.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-pkcs11.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-present.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-ptxjitcompiler.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-rtcore.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-sandboxutils.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-tls.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-vksc-core.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvidia-wayland-client.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/libnvoptix.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /etc/X11/xorg.conf.d/10-nvidia.conf type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /etc/vulkan/icd.d/nvidia_icd.json type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /etc/vulkan/icd.d/nvidia_icd.x86_64.json type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /etc/vulkan/implicit_layer.d/nvidia_layers.json type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/vdpau/libvdpau_nvidia.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/share/nvidia/nvoptix.bin type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+tmpfs on /run/secrets/kubernetes.io/serviceaccount type tmpfs (ro,relatime,seclabel,size=14717844k,noswap)
+/dev/nvme0n1p1 on /lib/firmware/nvidia/580.126.09/gsp_ga10x.bin type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /lib/firmware/nvidia/580.126.09/gsp_tu10x.bin type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/share/egl/egl_external_platform.d/10_nvidia_wayland.json type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/share/egl/egl_external_platform.d/15_nvidia_gbm.json type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/share/glvnd/egl_vendor.d/10_nvidia.json type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/xorg/modules/drivers/nvidia_drv.so type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+/dev/nvme0n1p1 on /usr/lib64/xorg/modules/extensions/libglxserver_nvidia.so.580.126.09 type xfs (ro,nosuid,nodev,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,sunit=1024,swidth=1024,noquota)
+tmpfs on /run/nvidia-ctk-hook358549ab-23fa-497c-a9e4-9b9c0a2250ff type tmpfs (rw,relatime,seclabel,size=4k)
+tmpfs on /proc/driver/nvidia/params type tmpfs (rw,relatime,seclabel,size=4k)
+...
+```
+
+[Figure 4]는 CDI Mode의 Architecture를 나타내고 있다. CDI Mode와 Legacy Mode의 가장 큰 차이점은 Device File을 Bind Mount 방식으로 주입하지 않고, runc CLI가 직접 Device File을 생성하는 방식을 활용한다는 점이다. 따라서 [Shell 3]과 Mount 정보 조회시 CUDA Library/Tool만 Bind Mount가 수행되어 있고, Device File은 Bind Mount가 수행되지 않은것을 확인할 수 있다.
 
 ```yaml {caption="[File 4] /etc/cdi/nvidia.yaml Example", linenos=table}
 cdiVersion: 0.5.0
