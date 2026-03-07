@@ -8,7 +8,7 @@ This document analyzes techniques for allocating NVIDIA GPUs to containers.
 
 ### 1.1. NVIDIA GPU Container Architecture
 
-{{< figure caption="[Figure 1] NVIDIA GPU Container Architecture" src="images/gpu-container-architecture.png" width="900px" >}}
+{{< figure caption="[Figure 1] NVIDIA GPU Container Architecture" src="images/gpu-container-legacy-mode-architecture.png" width="900px" >}}
 
 NVIDIA GPUs can be allocated to containers to enable containers to use NVIDIA GPUs. Docker version 19.03 introduced the GPU option (`--gpu`) that can be used to allocate NVIDIA GPUs to containers. [Figure 1] shows containers with NVIDIA GPU configuration completed through the GPU option. Each container can use not only one GPU but also multiple GPUs. Additionally, containers can use not only dedicated GPUs allocated exclusively to them but also shared GPUs shared with other containers.
 
