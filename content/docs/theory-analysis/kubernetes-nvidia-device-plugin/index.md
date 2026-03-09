@@ -43,6 +43,12 @@ NVIDIA Device Plugin의 두번째 역할은 어떤 GPU를 컨테이너에게 할
 
 ### 1.3. GPU Health Check
 
+NVIDIA Device Plugin의 세번째 역할은 GPU의 상태를 확인하는, GPU Health Check 역할을 수행한다. GPU Health Check는 NVIDIA의 NVML (NVIDIA Management Library)를 통해서 수행된다. NVIDIA의 NVML은 GPU의 상태를 확인하기 위한 다양한 함수를 제공하며, 주로 다음의 Event를 모니터링하여 GPU의 상태를 확인한다.
+
+* EventTypeXidCriticalError : XID (eXtended ID) Error Events. XID는 GPU의 오류를 나타내는 코드이다.
+* EventTypeDoubleBitEccError : Double Bit ECC (Error Correcting Code) Error Events
+* EventTypeSingleBitEccError : Single Bit ECC (Error Correcting Code) Error Events
+
 ### 1.4. GPU Sharing
 
 기본적으로 하나의 GPU는 하나의 Container에만 할당되어 동작한다. 하지만 GPU Sharing 기법을 이용하면 하나의 GPU를 다수의 Container에 할당할 수 있다. NVIDIA GPU Sharing 기법은 Time-slicing, MPS, MIG 3가지 기법이 존재하며, NVIDIA Device Plugin은 이 3가지 기법을 모두 제공한다.
