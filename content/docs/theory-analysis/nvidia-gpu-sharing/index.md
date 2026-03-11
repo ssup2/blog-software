@@ -439,8 +439,8 @@ $ nvidia-smi mig -i 0 -lci
 +--------------------------------------------------------------------+
 ```
 
-[Shell 5]는 Compute Instance를 생성하고 확인하는 과정을 나타내고 있다. GPU Instance가 생성된 이후에는 해당 GPU Instance에 생성할 수 있는 Compute Instance Profile을 확인할 수 있다. `4g.20gb` GPU Instance의 경우에는 `1c.4g.20gb`, `2c.4g.20gb`, `4g.20gb` 3가지 Profile이 존재하며, `2g.10gb` GPU Instance의 경우에는 `1c.2g.10gb`, `2g.10gb` 2가지 Profile이 존재하고, `1g.5gb` GPU Instance의 경우에는 `1g.5gb` 1가지 Profile이 존재한다.
-의
+[Shell 5]는 Compute Instance를 생성하고 확인하는 과정을 나타내고 있다. GPU Instance가 생성된 이후에는 해당 GPU Instance에 생성할 수 있는 Compute Instance Profile을 확인할 수 있다. `4g.20gb` GPU Instance의 경우에는 `1c.4g.20gb`, `2c.4g.20gb`, `4g.20gb` 3가지 Profile이 존재하며, `2g.10gb` GPU Instance의 경우에는 `1c.2g.10gb`, `2g.10gb` 2가지 Profile이 존재하고, `1g.5gb` GPU Instance의 경우에는 `1g.5gb` 1가지 Profile이 존재한다. 하나의 GPU Instance를 다수의 Compute Instance가 공유하는 경우에는 `[x]c.[x]g.[x]gb` 형태의 Profile을 이용하여 Compute Instance를 생성한다. 여기서 `[x]c`는 Compute Instance에 할당되는 SM Slice의 개수를 의미한다.
+
 `4g.20gb` GPU Instance에는 `4g.20gb` Profile을 이용해 하나의 Compute Instance를 생성하고, `2g.10gb` GPU Instance에는 `1c.2g.10gb` Profile을 이용해 두개의 Compute Instance를 생성하고, `1g.5gb` GPU Instance에는 `1g.5gb` Profile을 이용해 하나의 Compute Instance를 생성한 것을 확인할 수 있다.
 
 ```shell {caption="[Shell 6] MIG vGPU 확인"}

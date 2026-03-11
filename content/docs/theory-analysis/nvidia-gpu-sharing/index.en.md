@@ -439,7 +439,7 @@ $ nvidia-smi mig -i 0 -lci
 +--------------------------------------------------------------------+
 ```
 
-[Shell 5] shows the process of creating and checking Compute Instances. After a GPU Instance is created, you can check the Compute Instance profiles that can be created for that GPU Instance. For the `4g.20gb` GPU Instance, there are 3 profiles: `1c.4g.20gb`, `2c.4g.20gb`, and `4g.20gb`. For the `2g.10gb` GPU Instance, there are 2 profiles: `1c.2g.10gb` and `2g.10gb`. For the `1g.5gb` GPU Instance, there is 1 profile: `1g.5gb`.
+[Shell 5] shows the process of creating and checking Compute Instances. After a GPU Instance is created, you can check the Compute Instance profiles that can be created for that GPU Instance. For the `4g.20gb` GPU Instance, there are 3 profiles: `1c.4g.20gb`, `2c.4g.20gb`, and `4g.20gb`. For the `2g.10gb` GPU Instance, there are 2 profiles: `1c.2g.10gb` and `2g.10gb`. For the `1g.5gb` GPU Instance, there is 1 profile: `1g.5gb`. When multiple Compute Instances share a single GPU Instance, Compute Instances are created using profiles in the form `[x]c.[x]g.[x]gb`. Here, `[x]c` means the number of SM slices allocated to the Compute Instance.
 
 You can see that one Compute Instance was created using the `4g.20gb` profile for the `4g.20gb` GPU Instance, two Compute Instances were created using the `1c.2g.10gb` profile for the `2g.10gb` GPU Instance, and one Compute Instance was created using the `1g.5gb` profile for the `1g.5gb` GPU Instance.
 

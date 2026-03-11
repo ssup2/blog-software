@@ -143,7 +143,11 @@ Time-slicing 기법과 동일하게 MPS 기법이 적용된 Node의 GPU는 [Conf
 
 MIG (Multi-Instance GPU) 기법은 GPU의 SM과 Memory를 완전히 격리하여 vGPU를 생성하고, vGPU를 CUDA App에서 사용할 수 있도록 제공하는 Hardware Level의 가상화 기법이다. Hardware Level의 가상화 기법이기 때문에 MIG를 지원하는 Ampere Architecture 이후의 GPU(a100)에서만 이용 가능하다. [Figure 7]는 MIG 기법의 구조를 나타내고 있다. MIG 기법은 Memory를 격리하는 **GPU Instance**와 SM을 격리하는 **Compute Instance** 두가지 단위로 GPU를 가상화 한다.
 
-GPU Instance와 Compute Instance는 1:1 또는 1:N으로 구성될 수 있다. 1:N으로 구성된 경우에는 Compute Instance는 GPU Instance의 Memory를 공유하여 이용한다. [Figure 7]에서 `4g.20gb`, `1g.5gb` GPU Instance는 Compute Instance 1:1로 구성되어 있고, `2g.10gb` GPU Instance는 Compute Instance 1:2으로 구성되어 있는것을 확인할 수 있다. Container에는 동시에 하나의 GPU Instance만 할당 받아 이용할 수 있다. [Figure 7]에서 Container B는 두개의 `1c.2g.10gb` Compute Instance를 할당 받아 이용하고 있는데, 두 Compute Instance가 하나의 GPU Instance에서 동작하기 때문이다.
+GPU Instance와 Compute Instance는 1:1 또는 1:N으로 구성될 수 있다. 1:N으로 구성된 경우에는 Compute Instance는 GPU Instance의 Memory를 공유하여 이용한다. 
+
+[Figure 7]에서 `4g.20gb`, `1g.5gb` GPU Instance는 Compute Instance 1:1로 구성되어 있고, `2g.10gb` GPU Instance는 Compute Instance 1:2으로 구성되어 있는것을 확인할 수 있다. Container에는 동시에 하나의 GPU Instance만 할당 받아 이용할 수 있다. [Figure 7]에서 Container B는 두개의 `1c.2g.10gb` Compute Instance를 할당 받아 이용하고 있는데, 두 Compute Instance가 하나의 GPU Instance에서 동작하기 때문이다.
+
+`xg.xgb` 
 
 ```yaml {caption="[Config 3] NVIDIA Device Plugin MIG_STRATEGY Environment Variable", linenos=table}
     containers:
