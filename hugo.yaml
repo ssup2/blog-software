@@ -1,6 +1,10 @@
 baseURL: https://ssup2.github.io/blog-software
 title: ssup2 Blog / Software
 
+Author:
+  email: supsup5642@gmail.com
+  name: Jungsub Shin
+
 # Import hextra as module
 module:
   imports:
@@ -47,6 +51,10 @@ menu:
       icon: github
 
 params:
+  author:
+    email: supsup5642@gmail.com
+    name: Jungsub Shin
+
   theme:
     # light | dark | system
     default: dark
