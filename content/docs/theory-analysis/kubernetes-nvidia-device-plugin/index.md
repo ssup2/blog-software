@@ -59,35 +59,9 @@ NVIDIA Device Plugin의 세번째 역할은 GPU의 상태를 확인하는, GPU H
 
 {{< figure caption="[Figure 4] NVIDIA Device Plugin Architecture with Time-slicing" src="images/nvidia-device-plugin-architecture-timeslicing.png" width="1000px" >}}
 
-Time-slicing 기법은 GPU의 SM (Streaming Processor)를 시분할하여 다수의 App/Container가 GPU를 공유하여 사용하는 기법이다. [Figure 4]는 Time-slicing 기법의 구조를 나타내고 있다. 두개의 GPU가 존재하며, Container A와 Container B가 첫번째 GPU를 공유하며 이용하고 있고, Container B와 Container C가 두번째 GPU를 공유하며 이용하고 있는것을 확인할 수 있다.
+Time-slicing 기법은 GPU의 SM (Streaming Processor)를 시분할하여 다수의 App/Container가 GPU를 공유하여 사용하는 기법이다. Time-slicing 기법은 하나의 Container가 다수의 GPU를 공유하여 이용할 수 있다. [Figure 4]는 Time-slicing 기법의 구조를 나타내고 있다. 두개의 GPU가 존재하며, Container A와 Container B가 첫번째 GPU를 공유하며 이용하고 있고, Container B와 Container C가 두번째 GPU를 공유하며 이용하고 있는것을 확인할 수 있다. 
 
-GPU를 공유하여 Pod에게 할당하기 위해서 NVIDIA Device Plugin은 GPU의 개수를 배수로 늘려서 Kubelet에게 전달한다. 예를들어 GPU에 4개의 GPU 존재할 경우 4의 배수로 kubelet에게 전달할 경우, kubelet에게는 Node에 16개의 GPU가 있는것 전달한다. 이 의미는 하나의 GPU를 최대 4개의 Container에게 할당할 수 있다는걸 의미한다. 
-
-```yaml {caption="[Config 1] nvidia-device-plugin-configs ConfigMap Example for Time-slicing", linenos=table}
-apiVersion: v1
-data:
-...
-  timeslicing-4: |-
-    version: v1
-    sharing:
-      timeSlicing:
-        renameByDefault: true
-        resources:
-        - name: nvidia.com/gpu
-          replicas: 4
-```
-
-배수는 NVIDIA Device Plugin이 존재하는 Namespace의 `nvidia-device-plugin-configs` ConfigMap에서 설정할 수 있다. [Config 1]은 4의 배수로 Time-slicing 기법을 적용하는 설정을 나타내고 있다. `timeslicing-4` 이라는 이름을 이용하고 있으며, 이 이름을 Time-slcing을 적용할 Node의 Label에 `nvidia.com/device-plugin.config: timeslicing-4` 형태로 설정하면 된다.
-
-GPU를 어떤 Container에게 할당할지 결정하는 스케줄링 역할은 [Figure 3]의 GPU 할당 과정에서 동일하게 NVIDIA Device Plugin이 수행한다. NVIDIA Device Plugin은 기본적으로 Container 할당이 적은 GPU를 우선적으로 할당하도록 스케줄링을 수행한다. 예를들어 첫번째 GPU에는 2개의 Container가 공유하여 이용중이고 두번째 GPU에는 1개의 Container가 이용중이라면, NVIDIA Device Plugin은 두번째 GPU를 먼저 Container에게 할당하도록 스케줄링을 수행한다.
-
-[Figure 4]의 Container B의 예시처럼 Time-slicing 기법은 하나의 Container가 다수의 GPU를 공유하여 이용할 수 있다. 이 경우 TO-DO
-
-Time-slicing 기법은 각 App/Container의 GPU 사용률을 제한하는 기능을 제공하지 않는다. 따라서 특정 App/Container가 GPU를 과도하게 사용하는 경우에는 다른 App/Container가 GPU를 제대로 이용할 수 없는 문제가 발생할 수 있다.
-
-Time-slicing 기법은 GPU의 SM (Streaming Processor)를 시간 단위로 분할하여 다수의 App/Container가 GPU를 공유하여 사용하는 기법이다. [Figure 4]는 Time-slicing 기법의 구조를 나타내고 있다. 두개의 GPU가 존재하며, Container A와 Container B가 첫번째 GPU를 공유하며 이용하고 있고, Container B와 Container C가 두번째 GPU를 공유하며 이용하고 있는것을 확인할 수 있다.
-
-GPU를 공유하여 Pod에게 할당하기 위해서 NVIDIA Device Plugin은 GPU의 개수를 배수로 늘려서 Kubelet에게 전달한다. 예를들어 GPU에 4개의 GPU 존재할 경우 4의 배수로 kubelet에게 전달할 경우, kubelet에게는 Node에 16개의 GPU가 있는것 전달한다. 이 의미는 하나의 GPU를 최대 4개의 Container에게 할당할 수 있다는걸 의미한다. 
+GPU를 공유하여 Pod에게 할당하기 위해서 NVIDIA Device Plugin은 GPU의 개수를 배수로 늘려서 Kubelet에게 전달한다. 예를들어 GPU에 4개의 GPU 존재할 경우 4배수로 kubelet에게 전달할 경우, kubelet에게는 Node에 16개의 GPU가 있는것 전달한다. 이 의미는 하나의 GPU를 최대 4개의 Container에게 할당할 수 있다는걸 의미한다.
 
 ```yaml {caption="[Config 1] nvidia-device-plugin-configs ConfigMap Example for Time-slicing", linenos=table}
 apiVersion: v1
@@ -105,9 +79,13 @@ data:
 
 배수는 NVIDIA Device Plugin이 존재하는 Namespace의 `nvidia-device-plugin-configs` ConfigMap에서 설정할 수 있다. [Config 1]은 4의 배수로 Time-slicing 기법을 적용하는 설정을 나타내고 있다. `timeslicing-4` 이라는 이름을 이용하고 있으며, 이 이름을 Time-slcing을 적용할 Node의 Label에 `nvidia.com/device-plugin.config: timeslicing-4` 형태로 설정하면 된다.
 
-GPU를 어떤 Container에게 할당할지 결정하는 스케줄링 역할은 [Figure 3]의 GPU 할당 과정에서 동일하게 NVIDIA Device Plugin이 수행한다. NVIDIA Device Plugin은 기본적으로 Container 할당이 적은 GPU를 우선적으로 할당하도록 스케줄링을 수행한다. 예를들어 첫번째 GPU에는 2개의 Container가 공유하여 이용중이고 두번째 GPU에는 1개의 Container가 이용중이라면, NVIDIA Device Plugin은 두번째 GPU를 먼저 Container에게 할당하도록 스케줄링을 수행한다.
+{{< figure caption="[Figure 5] NVIDIA Device Plugin GPU Scheduling" src="images/nvidia-device-plugin-gpu-scheduling.png" width="600px" >}}
 
-[Figure 4]의 Container B의 예시처럼 Time-slicing 기법은 하나의 Container가 다수의 GPU를 공유하여 이용할 수 있다. 이 경우 
+GPU를 어떤 Container에게 할당할지 결정하는 스케줄링 역할은 [Figure 3]의 GPU 할당 과정에서 동일하게 NVIDIA Device Plugin이 수행한다. [Figure 5]는 4개의 GPU가 존재하고 2배수로 설정된 환경에서 NVIDIA Device Plugin의 GPU Scheduling 과정을 나타내고 있다. NVIDIA Device Plugin은 기본적으로 Container 할당이 적은 GPU를 우선적으로 할당하도록 스케줄링을 수행한다. Container A가 3개의 GPU를 할당받을 때는 모든 GPU에 Pod가 할당되어 있지 않기 때문에 NVIDIA Device Plugin은 임의의 3개의 GPU를 Container A에게 할당한다. [Figure 5]에서는 GPU 0, 1, 2가 Container A에게 할당되어 있다.
+
+이후에 Container B가 3개의 GPU를 요청하는 경우에는 GPU 3에만 아직 할당된 Pod가 존재하지 않기 때문에 NVIDIA Device Plugin은 GPU 3를 Container B에게 할당한다. NVIDIA Device Plugin은 이후에 두개의 GPU는 임의의 GPU를 Container B에게 할당한다. [Figure 5]에서는 GPU 1, 3가 Container B에게 할당되어 있다. 마지막으로 Container C가 2개의 GPU를 요청하는 경우에는 NVIDIA Device Plugin은 남은 GPU 1, 2를 Container C에게 할당한다.
+
+한가지 주목할 점은 Container B의 경우에는 3개의 GPU를 요청하였지만 GPU Scheduling에 의해서 실제로는 2개의 GPU만 할당되었다는 점이다. 즉 Pod가 요청한 GPU의 개수만큼 GPU를 할당받지 못하는 경우가 발생할 수 있다는 점이다. Time-slicing 기법은 각 App/Container의 GPU 사용률을 제한하는 기능을 제공하지 않는다. 따라서 특정 App/Container가 GPU를 과도하게 사용하는 경우에는 다른 App/Container가 GPU를 제대로 이용할 수 없는 문제가 발생할 수 있다.
 
 #### 1.4.2. with MPS (Multi-Process Service)
 
