@@ -115,26 +115,9 @@ prwxrwxrwx. 1 root root 0 Mar  6 18:17 log
 -rw-rw-rw-. 1 root root 3 Mar  6 18:07 nvidia-cuda-mps-control.pid
 ```
 
-App/Container는 MPS를 이용하기 위해서는 MPS Control과 통신을 수행해야 하며, 통신은 Unix Domain Socket을 통해서 수행된다. 따라서 App/Container는 MPS Control의 Unix Domain Socket에 접근할 수 있도록, NVIDIA Device Plugin은 Host의 `/run/nvidia/mps` 경로를 Bind Mount를 통해서 MPS Control Daemon Pod와 App/Container의 `/mps/nvidia.com/gpu.shared` 경로에 연결한다. 이후에 MPS Control은 Bind Mount된 경로에 Unix Domain Socket을 생성하여 App/Container에게 Unix Domain Socket을 노출시킨다. [Shell 1]은 MPS Control Daemon Pod에서 생성하여 App/Container에게 노출시키는 파일 목록을 나타내고 있다. 이중에 `control` 파일이 MPS Control의 Unix Domain Socket이다.
+App/Container는 MPS를 이용하기 위해서는 MPS Control과 통신을 수행해야 하며, 통신은 Unix Domain Socket을 통해서 수행된다. 따라서 App/Container는 MPS Control의 Unix Domain Socket에 접근할 수 있도록, NVIDIA Device Plugin은 Host의 `/run/nvidia/mps` 경로를 Bind Mount를 통해서 MPS Control Daemon Pod와 App/Container의 `/mps/nvidia.com/gpu.shared` 경로에 연결한다. 이후에 MPS Control은 Bind Mount된 경로에 Unix Domain Socket을 생성하여 App/Container에게 Unix Domain Socket을 노출시킨다. [Shell 1]은 MPS Control Daemon Pod에서 생성하여 App/Container에게 노출시키는 Unix Domain Socket과 이외의 파일 목록을 나타내고 있다.
 
-MPS를 이용하면 App/Container에는 `NVIDIA_VISIBLE_DEVICES` 환경 변수뿐만이 아니라 `CUDA_MPS_PIPE_DIRECTORY` 환경 변수도 같이 설정된다. `CUDA_MPS_PIPE_DIRECTORY` 환경 변수는 MPS Control의 Unix Domain Socket 경로를 명시하는 환경 변수이며, 따라서 
-
-```yaml {caption="[Config 2] nvidia-device-plugin-configs ConfigMap Example for MPS", linenos=table}
-apiVersion: v1
-data:
-...
-  mps-4: |-
-    version: v1
-    sharing:
-      mps:
-        renameByDefault: true
-        resources:
-        - name: nvidia.com/gpu
-          replicas: 4
-```
-
-* `nvidia.com/device-plugin.config` : Node에 적용할 GPU Sharing 설정을 명시한다. Ex) `nvidia.com/device-plugin.config: mps-4`
-* `nvidia.com/mps.capable` : Node에 MPS 기능을 활성화 할지를 명시한다. Ex) `nvidia.com/mps.capable: "true"`
+MPS를 이용하면 App/Container에는 `NVIDIA_VISIBLE_DEVICES` 환경 변수뿐만이 아니라 `CUDA_MPS_PIPE_DIRECTORY` 환경 변수도 같이 설정된다. `CUDA_MPS_PIPE_DIRECTORY` 환경 변수는 MPS Control의 Unix Domain Socket이 포함된 Directory 경로를 명시하는 환경 변수이다. 따라서 `CUDA_MPS_PIPE_DIRECTORY` 환경 변수에는 `/mps/nvidia.com/gpu.shared/pipe` 경로가 설정된다. App/Container의 CUDA Library는 `CUDA_MPS_PIPE_DIRECTORY` 환경 변수가 존재하면 MPS를 이용하도록 기본적으로 동작한다.
 
 ```yaml {caption="[Config 2] nvidia-device-plugin-configs ConfigMap Example for MPS", linenos=table}
 apiVersion: v1
