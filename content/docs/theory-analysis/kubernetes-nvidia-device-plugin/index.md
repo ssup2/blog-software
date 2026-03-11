@@ -59,7 +59,7 @@ NVIDIA Device Plugin의 세번째 역할은 GPU의 상태를 확인하는, GPU H
 
 {{< figure caption="[Figure 4] NVIDIA Device Plugin Architecture with Time-slicing" src="images/nvidia-device-plugin-architecture-timeslicing.png" width="1000px" >}}
 
-Time-slicing 기법은 GPU의 SM (Streaming Processor)를 시분할하여 다수의 App/Container가 GPU를 공유하여 사용하는 기법이다. Time-slicing 기법은 하나의 Container가 다수의 GPU를 공유하여 이용할 수 있다. [Figure 4]는 Time-slicing 기법의 구조를 나타내고 있다. 두개의 GPU가 존재하며, Container A와 Container B가 첫번째 GPU를 공유하며 이용하고 있고, Container B와 Container C가 두번째 GPU를 공유하며 이용하고 있는것을 확인할 수 있다. 
+Time-slicing 기법은 GPU의 SM (Streaming Processor)를 **시분할**하여 다수의 App/Container가 GPU를 공유하여 사용하는 기법이다. Time-slicing 기법은 **하나의 Container가 다수의 GPU를 할당 받아** 이용할 수 있다. [Figure 4]는 Time-slicing 기법의 구조를 나타내고 있다. 두개의 GPU가 존재하며, Container A와 Container B가 첫번째 GPU를 공유하며 이용하고 있고, Container B와 Container C가 두번째 GPU를 공유하며 이용하고 있는것을 확인할 수 있다. 
 
 GPU를 공유하여 Pod에게 할당하기 위해서 NVIDIA Device Plugin은 GPU의 개수를 배수로 늘려서 Kubelet에게 전달한다. 예를들어 GPU에 4개의 GPU 존재할 경우 4배수로 kubelet에게 전달할 경우, kubelet에게는 Node에 16개의 GPU가 있는것 전달한다. 이 의미는 하나의 GPU를 최대 4개의 Container에게 할당할 수 있다는걸 의미한다.
 
@@ -91,11 +91,16 @@ GPU를 어떤 Container에게 할당할지 결정하는 스케줄링 역할은 [
 
 {{< figure caption="[Figure 6] NVIDIA Device Plugin Architecture with MPS" src="images/nvidia-device-plugin-architecture-mps.png" width="1100px" >}}
 
-MPS (Multi-Process Service) 기법은 GPU의 SM을 공간 분할하여 다수의 App/Container가 GPU를 공유하여 사용하는 기법이다. [Figure 5]는 MPS 기법의 구조를 나타내고 있다. 두개의 GPU가 존재하며, Container A와 Container B가 첫번째 GPU를 공유하며 이용하고 있고, Container C가 두번째 GPU를 공유하며 이용하고 있는것을 확인할 수 있다.
+MPS (Multi-Process Service) 기법은 GPU의 SM을 **공간 분할**하여 다수의 App/Container가 GPU를 공유하여 사용하는 기법이다. MPS 기법을 이용할 경우 **하나의 Container가 반드시 하나의 GPU**를 할당 받아 이용해야 한다. 또한 MPS 기법과 Time-slicing 기법은 동시에 사용할 수 없다. [Figure 5]는 MPS 기법의 구조를 나타내고 있다. 두개의 GPU가 존재하며, Container A와 Container B가 첫번째 GPU를 공유하며 이용하고 있고, Container C가 두번째 GPU를 공유하며 이용하고 있는것을 확인할 수 있다.
 
 MPS 기법을 이용하기 위해서는 **MPS Control DaemonSet**을 추가로 배포해야 한다. MPS Control DaemonSet은 내부적으로 **MPS Control**(`nvidia-cuda-mps-control`)과 **MPS Server**(`nvidia-cuda-mps-server`)를 동작시킨다. MPS Control은 MPS Server를 관리하고 제어하는 역할을 수행하며, MPS Server는 각 App/Container별로 이용할 SM을 공간 분활하여 이용할 수 있도록 제어하는 역할을 수행한다.
 
 ```shell {caption="[Shell 1] MPS Control Files"}
+$ ls -l /mps/
+total 0
+drwxr-xr-x. 3 root root 60 Mar  6 18:07 nvidia.com
+drwxrwxrwt. 2 root root 40 Mar  6 18:07 shm
+
 $ ls -l /mps/nvidia.com/gpu.shared/log/
 total 4
 -rw-r--r--. 1 root root 1256 Mar  6 18:17 control.log
@@ -110,7 +115,9 @@ prwxrwxrwx. 1 root root 0 Mar  6 18:17 log
 -rw-rw-rw-. 1 root root 3 Mar  6 18:07 nvidia-cuda-mps-control.pid
 ```
 
-App/Container는 MPS를 이용하기 위해서는 MPS Control과 통신을 수행해야 하며, 통신은 Unix Domain Socket을 통해서 수행된다. 따라서 App/Container는 MPS Control의 Unix Domain Socket에 접근할 수 있도록, NVIDIA Device Plugin은 Host의 `/run/nvidia/mps` 경로를 Bind Mount를 통해서 MPS Control Daemon Pod와 App/Container의 `/mps/nvidia.com/gpu.shared` 경로에 연결한다. 이후에 MPS Control은 Bind Mount된 경로에 Unix Domain Socket을 생성하여 App/Container는 해당 Unix Domain Socket을 노출시킨다.
+App/Container는 MPS를 이용하기 위해서는 MPS Control과 통신을 수행해야 하며, 통신은 Unix Domain Socket을 통해서 수행된다. 따라서 App/Container는 MPS Control의 Unix Domain Socket에 접근할 수 있도록, NVIDIA Device Plugin은 Host의 `/run/nvidia/mps` 경로를 Bind Mount를 통해서 MPS Control Daemon Pod와 App/Container의 `/mps/nvidia.com/gpu.shared` 경로에 연결한다. 이후에 MPS Control은 Bind Mount된 경로에 Unix Domain Socket을 생성하여 App/Container에게 Unix Domain Socket을 노출시킨다. [Shell 1]은 MPS Control Daemon Pod에서 생성하여 App/Container에게 노출시키는 파일 목록을 나타내고 있다. 이중에 `control` 파일이 MPS Control의 Unix Domain Socket이다.
+
+MPS를 이용하면 App/Container에는 `NVIDIA_VISIBLE_DEVICES` 환경 변수뿐만이 아니라 `CUDA_MPS_PIPE_DIRECTORY` 환경 변수도 같이 설정된다. `CUDA_MPS_PIPE_DIRECTORY` 환경 변수는 MPS Control의 Unix Domain Socket 경로를 명시하는 환경 변수이며, 따라서 
 
 ```yaml {caption="[Config 2] nvidia-device-plugin-configs ConfigMap Example for MPS", linenos=table}
 apiVersion: v1
