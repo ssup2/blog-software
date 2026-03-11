@@ -61,7 +61,7 @@ NVIDIA Device Plugin의 세번째 역할은 GPU의 상태를 확인하는, GPU H
 
 Time-slicing 기법은 GPU의 SM (Streaming Processor)를 **시분할**하여 다수의 App/Container가 GPU를 공유하여 사용하는 기법이다. Time-slicing 기법은 **하나의 Container가 다수의 GPU를 할당 받아** 이용할 수 있다. [Figure 4]는 Time-slicing 기법의 구조를 나타내고 있다. 두개의 GPU가 존재하며, Container A와 Container B가 첫번째 GPU를 공유하며 이용하고 있고, Container B와 Container C가 두번째 GPU를 공유하며 이용하고 있는것을 확인할 수 있다. 
 
-GPU를 공유하여 Pod에게 할당하기 위해서 NVIDIA Device Plugin은 GPU의 개수를 배수로 늘려서 Kubelet에게 전달한다. 예를들어 GPU에 4개의 GPU 존재할 경우 4배수로 kubelet에게 전달할 경우, kubelet에게는 Node에 16개의 GPU가 있는것 전달한다. 이 의미는 하나의 GPU를 최대 4개의 Container에게 할당할 수 있다는걸 의미한다.
+GPU를 공유하여 Container에게 할당하기 위해서 NVIDIA Device Plugin은 GPU의 개수를 배수로 늘려서 Kubelet에게 전달한다. 예를들어 GPU에 4개의 GPU 존재할 경우 4배수로 kubelet에게 전달할 경우, kubelet에게는 Node에 16개의 GPU가 있는것 전달한다. 이 의미는 하나의 GPU를 최대 4개의 Container에게 할당할 수 있다는걸 의미한다.
 
 ```yaml {caption="[Config 1] nvidia-device-plugin-configs ConfigMap Example for Time-slicing", linenos=table}
 apiVersion: v1
@@ -93,7 +93,7 @@ GPU를 어떤 Container에게 할당할지 결정하는 스케줄링 역할은 [
 
 MPS (Multi-Process Service) 기법은 GPU의 SM을 **공간 분할**하여 다수의 App/Container가 GPU를 공유하여 사용하는 기법이다. MPS 기법을 이용할 경우 **하나의 Container가 반드시 하나의 GPU**를 할당 받아 이용해야 한다. 또한 MPS 기법과 Time-slicing 기법은 동시에 사용할 수 없다. [Figure 5]는 MPS 기법의 구조를 나타내고 있다. 두개의 GPU가 존재하며, Container A와 Container B가 첫번째 GPU를 공유하며 이용하고 있고, Container C가 두번째 GPU를 공유하며 이용하고 있는것을 확인할 수 있다.
 
-MPS 기법을 이용하기 위해서는 **MPS Control DaemonSet**을 추가로 배포해야 한다. MPS Control DaemonSet은 내부적으로 **MPS Control**(`nvidia-cuda-mps-control`)과 **MPS Server**(`nvidia-cuda-mps-server`)를 동작시킨다. MPS Control은 MPS Server를 관리하고 제어하는 역할을 수행하며, MPS Server는 각 App/Container별로 이용할 SM을 공간 분활하여 이용할 수 있도록 제어하는 역할을 수행한다.
+MPS 기법을 이용하기 위해서는 **MPS Control Daemon Pod** (DaemonSet)을 추가로 배포해야 한다. MPS Control Daemon Pod는 내부적으로 **MPS Control**(`nvidia-cuda-mps-control`)과 **MPS Server**(`nvidia-cuda-mps-server`)를 동작시킨다. MPS Control은 MPS Server를 관리하고 제어하는 역할을 수행하며, MPS Server는 각 App/Container별로 이용할 SM을 공간 분활하여 이용할 수 있도록 제어하는 역할을 수행한다.
 
 ```shell {caption="[Shell 1] MPS Control Files"}
 $ ls -l /mps/
@@ -133,8 +133,7 @@ data:
           replicas: 4
 ```
 
-* `nvidia.com/device-plugin.config` : Node에 적용할 GPU Sharing 설정을 명시한다. Ex) `nvidia.com/device-plugin.config: mps-4`
-* `nvidia.com/mps.capable` : Node에 MPS 기능을 활성화 할지를 명시한다. Ex) `nvidia.com/mps.capable: "true"`
+MPS 기법도 Time-slicing 기법과 동일하게 GPU를 공유하여 Container에게 할당하기 위해서 NVIDIA Device Plugin은 GPU의 개수를 배수로 늘려서 Kubelet에게 전달한다. [Config 2]는 4의 배수로 MPS 기법을 적용하는 설정을 나타내고 있다. `mps-4` 이라는 이름을 이용하고 있으며, 이 이름을 MPS 기법을 적용할 Node의 Label에 `nvidia.com/device-plugin.config: mps-4` 형태로 설정하면 된다. 또한 MPS Control Daemon Pod를 Node에 동작시키기 위해서는 `nvidia.com/mps.capable: "true"` Label을 설정해야 한다.
 
 #### 1.4.3. with MIG (Multi-Instance GPU)
 
