@@ -157,6 +157,8 @@ GPU Instance와 Compute Instance는 1:1 또는 1:N으로 구성될 수 있다. 1
 
 MIG 기법을 이용하기 위해서는 App/Container에서는 GPU와 연결되어 있는 `/dev/nvidia[x]` Device File 뿐만이 아니라, GPU Instance와 Compute Instance와 연결되어 있는 `/dev/nvidia-caps/nvidia-cap[x]` Device File도 필요하다. 따라서 NVIDIA Device Plugin은 Container에게 `/dev/nvidia-caps/nvidia-cap[x]` Device File도 App/Container에 생성한다.
 
+현재 Device Plugin에서는 동적으로 GPU Instance, Compute Instance를 생성하여 Container에게 할당하는 Dynamic MIG 기능을 제공하고 있지 않는다. 따라서 MIG를 이용하기 위해서는 미리 GPU Instance와 Compute Instance를 생성해 놓은 다음 Container에게 할당하는 방식으로 이용해야 한다. MIG Compute Instance는 `NVIDIA_VISIBLE_DEVICES` 환경 변수에 `MIG-[UUID]` 형태로 지정된다.
+
 ## 2. 참조
 
 * NVIDIA MIG : [https://toss.tech/article/toss-securities-gpu-mig](https://toss.tech/article/toss-securities-gpu-mig)

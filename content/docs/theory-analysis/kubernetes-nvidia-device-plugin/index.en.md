@@ -157,6 +157,8 @@ When the NVIDIA Device Plugin's `MIG_STRATEGY` environment variable is set to `m
 
 To use the MIG technique, apps/containers need not only `/dev/nvidia[x]` device files connected to GPUs but also `/dev/nvidia-caps/nvidia-cap[x]` device files connected to GPU Instances and Compute Instances. Therefore, the NVIDIA Device Plugin also creates `/dev/nvidia-caps/nvidia-cap[x]` device files for containers in apps/containers.
 
+Currently, the Device Plugin does not provide Dynamic MIG functionality that dynamically creates GPU Instances and Compute Instances and allocates them to containers. Therefore, to use MIG, GPU Instances and Compute Instances must be created in advance and then allocated to containers. MIG Compute Instances are specified in the `NVIDIA_VISIBLE_DEVICES` environment variable in the form `MIG-[UUID]`.
+
 ## 2. References
 
 * NVIDIA MIG : [https://toss.tech/article/toss-securities-gpu-mig](https://toss.tech/article/toss-securities-gpu-mig)
