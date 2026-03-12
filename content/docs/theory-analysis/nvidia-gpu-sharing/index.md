@@ -131,7 +131,7 @@ CUDA SDK는 기본적으로 `CUDA_MPS_PIPE_DIRECTORY` 환경변수를 통해 지
 
 {{< figure caption="[Figure 8] MIG Architecture" src="images/mig-architecture.png" width="600px" >}}
 
-[Figure 8]은 MIG 기법의 구조를 나타내고 있다. MIG에서는 **GPU Instance**와 **Compute Instance** 두가지 단위로 GPU를 가상화 한다. GPU Instance는 GPU Memory를 격리하는 역할을 수행한다. Compute Instance는 GPU Instance 내부에서 다시 SM을 격리하는 역할을 수행한다. 따라서 일반적으로 GPU Instance와 Compute Instance는 일반적으로 1:1으로 구성하지만 1:N으로 구성도 가능하다. 1:N으로 구성한 경우에는 Compute Instance의 SM은 GPU Instance의 Memroy를 공유하여 이용한다. CUDA App은 Compute Instance를 vGPU라고 간주한다.
+[Figure 8]은 MIG 기법의 구조를 나타내고 있다. MIG에서는 **GPU Instance**와 **Compute Instance** 두가지 단위로 GPU를 가상화 한다. GPU Instance는 GPU Memory를 격리하는 역할을 수행한다. Compute Instance는 GPU Instance 내부에서 다시 SM을 격리하는 역할을 수행한다. GPU Instance와 Compute Instance는 1:1 또는 1:N으로 구성될 수 있다. Compute Instance와 GPU Instance가 1:1로 구성된 경우에는 `4g.20gb`와 같은 Profile 이름을 사용하여 Compute Instance를 생성하며, GPU Instance에 할당된 모든 SM Slice와 Memory가 단일 Compute Instance에 할당되어 완전히 격리된 vGPU를 제공한다. 1:N으로 구성된 경우에는 `1c.2g.10gb`와 같은 `[x]c.[x]g.[x]gb` 형태의 Profile을 이용하여 Compute Instance를 생성하며, Compute Instance는 GPU Instance의 Memory를 공유하여 이용한다. CUDA App은 Compute Instance를 vGPU라고 간주한다.
 
 [Figure 8]에서는 CUDA App A가 이용하는 vGPU는 GPU Instance와 Compute Instance 1:1로 구성하여 완전히 격리된 vGPU를 이용하는 예시를 나타내고 있다. 또한 App B와 App C의 vGPU는 GPU Instance와 Compute Instance 1:N으로 구성하여 GPU Instance의 Memory를 공유하여 이용하는 예시를 나타내고 있다.
 

@@ -59,9 +59,9 @@ NVIDIA Device Plugin의 세번째 역할은 GPU의 상태를 확인하는, GPU H
 
 {{< figure caption="[Figure 4] NVIDIA Device Plugin Architecture with Time-slicing" src="images/nvidia-device-plugin-architecture-timeslicing.png" width="1000px" >}}
 
-Time-slicing 기법은 GPU의 SM (Streaming Processor)를 **시분할**하여 다수의 App/Container가 GPU를 공유하여 사용하는 기법이다. [Figure 4]는 Time-slicing 기법의 구조를 나타내고 있다. Time-slicing 기법은 **하나의 Container가 다수의 GPU를 할당 받아** 이용할 수 있다. 두개의 GPU가 존재하며, Container A와 Container B가 첫번째 GPU를 공유하며 이용하고 있고, Container B와 Container C가 두번째 GPU를 공유하며 이용하고 있는것을 확인할 수 있다. 
+Time-slicing 기법은 GPU의 SM (Streaming Processor)를 **시분할**하여 다수의 App/Container가 GPU를 공유하여 사용하는 기법이다. [Figure 4]는 Time-slicing 기법의 구조를 나타내고 있다. Time-slicing 기법은 **하나의 Container가 다수의 GPU를 할당 받아** 이용할 수 있다. 두개의 GPU가 존재하며, Container A와 Container B가 첫번째 GPU를 공유하며 이용하고 있고, Container B와 Container C가 두번째 GPU를 공유하며 이용하고 있는것을 확인할 수 있다.
 
-GPU를 공유하여 Container에게 할당하기 위해서 NVIDIA Device Plugin은 GPU의 개수를 배수로 늘려서 Kubelet에게 전달한다. 예를들어 GPU에 4개의 GPU 존재할 경우 4배수로 kubelet에게 전달할 경우, kubelet에게는 Node에 16개의 GPU가 있는것 전달한다. 이 의미는 하나의 GPU를 최대 4개의 Container에게 할당할 수 있다는걸 의미한다.
+GPU를 공유하여 Container에게 할당하기 위해서 NVIDIA Device Plugin은 GPU의 개수를 배수로 늘려서 Kubelet에게 전달한다. 예를들어 GPU에 4개의 GPU 존재할 경우 4배수로 kubelet에게 전달할 경우, kubelet에게는 Node에 16개의 GPU가 있는것 처럼 전달한다. 이 의미는 하나의 GPU를 최대 4개의 Container에게 할당할 수 있다는걸 의미한다.
 
 ```yaml {caption="[Config 1] nvidia-device-plugin-configs ConfigMap Example for Time-slicing", linenos=table}
 apiVersion: v1
@@ -143,11 +143,9 @@ Time-slicing 기법과 동일하게 MPS 기법이 적용된 Node의 GPU는 [Conf
 
 MIG (Multi-Instance GPU) 기법은 GPU의 SM과 Memory를 완전히 격리하여 vGPU를 생성하고, vGPU를 CUDA App에서 사용할 수 있도록 제공하는 Hardware Level의 가상화 기법이다. Hardware Level의 가상화 기법이기 때문에 MIG를 지원하는 Ampere Architecture 이후의 GPU(a100)에서만 이용 가능하다. [Figure 7]는 MIG 기법의 구조를 나타내고 있다. MIG 기법은 Memory를 격리하는 **GPU Instance**와 SM을 격리하는 **Compute Instance** 두가지 단위로 GPU를 가상화 한다.
 
-GPU Instance와 Compute Instance는 1:1 또는 1:N으로 구성될 수 있다. 1:N으로 구성된 경우에는 Compute Instance는 GPU Instance의 Memory를 공유하여 이용한다. 
+GPU Instance와 Compute Instance는 1:1 또는 1:N으로 구성될 수 있다. 1:N으로 구성된 경우에는 Compute Instance는 GPU Instance의 Memory를 공유하여 이용한다. Compute Instance와 GPU Instance가 1:1로 구성된 경우에는 `[x]g.[x]gb` 형태의 Profile을 이용하여 Compute Instance를 생성한다. 여기서 `[x]g`는 Compute Instance에 할당되는 SM Slice의 개수를 의미하며, `[x]gb`는 Compute Instance에 할당되는 Memory의 크기를 의미한다. 또한 Compute Instance와 GPU Instance가 1:N으로 구성된 경우에는 `[x]c.[x]g.[x]gb` 형태의 Profile을 이용하여 Compute Instance를 생성한다. 여기서 `[x]c`는 Compute Instance에 할당되는 SM Slice의 개수를 의미한다.
 
-[Figure 7]에서 `4g.20gb`, `1g.5gb` GPU Instance는 Compute Instance 1:1로 구성되어 있고, `2g.10gb` GPU Instance는 Compute Instance 1:2으로 구성되어 있는것을 확인할 수 있다. Container에는 동시에 하나의 GPU Instance만 할당 받아 이용할 수 있다. [Figure 7]에서 Container B는 두개의 `1c.2g.10gb` Compute Instance를 할당 받아 이용하고 있는데, 두 Compute Instance가 하나의 GPU Instance에서 동작하기 때문이다.
-
-`xg.xgb` 
+[Figure 7]에서 `4g.20gb`, `1g.5gb` GPU Instance는 Compute Instance와 1:1로 구성되어 있고, `2g.10gb` GPU Instance는 `1c.2g.10gb` Compute Instance와 1:2으로 구성되어 있는것을 확인할 수 있다. Container에는 다수의 Compute Instance를 동시에 할당 받아 이용할 수 있지만, 할당 받은 Compute Instance는 반드시 동일 GPU Instance에서 동작해야 한다. [Figure 7]에서 Container B는 두개의 `1c.2g.10gb` Compute Instance를 할당 받아 이용하고 있는데, 두 Compute Instance가 하나의 `2g.10gb` GPU Instance에서 동작하기 때문이다.
 
 ```yaml {caption="[Config 3] NVIDIA Device Plugin MIG_STRATEGY Environment Variable", linenos=table}
     containers:
@@ -156,7 +154,7 @@ GPU Instance와 Compute Instance는 1:1 또는 1:N으로 구성될 수 있다. 1
           value: mixed
 ```
 
-[Config 3]과 같이 NVIDIA Device Plugin의 `MIG_STRATEGY` 환경 변수에 `mixed` 값을 설정하면 NVIDIA Device Plugin은 
+[Config 3]과 같이 NVIDIA Device Plugin의 `MIG_STRATEGY` 환경 변수에 `mixed` 값을 설정하면 NVIDIA Device Plugin은 `nvidia.com/gpu-[GPU Instance Profile Name]` Resource를 Node에 등록한다. 에를들어 `4g.20gb` GPU Instance에는 `nvidia.com/gpu-4g.20gb` Resource가 등록되고, `2g.10gb` GPU Instance에는 `nvidia.com/gpu-2g.10gb` Resource가 등록된다. 그리고 해당 Resource의 개수는 Compute Instance의 개수가 등록된다. 따라서 [Figure 7]를 기준으로 `nvidia.com/gpu-4g.20gb` Resource는 1개만 존재하며 `nvidia.com/gpu-2g.10gb` Resource가 2개 등록된다.
 
 ## 2. 참조
 
