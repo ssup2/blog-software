@@ -1,6 +1,5 @@
 ---
 title: Kubernetes NVIDIA Device Plugin
-draft: true
 ---
 
 ## 1. Kubernetes NVIDIA Device Plugin
@@ -57,7 +56,7 @@ NVIDIA Device Plugin의 세번째 역할은 GPU의 상태를 확인하는, GPU H
 
 #### 1.4.1. with Time-slicing
 
-{{< figure caption="[Figure 4] NVIDIA Device Plugin Architecture with Time-slicing" src="images/nvidia-device-plugin-architecture-timeslicing.png" width="1000px" >}}
+{{< figure caption="[Figure 4] NVIDIA Device Plugin Architecture with Time-slicing" src="images/nvidia-device-plugin-architecture-timeslicing.png" width="900px" >}}
 
 Time-slicing 기법은 GPU의 SM (Streaming Processor)를 **시분할**하여 다수의 App/Container가 GPU를 공유하여 사용하는 기법이다. [Figure 4]는 Time-slicing 기법의 구조를 나타내고 있다. Time-slicing 기법은 **하나의 Container가 다수의 GPU를 할당 받아** 이용할 수 있다. 두개의 GPU가 존재하며, Container A와 Container B가 첫번째 GPU를 공유하며 이용하고 있고, Container B와 Container C가 두번째 GPU를 공유하며 이용하고 있는것을 확인할 수 있다.
 
@@ -155,6 +154,8 @@ GPU Instance와 Compute Instance는 1:1 또는 1:N으로 구성될 수 있다. 1
 ```
 
 [Config 3]과 같이 NVIDIA Device Plugin의 `MIG_STRATEGY` 환경 변수에 `mixed` 값을 설정하면 NVIDIA Device Plugin은 `nvidia.com/gpu-[GPU Instance Profile Name]` Resource를 Node에 등록한다. 에를들어 `4g.20gb` GPU Instance에는 `nvidia.com/gpu-4g.20gb` Resource가 등록되고, `2g.10gb` GPU Instance에는 `nvidia.com/gpu-2g.10gb` Resource가 등록된다. 그리고 해당 Resource의 개수는 Compute Instance의 개수가 등록된다. 따라서 [Figure 7]를 기준으로 `nvidia.com/gpu-4g.20gb` Resource는 1개만 존재하며 `nvidia.com/gpu-2g.10gb` Resource가 2개 등록된다.
+
+MIG 기법을 이용하기 위해서는 App/Container에서는 GPU와 연결되어 있는 `/dev/nvidia[x]` Device File 뿐만이 아니라, GPU Instance와 Compute Instance와 연결되어 있는 `/dev/nvidia-caps/nvidia-cap[x]` Device File도 필요하다. 따라서 NVIDIA Device Plugin은 Container에게 `/dev/nvidia-caps/nvidia-cap[x]` Device File도 App/Container에 생성한다.
 
 ## 2. 참조
 
