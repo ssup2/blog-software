@@ -26,6 +26,7 @@ draft: true
 * NVIDIA H100 Whitepaper : [https://modal-cdn.com/gpu-glossary/gtc22-whitepaper-hopper.pdf](https://modal-cdn.com/gpu-glossary/gtc22-whitepaper-hopper.pdf)
 * NVIDIA CUDA Core vs Tensor Core : [https://dreamgonfly.github.io/blog/cuda-cores-vs-tensor-cores/](https://dreamgonfly.github.io/blog/cuda-cores-vs-tensor-cores/)
 * NVIDIA DGX H100 Guide : [https://docs.nvidia.com/dgx/dgxh100-user-guide/introduction-to-dgxh100.html](https://docs.nvidia.com/dgx/dgxh100-user-guide/introduction-to-dgxh100.html)
+* NVIDIA DGX H100 Guide : [https://www.xdnode.co.kr/product/?bmode=view&idx=167230117](https://www.xdnode.co.kr/product/?bmode=view&idx=167230117)
 * NVIDIA DGX A100 Guide : [https://docs.nvidia.com/dgx/dgxa100-user-guide/introduction-to-dgxa100.html](https://docs.nvidia.com/dgx/dgxa100-user-guide/introduction-to-dgxa100.html)
 * NVIDIA DGX H100 Architecture : [https://www.hardwarezone.com.sg/pc/components/tech-news-nvidia-h100-gpu-hopper-architecture-building-block-ai-infrastructure-dgx-h100-supercomputer](https://www.hardwarezone.com.sg/pc/components/tech-news-nvidia-h100-gpu-hopper-architecture-building-block-ai-infrastructure-dgx-h100-supercomputer)
 * NVIDIA DGX H100 Architecture : [https://www.linkedin.com/pulse/network-computing-how-cluster-128-units-h100-fiberstamp-qkgrc/](https://www.linkedin.com/pulse/network-computing-how-cluster-128-units-h100-fiberstamp-qkgrc/)
