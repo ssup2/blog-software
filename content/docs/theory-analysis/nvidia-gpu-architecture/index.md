@@ -9,6 +9,18 @@ draft: true
 
 {{< figure caption="[Figure 1] NVIDIA H100 GPU Architecture" src="images/nvidia-h100-gpu-architecture.png" width="1100px" >}}
 
+[Figure 1]은 H100 GPU의 Architecture를 나타내고 있다. H100 GPU Chipset 전체에서 시작하여, 주 연산을 담당하는 **SM** (Streaming Multiprocessor) 단계를 거쳐, SM 내부의 **Sub-core**까지 순차적으로 확대하며 Architecture를 단계적으로 보여 준다.
+
+#### 1.1.1. GPU Chipset
+
+* PCI Express 5.0 : 
+* GigaThread Engine :
+* GCP (GPU Processing Cluster) : 
+
+#### 1.1.2. SM (Streaming Multiprocessor)
+
+#### 1.1.3. Sub-core
+
 ### 1.2. GPU Server Architecture
 
 {{< figure caption="[Figure 2] NVIDIA DGX H100 Server Architecture" src="images/nvidia-dgx-h100-server-architecture.png" width="1100px" >}}
