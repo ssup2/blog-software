@@ -5,13 +5,13 @@ draft: true
 
 ## 1. NVIDIA GPU Architecture
 
-### 1.1. H100 GPU Architecture
+### 1.1. GPU Architecture
 
-#### 1.1.1. SM Architecture
+{{< figure caption="[Figure 1] GPU Architecture" src="images/nvidia-h100-gpu-architecture.png" width="1100px" >}}
 
-#### 1.1.2. 
+### 1.2. GPU Server Architecture
 
-### 1.2. H100 Server Architecture 
+{{< figure caption="[Figure 2] GPU Server Architecture" src="images/nvidia-dgx-h100-server-architecture.png" width="1100px" >}}
 
 ## 2. 참조
 
