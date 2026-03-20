@@ -13,9 +13,15 @@ draft: true
 
 #### 1.1.1. GPU Chipset
 
-* PCI Express 5.0 : 
-* GigaThread Engine :
-* GCP (GPU Processing Cluster) : 
+* **PCI Express 5.0** : 
+* **GigaThread Engine** :
+* **GPC (GPU Processing Cluster)** : 
+* **TPC (Texture Processing Clusters)** :
+* **SM (Streaming Multiprocessor)** :
+* **L2 Cache** :
+* **Memory Controller** :
+* **High-speed Hub** :
+* **NVLink** :
 
 #### 1.1.2. SM (Streaming Multiprocessor)
 
