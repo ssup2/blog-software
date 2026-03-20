@@ -7,11 +7,11 @@ draft: true
 
 ### 1.1. GPU Architecture
 
-{{< figure caption="[Figure 1] GPU Architecture" src="images/nvidia-h100-gpu-architecture.png" width="1100px" >}}
+{{< figure caption="[Figure 1] NVIDIA H100 GPU Architecture" src="images/nvidia-h100-gpu-architecture.png" width="1100px" >}}
 
 ### 1.2. GPU Server Architecture
 
-{{< figure caption="[Figure 2] GPU Server Architecture" src="images/nvidia-dgx-h100-server-architecture.png" width="1100px" >}}
+{{< figure caption="[Figure 2] NVIDIA DGX H100 Server Architecture" src="images/nvidia-dgx-h100-server-architecture.png" width="1100px" >}}
 
 ## 2. 참조
 
