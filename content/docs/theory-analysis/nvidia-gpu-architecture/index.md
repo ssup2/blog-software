@@ -28,7 +28,7 @@ draft: true
 * **L1 Instruction Cache** : SM 내부에서 실행되는 GPU Thread의 Instruction을 Caching하는 역할을 수행한다. GPU는 SIMT (Single Instruction Multiple Threads) 구조, 즉 하나의 명령어를 동시에 여러 GPU Thread에서 수행하기 때문에 각 GPU Thread마다 Memory에 접근을 수행하는 경우에는 Memory의 병목이 발생한다. L1 Instruction Cache는 Instruction을 Caching하여 Memory 접근을 최소화하는 역할을 수행한다.
 * **Sub-core** : 실제 연산을 수행하는 Core들을 묶는 단위이다. H100 GPU의 경우에는 4개의 Sub-core가 존재한다.
 * **Tensor Memory Accelerator** :
-* **L1 Data Cache / Shared Memory** : SM 내부에서 처리되는 Data를 Caching하는 역할을 수행하거나, SM 내부에서 Data 공유를 위한 Shared Memory 역할을 수행한다.
+* **L1 Data Cache / Shared Memory** : SM 내부에서 처리되는 Data를 Caching하는 역할을 수행하거나, SM 내부에서 Data 공유를 위한 Shared Memory 역할을 수행한다. H100 GPU의 경우에는 256KB의 용량을 가진다.
 * **Tex** : 
 
 #### 1.1.3. Sub-core
