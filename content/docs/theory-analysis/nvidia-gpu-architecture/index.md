@@ -16,24 +16,24 @@ draft: true
 * **PCI Express** : GPU는 PCI Express Interface를 통해서 CPU 또는 Network Card와 연결된다. H100 GPU의 경우에는 PCI Express 5.0 Interface를 이용한다.
 * **GigaThread Engine** : 수천, 수백개의 GPU Thread를 동시에 생성하고 관리하는 역할을 담당한다. 생성한 GPU Thread를 다수의 SM에 분배하고, 유휴한 SM이 발생하지 않도록 관리한다. 다수의 App이 GPU를 이용하기 위해서 Time-slicing 기법을 이용하는 경우, GPU의 Context Switching을 담당하는 역할도 수행한다. A100 GPU부터 제공되는 MIG (Multi Instance GPU) 기능도 GigaThread Engine를 확장하여 구현되었다.
 * **GPC (GPU Processing Cluster)** : SM을 묶는 가장 큰 단위이다. H100 GPU의 경우에는 8개의 GPC가 존재한다.
-* **TPC (Texture Processing Clusters)** : GPC 다음으로 SM을 묶는 단위이며, Texture Sampling/Filtering, Vertex Fetch, Tessellation 연산을 담당한다. H100 GPU의 경우에는 하나의 GPC에 8개의 TPC가 존재한다.
-* **L2 Cache** : 모든 SM이 공유하여 이용하는 Data Cache의 역할을 수행하며, GPU가 HBM (High-Bandwidth Memory)의 접근을 최소화하기 위해 사용된다. H100 GPU의 경우에는 L2 Cache가 2개의 Partition으로 구성되어 있으며, NUMA (Non-Uniform Memory Access) 기반으로 동작하며, 각 Partition당 60MB의 용량을 가진다.
-* **Memory Controller** : HBM을 제어하는 Controller 역할을 수행한다.
-* **HBM** :
-* **High-speed Hub** :
-* **NVLink** :
+* **TPC (Texture Processing Clusters)** : GPC 다음으로 SM을 묶는 단위이며, Texture Sampling/Filtering, Vertex Fetch, Tessellation 연산을 담당한다. H100 GPU의 경우에는 하나의 GPC에 8개의 TPC가 존재한다. 또한 하나의 TPC에는 2개의 SM이 존재한다.
+* **L2 Cache** : 모든 SM이 공유하여 이용하는 Data Cache의 역할을 수행하며, GPU가 Memory의 접근을 최소화하기 위해 사용된다. H100 GPU의 경우에는 L2 Cache가 2개의 Partition으로 구성되어 있으며, NUMA (Non-Uniform Memory Access) 기반으로 동작하며, 각 Partition당 60MB의 용량을 가진다.
+* **Memory Controller** : Memory을 제어하는 역할을 수행한다. H100 GPU의 경우에는 12개의 Memory Controller가 존재하며, 2개의 Memory Controller가 한 쌍을 이루어 1024 Bit Bus를 구성하여 하나의 HBM3를 제어한다.
+* **Memory** : GPU의 주 기억 장치로 이용된다. H100 GPU의 경우에는 HBM3를 이용하며, 최대 6개의 Memory를 가질 수 있다. 각 HBM3마다 16GB의 용량을 가지기 때문에 최대 96GB의 용량을 가질 수 있다.
+* **High-speed Hub** : GPU 내부 Bus와 NVLink를 연결하는 Hub 역할을 수행한다.
+* **NVLink** : GPU 사이의 데이터를 주고받기 위한 초고속 데이터 전송 채널을 제공한다. H100 GPU의 경우에는 NVLink 4.0를 이용한다.
 
 #### 1.1.2. SM (Streaming Multiprocessor)
 
-* **L1 Instruction Cache** :
-* **Sub-core** :
+* **L1 Instruction Cache** : SM 내부에서 실행되는 GPU Thread의 Instruction을 Cache하는 역할을 수행한다. GPU는 SIMT (Single Instruction Multiple Threads) 구조, 즉 하나의 명령어를 동시에 여러 GPU Thread에서 수행하기 때문에 각 GPU Thread마다 Memory에 접근을 수행하는 경우에는 Memory의 병목이 발생한다. L1 Instruction Cache는 Instruction을 Caching하여 Memory 접근을 최소화하는 역할을 수행한다.
+* **Sub-core** : 실제 연산을 수행하는 Core들을 묶는 단위이다. H100 GPU의 경우에는 4개의 Sub-core가 존재한다.
 * **Tensor Memory Accelerator** :
 * **L1 Data Cache** :
 * **Tex** : 
 
 #### 1.1.3. Sub-core
 
-* **L0 Instruction Cache** :
+* **L0 Instruction Cache** : 
 * **Warp Scheduler** :
 * **Dispatch Unit** :
 * **Register File** :
