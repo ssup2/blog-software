@@ -13,14 +13,14 @@ draft: true
 
 #### 1.1.1. GPU Chipset
 
-* **PCI Express 5.0** : 
-* **GigaThread Engine** :
+* **PCI Express** : GPU는 PCI Express Interface를 통해서 CPU 또는 Network Card와 연결된다. H100 GPU의 경우에는 PCI Express 5.0 Interface를 이용한다.
+* **GigaThread Engine** : 수천, 수백개의 GPU Thread를 동시에 생성하고 관리하는 역할을 담당한다. 생성한 GPU Thread를 다수의 SM에 분배하고, 유휴한 SM이 발생하지 않도록 관리한다. 다수의 App이 GPU를 이용하기 위해서 Time-slicing 기법을 이용하는 경우, GPU의 Context Switching을 담당하는 역할도 수행한다. A100 GPU부터 제공되는 MIG (Multi Instance GPU) 기능도 GigaThread Engine를 확장하여 구현되었다.
 * **GPC (GPU Processing Cluster)** : 
 * **TPC (Texture Processing Clusters)** :
 * **SM (Streaming Multiprocessor)** :
 * **L2 Cache** :
 * **Memory Controller** :
-* **HBM3** :
+* **HBM** :
 * **High-speed Hub** :
 * **NVLink** :
 
