@@ -15,11 +15,10 @@ draft: true
 
 * **PCI Express** : GPU는 PCI Express Interface를 통해서 CPU 또는 Network Card와 연결된다. H100 GPU의 경우에는 PCI Express 5.0 Interface를 이용한다.
 * **GigaThread Engine** : 수천, 수백개의 GPU Thread를 동시에 생성하고 관리하는 역할을 담당한다. 생성한 GPU Thread를 다수의 SM에 분배하고, 유휴한 SM이 발생하지 않도록 관리한다. 다수의 App이 GPU를 이용하기 위해서 Time-slicing 기법을 이용하는 경우, GPU의 Context Switching을 담당하는 역할도 수행한다. A100 GPU부터 제공되는 MIG (Multi Instance GPU) 기능도 GigaThread Engine를 확장하여 구현되었다.
-* **GPC (GPU Processing Cluster)** : 
-* **TPC (Texture Processing Clusters)** :
-* **SM (Streaming Multiprocessor)** :
-* **L2 Cache** :
-* **Memory Controller** :
+* **GPC (GPU Processing Cluster)** : SM을 묶는 가장 큰 단위이다. H100 GPU의 경우에는 8개의 GPC가 존재한다.
+* **TPC (Texture Processing Clusters)** : GPC 다음으로 SM을 묶는 단위이며, Texture Sampling/Filtering, Vertex Fetch, Tessellation 연산을 담당한다. H100 GPU의 경우에는 하나의 GPC에 8개의 TPC가 존재한다.
+* **L2 Cache** : 모든 SM이 공유하여 이용하는 Data Cache의 역할을 수행하며, GPU가 HBM (High-Bandwidth Memory)의 접근을 최소화하기 위해 사용된다. H100 GPU의 경우에는 L2 Cache가 2개의 Partition으로 구성되어 있으며, NUMA (Non-Uniform Memory Access) 기반으로 동작하며, 각 Partition당 60MB의 용량을 가진다.
+* **Memory Controller** : HBM을 제어하는 Controller 역할을 수행한다.
 * **HBM** :
 * **High-speed Hub** :
 * **NVLink** :
