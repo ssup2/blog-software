@@ -20,16 +20,40 @@ draft: true
 * **SM (Streaming Multiprocessor)** :
 * **L2 Cache** :
 * **Memory Controller** :
+* **HBM3** :
 * **High-speed Hub** :
 * **NVLink** :
 
 #### 1.1.2. SM (Streaming Multiprocessor)
 
+* **L1 Instruction Cache** :
+* **Sub-core** :
+* **Tensor Memory Accelerator** :
+* **L1 Data Cache** :
+* **Tex** : 
+
 #### 1.1.3. Sub-core
+
+* **L0 Instruction Cache** :
+* **Warp Scheduler** :
+* **Dispatch Unit** :
+* **Register File** :
+* **INT32 Core** :
+* **FP32 Core** :
+* **FP64 Core** :
+* **Tensor Core** :
+* **LD/ST Unit** :
+* **SFU (Special Function Unit)** :
 
 ### 1.2. GPU Server Architecture
 
 {{< figure caption="[Figure 2] NVIDIA DGX H100 Server Architecture" src="images/nvidia-dgx-h100-server-architecture.png" width="1100px" >}}
+
+* **Data Cache NVME** :
+* **Storage Networking ConnectX-7** :
+* **OS NVME** :
+* **DGX Networking ConnectX-7** :
+* **NVSwitch** :
 
 ## 2. 참조
 
