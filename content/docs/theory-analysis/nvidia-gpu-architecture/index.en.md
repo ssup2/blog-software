@@ -51,10 +51,10 @@ title: NVIDIA GPU Architecture
 
 * **CPU** : There are two Intel CPUs connected to each other via UPI (Ultra Path Interconnect). The CPUs connect directly to DGX Networking ConnectX-7 and the GPUs via PCI Express, and also connect to Data Cache NVME, Storage Networking ConnectX-7, and NVSwitch through a PCI Express switch.
 * **Data Cache NVME** : Temporarily caches data fetched from external storage (NFS, Lustre). The DGX H100 server uses four 3.84 TB NVMe drives.
-* **Storage Networking ConnectX-7** : Network interface for pulling data from external storage into Data Cache NVME. ConnectX-7 refers to NVIDIA’s SmartNIC and uses the InfiniBand protocol.
+* **Storage Networking Interface** : Network interface for pulling data from external storage into Data Cache NVME. For the H100 GPU, ConnectX-7 is used. ConnectX-7 refers to NVIDIA’s SmartNIC and uses the InfiniBand protocol.
 * **OS NVME** : NVMe drives where the operating system is installed. Connected to the first CPU via PCI Express. The DGX H100 server uses two 1.92 TB NVMe drives.
 * **100Gbps Ethernet** : Network interface for management and monitoring of the GPU server. Connected to the second CPU via PCI Express.
-* **DGX Networking ConnectX-7** : Network interface for the DGX network—that is, the data-plane network of the GPU cluster. DGX Networking ConnectX-7 is connected not only to CPUs but also to GPUs via PCI Express so that, in a GPU server cluster, GPUs can access GPU memory on other GPU servers using GPUDirect RDMA (Remote Direct Memory Access) without CPU involvement.
+* **DGX Networking Interface** : Network interface for the DGX network—that is, the data-plane network of the GPU cluster. For the H100 GPU, ConnectX-7 is used. DGX Networking Interface is connected not only to CPUs but also to GPUs via PCI Express so that, in a GPU server cluster, GPUs can access GPU memory on other GPU servers using GPUDirect RDMA (Remote Direct Memory Access) without CPU involvement.
 * **NVSwitch** : Acts as a switch to fully (any-to-any) connect GPUs over NVLink. The CPU connects to NVSwitch via PCIe to control it.
 
 ## 2. References
