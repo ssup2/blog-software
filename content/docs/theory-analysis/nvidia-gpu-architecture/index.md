@@ -33,7 +33,7 @@ title: NVIDIA GPU Architecture
 #### 1.1.3. Sub-core
 
 * **L0 Instruction Cache** : Sub-core 내부에서 실행되는 GPU Thread의 Instruction을 Cache하는 역할을 수행한다.
-* **Warp Scheduler** : **Warp**은 32개의 GPU Thread로 구성된 가장 기본적인 실행 및 스케줄링 단위이며, Warp에 GPU Thread들은 서로 다른 Data를 가지지만 동일한 명령어를 실행한다. Wrap Scheduler는 실행 준비가 완료된 Warp을 선택하고 연산 유닛으로 전달한다. 만약 실행 상태의 Wrap이 중단되어야 하는 경우 다른 실행 준비 상태의 Wrap을 선택하여 연산 유닛에 전달하여, 연산 유닛이 놀지 않도록 관리하는 역할을 수행한다.
+* **Warp Scheduler** : **Warp**는 32개의 GPU Thread로 구성된 가장 기본적인 실행 및 스케줄링 단위이며, Warp에 GPU Thread들은 서로 다른 Data를 가지지만 동일한 명령어를 실행한다. Wrap Scheduler는 실행 준비가 완료된 Warp을 선택하고 연산 유닛으로 전달한다. 만약 실행 상태의 Wrap이 중단되어야 하는 경우 다른 실행 준비 상태의 Wrap을 선택하여 연산 유닛에 전달하여, 연산 유닛이 놀지 않도록 관리하는 역할을 수행한다.
 * **Dispatch Unit** : Warp Scheduler에서 선택된 Warp을 어느 연산 Unit에 전달할지 결정하는 역할을 수행한다.
 * **Register File** : 모든 연산 유닛은 Register File에서 데이터를 읽고, 결과를 Register File에 저장한다.
 * **INT32 Core** : 32 Bit Integer 연산을 수행하는 연산 Unit. H100 GPU의 경우에는 하나의 Sub-core에 16개의 INT32 Core가 존재한다.
