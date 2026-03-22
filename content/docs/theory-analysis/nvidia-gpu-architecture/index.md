@@ -43,7 +43,7 @@ title: NVIDIA GPU Architecture
 * **LD/ST Unit** : Memory, Cache로부터 Register File에 Data를 Load하거나, Register File의 Data를 Memory, Cache에 Store하는 역할을 수행한다.
 * **SFU (Special Function Unit)** : `exp()`, `sin()`, `cos()`과 같은 초월함수 연산을 수행한는 연산 Unit. H100 GPU의 경우에는 하나의 Sub-core에 4개의 SFU가 존재한다.
 
-### 1.2. GPU Server Architectur의
+### 1.2. GPU Server Architecture
 
 {{< figure caption="[Figure 2] NVIDIA DGX H100 Server Architecture" src="images/nvidia-dgx-h100-server-architecture.png" width="1100px" >}}
 
