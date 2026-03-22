@@ -19,7 +19,7 @@ draft: true
 * **TPC (Texture Processing Clusters)** : GPC 다음으로 SM을 묶는 단위이며, Texture Sampling/Filtering, Vertex Fetch, Tessellation 연산을 담당한다. H100 GPU의 경우에는 하나의 GPC에 8개의 TPC가 존재한다. 또한 하나의 TPC에는 2개의 SM이 존재한다.
 * **L2 Cache** : 모든 SM이 공유하여 이용하는 Data Cache의 역할을 수행하며, GPU가 Memory의 접근을 최소화하기 위해 사용된다. H100 GPU의 경우에는 L2 Cache가 2개의 Partition으로 구성되어 있으며, NUMA (Non-Uniform Memory Access) 기반으로 동작하며, 각 Partition당 60MB의 용량을 가진다.
 * **Memory Controller** : Memory을 제어하는 역할을 수행한다. H100 GPU의 경우에는 12개의 Memory Controller가 존재하며, 2개의 Memory Controller가 한 쌍을 이루어 1024 Bit Bus를 구성하여 하나의 HBM3를 제어한다.
-* **Memory** : GPU의 주 기억 장치로 이용된다. H100 GPU의 경우에는 HBM3를 이용하며, 최대 6개의 Memory를 가질 수 있다. 각 HBM3마다 16GB의 용량을 가지기 때문에 최대 96GB의 용량을 가질 수 있다.
+* **Memory** : GPU의 전역 (Global) 공유 메모리 역할을 수행한다. H100 GPU의 경우에는 HBM3를 이용하며, 최대 6개의 Memory를 가질 수 있다. 각 HBM3마다 16GB의 용량을 가지기 때문에 최대 96GB의 용량을 가질 수 있다.
 * **High-speed Hub** : GPU 내부 Bus와 NVLink를 연결하는 Hub 역할을 수행한다.
 * **NVLink** : GPU 사이의 데이터를 주고받기 위한 초고속 데이터 전송 채널을 제공한다. H100 GPU의 경우에는 NVLink 4.0를 이용한다.
 
@@ -27,9 +27,9 @@ draft: true
 
 * **L1 Instruction Cache** : SM 내부에서 실행되는 GPU Thread의 Instruction을 Caching하는 역할을 수행한다. GPU는 SIMT (Single Instruction Multiple Threads) 구조, 즉 하나의 명령어를 동시에 여러 GPU Thread에서 수행하기 때문에 각 GPU Thread마다 Memory에 접근을 수행하는 경우에는 Memory의 병목이 발생한다. L1 Instruction Cache는 Instruction을 Caching하여 Memory 접근을 최소화하는 역할을 수행한다.
 * **Sub-core** : 실제 연산을 수행하는 Core들을 묶는 단위이다. H100 GPU의 경우에는 4개의 Sub-core가 존재한다.
-* **Tensor Memory Accelerator** :
+* **Tensor Memory Accelerator** : Memory와 Shared Memory 사이의 Data 전송을 관리하는 역할을 수행한다.
 * **L1 Data Cache / Shared Memory** : SM 내부에서 처리되는 Data를 Caching하는 역할을 수행하거나, SM 내부에서 Data 공유를 위한 Shared Memory 역할을 수행한다. H100 GPU의 경우에는 256KB의 용량을 가진다.
-* **Tex** : 
+* **Texture Units (Tex)** : Texture Sampling, Filtering 연산을 수행한다. H100 GPU의 경우에는 하나의 SM에 4개의 Tex가 존재한다.
 
 #### 1.1.3. Sub-core
 
