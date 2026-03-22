@@ -1,6 +1,5 @@
 ---
 title: NVIDIA GPU Architecture
-draft: true
 ---
 
 ## 1. NVIDIA GPU Architecture
@@ -48,11 +47,15 @@ draft: true
 
 {{< figure caption="[Figure 2] NVIDIA DGX H100 Server Architecture" src="images/nvidia-dgx-h100-server-architecture.png" width="1100px" >}}
 
-* **Data Cache NVME** :
-* **Storage Networking ConnectX-7** :
-* **OS NVME** :
-* **DGX Networking ConnectX-7** :
-* **NVSwitch** :
+[Figure 2]는 NVIDIA DGX H100 Server의 Architecture를 나타내고 있다. 대부분의 GPU Server는 다수의 GPU를 Cluster로 구성하여 이용한다. DGX H100 Server는 H100 GPU 8개와 CPU 2개를 이용하여 NUMA (Non-Uniform Memory Access) 기반으로 구성되어 있다.
+
+* **CPU** : 두 개의 Intel CPU가 존재하며, UPI (Ultra Path Interconnect)를 통해서 두 CPU가 연결되어 있다. CPU는 PCI Express Interface를 통해서 DGX Networking ConnectX-7와 GPU와 직접 연결되어 있으며, PCI Express Switch를 통해서 Data Cache NVME, Storage Networking ConnectX-7, NVSwitch와도 연결되어 있다.
+* **Data Cache NVME** : 외부 Storage (NFS, Lustre)로부터 Data를 가져와 임시로 Caching하는 역할을 수행한다. DGX H100 Server의 경우에는 4개의 3.84TB의 NVME를 이용한다.
+* **Storage Networking ConnectX-7** : 외부 Storage에서 Data를 가져와 Data Cache NVME로 저장하기 위한 Network Card Interface이다. ConnectX-7는 NVIDIA의 SmartNIC을 지징하며 InfiniBand Protocol을 이용한다.
+* **OS NVME** : 운영체제가 설치된 NVME를 의미한다. 첫번째 CPU와 PCI Express Interface를 통해서 연결되어 있다. DGX H100 Server의 경우에는 2개의 1.92TB의 NVME를 이용한다.
+* **100Gbps Ethernet** : GPU Server 관리 및 모니터링을 위한 Network와 연결된 Network Card Interface이다. 두번째 CPU와 PCI Express Interface를 통해서 연결되어 있다.
+* **DGX Networking ConnectX-7** : DGX Network 즉 GPU Cluster의 Data Plane Network를 담당하는 Network Card Interface이다. DGX Networking ConnectX-7는 CPU 뿐만 아니라 GPU와도 PCI Express Interface와도 연결되어 있는데, 이러한 이유는 GPU Server 클러스터 환경에서 GPU가 다른 GPU Server의 GPU Memory에 GPUDirect RDMA (Remote Direct Memory Access) 기반으로 CPU 개입없이 접근할 수 있도록 하기 위함이다.
+* **NVSwitch** : GPU를 NVLink를 통해서 완전히 (Any-to-Any) 연결하기 위해서 사용되는 Switch 역할을 수행한다. CPU는 NVSwitch를 제어하기 위해서 PCIe Interface를 통해서 연결되어 있다.
 
 ## 2. 참조
 
