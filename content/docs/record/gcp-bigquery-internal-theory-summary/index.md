@@ -105,6 +105,48 @@ title: GCP BigQuery 내부 이론 정리
   * Interactive : 즉시 쿼리 실행
   * Batch : Idle Resource가 발생하는 시점에 실행, 일반적으로 1~2분 이내에 실행됨. 24시간 이내에 실행되지 않으면 Interactive로 변경되어 실행
 
+### 3.2. Caching Features & Limits
+
+* To retrive data from stored cached, the query should be exact replica of the original query
+* Not cached when destination table is specified to store the results in query
+* Not cached if tables/views being used in the query have changed since the last cache.
+* Not cached for tables having streaming ingestion.
+* Not cached if query uses non-deterministic functions. (NOW(), CURRENT_USER())
+* Not cached if query runs against external data sources like BigTable or CloudStorage.
+* Result set must be smaller than maximum response size (10GB Default)
+
+### 3.3. Wildcard Tables
+
+* 다수의 Table에서 한번에 데이터를 조회하고 싶을때 이용
+  * Example : SELECT * FROM `project_id.dataset_id.table_id_*`
+* `_TABLE_SUFFIX` : Wildcard Table 쿼리 이용시 Pseudo Column이며, 이를 활용하여 특정 Table만 조회 가능
+  * Example : SELECT * FROM `project_id.dataset_id.table_id_*` WHERE _TABLE_SUFFIX = '100' OR _TABLE_SUFFIX = '200'
+* Limitations
+  * Support BigQuery storage only
+  * Caching is not supported
+  * DML is not supported
+
+### 3.4. Scheduled Queries
+
+* 특정 시간에 쿼리 수행
+* Backfill 지원
+
+### 3.5. Auto Schema Detection
+
+* 최대 100개의 Random Row를 선택해서 Schema 파악
+* 다음의 제약 조건 존재 
+  * CSV, SON 형태만 지원
+  * Gzip 지원
+  * Comma, Pipe, Tab, Delimiter 지원
+  * Header from file
+  * endline 지원
+  * `YYYY-MM-DD` 형태의 Date 지원
+  * `yyyy-mm-dd hh:mm:ss` 형태의 Timestamp 지원
+
+## 4. Efficient Schema Design
+
+
+
 ## 6. 참고
 
 * [https://www.udemy.com/course/bigquery/](https://www.udemy.com/course/bigquery/)
