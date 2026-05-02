@@ -82,9 +82,29 @@ title: GCP BigQuery 내부 이론 정리
 * Default Rounding Mode : 반올림 모드
 * Time Travel Window : 데이터 복구 가능한 시간 범위
 
-### 2.3. Table Creation
 
-* Table 생성
+## 3. Using BigQuery Dashboard Options
+
+###  3.1. Running query with varioius query settings
+
+* Destination
+  * BigQuery의 Query 결과는 Table로 저장되며, 어느 Table에 저장할지 설정
+  * Save query results in a temporary table
+     * 임시 Table에 저장
+     * 임시 Table은 Caching 용도로 사용되며, 약 24시간 동안 Caching
+     * 다른 사용자와 공유가 불가능
+     * 추가 비용이 발생하지 않음
+  * Select a destination table for query results
+     * 특정 Table에 저장
+     * 저장 비용 발생
+     * 동일한 DataSet의 Table에만 저장 가능
+
+* Allow Large Results : 10GB 이상의 결과를 저장 가능
+
+* Job Priority
+  * Interactive : 즉시 쿼리 실행
+  * Batch : Idle Resource가 발생하는 시점에 실행, 일반적으로 1~2분 이내에 실행됨. 24시간 이내에 실행되지 않으면 Interactive로 변경되어 실행
+
 ## 6. 참고
 
 * [https://www.udemy.com/course/bigquery/](https://www.udemy.com/course/bigquery/)
