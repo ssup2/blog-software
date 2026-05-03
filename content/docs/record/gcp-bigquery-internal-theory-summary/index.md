@@ -151,6 +151,28 @@ title: GCP BigQuery 내부 이론 정리
 
 ## 5. Query Plan Execution
 
+* BigQuery는 SQL 쿼리를 실행할 때 단순히 순서대로 처리하는 게 아니라, 최적화된 실행 계획(Execution Plan)을 자동으로 설계. 다른 DB의 EXPLAIN 문과 유사한 개념
+* In-Memory Shuffle
+  * BigQuery는 중간 데이터를 전용 **메모리 노드**에 저장하여 처리 속도를 획기적으로 향상시킴. 특히 데이터가 생성되는 즉시 다음 작업자가 소비할 수 있어 파이프라인 방식 실행이 가능
+* 주요 성능 지표
+  * Elapsed Time : 쿼리 시작부터 완료까지 실제 경과 시간
+  * Slot Time : 모든 슬롯이 작업한 시간의 합계
+  * Bytes Shuffled : 단계 간 전송된 데이터량 (낮을수록 좋음)
+  * Bytes Spilled to Disk : 메모리 초과로 디스크에 기록된 데이터량 (0이 이상적)
+
+## 6. Partitioned Tables
+
+* Stage별 타이밍 지표
+  * Average Time : 해당 Stage의 모든 Worker 평균 시간
+  * Max Time : 가장 느린 Worker(Long Tail)의 시간
+
+* Worker의 4가지 상태
+  * Wait : 스케줄링 대기 또는 이전 Stage 완료 대기
+  * Read : 데이터 읽기 및 필터링
+  * Compute : 연산 처리 (수식 계산, SQL 함수, 집계 등)
+  * Write : 결과 출력 (메모리 또는 디스크에 저장)
+
+
 ## 6. 참고
 
 * [https://www.udemy.com/course/bigquery/](https://www.udemy.com/course/bigquery/)
