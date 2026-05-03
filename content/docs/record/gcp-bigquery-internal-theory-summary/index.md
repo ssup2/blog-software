@@ -247,7 +247,56 @@ title: GCP BigQuery 내부 이론 정리
 
 ### 7.5. Partition Best Practices
 
+* 권장 O : 파티션 컬럼을 WHERE 절에 단독으로 사용
 
+```
+-- 좋음: 파티션 컬럼을 좌변에 단독으로
+WHERE _PARTITIONTIME > TIMESTAMP_SUB(TIMESTAMP('2024-01-01'), INTERVAL 1 DAY)
+
+-- 나쁨: 파티션 컬럼에 연산 포함
+WHERE _PARTITIONTIME + INTERVAL 1 DAY > '2024-01-01'
+```
+
+* 권장 O : AND 조건으로 추가 필터 사용
+
+```
+-- 좋음: AND는 스캔 범위를 더 좁혀줌
+WHERE department = 45 AND id = 1
+```
+
+* 권장 X : OR 조건으로 비파티션 컬럼 추가
+
+```
+-- 나쁨: OR로 비파티션 컬럼이 들어오면 전체 스캔
+WHERE department = 45 OR id = 1
+-- id가 어느 파티션에 있는지 알 수 없어 풀스캔 발생
+```
+
+* 파티션 컬럼에 다른 컬럼과의 연산 포함
+
+```
+-- 나쁨: 전체 스캔 발생
+WHERE department + LENGTH(name) = 45
+```
+
+* 서브쿼리를 WHERE 절에 사용
+
+```
+-- 나쁨: 파티션 제거 효과 없음
+WHERE department = (SELECT MAX(department) FROM ...)
+```
+
+* 파티션 컬럼을 다른 컬럼과 비교
+
+```
+-- 나쁨: 전체 스캔 발생
+WHERE _PARTITIONTIME > ts1  -- ts1은 테이블의 다른 컬럼
+```
+
+* 파티션을 너무 많이 생성
+  * 파티션마다 메타데이터가 쌓여 오히려 성능 저하
+  * 파티션이 너무 많아지면 비파티션 테이블과 다를 바 없어짐
+  * 이런 경우엔 파티션 대신 클러스터 테이블 사용을 권장
 
 ## 6. 참고
 
