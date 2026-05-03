@@ -298,6 +298,8 @@ WHERE _PARTITIONTIME > ts1  -- ts1은 테이블의 다른 컬럼
   * 파티션이 너무 많아지면 비파티션 테이블과 다를 바 없어짐
   * 이런 경우엔 파티션 대신 클러스터 테이블 사용을 권장
 
+## 8. Clustered Tables
+
 ## 6. 참고
 
 * [https://www.udemy.com/course/bigquery/](https://www.udemy.com/course/bigquery/)
