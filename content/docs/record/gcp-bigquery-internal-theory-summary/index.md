@@ -145,7 +145,11 @@ title: GCP BigQuery 내부 이론 정리
 
 ## 4. Efficient Schema Design
 
+* BigQuery 환경에서는 De-normalized Schema를 권장
+  * 분산 처리에 유리
+* Nested & Repeated Column 지원
 
+## 5. Query Plan Execution
 
 ## 6. 참고
 
