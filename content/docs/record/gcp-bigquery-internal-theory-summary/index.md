@@ -300,6 +300,58 @@ WHERE _PARTITIONTIME > ts1  -- ts1은 테이블의 다른 컬럼
 
 ## 8. Clustered Tables
 
+* 파티셔닝 한계점
+  * 파티션 내에 데이터가 여전히 너무 많을 때
+  * 파티션 크기가 불균형할 때 (부서별 인원 차이 등)
+
+* 클러스터링
+  * 파티션 내부의 데이터를 특정 컬럼 값 기준으로 같은 버킷(파일)에 모아 저장하는 방식입니다. Hive의 버킷팅(Bucketing)과 동일한 개념입니다.
+
+* 파티션 vs 클러스터
+  * 파티션 : 디렉토리
+  * 클러스터 : 파티션 디렉토리 안의 파일
+
+* 파티셔닝만 사용
+  * 쿼리 실행 전에 정확한 처리 데이터량과 비용을 미리 알아야 할 때
+  * 파티션 단위의 만료, DML 등 세부 관리가 필요할 때
+* 파티셔닝 + 클러스터링 사용
+  * 데이터가 대용량이고 정교한 데이터 조직화가 필요할 때
+  * 주로 집계(Aggregation)와 필터링 쿼리를 많이 실행할 때
+  * 비용 사전 예측이 크게 중요하지 않을 때
+* 클러스터링만 사용
+  * 파티셔닝 시 파티션이 수천 개 이상으로 너무 많이 생성될 때
+  * 평균 파티션 크기가 1GB 미만으로 작을 때
+
+### 8.1. Best Practices
+
+* WHERE 절 컬럼 순서를 생성 시 순서와 동일하게 : O
+```
+-- 테이블 생성 시: CLUSTER BY name, surname
+-- 좋음: 생성 순서와 동일
+WHERE name = 'John' AND surname = 'Doe'
+
+-- 나쁨: 순서가 다르면 최적 성능 보장 안 됨
+WHERE surname = 'Doe' AND name = 'John'
+```
+
+* 클러스터 컬럼에 복잡한 표현식 사용 금지 : O
+
+```
+-- 좋음: 단순 비교 → 100KB만 스캔
+WHERE layer_code = 123
+
+-- 나쁨: 캐스팅/연산 포함 → 203GB 전체 스캔
+WHERE CAST(layer_code AS STRING) = '123'
+```
+
+* 클러스터 컬럼을 다른 컬럼과 비교 금지 : X
+
+```
+WHERE cluster_column = other_column
+```
+
+## 9. Loading & Querying External Data Sources
+
 ## 6. 참고
 
 * [https://www.udemy.com/course/bigquery/](https://www.udemy.com/course/bigquery/)
