@@ -362,6 +362,33 @@ WHERE cluster_column = other_column
 
 ## 9. Loading & Querying External Data Sources
 
+* 외부 저장소 (GCS)의 Data를 BigQuery에서 바로 조회 가능
+
+### 9.1. Limitations
+
+* 데이터 일관성 미보장
+  * 쿼리 실행 중 외부 데이터가 변경되면 예상치 못한 결과가 나올 수 있음
+
+* 쿼리 성능 저하
+  * 속도가 중요하다면 데이터를 BigQuery에 직접 로드하는 것을 권장
+  * 스토리지 유형별 성능 차이 존재
+    * Cloud Storage > Google Drive
+
+* 직접 Export 불가
+  * 외부 데이터 변경 시 쿼리 재실행 필요
+
+* 와일드카드 테이블 쿼리 불가
+  * 외부 데이터 소스는 와일드카드 테이블 쿼리에서 참조할 수 없습니다.
+
+* 파티셔닝/클러스터링 제한적 지원
+  * 지원 포맷: Avro, Parquet, ORC, JSON, CSV (Cloud Storage)
+  * Hive 파티셔닝 레이아웃 방식으로만 지원
+  * 파티셔닝 키와 컬럼이 겹치면 안 됨
+  * Standard SQL만 지원
+
+* 쿼리 결과 캐싱 없음
+  * 동일한 쿼리를 반복 실행해도 매번 비용이 청구됩니다.
+
 ## 6. 참고
 
 * [https://www.udemy.com/course/bigquery/](https://www.udemy.com/course/bigquery/)
