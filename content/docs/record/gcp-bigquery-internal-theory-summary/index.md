@@ -350,6 +350,16 @@ WHERE CAST(layer_code AS STRING) = '123'
 WHERE cluster_column = other_column
 ```
 
+### 8.2. Partitioning Limits
+
+* 쿼리 방식 : Standard SQL만 지원
+* 클러스터 컬럼 지정 : 테이블 생성 시 지정해야 함
+* 클러스터 컬럼 변경 : API로 변경 가능하나 이후 적재 데이터에만 적용
+* 컬럼 위치 : 최상위 필드만 가능 (STRUCT, ARRAY 내부 필드 불가)
+* 최대 클러스터 컬럼 수 : 4개
+* 지원 타입 : DATE, BOOLEAN, GEOGRAPHY, INTEGER, NUMERIC, STRING, TIMESTAMP
+* 쿼터 : 일반 테이블과 동일 (Load/Export/Query/Copy)
+
 ## 9. Loading & Querying External Data Sources
 
 ## 6. 참고
