@@ -434,7 +434,8 @@ WHERE cluster_column = other_column
 ## 11. Materialized View
 
 * Data Refresh : 수동 갱신, Auto Refresh 활성화 → 주기적으로 자동 갱신
-* Smart Query  Optimization : BigQuery가 일반 쿼리를 실행할 때 자동으로 구체화 뷰를 활용
+* Smart Query Optimization : BigQuery가 일반 쿼리를 실행할 때 자동으로 구체화 뷰를 활용
+* 최신의 데이터를 제공 기능 with streaming tables
 * Materialized View 유용한 경우
   * 반복적이고 예측 가능한 쿼리 : 미리 계산된 결과 재사용 가능
   * ETL/BI 파이프 라인 : 동일 쿼리 반복 실행 패턴
