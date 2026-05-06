@@ -412,6 +412,7 @@ WHERE cluster_column = other_column
   * 데이터 저장 : X vs O
   * 저장 비용 : 무료 vs 비용 발료
   * 쿼리 성능 : 기본 Table 조회 vs 저장된 결과 바로 반환
+  * 쿼리만 저장 vs 쿼리 결과를 실제 Storage에 저장
 
 ### 10.1. Row-Level Security
 
@@ -440,6 +441,22 @@ WHERE cluster_column = other_column
   * 반복적이고 예측 가능한 쿼리 : 미리 계산된 결과 재사용 가능
   * ETL/BI 파이프 라인 : 동일 쿼리 반복 실행 패턴
   * 집계 쿼리 (SUM, AVG 등) : 연산 시간은 길지만 결과는 작은 경우
+
+### 11.1. Alert Materialized View
+
+* 지원
+  * CREATE : Materialized View 생성
+  * DROP : Materialized View 삭제
+  * ALTER : Auto Refresh만 변경 가능
+
+* 불가능
+  * COPY : Materialized View 복사 불가
+  * IMPORT/EXPORT : Materialized View로 가져오거나 내보내기 불가
+  * INSERT : Materialized View에 직접 쓰기 불가능
+  * BigQuery Storage API : API를 통한 직접 접근 불가
+
+* 기본 Table 삭제시
+  * 기본 Table을 동일한 이름으로 재생성해도, Materialized View도 다시 생성 필요
 
 ## 6. 참고
 
