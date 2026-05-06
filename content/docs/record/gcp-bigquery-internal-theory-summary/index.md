@@ -431,6 +431,15 @@ WHERE cluster_column = other_column
 * 중첩 뷰 : 최대 레벨16단계
 * 데이터셋당 인가된 뷰 수 : 2500개
 
+## 11. Materialized View
+
+* Data Refresh : 수동 갱신, Auto Refresh 활성화 → 주기적으로 자동 갱신
+* Smart Query  Optimization : BigQuery가 일반 쿼리를 실행할 때 자동으로 구체화 뷰를 활용
+* Materialized View 유용한 경우
+  * 반복적이고 예측 가능한 쿼리 : 미리 계산된 결과 재사용 가능
+  * ETL/BI 파이프 라인 : 동일 쿼리 반복 실행 패턴
+  * 집계 쿼리 (SUM, AVG 등) : 연산 시간은 길지만 결과는 작은 경우
+
 ## 6. 참고
 
 * [https://www.udemy.com/course/bigquery/](https://www.udemy.com/course/bigquery/)
