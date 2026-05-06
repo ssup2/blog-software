@@ -413,6 +413,24 @@ WHERE cluster_column = other_column
   * 저장 비용 : 무료 vs 비용 발료
   * 쿼리 성능 : 기본 Table 조회 vs 저장된 결과 바로 반환
 
+### 10.1. Row-Level Security
+
+* 특정 사용자마다 다른 데이터만 보여줄 수 있음
+
+* 적용 방법
+  * `SESSION_USER()` 함수를 사용하여 현재 쿼리를 실행하는 사용자의 email 반환
+
+### 10.2. Limitations
+
+* 데이터셋 : 위치뷰와 참조 테이블이 같은 위치(Location) 에 있어야 함
+* 데이터 Export : 뷰는 물리적 데이터가 없으므로 직접 Export 불가
+* SQL 방언 혼용 : Standard SQL과 Legacy SQL 혼용 불가
+* 쿼리 파라미터 : 뷰 정의 쿼리에서 참조 불가
+* 사용자 정의 함수(UDF) : 뷰를 정의하는 쿼리에는 포함 불가 (뷰를 조회할 때는 사용 가능)
+* 와일드카드 테이블 : 와일드카드 테이블 쿼리에서 참조 불가
+* 중첩 뷰 : 최대 레벨16단계
+* 데이터셋당 인가된 뷰 수 : 2500개
+
 ## 6. 참고
 
 * [https://www.udemy.com/course/bigquery/](https://www.udemy.com/course/bigquery/)
