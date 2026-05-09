@@ -458,6 +458,65 @@ WHERE cluster_column = other_column
 * 기본 Table 삭제시
   * 기본 Table을 동일한 이름으로 재생성해도, Materialized View도 다시 생성 필요
 
+### 11.2. Ad-hoc Query를 Materialized View 활용
+
+* MV의 GROUP BY/집계 컬럼의 부분집합 사용
+* GROUP BY 컬럼에 연산 적용
+* MV의 그룹핑 컬럼 또는 기존 필터 조건으로 필터링
+* MV 필터의 부분집합으로 필터링
+
+### 11.3. Materialized View 갱신
+
+* 변경 유형
+  * INSERT만 (append) : 변경된 델타 데이터만 읽어서 추가
+  * UPDATE/DELETE/MERGE : 영향받은 부분 무효화 후 재읽기
+
+* 파티션 여부에 따른 차이
+  * 파티션 MV : 영향받은 파티션만 무효화 + 재읽기
+  * 비파티션 MV : 전체 무효화 + 전체 기본 테이블 재읽기
+
+* 갱신 방법
+  * 수동 갱신
+  * Auto Refresh 설정
+
+* Auto Refresh 동작 원리
+  * 기본 테이블 변경 감지
+  * 5분 이내 자동 갱신 (변경 발생 후)
+  * 단, 최소 갱신 간격 준수 (기본 30분) : 기본 테이블이 계속 바뀌어도 30분마다 최대 1회 갱신
+
+* 갱신 사이 시간대의 데이터 처리
+  * INSERT만 : MV 데이터 + 마지막 갱신 이후 델타 데이터 합산
+  * UPDATE/DELETE : MV 스캔 안 하고 기본 테이블 직접 조회
+
+* BigQuery는 MV 갱신 여부와 관계없이 항상 최신 데이터를 보장합니다. 갱신 전이면 델타를 합산하거나 기본 테이블을 직접 조회하는 방식으로 일관성을 유지합니다.
+
+### 11.4. Materialized View Limitations
+
+| 항목 | 일반 뷰 | 구체화 뷰 |
+|------|------|------|
+| 데이터 저장 | ❌ | ✅ |
+| 저장 비용 | 무료 | 발생 |
+| 쿼리 성능 | 느림 | 빠름 |
+| JOIN 지원 | ✅ | ❌ |
+| 중첩 | 16단계 | ❌ |
+| 참조 테이블 | 다중 | 단일 |
+| DML | ❌ | ❌ |
+| 데이터셋 위치 | 자유 | 동일 데이터셋 |
+| 최대 개수 | 2,500개/데이터셋 | 20개/기본 테이블 |
+| SQL 방언 | Legacy/Standard | Standard SQL만 |
+
+* 불가능한 작업
+  * COPY : 소스/대상으로 복사 불가
+  * EXPORT : 데이터 내보내기 불가
+  * LOAD : 직접 데이터 적재 불가
+  * INSERT : 쿼리 결과 직접 쓰기 불가
+  * DML : UPDATE/DELETE/MERGE 불가
+  * UNNEST : 배열 펼치기 불가
+  * JOIN : 여러 테이블 조인 불가
+  * MV 중첩 : MV 기반 MV 생성 불가
+
+### 11.5. Materialized View Best Practices
+
 ## 6. 참고
 
 * [https://www.udemy.com/course/bigquery/](https://www.udemy.com/course/bigquery/)
