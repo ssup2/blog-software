@@ -517,6 +517,42 @@ WHERE cluster_column = other_column
 
 ### 11.5. Materialized View Best Practices
 
+* Materialized View를 넓은 범위의 쿼리를 커버하도록 설계
+  * 최대 20개 제한이 있으므로 세분화된 필터보다 그룹핑 중심으로 설계합니다.
+
+```
+-- 나쁨: 특정 값으로 필터링 → 재사용성 낮음
+CREATE MATERIALIZED VIEW mv_household AS
+SELECT customer_id, SUM(sales)
+FROM orders
+WHERE product_category = 'household'  -- 너무 구체적
+GROUP BY customer_id
+
+-- 좋음: 그룹핑으로 설계 → 다양한 쿼리가 활용 가능
+CREATE MATERIALIZED VIEW mv_sales_summary AS
+SELECT customer_id, product_category, SUM(sales)
+FROM orders
+GROUP BY customer_id, product_category
+```
+
+* 사용자들이 자주 쓰는 날짜 범위를 Materialized View 생성 시 미리 포함시켜 두기
+
+* Materialized View 크기가 크면 Materialized View에도 파티셔닝 적용
+
+* Auto Refresh 주기는 데이터 변경 패턴에 맞게 설정 (비용 최적화를 위해서)
+  * 기본 테이블 변경이 적음 : 갱신 주기 길게 설정
+  * 기본 테이블 변경이 많음 : 갱신 주기 짧게 설정
+  * ETL/야간 배치로 데이터 적재 : Auto Refresh 끄고 수동 갱신 또는 스케줄링
+
+* DML 작업은 배치로 묶고 수동 갱신
+  * UPDATE/DELETE/MERGE는 MV를 무효화시키므로 개별 실행보다 한 번에 묶어서 실행 후 수동 갱신합니다.
+
+* JOIN이 필요한 경우 집계를 먼저 MV로 만들기
+  * Materialized View 생성시에 JOIN을 지원하지 않음
+  * 집계용 Materialized View를 먼저 생성하고, 이를 원래 Base Table과 JOIN 쿼리로 묶어서 사용
+
+## 12. Data Pipeline with Beam
+
 ## 6. 참고
 
 * [https://www.udemy.com/course/bigquery/](https://www.udemy.com/course/bigquery/)
