@@ -590,6 +590,41 @@ GROUP BY customer_id, product_category
 
 ### 12.2. Query Pricing
 
+* 두가지 요금제
+  * 온디멘드 요금제
+    * 쿼리 실행 시에만 과금
+    * 처리된 바이트 수
+    * 기본 적용
+  * 정액제 (Flat Rate)
+    * 슬롯 구매 (구독형)
+    * 할당된 처리 용량
+    * 별도 전환 필요
+
+* 온디멘드 요금제
+  * 데이터 위치에 관계없이 처리된 바이트 수에 따라 과금 (BigQuery, Cloud Storage, BigTable 동일)
+  * 매월 1TB는 무료
+
+* 정액제 (Flat Rate)
+  * 안정적인 비용을 원하는 고객에게 적합한 구독형 모델.
+  * 처리된 바이트에 대한 추가 과금 없음
+  * BigQuery ML, DML, DDL 쿼리 모두 포함
+  * 스토리지, 스트리밍 수집, BI Engine 비용은 별도
+  * 슬롯은 지역 단위 자원 (다른 지역으로 이동 불가)
+  * 최소 100슬롯 구매, 100슬롯 단위로 확장
+  * 조직 전체에서 슬롯 공유 가능
+  * 용량 초과 시 추가 과금 없이 **대기열(Queue)** 처리
+
+### 12.3. API, DML Pricing
+
+* Streaming Inserts
+  * File Upload 방식의 데이터 적재는 무료
+  * 스트리밍 수집 모드로 적재 시 처리된 바이트 수에 따라 과금
+  * 성공적으로 적재된 데이터만 과금
+  * 행당 최소 최소 과금 단위 : 1KB
+
+
+
+
 ## 6. 참고
 
 * [https://www.udemy.com/course/bigquery/](https://www.udemy.com/course/bigquery/)
