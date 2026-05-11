@@ -691,13 +691,14 @@ GROUP BY customer_id, product_category
 
 ### 13.1. Data Scan 제한
 
-* SELECT * 사용 금지
-* LIMIT은 비용 절감 효과 없음 (오해 주의!)
-* 파티셔닝 & 클러스터링 적극 활용
-* 데이터 비정규화 (De-normalize)
-* Materialized View 활용
-* 캐시 결과 활용
-* 외부 데이터 소스 사용 주의
+* Data Scan 최적화
+  * SELECT * 사용 금지
+  * LIMIT은 비용 절감 효과 없음 (오해 주의!)
+  * 파티셔닝 & 클러스터링 적극 활용
+  * 데이터 비정규화 (De-normalize)
+  * Materialized View 활용
+  * 캐시 결과 활용
+  * 외부 데이터 소스 사용 주의
   * Cloud Storage, BigTable 등 외부 소스는 BigQuery 내부 스토리지보다 느리고 비쌈
   * 외부 소스가 적합한 경우: ETL 작업, 자주 변경되는 데이터, 주기적 로드
 
@@ -707,6 +708,18 @@ GROUP BY customer_id, product_category
   * 비정규화 스키마 활용
 
 ### 13.2. CPU Time 감소
+
+* 연산량(CPU Time) 줄이기
+  * 변환 작업은 중간 테이블로 분리
+  * 근사 집계 함수 활용 (가능한 경우)
+  * ORDER BY 사용 주의
+    * 반드시 가장 바깥쪽 쿼리에서만 사용
+  * JOIN 테이블 순서 — 큰 테이블부터 작은 테이블 순
+
+* 출력 데이터 관리
+  * LIMIT으로 출력 데이터 제한
+  * 중복 저장 방지
+  * 구체화된 뷰 크기 주의
 
 ### 13.3. SQL Anti-Patterns
 
