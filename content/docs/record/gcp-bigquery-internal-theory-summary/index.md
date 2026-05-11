@@ -747,6 +747,8 @@ GROUP BY customer_id, product_category
     * Cloud Storage Nearline 요금과 비슷한 수준
     * BigQuery 내부 스토리지에 두면 → 쿼리 성능도 좋고 비용도 절감
 
-## 6. 참고
+## 14. File Format, Apache Beam
+
+## 15. 참고
 
 * [https://www.udemy.com/course/bigquery/](https://www.udemy.com/course/bigquery/)
