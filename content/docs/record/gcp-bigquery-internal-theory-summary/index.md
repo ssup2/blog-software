@@ -622,8 +622,51 @@ GROUP BY customer_id, product_category
   * 성공적으로 적재된 데이터만 과금
   * 행당 최소 최소 과금 단위 : 1KB
 
+* DML Query Cost
+  * 데이터 스캔이 발생할 경우에만 과금. 과금 기준은 테이블 유형과 DML 작업 종류에 따라 다름.
+  * INSERT : 소스 테이블에서 SELECT로 참조된 모든 컬럼의 바이트 합계
+  * UPDATE : 참조된 컬럼의 바이트 합계 + 수정 대상 행의 모든 컬럼 바이트 합계
+  * DELETE : 참조된 컬럼의 바이트 합계 + 삭제 대상 행의 모든 컬럼 바이트 합계
+  * MERGE : 포함된 INSERT/UPDATE/DELETE 각각의 위 공식 적용
 
+* BigQuery Storage API 요금
+  * RPC 기반 프로토콜로 BigQuery 스토리지에 빠르게 접근하는 API.
+  * 정액제 고객 : 월 3TB까지 무료 읽기 제공, 초과 시 온디맨드 요금 적용
+  * 온디맨드 요금 : $1.10 / TB (멀티 리전에서만 제공)
+  * 임시 테이블 읽기 : 무료
 
+* ReadRows 메서드 호출 시 다음 경우에도 과금 발생
+  * ReadRows 호출이 실패한 경우 → 읽은 데이터만큼 과금
+  * ReadRows 호출을 중간에 취소한 경우 → 취소 전까지 읽은 데이터 과금
+  * 취소 전 읽혔지만 반환되지 않은 데이터도 과금 대상
+
+### 12.4. Free Operations
+
+* Data Load
+  * Cloud Storage 또는 로컬 파일에서 BigQuery로 데이터 로드
+  * 단, Cloud Storage에 저장된 동안의 스토리지 비용 및 로드 후 BigQuery 스토리지 비용은 별도 과금
+
+* 네트워크
+  * 목적지 데이터셋이 US 멀티 리전인 경우, 다른 지역의 Cloud Storage 버킷에서 로드 시 네트워크 비용 무료
+
+* 복사 & 내보내기
+  * 테이블 복사 무료 (단, 원본/복사본 테이블 스토리지 비용은 과금)
+  * BigQuery → Cloud Storage 데이터 내보내기 무료 (단, Cloud Storage 스토리지 비용은 과금)
+
+* 삭제 작업 (전부 무료)
+  * 데이터셋 삭제
+  * 테이블 삭제
+  * 뷰 삭제
+  * 테이블 파티션 삭제
+  * 사용자 정의 함수(UDF) 삭제
+
+* 메타데이터 작업
+  * List, Get, Patch, Update, Delete 호출 등 대부분의 메타데이터 작업 무료
+  * 데이터셋 목록 조회, 데이터셋 ACL 업데이트, 테이블 설명 업데이트, UDF 목록 조회 등
+
+* 의사 컬럼(Pseudo Column) 쿼리
+  * `_TABLE_SUFFIX` (와일드카드 테이블 쿼리 시)
+  * `_PARTITIONDATE` / `_PARTITIONTIME` (수집 시간 파티션 테이블 쿼리 시)
 
 ## 6. 참고
 
