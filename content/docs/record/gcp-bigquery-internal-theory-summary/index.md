@@ -725,6 +725,28 @@ GROUP BY customer_id, product_category
 
 ### 13.3. SQL Anti-Patterns
 
+* SQL 안티패턴 주의
+  * Self Join 금지 → 윈도우 함수로 대체
+  * Cross Join 금지 → 사전 집계 또는 윈도우 함수로 대체
+  * 데이터 스큐(Data Skew) 주의
+    * 데이터 스큐란 파티션 간 데이터 크기가 극도로 불균형한 상태
+    * 원인: 파티션 키 컬럼의 특정 값에 데이터가 집중되는 경우
+    * 해결책: 파티션 키 변경 또는 복합 파티션 키 사용
+  * BigQuery를 OLTP 시스템처럼 사용 금지
+    * 한 번에 한 행씩 수정하는 DML은 BigQuery에 부적합
+    * 단건 처리가 필요하다면 → Cloud SQL 사용 권장
+    * BigQuery에서는 업데이트/삽입을 반드시 배치로 묶어서 처리
+
+* 전체 프로젝트 비용 절감 전략
+  * 테이블/파티션 만료 시간 설정
+  * 필요한 기간만큼만 데이터 보관 → 오래된 데이터 자동 삭제
+    * 예: 최근 7일 데이터만 필요 → 만료 시간을 7일로 설정 → 롤링 7일 데이터 유지
+    * 실험용 데이터에도 유용 (테스트 후 자동 정리)
+  * 장기 스토리지 가격 적극 활용
+    * 90일 수정 없으면 자동으로 약 50% 할인 적용
+    * Cloud Storage Nearline 요금과 비슷한 수준
+    * BigQuery 내부 스토리지에 두면 → 쿼리 성능도 좋고 비용도 절감
+
 ## 6. 참고
 
 * [https://www.udemy.com/course/bigquery/](https://www.udemy.com/course/bigquery/)
