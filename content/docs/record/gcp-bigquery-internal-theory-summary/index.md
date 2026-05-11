@@ -720,6 +720,8 @@ GROUP BY customer_id, product_category
   * LIMIT으로 출력 데이터 제한
   * 중복 저장 방지
   * 구체화된 뷰 크기 주의
+    * 기본 최대 응답 크기: 10GB (압축 기준)
+    * 이를 초과하는 대용량 결과 저장 시 성능 저하 발생 가능
 
 ### 13.3. SQL Anti-Patterns
 
