@@ -689,6 +689,27 @@ GROUP BY customer_id, product_category
   * 출력 데이터 : 쿼리가 몇 바이트를 쓰는가?
   * 쿼리 안티패턴 : SQL 모범 사례를 따르고 있는가?
 
+### 13.1. Data Scan 제한
+
+* SELECT * 사용 금지
+* LIMIT은 비용 절감 효과 없음 (오해 주의!)
+* 파티셔닝 & 클러스터링 적극 활용
+* 데이터 비정규화 (De-normalize)
+* Materialized View 활용
+* 캐시 결과 활용
+* 외부 데이터 소스 사용 주의
+  * Cloud Storage, BigTable 등 외부 소스는 BigQuery 내부 스토리지보다 느리고 비쌈
+  * 외부 소스가 적합한 경우: ETL 작업, 자주 변경되는 데이터, 주기적 로드
+
+* 셔플링 줄이기
+  * JOIN 전에 데이터를 최대한 줄이기
+  * JOIN 쿼리 테이블 순서 : 큰 테이블부터 작은 테이블 순으로
+  * 비정규화 스키마 활용
+
+### 13.2. CPU Time 감소
+
+### 13.3. SQL Anti-Patterns
+
 ## 6. 참고
 
 * [https://www.udemy.com/course/bigquery/](https://www.udemy.com/course/bigquery/)
