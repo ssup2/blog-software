@@ -749,6 +749,44 @@ GROUP BY customer_id, product_category
 
 ## 14. File Format, Apache Beam
 
+### 14.1. Text File
+
+| 항목 | CSV/TSV | Sequence | Avro | RC | ORC | Parquet |
+|---|---|---|---|---|---|---|
+| **읽기 성능** | 가장 느림 | 느림 | 중간 | 좋음 | 가장 빠름 | 좋음 |
+| **쓰기 성능** | 가장 빠름 | 빠름 | 중간 | 낮음 | 가장 느림 | 중간 |
+| **압축 단위** | 파일 전체 | 블록 | 블록 | 블록 | 블록 | 블록 |
+| **지원 압축** | bzip2 등 | 다양 | Deflate, Snappy | 높은 압축률 | Zlib, Snappy, LZO, LZ4 | Snappy, GZip, LZO_1X |
+| **분할 가능** | 가능 | 가능 | 가능 | 가능 | 가능 (스트라이프 단위) | 조건부 가능 |
+| **메타데이터** | 미지원 | 미지원 | 지원 | 미지원 | 미지원 | 지원 |
+| **스키마 진화** | 추가만 가능 | 추가만 가능 | 완전 지원 | 미지원 | 미지원 | 끝에 추가만 가능 |
+| **중첩 구조** | 미지원 | 미지원 | 지원 | 미지원 | 미지원 | 지원 |
+| **저장 방식** | 행 기반 | 행 기반 | 행 기반 | 컬럼형 | 컬럼형 | 컬럼형 |
+| **BigQuery 권장** | 비압축 시 빠름 | 해당없음 | 최우선 권장 | 해당없음 | 해당없음 | 해당없음 |
+| **적합한 용도** | DB 덤프, 빠른 쓰기 | 빠른 쓰기 | 스키마 변경 잦은 경우 | 읽기 중심 | 읽기 최적화 | 읽기 중심, 중첩 구조 |
+
+| 상황 | 추천 포맷 | 이유 |
+|---|---|---|
+| **스키마가 자주 변경됨** | Avro | 완전한 스키마 진화 지원 |
+| **쓰기가 많음** (DB/HDFS 덤프 등) | Text (CSV) | 쓰기 성능 최강 |
+| **읽기가 많음** (데이터 레이크 등) | Parquet / ORC | 컬럼형 포맷으로 읽기 최적화 |
+| **MapReduce 중간 데이터** | Sequence | 바이너리 형식으로 네트워크 전송 빠름 |
+| **BigQuery 데이터 로드** | Avro | BigQuery 공식 권장 포맷 |
+
+### 14.2. Apache Beam
+
+* 배치와 스트림 데이터를 하나의 통합 API로 처리하고, 어떤 실행 엔진에서도 실행 가능한 오픈소스 데이터 처리 프로그래밍 모델
+* Beam에서는 배치/스트림 구분 없이 데이터 자체에만 집중
+* 파이프라인 종류를 신경 쓸 필요 없음
+* 지원 언어
+  * Java (가장 성숙), Python (2위), Go, 기타 추가 중
+  * Apache Spark
+  * Apache Flink
+  * Google Cloud Dataflow
+  * Apache Apex
+  * Apache Samza
+  * Apache Gearpump
+
 ## 15. 참고
 
 * [https://www.udemy.com/course/bigquery/](https://www.udemy.com/course/bigquery/)
