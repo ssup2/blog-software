@@ -7,9 +7,9 @@ Spark의 RDD를 분석한다.
 
 ## 1. Spark RDD
 
-{{< figure caption="[Figure 1] Spark RDD" src="images/spark-rdd.png" width="700px" >}}
+{{< figure caption="[Figure 1] Spark RDD" src="images/spark-rdd.png" width="800px" >}}
 
-{{< figure caption="[Figure 2] Spark RDD Dependency" src="images/spark-rdd-dependency.png" width="700px" >}}
+{{< figure caption="[Figure 2] Spark RDD Dependency" src="images/spark-rdd-dependency.png" width="800px" >}}
 
 ## 1.1. Job, Stage, Task
 
