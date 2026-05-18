@@ -26,6 +26,19 @@ Spark RDD가 불변성을 갖는 이유는 Resilient라는 이름에서 알 수 
 
 {{< figure caption="[Figure 2] Spark RDD Dependency" src="images/spark-rdd-dependency.png" width="800px" >}}
 
+Spark의 RDD 사이의 Dependency는 Narrow Dependency와 Wide Dependency로 구분된다. [Figure 2]는 Narrow Dependency와 Wide Dependency를 나타낸다. Narrow Dependency는 자식 RDD의 각 Partition이 소수의 부모 Partition에만 의존하는 경우를 의미한다. 이러한 Dependency에서는 데이터 이동(Shuffle)이 발생하지 않으므로 하나의 Stage 내에서 연산이 수행될 수 있다. 반면, Wide Dependency는 자식 RDD의 각 Partition이 여러 부모 Partition에 의존하는 경우를 의미한다. 이 경우 Partition 간 데이터 재분배(Shuffle)가 발생하며, 새로운 Stage가 생성된다.
+
+Narrow Dependency를 생성하는 대표적인 함수는 다음과 같다.
+
+* `map()` : 데이터를 1:1로 변환할 때 사용한다.
+* `filter()` : 조건에 맞는 데이터만 걸러낼 때 사용한다.
+
+Wide Dependency를 생성하는 대표적인 함수는 다음과 같다.
+
+* `reduceByKey()` : 키를 기준으로 데이터를 집계할 때 사용한다.
+* `groupByKey()` : 키를 기준으로 데이터를 그룹화할 때 사용한다.
+* `repartition()` : 데이터를 다시 분배할 때 사용한다.
+
 ### 1.3. Lazy Evaluation
 
 ## 2. 참조
