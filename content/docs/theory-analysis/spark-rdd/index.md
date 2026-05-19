@@ -1,6 +1,5 @@
 ---
 title: Spark RDD
-draft: true
 ---
 
 Spark의 RDD를 분석한다.
