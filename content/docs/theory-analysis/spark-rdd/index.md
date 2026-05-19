@@ -43,7 +43,11 @@ Narrow, Wide Dependency가 모두 가능한 함수는 다음과 같다.
 
 * `join()` : 두 개의 RDD를 조인할 때 사용한다. 조인을 수행하는 RDD의 Data가 Key를 기준으로 같은 Partition에 위치하는 **Co-Partition** 관계를 갖는 경우에는 Narrow Dependency, 그렇지 않은 경우에는 Wide Dependency가 된다.
 
-### 1.3. Transformation/Action Function, Lazy Evaluation
+### 1.3. Lazy Evaluation
+
+**Lazy Evalutation**은 이름에서도 알 수 있는것 처럼 필요한 시점에만 연산을 수행하는 기법을 의미하며, Spark에서도 이를 통해서 성능과 Resource를 최적화하고 있다. Lazy Evalutation 관점에서 Spark 함수는 `map()`, `filter()`와 같은 **Transformation** 함수와 `collect()`, `count()`와 같은 **Action** 함수로 구분된다. Transformation 함수는 데이터를 변환하는 함수를 의미하며, Action 함수는 결과를 반환하거나 외부에 저장하는 등 실제 실행을 트리거하는 함수를 의미한다.
+
+Lazy Evaluation을 통해 Transformation 함수가 호출되는 시점에는 실제 Data 처리가 수행되지 않으며, 이후 Action 함수가 호출되는 시점에 비로소 실제 Data 처리가 수행된다. Spark는 Action 호출 시점에 전체 실행 계획을 한번에 파악하기 때문에, 다수의 Transformation 연산을 파이프라인으로 묶어 최적화할 수 있으며 중간 결과를 불필요하게 저장하지 않아도 된다. Transformation 함수와 Action 함수는 다음과 같다.
 
 ## 2. 참조
 
@@ -51,4 +55,4 @@ Narrow, Wide Dependency가 모두 가능한 함수는 다음과 같다.
 * Batch Processing Apache Spark : [https://blog.k2datascience.com/batch-processing-apache-spark-a67016008167](https://blog.k2datascience.com/batch-processing-apache-spark-a67016008167)
 * Spark RDD DAG : [https://stackoverflow.com/questions/41340612/do-stages-in-an-application-run-parallel-in-spark](https://stackoverflow.com/questions/41340612/do-stages-in-an-application-run-parallel-in-spark)
 * Spark Join Optimization : [https://jaemunbro.medium.com/apache-spark-%EC%A1%B0%EC%9D%B8-join-%EC%B5%9C%EC%A0%81%ED%99%94-c9e54d20ae06](https://jaemunbro.medium.com/apache-spark-%EC%A1%B0%EC%9D%B8-join-%EC%B5%9C%EC%A0%81%ED%99%94-c9e54d20ae06)
-* Spark Lazy Loading : []()
+* Spark Lazy Loading : [https://snowturtle93.github.io/posts/Spark%EA%B0%80-Lazy-Evaluation%EC%9D%84-%EC%82%AC%EC%9A%A9%ED%95%98%EB%8A%94-%EC%9D%B4%EC%9C%A0/](https://snowturtle93.github.io/posts/Spark%EA%B0%80-Lazy-Evaluation%EC%9D%84-%EC%82%AC%EC%9A%A9%ED%95%98%EB%8A%94-%EC%9D%B4%EC%9C%A0/)
