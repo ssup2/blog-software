@@ -46,7 +46,7 @@ Narrow, Wide Dependency가 모두 가능한 함수는 다음과 같다.
 
 **Lazy Evalutation**은 이름에서도 알 수 있는것 처럼 필요한 시점에만 연산을 수행하는 기법을 의미하며, Spark에서도 이를 통해서 성능과 Resource를 최적화하고 있다. Lazy Evalutation 관점에서 Spark 함수는 `map()`, `filter()`와 같은 **Transformation** 함수와 `collect()`, `count()`와 같은 **Action** 함수로 구분된다. Transformation 함수는 데이터를 변환하는 함수를 의미하며, Action 함수는 결과를 반환하거나 외부에 저장하는 등 실제 실행을 트리거하는 함수를 의미한다.
 
-Lazy Evaluation을 통해 Transformation 함수가 호출되는 시점에는 실제 Data 처리가 수행되지 않으며, 이후 Action 함수가 호출되는 시점에 비로소 실제 Data 처리가 수행된다. Spark는 Action 호출 시점에 전체 실행 계획을 한번에 파악하기 때문에, 다수의 Transformation 연산을 파이프라인으로 묶어 최적화할 수 있으며 중간 결과를 불필요하게 저장하지 않아도 된다. Transformation 함수와 Action 함수는 다음과 같다.
+Lazy Evaluation을 통해 Transformation 함수가 호출되는 시점에는 실제 Data 처리가 수행되지 않으며, 이후 Action 함수가 호출되는 시점에 비로소 실제 Data 처리가 수행된다. Spark는 Action 호출 시점에 전체 실행 계획을 한번에 파악하기 때문에, 다수의 Transformation 연산을 파이프라인으로 묶어 최적화할 수 있으며 중간 결과를 불필요하게 저장하지 않아도 된다. 이러한 최적화는 Spark의 Catalyst Optimizer가 수행한다.
 
 ## 2. 참조
 

@@ -46,7 +46,7 @@ Functions that can result in either Narrow or Wide Dependency are as follows.
 
 **Lazy Evaluation** is, as the name suggests, a technique that performs computation only when needed, and Spark also uses this to optimize performance and resources. From a lazy evaluation perspective, Spark functions are divided into **Transformation** functions such as `map()` and `filter()`, and **Action** functions such as `collect()` and `count()`. Transformation functions are functions that transform data, while Action functions trigger actual execution, such as returning results or saving to external storage.
 
-Through lazy evaluation, actual data processing is not performed when Transformation functions are called; actual data processing is performed only when Action functions are called afterward. Because Spark understands the entire execution plan at once when an Action is called, it can optimize by bundling multiple Transformation operations into a pipeline and does not need to store intermediate results unnecessarily. Transformation functions and Action functions are as follows.
+Through lazy evaluation, actual data processing is not performed when Transformation functions are called; actual data processing is performed only when Action functions are called afterward. Because Spark understands the entire execution plan at once when an Action is called, it can optimize by bundling multiple Transformation operations into a pipeline and does not need to store intermediate results unnecessarily. Spark's Catalyst Optimizer performs this optimization.
 
 ## 2. References
 
