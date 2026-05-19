@@ -19,8 +19,8 @@ Spark RDD가 불변성을 갖는 이유는 Resilient라는 이름에서 알 수 
 
 * **Job** : Job은 Spark Application의 실행 단위이다. Job은 하나 또는 여러개의 Stage로 구성된다.
 * **Stage** : Stage는 Job의 실행 단위이며, 일반적으로 Shuffling이 발생하는 기준으로 구분된다. 여기서 Shuffling은 RDD 사이에 Key를 기준으로 Data를 완전히 재배치하는 과정을 의미한다. [Figure 1]에서 하나의 Job에 A,B,C 3개의 Stage가 있는 것을 확인할 수 있으며, Shuffling이 발생하는 지점을 기준으로 Stage가 구분되는것도 확인할 수 있다.
-* **Partition** : Partition은 RDD의 물리적 분할 단위를 의미한다.
-* **Task** : Task는 Stage의 실제 실행 단위를 의미한다. Task와 Partition은 1:1 관계를 갖는다.
+* **Partition** : Partition은 RDD의 물리적 분할 단위를 의미한다. 일반적으로 특정 Key를 기준으로 분할하는 경우가 많으며, 적절한 Key를 선택하여 Partition Skew를 최소화하는 것이 중요하다.
+* **Task** : Task는 Stage의 실제 실행 단위를 의미한다. Task와 Partition은 1:1 관계를 갖으며, 하나의 Executor는 할당된 Core수 만큼 다수의 Task를 병렬로 실행할 수 있다.
 
 ### 1.2. Narrow Dependency, Wide Dependency
 
@@ -35,21 +35,20 @@ Narrow Dependency를 생성하는 대표적인 함수는 다음과 같다.
 
 Wide Dependency를 생성하는 대표적인 함수는 다음과 같다.
 
-* `reduceByKey()` : 키를 기준으로 데이터를 집계할 때 사용한다.
 * `groupByKey()` : 키를 기준으로 데이터를 그룹화할 때 사용한다.
+* `reduceByKey()` : 키를 기준으로 데이터를 집계할 때 사용한다.
 * `repartition()` : 데이터를 다시 분배할 때 사용한다.
 
 Narrow, Wide Dependency가 모두 가능한 함수는 다음과 같다.
 
 * `join()` : 두 개의 RDD를 조인할 때 사용한다. 조인을 수행하는 RDD의 Data가 Key를 기준으로 같은 Partition에 위치하는 **Co-Partition** 관계를 갖는 경우에는 Narrow Dependency, 그렇지 않은 경우에는 Wide Dependency가 된다.
 
-### 1.3. Lazy Evaluation
+### 1.3. Transformation/Action Function, Lazy Evaluation
 
 ## 2. 참조
 
-* [https://datastrophic.io/core-concepts-architecture-and-internals-of-apache-spark/](https://datastrophic.io/core-concepts-architecture-and-internals-of-apache-spark/)
-* [https://blog.k2datascience.com/batch-processing-apache-spark-a67016008167](https://blog.k2datascience.com/batch-processing-apache-spark-a67016008167)
-* [https://stackoverflow.com/questions/41340612/do-stages-in-an-application-run-parallel-in-spark](https://stackoverflow.com/questions/41340612/do-stages-in-an-application-run-parallel-in-spark)
-* [https://jaemunbro.medium.com/apache-spark-%EC%A1%B0%EC%9D%B8-join-%EC%B5%9C%EC%A0%81%ED%99%94-c9e54d20ae06](https://jaemunbro.medium.com/apache-spark-%EC%A1%B0%EC%9D%B8-join-%EC%B5%9C%EC%A0%81%ED%99%94-c9e54d20ae06)
-* [https://alklid.github.io/dlog/2017/10/12/spark-01/index.html](https://alklid.github.io/dlog/2017/10/12/spark-01/index.html)
-* [https://pizzathief.oopy.io/spark-rdd](https://pizzathief.oopy.io/spark-rdd)
+* Spark Core Concepts and Architecture :  [https://datastrophic.io/core-concepts-architecture-and-internals-of-apache-spark/](https://datastrophic.io/core-concepts-architecture-and-internals-of-apache-spark/)
+* Batch Processing Apache Spark : [https://blog.k2datascience.com/batch-processing-apache-spark-a67016008167](https://blog.k2datascience.com/batch-processing-apache-spark-a67016008167)
+* Spark RDD DAG : [https://stackoverflow.com/questions/41340612/do-stages-in-an-application-run-parallel-in-spark](https://stackoverflow.com/questions/41340612/do-stages-in-an-application-run-parallel-in-spark)
+* Spark Join Optimization : [https://jaemunbro.medium.com/apache-spark-%EC%A1%B0%EC%9D%B8-join-%EC%B5%9C%EC%A0%81%ED%99%94-c9e54d20ae06](https://jaemunbro.medium.com/apache-spark-%EC%A1%B0%EC%9D%B8-join-%EC%B5%9C%EC%A0%81%ED%99%94-c9e54d20ae06)
+* Spark Lazy Loading : []()
