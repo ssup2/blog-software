@@ -16,7 +16,7 @@ Record Insert 과정은 Primary Key가 일정하게 증가하는 Auto Increment 
 
 반면 Primary Key가 Random 방식의 경우에는 B+ Tree에 의해서 추가되는 Record가 Disk의 동일한 Page가 아닌 각각 다른 Page에 저장될 확률이 높다. 이 경우 DB의 Memory Buffer 활용성이 떨어지고 자주 Memory Buffer Flush가 발생하여 Insert 성능이 떨어진다.
 
-Read 성능의 경우에도 Auto Increment 방식이 Random 방식에 비해서 Primary Key의 크기가 작기 때문에 더 좋은 성능을 보여준다. Auto Increment 방식은 Primary Key로 대부분 Integer Type을 이용한다. 즉 4Byte만을 이용하여 Primary Key를 저장할 수 있다. 반면에 Random 값은 Primary Key의 크기가 커야 충돌 발생을 방지할수 있기 때문에 Integer Type을 이용하지 못한다. Random 값으로 가장 많이 이용되는 UUID의 경우에도 최소 16Byte의 용량이 필요하다.
+Read 성능의 경우에도 Auto Increment 방식이 Random 방식에 비해서 Primary Key의 크기가 작기 때문에 더 좋은 성능을 보여준다. Auto Increment 방식은 Primary Key로 대부분 Integer Type을 이용한다. 즉 4Byte 만을 이용하여 Primary Key를 저장할 수 있다. 반면에 Random 값은 Primary Key의 크기가 커야 충돌 발생을 방지할수 있기 때문에 Integer Type을 이용하지 못한다. Random 값으로 가장 많이 이용되는 UUID의 경우에도 최소 16Byte의 용량이 필요하다.
 
 반면 Random 방식은 Auto Increment 방식에 비해서 높은 **유연성**이 가장 큰 장점이다. Random 방식의 경우 각 Record의 Primary Key의 고유성이 특정 Table 내부에 한정되지 않고 Global 범위에서도 유효하다는 특정이 있다. 이러한 특징 때문에  Record를 다른 DB/Table에 Migration을 수행할때 Primary Key를 변경할 필요없이 그대로 Migration을 수행할 수 있다.
 
