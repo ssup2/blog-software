@@ -51,6 +51,8 @@ HR Carol -> O
 
 반면 `dept_id` Column에 Index가 있으면, `Departments` Table의 각 행마다 Index Lookup을 통해 해당 `dept_id`를 가진 `Employees` Row만 찾을 수 있다. [Text 2]는 이 경우 Nested Loop Join 수행 시 순회하는 순서를 나타내고 있다. `Employees` Table의 모든 Record를 스캔하지 않고 Join 조건에 맞는 Row만 접근하므로, [Text 1]과 같이 15번이 아니라 5번만 비교하면 된다.
 
+이처럼 Inner Table의 Join Key Column에 Index가 있으면, Outer Table의 각 Row마다 Index Lookup이 한 번씩 수행되고 Inner Table 전체를 반복 스캔하지 않아도 된다. 따라서 탐색 비용은 크게 Outer Table Row 수에 좌우되며, Optimizer는 일반적으로 Row 수가 더 적은 Table을 Outer Table로 선택한다.
+
 #### 1.2.2. Sort Merge Join
 
 {{< figure caption="[Figure 2] DB Join Algorithm" src="images/db-join-algorithm-tables-sort-merge.png" width="800px" >}}
