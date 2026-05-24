@@ -19,7 +19,7 @@ Join을 수행하기 위해서는 Table 순회가 필요한데, 이때 기준이
 
 Nested Loop Join은 가장 기본적인 Join 알고리즘으로, Outer Table의 각 행을 순회하면서 Inner Table의 모든 행을 순회하는 방식으로 동작한다.
 
-```text {caption="[Text 1] Departments Table Outer Table, No dept_id Index / Nested Loop Join 순회 순서"}
+```text {caption="[Text 1] Departments Table : Outer Table, dept_id Index : X / Nested Loop Join 순회 순서"}
 Engineering Alice -> O
 Engineering Bob -> O
 Engineering Carol -> X
@@ -37,9 +37,19 @@ HR Dave -> O
 HR Eve -> X
 ```
 
-[Text 1]은 `Departments` Table이 Outer Table이고 `Employees` Table이 Inner Table이며, `dept_id` Column에 Index가 없는 경우 Nested Loop Join 수행시 순회하는 순서를 나타내고 있다. Outer Table인 `Departments` Table의 각 행을 순회하면서 Inner Table인 `Employees` Table의 모든 행을 순회하고 값을 비교하는 방식으로 동작하는 것을 확인할 수 있다. 즉 `Departments` Table이 3개의 Record를 가지고 있고, `Employees` Table이 5개의 Record를 가지고 있기 때문에 총 15번의 순회가 발생하다.
+[Text 1]은 `Departments` Table이 Outer Table이고 `Employees` Table이 Inner Table이며, `dept_id` Column에 Index가 없는 경우 Nested Loop Join 수행 시 순회하는 순서를 나타내고 있다. Outer Table인 `Departments` Table의 각 행을 순회하면서 Inner Table인 `Employees` Table의 모든 행을 순회하고 값을 비교하는 방식으로 동작하는 것을 확인할 수 있다.
 
-`Departments` Table의 각 행마다 `Employees` Table의 모든 행을 순회해야 하는 이유는 `dept_id` Column에 Index가 존재하지 않기 때문에, 직접 읽지 않으면 어떤 값을 갖는지 알 수 없기 때문이다. 하지만 `dept_id` Column에 Index가 존재하면, 해당 Column을 기반으로 빠르게 `Employees` Table을 순회할 수 있다.
+`dept_id` Column에 Index가 없으면 특정 `dept_id` 값을 가진 Row의 위치를 바로 알 수 없기 때문에, Join 조건(`Employees.dept_id` = `Departments.id`)을 만족하는 Row를 찾으려면 `Employees` Table 전체를 읽어 비교해야 한다. `Departments` Table이 3개의 Record를 가지고 `Employees` Table이 5개의 Record를 가지므로 총 15번의 비교가 발생한다.
+
+```text {caption="[Text 2] Employees Table : Inner Table, dept_id Index : O / Nested Loop Join 순회 순서"}
+Engineering Alice -> O
+Engineering Bob -> O
+Marketing Carol -> O
+Marketing Eve -> O
+HR Carol -> O
+```
+
+반면 `dept_id` Column에 Index가 있으면, `Departments` Table의 각 행마다 Index Lookup을 통해 해당 `dept_id`를 가진 `Employees` Row만 찾을 수 있다. [Text 2]는 이 경우 Nested Loop Join 수행 시 순회하는 순서를 나타내고 있다. `Employees` Table의 모든 Record를 스캔하지 않고 Join 조건에 맞는 Row만 접근하므로, [Text 1]과 같이 15번이 아니라 5번만 비교하면 된다.
 
 #### 1.2.2. Sort Merge Join
 
