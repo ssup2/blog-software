@@ -15,19 +15,53 @@ Join 연산은 연산 방식에 따라서 **Inner Join**, **Outer Join**, **Cros
 
 #### 1.1.1. Inner Join
 
-{{< figure caption="[Figure 2] Inner Join" src="images/db-join-type-inner.png" width="550px" >}}
+```sql {caption="[Query 1] Inner Join"}
+SELECT   d.id, d.dept_name, e.name
+FROM     departments d
+INNER JOIN employees e
+  ON d.id = e.dept_id;
+```
+
+{{< figure caption="[Figure 2] Inner Join Result" src="images/db-join-type-inner.png" width="550px" >}}
 
 #### 1.1.2. Outer Join
 
-{{< figure caption="[Figure 3] Outer Join" src="images/db-join-type-outer-left.png" width="550px" >}}
+```sql {caption="[Query 2] Left Outer Join"}
+SELECT   d.id, d.dept_name, e.name
+FROM     departments d
+LEFT JOIN employees e
+  ON d.id = e.dept_id;
+```
 
-{{< figure caption="[Figure 4] Outer Join" src="images/db-join-type-outer-right.png" width="550px" >}}
+{{< figure caption="[Figure 3] Left Outer Join Result" src="images/db-join-type-outer-left.png" width="550px" >}}
 
-{{< figure caption="[Figure 5] Outer Join" src="images/db-join-type-outer-full.png" width="550px" >}}
+```sql {caption="[Query 3] Right Outer Join"}
+SELECT   d.id, d.dept_name, e.name
+FROM     departments d
+RIGHT JOIN employees e
+  ON d.id = e.dept_id;
+```
+
+{{< figure caption="[Figure 4] Right Outer Join Result" src="images/db-join-type-outer-right.png" width="550px" >}}
+
+```sql {caption="[Query 4] Full Outer Join"}
+SELECT   d.id, d.dept_name, e.name
+FROM     departments d
+FULL OUTER JOIN employees e
+  ON d.id = e.dept_id;
+```
+
+{{< figure caption="[Figure 5] Full Outer Join Result" src="images/db-join-type-outer-full.png" width="550px" >}}
 
 #### 1.1.3. Cross Join
 
-{{< figure caption="[Figure 6] Cross Join" src="images/db-join-type-cross.png" width="1000px" >}}
+```sql {caption="[Query 5] Cross Join"}
+SELECT   d.id, d.dept_name, e.name, e.dept_id
+FROM     departments d
+CROSS JOIN employees e;
+```
+
+{{< figure caption="[Figure 6] Cross Join Result" src="images/db-join-type-cross.png" width="1000px" >}}
 
 ### 1.2. Join 알고리즘
 
