@@ -138,9 +138,9 @@ Nested Loop Join은 가장 기본적인 Join 알고리즘으로, Outer Table의 
 [Outer: NULL (dept_id=40)]
 ```
 
-반면 `dept_id` Column에 Index가 있으면, `Departments` Table의 각 행마다 Index Lookup을 통해 해당 `dept_id`를 가진 `Employees` Row만 찾을 수 있다. [Text 2]는 이 경우 Nested Loop Join 수행 시 순회하는 순서를 나타내고 있다. `Employees` Table의 모든 Record를 스캔하지 않고 Join 조건에 맞는 Row만 접근하므로, [Text 1]과 같이 15번이 아니라 5번만 비교하면 된다.
+반면 `dept_id` Column에 Index가 있으면, `Departments` Table의 각 행마다 Index Lookup을 통해 해당 `dept_id`를 가진 `Employees` Row만 찾을 수 있다. [Text 2]는 이 경우 Nested Loop Join 수행 시 순회하는 순서를 나타내고 있다. `Employees` Table의 모든 Record를 스캔하지 않고 Join 조건에 맞는 Row만 접근하므로, [Text 1]과 같이 15번이 아니라 5번만 비교하면 되며, 이 경우 Index Lookup은 4번만 수행하면 된다.
 
-```text {caption="[Text 3] Nested Loop Join 순회 / Outer Table: Employees, Inner Table: Departments, dept_id Index: O"}
+```text {caption="[Text 3] Nested Loop Join 순회 / Outer Table: Employees, Inner Table: Departments"}
 [Outer: Alice (dept_id=10)]
   → Engineering (id=10)   O
 
@@ -148,21 +148,20 @@ Nested Loop Join은 가장 기본적인 Join 알고리즘으로, Outer Table의 
   → Engineering (id=10)   O
 
 [Outer: Coral (dept_id=20)]
-  → Marketing (id=20)   O
+  → Marketing   (id=20)   O
 
 [Outer: Dave (dept_id=30)]
-  → HR (id=30)   O
+  → HR          (id=30)   O
 
 [Outer: Eve (dept_id=20)]
-  → Marketing (id=20)   O
+  → Marketing   (id=20)   O
 
 [Outer: Ssup (dept_id=NULL)]
-  → NULL (dept_id=40)   O
 ```
 
-[Text 3]는 `Employees` Table이 Outer Table이고 `Departments` Table이 Inner Table이며, `dept_id` Column에 Index가 있는 경우 Nested Loop Join 수행 시 순회하는 순서를 나타내고 있다. Outer Table인 `Employees` Table의 각 행을 순회하면서 Inner Table인 `Departments` Table의 모든 행을 순회하고 값을 비교하는 방식으로 동작하는 것을 확인할 수 있다.
+[Text 3]는 `Employees` Table이 Outer Table이고 `Departments` Table이 Inner Table이며, `dept_id` Column에 Index가 있는 경우 Nested Loop Join 수행 시 순회하는 순서를 나타내고 있다. Outer Table인 `Employees` Table의 각 행을 순회하면서, Inner Table인 `Departments` Table의 Index를 통해 조건에 맞는 Row만 직접 탐색하는 방식으로 동작하는 것을 확인할 수 있다. 이 경우 비교 연산은 [Text 2]와 같이 5번을 수행하지만 Index Lookup도 5번 수행이 필요한다.
 
-이처럼 Inner Table의 Join Key Column에 Index가 있으면, Outer Table의 각 Row마다 Index Lookup이 한 번씩 수행되고 Inner Table 전체를 반복 스캔하지 않아도 된다. 따라서 탐색 비용은 크게 Outer Table Row 수에 좌우되며, Optimizer는 일반적으로 Row 수가 더 적은 Table을 Outer Table로 선택한다.
+이처럼 [Text 2]와 [Text 3]는 동일한 Join 연산이지만 Index Lookup 횟수가 달라질 수 있으며, 이는 Join 알고리즘의 성능에 크게 영향을 미칠 수 있다. Index Lookup 횟수를 줄이기 위해서는 Outer Table의 Row 수가 Inner Table보다 적어야 하며, DB Optimizer는 일반적으로 Row 수가 더 적은 Table을 Outer Table로 자동 선택한다.
 
 #### 1.2.2. Sort Merge Join
 
