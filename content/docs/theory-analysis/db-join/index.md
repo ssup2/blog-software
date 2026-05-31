@@ -85,37 +85,82 @@ Join 연산을 수행하기 위해서는 Join 대상 테이블을 한 번 이상
 
 Nested Loop Join은 가장 기본적인 Join 알고리즘으로, Outer Table의 각 행을 순회하면서 Inner Table의 모든 행을 순회하는 방식으로 동작한다.
 
-```text {caption="[Text 1] Departments Table : Outer Table, dept_id Index : X / Nested Loop Join 순회 순서"}
-Engineering Alice -> O
-Engineering Bob -> O
-Engineering Carol -> X
-Engineering Dave -> X
-Engineering Eve -> X
-Marketing Alice -> X
-Marketing Bob -> X
-Marketing Carol -> O
-Marketing Dave -> X
-Marketing Eve -> O
-HR Alice -> X
-HR Bob -> X
-HR Carol -> X
-HR Dave -> O
-HR Eve -> X
+```text {caption="[Text 1] Nested Loop Join 순회 / Outer Table: Departments, Inner Table: Employees, dept_id Index: X"}
+[Outer: Engineering (id=10)]
+  → Alice (dept_id=10)   O
+  → Bob   (dept_id=10)   O
+  → Coral (dept_id=20)   X
+  → Dave  (dept_id=30)   X
+  → Eve   (dept_id=20)   X
+  → Ssup  (dept_id=NULL) X
+
+[Outer: Marketing (id=20)]
+  → Alice (dept_id=10)   X
+  → Bob   (dept_id=10)   X
+  → Coral (dept_id=20)   O
+  → Dave  (dept_id=30)   X
+  → Eve   (dept_id=20)   O
+  → Ssup  (dept_id=NULL) X
+
+[Outer: HR (id=30)]
+  → Alice (dept_id=10)   X
+  → Bob   (dept_id=10)   X
+  → Coral (dept_id=20)   X
+  → Dave  (dept_id=30)   O
+  → Eve   (dept_id=20)   X
+  → Ssup  (dept_id=NULL) X
+
+[Outer: NULL (dept_id=40)]
+  → Alice (dept_id=10)   X
+  → Bob   (dept_id=10)   X
+  → Coral (dept_id=20)   X
+  → Dave  (dept_id=30)   X
+  → Eve   (dept_id=20)   X
+  → Ssup  (dept_id=NULL) X
 ```
 
 [Text 1]은 `Departments` Table이 Outer Table이고 `Employees` Table이 Inner Table이며, `dept_id` Column에 Index가 없는 경우 Nested Loop Join 수행 시 순회하는 순서를 나타내고 있다. Outer Table인 `Departments` Table의 각 행을 순회하면서 Inner Table인 `Employees` Table의 모든 행을 순회하고 값을 비교하는 방식으로 동작하는 것을 확인할 수 있다.
 
-`dept_id` Column에 Index가 없으면 특정 `dept_id` 값을 가진 Row의 위치를 바로 알 수 없기 때문에, Join 조건(`Employees.dept_id` = `Departments.id`)을 만족하는 Row를 찾으려면 `Employees` Table 전체를 읽어 비교해야 한다. `Departments` Table이 3개의 Record를 가지고 `Employees` Table이 5개의 Record를 가지므로 총 15번의 비교가 발생한다. 시간 복잡도는 O(N * M)이다.
+`dept_id` Column에 Index가 없으면 특정 `dept_id` 값을 가진 Row의 위치를 바로 알 수 없기 때문에, Join 조건(`Employees.dept_id` = `Departments.id`)을 만족하는 Row를 찾으려면 `Employees` Table 전체를 읽어 비교해야 한다. `Departments` Table이 4개의 Record를 가지고 `Employees` Table이 6개의 Record를 가지므로 총 24번의 비교가 발생한다. 시간 복잡도는 `O(N * M)`이다.
 
-```text {caption="[Text 2] Departments Table : Outer Table, dept_id Index : O / Nested Loop Join 순회 순서"}
-Engineering Alice -> O
-Engineering Bob -> O
-Marketing Carol -> O
-Marketing Eve -> O
-HR Carol -> O
+```text {caption="[Text 2] Nested Loop Join 순회 / Outer Table: Departments, Inner Table: Employees, dept_id Index: O"}
+[Outer: Engineering (id=10)]
+  → Alice (dept_id=10)   O
+  → Bob   (dept_id=10)   O
+
+[Outer: Marketing (id=20)]
+  → Coral (dept_id=20)   O
+  → Eve   (dept_id=20)   O
+
+[Outer: HR (id=30)]
+  → Dave  (dept_id=30)   O
+
+[Outer: NULL (dept_id=40)]
 ```
 
 반면 `dept_id` Column에 Index가 있으면, `Departments` Table의 각 행마다 Index Lookup을 통해 해당 `dept_id`를 가진 `Employees` Row만 찾을 수 있다. [Text 2]는 이 경우 Nested Loop Join 수행 시 순회하는 순서를 나타내고 있다. `Employees` Table의 모든 Record를 스캔하지 않고 Join 조건에 맞는 Row만 접근하므로, [Text 1]과 같이 15번이 아니라 5번만 비교하면 된다.
+
+```text {caption="[Text 3] Nested Loop Join 순회 / Outer Table: Employees, Inner Table: Departments, dept_id Index: O"}
+[Outer: Alice (dept_id=10)]
+  → Engineering (id=10)   O
+
+[Outer: Bob (dept_id=10)]
+  → Engineering (id=10)   O
+
+[Outer: Coral (dept_id=20)]
+  → Marketing (id=20)   O
+
+[Outer: Dave (dept_id=30)]
+  → HR (id=30)   O
+
+[Outer: Eve (dept_id=20)]
+  → Marketing (id=20)   O
+
+[Outer: Ssup (dept_id=NULL)]
+  → NULL (dept_id=40)   O
+```
+
+[Text 3]는 `Employees` Table이 Outer Table이고 `Departments` Table이 Inner Table이며, `dept_id` Column에 Index가 있는 경우 Nested Loop Join 수행 시 순회하는 순서를 나타내고 있다. Outer Table인 `Employees` Table의 각 행을 순회하면서 Inner Table인 `Departments` Table의 모든 행을 순회하고 값을 비교하는 방식으로 동작하는 것을 확인할 수 있다.
 
 이처럼 Inner Table의 Join Key Column에 Index가 있으면, Outer Table의 각 Row마다 Index Lookup이 한 번씩 수행되고 Inner Table 전체를 반복 스캔하지 않아도 된다. 따라서 탐색 비용은 크게 Outer Table Row 수에 좌우되며, Optimizer는 일반적으로 Row 수가 더 적은 Table을 Outer Table로 선택한다.
 
