@@ -5,7 +5,29 @@ draft: true
 
 ## 1. Join
 
+{{< figure caption="[Figure 1] DB Join Dataset Example" src="images/db-join-dataset-example.png" width="700px" >}}
+
+Join은 서로 다른 Table에 흩어진 관련 Data를 하나의 Query 결과로 함께 조회할 때 주로 이용하는 RDB 연산이다. [Figure 1]은 Join 연산을 설명하기 위한 예제 Dataset을 나타내고 있다. `Departments` Table과 `Employees` Table이 존재하며, `Departments` Table의 `id` Column과 `Employees` Table의 `dept_id` Column을 Join Key로 사용하여 Join을 수행한다.
+
 ### 1.1. Join Type
+
+Join 연산은 연산 방식에 따라서 **Inner Join**, **Outer Join**, **Cross Join**으로 구분할 수 있다.
+
+#### 1.1.1. Inner Join
+
+{{< figure caption="[Figure 2] Inner Join" src="images/db-join-type-inner.png" width="550px" >}}
+
+#### 1.1.2. Outer Join
+
+{{< figure caption="[Figure 3] Outer Join" src="images/db-join-type-outer-left.png" width="550px" >}}
+
+{{< figure caption="[Figure 4] Outer Join" src="images/db-join-type-outer-right.png" width="550px" >}}
+
+{{< figure caption="[Figure 5] Outer Join" src="images/db-join-type-outer-full.png" width="550px" >}}
+
+#### 1.1.3. Cross Join
+
+{{< figure caption="[Figure 6] Cross Join" src="images/db-join-type-cross.png" width="1000px" >}}
 
 ### 1.2. Join 알고리즘
 
@@ -39,9 +61,9 @@ HR Eve -> X
 
 [Text 1]은 `Departments` Table이 Outer Table이고 `Employees` Table이 Inner Table이며, `dept_id` Column에 Index가 없는 경우 Nested Loop Join 수행 시 순회하는 순서를 나타내고 있다. Outer Table인 `Departments` Table의 각 행을 순회하면서 Inner Table인 `Employees` Table의 모든 행을 순회하고 값을 비교하는 방식으로 동작하는 것을 확인할 수 있다.
 
-`dept_id` Column에 Index가 없으면 특정 `dept_id` 값을 가진 Row의 위치를 바로 알 수 없기 때문에, Join 조건(`Employees.dept_id` = `Departments.id`)을 만족하는 Row를 찾으려면 `Employees` Table 전체를 읽어 비교해야 한다. `Departments` Table이 3개의 Record를 가지고 `Employees` Table이 5개의 Record를 가지므로 총 15번의 비교가 발생한다.
+`dept_id` Column에 Index가 없으면 특정 `dept_id` 값을 가진 Row의 위치를 바로 알 수 없기 때문에, Join 조건(`Employees.dept_id` = `Departments.id`)을 만족하는 Row를 찾으려면 `Employees` Table 전체를 읽어 비교해야 한다. `Departments` Table이 3개의 Record를 가지고 `Employees` Table이 5개의 Record를 가지므로 총 15번의 비교가 발생한다. 시간 복잡도는 O(N * M)이다.
 
-```text {caption="[Text 2] Employees Table : Inner Table, dept_id Index : O / Nested Loop Join 순회 순서"}
+```text {caption="[Text 2] Departments Table : Outer Table, dept_id Index : O / Nested Loop Join 순회 순서"}
 Engineering Alice -> O
 Engineering Bob -> O
 Marketing Carol -> O
