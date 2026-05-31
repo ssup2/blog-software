@@ -24,7 +24,11 @@ INNER JOIN employees e
 
 {{< figure caption="[Figure 2] Inner Join Result" src="images/db-join-type-inner.png" width="550px" >}}
 
+Inner Join은 가장 기본적인 Join 연산으로, 두 Table의 Join Key가 일치하는 Row만 결과에 포함된다. [Query 1]은 Inner Join을 수행하는 SQL Query를 나타내고 있으며, [Figure 2]는 Inner Join 결과를 나타내고 있다. [Figure 2]에서 `NULL` 값을 가진 Row를 제외하고 `Departments` Table의 `id` Column과 `Employees` Table의 `dept_id` Column이 일치하는 Row만 결과에 포함된 것을 확인할 수 있다.
+
 #### 1.1.2. Outer Join
+
+Outer Join은 두 Table의 Join Key가 일치하지 않는 Row도 결과에 포함된다. Outer Join을 이용하는 이유는 왼쪽 또는 오른쪽 또는 양쪽 Table의 모든 Row를 결과에 포함시키기 위해서이다. 모든 Row를 결과에 포함시키는 이유는 누락된 데이터를 파악하거나, 데이터 정합성을 검증하기 위해서 또는 집계 연산을 수행하기 위해서 등 다양한 이유가 있다. 어느 Table의 모든 Row를 결과에 포함시킬지에 따라서 **Left Outer Join**, **Right Outer Join**, **Full Outer Join**으로 구분할 수 있다.
 
 ```sql {caption="[Query 2] Left Outer Join"}
 SELECT   d.id, d.dept_name, e.name
@@ -35,6 +39,8 @@ LEFT JOIN employees e
 
 {{< figure caption="[Figure 3] Left Outer Join Result" src="images/db-join-type-outer-left.png" width="550px" >}}
 
+Left Outer Join은 이름에서 유추할 수 있는것 처럼 Join Query의 왼쪽 Table이 기준이되어 왼쪽 Table의 모든 Row를 결과에 포함시키고, Join Key가 일치하지 않는 Row는 `NULL` 값을 가진 Row로 채운다. [Query 2]는 Left Outer Join을 수행하는 SQL Query를 나타내고 있으며, [Figure 3]는 Left Outer Join 결과를 나타내고 있다. [Figure 3]에서 `Departments` Table의 모든 Row를 결과에 포함시키고, Join Key가 일치하지 않는 `d.id = 40` Row는 `NULL` 값을 가진 Row로 채워진 것을 확인할 수 있다.
+
 ```sql {caption="[Query 3] Right Outer Join"}
 SELECT   d.id, d.dept_name, e.name
 FROM     departments d
@@ -43,6 +49,8 @@ RIGHT JOIN employees e
 ```
 
 {{< figure caption="[Figure 4] Right Outer Join Result" src="images/db-join-type-outer-right.png" width="550px" >}}
+
+Right Outer Join은 이름에서 유추할 수 있는것 처럼 Join Query의 오른쪽 Table이 기준이되어 오른쪽 Table의 모든 Row를 결과에 포함시키고, Join Key가 일치하지 않는 Row는 `NULL` 값을 가진 Row로 채운다. [Query 3]는 Right Outer Join을 수행하는 SQL Query를 나타내고 있으며, [Figure 4]는 Right Outer Join 결과를 나타내고 있다. [Figure 4]에서 `Employees` Table의 모든 Row를 결과에 포함시키고, Join Key가 일치하지 않는 `name = Ssup` Row는 `NULL` 값을 가진 Row로 채워진 것을 확인할 수 있다.
 
 ```sql {caption="[Query 4] Full Outer Join"}
 SELECT   d.id, d.dept_name, e.name
@@ -53,6 +61,8 @@ FULL OUTER JOIN employees e
 
 {{< figure caption="[Figure 5] Full Outer Join Result" src="images/db-join-type-outer-full.png" width="550px" >}}
 
+Full Outer Join은 이름에서 유추할 수 있는것 처럼 양쪽 Table의 모든 Row를 결과에 포함시킨다. [Query 4]는 Full Outer Join을 수행하는 SQL Query를 나타내고 있으며, [Figure 5]는 Full Outer Join 결과를 나타내고 있다. [Figure 5]에서 양쪽 Table의 모든 Row를 결과에 포함시키고, Join Key가 일치하지 않는 Row는 `NULL` 값을 가진 Row로 채워진 것을 확인할 수 있다.
+
 #### 1.1.3. Cross Join
 
 ```sql {caption="[Query 5] Cross Join"}
@@ -62,6 +72,8 @@ CROSS JOIN employees e;
 ```
 
 {{< figure caption="[Figure 6] Cross Join Result" src="images/db-join-type-cross.png" width="1000px" >}}
+
+Cross Join은 두 Table의 모든 Row를 조합하여 결과를 생성한다. 따라서 Cross Join으로 생성된 Row의 개수는 두 Table의 Row 개수를 곱한 값이 된다. 이러한 특징 때문에 **카디시안 곱(Cartesian Product)**이라고 부르기도 한다. [Query 5]는 Cross Join을 수행하는 SQL Query를 나타내고 있으며, [Figure 6]는 Cross Join 결과를 나타내고 있다. [Figure 6]에서 두 Table의 모든 Row를 조합하여 결과를 생성한 것을 확인할 수 있다.
 
 ### 1.2. Join 알고리즘
 
