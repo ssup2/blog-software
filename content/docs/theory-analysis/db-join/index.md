@@ -159,14 +159,28 @@ Nested Loop Join은 가장 기본적인 Join 알고리즘으로, Outer Table의 
 [Outer: Ssup (dept_id=NULL)]
 ```
 
-[Text 3]는 `Employees` Table이 Outer Table이고 `Departments` Table이 Inner Table이며, `dept_id` Column에 Index가 있는 경우 Nested Loop Join 수행 시 순회하는 순서를 나타내고 있다. Outer Table인 `Employees` Table의 각 행을 순회하면서, Inner Table인 `Departments` Table의 Index를 통해 조건에 맞는 Row만 직접 탐색하는 방식으로 동작하는 것을 확인할 수 있다. 이 경우 Row Scan은 [Text 2]와 같이 5번을 수행하지만 Index Lookup도 5번 (`10`, `10`, `20`, `30`, `20`) 수행이 필요하다. `Ssup`은 `dept_id`가 NULL이므로 Index Lookup을 수행하지 않고 즉시 조인 대상에서 제외된다.
+[Text 3]은 `Employees` Table이 Outer Table이고 `Departments` Table이 Inner Table이며, `dept_id` Column에 Index가 있는 경우 Nested Loop Join 수행 시 순회하는 순서를 나타내고 있다. Outer Table인 `Employees` Table의 각 행을 순회하면서, Inner Table인 `Departments` Table의 Index를 통해 조건에 맞는 Row만 직접 탐색하는 방식으로 동작하는 것을 확인할 수 있다. 이 경우 Row Scan은 [Text 2]와 같이 5번을 수행하지만 Index Lookup도 5번 (`10`, `10`, `20`, `30`, `20`) 수행이 필요하다. `Ssup`은 `dept_id`가 NULL이므로 Index Lookup을 수행하지 않고 즉시 조인 대상에서 제외된다.
 
 이 처럼 [Text 2]와 [Text 3]는 동일한 Join 연산이지만 어떤 Table을 Outer Table로 선택하느냐에 따라서 Index Lookup 횟수가 달라질 수 있으며, 이는 Join 알고리즘의 성능에 크게 영향을 미칠 수 있다. Index Lookup 횟수를 줄이기 위해서는 Outer Table의 Row 수가 Inner Table보다 적어야 하며, 따라서 DB Optimizer는 일반적으로 Row 수가 더 적은 Table을 Outer Table로 자동 선택한다.
 
 #### 1.2.2. Sort Merge Join
 
-{{< figure caption="[Figure 2] DB Join Algorithm" src="images/db-join-algorithm-tables-sort-merge.png" width="700px" >}}
+{{< figure caption="[Figure 7] Sort Merge Join" src="images/db-join-dataset-example-sorted.png" width="700px" >}}
+
+Sort Merge Join은 이름에서 유추할 수 있듯이 Join Key 기준으로 Data를 정렬한 뒤 Join을 수행한다. [Figure 7]은 [Figure 1]의 Dataset에서 `Departments.id`와 `Employees.dept_id`를 Join Key로 정렬한 상태를 나타내고 있다. `Departments` Table은 `id` 기준으로, `Employees` Table은 `dept_id` 기준으로 정렬되어 있다.
+
+```text {caption="[Text 4] Sort Merge Join Merge 단계 / Inner Join (d.id = e.dept_id)"}
+[Merge] ptr_d · ptr_e
+Engineering(10)  · Alice(10)      → O
+Engineering(10)  · Bob(10)        → O
+Marketing(20)    · Coral(20)      → O  (ptr_d 유지, ptr_e 전진)
+Marketing(20)    · Eve(20)        → O
+HR(30)           · Dave(30)       → O
+(Unassigned)40   · Ssup(NULL)     → X  (Inner Join: 매칭 없음, 결과 제외)
+```
+
+[Text 4]는 [Figure 7]의 정렬 결과를 기준으로 Sort Merge Join의 Merge 단계를 나타낸다. Nested Loop Join과 달리 Outer Table의 각 Row마다 Inner Table 전체를 순회하지 않고, `ptr_d`, `ptr_e` 두 포인터로 앞에서부터 읽으며 진행한다. Join Key가 같으면 매칭(O)하고 `ptr_e`만 전진하며, 같은 Join Key를 가진 Row가 여러 개면 `ptr_d`는 유지한 채 `ptr_e`만 순회한다. Join Key가 다르면 작은 쪽 포인터만 전진하므로, [Text 1]처럼 Engineering일 때 Coral, Dave 등을 일일이 비교하지 않고 이미 지난 Join Key는 다시 비교하지 않는다.
+
+Left Outer Join처럼 매칭되지 않는 `Departments` Row를 포함해야 하는 경우, Merge가 끝난 뒤 `Unassigned(40)`처럼 남은 `ptr_d` Row를 한 번만 출력하면 되며, Nested Loop Join처럼 직원 6명을 모두 스캔할 필요는 없다. `Ssup(dept_id=NULL)`은 정렬 결과 맨 뒤에 위치하며, Inner Join에서는 Join Key가 일치하지 않아 결과에서 제외된다.
 
 #### 1.2.3. Hash Join
-
-## 2. 참고
