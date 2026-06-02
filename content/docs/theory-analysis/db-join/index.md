@@ -171,7 +171,7 @@ Sort Merge Join은 이름에서 유추할 수 있듯이 Join Key 기준으로 Da
 
 [Figure 7]은 [Figure 1]의 Dataset에서 `Employees.dept_id` Column을 기준으로 `Employees` Table만 정렬한 상태를 나타내고 있다. `Departments.id`는 Primary Key Clustered Index에 의해 이미 정렬되어 있으므로 [Figure 1]과 동일한 순서를 유지한다.
 
-```text {caption="[Text 4] Sort Merge Join Merge 단계 / Inner Join (d.id = e.dept_id)"}
+```text {caption="[Text 4] Sort Merge Join Merge 단계"}
 Engineering(10)  · Alice(10)      → O    →            `ptr_e++`
 Engineering(10)  · Bob(10)        → O    →            `ptr_e++`
 Engineering(10)  · Coral(20)      → X    → `ptr_d++`
@@ -187,8 +187,8 @@ HR(30)           · Ssup(NULL)     → X    → `ptr_d++`
 
 Sort Merge Join에서 정렬의 기준은 Join Key이며, Index 유무는 정렬 비용에 영향을 준다. Join Key에 대한 Index(Clustered Index, Non-clustered Index)가 존재하면 Join Key 기준으로 정렬된 입력을 더 쉽게 만들 수 있어 정렬 비용을 줄이거나 경우에 따라 정렬을 생략할 수도 있다. 정렬이 필요한 경우 DB는 Query 실행 계획에 Sort 연산을 포함해 실행 시점에 정렬을 수행한다. 정렬 작업은 기본적으로 Memory의 Sort Buffer(Work Memory)에서 처리되며, Memory가 부족하면 Spill이 발생해 Temporary 영역으로 내려가 Disk를 사용한다.
 
-Nested Loop Join(특히 Index Nested Loop Join)은 Outer Table의 각 Row마다 Inner Table을 **Index Lookup**으로 탐색해야 한다. 이 방식은 Inner Table을 반복 Full Scan 하지는 않지만, Outer Row 수만큼 Lookup이 반복되므로 Join Key 값이 분산되어 있으면 많은 랜덤 I/O(Random Read)가 발생할 수 있다. 
+Nested Loop Join(특히 Index Nested Loop Join)은 Outer Table의 각 Row마다 Inner Table을 Index Lookup으로 탐색해야 한다. 이 방식은 Inner Table을 반복 Full Scan 하지는 않지만, Outer Row 수만큼 Lookup이 반복되므로 Join Key 값이 분산되어 있으면 많은 **Random I/O**가 발생할 수 있다. 
 
-반면 Sort Merge Join은 Join Key로 양쪽 입력을 정렬한 뒤 정렬된 순서로 한 번씩만 훑으며 Join을 수행하므로, Merge 단계에서 접근 패턴이 순차 I/O(Sequential Read)에 가깝다. 따라서 대용량 데이터에서 랜덤 I/O 비용이 큰 환경에서는 Sort 비용을 감안하더라도 Nested Loop Join보다 유리해질 수 있으며, Join Key에 대한 Index Scan 등으로 정렬된 입력을 만들 수 있으면 Sort 비용을 줄이거나 생략할 수도 있다.
+반면 Sort Merge Join은 Join Key로 양쪽 입력을 정렬한 뒤 정렬된 순서로 한 번씩만 훑으며 Join을 수행하므로, Merge 단계에서 접근 패턴이 **Sequential I/O**에 가깝다. 따라서 대용량 데이터에서 랜덤 I/O 비용이 큰 환경에서는 Sort 비용을 감안하더라도 Nested Loop Join보다 유리해질 수 있으며, Join Key에 대한 Index Scan 등으로 정렬된 입력을 만들 수 있으면 Sort 비용을 줄이거나 생략할 수도 있다.
 
 #### 1.2.3. Hash Join
