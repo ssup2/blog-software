@@ -192,3 +192,29 @@ Nested Loop Join(특히 Index Nested Loop Join)은 Outer Table의 각 Row마다 
 반면 Sort Merge Join은 Join Key로 양쪽 입력을 정렬한 뒤 정렬된 순서로 한 번씩만 훑으며 Join을 수행하므로, Merge 단계에서 접근 패턴이 **Sequential I/O**에 가깝다. 따라서 대용량 데이터에서 랜덤 I/O 비용이 큰 환경에서는 Sort 비용을 감안하더라도 Nested Loop Join보다 유리해질 수 있으며, Join Key에 대한 Index Scan 등으로 정렬된 입력을 만들 수 있으면 Sort 비용을 줄이거나 생략할 수도 있다.
 
 #### 1.2.3. Hash Join
+
+Hash Join은 Join Key에 Hash Function을 적용해 **Hash Table**을 만든 뒤 Join을 수행한다. 일반적으로 Row 수가 적은 Table을 **Build Table**로 두고 Hash Table을 구성한 다음, Row 수가 많은 Table을 **Probe Table**로 두고 한 번만 순회하며 Hash Table에서 Join Key를 조회한다. Sort Merge Join과 달리 Join Key 정렬이 필요 없다는 장점이 있지만, Equality Join(`=`)에만 사용할 수 있다는 단점이 있다.
+
+```text {caption="[Text 5] Hash Join / Inner Join (d.id = e.dept_id)"}
+[Build] Departments → Hash Table (key: id)
+  10 → Engineering
+  20 → Marketing
+  30 → HR
+  40 → Unassigned
+
+[Probe] Employees (dept_id)
+  Alice(10)   → lookup 10 → O
+  Bob(10)     → lookup 10 → O
+  Coral(20)   → lookup 20 → O
+  Eve(20)     → lookup 20 → O
+  Dave(30)    → lookup 30 → O
+  Ssup(NULL)  → lookup NULL → X
+```
+
+[Text 5]는 [Figure 1]의 Dataset을 기준으로 `Departments` Table을 Build Table로, `Employees` Table을 Probe Table로 두는 경우를 가정하고 Hash Join을 수행하는 과정을 나타낸다. Build 단계에서 `Departments.id`를 Hash Key로 Hash Table을 만들고, Probe 단계에서 `Employees`의 각 Row마다 `dept_id`로 Hash Table을 조회한다.
+
+[Text 5]는 Hash Join의 Build·Probe 단계를 나타낸다. Build 단계에서 `Departments` Table을 한 번 스캔해 Hash Table을 만들고, Probe 단계에서 `Employees` Table을 한 번 스캔하며 Join Key가 일치하는 Row만 결과에 포함한다. Nested Loop Join(Index Nested Loop Join)처럼 Outer Row마다 Inner Table을 반복 탐색하지 않고, Sort Merge Join처럼 Join Key로 정렬할 필요도 없다.
+
+Hash Table은 기본적으로 Memory에 생성되며, Memory가 부족하면 Sort Merge Join의 Spill과 유사하게 Disk의 Temporary 영역을 사용할 수 있다. Hash Join은 Build·Probe 각각 Table을 한 번씩 스캔하는 `O(N + M)`에 가깝지만, Hash Table 생성 비용과 Memory 사용량이 추가된다. Hash Join은 정렬 없이 Hash Lookup으로 매칭하므로 Equality Join에서 대용량 Table Join에 자주 선택되며, Optimizer는 통계 정보를 바탕으로 Build Table·Probe Table과 Hash Join 사용 여부를 결정한다.
+
+#### 1.2.4. Join Algorithm Comparison
