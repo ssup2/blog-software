@@ -183,6 +183,6 @@ HR(30)           · Ssup(NULL)     → X    → `ptr_d++`
 (Unassigned)40   · Ssup(NULL)     → X
 ```
 
-[Text 4]는 [Figure 7]의 Sort Merge Join Merge 단계를 나타낸다. Nested Loop Join과 달리 Outer Table의 각 Row마다 Inner Table 전체를 순회하지 않고, `ptr_d`는 `Departments` Table의, `ptr_e`는 `Employees` Table의 현재 Row를 가리키는 두 Pointer로 앞에서부터 읽으며 진행한다. Join Key가 같으면 `ptr_e++`로 다음 Employee를 본다. `ptr_d++`로 다음 Department를 본다.
+[Text 4]는 [Figure 7]의 Sort Merge Join Merge 단계를 나타낸다. Nested Loop Join과 달리 Outer Table의 각 Row마다 Inner Table 전체를 순회하지 않고, `ptr_d`는 `Departments` Table의, `ptr_e`는 `Employees` Table의 현재 Row를 가리키는 두 Pointer로 앞에서부터 읽으며 진행한다. Join Key가 같으면 `ptr_e++`로 다음 Employee를 본다. Join Key가 다르면 `ptr_d++`로 다음 Department를 본다. 이런식으로 Pointer를 이동하면서 양쪽의 Pointer가 모두 끝에 도달하면 Join이 종료된다.
 
 #### 1.2.3. Hash Join
