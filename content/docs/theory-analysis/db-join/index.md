@@ -1,6 +1,5 @@
 ---
 title: DB Join
-draft: true
 ---
 
 ## 1. Join
@@ -85,7 +84,7 @@ Join 연산을 수행하기 위해서는 Join 대상 테이블을 한 번 이상
 
 Nested Loop Join은 가장 기본적인 Join 알고리즘으로, Outer Table의 각 행을 순회하면서 Inner Table의 모든 행을 순회하는 방식으로 동작한다.
 
-```text {caption="[Text 1] Nested Loop Join 순회 / Outer Table: Departments, Inner Table: Employees, dept_id Index: X"}
+```text {caption="[Text 1] Nested Loop Join Process / Outer Table: Departments, Inner Table: Employees, dept_id Index: X"}
 [Outer: Engineering (id=10)]
   → Alice (dept_id=10)   O
   → Bob   (dept_id=10)   O
@@ -119,11 +118,11 @@ Nested Loop Join은 가장 기본적인 Join 알고리즘으로, Outer Table의 
   → Ssup  (dept_id=NULL) X
 ```
 
-[Text 1]은 `Departments` Table이 Outer Table이고 `Employees` Table이 Inner Table이며, `dept_id` Column에 Index가 없는 경우 Nested Loop Join 수행 시 순회하는 순서를 나타내고 있다. Outer Table인 `Departments` Table의 각 행을 순회하면서 Inner Table인 `Employees` Table의 모든 행을 순회하고 값을 비교하는 방식으로 동작하는 것을 확인할 수 있다.
+[Text 1]은 `Departments` Table이 Outer Table이고 `Employees` Table이 Inner Table이며, `dept_id` Column에 Index가 없는 경우 Nested Loop Join 수행 시 처리 과정을 나타내고 있다. Outer Table인 `Departments` Table의 각 행을 순회하면서 Inner Table인 `Employees` Table의 모든 행을 순회하고 값을 비교하는 방식으로 동작하는 것을 확인할 수 있다.
 
 `dept_id` Column에 Index가 없으면 특정 `dept_id` 값을 가진 Row의 위치를 바로 알 수 없기 때문에, Join 조건(`Employees.dept_id` = `Departments.id`)을 만족하는 Row를 찾으려면 `Employees` Table 전체를 읽어 비교해야 한다. `Departments` Table이 4개의 Record를 가지고 `Employees` Table이 6개의 Record를 가지므로 총 24번의 Row Scan이 발생한다. 시간 복잡도는 `O(N * M)`이다.
 
-```text {caption="[Text 2] Nested Loop Join 순회 / Outer Table: Departments, Inner Table: Employees, dept_id Index: O"}
+```text {caption="[Text 2] Nested Loop Join Process / Outer Table: Departments, Inner Table: Employees, dept_id Index: O"}
 [Outer: Engineering (id=10)]
   → Alice (dept_id=10)   O
   → Bob   (dept_id=10)   O
@@ -138,9 +137,9 @@ Nested Loop Join은 가장 기본적인 Join 알고리즘으로, Outer Table의 
 [Outer: NULL (id=40)]
 ```
 
-반면 `dept_id` Column에 Index가 있으면, `Departments` Table의 각 행마다 Index Lookup을 통해 해당 `dept_id`를 가진 `Employees` Row만 찾을 수 있다. [Text 2]는 이 경우 Nested Loop Join 수행 시 순회하는 순서를 나타내고 있다. `Employees` Table의 모든 Record를 스캔하지 않고 Join 조건에 맞는 Row만 접근하므로, [Text 2]와 같이 24번이 아니라 5번의 Row Scan만 수행하면 되며, 이 경우 Index Lookup은 4번만 (`10`, `20`, `30`, `40`) 수행하면 된다.
+반면 `dept_id` Column에 Index가 있으면, `Departments` Table의 각 행마다 Index Lookup을 통해 해당 `dept_id`를 가진 `Employees` Row만 찾을 수 있다. [Text 2]는 이 경우 Nested Loop Join 수행 시 처리 과정을 나타내고 있다. `Employees` Table의 모든 Record를 스캔하지 않고 Join 조건에 맞는 Row만 접근하므로, [Text 2]와 같이 24번이 아니라 5번의 Row Scan만 수행하면 되며, 이 경우 Index Lookup은 4번만 (`10`, `20`, `30`, `40`) 수행하면 된다.
 
-```text {caption="[Text 3] Nested Loop Join 순회 / Outer Table: Employees, Inner Table: Departments"}
+```text {caption="[Text 3] Nested Loop Join Process / Outer Table: Employees, Inner Table: Departments"}
 [Outer: Alice (dept_id=10)]
   → Engineering (id=10)   O
 
@@ -159,7 +158,7 @@ Nested Loop Join은 가장 기본적인 Join 알고리즘으로, Outer Table의 
 [Outer: Ssup (dept_id=NULL)]
 ```
 
-[Text 3]은 `Employees` Table이 Outer Table이고 `Departments` Table이 Inner Table이며, `dept_id` Column에 Index가 있는 경우 Nested Loop Join 수행 시 순회하는 순서를 나타내고 있다. Outer Table인 `Employees` Table의 각 행을 순회하면서, Inner Table인 `Departments` Table의 Index를 통해 조건에 맞는 Row만 직접 탐색하는 방식으로 동작하는 것을 확인할 수 있다. 이 경우 Row Scan은 [Text 2]와 같이 5번을 수행하지만 Index Lookup도 5번 (`10`, `10`, `20`, `30`, `20`) 수행이 필요하다. `Ssup`은 `dept_id`가 NULL이므로 Index Lookup을 수행하지 않고 즉시 조인 대상에서 제외된다.
+[Text 3]은 `Employees` Table이 Outer Table이고 `Departments` Table이 Inner Table이며, `dept_id` Column에 Index가 있는 경우 Nested Loop Join 수행 시 처리 과정을 나타내고 있다. Outer Table인 `Employees` Table의 각 행을 순회하면서, Inner Table인 `Departments` Table의 Index를 통해 조건에 맞는 Row만 직접 탐색하는 방식으로 동작하는 것을 확인할 수 있다. 이 경우 Row Scan은 [Text 2]와 같이 5번을 수행하지만 Index Lookup도 5번 (`10`, `10`, `20`, `30`, `20`) 수행이 필요하다. `Ssup`은 `dept_id`가 NULL이므로 Index Lookup을 수행하지 않고 즉시 조인 대상에서 제외된다.
 
 이 처럼 [Text 2]와 [Text 3]는 동일한 Join 연산이지만 어떤 Table을 Outer Table로 선택하느냐에 따라서 Index Lookup 횟수가 달라질 수 있으며, 이는 Join 알고리즘의 성능에 크게 영향을 미칠 수 있다. Index Lookup 횟수를 줄이기 위해서는 Outer Table의 Row 수가 Inner Table보다 적어야 하며, 따라서 DB Optimizer는 일반적으로 Row 수가 더 적은 Table을 Outer Table로 자동 선택한다.
 
@@ -171,15 +170,15 @@ Sort Merge Join은 이름에서 유추할 수 있듯이 Join Key 기준으로 Da
 
 [Figure 7]은 [Figure 1]의 Dataset에서 `Employees.dept_id` Column을 기준으로 `Employees` Table만 정렬한 상태를 나타내고 있다. `Departments.id`는 Primary Key Clustered Index에 의해 이미 정렬되어 있으므로 [Figure 1]과 동일한 순서를 유지한다.
 
-```text {caption="[Text 4] Sort Merge Join Merge 단계"}
-Engineering(10)  · Alice(10)      → O    →            `ptr_e++`
-Engineering(10)  · Bob(10)        → O    →            `ptr_e++`
-Engineering(10)  · Coral(20)      → X    → `ptr_d++`
-Marketing(20)    · Coral(20)      → O    →            `ptr_e++`
-Marketing(20)    · Eve(20)        → O    →            `ptr_e++`
-Marketing(20)    · Dave(30)       → X    → `ptr_d++`
-HR(30)           · Dave(30)       → O    →            `ptr_e++`
-HR(30)           · Ssup(NULL)     → X    → `ptr_d++`
+```text {caption="[Text 4] Sort Merge Join Process"}
+Engineering(10)  · Alice(10)      → O     →            `ptr_e++`
+Engineering(10)  · Bob(10)        → O     →            `ptr_e++`
+Engineering(10)  · Coral(20)      → X     → `ptr_d++`
+Marketing(20)    · Coral(20)      → O     →            `ptr_e++`
+Marketing(20)    · Eve(20)        → O     →            `ptr_e++`
+Marketing(20)    · Dave(30)       → X     → `ptr_d++`
+HR(30)           · Dave(30)       → O     →            `ptr_e++`
+HR(30)           · Ssup(NULL)     → X     → `ptr_d++`
 (Unassigned)40   · Ssup(NULL)     → X
 ```
 
@@ -187,15 +186,15 @@ HR(30)           · Ssup(NULL)     → X    → `ptr_d++`
 
 Sort Merge Join에서 정렬의 기준은 Join Key이며, Index 유무는 정렬 비용에 영향을 준다. Join Key에 대한 Index(Clustered Index, Non-clustered Index)가 존재하면 Join Key 기준으로 정렬된 입력을 더 쉽게 만들 수 있어 정렬 비용을 줄이거나 경우에 따라 정렬을 생략할 수도 있다. 정렬이 필요한 경우 DB는 Query 실행 계획에 Sort 연산을 포함해 실행 시점에 정렬을 수행한다. 정렬 작업은 기본적으로 Memory의 Sort Buffer(Work Memory)에서 처리되며, Memory가 부족하면 Spill이 발생해 Temporary 영역으로 내려가 Disk를 사용한다.
 
-Nested Loop Join(특히 Index Nested Loop Join)은 Outer Table의 각 Row마다 Inner Table을 Index Lookup으로 탐색해야 한다. 이 방식은 Inner Table을 반복 Full Scan 하지는 않지만, Outer Row 수만큼 Lookup이 반복되므로 Join Key 값이 분산되어 있으면 많은 **Random I/O**가 발생할 수 있다. 
+Nested Loop Join은 Outer Table의 각 Row마다 Inner Table을 Index Lookup으로 탐색해야 한다. 이 방식은 Inner Table을 반복 Full Scan 하지는 않지만, Outer Row 수만큼 Lookup이 반복되므로 Join Key 값이 분산되어 있으면 많은 **Random I/O**가 발생할 수 있다. 반면 Sort Merge Join은 Join Key로 양쪽 입력을 정렬한 뒤 정렬된 순서로 한 번씩만 훑으며 Join을 수행하므로, Merge 단계에서 접근 패턴이 **Sequential I/O**에 가깝다. 따라서 대용량 데이터에서 랜덤 I/O 비용이 큰 환경에서는 Sort 비용을 감안하더라도 Nested Loop Join보다 유리해질 수 있으며, Join Key에 대한 Index Scan 등으로 정렬된 입력을 만들 수 있으면 Sort 비용을 줄이거나 생략할 수도 있다.
 
-반면 Sort Merge Join은 Join Key로 양쪽 입력을 정렬한 뒤 정렬된 순서로 한 번씩만 훑으며 Join을 수행하므로, Merge 단계에서 접근 패턴이 **Sequential I/O**에 가깝다. 따라서 대용량 데이터에서 랜덤 I/O 비용이 큰 환경에서는 Sort 비용을 감안하더라도 Nested Loop Join보다 유리해질 수 있으며, Join Key에 대한 Index Scan 등으로 정렬된 입력을 만들 수 있으면 Sort 비용을 줄이거나 생략할 수도 있다.
+Sort Merge Join은 주로 Equality Join(`=`)에 사용된다. [Text 4]처럼 Join Key가 같으면 매칭하고 `ptr_e++`로 전진하며, Join Key가 다르면 Join Key가 더 작은 쪽 Pointer만 전진하는 방식은 Equality Join에 맞춰져 있다. `<`, `>`, `BETWEEN`과 같은 비등가 Join은 조건을 만족하는 Row 조합을 한 번의 순차 Merge로 처리하기 어렵고, Pointer를 되돌리거나 한쪽 Table을 반복 스캔해야 할 수 있다. 이 경우 Sort Merge Join의 **양쪽 Table을 각각 한 번씩만 순차 스캔한다는 장점**이 사라지므로, 일반적으로 Nested Loop Join처럼 조건식을 평가하는 방식이 선택된다.
 
 #### 1.2.3. Hash Join
 
 Hash Join은 Join Key에 Hash Function을 적용해 **Hash Table**을 만든 뒤 Join을 수행한다. 일반적으로 Row 수가 적은 Table을 **Build Table**로 두고 Hash Table을 구성한 다음, Row 수가 많은 Table을 **Probe Table**로 두고 한 번만 순회하며 Hash Table에서 Join Key를 조회한다. Sort Merge Join과 달리 Join Key 정렬이 필요 없다는 장점이 있지만, Equality Join(`=`)에만 사용할 수 있다는 단점이 있다.
 
-```text {caption="[Text 5] Hash Join / Inner Join (d.id = e.dept_id)"}
+```text {caption="[Text 5] Hash Join Process"}
 [Build] Departments → Hash Table (key: id)
   10 → Engineering
   20 → Marketing
@@ -211,10 +210,22 @@ Hash Join은 Join Key에 Hash Function을 적용해 **Hash Table**을 만든 뒤
   Ssup(NULL)  → lookup NULL → X
 ```
 
-[Text 5]는 [Figure 1]의 Dataset을 기준으로 `Departments` Table을 Build Table로, `Employees` Table을 Probe Table로 두는 경우를 가정하고 Hash Join을 수행하는 과정을 나타낸다. Build 단계에서 `Departments.id`를 Hash Key로 Hash Table을 만들고, Probe 단계에서 `Employees`의 각 Row마다 `dept_id`로 Hash Table을 조회한다.
+[Text 5]는 [Figure 1]의 Dataset을 기준으로 `Departments` Table을 Build Table로, `Employees` Table을 Probe Table로 두는 경우를 가정하고 Hash Join을 수행하는 과정을 나타낸다. Build 단계에서 `Departments.id`를 Hash Key로 Hash Table을 만들고, Probe 단계에서 `Employees`의 각 Row마다 `dept_id`로 Hash Table을 조회한다. Build 단계에서만 Hash Table이 새로 생성되며, Probe Table은 별도로 만들지 않고 원본 Table을 한 번 스캔한다.
 
-[Text 5]는 Hash Join의 Build·Probe 단계를 나타낸다. Build 단계에서 `Departments` Table을 한 번 스캔해 Hash Table을 만들고, Probe 단계에서 `Employees` Table을 한 번 스캔하며 Join Key가 일치하는 Row만 결과에 포함한다. Nested Loop Join(Index Nested Loop Join)처럼 Outer Row마다 Inner Table을 반복 탐색하지 않고, Sort Merge Join처럼 Join Key로 정렬할 필요도 없다.
-
-Hash Table은 기본적으로 Memory에 생성되며, Memory가 부족하면 Sort Merge Join의 Spill과 유사하게 Disk의 Temporary 영역을 사용할 수 있다. Hash Join은 Build·Probe 각각 Table을 한 번씩 스캔하는 `O(N + M)`에 가깝지만, Hash Table 생성 비용과 Memory 사용량이 추가된다. Hash Join은 정렬 없이 Hash Lookup으로 매칭하므로 Equality Join에서 대용량 Table Join에 자주 선택되며, Optimizer는 통계 정보를 바탕으로 Build Table·Probe Table과 Hash Join 사용 여부를 결정한다.
+Hash Table은 기본적으로 Memory에 생성되며, Memory가 부족하면 Sort Merge Join의 Spill과 유사하게 Disk의 Temporary 영역을 사용할 수 있다. Hash Join은 Build·Probe 각각 Table을 한 번씩 스캔하는 `O(N + M)`에 가깝지만, Hash Table 생성 비용과 Memory 사용량이 추가된다. Hash Join은 정렬 없이 Hash Lookup으로 매칭하므로 Equality Join에서 대용량 Table Join에 자주 선택되며, Optimizer는 통계 정보를 바탕으로 Build Table/Probe Table과 Hash Join 사용 여부를 결정한다.
 
 #### 1.2.4. Join Algorithm Comparison
+
+{{< table caption="[Table 1] Join Algorithm Comparison" >}}
+| | Nested Loop Join | Sort Merge Join | Hash Join |
+|----|----|----|----|
+| Join Key 정렬 | 불필요 | 필요 | 불필요 |
+| Join 조건 | Equality, Non-equality | 주로 Equality (`=`) | Equality (`=`)만 |
+| Table 순회 | Outer Row마다 Inner 반복 탐색 | 양쪽 Table 각 1회 | Build Table 1회 + Probe Table 1회 |
+| I/O 패턴 | Index Nested Loop 시 Random I/O | Merge 단계 Sequential I/O | Build·Probe Sequential Scan |
+| 시간 복잡도 | `O(N × M)` (Index 시 개선) | `O(N log N + M log M)` + `O(N + M)` | `O(N + M)` |
+| 추가 비용 | Inner Table Index 의존 | Sort, Spill | Hash Table 생성, Memory, Spill |
+| 유리한 경우 | 소규모 Table, Index가 잘 갖춰진 경우 | 대용량, 정렬된 입력(Index Scan) 활용 가능 | 대용량 Equality Join |
+{{< /table >}}
+
+[Table 1]은 Join Algorithm을 비교한 것이다. DB Optimizer는 일반적으로 소규모 Table Join에는 Nested Loop Join, 대용량 Equality Join에는 Hash Join, 정렬된 입력을 활용할 수 있는 대용량 Join에는 Sort Merge Join을 선택하는 경향이 있다. 실제 선택은 DB 종류, 통계, Memory 설정, Join 조건에 따라 달라진다.
