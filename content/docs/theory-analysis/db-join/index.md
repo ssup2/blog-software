@@ -172,14 +172,17 @@ Sort Merge Join은 이름에서 유추할 수 있듯이 Join Key 기준으로 Da
 [Figure 7]은 [Figure 1]의 Dataset에서 `Employees.dept_id` Column을 기준으로 `Employees` Table만 정렬한 상태를 나타내고 있다. `Departments.id`는 Primary Key Clustered Index에 의해 이미 정렬되어 있으므로 [Figure 1]과 동일한 순서를 유지한다.
 
 ```text {caption="[Text 4] Sort Merge Join Merge 단계 / Inner Join (d.id = e.dept_id)"}
-Engineering(10)  · Alice(10)      → O
-Engineering(10)  · Bob(10)        → O
-Marketing(20)    · Coral(20)      → O  (ptr_d 유지, ptr_e 전진)
-Marketing(20)    · Eve(20)        → O
-HR(30)           · Dave(30)       → O
-(Unassigned)40   · Ssup(NULL)     → X  (Inner Join: 매칭 없음, 결과 제외)
+Engineering(10)  · Alice(10)      → O    →            `ptr_e++`
+Engineering(10)  · Bob(10)        → O    →            `ptr_e++`
+Engineering(10)  · Coral(20)      → X    → `ptr_d++`
+Marketing(20)    · Coral(20)      → O    →            `ptr_e++`
+Marketing(20)    · Eve(20)        → O    →            `ptr_e++`
+Marketing(20)    · Dave(30)       → X    → `ptr_d++`
+HR(30)           · Dave(30)       → O    →            `ptr_e++`
+HR(30)           · Ssup(NULL)     → X    → `ptr_d++`
+(Unassigned)40   · Ssup(NULL)     → X
 ```
 
-[Text 4]는 [Figure 7]의 Sort Merge Join Merge 단계를 나타낸다. Nested Loop Join과 달리 Outer Table의 각 Row마다 Inner Table 전체를 순회하지 않고, `ptr_d`는 `Departments` Table의, `ptr_e`는 `Employees` Table의 현재 Row를 가리키는 두 포인터로 앞에서부터 읽으며 진행한다. Join Key가 같으면 매칭(O)하고 `ptr_e`만 전진하며, 같은 Join Key를 가진 Row가 여러 개면 `ptr_d`는 유지한 채 `ptr_e`만 순회한다. Join Key가 다르면 작은 쪽 포인터만 전진하므로, [Text 1]처럼 Engineering일 때 Coral, Dave 등을 일일이 비교하지 않고 이미 지난 Join Key는 다시 비교하지 않는다.
+[Text 4]는 [Figure 7]의 Sort Merge Join Merge 단계를 나타낸다. Nested Loop Join과 달리 Outer Table의 각 Row마다 Inner Table 전체를 순회하지 않고, `ptr_d`는 `Departments` Table의, `ptr_e`는 `Employees` Table의 현재 Row를 가리키는 두 Pointer로 앞에서부터 읽으며 진행한다. Join Key가 같으면 `ptr_e++`로 다음 Employee를 본다. `ptr_d++`로 다음 Department를 본다.
 
 #### 1.2.3. Hash Join
