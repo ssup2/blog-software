@@ -185,4 +185,6 @@ HR(30)           · Ssup(NULL)     → X    → `ptr_d++`
 
 [Text 4]는 [Figure 7]의 Sort Merge Join Merge 단계를 나타낸다. Nested Loop Join과 달리 Outer Table의 각 Row마다 Inner Table 전체를 순회하지 않고, `ptr_d`는 `Departments` Table의, `ptr_e`는 `Employees` Table의 현재 Row를 가리키는 두 Pointer로 앞에서부터 읽으며 진행한다. Join Key가 같으면 `ptr_e++`로 다음 Employee를 본다. Join Key가 다르면 `ptr_d++`로 다음 Department를 본다. 이런식으로 Pointer를 이동하면서 양쪽의 Pointer가 모두 끝에 도달하면 Join이 종료된다.
 
+Sort Merge Join에서 정렬의 기준은 Join Key이며, Index 유무는 정렬 비용에 영향을 준다. Join Key에 대한 Index(Clustered Index, Non-clustered Index)가 존재하면 Join Key 기준으로 정렬된 입력을 더 쉽게 만들 수 있어 정렬 비용을 줄이거나 경우에 따라 정렬을 생략할 수도 있다. 정렬이 필요한 경우 DB는 Query 실행 계획에 Sort 연산을 포함해 실행 시점에 정렬을 수행한다. 정렬 작업은 기본적으로 Memory의 Sort Buffer(Work Memory)에서 처리되며, Memory가 부족하면 Spill이 발생해 Temporary 영역으로 내려가 Disk를 사용한다.
+
 #### 1.2.3. Hash Join
