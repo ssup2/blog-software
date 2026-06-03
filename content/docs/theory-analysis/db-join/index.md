@@ -202,12 +202,12 @@ Hash Join은 Join Key에 Hash Function을 적용해 **Hash Table**을 만든 뒤
   40 → Unassigned
 
 [Probe] Employees (dept_id)
-  Alice(10)   → lookup 10 → O
-  Bob(10)     → lookup 10 → O
-  Coral(20)   → lookup 20 → O
-  Eve(20)     → lookup 20 → O
-  Dave(30)    → lookup 30 → O
-  Ssup(NULL)  → lookup NULL → X
+  Alice(10)   → lookup 10     → O
+  Bob(10)     → lookup 10     → O
+  Coral(20)   → lookup 20     → O
+  Eve(20)     → lookup 20     → O
+  Dave(30)    → lookup 30     → O
+  Ssup(NULL)  → lookup NULL   → X
 ```
 
 [Text 5]는 [Figure 1]의 Dataset을 기준으로 `Departments` Table을 Build Table로, `Employees` Table을 Probe Table로 두는 경우를 가정하고 Hash Join을 수행하는 과정을 나타낸다. Build 단계에서 `Departments.id`를 Hash Key로 Hash Table을 만들고, Probe 단계에서 `Employees`의 각 Row마다 `dept_id`로 Hash Table을 조회한다. Build 단계에서만 Hash Table이 새로 생성되며, Probe Table은 별도로 만들지 않고 원본 Table을 한 번 스캔한다.

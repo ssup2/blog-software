@@ -202,12 +202,12 @@ Hash Join applies a hash function to the join key to create a **Hash Table** and
   40 → Unassigned
 
 [Probe] Employees (dept_id)
-  Alice(10)   → lookup 10 → O
-  Bob(10)     → lookup 10 → O
-  Coral(20)   → lookup 20 → O
-  Eve(20)     → lookup 20 → O
-  Dave(30)    → lookup 30 → O
-  Ssup(NULL)  → lookup NULL → X
+  Alice(10)   → lookup 10     → O
+  Bob(10)     → lookup 10     → O
+  Coral(20)   → lookup 20     → O
+  Eve(20)     → lookup 20     → O
+  Dave(30)    → lookup 30     → O
+  Ssup(NULL)  → lookup NULL   → X
 ```
 
 [Text 5] shows the Hash Join process assuming the `Departments` table as the Build Table and the `Employees` table as the Probe Table based on the dataset in [Figure 1]. In the build phase, a hash table is created with `Departments.id` as the hash key, and in the probe phase, the hash table is looked up with `dept_id` for each row of `Employees`. Only the hash table is newly created in the build phase; the Probe Table is not created separately and the original table is scanned once.
