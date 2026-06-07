@@ -25,7 +25,7 @@ draft: true
 
 ### 2.3. Shuffle Sort Merge Join
 
-### 2.4. Cross Join
+### 2.4. Cartesian Product (Cross Join)
 
 ### 2.5. Broadcast Nested Loop Join
 
