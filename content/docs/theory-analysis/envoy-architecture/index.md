@@ -6,7 +6,7 @@ title: "Envoy Architecture"
 
 {{< figure caption="[Figure 1] Envoy Architecture" src="images/envoy-architecture.png" width="1000px" >}}
 
-[Figure 1]은 Envoy Architecture를 나타내고 있다. Envoy Architecture는 libevent와 io_uring을 기반으로 동작하는 **Dispatcher**를 활용하여 **Event Driven Architecture**를 구현하고 있으며, 각 Thread마다 전용 저장소인 TLS (Thread Local Storage)를 활용하여 Lock 활용을 최소화하며 동작한다.
+[Figure 1]은 Envoy Architecture를 나타내고 있다. Envoy Architecture는 libevent와 io_uring을 기반으로 동작하는 **Dispatcher**를 활용하여 **Event Driven Architecture**를 구현하고 있으며, 각 Thread마다 전용 저장소인 TLS (Thread Local Storage)를 활용하여 Lock 활용을 최소화하며 동작한다. Thread 관점에서는 **Main Thread**, **Worker Thread**, **Flush Thread**로 구분된다.
 
 ### 1.1. Main Thread
 
@@ -17,6 +17,8 @@ title: "Envoy Architecture"
 {{< figure caption="[Figure 2] Envoy TLS (Thread Local Storage)" src="images/envoy-tls.png" width="800px" >}}
 
 {{< figure caption="[Figure 3] Envoy Run on All Threads" src="images/envoy-runonallthreads.png" width="1000px" >}}
+
+### 1.4. Flush Thread
 
 ## 2. 참조
 
