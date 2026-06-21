@@ -29,9 +29,9 @@ Worker Thread는 **Downstream** (Client)의 요청을 받아 처리 이후에 **
 
 * **Listener Filter Chain** : Listener Filter Chain은 SNI (Server Name Indication)와 같이 Connection의 Metadata를 추출하여 Connection의 추가 정보를 알아내는 역할을 수행한다. 각 Connection 또는 HTTP/2 Stream마다 별도의 Listener Filter Chain이 존재한다.
 
-* **TLS Transport Socket** : Listner Filter Chain을 통해서 추출된 Metadata를 이용하여 TLS로 암호화된 Data를 복호화하여 원본 Data로 변환 및 Network Chain Filter로 전달하는 역할을 수행한다. 만약 TLS로 암호화된 Data가 아닌 경우에는 복호화 과정을 거치지 않고 바로 원본 Data를 그대로 Network Chain Filter로 전달한다.
+* **TLS Transport Socket** : Listner Filter Chain을 통해서 추출된 Metadata를 이용하여 TLS로 암호화된 Data를 복호화하여 원본 Data로 변환 및 Network Chain Filter로 전달하는 역할을 수행한다. 만약 TLS로 암호화된 Data가 아닌 경우에는 복호화 과정을 거치지 않고 바로 원본 Data를 그대로 Network Chain Filter로 전달한다. 각 Connection 또는 HTTP/2 Stream마다 별도의 TLS Transport Socket이 존재한다.
 
-* **Network Filter Chain** : 
+* **Network Filter Chain** : Network Filter Chain은 복호화된 요청/응답을 변조, Rate Limiting 수행, Circuit Breaking 수행 또는 어느 Upstream으로 요청을 전송할지 결정하는 Routing 등의 역할을 수행한다. 마지막 Network Filter Chain에는 HCM (HTTP Connection Manager)이 존재한다. HCM은 HTTP 관련 Filter Chain을 소유하고 있으며, HTTP/2 Codec을 통해서 HTTP/2 요청/응답을 Encoding/Decoding하는 역할도 수행한다.
 
 하나의 Downstream은 하나의 Worker Thread와 Connection을 맺는다. 반면에 모든 Worker Thread는 모든 Upstream과 Connection을 맺는다. 이러한 이유는 Worker Thread 사이에는 상태 정보를 공유하지 않기 때문에, Downstream이 어떤 Worker Thread와 Connection을 맺더라도 Upstream으로 요청을 전달할 수 있어야 하기 때문이다. 이 의미는 Worker Thread의 개수에 비례하여 Upstream과의 Connection 개수도 증가하는걸 의미하며, 따라서 너무 많은 Worker Thread를 생성하면 Upstream과의 Connection 유지를 위한 Memory 낭비가 발생하게 된다. 
 
