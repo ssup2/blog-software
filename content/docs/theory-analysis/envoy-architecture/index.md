@@ -29,7 +29,7 @@ Worker Thread는 **Downstream** (Client)의 요청을 받아 처리 이후에 **
 
 * **Listener Filter Chain** : Listener Filter Chain은 SNI (Server Name Indication)와 같이 Connection의 Metadata를 추출하여 Connection의 추가 정보를 알아내는 역할을 수행한다. 각 Connection 또는 HTTP/2 Stream마다 별도의 Listener Filter Chain이 존재한다.
 
-* **TLS Transport Socket** : 
+* **TLS Transport Socket** : Listner Filter Chain을 통해서 추출된 Metadata를 이용하여 TLS로 암호화된 Data를 복호화하여 원본 Data로 변환 및 Network Chain Filter로 전달하는 역할을 수행한다. 만약 TLS로 암호화된 Data가 아닌 경우에는 복호화 과정을 거치지 않고 바로 원본 Data를 그대로 Network Chain Filter로 전달한다.
 
 * **Network Filter Chain** : 
 
