@@ -27,7 +27,7 @@ Worker Thread는 **Downstream** (Client)의 요청을 받아 처리 이후에 **
 
 * **Listener** : Listener는 TCP/UDP Listening을 수행하여 Downstream의 Connection 수락하고, Connection을 수학하며 생성된 Socket을 Dispatcher에 등록하는 역할을 수행한다. Listener는 각 Worker Thread 마다 별도로 존재하며 `SO_REUSEPORT` Option을 통해서 모든 Listener는 동일한 IP/Port를 Listening 하도록 설정된다. 다수의 Listener가 동시에 Listening 하는 경우에는 Kernel은 임의의 Listener를 선택하여 Connection을 수락하게 된다. 따라서 Client가 어떤 Thread와 Connection을 맺을지는 Envoy가 아니라 Kernel에 의해서 결정된다.
 
-* **Listener Filter Chain** : 
+* **Listener Filter Chain** : Listener Filter Chain은 SNI (Server Name Indication)와 같이 Connection의 Metadata를 추출하여 Connection의 추가 정보를 알아내는 역할을 수행한다. 각 Connection 또는 HTTP/2 Stream마다 별도의 Listener Filter Chain이 존재한다.
 
 * **TLS Transport Socket** : 
 
