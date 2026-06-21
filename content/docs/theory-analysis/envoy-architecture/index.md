@@ -28,10 +28,14 @@ Worker Thread는 **Downstream** (Client)의 요청을 받아 처리 이후에 **
 * **Listener** : Listener는 TCP/UDP Listening을 수행하여 Downstream의 Connection 수락하고, Connection을 수학하며 생성된 Socket을 Dispatcher에 등록하는 역할을 수행한다. Listener는 각 Worker Thread 마다 별도로 존재하며 `SO_REUSEPORT` Option을 통해서 모든 Listener는 동일한 IP/Port를 Listening 하도록 설정된다.
 
 * **Listener Filter Chain** : 
+
 * **TLS Transport Socket** : 
+
 * **Network Filter Chain** : 
 
-하나의 Downstream은 하나의 Worker Thread와 Connection을 맺는다. 반면에 모든 Worker Thread는 모든 Upstream과 Connection을 맺는다. 이러한 이유는 Worker Thread 사이에는 상태 정보를 공유하지 않기 때문에, Downstream이 어떤 Worker Thread와 Connection을 맺더라도 Upstream으로 요청을 전달할 수 있어야 하기 때문이다. 이 의미는 Worker Thread의 개수에 비례하여 Upstream과의 Connection 개수도 증가하는걸 의미하며, 따라서 너무 많은 Worker Thread를 생성하면 Upstream과의 Connection 유지를 위한 Memory 낭비가 발생하게 된다.
+하나의 Downstream은 하나의 Worker Thread와 Connection을 맺는다. 반면에 모든 Worker Thread는 모든 Upstream과 Connection을 맺는다. 이러한 이유는 Worker Thread 사이에는 상태 정보를 공유하지 않기 때문에, Downstream이 어떤 Worker Thread와 Connection을 맺더라도 Upstream으로 요청을 전달할 수 있어야 하기 때문이다. 이 의미는 Worker Thread의 개수에 비례하여 Upstream과의 Connection 개수도 증가하는걸 의미하며, 따라서 너무 많은 Worker Thread를 생성하면 Upstream과의 Connection 유지를 위한 Memory 낭비가 발생하게 된다. 
+
+[Figure 1]에서는 Downstream A/B가 각기 다른 Worker Thread와 Connnection을 맺고 있으며, 4개의 Worker Thread가 존재하기 때문에 모든 Worker Thread가 Upstream과의 Connection을 유지하기 위해서 Worker Thread의 개수인 4개의 Connection을 유지하고 있는것을 확인할 수 있다.
 
 ### 1.3. TLS (Thread Local Storage)
 
