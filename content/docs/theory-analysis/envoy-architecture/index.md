@@ -1,19 +1,16 @@
 ---
 title: "Envoy Architecture"
-draft: true
 ---
 
 ## 1. Envoy Architecture
 
-### 1.1. Main Thread
+{{< figure caption="[Figure 1] Envoy Architecture" src="images/envoy-architecture.png" width="1000px" >}}
 
-* xDS : xDS API
-* Runtime : Feature Flags
-* Stats Flush : Metric 수집 및 전송, 노출
-* Admin : `/admin` Endpoint 제공 
-* Process Management : Signal Handling, Hot Restart
+### 1.1. Thread Local Storage (TLS)
 
-### 1.2. 
+{{< figure caption="[Figure 2] EnvoyThread Local Storage (TLS)" src="images/envoy-tls.png" width="800px" >}}
+
+{{< figure caption="[Figure 3] Envoy Run on All Threads" src="images/envoy-runonallthreads.png" width="1000px" >}}
 
 ## 2. 참조
 
