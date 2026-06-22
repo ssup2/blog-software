@@ -3,43 +3,31 @@ title: Spark Join Strategy
 draft: true
 ---
 
-## 1. Strategy Decision Flow
+## 1. Spark Join Strategy
 
 {{< table caption="[Table 1] Spark Join Strategy" >}}
 | Join Strategy | 개요 | Shuffle | 지원 Join Type | Hint |
 |----|----|----|----|----|
-| Broadcast Hash Join | 소형 Table을 Executor에 Broadcast 후 Hash Join | 불필요 (Broadcast) | Inner, Left Semi, Left Anti | `BROADCAST`, `BROADCASTJOIN`,  `MAPJOIN`|
+| Broadcast Hash Join | 소형 Table을 Executor에 Broadcast 후 Hash Join | 불필요 (Broadcast) | Inner, Left Semi, Left Anti | `BROADCAST` |
 | Shuffle Hash Join | 양쪽을 Join Key로 Shuffle 후 Hash Join | 필요 | Inner | `SHUFFLE_HASH` |
-| Shuffle Sort Merge Join | 양쪽을 Join Key로 Shuffle·정렬 후 Merge Join | 필요 | Inner, Left/Right/Full Outer |  `SHUFFLE_MERGE`, `MERGE`,`MERGEJOIN` |
-| Cartesian Product (Cross Join) | 두 Table의 모든 Row 조합 | 불필요 또는 필요 | Cross | `SHUFFLE_REPLICATE_NL` |
+| Shuffle Sort Merge Join | 양쪽을 Join Key로 Shuffle·정렬 후 Merge Join | 필요 | Inner, Left/Right/Full Outer | `MERGE` |
+| Cross Join | 두 Table의 모든 Row 조합 | 불필요 또는 필요 | Cross | `SHUFFLE_REPLICATE_NL` |
 | Broadcast Nested Loop Join | 소형 Table Broadcast 후 Nested Loop | 불필요 (Broadcast) | Inner, Outer | - |
 {{< /table >}}
 
-{{< figure caption="[Figure 1] Spark Join Strategy Decision Flow" src="images/spark-join-strategy-decision-flow.png" width="1000px" >}}
+### 1.1. Strategy Decision Flow
 
-## 2. Join Strategy
+### 1.2. Broadcast Hash Join
 
-### 2.1. Broadcast Hash Join
+### 1.3. Shuffle Hash Join
 
-{{< figure caption="[Figure 2] Broadcast Hash Join" src="images/spark-join-broadcast-hash.png" width="1000px" >}}
+### 1.4. Shuffle Sort Merge Join
 
-### 2.2. Shuffle Hash Join
+### 1.5. Broadcast Nested Loop Join
 
-{{< figure caption="[Figure 3] Shuffle Hash Join" src="images/spark-join-shuffle-hash.png" width="1000px" >}}
+### 1.6. Cartesian Product (Cross Join)
 
-### 2.3. Shuffle Sort Merge Join
-
-{{< figure caption="[Figure 4] Shuffle Sort Merge Join" src="images/spark-join-shuffle-sort-merge.png" width="1000px" >}}
-
-### 2.4. Cartesian Product (Cross Join)
-
-{{< figure caption="[Figure 5] Cartesian Product (Cross Join)" src="images/spark-join-cartesian-product.png" width="1000px" >}}
-
-### 2.5. Broadcast Nested Loop Join
-
-{{< figure caption="[Figure 6] Broadcast Nested Loop Join" src="images/spark-join-broadcast-nested-loop.png" width="1000px" >}}
-
-## 3. 참고
+## 2. 참고
 
 * Spark Join : [https://velog.io/@kimhaggie/spark-join%EC%9D%98-%EC%A2%85%EB%A5%98](https://velog.io/@kimhaggie/spark-join%EC%9D%98-%EC%A2%85%EB%A5%98)
 * Spark Join : [https://sunrise-min.tistory.com/entry/Apache-Spark-Join-strategy](https://sunrise-min.tistory.com/entry/Apache-Spark-Join-strategy)
