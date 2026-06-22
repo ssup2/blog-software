@@ -73,7 +73,12 @@ Main/Worker Thread가 동작하는지 검사하는 역할을 수행한다. Guard
 
 #### 1.1.7. Hot Restart
 
+Hot Restart는 Envoy 재시작시 Downtime 없이 새로운 Envoy 프로세스로 교체하는 기능을 의미한다. 일반적으로 Systemd와 같이 프로세스/Daemon을 관리하는 Component가 필요에 따라서 UDS (Unix Domain Socket)을 통해서 Envoy Hot Restart를 요청한다. Hot Restart는 다음과 같은 과정을 통해서 진행된다.
 
+* 새로운 Envoy 프로세스를 생성한다.
+* 기존의 Envoy 프로세스의 Listen Socket을 새로운 Envoy 프로세스에서 UDS (Unix Domain Socket)을 통해서 전달한다.
+* 새로운 Envoy 프로세스는 전달받은 Listen Socket을 통해서 Client의 신규 Connection을 수락한다.
+* 기존의 Envoy 프로세스는 Drain Manager를 통해서 현재 처리중인 Request를 종료하고 종료 완료 후에 Envoy를 종료한다.
 
 #### 1.1.8. Access Logger Notification
 
