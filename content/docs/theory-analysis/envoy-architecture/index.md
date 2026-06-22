@@ -75,28 +75,35 @@ Main/Worker Thread가 동작하는지 검사하는 역할을 수행한다. Guard
 
 Hot Restart는 Envoy 재시작시 Downtime 없이 새로운 Envoy 프로세스로 교체하는 기능을 의미한다. 일반적으로 Systemd와 같이 프로세스/Daemon을 관리하는 Component가 필요에 따라서 UDS (Unix Domain Socket)을 통해서 Envoy Hot Restart를 요청한다. Hot Restart는 다음과 같은 과정을 통해서 진행된다.
 
-* 새로운 Envoy 프로세스를 생성한다.
-* 기존의 Envoy 프로세스의 Listen Socket을 새로운 Envoy 프로세스에서 UDS (Unix Domain Socket)을 통해서 전달한다.
-* 새로운 Envoy 프로세스는 전달받은 Listen Socket을 통해서 Client의 신규 Connection을 수락한다.
-* 기존의 Envoy 프로세스는 Drain Manager를 통해서 현재 처리중인 Request를 종료하고 종료 완료 후에 Envoy를 종료한다.
+1. 새로운 Envoy 프로세스를 생성한다.
+2. 기존의 Envoy 프로세스의 Listen Socket을 새로운 Envoy 프로세스에서 UDS (Unix Domain Socket)을 통해서 전달한다.
+3. 새로운 Envoy 프로세스는 전달받은 Listen Socket을 통해서 Client의 신규 Connection을 수락한다.
+4. 기존의 Envoy 프로세스는 Drain Manager를 통해서 현재 처리중인 Request를 종료하고 종료 완료 후에 Envoy를 종료한다.
 
 #### 1.1.8. Access Logger Notification
 
 ### 1.2. Worker Thread
 
-Worker Thread는 **Downstream** (Client)의 요청을 받아 처리 이후에 **Upstream** (Server)로 요청을 전달하는 Thread이다. Main Thread와 유사하게 Dispatcher를 통해서 Socket, Timer Event를 수신하며, 상태 저장이 필요한 경우에 각 Worker Thread마다 가지고 있는 전용 TLS에 저장한다. Worker Thread에서 동작하는 Module은 다음과 같다.
+Worker Thread는 **Downstream** (Client)의 요청을 받아 처리 이후에 **Upstream** (Server)로 요청을 전달하는 Thread이다. Main Thread와 유사하게 Dispatcher를 통해서 Socket, Timer Event를 수신하며, 상태 저장이 필요한 경우에 각 Worker Thread마다 가지고 있는 전용 TLS에 저장한다. 
 
-* **Listener** : Listener는 TCP/UDP Listening을 수행하여 Downstream의 Connection 수락하고, Connection을 수학하며 생성된 Socket을 Dispatcher에 등록하는 역할을 수행한다. Listener는 각 Worker Thread 마다 별도로 존재하며 `SO_REUSEPORT` Option을 통해서 모든 Listener는 동일한 IP/Port를 Listening 하도록 설정된다. 다수의 Listener가 동시에 Listening 하는 경우에는 Kernel은 임의의 Listener를 선택하여 Connection을 수락하게 된다. 따라서 Client가 어떤 Thread와 Connection을 맺을지는 Envoy가 아니라 Kernel에 의해서 결정된다.
+하나의 Downstream은 하나의 Worker Thread와 Connection을 맺는다. 반면에 모든 Worker Thread는 모든 Upstream과 Connection을 맺는다. 이러한 이유는 Worker Thread 사이에는 상태 정보를 공유하지 않기 때문에, Downstream이 어떤 Worker Thread와 Connection을 맺더라도 Upstream으로 요청을 전달할 수 있어야 하기 때문이다. 이 의미는 Worker Thread의 개수에 비례하여 Upstream과의 Connection 개수도 증가하는걸 의미하며, 따라서 너무 많은 Worker Thread를 생성하면 Upstream과의 Connection 유지를 위한 Memory 낭비가 발생하게 된다.
 
-* **Listener Filter Chain** : Listener Filter Chain은 SNI (Server Name Indication)와 같이 Connection의 Metadata를 추출하여 Connection의 추가 정보를 알아내는 역할을 수행한다. 각 Connection 또는 HTTP/2 Stream마다 별도의 Listener Filter Chain이 존재한다.
+[Figure 1]에서는 Downstream A/B가 각기 다른 Worker Thread와 Connnection을 맺고 있으며, 4개의 Worker Thread가 존재하기 때문에 모든 Worker Thread가 Upstream과의 Connection을 유지하기 위해서 Worker Thread의 개수인 4개의 Connection을 유지하고 있는것을 확인할 수 있다. Worker Thread에서 동작하는 Module은 다음과 같다.
 
-* **TLS Transport Socket** : Listner Filter Chain을 통해서 추출된 Metadata를 이용하여 TLS로 암호화된 Data를 복호화하여 원본 Data로 변환 및 Network Chain Filter로 전달하는 역할을 수행한다. 만약 TLS로 암호화된 Data가 아닌 경우에는 복호화 과정을 거치지 않고 바로 원본 Data를 그대로 Network Chain Filter로 전달한다. 각 Connection 또는 HTTP/2 Stream마다 별도의 TLS Transport Socket이 존재한다.
+#### 1.2.1. Listener
 
-* **Network Filter Chain** : Network Filter Chain은 복호화된 요청/응답을 변조, Rate Limiting 수행, Circuit Breaking 수행 또는 어느 Upstream으로 요청을 전송할지 결정하는 Routing 등의 역할을 수행한다. 마지막 Network Filter Chain에는 HCM (HTTP Connection Manager)이 존재한다. HCM은 HTTP 관련 Filter Chain을 소유하고 있으며, HTTP/2 Codec을 통해서 HTTP/2 요청/응답을 Encoding/Decoding하는 역할도 수행한다.
+Listener는 TCP/UDP Listening을 수행하여 Downstream의 Connection 수락하고, Connection을 수학하며 생성된 Socket을 Dispatcher에 등록하는 역할을 수행한다. Listener는 각 Worker Thread 마다 별도로 존재하며 `SO_REUSEPORT` Option을 통해서 모든 Listener는 동일한 IP/Port를 Listening 하도록 설정된다. 다수의 Listener가 동시에 Listening 하는 경우에는 Kernel은 임의의 Listener를 선택하여 Connection을 수락하게 된다. 따라서 Client가 어떤 Thread와 Connection을 맺을지는 Envoy가 아니라 Kernel에 의해서 결정된다.
 
-하나의 Downstream은 하나의 Worker Thread와 Connection을 맺는다. 반면에 모든 Worker Thread는 모든 Upstream과 Connection을 맺는다. 이러한 이유는 Worker Thread 사이에는 상태 정보를 공유하지 않기 때문에, Downstream이 어떤 Worker Thread와 Connection을 맺더라도 Upstream으로 요청을 전달할 수 있어야 하기 때문이다. 이 의미는 Worker Thread의 개수에 비례하여 Upstream과의 Connection 개수도 증가하는걸 의미하며, 따라서 너무 많은 Worker Thread를 생성하면 Upstream과의 Connection 유지를 위한 Memory 낭비가 발생하게 된다. 
+#### 1.2.2. Listener Filter Chain
+Listener Filter Chain은 SNI (Server Name Indication)와 같이 Connection의 Metadata를 추출하여 Connection의 추가 정보를 알아내는 역할을 수행한다. 각 Connection 또는 HTTP/2 Stream마다 별도의 Listener Filter Chain이 존재한다.
 
-[Figure 1]에서는 Downstream A/B가 각기 다른 Worker Thread와 Connnection을 맺고 있으며, 4개의 Worker Thread가 존재하기 때문에 모든 Worker Thread가 Upstream과의 Connection을 유지하기 위해서 Worker Thread의 개수인 4개의 Connection을 유지하고 있는것을 확인할 수 있다.
+#### 1.2.3. TLS Transport Socket
+
+Listner Filter Chain을 통해서 추출된 Metadata를 이용하여 TLS로 암호화된 Data를 복호화하여 원본 Data로 변환 및 Network Chain Filter로 전달하는 역할을 수행한다. 만약 TLS로 암호화된 Data가 아닌 경우에는 복호화 과정을 거치지 않고 바로 원본 Data를 그대로 Network Chain Filter로 전달한다. 각 Connection 또는 HTTP/2 Stream마다 별도의 TLS Transport Socket이 존재한다.
+
+#### 1.2.4. Network Filter Chain
+
+Network Filter Chain은 복호화된 요청/응답을 변조, Rate Limiting 수행, Circuit Breaking 수행 또는 어느 Upstream으로 요청을 전송할지 결정하는 Routing 등의 역할을 수행한다. 마지막 Network Filter Chain에는 HCM (HTTP Connection Manager)이 존재한다. HCM은 HTTP 관련 Filter Chain을 소유하고 있으며, HTTP/2 Codec을 통해서 HTTP/2 요청/응답을 Encoding/Decoding하는 역할도 수행한다.
 
 ### 1.3. TLS (Thread Local Storage)
 
