@@ -153,6 +153,8 @@ Write 함수는 Access Log를 실제 파일에 기록하지 않고 **Flush Buffe
 
 Flush Thread는 Main/Worker Thread와 다르게 Dispatcher를 이용하지 않고, Condition Variable을 통해서 깨어나는 방식으로 동작한다. Main Thread에서 Dispatcher와 Timer에 의해서 주기적으로 Flush Thread를 깨우거나, Worker Thread에서 Write 함수를 통해서 Flush Buffer에 Access Log를 기록하다가 Flush Buffer가 가득찬 경우 Flush Thread를 깨운다.
 
+깨어난 Flush Thread는 Flush Buffer에 저장된 Access Log를 바로 기록하지 않고 **About to write Buffer**에 한번더 임시 저장한다. 이러한 이유는 Access Logger에서 바로 Access Log를 기록하면 Disk I/O에 의해서 Flush Buffer의 Write Lock을 오랜 시간동안 점유하게 되어, Worker Thread가 Flush Buffer 접근에 오랜 시간동안 대기하는걸 방지하기 위해서이다. About to write Buffer에 접근하기 위해서는 Flush Lock을 획득해야 한다.
+
 ## 2. 참조
 
 * Life of a Request : [https://www.envoyproxy.io/docs/envoy/latest/intro/life_of_a_request](https://www.envoyproxy.io/docs/envoy/latest/intro/life_of_a_request)
