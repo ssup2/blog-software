@@ -147,13 +147,19 @@ void InstanceImpl::runOnAllThreads(std::function<void()> cb,
 
 ### 1.4. Flush Thread
 
+Envoy에서는 처리한 요청을 기록하는 **Access Log** 기능을 제공하며, stdout/stderr를 포함하여 다수의 출력 경로(파일)를 설정할 수 있다. Envoy에서는 Access Log의 기록 요청은 Traffic을 실제로 처리하는 Worker Thread에서 발생한다. 하지만 Work Thread에 직접 Access Log를 기록하면 Lock, I/O Blocking이 발생하여 Traffic 처리를 방해하게 된다. Envoy에서는 이러한 이슈를 회피하기 위해서 Flush Thread를 도입하여 이용하고 있다.
+
 Flush Thread는 Access Log를 기록하기 위한 전용 Thread이며, Envoy는 Access Log 기록 과정중에 Lock 구간을 최소화 하기 위해서 다양한 Buffer와 Lock을 활용하며 동작한다. Network Filter Chain에 설정에 의해서 Worker Thread가 Access Log를 기록하기 위해서는 모든 Worker Thread 사이에서 공유되는 **Access Logger**의 Write 함수를 호출한다.
 
 Write 함수는 Access Log를 실제 파일에 기록하지 않고 **Flush Buffer**에 저장만 하고 종료하며, Flush Buffer는 Worker Thread 사이에 공유되는 Buffer이기 때문에 **Write Lock**에 의해서 보호된다. Flush Buffer를 이용하는 이유는 Write 함수에서 직접 Access Log를 남기면 느린 Disk I/O에 의해서 Worker Thread가 Traffic을 처리하는데 지연이 발생하는걸 막기 위해서이다.
 
 Flush Thread는 Main/Worker Thread와 다르게 Dispatcher를 이용하지 않고, Condition Variable을 통해서 깨어나는 방식으로 동작한다. Main Thread에서 Dispatcher와 Timer에 의해서 주기적으로 Flush Thread를 깨우거나, Worker Thread에서 Write 함수를 통해서 Flush Buffer에 Access Log를 기록하다가 Flush Buffer가 가득찬 경우 Flush Thread를 깨운다.
 
-깨어난 Flush Thread는 Flush Buffer에 저장된 Access Log를 바로 기록하지 않고 **About to write Buffer**에 한번더 임시 저장한다. 이러한 이유는 Access Logger에서 바로 Access Log를 기록하면 Disk I/O에 의해서 Flush Buffer의 Write Lock을 오랜 시간동안 점유하게 되어, Worker Thread가 Flush Buffer 접근에 오랜 시간동안 대기하는걸 방지하기 위해서이다. About to write Buffer에 접근하기 위해서는 Flush Lock을 획득해야 한다.
+깨어난 Flush Thread는 Access Logger를 통해서 Flush Buffer에 저장된 Access Log를 바로 기록하지 않고 **About to write Buffer**에 한번더 임시 저장한다. 이러한 이유는 Access Logger에서 바로 Access Log를 기록하면 Disk I/O에 의해서 Flush Buffer의 Write Lock을 오랜 시간동안 점유하게 되어, Worker Thread가 Flush Buffer 접근에 오랜 시간동안 대기하는걸 방지하기 위해서이다. About to write Buffer는 Flush Thread만 단독으로 접근하기 때문에 별도의 Lock이 존재하지 않는다.
+
+이후에 Flush Thread의 Access Logger는 About to write Buffer에 저장된 Access Log를 stdout/stderr 또는 실제 파일에 기록한다. stdout/stderr 또는 파일에는 File Lock을 통해서 보호되며, File Lock이 존재하는 이유는 Hot Restart 과정에서 일시적으로 동시에 다수의 Envoy 프로세스가 동일한 파일에 접근하는 경우 발생할 수 있는 Race Condition을 방지하기 위해서이다.
+
+Flush Thread/Buffer/Lock 세트는 Access Log의 출력 경로(파일)마다 독립적으로 존재한다. [Figure 1]에서는 stdout, File 2가지 출력 경로가 존재하기 때문에 2개의 Flush Thread/Buffer/Lock 세트가 존재하는 것을 확인할 수 있다. 이 의미 Worker Thread에서도 Access Log의 출력 경로만큼 여러번 Write 함수를 호출하는 것을 의미하며, 따라서 너무 많은 Access Log의 출력 경로가 설정되어 있을 경우 성능 저하가 발생할 수 있다.
 
 ## 2. 참조
 
