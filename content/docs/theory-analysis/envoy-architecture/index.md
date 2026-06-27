@@ -141,7 +141,7 @@ void InstanceImpl::runOnAllThreads(std::function<void()> cb,
 }
 ```
 
-TLS 변경 과정은 일반적으로 `runOnAllThreads()` 함수를 이용한다. [Figure 3]에서는 `runOnAllThreads()` 함수의 동작 과정을 나타내고 있으며, [Code 1]은 실제 `runOnAllThreads()` 함수의 코드를 나타내고 있다. `runOnAllThreads()` 함수는 이름에서 유추할 수 있듯이 모든 Main/Thread에서 동일한 로직을 수행하도록 도와주는 함수이다. `runOnAllThreads()` 함수를 통해서 모든 Main/Thread는 TLS를 변경하는 작업을 수행한다. `runOnAllThreads()` 함수는 일반적으로 Main Thread에서 호출되기 때문에, TLS 변경 작업은 Main Thread에서 각 Worker Thread로 전파되는 형태로 동작한다.
+TLS 변경 과정은 일반적으로 `runOnAllThreads()` 함수를 이용한다. [Figure 3]에서는 `runOnAllThreads()` 함수의 동작 과정을 나타내고 있으며, [Code 1]은 실제 `runOnAllThreads()` 함수의 코드를 나타내고 있다. `runOnAllThreads()` 함수는 이름에서 유추할 수 있듯이 모든 Main/Thread에서 동일한 로직을 수행하도록 도와주는 함수이다. `runOnAllThreads()` 함수를 통해서 모든 Main/Thread는 TLS를 변경하는 작업을 수행한다. `runOnAllThreads()` 함수는 일반적으로 Main Thread에서 호출되기 때문에, TLS 변경 작업은 Main Thread에서 각 Worker Thread로 전파되는 형태로 동작한다. 따라서 만약에 Worker Thread에서 TLS를 변경하고 싶다면, Main Thread를 깨워서 Main Thread에서 `runOnAllThreads()` 함수를 호출을 통해서 TLS 변경 작업을 수행하도록 만든다.
 
 `runOnAllThreads()` 함수는 첫번째 Parameter추 Main/Worker Thread에서 실행되는 `cb` Callback 함수를 받으며, 두번째 Parameter로 모든 Thread에서 `cb` Callback 함수가 수행된 다음에 Main Thread에서 마지막으로 한번만 수행되는 `all_threads_complete_cb` Callback 함수를 받는다. 다음과 같은 순서대로 동작한다. `cb` Callback 함수에 TLS 변경 로직이 포함되며, `all_threads_complete_cb` Callback 함수에는 모든 Worker Thread의 TLS 변경 작업이 완료된 후에 수행되어야 하는 로직이 포함되어 있다.
 

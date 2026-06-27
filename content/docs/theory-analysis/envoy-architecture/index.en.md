@@ -141,7 +141,7 @@ void InstanceImpl::runOnAllThreads(std::function<void()> cb,
 }
 ```
 
-TLS updates generally use the `runOnAllThreads()` function. [Figure 3] shows how the `runOnAllThreads()` function works, and [Code 1] shows the actual `runOnAllThreads()` function code. As the name suggests, `runOnAllThreads()` helps run the same logic on all Main/Worker Threads. Through `runOnAllThreads()`, all Main/Worker Threads perform TLS update work. Because `runOnAllThreads()` is generally called from the Main Thread, TLS updates propagate from the Main Thread to each Worker Thread.
+TLS updates generally use the `runOnAllThreads()` function. [Figure 3] shows how the `runOnAllThreads()` function works, and [Code 1] shows the actual `runOnAllThreads()` function code. As the name suggests, `runOnAllThreads()` helps run the same logic on all Main/Worker Threads. Through `runOnAllThreads()`, all Main/Worker Threads perform TLS update work. Because `runOnAllThreads()` is generally called from the Main Thread, TLS updates propagate from the Main Thread to each Worker Thread. Therefore, if a Worker Thread needs to update TLS, it wakes the Main Thread so that the Main Thread performs the TLS update by calling `runOnAllThreads()`.
 
 The `runOnAllThreads()` function receives a `cb` Callback function executed on Main/Worker Threads as its first parameter, and an `all_threads_complete_cb` Callback function executed once on the Main Thread after `cb` has run on all Threads as its second parameter. It operates in the following order. The `cb` Callback function contains TLS update logic, and the `all_threads_complete_cb` Callback function contains logic that must run after TLS updates on all Worker Threads are complete.
 
