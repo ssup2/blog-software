@@ -4,6 +4,8 @@ title: "Envoy Traffic Processing"
 
 ## 1. Envoy HTTP Traffic Processing
 
+{{< figure caption="[Figure 1] Envoy HTTP Traffic Processing" src="images/envoy-traffic-processing.png" width="1100px" >}}
+
 ### 1.1. Listener
 
 ### 1.2. Listener Filter Chain
