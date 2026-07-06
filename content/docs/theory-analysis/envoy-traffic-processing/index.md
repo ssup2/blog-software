@@ -14,11 +14,11 @@ title: "Envoy Traffic Processing"
 
 **Listener Filter Chain**은 Downstream과 TCP 연결이 맺어진 뒤, 들어온 트래픽의 앞부분을 소비하지 않고 `recv(..., MSG_PEEK)`로 엿보아 필요한 연결 정보를 얻는 데 사용된다. 일부  Filter(`proxy_protocol`)는 앞쪽의 PROXY Protocol Header를 실제로 읽어 원래 클라이언트 주소를 복원하고 그 헤더를 소비(제거)하기도 한다. Listener는 새로운 연결마다 Listener Filter 인스턴스를 생성하므로, 각 TCP 연결별로 별도의 Listener Filter Chain이 존재한다. Envoy가 제공하는 대표적인 Listener Filter는 다음과 같다.
 
-* `original_dst` : iptables `REDIRECT` 등으로 가려진 원래 목적지 IP, Port를 `getsockopt(SO_ORIGINAL_DST)` System Call로 복원한다. Istio 같은 Mesh Network 환경에서 Envoy가 실제 목적지 정보를 얻기 위해 사용된다.
-* `original_src` : 원래 Downstream의 출발지 IP, Port를 `setsockopt(IP_TRANSPARENT)` System Call로 보존하여 Upstream으로 전송한다.
-* `proxy_protocol` : PROXY Protocol을 사용하는 경우, 맨 앞 PROXY Header를 읽어 원래 Client IP, Port를 Envoy에서 Downstream IP, Port로 설정하고 그 Header를 제거한다.
-* `tls_inspector` : TLS를 사용하는 경우, ClientHello를 엿보아 SNI(Server Name Indication), ALPN(Application Layer Protocol Negotiation) 등 정보를 추출한다.
-* `http_inspector` : TLS를 사용하지 않아 APLN 이용이 불가능한 경우, 앞쪽 Byte를 엿보아 HTTP 프로토콜 버전(HTTP/1.x인지 HTTP/2인지)을 감지한다.
+* `envoy.filters.listener.original_dst` : iptables `REDIRECT` 등으로 가려진 원래 목적지 IP, Port를 `getsockopt(SO_ORIGINAL_DST)` System Call로 복원한다. Istio 같은 Mesh Network 환경에서 Envoy가 실제 목적지 정보를 얻기 위해 사용된다.
+* `envoy.filters.listener.original_src` : 원래 Downstream의 출발지 IP, Port를 `setsockopt(IP_TRANSPARENT)` System Call로 보존하여 Upstream으로 전송한다.
+* `envoy.filters.listener.proxy_protocol` : PROXY Protocol을 사용하는 경우, 맨 앞 PROXY Header를 읽어 원래 Client IP, Port를 Envoy에서 Downstream IP, Port로 설정하고 그 Header를 제거한다.
+* `envoy.filters.listener.tls_inspector` : TLS를 사용하는 경우, ClientHello를 엿보아 SNI(Server Name Indication), ALPN(Application Layer Protocol Negotiation) 등 정보를 추출한다.
+* `envoy.filters.listener.http_inspector` : TLS를 사용하지 않아 ALPN 이용이 불가능한 경우, 앞쪽 Byte를 엿보아 HTTP 프로토콜 버전(HTTP/1.x인지 HTTP/2인지)을 감지한다.
 
 Listener Filter Chain은 Envoy Config에 따라서 자유롭게 구성할 수 있지만, 일반적으로 목적지 IP, Port를 복원하기 위한 `original_dst` Filter를 첫 번째로 사용하며, Proxy Protocol을 사용하는 경우, Proxy Header를 제거하기 위한 `proxy_protocol` Filter를 두 번째로 구성한다. 단순히 TCP Connection의 Meta 정보를 얻기 위한 `tls_inspector`, `http_inspector` Filter는 뒤에 구성하며, 일반적으로 `tls_inspector`, `http_inspector` 순서대로 구성하여 TLS가 아닌 경우, `http_inspector` Filter가 HTTP 버전을 판별하도록 한다.
 
@@ -133,6 +133,16 @@ Envoy에서 제공하는 커스텀 로직 Filter는 다음과 같다.
 
 **Router Filter**는 Downstream HTTP Filter 의 마지막에 위치하는 Terminal Filter로, 요청을 실제 Upstream으로 보내는 역할을 담당한다. 앞의 모든 Filter를 통과한 요청에 대해, Route Config의 규칙에 따라 **Target Cluster**를 결정한다. 이후 **Outlier Detection** 정책을 통해서 Cluster에 소속되어 있는 Host 중에서 비정상 Host를 제외한다. 이후에는 남은 정상 Host 중에서 **Load Balancing** 정책에 따라 실제 Host를 선택하고, 해당 Host로의 연결을 통해 요청을 전달한다.
 
+Router Filter는 다음과 같은 Load Balancing 정책을 제공한다.
+
+* `envoy.load_balancing_policies.round_robin` : Host를 순서대로 하나씩 선택이며, 가장 기본적인 정책.
+* `envoy.load_balancing_policies.least_request` : 활성 요청이 적은 Host 우선. 무작위 2개를 뽑아 비교하는 P2C 방식.
+* `envoy.load_balancing_policies.random` : 정상 Host 중 무작위 선택. 단순하고 가벼운 방식.
+* `envoy.load_balancing_policies.ring_hash` : 일관 해싱. 같은 키(Header/Cookie/IP 등)는 같은 Host로. 세션 어피니티용.
+* `envoy.load_balancing_policies.maglev` : Lookup Table 기반 일관 해싱. `ring_hash`보다 빠르고 균등하나 Host 변동 시 재배치가 다소 큼.
+* `envoy.load_balancing_policies.client_side_weighted_round_robin` : Host가 리포트한 부하 지표로 Weight를 동적 계산해 반영하는 Round Robin.
+* `envoy.load_balancing_policies.wrr_locality` : Locality(Zone) 간 분배를 Weight로 제어하고, Zone 내부 선택은 하위 정책에 위임하는 계층형 정책.
+
 ### 1.6. Upstream HTTP Filter
 
 Upstream HTTP Filter는 Router Filter에 의해서 어느 Host로 Traffic을 전달할지 결정도니 이후에 실행되는 Filter이다. Upstresm Filter Instance는 매 재시도마다 Router Filter에 의해서 새로운 Instance가 생성되는 특징을 갖는다. Envoy에서 제공하는 Upstream HTTP Filter는 다음과 같다.
@@ -147,6 +157,111 @@ Upstream HTTP Filter는 Router Filter에 의해서 어느 Host로 Traffic을 전
 **Upstream Transport Socket**은 Downstream Transport Socket과 대칭적으로 Upstream 방향의 Transport Socket을 제공한다. TLS가 적용된 경우, Upstream Codec Filter로부터 전달받은 요청 트래픽을 암호화하여 Upstream으로 전송하고, 반대로 Upstream으로부터 받은 응답 트래픽을 복호화하여 Upstream Codec Filter로 올린다. TLS가 적용되지 않은 경우에는 Downstream과 동일하게 Raw Buffer Transport Socket이 트래픽을 변형 없이 그대로 전달한다.
 
 ## 2. Envoy Configuration
+
+```yaml linenos {caption="[Text 1] Envoy Configuration", linenos=table}
+static_resources:
+
+  listeners:
+  # ── 1. Listener ──────────────────────────────────────────────
+  - name: main_listener
+    address:
+      socket_address: { address: 0.0.0.0, port_value: 10000 }
+
+    # ── 2. Listener Filter Chain (names only) ───────────────────
+    listener_filters:
+    - name: envoy.filters.listener.tls_inspector       # Peeks at ClientHello to extract SNI/ALPN
+    - name: envoy.filters.listener.http_inspector       # Detects HTTP version (h1/h2)
+    - name: envoy.filters.listener.proxy_protocol       # Parses the leading PROXY header
+    - name: envoy.filters.listener.original_dst         # Restores original destination (iptables REDIRECT)
+
+    # ── 3. Filter Chain Manager ──────────────────────────────────
+    # Selects one of the filter_chains below based on info extracted
+    # by listener_filters (SNI, ALPN, etc.)
+    filter_chains:
+
+    # (a) Match by SNI (server_names) — most common case
+    - filter_chain_match:
+        server_names: ["example.com", "*.example.com"]
+
+      # ── 4. Downstream Transport Socket (TLS termination) ──────
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        common_tls_context:
+          tls_certificates:
+          - certificate_chain: { filename: "/etc/envoy/cert.pem" }
+            private_key:       { filename: "/etc/envoy/key.pem" }
+
+      # ── 5. Network Filter Chain ──────────────────────────────
+      filters:
+      - name: envoy.filters.network.connection_limit
+      - name: envoy.filters.network.rbac
+      - name: envoy.filters.network.local_ratelimit
+
+      # ── 6. HTTP Connection Manager (terminal filter of the network chain) ──
+      - name: envoy.filters.network.http_connection_manager
+        stat_prefix: ingress_http
+        codec_type: AUTO                              # ── 7. HTTP Codec ──
+
+        route_config:
+          name: local_route
+          virtual_hosts:
+          - name: backend_vh
+            domains: ["*"]
+            routes:
+            - match: { prefix: "/" }
+              route: { cluster: backend }
+
+        # ── 8. Downstream HTTP Filter ──────────────────────────
+        http_filters:
+        - name: envoy.filters.http.cors
+        - name: envoy.filters.http.jwt_authn
+        - name: envoy.filters.http.local_ratelimit
+        - name: envoy.filters.http.fault
+        - name: envoy.filters.http.compressor
+        - name: envoy.filters.http.lua
+
+        # ── 9. Router Filter (terminal filter of the downstream chain) ──
+        - name: envoy.filters.http.router
+
+    # (b) Match by ALPN — route h2 traffic to this chain
+    - filter_chain_match:
+        application_protocols: ["h2"]
+      # (filters omitted — in practice, build a full network/http filter chain like (a))
+
+  # ── 1b. Listener (second listener — plain HTTP, e.g. internal/health traffic) ──
+  - name: internal_listener
+    address:
+      socket_address: { address: 0.0.0.0, port_value: 8080 }
+    # (filter_chains omitted — in practice, build a full network/http filter chain like (a))
+
+  clusters:
+  - name: backend
+    type: STRICT_DNS
+    lb_policy: ROUND_ROBIN
+    load_assignment:
+      cluster_name: backend
+      endpoints:
+      - lb_endpoints:
+        - endpoint:
+            address:
+              socket_address: { address: httpbin.org, port_value: 443 }
+
+    typed_extension_protocol_options:
+      envoy.extensions.upstreams.http.v3.HttpProtocolOptions:
+        explicit_http_config:
+          http_protocol_options: {}
+
+        # ── 10. Upstream HTTP Filter ──────────────────────────
+        http_filters:
+        - name: envoy.filters.http.header_mutation
+        - name: envoy.filters.http.lua
+        - name: envoy.filters.http.upstream_codec        # terminal
+
+    # ── 11. Upstream Transport Socket (TLS origination) ────────
+    transport_socket:
+      name: envoy.transport_sockets.tls
+      sni: httpbin.org
+```
 
 ## 3. 참조
 
