@@ -8,7 +8,7 @@ title: "Envoy Traffic Processing"
 
 ### 1.1. Listener
 
-**Listener**는 커널이 TCP 3-way Handshake를 완료해 Accept Queue에 올려둔 Downstream 연결을 `accept()` 함수로 수락하여 새로운 Socket을 얻는다. 이후에 얻은 Socket을 Dispatcher에 등록하고, TCP Connection 관련 정보를 얻기위한 **Listener Filter Chain**을 Instance를 생성한다.
+**Listener**는 커널이 TCP 3-way Handshake를 완료해 Accept Queue에 올려둔 Downstream 연결을 `accept()` 함수로 수락하여 새로운 Socket을 얻는다. 이후에 얻은 Socket을 Dispatcher에 등록하고, TCP Connection 관련 정보를 얻기위한 **Listener Filter Chain**을 Instance를 생성한다. 다수의 Listner가 등록되어 있는 경우에는 일반적으로 IP, Port를 통해서 어떤 Listener가 해당 Connection을 처리할지 결정하게 된다.
 
 ### 1.2. Listener Filter Chain
 
@@ -131,11 +131,11 @@ Envoy에서 제공하는 커스텀 로직 Filter는 다음과 같다.
 
 ##### 1.5.1.3. Router Filter
 
-**Router Filter**는 Downstream HTTP Filter 의 마지막에 위치하는 Terminal Filter로, 요청을 실제 Upstream으로 보내는 역할을 담당한다. 앞의 모든 Filter를 통과한 요청에 대해, Route Config의 규칙에 따라 **목적지 Cluster**를 결정한다. 이후 Outlier Detection 정책을 통해서 Cluster에 소속되어 있는 Host 중에서 비정상 Host를 제외한다. 이후에는 남은 정상 Host 중에서 Load Balancing 정책에 따라 실제 Host를 선택하고, 해당 Host로의 연결을 통해 요청을 전달한다.
+**Router Filter**는 Downstream HTTP Filter 의 마지막에 위치하는 Terminal Filter로, 요청을 실제 Upstream으로 보내는 역할을 담당한다. 앞의 모든 Filter를 통과한 요청에 대해, Route Config의 규칙에 따라 **Target Cluster**를 결정한다. 이후 **Outlier Detection** 정책을 통해서 Cluster에 소속되어 있는 Host 중에서 비정상 Host를 제외한다. 이후에는 남은 정상 Host 중에서 **Load Balancing** 정책에 따라 실제 Host를 선택하고, 해당 Host로의 연결을 통해 요청을 전달한다.
 
 ### 1.6. Upstream HTTP Filter
 
-Upstream HTTP Filter는 Router Filter에 의해서 어느 Host로 Traffic을 전달할지 결정도니 이후에 실행되는 Filter이다. Upstresm Filter Instance는 매 재시도마다 새로운 Instance가 생성되는 특징을 갖는다. Envoy에서 제공하는 Upstream HTTP Filter는 다음과 같다.
+Upstream HTTP Filter는 Router Filter에 의해서 어느 Host로 Traffic을 전달할지 결정도니 이후에 실행되는 Filter이다. Upstresm Filter Instance는 매 재시도마다 Router Filter에 의해서 새로운 Instance가 생성되는 특징을 갖는다. Envoy에서 제공하는 Upstream HTTP Filter는 다음과 같다.
 
 * `envoy.filters.http.header_mutation` : 선택된 Upstream Host를 기준으로 Header를 추가/삭제/수정. 어느 Host로 Traffic이 전달되는지 정해진 뒤에 헤더를 조작해야 할 때 이용.
 * `envoy.filters.http.lua` : Upstream Context에서 Lua Script로 Custom Logic 수행.
