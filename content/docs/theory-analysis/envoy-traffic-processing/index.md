@@ -12,7 +12,7 @@ title: "Envoy Traffic Processing"
 
 ### 1.2. Listener Filter Chain
 
-Listener Filter는 downstream과 TCP 연결이 맺어진 뒤, 들어온 트래픽의 앞부분을 소비하지 않고 `recv(..., MSG_PEEK)`로 엿보아 필요한 연결 정보를 얻는 데 사용된다. 일부 필터(`proxy_protocol`)는 앞쪽의 PROXY Protocol 헤더를 실제로 읽어 원래 클라이언트 주소를 복원하고 그 헤더를 소비(제거)하기도 한다. Listener는 새로운 연결마다 Listener Filter 인스턴스를 생성하므로, 각 TCP 연결별로 별도의 Listener Filter Chain이 존재한다. Envoy가 제공하는 대표적인 Listener Filter는 다음과 같다. 
+**Listener Filter Chain**은 Downstream과 TCP 연결이 맺어진 뒤, 들어온 트래픽의 앞부분을 소비하지 않고 `recv(..., MSG_PEEK)`로 엿보아 필요한 연결 정보를 얻는 데 사용된다. 일부 필터(`proxy_protocol`)는 앞쪽의 PROXY Protocol 헤더를 실제로 읽어 원래 클라이언트 주소를 복원하고 그 헤더를 소비(제거)하기도 한다. Listener는 새로운 연결마다 Listener Filter 인스턴스를 생성하므로, 각 TCP 연결별로 별도의 Listener Filter Chain이 존재한다. Envoy가 제공하는 대표적인 Listener Filter는 다음과 같다.
 
 * `original_dst` : iptables `REDIRECT` 등으로 가려진 원래 목적지 IP, Port를 `getsockopt(SO_ORIGINAL_DST)` System Call로 복원한다. Istio 같은 Mesh Network 환경에서 Envoy가 실제 목적지 정보를 얻기 위해 사용된다.
 * `original_src` : 원래 Downstream의 출발지 IP, Port를 `setsockopt(IP_TRANSPARENT)` System Call로 보존하여 Upstream으로 전송한다.
@@ -28,9 +28,13 @@ virtual FilterStatus onAccept(ListenerFilterCallbacks& cb) PURE;
 
 [Code 1]은 Listener Filter Chain이 구현해야하는 `onAccept()` Interface를 나타내고 있다. Parameter로 `onAccept()` 함수 내부에서 현재 TCP Connection을 제어할 수 있는 `ListenerFilterCallbacks` Callback 함수를 전달하며, 결과로 Listener Filter Chain을 계속 진행할지 또는 잠깐 중단할지를 결정하는 `FilterStatus`를 반환한다.
 
-### 1.3. Selecting a Filter Chain
+### 1.3. Filter Chain Manager
+
+Listener Filter Chain의 `tls_inspector` Filter 또는 `http_inspector` Filter를 통해서 Server Name과 Application Protocol을 파악한 이후에, **Filter Chain Manager**는 해당 TCP Connection으로 전송되는 요청을 처리하기 위한 Downstream Transport Socket Instance와 Network Filter Chain Instance를 생성한다. 즉 각 TCP Connection별로 별도의 Downstream Transport Socket Instance와 Network Filter Chain Instance가 존재하게 된다.
 
 ### 1.4. Downstream Transport Socket
+
+**Downstream Transport Socket**은 TLS가 적용된 경우, Downstream에서 들어온 트래픽을 복호화하여 Network Filter Chain으로 전달하고, 반대로 Downstream으로 전송하는 응답은 암호화해 내보낸다. TLS가 적용되지 않은 경우에는 Traffic을 변형 없이 그대로 전달하는 역할을 수행한다.
 
 ### 1.5. Network Filter Chain
 
