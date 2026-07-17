@@ -1,10 +1,10 @@
 ---
-title: Server Load Balancing (SLB)
+title: SLB
 ---
 
-This document analyzes Server Load Balancing (SLB) techniques.
+This document analyzes SLB (Server Load Balancing) techniques.
 
-## 1. Server Load Balancing (SLB)
+## 1. SLB (Server Load Balancing)
 
 {{< figure caption="[Figure 1] SLB" src="images/slb.png" width="450px" >}}
 

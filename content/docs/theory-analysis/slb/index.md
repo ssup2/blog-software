@@ -1,10 +1,10 @@
 ---
-title: Server Load Balancing (SLB)
+title: SLB
 ---
 
-Server Load Balancing (SLB) 기법을 분석한다.
+SLB (Server Load Balancing) 기법을 분석한다.
 
-## 1. Server Load Balancing (SLB)
+## 1. SLB (Server Load Balancing)
 
 {{< figure caption="[Figure 1] SLB" src="images/slb.png" width="450px" >}}
 

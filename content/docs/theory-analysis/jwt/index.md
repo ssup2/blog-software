@@ -1,5 +1,5 @@
 ---
-title: JWT (JSON Web Token)
+title: JWT
 ---
 
 JWT (JSON Web Token)을 분석한다.

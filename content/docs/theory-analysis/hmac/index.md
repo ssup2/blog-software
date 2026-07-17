@@ -1,8 +1,8 @@
 ---
-title: HMAC (Hash based Message Authentication Code)
+title: HMAC
 ---
 
-## 1. HMAC
+## 1. HMAC (Hash based Message Authentication Code)
 
 {{< figure caption="[Figure 1] HMAC" src="images/hmac.png" width="700px" >}}
 
