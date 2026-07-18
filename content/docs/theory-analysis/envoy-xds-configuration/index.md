@@ -5,7 +5,18 @@ draft: true
 
 ## 1. Envoy Configuration
 
+Envoy Configuration은 Root Configration 역할을 수행하는 **Bootstrap Configuration 파일**과, 외부에서 동적으로 설정을 가져오는데 사용되는 xDS (eXtensible Discovery Services) Protocol이 함께 사용되어 이루어진다.
+
 ### 1.1. xDS (eXtensible Discovery Services)
+
+**xDS** **(eXtensible Discovery Services)**는 Envoy의 동작에 필요한 설정을 외부에서 동적으로 가져오는데 사용되는 Protocol을 의미한다. xDS은 다음과 같은 종류가 존재한다.
+
+* LDS (Listener Discovery Service) : Listener 설정(어느 포트로 트래픽을 받을지)을 동적으로 가져온다.
+* RDS (Route Discovery Service) : Route 설정(요청을 어느 Cluster로 보낼지 정하는 라우팅 테이블)을 동적으로 가져온다.
+* CDS (Cluster Discovery Service) : Cluster 설정(Upstream 서비스 그룹의 정의와 LB 정책)을 동적으로 가져온다.
+* EDS (Endpoint Discovery Service) : Endpoint 설정(Cluster에 속한 실제 인스턴스 IP:Port 목록)을 동적으로 가져온다.
+* SDS (Secret Discovery Service) : Secret 설정(TLS 인증서와 키)을 동적으로 가져온다.
+* ADS (Aggregated Discovery Service) : 위의 xDS들(LDS/RDS/CDS/EDS/SDS)을 별도의 연결이 아닌 하나의 gRPC 스트림으로 묶어서 전달하는 방식이다. 새로운 설정 종류를 가져오는 것이 아니라, 여러 xDS 간의 적용 순서를 보장하기 위한 전송 메커니즘이며, Istio는 기본적으로 ADS만 사용한다.
 
 #### 1.1.1. LDS (Listener Discovery Service)
 
