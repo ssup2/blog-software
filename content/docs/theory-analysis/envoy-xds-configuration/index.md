@@ -1,22 +1,116 @@
 ---
-title: "Envoy Configuration, xDS"
+title: "Envoy xDS, Configuration"
 draft: true
 ---
 
 ## 1. Envoy Configuration
 
+### 1.1. xDS (eXtensible Discovery Services)
+
+#### 1.1.1. LDS (Listener Discovery Service)
+
+```yaml {caption="[Config 1] LDS Configuration", linenos=table}
+resources:
+- "@type": type.googleapis.com/envoy.config.listener.v3.Listener
+  name: "0.0.0.0_8080"
+  address:
+    socket_address: { address: 0.0.0.0, port_value: 8080 }
+  filter_chains:
+  - filters:
+    - name: envoy.filters.network.http_connection_manager
+      typed_config:
+        "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+        stat_prefix: ingress_http
+        rds:
+          route_config_name: "8080"
+          config_source: { ads: {} }
+```
+
+#### 1.1.2. RDS (Route Discovery Service)
+
+```yaml {caption="[Config 2] RDS Configuration", linenos=table}
+resources:
+- "@type": type.googleapis.com/envoy.config.route.v3.RouteConfiguration
+  name: "8080"
+  virtual_hosts:
+  - name: "reviews.default.svc.cluster.local:8080"
+    domains: ["reviews.default.svc.cluster.local"]
+    routes:
+    - match: { prefix: "/" }
+      route:
+        cluster: "outbound|8080||reviews.default.svc.cluster.local"
+        timeout: 15s
+```
+
+#### 1.1.3. CDS (Cluster Discovery Service)
+
+```yaml {caption="[Config 3] CDS Configuration", linenos=table}
+resources:
+- "@type": type.googleapis.com/envoy.config.cluster.v3.Cluster
+  name: "outbound|8080||reviews.default.svc.cluster.local"
+  type: EDS
+  eds_cluster_config:
+    eds_config: { ads: {} }
+  lb_policy: ROUND_ROBIN
+  connect_timeout: 10s
+```
+
+#### 1.1.4. EDS (Endpoint Discovery Service)
+
+```yaml {caption="[Config 4] EDS Configuration", linenos=table}
+resources:
+- "@type": type.googleapis.com/envoy.config.endpoint.v3.ClusterLoadAssignment
+  cluster_name: "outbound|8080||reviews.default.svc.cluster.local"
+  endpoints:
+  - lb_endpoints:
+    - endpoint:
+        address:
+          socket_address: { address: 10.44.0.12, port_value: 8080 }
+```
+
+#### 1.1.5. SDS (Secret Discovery Service)
+
+```yaml {caption="[Config 5] SDS Configuration", linenos=table}
+resources:
+- "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.Secret
+  name: "default"
+  tls_certificate:
+    certificate_chain: { filename: "/etc/certs/cert-chain.pem" }
+    private_key: { filename: "/etc/certs/key.pem" }
+```
+
+#### 1.1.6. NDS (Name Discovery Service)
+
+```yaml {caption="[Config 6] NDS Configuration", linenos=table}
+resources:
+- "@type": type.googleapis.com/istio.networking.nds.v1.NameTable
+  table:
+    "reviews.default.svc.cluster.local":
+      ips: ["10.96.23.15", "10.96.23.16"]
+      registry: Kubernetes
+```
+
+#### 1.1.7. ADS (Aggregated Discovery Service)
+
+```yaml {caption="[Config 6] ADS Configuration", linenos=table}
+# 하나의 gRPC 스트림 안에서 type_url로 리소스 종류를 구분해서 순차 전송
+node: { id: "sidecar~10.44.0.12~reviews-v1-abc.default~default.svc.cluster.local" }
+type_url: "type.googleapis.com/envoy.config.cluster.v3.Cluster"
+```
+
+### 1.2. Bootstrap Configuration
+
 ```shell {caption="[Shell 1] Envoy Configuration Command Example", linenos=table}
 ./envoy -c config.yaml
 ```
 
-Envoy Configuration은 **Bootstrap Configuration 파일**을 통해서 이루어진다. Bootstrap Configuration 파일은 이름에서 알 수 있듯이 Envoy의 Bootstrap 시에 사용되는 Configuration 파일을 의미하며, Envoy의 Root Configuration 파일이라고 할 수 있다. [Shell 1]은 Envoy를 Bootstrap Configuration 파일과 함께 실행하는 예시를 나타내고 있다.
+Envoy Configuration은 **Bootstrap Configuration 파일**을 통해서 이루어진다. Bootstrap Configuration 파일은 이름에서 알 수 있듯이 Envoy의 Bootstrap 시에 사용되는 Configuration 파일을 의미하며, Envoy의 Root Configuration을 의미한다. [Shell 1]은 Envoy를 Bootstrap Configuration 파일과 함께 실행하는 예시를 나타내고 있다.
 
-Envoy는 Bootstrap Configuration 파일에 필요한 설정을 모두 넣어서 고정적으로 이용하는 **Static Configuration**과, xDS (eXtensible Discovery Services)를 통해서 외부로부터 동적으로 가져와 이용하는 **Dynamic Configuration**으로 크게 구분할 수 있다.
+Envoy는 Bootstrap Configuration 파일에 필요한 설정을 모두 넣어서 고정적으로 이용하는 **Static Configuration**과, xDS (eXtensible Discovery Services) Protocol을 통해서 외부로부터 동적으로 가져와 이용하는 **Dynamic Configuration**으로 크게 구분할 수 있다.
 
-### 1.1. Static Configuration
+#### 1.2.1. Static Configuration
 
 ```yaml {caption="[Config 1] Static Configuration Example", linenos=table}
-# CASE 0 · fully static — run: envoy -c envoy-static.yaml
 static_resources:
 
   listeners:                                           # INLINE → LDS
@@ -63,7 +157,9 @@ admin:
     socket_address: { address: 127.0.0.1, port_value: 9901 }
 ```
 
-### 1.2. Mostly Static with Dynamic EDS
+[Config 1]은 Envoy의 **Static Configuration 예시**를 나타내고 있다. Static Configuration은 Bootstrap Configuration 파일에 Envoy 동작에 필요한 모든 설정을 고정값으로 넣어서 이용하는 방식을 의미한다. 
+
+#### 1.2.2. Mostly Static with Dynamic EDS
 
 ```yaml {caption="[Config 2] Mostly Static with Dynamic EDS Example", linenos=table}
 static_resources:
@@ -95,12 +191,12 @@ static_resources:
   - name: service_backend
     connect_timeout: 5s
     lb_policy: ROUND_ROBIN
-    type: EDS                                          # xDS: EDS on
-    eds_cluster_config:                                # xDS: EDS subscription
+    type: EDS                                          # EDS on
+    eds_cluster_config:                                # EDS subscription
       service_name: service_backend                    #   key = server's cluster_name
       eds_config:
         resource_api_version: V3
-        api_config_source:                             # xDS: dedicated gRPC stream (not ADS)
+        api_config_source:                             # Dedicated gRPC stream (not ADS)
           api_type: GRPC
           transport_api_version: V3
           grpc_services:
@@ -127,7 +223,7 @@ admin:
     socket_address: { address: 127.0.0.1, port_value: 9901 }
 ```
 
-### 1.3. Dynamic Configuration
+#### 1.2.3. Dynamic Configuration
 
 ```yaml {caption="[Config 3] Dynamic Configuration Example", linenos=table}
 node:                                                  # xDS identity (server keys config on this)
@@ -135,13 +231,13 @@ node:                                                  # xDS identity (server ke
   cluster: demo-cluster
  
 dynamic_resources:
-  lds_config:                                          # xDS: LDS
+  lds_config:                                          # LDS on
     resource_api_version: V3
     ads: {}                                            #   via shared ADS stream
-  cds_config:                                          # xDS: CDS
+  cds_config:                                          # CDS on
     resource_api_version: V3
     ads: {}                                            #   via shared ADS stream
-  ads_config:                                          # xDS: the single ADS stream
+  ads_config:                                          # The single ADS stream
     api_type: GRPC
     transport_api_version: V3
     grpc_services:
@@ -169,99 +265,6 @@ static_resources:
 admin:
   address:
     socket_address: { address: 127.0.0.1, port_value: 9901 }
-```
-
-## 2. xDS (eXtensible Discovery Services)
-
-### 2.1. LDS (Listener Discovery Service)
-
-```yaml {caption="[Config 1] LDS Configuration", linenos=table}
-resources:
-- "@type": type.googleapis.com/envoy.config.listener.v3.Listener
-  name: "0.0.0.0_8080"
-  address:
-    socket_address: { address: 0.0.0.0, port_value: 8080 }
-  filter_chains:
-  - filters:
-    - name: envoy.filters.network.http_connection_manager
-      typed_config:
-        "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
-        stat_prefix: ingress_http
-        rds:
-          route_config_name: "8080"
-          config_source: { ads: {} }
-```
-
-### 2.2. RDS (Route Discovery Service)
-
-```yaml {caption="[Config 2] RDS Configuration", linenos=table}
-resources:
-- "@type": type.googleapis.com/envoy.config.route.v3.RouteConfiguration
-  name: "8080"
-  virtual_hosts:
-  - name: "reviews.default.svc.cluster.local:8080"
-    domains: ["reviews.default.svc.cluster.local"]
-    routes:
-    - match: { prefix: "/" }
-      route:
-        cluster: "outbound|8080||reviews.default.svc.cluster.local"
-        timeout: 15s
-```
-
-### 2.3. CDS (Cluster Discovery Service)
-
-```yaml {caption="[Config 3] CDS Configuration", linenos=table}
-resources:
-- "@type": type.googleapis.com/envoy.config.cluster.v3.Cluster
-  name: "outbound|8080||reviews.default.svc.cluster.local"
-  type: EDS
-  eds_cluster_config:
-    eds_config: { ads: {} }
-  lb_policy: ROUND_ROBIN
-  connect_timeout: 10s
-```
-
-### 2.4. EDS (Endpoint Discovery Service)
-
-```yaml {caption="[Config 4] EDS Configuration", linenos=table}
-resources:
-- "@type": type.googleapis.com/envoy.config.endpoint.v3.ClusterLoadAssignment
-  cluster_name: "outbound|8080||reviews.default.svc.cluster.local"
-  endpoints:
-  - lb_endpoints:
-    - endpoint:
-        address:
-          socket_address: { address: 10.44.0.12, port_value: 8080 }
-```
-
-### 2.5. SDS (Secret Discovery Service)
-
-```yaml {caption="[Config 5] SDS Configuration", linenos=table}
-resources:
-- "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.Secret
-  name: "default"
-  tls_certificate:
-    certificate_chain: { filename: "/etc/certs/cert-chain.pem" }
-    private_key: { filename: "/etc/certs/key.pem" }
-```
-
-### 2.6. NDS (Name Discovery Service)
-
-```yaml {caption="[Config 6] NDS Configuration", linenos=table}
-resources:
-- "@type": type.googleapis.com/istio.networking.nds.v1.NameTable
-  table:
-    "reviews.default.svc.cluster.local":
-      ips: ["10.96.23.15", "10.96.23.16"]
-      registry: Kubernetes
-```
-
-### 2.7. ADS (Aggregated Discovery Service)
-
-```yaml {caption="[Config 6] ADS Configuration", linenos=table}
-# 하나의 gRPC 스트림 안에서 type_url로 리소스 종류를 구분해서 순차 전송
-node: { id: "sidecar~10.44.0.12~reviews-v1-abc.default~default.svc.cluster.local" }
-type_url: "type.googleapis.com/envoy.config.cluster.v3.Cluster"
 ```
 
 ## 2. 참조
