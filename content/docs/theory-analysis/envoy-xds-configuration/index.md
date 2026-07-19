@@ -9,6 +9,8 @@ Envoy Configuration은 Root Configration 역할을 수행하는 **Bootstrap Conf
 
 ### 1.1. xDS (eXtensible Discovery Services)
 
+{{< figure caption="[Figure 1] xDS (eXtensible Discovery Services)" src="images/xds-protocol.png" width="1100px" >}}
+
 **xDS** **(eXtensible Discovery Services)**는 Envoy의 동작에 필요한 설정을 외부에서 동적으로 가져오는데 사용되는 Protocol을 의미한다. xDS은 다음과 같은 종류가 존재한다.
 
 * LDS (Listener Discovery Service) : Listener 설정(어느 포트로 트래픽을 받을지)을 동적으로 가져온다.
