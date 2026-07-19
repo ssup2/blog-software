@@ -1,6 +1,5 @@
 ---
 title: "Envoy with Istio"
-draft: true
 ---
 
 ## 1. Envoy as Sidecar Proxy with Istio

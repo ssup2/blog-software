@@ -1,6 +1,5 @@
 ---
 title: "Envoy xDS, Configuration"
-draft: true
 ---
 
 ## 1. Envoy Configuration
