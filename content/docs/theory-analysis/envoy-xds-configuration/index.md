@@ -23,19 +23,88 @@ Envoy Configuration은 Root Configration 역할을 수행하는 **Bootstrap Conf
 
 ```yaml {caption="[Config 1] LDS Configuration", linenos=table}
 resources:
+
+# ── Listener 1 · single chain · HTTP · mTLS terminate ─────────────────
 - "@type": type.googleapis.com/envoy.config.listener.v3.Listener
-  name: "0.0.0.0_8080"
+  name: internal-listener                      # arbitrary string (istiod convention would be "0.0.0.0_8080")
   address:
-    socket_address: { address: 0.0.0.0, port_value: 8080 }
+    socket_address: { address: 0.0.0.0, port_value: 8080 }   # binding — unrelated to the name
   filter_chains:
-  - filters:
+  - transport_socket:                          # ← belongs to the CHAIN, not the listener
+      name: envoy.transport_sockets.tls
+      typed_config:
+        "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.DownstreamTlsContext
+        require_client_certificate: true       # the "m" in mTLS — require client cert
+        common_tls_context:
+          tls_certificate_sds_secret_configs:
+          - name: internal-cert                # ← sds: the server cert I present
+            sds_config: { ads: {} }
+          validation_context_sds_secret_config:
+            name: internal-ca                  # ← CA to verify the peer (proving ≠ verifying)
+            sds_config: { ads: {} }
+    filters:
     - name: envoy.filters.network.http_connection_manager
       typed_config:
         "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
         stat_prefix: ingress_http
         rds:
-          route_config_name: "8080"
+          route_config_name: internal-routes   # ← rds: the Route table to read (L7 only)
           config_source: { ads: {} }
+        http_filters:
+        - name: envoy.filters.http.router      # terminal — executes the matched RDS entry
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+
+# ── Listener 2 · two SNI chains · different sds per chain ─────────────
+- "@type": type.googleapis.com/envoy.config.listener.v3.Listener
+  name: external-listener
+  address:
+    socket_address: { address: 0.0.0.0, port_value: 443 }
+  listener_filters:
+  - name: envoy.filters.listener.tls_inspector # reads SNI to pick a chain below (once per connection)
+    typed_config:
+      "@type": type.googleapis.com/envoy.extensions.filters.listener.tls_inspector.v3.TlsInspector
+  filter_chains:
+
+  - filter_chain_match:
+      server_names: ["web.com"]                # SNI → this chain
+    transport_socket:
+      name: envoy.transport_sockets.tls
+      typed_config:
+        "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.DownstreamTlsContext
+        common_tls_context:
+          tls_certificate_sds_secret_configs:
+          - name: web-cert                     # ← sds: cert whose SAN is web.com
+            sds_config: { ads: {} }
+    filters:
+    - name: envoy.filters.network.http_connection_manager
+      typed_config:
+        "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+        stat_prefix: https_web
+        rds:
+          route_config_name: external-routes   # ← rds: this chain's own Route table
+          config_source: { ads: {} }
+        http_filters:
+        - name: envoy.filters.http.router
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+
+  - filter_chain_match:
+      server_names: ["kafka.com"]
+    transport_socket:
+      name: envoy.transport_sockets.tls
+      typed_config:
+        "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.DownstreamTlsContext
+        common_tls_context:
+          tls_certificate_sds_secret_configs:
+          - name: kafka-cert                   # ← sds: same listener, different chain → different cert
+            sds_config: { ads: {} }
+    filters:
+    - name: envoy.filters.network.tcp_proxy    # L4 — has no rds field at all
+      typed_config:
+        "@type": type.googleapis.com/envoy.extensions.filters.network.tcp_proxy.v3.TcpProxy
+        stat_prefix: tcp_kafka
+        cluster: kafka                         # straight to cluster, no Route table (no rds ≠ no sds)
 ```
 
 #### 1.1.2. RDS (Route Discovery Service)
@@ -58,56 +127,232 @@ resources:
 
 ```yaml {caption="[Config 3] CDS Configuration", linenos=table}
 resources:
-- "@type": type.googleapis.com/envoy.config.cluster.v3.Cluster
-  name: "outbound|8080||reviews.default.svc.cluster.local"
-  type: EDS
-  eds_cluster_config:
-    eds_config: { ads: {} }
-  lb_policy: ROUND_ROBIN
-  connect_timeout: 10s
+ 
+# ── Table 1 · read by internal-listener (rds: internal-routes) ────────
+- "@type": type.googleapis.com/envoy.config.route.v3.RouteConfiguration
+  name: internal-routes                        # arbitrary string (istiod convention would be "8080")
+  virtual_hosts:
+ 
+  - name: reviews-vhost                        # vhost label — not matched, just a name
+    domains: ["reviews"]                       # HOST rung: matched against Host header
+    routes:                                    # PATH rung: first match wins — order matters
+    - match: { prefix: "/api" }                # specific entry BEFORE the catch-all
+      route:
+        weighted_clusters:                     # WEIGHT rung: refs are CDS cluster names
+          clusters:
+          - name: reviews-v1
+            weight: 80
+          - name: reviews-v2
+            weight: 20
+        timeout: 15s
+    - match: { prefix: "/" }                   # catch-all — everything /api didn't take
+      route:
+        cluster: reviews-v1                    # converges onto v1: entries may SHARE a cluster (N:1)
+ 
+  - name: ratings-vhost
+    domains: ["ratings"]
+    routes:
+    - match: { prefix: "/" }
+      route:
+        cluster: ratings
+ 
+# ── Table 2 · read only by the web.com chain (rds: external-routes) ───
+- "@type": type.googleapis.com/envoy.config.route.v3.RouteConfiguration
+  name: external-routes
+  virtual_hosts:
+  - name: web-vhost
+    domains: ["web.com"]                       # after TLS terminate, Host header says web.com
+    routes:
+    - match: { prefix: "/" }
+      route:
+        cluster: web
 ```
 
 #### 1.1.4. EDS (Endpoint Discovery Service)
 
 ```yaml {caption="[Config 4] EDS Configuration", linenos=table}
 resources:
+ 
 - "@type": type.googleapis.com/envoy.config.endpoint.v3.ClusterLoadAssignment
-  cluster_name: "outbound|8080||reviews.default.svc.cluster.local"
+  cluster_name: reviews-v1                     # must equal the CDS cluster's name
+  endpoints:                                   # locality groups — contained field, not a resource
+  - lb_endpoints:
+    - endpoint:
+        address:
+          socket_address: { address: 10.0.0.11, port_value: 80 }
+    - endpoint:
+        address:
+          socket_address: { address: 10.0.0.12, port_value: 80 }
+ 
+- "@type": type.googleapis.com/envoy.config.endpoint.v3.ClusterLoadAssignment
+  cluster_name: reviews-v2
   endpoints:
   - lb_endpoints:
     - endpoint:
         address:
-          socket_address: { address: 10.44.0.12, port_value: 8080 }
+          socket_address: { address: 10.0.0.21, port_value: 80 }
+ 
+- "@type": type.googleapis.com/envoy.config.endpoint.v3.ClusterLoadAssignment
+  cluster_name: ratings
+  endpoints:
+  - lb_endpoints:
+    - endpoint:
+        address:
+          socket_address: { address: 10.0.0.31, port_value: 80 }
+ 
+- "@type": type.googleapis.com/envoy.config.endpoint.v3.ClusterLoadAssignment
+  cluster_name: web
+  endpoints:
+  - lb_endpoints:
+    - endpoint:
+        address:
+          socket_address: { address: 10.0.0.41, port_value: 80 }
+    - endpoint:
+        address:
+          socket_address: { address: 10.0.0.42, port_value: 80 }
+ 
+- "@type": type.googleapis.com/envoy.config.endpoint.v3.ClusterLoadAssignment
+  cluster_name: kafka
+  endpoints:
+  - lb_endpoints:
+    - endpoint:
+        address:
+          socket_address: { address: 10.0.0.51, port_value: 9092 }   # TCP backend — its own port
 ```
 
 #### 1.1.5. SDS (Secret Discovery Service)
 
 ```yaml {caption="[Config 5] SDS Configuration", linenos=table}
 resources:
+ 
 - "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.Secret
-  name: "default"
+  name: internal-cert                          # ← 6 refs share this one (1 chain + 5 clusters)
   tls_certificate:
     certificate_chain: { filename: "/etc/certs/cert-chain.pem" }
-    private_key: { filename: "/etc/certs/key.pem" }
-```
-
-#### 1.1.6. NDS (Name Discovery Service)
-
-```yaml {caption="[Config 6] NDS Configuration", linenos=table}
-resources:
-- "@type": type.googleapis.com/istio.networking.nds.v1.NameTable
-  table:
-    "reviews.default.svc.cluster.local":
-      ips: ["10.96.23.15", "10.96.23.16"]
-      registry: Kubernetes
+    private_key: { filename: "/etc/certs/key.pem" }      # redacted in config_dump
+ 
+- "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.Secret
+  name: internal-ca                            # same resource type, different payload:
+  validation_context:                          # a CA bundle for verifying PEERS
+    trusted_ca: { filename: "/etc/certs/root-cert.pem" }
+ 
+- "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.Secret
+  name: web-cert                               # SAN inside must cover web.com (matches the SNI)
+  tls_certificate:
+    certificate_chain: { filename: "/etc/certs/web-com.pem" }
+    private_key: { filename: "/etc/certs/web-com-key.pem" }
+ 
+- "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.Secret
+  name: kafka-cert                             # SAN: kafka.com
+  tls_certificate:
+    certificate_chain: { filename: "/etc/certs/kafka-com.pem" }
+    private_key: { filename: "/etc/certs/kafka-com-key.pem" }
 ```
 
 #### 1.1.7. ADS (Aggregated Discovery Service)
 
 ```yaml {caption="[Config 6] ADS Configuration", linenos=table}
-# 하나의 gRPC 스트림 안에서 type_url로 리소스 종류를 구분해서 순차 전송
-node: { id: "sidecar~10.44.0.12~reviews-v1-abc.default~default.svc.cluster.local" }
-type_url: "type.googleapis.com/envoy.config.cluster.v3.Cluster"
+# ── 1 · stream opens: envoy identifies itself (node sent once) ────────
+DiscoveryRequest:
+  node:
+    id: "sidecar~10.44.0.12~reviews-v1-abc.default~default.svc.cluster.local"
+    #     role ~ podIP     ~ pod.namespace        ~ dns domain
+  type_url: "type.googleapis.com/envoy.config.cluster.v3.Cluster"
+  resource_names: []                   # empty = wildcard (CDS/LDS subscribe like this)
+ 
+# ── 2 · server: CDS response ──────────────────────────────────────────
+DiscoveryResponse:
+  version_info: "v1"
+  nonce: "n1"
+  type_url: "type.googleapis.com/envoy.config.cluster.v3.Cluster"
+  resources: [ ... ]                   # → envoy-cds-clusters-example.yaml
+ 
+# ── 3 · envoy: ACK = echo version + nonce back on the same type ───────
+DiscoveryRequest:
+  type_url: "type.googleapis.com/envoy.config.cluster.v3.Cluster"
+  version_info: "v1"                   # accepted this version
+  response_nonce: "n1"
+ 
+# ── 4 · derived subscription: EDS BY NAME (names came from CDS) ───────
+DiscoveryRequest:
+  type_url: "type.googleapis.com/envoy.config.endpoint.v3.ClusterLoadAssignment"
+  resource_names: [reviews-v1, reviews-v2, ratings, web, kafka]
+ 
+DiscoveryResponse:
+  version_info: "v1"
+  nonce: "n2"
+  type_url: "type.googleapis.com/envoy.config.endpoint.v3.ClusterLoadAssignment"
+  resources: [ ... ]                   # → envoy-eds-endpoints-example.yaml
+ 
+# ── 5 · LDS (wildcard) → RDS / SDS (by name, derived from listeners) ──
+DiscoveryRequest:
+  type_url: "type.googleapis.com/envoy.config.listener.v3.Listener"
+  resource_names: []                   # wildcard again
+# ... response → envoy-lds-listeners-sds-rds.yaml, then:
+DiscoveryRequest:
+  type_url: "type.googleapis.com/envoy.config.route.v3.RouteConfiguration"
+  resource_names: [internal-routes, external-routes]     # from rds: fields
+DiscoveryRequest:
+  type_url: "type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.Secret"
+  resource_names: [internal-cert, internal-ca, web-cert, kafka-cert]
+  # sds_config: { ads: {} } in L/C is what put these on THIS stream
+ 
+# ── 6 · NACK example: keep last-good, report why ──────────────────────
+DiscoveryRequest:
+  type_url: "type.googleapis.com/envoy.config.listener.v3.Listener"
+  version_info: "v1"                   # still the LAST GOOD version, not the broken one
+  response_nonce: "n5"
+  error_detail: { code: 3, message: "invalid filter_chain_match" }
+```
+
+```yaml {caption="[Config 7] ADS Configuration", linenos=table}
+resources:
+
+- "@type": type.googleapis.com/envoy.config.cluster.v3.Cluster
+  name: reviews-v1
+  type: EDS
+  eds_cluster_config:
+    eds_config: { ads: {} }                    # endpoints arrive separately, by this name
+  connect_timeout: 1s
+  transport_socket: &mtls-client               # YAML anchor — reused below (same value, per-cluster field)
+    name: envoy.transport_sockets.tls
+    typed_config:
+      "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+      common_tls_context:
+        tls_certificate_sds_secret_configs:
+        - name: internal-cert                  # ← sds: client cert (I prove myself)
+          sds_config: { ads: {} }
+        validation_context_sds_secret_config:
+          name: internal-ca                    # ← CA to verify the SERVER side
+          sds_config: { ads: {} }
+
+- "@type": type.googleapis.com/envoy.config.cluster.v3.Cluster
+  name: reviews-v2
+  type: EDS
+  eds_cluster_config: { eds_config: { ads: {} } }
+  connect_timeout: 1s
+  transport_socket: *mtls-client
+
+- "@type": type.googleapis.com/envoy.config.cluster.v3.Cluster
+  name: ratings
+  type: EDS
+  eds_cluster_config: { eds_config: { ads: {} } }
+  connect_timeout: 1s
+  transport_socket: *mtls-client
+
+- "@type": type.googleapis.com/envoy.config.cluster.v3.Cluster
+  name: web
+  type: EDS
+  eds_cluster_config: { eds_config: { ads: {} } }
+  connect_timeout: 1s
+  transport_socket: *mtls-client
+
+- "@type": type.googleapis.com/envoy.config.cluster.v3.Cluster
+  name: kafka                                  # TCP upstream — cluster shape is identical;
+  type: EDS                                    # payload protocol is irrelevant here
+  eds_cluster_config: { eds_config: { ads: {} } }
+  connect_timeout: 1s
+  transport_socket: *mtls-client
 ```
 
 ### 1.2. Bootstrap Configuration
