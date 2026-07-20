@@ -467,7 +467,9 @@ admin:
     socket_address: { address: 127.0.0.1, port_value: 9901 }
 ```
 
-[Config 8]은 Listener, Route, Cluster는 Static으로 고정하고 **Endpoint만 EDS로 동적으로 받는 예시**를 나타내고 있다. `service_backend` Cluster가 `type: EDS`로 설정되어 있어, 실제 인스턴스 목록은 `eds_config`에 지정된 xDS Server로부터 `service_name`(`service_backend`)을 Key로 구독한다. 이때 `api_config_source`는 ADS가 아닌 EDS 전용 gRPC Stream을 사용한다. xDS Server의 주소 자체는 동적으로 받아올 수 없으므로, `xds_cluster`는 Static Cluster로 Bootstrap 파일에 직접 정의되어야 하며 gRPC 통신을 위해 HTTP/2가 활성화되어 있다. 이 방식은 배포나 Scaling으로 인스턴스 IP만 자주 바뀌는 환경에서, 라우팅 구조는 고정한 채 Endpoint 갱신만 재시작 없이 반영하고 싶을 때 사용된다.
+[Config 8]은 Listener, Route, Cluster는 Static으로 고정하고 **Endpoint만 EDS로 동적으로 받는 예시**를 나타내고 있다. `service_backend` Cluster가 `type: EDS`로 설정되어 있어, 실제 인스턴스 목록은 `eds_config`에 지정된 xDS Server로부터 `service_name`(`service_backend`)을 Key로 구독한다. 이때 `api_config_source`는 ADS가 아닌 EDS 전용 gRPC Stream을 사용한다.
+
+xDS Server의 주소 자체는 동적으로 받아올 수 없으므로, `xds_cluster`는 Static Cluster로 Bootstrap 파일에 직접 정의되어야 하며 gRPC 통신을 위해 HTTP/2가 활성화되어 있다. 이 방식은 배포나 Scaling으로 인스턴스 IP만 자주 바뀌는 환경에서, 라우팅 구조는 고정한 채 Endpoint 갱신만 재시작 없이 반영하고 싶을 때 사용된다.
 
 #### 1.2.3. Dynamic Configuration
 
@@ -513,7 +515,9 @@ admin:
     socket_address: { address: 127.0.0.1, port_value: 9901 }
 ```
 
-[Config 9]는 Listener와 Cluster부터 모든 Resource를 xDS로 받아오는 **Dynamic Configuration 예시**를 나타내고 있다. `dynamic_resources`의 `lds_config`와 `cds_config`가 모두 `ads`로 지정되어 있어, LDS와 CDS 구독이 `ads_config`에 정의된 단일 gRPC Stream으로 전달되고, 응답에서 파생되는 RDS, EDS, SDS 구독도 같은 Stream을 공유한다. 이 Stream 위에서 오가는 메시지 흐름이 [Config 6]이다. `node`는 xDS Server가 어느 Envoy에게 어떤 설정을 내려줄지 구분하는 Identity이며, `set_node_on_first_message_only`는 Stream의 첫 메시지에만 `node`를 실어 이후 메시지의 크기를 줄인다. 결과적으로 Bootstrap 파일에는 xDS Server 접속 정보(`xds_cluster`)와 `admin`만 남고, 앞서 살펴본 [Config 1]~[Config 5]의 모든 Resource가 이 연결을 통해 동적으로 전달된다.
+[Config 9]는 Listener와 Cluster부터 모든 Resource를 xDS로 받아오는 **Dynamic Configuration 예시**를 나타내고 있다. `dynamic_resources`의 `lds_config`와 `cds_config`가 모두 `ads`로 지정되어 있어, LDS와 CDS 구독이 `ads_config`에 정의된 단일 gRPC Stream으로 전달되고, 응답에서 파생되는 RDS, EDS, SDS 구독도 같은 Stream을 공유한다. 이 Stream 위에서 오가는 메시지 흐름이 [Config 6]이다. 
+
+`node`는 xDS Server가 어느 Envoy에게 어떤 설정을 내려줄지 구분하는 Identity이며, `set_node_on_first_message_only`는 Stream의 첫 메시지에만 `node`를 실어 이후 메시지의 크기를 줄인다. 결과적으로 Bootstrap 파일에는 xDS Server 접속 정보(`xds_cluster`)와 `admin`만 남고, 앞서 살펴본 [Config 1~5]의 모든 Resource가 이 연결을 통해 동적으로 전달된다.
 
 ## 2. 참조
 
