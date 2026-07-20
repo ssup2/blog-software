@@ -16,6 +16,12 @@ title: "Envoy with Istio"
 * **Health Check (빨간색)** : kubelet은 Envoy의 `15021` Port `/healthz/ready`로 istio-proxy Container의 Health Check를 수행하며, Envoy는 이 요청을 pilot-agent의 `15020` Port `/healthz/ready`로 전달한다.
 * **Envoy Admin (검정색)** : istioctl은 Envoy의 `15000` Port Admin Interface에 접근하여 Envoy에 적용된 설정과 상태를 확인한다. `istioctl proxy-config` 명령어가 이 경로를 통해 Listener, Route, Cluster 등의 설정을 조회하는 대표적인 예이다.
 
+이처럼 Envoy가 istiod와 직접 통신하지 않고 pilot-agent를 xDS Proxy로 경유하는 이유는 다음과 같다.
+
+* **인증 위임** : Envoy가 istiod와 mTLS로 통신하려면 인증서가 필요하지만, 그 인증서는 다시 istiod로부터 발급받아야 하는 순환 문제가 존재한다. pilot-agent가 Pod의 Service Account Token을 이용해 CSR을 생성하고 istiod CA로부터 인증서를 발급받은 뒤 SDS Socket으로 Envoy에 공급하는 방식으로 이 문제를 해결하며, 인증서 갱신도 pilot-agent가 담당하므로 Envoy는 인증서 수명 주기를 신경 쓰지 않아도 된다.
+* **xDS 가공 가능** : pilot-agent는 istiod가 내려준 xDS 설정을 단순히 중계하는 것이 아니라 중간에서 가공할 수 있다. 대표적으로 설정에 원격 Wasm 모듈이 포함된 경우 pilot-agent가 모듈을 대신 다운로드한 뒤 로컬 경로로 바꾸어 Envoy에 전달한다.
+* **istiod 장애 대응** : pilot-agent는 istiod로부터 받은 마지막 설정을 캐시하고 있어, istiod 장애 중에도 Envoy가 재연결하면 캐시된 설정으로 응답할 수 있다. Envoy 입장에서 xDS Server는 항상 로컬의 pilot-agent이므로, Control Plane 장애가 Data Plane의 동작에 바로 전파되지 않는다.
+
 ## 2. Envoy as Ingress/Egress Gateway with Istio
 
 ## 3. Envoy Configuration with Istio and Kubernetes Resources 
