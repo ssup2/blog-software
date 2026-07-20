@@ -6,11 +6,19 @@ title: "Envoy xDS, Configuration"
 
 Envoy Configuration은 Root Configration 역할을 수행하는 **Bootstrap Configuration 파일**과, 외부에서 동적으로 설정을 가져오는데 사용되는 xDS (eXtensible Discovery Services) Protocol이 함께 사용되어 이루어진다.
 
-### 1.1. xDS (eXtensible Discovery Services)
+### 1.1. xDS (eXtensible Discovery Services) Protocol
 
-{{< figure caption="[Figure 1] xDS (eXtensible Discovery Services)" src="images/xds-protocol.png" width="1100px" >}}
+{{< figure caption="[Figure 1] xDS (eXtensible Discovery Services) Resources and API" src="images/xds-resources-api.png" width="1100px" >}}
 
-**xDS** **(eXtensible Discovery Services)**는 Envoy의 동작에 필요한 설정을 외부에서 동적으로 가져오는데 사용되는 Protocol을 의미한다. xDS은 다음과 같은 종류가 존재한다.
+**xDS** **(eXtensible Discovery Services)**는 Envoy의 동작에 필요한 설정을 외부에서 동적으로 가져오는데 사용되는 CNCF의 표준 Protocol을 의미한다. [Figure 1]은 xDS를 이루는 Resource와 API를 나타내고 있다. xDS Resource는 다음과 같은 종류가 존재한다.
+
+* **Listener** : Traffic을 받을 포트와 이를 처리할 Filter Chain(Protocol, TLS 등)을 정의한다.
+* **Route** : Traffic을 어느 Cluster로 보낼지 정하는 Route Table을 정의한다.
+* **Cluster** : Upstream 서비스 그룹의 정의와 LB 정책을 정의한다.
+* **Endpoint** : Cluster에 속한 실제 인스턴스 IP, Port 목록을 정의한다.
+* **Secret** : TLS 인증서와 키 등 민감 정보를 정의하며, 다른 Resource와 달리 SDS를 통해 별도 채널로 안전하게 전달된다.
+
+[Figure 1]은 xDS 관점에서 xDS은 다음과 같은 종류가 존재한다.
 
 * LDS (Listener Discovery Service) : Listener 설정(어느 포트로 트래픽을 받을지)을 동적으로 가져온다.
 * RDS (Route Discovery Service) : Route 설정(요청을 어느 Cluster로 보낼지 정하는 라우팅 테이블)을 동적으로 가져온다.
