@@ -1,0 +1,23 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: mock-server
+  namespace: default
+spec:
+  hosts:
+  - mock-server
+  http:
+  - match:
+    - uri:
+        prefix: /api
+    route:
+    - destination:
+        host: mock-server
+        port:
+          number: 8080
+    timeout: 3s
+  - route:
+    - destination:
+        host: mock-server
+        port:
+          number: 8080

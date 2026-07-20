@@ -1,0 +1,12 @@
+apiVersion: networking.istio.io/v1
+kind: WorkloadGroup
+metadata:
+  name: vm-server
+  namespace: default
+spec:
+  metadata:
+    labels:
+      app: vm-server
+  template:
+    serviceAccount: default
+    network: vm-network

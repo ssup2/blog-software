@@ -1,0 +1,10 @@
+apiVersion: networking.istio.io/v1beta1
+kind: ProxyConfig
+metadata:
+  name: mock-server
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: mock-server
+  concurrency: 4

@@ -1,0 +1,14 @@
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: mock-server
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: mock-server
+  action: DENY
+  rules:
+  - to:
+    - operation:
+        paths: ["/admin"]

@@ -401,7 +401,9 @@ admin:
     socket_address: { address: 127.0.0.1, port_value: 9901 }
 ```
 
-[Config 7]은 Envoy의 **Static Configuration 예시**를 나타내고 있다. Static Configuration은 Bootstrap Configuration 파일에 Envoy 동작에 필요한 모든 설정을 고정값으로 넣어서 이용하는 방식을 의미한다. `static_resources` 아래에 Listener, Route, Cluster, Endpoint가 모두 Inline으로 정의되어 있으며, [Figure 1]에서 xDS API를 통해 전달되던 각 Resource가 파일 안에 그대로 들어간 형태이다. `listener_http`는 `10000` Port로 수신한 모든 요청을 Inline Route Table(`local_route`)을 거쳐 `service_backend` Cluster의 두 Endpoint로 전달한다. xDS Server가 필요 없어 구성이 단순하지만, 설정을 변경하려면 파일을 수정하고 Envoy를 재시작해야 한다.
+[Config 7]은 Envoy의 **Static Configuration 예시**를 나타내고 있다. Static Configuration은 Bootstrap Configuration 파일에 Envoy 동작에 필요한 모든 설정을 고정값으로 넣어서 이용하는 방식을 의미한다. `static_resources` 아래에 Listener, Route, Cluster, Endpoint가 모두 Inline으로 정의되어 있으며, [Figure 1]에서 xDS API를 통해 전달되던 각 Resource가 파일 안에 그대로 들어간 형태이다. 
+
+`listener_http`는 `10000` Port로 수신한 모든 요청을 Inline Route Table(`local_route`)을 거쳐 `service_backend` Cluster의 두 Endpoint로 전달한다. xDS Server가 필요 없어 구성이 단순하지만, 설정을 변경하려면 파일을 수정하고 Envoy를 재시작해야 한다.
 
 #### 1.2.2. Mostly Static with Dynamic EDS
 

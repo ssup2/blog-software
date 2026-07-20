@@ -1,0 +1,9 @@
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: mock-server
+  namespace: default
+spec:
+  accessLogging:
+  - providers:
+    - name: otel

@@ -1,0 +1,27 @@
+apiVersion: networking.istio.io/v1
+kind: ServiceEntry
+metadata:
+  name: vm-server
+  namespace: default
+spec:
+  hosts:
+  - vm.example.com
+  ports:
+  - number: 8080
+    name: http
+    protocol: HTTP
+  resolution: STATIC
+  location: MESH_INTERNAL
+  workloadSelector:
+    labels:
+      app: vm-server
+---
+apiVersion: networking.istio.io/v1
+kind: WorkloadEntry
+metadata:
+  name: vm-server
+  namespace: default
+spec:
+  address: 10.10.10.10
+  labels:
+    app: vm-server

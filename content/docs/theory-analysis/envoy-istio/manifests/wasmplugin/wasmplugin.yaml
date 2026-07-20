@@ -1,0 +1,18 @@
+apiVersion: extensions.istio.io/v1alpha1
+kind: WasmPlugin
+metadata:
+  name: basic-auth
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: mock-server
+  url: oci://ghcr.io/istio-ecosystem/wasm-extensions/basic_auth:1.12.0
+  phase: AUTHN
+  pluginConfig:
+    basic_auth_rules:
+    - prefix: /api
+      request_methods:
+      - GET
+      credentials:
+      - admin:admin

@@ -1,0 +1,12 @@
+apiVersion: security.istio.io/v1
+kind: RequestAuthentication
+metadata:
+  name: mock-server
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: mock-server
+  jwtRules:
+  - issuer: "testing@secure.istio.io"
+    jwksUri: "https://raw.githubusercontent.com/istio/istio/release-1.24/security/tools/jwt/samples/jwks.json"
