@@ -16,7 +16,9 @@ Istio 환경에서 Envoy의 동작을 다루는 문서. 1장은 Sidecar Proxy �
 
 - kind Cluster (`kind-kind` context) + Istio **1.24.2** (istiod, ingress/egress gateway 설치됨).
 - `default` Namespace: `istio-injection=enabled`. Pod 2개 상주:
-  - `mock-server` (app=mock-server, Service `8080`/`9090` Port) — 받는 쪽(inbound) 실험 대상.
+  - `mock-server` (app=mock-server, Service `8080` Port) — 받는 쪽(inbound) 실험 대상.
+    2026-08-02에 Service의 `9090`(grpc) Port를 제거하여 문서 예제와 클러스터를 일치시켰다
+    (원본 백업: /tmp/istio-cr-exp2/backup-svc-mock-server.yaml, Pod의 containerPort 9090은 남아 있으나 무해).
   - `shell` (app=shell) — 보내는 쪽(outbound) 실험 대상.
 - Gateway 실험은 `istio-system`의 istio-ingressgateway Pod 대상 (Pod 이름은 `kubectl get pods -n istio-system`으로 확인).
 - **주의**: `default`에 상시 운영 중인 `mock-server` VirtualService/DestinationRule이 있다.
@@ -33,7 +35,10 @@ Istio 환경에서 Envoy의 동작을 다루는 문서. 1장은 Sidecar Proxy �
    - `version_info` 라인도 push마다 변하는 노이즈 (hunk 선별로 회피).
 4. 정규화 후 self-diff(같은 상태 두 번 캡처)가 0줄임을 확인하고 진행.
 5. CR 적용 직후 dump에는 **draining 상태의 구 Listener가 함께 남는다** (PeerAuthentication 실험에서
-   raw_buffer chain이 남아 보였던 원인). active_state 기준으로 판단할 것.
+   raw_buffer chain이 남아 보였던 원인). active_state 기준으로 판단할 것. 무변화 검증(WorkloadGroup,
+   ProxyConfig)은 직전 실험의 drain이 끝난 뒤(약 1분 대기) 새 baseline을 떠서 비교해야 diff 0이 나온다.
+6. Gateway-bound VirtualService diff는 base가 아니라 **Gateway 적용 상태**와 비교한다
+   (Gateway 적용 → 캡처 → VS 적용 → 캡처 → 두 캡처를 diff). blackhole → 실제 Virtual Host 교체가 핵심.
 
 ## 실험에서 확인된 특이사항
 
@@ -50,16 +55,18 @@ Istio 환경에서 Envoy의 동작을 다루는 문서. 1장은 Sidecar Proxy �
 ## 폴더 구조
 
 - `index.md` — 문서 본문.
-- `manifests/<cr이름>/<cr이름>.yaml` — 3장 예제 CR (14개, 전부 클러스터에 적용해 검증된 상태).
+- `manifests/<cr이름>/<cr이름>.yaml` — 3장 예제 CR (전부 클러스터에 적용해 검증된 상태).
   workloadentry는 ServiceEntry+WorkloadEntry 2개 리소스가 한 파일에 있음.
+  virtualservice에는 mesh용(virtualservice.yaml)과 Gateway-bound용(virtualservice-gateway.yaml) 2개 파일.
 - `manifests/base/` — 실험 환경 Workload (mock-server.yaml = Pod+Service, shell.yaml = Pod).
 - `images/` — Figure 이미지.
 
 ## 문서 컨벤션
 
 - Code Block caption: yaml은 `[Config N] <CR> Example`, diff는 `[Diff N] <CR> 적용 전후 <pod>의 proxy-config`.
-  번호는 등장 순서 기준 — [Config 1] = 도입부 실험 환경, [Config/Diff 2~15] = 3.1~3.14 CR
-  (3.8 WorkloadGroup, 3.9 ProxyConfig는 diff 블록 없음).
+  번호는 등장 순서 기준 — [Config 1] = 도입부 실험 환경, [Config/Diff 2~16] = 3.1~3.14 CR.
+  3.2 VirtualService에는 mesh용([Config/Diff 3])과 Gateway-bound용([Config/Diff 4]) 두 쌍이 있고,
+  3.8 WorkloadGroup, 3.9 ProxyConfig는 diff 블록 없음. 전체 diff는 2026-08-02에 8080-only 환경에서 재실측함.
 - diff 블록은 unified diff 스타일: 변경 라인(+/-) 앞뒤로 context 라인을 남기고,
   무관한 부분은 `...`으로 표기. 내용은 실측 dump에서 발췌 (창작 금지).
 - 리소스 이름/설정값은 백틱(`mock-server`, `lb_policy` 등), 일반 기술 용어는 영어 표기(Listener, Cluster 등).
