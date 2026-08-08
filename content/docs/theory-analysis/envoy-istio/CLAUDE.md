@@ -60,6 +60,16 @@ Istio 환경에서 Envoy의 동작을 다루는 문서. 1장은 Sidecar Proxy �
   virtualservice에는 mesh용(virtualservice.yaml)과 Gateway-bound용(virtualservice-gateway.yaml) 2개 파일.
 - `manifests/base/` — 실험 환경 Workload (mock-server.yaml = Pod+Service, shell.yaml = Pod).
 - `images/` — Figure 이미지.
+- `envoy_configs/` — CR별 적용 상태의 proxy-config dump 저장소 (manifests와 같은 하위폴더 구조).
+  질문/diff 요청 시 클러스터에 다시 실험하지 말고 여기 저장된 dump를 우선 활용할 것.
+  - `base/{shell,mock-server,istio-ingressgateway}.yaml` — CR 미적용 baseline (상시 VS/DR 삭제 상태).
+  - `<cr이름>/<관찰pod>.yaml` — 해당 CR만 적용된 상태의 dump. diff는 `base/<같은 pod>.yaml`과 뜬다.
+    예외: `virtualservice/virtualservice-gateway_istio-ingressgateway.yaml`은 Gateway+VS 적용 상태라
+    `gateway/istio-ingressgateway.yaml`과 diff.
+  - 모든 dump는 정규화됨 (EndpointsConfigDump 섹션·last_updated·version_info 라인 제거).
+  - **주의**: 캡처 간 Listener/Cluster 순서가 뒤바뀔 수 있어 파일 전체 diff에는 재배열 노이즈가 섞인다.
+    특정 리소스 이름으로 해당 부분만 발췌해서 비교할 것 (무변화 검증은 `diff <(sort a) <(sort b)`로 가능).
+  - `capture.sh` — 재캡처 스크립트 (상시 VS/DR 백업/복원 포함, 약 15분 소요). `_backup/`은 복원용.
 
 ## 문서 컨벤션
 

@@ -1,0 +1,28 @@
+{
+  "apiVersion": "networking.istio.io/v1",
+  "kind": "DestinationRule",
+  "metadata": {
+    "name": "mock-server",
+    "namespace": "default"
+  },
+  "spec": {
+    "host": "mock-server",
+    "trafficPolicy": {
+      "connectionPool": {
+        "http": {
+          "http1MaxPendingRequests": 1,
+          "http2MaxRequests": 1
+        },
+        "tcp": {
+          "maxConnections": 1
+        }
+      },
+      "outlierDetection": {
+        "baseEjectionTime": "30s",
+        "consecutive5xxErrors": 5,
+        "interval": "10s",
+        "maxEjectionPercent": 100
+      }
+    }
+  }
+}
