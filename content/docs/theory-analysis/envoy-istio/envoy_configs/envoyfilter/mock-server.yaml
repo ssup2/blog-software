@@ -3329,13 +3329,6 @@ configs:
                   path: /dev/stdout
               forward_client_cert_details: APPEND_FORWARD
               http_filters:
-              - name: envoy.filters.http.lua
-                typed_config:
-                  '@type': type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua
-                  inline_code: |
-                    function envoy_on_response(response_handle)
-                      response_handle:headers():add("x-added-by-envoyfilter", "true")
-                    end
               - name: istio.metadata_exchange
                 typed_config:
                   '@type': type.googleapis.com/udpa.type.v1.TypedStruct
@@ -3361,6 +3354,13 @@ configs:
                 typed_config:
                   '@type': type.googleapis.com/stats.PluginConfig
                   disable_host_header_fallback: true
+              - name: envoy.filters.http.lua
+                typed_config:
+                  '@type': type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua
+                  inline_code: |
+                    function envoy_on_response(response_handle)
+                      response_handle:headers():add("x-added-by-envoyfilter", "true")
+                    end
               - name: envoy.filters.http.router
                 typed_config:
                   '@type': type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
@@ -3533,13 +3533,6 @@ configs:
                   path: /dev/stdout
               forward_client_cert_details: APPEND_FORWARD
               http_filters:
-              - name: envoy.filters.http.lua
-                typed_config:
-                  '@type': type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua
-                  inline_code: |
-                    function envoy_on_response(response_handle)
-                      response_handle:headers():add("x-added-by-envoyfilter", "true")
-                    end
               - name: istio.metadata_exchange
                 typed_config:
                   '@type': type.googleapis.com/udpa.type.v1.TypedStruct
@@ -3565,6 +3558,13 @@ configs:
                 typed_config:
                   '@type': type.googleapis.com/stats.PluginConfig
                   disable_host_header_fallback: true
+              - name: envoy.filters.http.lua
+                typed_config:
+                  '@type': type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua
+                  inline_code: |
+                    function envoy_on_response(response_handle)
+                      response_handle:headers():add("x-added-by-envoyfilter", "true")
+                    end
               - name: envoy.filters.http.router
                 typed_config:
                   '@type': type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
@@ -3832,13 +3832,6 @@ configs:
                   path: /dev/stdout
               forward_client_cert_details: APPEND_FORWARD
               http_filters:
-              - name: envoy.filters.http.lua
-                typed_config:
-                  '@type': type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua
-                  inline_code: |
-                    function envoy_on_response(response_handle)
-                      response_handle:headers():add("x-added-by-envoyfilter", "true")
-                    end
               - name: istio.metadata_exchange
                 typed_config:
                   '@type': type.googleapis.com/udpa.type.v1.TypedStruct
@@ -3864,6 +3857,13 @@ configs:
                 typed_config:
                   '@type': type.googleapis.com/stats.PluginConfig
                   disable_host_header_fallback: true
+              - name: envoy.filters.http.lua
+                typed_config:
+                  '@type': type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua
+                  inline_code: |
+                    function envoy_on_response(response_handle)
+                      response_handle:headers():add("x-added-by-envoyfilter", "true")
+                    end
               - name: envoy.filters.http.router
                 typed_config:
                   '@type': type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
@@ -4034,13 +4034,6 @@ configs:
                   path: /dev/stdout
               forward_client_cert_details: APPEND_FORWARD
               http_filters:
-              - name: envoy.filters.http.lua
-                typed_config:
-                  '@type': type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua
-                  inline_code: |
-                    function envoy_on_response(response_handle)
-                      response_handle:headers():add("x-added-by-envoyfilter", "true")
-                    end
               - name: istio.metadata_exchange
                 typed_config:
                   '@type': type.googleapis.com/udpa.type.v1.TypedStruct
@@ -4066,6 +4059,13 @@ configs:
                 typed_config:
                   '@type': type.googleapis.com/stats.PluginConfig
                   disable_host_header_fallback: true
+              - name: envoy.filters.http.lua
+                typed_config:
+                  '@type': type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua
+                  inline_code: |
+                    function envoy_on_response(response_handle)
+                      response_handle:headers():add("x-added-by-envoyfilter", "true")
+                    end
               - name: envoy.filters.http.router
                 typed_config:
                   '@type': type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
@@ -5684,6 +5684,75 @@ configs:
   static_route_configs:
     route_config:
       '@type': type.googleapis.com/envoy.config.route.v3.RouteConfiguration
+      name: InboundPassthroughCluster
+      validate_clusters: false
+      virtual_hosts:
+      - domains:
+        - '*'
+        name: inbound|http|0
+        routes:
+        - decorator:
+            operation: :0/*
+          match:
+            prefix: /
+          name: default
+          route:
+            cluster: InboundPassthroughCluster
+            max_stream_duration:
+              grpc_timeout_header_max: 0s
+              max_stream_duration: 0s
+            retry_policy:
+              num_retries: 2
+              retry_on: reset-before-request
+            timeout: 0s
+    route_config:
+      '@type': type.googleapis.com/envoy.config.route.v3.RouteConfiguration
+      name: inbound|8080||
+      validate_clusters: false
+      virtual_hosts:
+      - domains:
+        - '*'
+        name: inbound|http|8080
+        routes:
+        - decorator:
+            operation: mock-server.default.svc.cluster.local:8080/*
+          match:
+            prefix: /
+          name: default
+          route:
+            cluster: inbound|8080||
+            max_stream_duration:
+              grpc_timeout_header_max: 0s
+              max_stream_duration: 0s
+            retry_policy:
+              num_retries: 2
+              retry_on: reset-before-request
+            timeout: 0s
+    route_config:
+      '@type': type.googleapis.com/envoy.config.route.v3.RouteConfiguration
+      name: InboundPassthroughCluster
+      validate_clusters: false
+      virtual_hosts:
+      - domains:
+        - '*'
+        name: inbound|http|0
+        routes:
+        - decorator:
+            operation: :0/*
+          match:
+            prefix: /
+          name: default
+          route:
+            cluster: InboundPassthroughCluster
+            max_stream_duration:
+              grpc_timeout_header_max: 0s
+              max_stream_duration: 0s
+            retry_policy:
+              num_retries: 2
+              retry_on: reset-before-request
+            timeout: 0s
+    route_config:
+      '@type': type.googleapis.com/envoy.config.route.v3.RouteConfiguration
       name: inbound|8080||
       validate_clusters: false
       virtual_hosts:
@@ -5764,20 +5833,20 @@ configs:
             cluster: prometheus_stats
     route_config:
       '@type': type.googleapis.com/envoy.config.route.v3.RouteConfiguration
-      name: InboundPassthroughCluster
+      name: inbound|8080||
       validate_clusters: false
       virtual_hosts:
       - domains:
         - '*'
-        name: inbound|http|0
+        name: inbound|http|8080
         routes:
         - decorator:
-            operation: :0/*
+            operation: mock-server.default.svc.cluster.local:8080/*
           match:
             prefix: /
           name: default
           route:
-            cluster: InboundPassthroughCluster
+            cluster: inbound|8080||
             max_stream_duration:
               grpc_timeout_header_max: 0s
               max_stream_duration: 0s
@@ -5812,75 +5881,6 @@ configs:
           name: default
           route:
             cluster: InboundPassthroughCluster
-            max_stream_duration:
-              grpc_timeout_header_max: 0s
-              max_stream_duration: 0s
-            retry_policy:
-              num_retries: 2
-              retry_on: reset-before-request
-            timeout: 0s
-    route_config:
-      '@type': type.googleapis.com/envoy.config.route.v3.RouteConfiguration
-      name: inbound|8080||
-      validate_clusters: false
-      virtual_hosts:
-      - domains:
-        - '*'
-        name: inbound|http|8080
-        routes:
-        - decorator:
-            operation: mock-server.default.svc.cluster.local:8080/*
-          match:
-            prefix: /
-          name: default
-          route:
-            cluster: inbound|8080||
-            max_stream_duration:
-              grpc_timeout_header_max: 0s
-              max_stream_duration: 0s
-            retry_policy:
-              num_retries: 2
-              retry_on: reset-before-request
-            timeout: 0s
-    route_config:
-      '@type': type.googleapis.com/envoy.config.route.v3.RouteConfiguration
-      name: InboundPassthroughCluster
-      validate_clusters: false
-      virtual_hosts:
-      - domains:
-        - '*'
-        name: inbound|http|0
-        routes:
-        - decorator:
-            operation: :0/*
-          match:
-            prefix: /
-          name: default
-          route:
-            cluster: InboundPassthroughCluster
-            max_stream_duration:
-              grpc_timeout_header_max: 0s
-              max_stream_duration: 0s
-            retry_policy:
-              num_retries: 2
-              retry_on: reset-before-request
-            timeout: 0s
-    route_config:
-      '@type': type.googleapis.com/envoy.config.route.v3.RouteConfiguration
-      name: inbound|8080||
-      validate_clusters: false
-      virtual_hosts:
-      - domains:
-        - '*'
-        name: inbound|http|8080
-        routes:
-        - decorator:
-            operation: mock-server.default.svc.cluster.local:8080/*
-          match:
-            prefix: /
-          name: default
-          route:
-            cluster: inbound|8080||
             max_stream_duration:
               grpc_timeout_header_max: 0s
               max_stream_duration: 0s

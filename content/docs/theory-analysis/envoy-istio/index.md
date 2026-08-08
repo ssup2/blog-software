@@ -464,6 +464,8 @@ spec:
         filterChain:
           filter:
             name: envoy.filters.network.http_connection_manager
+            subFilter:
+              name: envoy.filters.http.router
     patch:
       operation: INSERT_BEFORE
       value:
@@ -481,8 +483,12 @@ spec:
              typed_config:
                '@type': type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
                ...
-               forward_client_cert_details: APPEND_FORWARD
                http_filters:
+               ...
+               - name: istio.stats
+                 typed_config:
+                   '@type': type.googleapis.com/stats.PluginConfig
+                   disable_host_header_fallback: true
 +              - name: envoy.filters.http.lua
 +                typed_config:
 +                  '@type': type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua
@@ -490,12 +496,14 @@ spec:
 +                    function envoy_on_response(response_handle)
 +                      response_handle:headers():add("x-added-by-envoyfilter", "true")
 +                    end
-               - name: istio.metadata_exchange
+               - name: envoy.filters.http.router
                  typed_config:
-                   '@type': type.googleapis.com/udpa.type.v1.TypedStruct
+                   '@type': type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
 ```
 
-EnvoyFilter는 istiod가 생성한 Envoy 설정을 **직접 Patch하는 CR**로, 다른 CR이 추상화하지 않는 Envoy 기능에 접근할 수 있다. 예시는 mock-server Sidecar의 Inbound HTTP Filter Chain에 Lua Filter를 삽입하여 응답 Header를 추가한다. Envoy 내부 구현에 직접 의존하므로 Istio Upgrade 시 깨질 수 있어 주의가 필요하다.
+EnvoyFilter는 istiod가 생성한 Envoy 설정을 **직접 Patch하는 CR**로, 다른 CR이 추상화하지 않는 Envoy 기능에 접근할 수 있다. 예시는 mock-server Sidecar의 Inbound HTTP Filter Chain에 Lua Filter를 삽입하여 응답 Header를 추가한다. `context: SIDECAR_INBOUND`는 Patch 대상을 Sidecar의 Inbound 설정으로 한정하며, Outbound 설정은 `SIDECAR_OUTBOUND`, Gateway Pod는 `GATEWAY`로 지정한다. `applyTo: HTTP_FILTER`는 HTTP Connection Manager의 `http_filters` 배열이 Patch 대상임을 의미한다.
+
+`operation: INSERT_BEFORE`는 match의 `subFilter`로 지정한 기준 Filter 앞에 새 Filter를 삽입하는 연산이다. [Diff 9]에서 Lua Filter가 기준 Filter인 `envoy.filters.http.router` 바로 앞에 추가된 것을 확인할 수 있으며, `subFilter`를 지정하지 않으면 배열의 맨 앞에 삽입된다. 이처럼 EnvoyFilter는 Envoy 내부 구현에 직접 의존하므로 Istio Upgrade 시 깨질 수 있어 주의가 필요하다.
 
 ### 3.7. WorkloadEntry
 
@@ -558,7 +566,7 @@ spec:
 +          load_balancing_weight: 1
 ```
 
-WorkloadEntry는 **VM 같은 Kubernetes 외부 Workload를 Pod처럼 등록**하는 CR이다. 단독으로는 효과가 없고, workloadSelector로 이를 선택하는 ServiceEntry와 함께 사용해야 한다. Label이 매칭되면 WorkloadEntry의 address가 해당 Outbound Cluster의 Endpoint(EDS)로 등록되어, Pod의 Endpoint와 동일한 방식으로 LB 대상이 된다.
+WorkloadEntry는 **Kubernetes Cluster 외부에서 동작하는 Workload를 Pod와 동일한 방식으로 Mesh에 등록**하는 CR이다. 대표적인 대상은 Cluster 밖의 VM에서 동작하는 Server Process이다. 단독으로는 효과가 없고, workloadSelector로 이를 선택하는 ServiceEntry와 함께 사용해야 한다. Label이 매칭되면 WorkloadEntry의 address가 해당 Outbound Cluster의 Endpoint(EDS)로 등록되어, Pod의 Endpoint와 동일한 방식으로 LB 대상이 된다.
 
 ### 3.8. WorkloadGroup
 
@@ -577,7 +585,9 @@ spec:
     network: vm-network
 ```
 
-WorkloadGroup은 적용해도 **Envoy 설정에 아무 변화가 없다** (proxy-config diff 없음). Deployment가 Pod의 Template인 것처럼, WorkloadGroup은 WorkloadEntry의 Template이기 때문이다. VM의 istio-agent가 Auto-registration으로 Mesh에 참여할 때 이 Template을 기반으로 WorkloadEntry가 자동 생성되며, 그 시점에 비로소 Endpoint가 반영된다.
+WorkloadGroup은 적용해도 **Envoy 설정에 아무 변화가 없다**. WorkloadGroup은 그 자체로 Workload를 Mesh에 등록하는 리소스가 아니라, 이후 생성될 WorkloadEntry의 Template이기 때문이다.
+
+Kubernetes Cluster 외부에서 istio-agent를 실행하면 istio-agent가 istiod의 xDS Server에 접속하는데, 이때 자신이 속한 WorkloadGroup과 자신의 address를 함께 알린다. istiod는 해당 WorkloadGroup의 `template`(serviceAccount, network 등)에 전달받은 address를 채운 WorkloadEntry 오브젝트를 Kubernetes API Server에 생성하며, istio-agent와의 연결이 끊어진 뒤 유예 시간 동안 재연결이 없으면 자동으로 삭제한다. 이렇게 생성된 WorkloadEntry가 앞 절의 WorkloadEntry와 동일한 방식으로 Cluster의 Endpoint에 반영되므로, Envoy 설정의 변화는 이 시점에 비로소 나타난다.
 
 ### 3.9. ProxyConfig
 
@@ -594,7 +604,7 @@ spec:
   concurrency: 4
 ```
 
-ProxyConfig도 적용 시점에는 **동작 중인 Envoy에 변화가 없다** (proxy-config diff 없음). concurrency(Worker Thread 수) 같은 설정은 xDS로 동적 전달되는 것이 아니라 Envoy Bootstrap Configuration에 속하기 때문이다. Sidecar Injection 시점에 주입되므로, Pod를 재생성해야 반영된다.
+ProxyConfig도 적용 시점에는 **동작 중인 Envoy에 변화가 없다**. `concurrency` 같은 설정은 xDS로 동적 전달되는 것이 아니라 Envoy Bootstrap Configuration에 속하기 때문이다. Sidecar Injection 시점에 주입되므로, Pod를 재생성해야 반영된다.
 
 ### 3.10. PeerAuthentication
 
@@ -631,7 +641,11 @@ spec:
 -          ... (inbound|8080|| Plaintext Chain 전체 제거)
 ```
 
-PeerAuthentication은 **Sidecar의 Inbound 설정인 virtualInbound Listener Filter Chain에 반영**된다. 기본값인 PERMISSIVE Mode에서는 Port마다 mTLS용 `tls` Chain(Istio ALPN 조건 포함)과 Plaintext용 `raw_buffer` Chain이 함께 존재하지만, STRICT Mode로 변경하면 `raw_buffer` Chain이 모두 제거되어 mTLS가 아닌 연결은 수립 자체가 불가능해진다. `tls` Chain의 `application_protocols` Match 조건도 사라지는데, 더 이상 Plaintext Chain과 구분할 필요 없이 모든 연결이 TLS Chain으로 처리되기 때문이다.
+PeerAuthentication은 **Sidecar의 Inbound 설정인 virtualInbound Listener Filter Chain에 반영**된다. 기본값인 `PERMISSIVE` Mode에서는 Port마다 mTLS용 `tls` Chain과 Plaintext용 `raw_buffer` Chain이 함께 존재하지만, `STRICT` Mode로 변경하면 `raw_buffer` Chain이 모두 제거되어 mTLS가 아닌 연결은 수립 자체가 불가능해진다.
+
+`tls` Chain의 `application_protocols` Match에 나열된 `istio`, `istio-peer-exchange`, `istio-http/1.1`, `istio-h2`는 Istio 전용 ALPN 값으로, 보내는 쪽 Sidecar가 mTLS Handshake 시 광고하여 Sidecar가 만든 mTLS 연결임을 알린다. `PERMISSIVE` Mode에서는 App이 자체적으로 TLS를 처리하는 연결도 같은 Port로 들어올 수 있으므로, 이 ALPN 조건으로 선별한 Sidecar mTLS 연결만 Envoy가 TLS Termination을 수행하여 복호화하고, 그 외의 TLS 연결은 암호화된 상태 그대로 App에 전달한다.
+
+`STRICT` Mode에서는 이 Match 조건도 사라지는데, Plaintext Chain이 제거되어 더 이상 구분할 대상이 없고, Istio mTLS가 아닌 연결은 어차피 Client 인증서 검증에서 실패하기 때문이다.
 
 ### 3.11. RequestAuthentication
 
@@ -827,6 +841,8 @@ spec:
                    '@type': type.googleapis.com/envoy.extensions.filters.http.grpc_stats.v3.FilterConfig
 ```
 
-WasmPlugin은 **Inbound HTTP Filter Chain에 Wasm Filter를 추가**하며, Filter의 실제 설정은 다른 Filter와 달리 ECDS (Extension Config Discovery Service)를 통해 별도 Resource로 전달된다 (적용 전에는 ECDS Resource가 아예 없다). Wasm 모듈은 pilot-agent가 OCI Registry에서 대신 다운로드하여 로컬 경로로 변환 후 Envoy에 전달한다. phase(AUTHN, AUTHZ, STATS 등)로 Filter Chain 내 삽입 위치를 제어할 수 있어, EnvoyFilter보다 안전한 확장 수단이다.
+WasmPlugin은 **Inbound HTTP Filter Chain에 Wasm Filter를 추가**하며, Filter의 실제 설정은 다른 Filter와 달리 ECDS (Extension Config Discovery Service)를 통해 별도 Resource로 전달된다 (적용 전에는 ECDS Resource가 아예 없다). Wasm 모듈은 pilot-agent가 OCI Registry에서 대신 다운로드하여 로컬 경로로 변환 후 Envoy에 전달한다.
+
+`phase`는 Filter Chain 내 삽입 위치를 단계로 지정하는 필드이다. `AUTHN`은 Istio 인증 Filter 앞, `AUTHZ`는 인증 Filter 뒤이자 인가 Filter(`rbac`) 앞, `STATS`는 인가 Filter 뒤이자 Stats Filter(`istio.stats`) 앞에 삽입되며, 지정하지 않으면 Filter Chain의 끝(Router Filter 앞)에 삽입된다. 예시는 `phase: AUTHN`이므로 [Diff 17]에서 항상 맨 앞에 위치하는 `istio.metadata_exchange` 바로 뒤에 삽입되었다. EnvoyFilter의 `subFilter`처럼 특정 Filter 이름에 의존하지 않고 단계로 위치를 지정하므로, Istio Upgrade에 더 안전한 확장 수단이다.
 
 ## 4. 참조
