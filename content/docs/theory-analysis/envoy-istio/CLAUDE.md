@@ -64,8 +64,10 @@ Istio 환경에서 Envoy의 동작을 다루는 문서. 1장은 Sidecar Proxy �
 ## 문서 컨벤션
 
 - Code Block caption: yaml은 `[Config N] <CR> Example`, diff는 `[Diff N] <CR> 적용 전후 <pod>의 proxy-config`.
-  번호는 등장 순서 기준 — [Config 1] = 도입부 실험 환경, [Config/Diff 2~16] = 3.1~3.14 CR.
-  3.2 VirtualService에는 mesh용([Config/Diff 3])과 Gateway-bound용([Config/Diff 4]) 두 쌍이 있고,
+  번호는 등장 순서 기준 — [Config 1] = 도입부 실험 환경,
+  [Config 2] = 3.1의 istio-ingressgateway Service Port 매핑 발췌(diff 없음, 클러스터 실측, Gateway 예시보다 앞에 배치),
+  [Config/Diff 3] = 3.1 Gateway, [Config/Diff 4~17] = 3.2~3.14 CR. Diff 2는 없음(Config/Diff 번호는 쌍 기준).
+  3.2 VirtualService에는 mesh용([Config/Diff 4])과 Gateway-bound용([Config/Diff 5]) 두 쌍이 있고,
   3.8 WorkloadGroup, 3.9 ProxyConfig는 diff 블록 없음. 전체 diff는 2026-08-02에 8080-only 환경에서 재실측함.
 - diff 블록은 unified diff 스타일: 변경 라인(+/-) 앞뒤로 context 라인을 남기고,
   무관한 부분은 `...`으로 표기. 내용은 실측 dump에서 발췌 (창작 금지).

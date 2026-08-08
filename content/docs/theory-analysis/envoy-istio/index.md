@@ -79,7 +79,28 @@ spec:
 
 ### 3.1. Gateway
 
-```yaml {caption="[Config 2] Gateway Example", linenos=table}
+```yaml {caption="[Config 2] istio-ingressgateway Service Port Mapping (발췌)", linenos=table}
+apiVersion: v1
+kind: Service
+metadata:
+  name: istio-ingressgateway
+  namespace: istio-system
+spec:
+  type: LoadBalancer
+  selector:
+    app: istio-ingressgateway
+    istio: ingressgateway
+  ports:
+  - name: http2
+    port: 80          # Server Port declared in Gateway CR
+    targetPort: 8080  # Port where Envoy Listener actually binds
+  - name: https
+    port: 443
+    targetPort: 8443
+  ...
+```
+
+```yaml {caption="[Config 3] Gateway Example", linenos=table}
 apiVersion: networking.istio.io/v1
 kind: Gateway
 metadata:
@@ -97,7 +118,7 @@ spec:
     - "mock-server.dev"
 ```
 
-```diff {caption="[Diff 2] Gateway 적용 전후 istio-ingressgateway Pod의 proxy-config"}
+```diff {caption="[Diff 3] Gateway 적용 전후 istio-ingressgateway Pod의 proxy-config"}
  - '@type': type.googleapis.com/envoy.admin.v3.ListenersConfigDump
 +  dynamic_listeners:
 +  - active_state:
@@ -134,11 +155,11 @@ spec:
    static_route_configs:
 ```
 
-Gateway는 Sidecar가 아닌 **selector로 선택된 Gateway Pod(istio-ingressgateway)의 Envoy에 반영**된다. Gateway CR에는 `80` Port를 선언했지만 Listener는 `0.0.0.0_8080`에 생성되는데, istiod가 `istio-ingressgateway` Service의 Port 매핑(`80` Port → `8080` targetPort)을 따라 실제 Traffic을 받는 targetPort에 Listener를 생성하기 때문이다. Listener와 Route 이름(`http.8080`)은 실제 바인딩 포트 기준이고, Virtual Host 이름(`blackhole:80`)은 Gateway CR에 선언된 Server Port 기준이다. 아직 이 Gateway에 연결된 VirtualService가 없으므로 모든 요청은 `blackhole` Virtual Host에 의해 `404`로 처리된다.
+Gateway는 Sidecar가 아닌 **selector로 선택된 Gateway Pod(istio-ingressgateway)의 Envoy에 반영**된다. Gateway CR에는 `80` Port를 선언했지만 Listener는 `0.0.0.0_8080`에 생성되는데, istiod가 `istio-ingressgateway` Service의 Port 매핑([Config 2]의 `80` Port → `8080` targetPort)을 따라 실제 Traffic을 받는 targetPort에 Listener를 생성하기 때문이다. Listener와 Route 이름(`http.8080`)은 실제 바인딩 포트 기준이고, Virtual Host 이름(`blackhole:80`)은 Gateway CR에 선언된 Server Port 기준이다. 아직 이 Gateway에 연결된 VirtualService가 없으므로 모든 요청은 `blackhole` Virtual Host에 의해 `404`로 처리된다.
 
 ### 3.2. VirtualService
 
-```yaml {caption="[Config 3] VirtualService Example", linenos=table}
+```yaml {caption="[Config 4] VirtualService Example", linenos=table}
 apiVersion: networking.istio.io/v1
 kind: VirtualService
 metadata:
@@ -164,7 +185,7 @@ spec:
           number: 8080
 ```
 
-```diff {caption="[Diff 3] VirtualService 적용 전후 shell Pod의 proxy-config"}
+```diff {caption="[Diff 4] VirtualService 적용 전후 shell Pod의 proxy-config"}
  - '@type': type.googleapis.com/envoy.admin.v3.RoutesConfigDump
    dynamic_route_configs:
    - route_config:
@@ -203,9 +224,9 @@ spec:
              cluster: outbound|8080||mock-server.default.svc.cluster.local
 ```
 
-VirtualService는 **요청을 보내는 쪽 Sidecar의 Route(RDS)에 반영**된다. 기존에 `/*` 하나였던 `mock-server` Virtual Host의 Route Entry가 `/api*` Match와 Catch-all 두 개로 늘어나고, `timeout: 3s`가 Route에 반영된다. 각 Route Entry의 `metadata.filter_metadata.istio.config`에는 이 설정을 만든 VirtualService의 경로가 기록되어 설정의 출처를 추적할 수 있다. Cluster나 Listener는 변하지 않는다.
+VirtualService는 **요청을 보내는 쪽 Sidecar의 Route(RDS)에 반영**된다. 기존에 `/*` 하나였던 `mock-server` Virtual Host의 Route Entry가 `/api*` Match와 Catch-all 두 개로 늘어나고, `timeout: 3s`가 Route에 반영된다. 사라진 `name: default`는 VirtualService가 없을 때 istiod가 자동 생성하는 기본 Route에 붙이는 이름이며, VirtualService 유래 Route는 `spec.http[].name`을 지정하지 않는 한 이름 없이 생성된다. 대신 각 Route Entry의 `metadata.filter_metadata.istio.config`에 이 설정을 만든 VirtualService의 경로가 기록되어 설정의 출처를 추적할 수 있다. Cluster나 Listener는 변하지 않는다.
 
-```yaml {caption="[Config 4] VirtualService with Gateway Example", linenos=table}
+```yaml {caption="[Config 5] VirtualService with Gateway Example", linenos=table}
 apiVersion: networking.istio.io/v1
 kind: VirtualService
 metadata:
@@ -224,7 +245,7 @@ spec:
           number: 8080
 ```
 
-```diff {caption="[Diff 4] Gateway에 VirtualService 연결 전후 istio-ingressgateway Pod의 proxy-config"}
+```diff {caption="[Diff 5] Gateway에 VirtualService 연결 전후 istio-ingressgateway Pod의 proxy-config"}
  - '@type': type.googleapis.com/envoy.admin.v3.RoutesConfigDump
    dynamic_route_configs:
    - route_config:
@@ -250,11 +271,11 @@ spec:
 +            ...
 ```
 
-[Config 4]는 `gateways` 필드로 [Config 2]의 Gateway에 연결한 VirtualService 예시이다. 이 경우 Sidecar가 아닌 **Gateway Pod(istio-ingressgateway)의 Route에 반영**되며, [Diff 2]에서 `blackhole` Virtual Host뿐이었던 `http.8080` Route Table이 `mock-server.dev` Virtual Host로 교체되어 `mock-server` Cluster로 라우팅되기 시작한다. Gateway Pod도 Sidecar와 동일하게 Mesh 전체 서비스의 Cluster 설정을 받고 있으므로, 라우팅 대상인 `outbound|8080||mock-server...` Cluster는 이미 존재한다.
+[Config 5]는 `gateways` 필드로 [Config 3]의 Gateway에 연결한 VirtualService 예시이다. 이 경우 Sidecar가 아닌 **Gateway Pod(istio-ingressgateway)의 Route에 반영**되며, [Diff 3]에서 `blackhole` Virtual Host뿐이었던 `http.8080` Route Table이 `mock-server.dev` Virtual Host로 교체되어 `mock-server` Cluster로 라우팅되기 시작한다. Gateway Pod도 Sidecar와 동일하게 Mesh 전체 서비스의 Cluster 설정을 받고 있으므로, 라우팅 대상인 `outbound|8080||mock-server...` Cluster는 이미 존재한다.
 
 ### 3.3. DestinationRule
 
-```yaml {caption="[Config 5] DestinationRule Example", linenos=table}
+```yaml {caption="[Config 6] DestinationRule Example", linenos=table}
 apiVersion: networking.istio.io/v1
 kind: DestinationRule
 metadata:
@@ -271,7 +292,7 @@ spec:
       version: v1
 ```
 
-```diff {caption="[Diff 5] DestinationRule 적용 전후 shell Pod의 proxy-config"}
+```diff {caption="[Diff 6] DestinationRule 적용 전후 shell Pod의 proxy-config"}
  - '@type': type.googleapis.com/envoy.admin.v3.ClustersConfigDump
    dynamic_active_clusters:
    ...
@@ -307,7 +328,7 @@ DestinationRule은 **요청을 보내는 쪽 Sidecar의 Cluster(CDS)에 반영**
 
 ### 3.4. ServiceEntry
 
-```yaml {caption="[Config 6] ServiceEntry Example", linenos=table}
+```yaml {caption="[Config 7] ServiceEntry Example", linenos=table}
 apiVersion: networking.istio.io/v1
 kind: ServiceEntry
 metadata:
@@ -324,7 +345,7 @@ spec:
   location: MESH_EXTERNAL
 ```
 
-```diff {caption="[Diff 6] ServiceEntry 적용 전후 shell Pod의 proxy-config"}
+```diff {caption="[Diff 7] ServiceEntry 적용 전후 shell Pod의 proxy-config"}
  - '@type': type.googleapis.com/envoy.admin.v3.ClustersConfigDump
    dynamic_active_clusters:
    ...
@@ -359,7 +380,7 @@ ServiceEntry는 외부 서비스를 Mesh의 Service Registry에 등록하며, **
 
 ### 3.5. Sidecar
 
-```yaml {caption="[Config 7] Sidecar Example", linenos=table}
+```yaml {caption="[Config 8] Sidecar Example", linenos=table}
 apiVersion: networking.istio.io/v1
 kind: Sidecar
 metadata:
@@ -371,7 +392,7 @@ spec:
     - "./mock-server.default.svc.cluster.local"
 ```
 
-```diff {caption="[Diff 7] Sidecar 적용 전후 shell Pod의 proxy-config (Cluster 22개 → 8개)"}
+```diff {caption="[Diff 8] Sidecar 적용 전후 shell Pod의 proxy-config (Cluster 22개 → 8개)"}
  - '@type': type.googleapis.com/envoy.admin.v3.ClustersConfigDump
    dynamic_active_clusters:
 -  - cluster:
@@ -393,7 +414,7 @@ Sidecar CR은 Envoy에 새로운 설정을 추가하는 것이 아니라 **Sidec
 
 ### 3.6. EnvoyFilter
 
-```yaml {caption="[Config 8] EnvoyFilter Example", linenos=table}
+```yaml {caption="[Config 9] EnvoyFilter Example", linenos=table}
 apiVersion: networking.istio.io/v1alpha3
 kind: EnvoyFilter
 metadata:
@@ -423,7 +444,7 @@ spec:
             end
 ```
 
-```diff {caption="[Diff 8] EnvoyFilter 적용 전후 mock-server Pod의 proxy-config (virtualInbound Listener)"}
+```diff {caption="[Diff 9] EnvoyFilter 적용 전후 mock-server Pod의 proxy-config (virtualInbound Listener)"}
            - name: envoy.filters.network.http_connection_manager
              typed_config:
                '@type': type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
@@ -446,7 +467,7 @@ EnvoyFilter는 istiod가 생성한 Envoy 설정을 **직접 Patch하는 CR**로,
 
 ### 3.7. WorkloadEntry
 
-```yaml {caption="[Config 9] WorkloadEntry Example", linenos=table}
+```yaml {caption="[Config 10] WorkloadEntry Example", linenos=table}
 apiVersion: networking.istio.io/v1
 kind: ServiceEntry
 metadata:
@@ -476,7 +497,7 @@ spec:
     app: vm-server
 ```
 
-```diff {caption="[Diff 9] WorkloadEntry 적용 전후 shell Pod의 proxy-config"}
+```diff {caption="[Diff 10] WorkloadEntry 적용 전후 shell Pod의 proxy-config"}
  - '@type': type.googleapis.com/envoy.admin.v3.ClustersConfigDump
    dynamic_active_clusters:
    ...
@@ -509,7 +530,7 @@ WorkloadEntry는 **VM 같은 Kubernetes 외부 Workload를 Pod처럼 등록**하
 
 ### 3.8. WorkloadGroup
 
-```yaml {caption="[Config 10] WorkloadGroup Example", linenos=table}
+```yaml {caption="[Config 11] WorkloadGroup Example", linenos=table}
 apiVersion: networking.istio.io/v1
 kind: WorkloadGroup
 metadata:
@@ -528,7 +549,7 @@ WorkloadGroup은 적용해도 **Envoy 설정에 아무 변화가 없다** (proxy
 
 ### 3.9. ProxyConfig
 
-```yaml {caption="[Config 11] ProxyConfig Example", linenos=table}
+```yaml {caption="[Config 12] ProxyConfig Example", linenos=table}
 apiVersion: networking.istio.io/v1beta1
 kind: ProxyConfig
 metadata:
@@ -545,7 +566,7 @@ ProxyConfig도 적용 시점에는 **동작 중인 Envoy에 변화가 없다** (
 
 ### 3.10. PeerAuthentication
 
-```yaml {caption="[Config 12] PeerAuthentication Example", linenos=table}
+```yaml {caption="[Config 13] PeerAuthentication Example", linenos=table}
 apiVersion: security.istio.io/v1
 kind: PeerAuthentication
 metadata:
@@ -556,7 +577,7 @@ spec:
     mode: STRICT
 ```
 
-```diff {caption="[Diff 12] PeerAuthentication 적용 전후 mock-server Pod의 proxy-config (virtualInbound Listener)"}
+```diff {caption="[Diff 13] PeerAuthentication 적용 전후 mock-server Pod의 proxy-config (virtualInbound Listener)"}
          name: virtualInbound
          filter_chains:
          ...
@@ -582,7 +603,7 @@ PeerAuthentication은 **받는 쪽 Sidecar의 virtualInbound Listener Filter Cha
 
 ### 3.11. RequestAuthentication
 
-```yaml {caption="[Config 13] RequestAuthentication Example", linenos=table}
+```yaml {caption="[Config 14] RequestAuthentication Example", linenos=table}
 apiVersion: security.istio.io/v1
 kind: RequestAuthentication
 metadata:
@@ -597,7 +618,7 @@ spec:
     jwksUri: "https://raw.githubusercontent.com/istio/istio/release-1.24/security/tools/jwt/samples/jwks.json"
 ```
 
-```diff {caption="[Diff 13] RequestAuthentication 적용 전후 mock-server Pod의 proxy-config (virtualInbound Listener)"}
+```diff {caption="[Diff 14] RequestAuthentication 적용 전후 mock-server Pod의 proxy-config (virtualInbound Listener)"}
                http_filters:
                - name: istio.metadata_exchange
                  ...
@@ -628,7 +649,7 @@ RequestAuthentication은 **받는 쪽 Sidecar의 Inbound HTTP Filter Chain에 `j
 
 ### 3.12. AuthorizationPolicy
 
-```yaml {caption="[Config 14] AuthorizationPolicy Example", linenos=table}
+```yaml {caption="[Config 15] AuthorizationPolicy Example", linenos=table}
 apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
 metadata:
@@ -645,7 +666,7 @@ spec:
         paths: ["/admin"]
 ```
 
-```diff {caption="[Diff 14] AuthorizationPolicy 적용 전후 mock-server Pod의 proxy-config (virtualInbound Listener)"}
+```diff {caption="[Diff 15] AuthorizationPolicy 적용 전후 mock-server Pod의 proxy-config (virtualInbound Listener)"}
                http_filters:
                - name: istio.metadata_exchange
                  ...
@@ -677,7 +698,7 @@ AuthorizationPolicy는 **받는 쪽 Sidecar의 Inbound HTTP Filter Chain에 `rba
 
 ### 3.13. Telemetry
 
-```yaml {caption="[Config 15] Telemetry Example", linenos=table}
+```yaml {caption="[Config 16] Telemetry Example", linenos=table}
 apiVersion: telemetry.istio.io/v1
 kind: Telemetry
 metadata:
@@ -689,7 +710,7 @@ spec:
     - name: otel
 ```
 
-```diff {caption="[Diff 15] Telemetry 적용 전후 mock-server Pod의 proxy-config (Listener Access Logger 8개 전부 교체)"}
+```diff {caption="[Diff 16] Telemetry 적용 전후 mock-server Pod의 proxy-config (Listener Access Logger 8개 전부 교체)"}
              typed_config:
                '@type': type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
                access_log:
@@ -719,7 +740,7 @@ Telemetry는 **Listener와 HTTP Connection Manager의 Access Logger, Tracing, St
 
 ### 3.14. WasmPlugin
 
-```yaml {caption="[Config 16] WasmPlugin Example", linenos=table}
+```yaml {caption="[Config 17] WasmPlugin Example", linenos=table}
 apiVersion: extensions.istio.io/v1alpha1
 kind: WasmPlugin
 metadata:
@@ -740,7 +761,7 @@ spec:
       - admin:admin
 ```
 
-```diff {caption="[Diff 16] WasmPlugin 적용 전후 mock-server Pod의 proxy-config (ECDS, virtualInbound Listener)"}
+```diff {caption="[Diff 17] WasmPlugin 적용 전후 mock-server Pod의 proxy-config (ECDS, virtualInbound Listener)"}
  - '@type': type.googleapis.com/envoy.admin.v3.EcdsConfigDump
 +  ecds_filters:
 +  - ecds_filter:
