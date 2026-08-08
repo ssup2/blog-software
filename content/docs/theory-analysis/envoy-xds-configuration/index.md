@@ -25,7 +25,8 @@ Envoy Configuration은 Root Configration 역할을 수행하는 **Bootstrap Conf
 * **CDS (Cluster Discovery Service)** : Cluster 설정을 동적으로 전달한다.
 * **EDS (Endpoint Discovery Service)** : Endpoint 설정을 동적으로 전달한다.
 * **SDS (Secret Discovery Service)** : Secret 설정을 동적으로 전달한다.
-* **ADS (Aggregated Discovery Service)** : 새로운 설정을 전달하는 API가 아니라, LDS/RDS/CDS/EDS/SDS를 별도의 연결 대신 하나의 gRPC Stream으로 묶어 전달하는 전송 메커니즘이다. 이를 통해 Management Server가 CDS → EDS → LDS → RDS와 같이 의존성에 맞는 적용 순서를 보장할 수 있으며, 설정 갱신 과정에서 발생할 수 있는 Traffic 유실을 방지할 수 있다.
+* **ECDS (Extension Config Discovery Service)** : Listener에 이름으로만 참조해 둔 Filter(Extension)의 실제 설정을 별도 Resource로 전달한다. Listener 전체를 다시 받지 않고 Filter 설정만 독립적으로 갱신할 수 있다.
+* **ADS (Aggregated Discovery Service)** : 새로운 설정을 전달하는 API가 아니라, LDS/RDS/CDS/EDS/SDS/ECDS를 별도의 연결 대신 하나의 gRPC Stream으로 묶어 전달하는 전송 메커니즘이다. 이를 통해 Management Server가 CDS → EDS → LDS → RDS와 같이 의존성에 맞는 적용 순서를 보장할 수 있으며, 설정 갱신 과정에서 발생할 수 있는 Traffic 유실을 방지할 수 있다.
 
 #### 1.1.1. LDS (Listener Discovery Service)
 
@@ -305,9 +306,40 @@ resources:
 
 [Config 5]는 [Figure 1]의 Secret 부분에 해당하는 SDS 설정 예시를 나타내고 있다. `internal-cert`는 `internal-listener`의 mTLS 종료와 모든 Cluster의 Client 인증서로 함께 사용되며, `internal-ca`는 상대방 인증서 검증에 사용되는 CA Bundle이다. `web-cert`와 `kafka-cert`는 `external-listener`에서 SNI에 따라 선택되는 Filter Chain별 Server 인증서이다.
 
-#### 1.1.6. ADS (Aggregated Discovery Service)
+#### 1.1.6. ECDS (Extension Config Discovery Service)
 
-```yaml {caption="[Config 6] ADS Configuration", linenos=table}
+```yaml {caption="[Config 6] ECDS Configuration", linenos=table}
+# ── LDS: HTTP Filter references config BY NAME, no inline config ──────
+          http_filters:
+          - name: custom-wasm-filter           # ECDS: custom-wasm-filter
+            config_discovery:
+              config_source: { ads: {} }       # subscribe on the same ADS stream
+              type_urls:
+              - type.googleapis.com/envoy.extensions.filters.http.wasm.v3.Wasm
+          - name: envoy.filters.http.router
+ 
+# ── ECDS: Extension Config Resource for the referenced name ───────────
+resources:
+- "@type": type.googleapis.com/envoy.config.core.v3.TypedExtensionConfig
+  name: custom-wasm-filter                     # must match config_discovery name
+  typed_config:
+    "@type": type.googleapis.com/envoy.extensions.filters.http.wasm.v3.Wasm
+    config:
+      vm_config:
+        runtime: envoy.wasm.runtime.v8
+        code:
+          local: { filename: "/etc/envoy/filter.wasm" }
+```
+
+[Config 6]은 ECDS 설정 예시를 나타내고 있다. Listener의 HTTP Filter 자리에는 설정 본문 대신 `config_discovery` 참조(이름과 type_url)만 두고, 실제 Filter 설정은 같은 이름의 TypedExtensionConfig Resource로 별도 전달받는다.
+
+Filter 설정이 Listener 안에 Inline으로 들어 있으면 Filter 설정 변경도 Listener 변경이 된다. Envoy는 동작 중인 Listener의 설정을 직접 변경하지 못하므로, 변경된 설정으로 새 Listener를 만들어 교체한다. 이 과정에서 기존 Listener가 처리하던 연결들은 Drain을 거쳐 일정 시간 안에 모두 끊어진다. 즉 Filter 설정 한 줄을 바꿔도 해당 Port의 Long-lived 연결이 끊길 수 있다.
+
+반면 ECDS를 사용하면 Filter 설정이 Listener 밖의 독립된 Resource로 분리되어 있으므로, 설정 갱신 시 Listener는 그대로 유지되고 참조된 설정만 교체된다. 기존 연결은 영향을 받지 않으며, 갱신된 Filter 설정은 이후의 새 요청부터 적용된다. Wasm Filter처럼 설정이 크거나 자주 바뀌는 Extension에 주로 사용되며, Istio의 WasmPlugin CR이 이 방식으로 반영되는 대표적인 예이다.
+
+#### 1.1.7. ADS (Aggregated Discovery Service)
+
+```yaml {caption="[Config 7] ADS Configuration", linenos=table}
 # ── 1 · Envoy → Server: CDS wildcard subscription ─────────────────────
 DiscoveryRequest:
   node: { id: envoy-node-1 }           # identity — sent once per stream
@@ -340,7 +372,7 @@ DiscoveryRequest:
   error_detail: { code: 3, message: "invalid filter_chain_match" }
 ```
 
-[Config 6]은 [Figure 1] 상단의 1 Stream with ADS에 해당하는, 하나의 gRPC Stream 위에서 오가는 xDS 메시지 흐름을 나타내고 있다. Envoy는 CDS와 LDS를 Wildcard로 구독하고, 응답으로 받은 Cluster와 Listener가 참조하는 이름을 기반으로 EDS, RDS, SDS 구독이 파생된다. Envoy는 각 응답에 대해 `version`과 `nonce`를 되돌려주는 ACK를 보내며, 잘못된 설정을 받은 경우에는 NACK를 보내고 마지막 정상 버전을 유지한다.
+[Config 7]은 [Figure 1] 상단의 1 Stream with ADS에 해당하는, 하나의 gRPC Stream 위에서 오가는 xDS 메시지 흐름을 나타내고 있다. Envoy는 CDS와 LDS를 Wildcard로 구독하고, 응답으로 받은 Cluster와 Listener가 참조하는 이름을 기반으로 EDS, RDS, SDS 구독이 파생된다. Envoy는 각 응답에 대해 `version`과 `nonce`를 되돌려주는 ACK를 보내며, 잘못된 설정을 받은 경우에는 NACK를 보내고 마지막 정상 버전을 유지한다.
 
 ### 1.2. Bootstrap Configuration
 
@@ -354,7 +386,7 @@ Envoy는 Bootstrap Configuration 파일에 필요한 설정을 모두 넣어서 
 
 #### 1.2.1. Static Configuration
 
-```yaml {caption="[Config 7] Static Configuration Example", linenos=table}
+```yaml {caption="[Config 8] Static Configuration Example", linenos=table}
 static_resources:
 
   listeners:                                           # INLINE → LDS
@@ -401,13 +433,13 @@ admin:
     socket_address: { address: 127.0.0.1, port_value: 9901 }
 ```
 
-[Config 7]은 Envoy의 **Static Configuration 예시**를 나타내고 있다. Static Configuration은 Bootstrap Configuration 파일에 Envoy 동작에 필요한 모든 설정을 고정값으로 넣어서 이용하는 방식을 의미한다. `static_resources` 아래에 Listener, Route, Cluster, Endpoint가 모두 Inline으로 정의되어 있으며, [Figure 1]에서 xDS API를 통해 전달되던 각 Resource가 파일 안에 그대로 들어간 형태이다. 
+[Config 8]은 Envoy의 **Static Configuration 예시**를 나타내고 있다. Static Configuration은 Bootstrap Configuration 파일에 Envoy 동작에 필요한 모든 설정을 고정값으로 넣어서 이용하는 방식을 의미한다. `static_resources` 아래에 Listener, Route, Cluster, Endpoint가 모두 Inline으로 정의되어 있으며, [Figure 1]에서 xDS API를 통해 전달되던 각 Resource가 파일 안에 그대로 들어간 형태이다. 
 
 `listener_http`는 `10000` Port로 수신한 모든 요청을 Inline Route Table(`local_route`)을 거쳐 `service_backend` Cluster의 두 Endpoint로 전달한다. xDS Server가 필요 없어 구성이 단순하지만, 설정을 변경하려면 파일을 수정하고 Envoy를 재시작해야 한다.
 
 #### 1.2.2. Mostly Static with Dynamic EDS
 
-```yaml {caption="[Config 8] Mostly Static with Dynamic EDS Example", linenos=table}
+```yaml {caption="[Config 9] Mostly Static with Dynamic EDS Example", linenos=table}
 static_resources:
  
   listeners:                                           # INLINE (not LDS)
@@ -469,13 +501,13 @@ admin:
     socket_address: { address: 127.0.0.1, port_value: 9901 }
 ```
 
-[Config 8]은 Listener, Route, Cluster는 Static으로 고정하고 **Endpoint만 EDS로 동적으로 받는 예시**를 나타내고 있다. `service_backend` Cluster가 `type: EDS`로 설정되어 있어, 실제 인스턴스 목록은 `eds_config`에 지정된 xDS Server로부터 `service_name`(`service_backend`)을 Key로 구독한다. 이때 `api_config_source`는 ADS가 아닌 EDS 전용 gRPC Stream을 사용한다.
+[Config 9]는 Listener, Route, Cluster는 Static으로 고정하고 **Endpoint만 EDS로 동적으로 받는 예시**를 나타내고 있다. `service_backend` Cluster가 `type: EDS`로 설정되어 있어, 실제 인스턴스 목록은 `eds_config`에 지정된 xDS Server로부터 `service_name`(`service_backend`)을 Key로 구독한다. 이때 `api_config_source`는 ADS가 아닌 EDS 전용 gRPC Stream을 사용한다.
 
 xDS Server의 주소 자체는 동적으로 받아올 수 없으므로, `xds_cluster`는 Static Cluster로 Bootstrap 파일에 직접 정의되어야 하며 gRPC 통신을 위해 HTTP/2가 활성화되어 있다. 이 방식은 배포나 Scaling으로 인스턴스 IP만 자주 바뀌는 환경에서, 라우팅 구조는 고정한 채 Endpoint 갱신만 재시작 없이 반영하고 싶을 때 사용된다.
 
 #### 1.2.3. Dynamic Configuration
 
-```yaml {caption="[Config 9] Dynamic Configuration Example", linenos=table}
+```yaml {caption="[Config 10] Dynamic Configuration Example", linenos=table}
 node:                                                  # xDS identity — xDS Server keys config on this
   id: envoy-node-1
   cluster: demo-cluster
@@ -517,7 +549,7 @@ admin:
     socket_address: { address: 127.0.0.1, port_value: 9901 }
 ```
 
-[Config 9]는 Listener와 Cluster부터 모든 Resource를 xDS로 받아오는 **Dynamic Configuration 예시**를 나타내고 있다. `dynamic_resources`의 `lds_config`와 `cds_config`가 모두 `ads`로 지정되어 있어, LDS와 CDS 구독이 `ads_config`에 정의된 단일 gRPC Stream으로 전달되고, 응답에서 파생되는 RDS, EDS, SDS 구독도 같은 Stream을 공유한다. 이 Stream 위에서 오가는 메시지 흐름이 [Config 6]이다. 
+[Config 10]은 Listener와 Cluster부터 모든 Resource를 xDS로 받아오는 **Dynamic Configuration 예시**를 나타내고 있다. `dynamic_resources`의 `lds_config`와 `cds_config`가 모두 `ads`로 지정되어 있어, LDS와 CDS 구독이 `ads_config`에 정의된 단일 gRPC Stream으로 전달되고, 응답에서 파생되는 RDS, EDS, SDS 구독도 같은 Stream을 공유한다. 이 Stream 위에서 오가는 메시지 흐름이 [Config 7]이다. 
 
 `node`는 xDS Server가 어느 Envoy에게 어떤 설정을 내려줄지 구분하는 Identity이며, `set_node_on_first_message_only`는 Stream의 첫 메시지에만 `node`를 실어 이후 메시지의 크기를 줄인다. 결과적으로 Bootstrap 파일에는 xDS Server 접속 정보(`xds_cluster`)와 `admin`만 남고, 앞서 살펴본 [Config 1~5]의 모든 Resource가 이 연결을 통해 동적으로 전달된다.
 
