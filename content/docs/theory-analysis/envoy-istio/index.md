@@ -641,7 +641,7 @@ spec:
 -          ... (inbound|8080|| Plaintext Chain 전체 제거)
 ```
 
-PeerAuthentication은 **Sidecar의 Inbound 설정인 virtualInbound Listener Filter Chain에 반영**된다. 기본값인 `PERMISSIVE` Mode에서는 Port마다 mTLS용 `tls` Chain과 Plaintext용 `raw_buffer` Chain이 함께 존재하지만, `STRICT` Mode로 변경하면 `raw_buffer` Chain이 모두 제거되어 mTLS가 아닌 연결은 수립 자체가 불가능해진다.
+PeerAuthentication은 **Sidecar의 Inbound `virtualInbound` Listener Filter Chain에 반영**된다. 기본값인 `PERMISSIVE` Mode에서는 Port마다 mTLS용 `tls` Chain과 Plaintext용 `raw_buffer` Chain이 함께 존재하지만, `STRICT` Mode로 변경하면 `raw_buffer` Chain이 모두 제거되어 mTLS가 아닌 연결은 수립 자체가 불가능해진다.
 
 `tls` Chain의 `application_protocols` Match에 나열된 `istio`, `istio-peer-exchange`, `istio-http/1.1`, `istio-h2`는 Istio 전용 ALPN 값으로, 보내는 쪽 Sidecar가 mTLS Handshake 시 광고하여 Sidecar가 만든 mTLS 연결임을 알린다. `PERMISSIVE` Mode에서는 App이 자체적으로 TLS를 처리하는 연결도 같은 Port로 들어올 수 있으므로, 이 ALPN 조건으로 선별한 Sidecar mTLS 연결만 Envoy가 TLS Termination을 수행하여 복호화하고, 그 외의 TLS 연결은 암호화된 상태 그대로 App에 전달한다.
 
