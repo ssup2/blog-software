@@ -691,7 +691,9 @@ spec:
                    '@type': type.googleapis.com/envoy.extensions.filters.http.grpc_stats.v3.FilterConfig
 ```
 
-RequestAuthentication은 **Sidecar의 Inbound HTTP Filter Chain에 `jwt_authn` Filter를 추가**한다. CR에는 `jwksUri`를 지정했지만 Envoy 설정에는 `local_jwks`로 반영되는데, istiod가 JWKS를 미리 가져와 인라인으로 내려주기 때문이다. 이 Filter는 요청의 JWT를 검증하여 유효하지 않으면 401로 거부하고, 유효하면 Claim 정보를 뒤의 Filter(AuthorizationPolicy의 RBAC 등)에서 사용할 수 있게 한다. `allow_missing` Rule에 의해 JWT가 없는 요청은 통과되므로, 미인증 요청 차단은 AuthorizationPolicy와 조합해야 한다.
+RequestAuthentication은 **Sidecar의 Inbound HTTP Filter Chain에 `jwt_authn` Filter를 추가**한다. CR에는 `jwksUri`를 지정했지만 Envoy 설정에는 `local_jwks`로 반영된다. istiod가 `jwksUri`의 JWKS(공개키 목록)를 대신 가져온 뒤, 키 내용을 `jwt_authn` Filter 설정의 `inline_string` 값에 그대로 담아 xDS로 배포하기 때문이다. 
+
+덕분에 각 Envoy는 외부 JWKS Endpoint에 직접 접근할 필요 없이 설정에 포함된 키로 바로 JWT를 검증할 수 있으며, 키 갱신도 istiod가 주기적으로 다시 가져와 xDS Push로 반영한다. 이 Filter는 요청의 JWT를 검증하여 유효하지 않으면 401로 거부하고, 유효하면 Claim 정보를 뒤의 Filter(AuthorizationPolicy의 RBAC 등)에서 사용할 수 있게 한다. `allow_missing` Rule에 의해 JWT가 없는 요청은 통과되므로, 미인증 요청 차단은 AuthorizationPolicy와 조합해야 한다.
 
 ### 3.12. AuthorizationPolicy
 
@@ -841,7 +843,7 @@ spec:
                    '@type': type.googleapis.com/envoy.extensions.filters.http.grpc_stats.v3.FilterConfig
 ```
 
-WasmPlugin은 **Inbound HTTP Filter Chain에 Wasm Filter를 추가**하며, Filter의 실제 설정은 다른 Filter와 달리 ECDS (Extension Config Discovery Service)를 통해 별도 Resource로 전달된다 (적용 전에는 ECDS Resource가 아예 없다). Wasm 모듈은 pilot-agent가 OCI Registry에서 대신 다운로드하여 로컬 경로로 변환 후 Envoy에 전달한다.
+WasmPlugin은 **Inbound HTTP Filter Chain에 Wasm Filter를 추가**하며, Filter의 실제 설정은 다른 Filter와 달리 ECDS (Extension Config Discovery Service)를 통해 별도 Resource로 전달된다. Wasm 모듈은 pilot-agent가 OCI Registry에서 대신 다운로드하여 로컬 경로로 변환 후 Envoy에 전달한다.
 
 `phase`는 Filter Chain 내 삽입 위치를 단계로 지정하는 필드이다. `AUTHN`은 Istio 인증 Filter 앞, `AUTHZ`는 인증 Filter 뒤이자 인가 Filter(`rbac`) 앞, `STATS`는 인가 Filter 뒤이자 Stats Filter(`istio.stats`) 앞에 삽입되며, 지정하지 않으면 Filter Chain의 끝(Router Filter 앞)에 삽입된다. 예시는 `phase: AUTHN`이므로 [Diff 17]에서 항상 맨 앞에 위치하는 `istio.metadata_exchange` 바로 뒤에 삽입되었다. EnvoyFilter의 `subFilter`처럼 특정 Filter 이름에 의존하지 않고 단계로 위치를 지정하므로, Istio Upgrade에 더 안전한 확장 수단이다.
 
