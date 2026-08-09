@@ -9,7 +9,7 @@ CR별 Envoy 설정 변화(실측 diff)는 2026-08-09에 **envoy-configuration-is
 ## 문서 구성 및 상태
 
 - **1장 (Envoy as Sidecar Proxy)**: 완료. Pod 내부 Traffic 흐름 + pilot-agent를 xDS Proxy로 두는 이유.
-- **2장 (Envoy as Ingress/Egress Gateway)**: 미작성.
+- **2장 (Envoy as Ingress/Egress Gateway)**: 초안 작성됨 (2026-08-09). 공통 구조(router 모드, 빈 Envoy) + Ingress/Egress 차이(Service 노출·Label·Traffic 흐름)를 소절 없이 한 장에 서술. ingress/egress 동일성은 클러스터 실측으로 검증됨(Deployment args·Envoy 설정 diff 0). Figure 미추가.
 - **3장 (참조)**: 링크 미채움.
 
 ## 폴더 구조

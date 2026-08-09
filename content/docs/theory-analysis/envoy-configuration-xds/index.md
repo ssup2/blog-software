@@ -17,6 +17,7 @@ Envoy Configuration은 Root Configration 역할을 수행하는 **Bootstrap Conf
 * **Cluster** : Upstream 서비스의 논리적 그룹으로, 연결 방식과 LB 정책을 정의한다.
 * **Endpoint** : Cluster에 속한 실제 인스턴스의 IP:Port 목록을 정의한다.
 * **Secret** : TLS 인증서와 키 등 민감 정보를 정의한다.
+* **Extension Config** : Listener의 Filter 자리에 이름으로만 참조해 둔 Extension(Wasm Filter 등)의 실제 설정을 정의한다.
 
 각 xDS Resource는 대응하는 xDS API를 통해 동적으로 설정된다. xDS API의 종류는 다음과 같다.
 
@@ -60,6 +61,11 @@ resources:
           route_config_name: internal-routes   # RDS: Route table to read (L7 only)
           config_source: { ads: {} }
         http_filters:
+        - name: internal-wasm-filter           # ECDS: config fetched separately BY NAME
+          config_discovery:
+            config_source: { ads: {} }
+            type_urls:
+            - type.googleapis.com/envoy.extensions.filters.http.wasm.v3.Wasm
         - name: envoy.filters.http.router      # terminal — executes the matched RDS entry
           typed_config:
             "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
@@ -116,7 +122,7 @@ resources:
         cluster: kafka                         # straight to cluster, no Route table
 ```
 
-[Config 1]은 [Figure 1]의 Listener 부분에 해당하는 LDS 설정 예시를 나타내고 있다. `internal-listener`는 `8080` Port에서 mTLS로 Traffic을 수신하며, `internal-cert` Secret으로 자신을 증명하고 `internal-ca` Secret으로 Client를 검증한 뒤 요청을 `internal-routes` Route Table로 넘긴다. `external-listener`는 `443` Port에서 TLS Inspector로 SNI를 확인하여 Filter Chain을 선택한다. `web.com` Chain은 `web-cert` Secret으로 TLS를 종료한 뒤 `external-routes` Route Table로 요청을 넘기고, `kafka.com` Chain은 `kafka-cert` Secret으로 TLS를 종료한 뒤 Route Table을 거치지 않고 TCP Proxy를 통해 `kafka` Cluster로 바로 전달한다.
+[Config 1]은 [Figure 1]의 Listener 부분에 해당하는 LDS 설정 예시를 나타내고 있다. `internal-listener`는 `8080` Port에서 mTLS로 Traffic을 수신하며, `internal-cert` Secret으로 자신을 증명하고 `internal-ca` Secret으로 Client를 검증한 뒤 요청을 `internal-routes` Route Table로 넘긴다. HTTP Filter Chain에는 Wasm Filter가 `internal-wasm-filter`라는 이름의 `config_discovery` 참조로만 들어 있으며, 실제 Filter 설정은 ECDS를 통해 별도로 전달받는다 (1.1.6에서 다룬다). `external-listener`는 `443` Port에서 TLS Inspector로 SNI를 확인하여 Filter Chain을 선택한다. `web.com` Chain은 `web-cert` Secret으로 TLS를 종료한 뒤 `external-routes` Route Table로 요청을 넘기고, `kafka.com` Chain은 `kafka-cert` Secret으로 TLS를 종료한 뒤 Route Table을 거치지 않고 TCP Proxy를 통해 `kafka` Cluster로 바로 전달한다.
 
 #### 1.1.2. RDS (Route Discovery Service)
 
@@ -309,19 +315,11 @@ resources:
 #### 1.1.6. ECDS (Extension Config Discovery Service)
 
 ```yaml {caption="[Config 6] ECDS Configuration", linenos=table}
-# ── LDS: HTTP Filter references config BY NAME, no inline config ──────
-          http_filters:
-          - name: custom-wasm-filter           # ECDS: custom-wasm-filter
-            config_discovery:
-              config_source: { ads: {} }       # subscribe on the same ADS stream
-              type_urls:
-              - type.googleapis.com/envoy.extensions.filters.http.wasm.v3.Wasm
-          - name: envoy.filters.http.router
- 
-# ── ECDS: Extension Config Resource for the referenced name ───────────
 resources:
+
+# ── Extension Config referenced by internal-listener (BY NAME) ────────
 - "@type": type.googleapis.com/envoy.config.core.v3.TypedExtensionConfig
-  name: custom-wasm-filter                     # must match config_discovery name
+  name: internal-wasm-filter                   # must match config_discovery name
   typed_config:
     "@type": type.googleapis.com/envoy.extensions.filters.http.wasm.v3.Wasm
     config:
@@ -331,11 +329,11 @@ resources:
           local: { filename: "/etc/envoy/filter.wasm" }
 ```
 
-[Config 6]은 ECDS 설정 예시를 나타내고 있다. Listener의 HTTP Filter 자리에는 설정 본문 대신 `config_discovery` 참조(이름과 type_url)만 두고, 실제 Filter 설정은 같은 이름의 TypedExtensionConfig Resource로 별도 전달받는다.
+[Config 6]은 [Config 1]의 `internal-listener`가 `config_discovery`로 참조하고 있는 `internal-wasm-filter`의 실제 설정을 전달하는 ECDS 예시를 나타내고 있다. Listener의 HTTP Filter 자리에는 설정 본문 대신 참조(이름과 type_url)만 두고, 실제 Filter 설정은 같은 이름의 TypedExtensionConfig Resource로 별도 전달받는다.
 
 Filter 설정이 Listener 안에 Inline으로 들어 있으면 Filter 설정 변경도 Listener 변경이 된다. Envoy는 동작 중인 Listener의 설정을 직접 변경하지 못하므로, 변경된 설정으로 새 Listener를 만들어 교체한다. 이 과정에서 기존 Listener가 처리하던 연결들은 Drain을 거쳐 일정 시간 안에 모두 끊어진다. 즉 Filter 설정 한 줄을 바꿔도 해당 Port의 Long-lived 연결이 끊길 수 있다.
 
-반면 ECDS를 사용하면 Filter 설정이 Listener 밖의 독립된 Resource로 분리되어 있으므로, 설정 갱신 시 Listener는 그대로 유지되고 참조된 설정만 교체된다. 기존 연결은 영향을 받지 않으며, 갱신된 Filter 설정은 이후의 새 요청부터 적용된다. Wasm Filter처럼 설정이 크거나 자주 바뀌는 Extension에 주로 사용되며, Istio의 WasmPlugin CR이 이 방식으로 반영되는 대표적인 예이다.
+반면 ECDS를 사용하면 Filter 설정이 Listener 밖의 독립된 Resource로 분리되어 있으므로, 설정 갱신 시 Listener는 그대로 유지되고 참조된 설정만 교체된다. 기존 연결은 영향을 받지 않으며, 갱신된 Filter 설정은 이후의 새 요청부터 적용된다. RDS가 Route를 Listener에서 분리하여 Route 변경이 Listener 교체를 유발하지 않게 만든 것처럼, ECDS는 같은 분리를 Filter 설정에 대해 수행하는 것이다. Wasm Filter처럼 설정이 크거나 자주 바뀌는 Extension에 주로 사용되며, Istio의 WasmPlugin CR이 이 방식으로 반영되는 대표적인 예이다.
 
 #### 1.1.7. ADS (Aggregated Discovery Service)
 
@@ -361,8 +359,9 @@ DiscoveryRequest:
 DiscoveryRequest:
   type_url: "type.googleapis.com/envoy.config.endpoint.v3.ClusterLoadAssignment"
   resource_names: [reviews-v1, reviews-v2, ratings, web, kafka]   # names came from CDS
-# ... the same pattern repeats — LDS (wildcard) → RDS / SDS (by name):
+# ... the same pattern repeats — LDS (wildcard) → RDS / SDS / ECDS (by name):
 #     RDS: [internal-routes, external-routes]  ·  SDS: [internal-cert, internal-ca, web-cert, kafka-cert]
+#     ECDS: [internal-wasm-filter]
  
 # ── 4 · NACK: reject a broken update, keep the last good version ──────
 DiscoveryRequest:
@@ -372,7 +371,7 @@ DiscoveryRequest:
   error_detail: { code: 3, message: "invalid filter_chain_match" }
 ```
 
-[Config 7]은 [Figure 1] 상단의 1 Stream with ADS에 해당하는, 하나의 gRPC Stream 위에서 오가는 xDS 메시지 흐름을 나타내고 있다. Envoy는 CDS와 LDS를 Wildcard로 구독하고, 응답으로 받은 Cluster와 Listener가 참조하는 이름을 기반으로 EDS, RDS, SDS 구독이 파생된다. Envoy는 각 응답에 대해 `version`과 `nonce`를 되돌려주는 ACK를 보내며, 잘못된 설정을 받은 경우에는 NACK를 보내고 마지막 정상 버전을 유지한다.
+[Config 7]은 [Figure 1] 상단의 1 Stream with ADS에 해당하는, 하나의 gRPC Stream 위에서 오가는 xDS 메시지 흐름을 나타내고 있다. Envoy는 CDS와 LDS를 Wildcard로 구독하고, 응답으로 받은 Cluster와 Listener가 참조하는 이름을 기반으로 EDS, RDS, SDS, ECDS 구독이 파생된다. Envoy는 각 응답에 대해 `version`과 `nonce`를 되돌려주는 ACK를 보내며, 잘못된 설정을 받은 경우에는 NACK를 보내고 마지막 정상 버전을 유지한다.
 
 ### 1.2. Bootstrap Configuration
 
@@ -549,9 +548,9 @@ admin:
     socket_address: { address: 127.0.0.1, port_value: 9901 }
 ```
 
-[Config 10]은 Listener와 Cluster부터 모든 Resource를 xDS로 받아오는 **Dynamic Configuration 예시**를 나타내고 있다. `dynamic_resources`의 `lds_config`와 `cds_config`가 모두 `ads`로 지정되어 있어, LDS와 CDS 구독이 `ads_config`에 정의된 단일 gRPC Stream으로 전달되고, 응답에서 파생되는 RDS, EDS, SDS 구독도 같은 Stream을 공유한다. 이 Stream 위에서 오가는 메시지 흐름이 [Config 7]이다. 
+[Config 10]은 Listener와 Cluster부터 모든 Resource를 xDS로 받아오는 **Dynamic Configuration 예시**를 나타내고 있다. `dynamic_resources`의 `lds_config`와 `cds_config`가 모두 `ads`로 지정되어 있어, LDS와 CDS 구독이 `ads_config`에 정의된 단일 gRPC Stream으로 전달되고, 응답에서 파생되는 RDS, EDS, SDS, ECDS 구독도 같은 Stream을 공유한다. 이 Stream 위에서 오가는 메시지 흐름이 [Config 7]이다. 
 
-`node`는 xDS Server가 어느 Envoy에게 어떤 설정을 내려줄지 구분하는 Identity이며, `set_node_on_first_message_only`는 Stream의 첫 메시지에만 `node`를 실어 이후 메시지의 크기를 줄인다. 결과적으로 Bootstrap 파일에는 xDS Server 접속 정보(`xds_cluster`)와 `admin`만 남고, 앞서 살펴본 [Config 1~5]의 모든 Resource가 이 연결을 통해 동적으로 전달된다.
+`node`는 xDS Server가 어느 Envoy에게 어떤 설정을 내려줄지 구분하는 Identity이며, `set_node_on_first_message_only`는 Stream의 첫 메시지에만 `node`를 실어 이후 메시지의 크기를 줄인다. 결과적으로 Bootstrap 파일에는 xDS Server 접속 정보(`xds_cluster`)와 `admin`만 남고, 앞서 살펴본 [Config 1~6]의 모든 Resource가 이 연결을 통해 동적으로 전달된다.
 
 ## 2. 참조
 
