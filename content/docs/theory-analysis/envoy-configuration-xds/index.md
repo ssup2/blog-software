@@ -1,5 +1,5 @@
 ---
-title: "Envoy xDS, Configuration"
+title: "Envoy Configuration with xDS"
 ---
 
 ## 1. Envoy Configuration

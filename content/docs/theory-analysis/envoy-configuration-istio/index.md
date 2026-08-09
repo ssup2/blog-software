@@ -1,30 +1,8 @@
 ---
-title: "Envoy with Istio"
+title: "Envoy Configuration with Istio"
 ---
 
-## 1. Envoy as Sidecar Proxy with Istio
-
-{{< figure caption="[Figure 1] Sidecar Proxy with Istio" src="images/envoy-istio-sidecar.png" width="700px" >}}
-
-[Figure 1]은 Istio 환경에서 Envoy가 Sidecar Proxy로 동작할 때 App Pod 내부의 구성 요소와 Traffic 흐름을 나타내고 있다. App Pod에는 App Container와 함께 istio-proxy Container가 배치되며, istio-proxy Container 안에서는 pilot-agent와 Envoy 두 Process가 동작한다. Pod 시작 시 istio-init Container가 설정한 iptables Rule에 의해 App Container의 모든 Traffic은 Envoy를 경유한다. 주요 흐름은 다음과 같다.
-
-* **xDS 설정 전달 (하늘색)** : istiod의 `15012` Port xDS Server는 LDS, RDS, CDS, EDS, SDS, NDS 설정을 하나의 ADS Stream으로 pilot-agent에 전달한다. pilot-agent는 받은 설정을 `unix:///etc/istio/proxy/XDS` Socket을 통해 다시 ADS로 Envoy에 중계하며, Workload 인증서는 `unix:///var/run/secrets/workload-spiffe-uds/socket` Socket을 통해 SDS로 전달한다. 인증서를 별도의 SDS Socket으로 분리하여 전달하는 이유는 Private Key와 같은 민감 정보를 일반 설정과 분리하기 위함이다. 즉 Envoy는 istiod와 직접 통신하지 않으며, pilot-agent가 xDS Proxy 역할을 수행한다.
-* **Outbound Traffic (주황색)** : App Container가 외부로 보내는 요청은 iptables에 의해 Envoy의 `15001` Port로 Redirect된 뒤, Envoy의 라우팅을 거쳐 상대 App Pod로 전달된다.
-* **Inbound Traffic (노란색)** : 다른 App Pod로부터 들어오는 요청은 iptables에 의해 Envoy의 `15006` Port로 Redirect된 뒤, App Container의 `8080` Port로 전달된다.
-* **DNS Lookup (초록색)** : DNS Capture가 활성화된 경우 App Container의 DNS 질의는 pilot-agent의 `15053` Port DNS Proxy로 Redirect되어 처리된다. 이때 DNS Proxy가 사용하는 Hostname 정보가 istiod로부터 NDS를 통해 전달되며, NDS가 Envoy로 중계되지 않고 pilot-agent에서 소비되는 이유이다.
-* **Metrics 수집 (파란색)** : Prometheus Server는 pilot-agent의 `15020` Port `/stats/prometheus` 하나만 Scrape한다. pilot-agent는 Envoy의 `15090` Port `/stats/prometheus`와 App Container의 `8080` Port `/metrics`를 함께 수집하여 병합된 Metrics를 제공한다.
-* **Health Check (빨간색)** : kubelet은 Envoy의 `15021` Port `/healthz/ready`로 istio-proxy Container의 Health Check를 수행하며, Envoy는 이 요청을 pilot-agent의 `15020` Port `/healthz/ready`로 전달한다.
-* **Envoy Admin (검정색)** : istioctl은 Envoy의 `15000` Port Admin Interface에 접근하여 Envoy에 적용된 설정과 상태를 확인한다. `istioctl proxy-config` 명령어가 이 경로를 통해 Listener, Route, Cluster 등의 설정을 조회하는 대표적인 예이다.
-
-이처럼 Envoy가 istiod와 직접 통신하지 않고 pilot-agent를 xDS Proxy로 경유하는 이유는 다음과 같다.
-
-* **인증 위임** : Envoy가 istiod와 mTLS로 통신하려면 인증서가 필요하지만, 그 인증서는 다시 istiod로부터 발급받아야 하는 순환 문제가 존재한다. pilot-agent가 Pod의 Service Account Token을 이용해 CSR (Certificate Signing Request)을 생성하고 istiod CA로부터 인증서를 발급받은 뒤 SDS Socket으로 Envoy에 공급하는 방식으로 이 문제를 해결하며, 인증서 갱신도 pilot-agent가 담당하므로 Envoy는 인증서 수명 주기를 신경 쓰지 않아도 된다.
-* **xDS 변조** : pilot-agent는 istiod가 내려준 xDS 설정을 단순히 중계하는 것이 아니라 중간에서 변조할 수 있다. 예를 들어 istiod가 "원격 저장소에서 Wasm 필터 모듈을 다운로드해서 사용하라"는 설정을 내려주면, pilot-agent가 모듈을 대신 다운로드해 두고 설정 안의 원격 주소를 로컬 파일 경로로 바꿔서 Envoy에 전달한다. Envoy는 로컬 파일만 읽으면 되므로, 저장소 인증이나 다운로드 실패 처리 같은 복잡한 일은 모두 pilot-agent가 담당한다.
-* **istiod 장애 대응** : pilot-agent는 istiod로부터 받은 마지막 설정을 캐시하고 있어, istiod 장애 중에도 Envoy가 재연결하면 캐시된 설정으로 응답할 수 있다. Envoy 입장에서 xDS Server는 항상 로컬의 pilot-agent이므로, Control Plane 장애가 Data Plane의 동작에 바로 전파되지 않는다.
-
-## 2. Envoy as Ingress/Egress Gateway with Istio
-
-## 3. Envoy Configuration with Istio and Kubernetes Resources 
+## 1. Envoy Configuration with Istio
 
 ```yaml {caption="[Config 1] Experiment Environment (mock-server, shell)", linenos=table}
 # kubectl label namespace default istio-injection=enabled
@@ -75,11 +53,219 @@ spec:
 * **`shell` Pod** : 요청을 보내는 Client 역할이며, Outbound 설정을 변경하는 CR(VirtualService, DestinationRule 등)의 관찰 대상이다.
 * **istio-ingressgateway Pod** : Gateway CR 실험의 관찰 대상이다.
 
-이러한 실험 환경에서 Istio의 각 CR (Custom Resource)이 Envoy 설정에 어떻게 반영되는지 살펴본다. 각 CR을 적용하기 전후의 `istioctl proxy-config all <pod> -o yaml` 출력을 비교하여, Envoy Config Dump의 어느 부분이 변경되는지 앞뒤 Context와 함께 diff로 기록한다. 변경과 무관한 부분은 `...`으로 표기한다.
+### 1.1. Default Configuration
 
-### 3.1. Gateway
+Istio CR을 하나도 적용하지 않은 상태에서도, istiod는 Kubernetes의 Service와 Endpoint 정보만으로 Mesh 전체 통신에 필요한 기본 설정을 만들어 모든 Sidecar에 배포한다. 이 절에서는 `shell` Pod의 Outbound 설정과 `mock-server` Pod의 Inbound 설정을 발췌하여, 1.2에서 각 CR이 변경하게 될 기준 상태를 살펴본다.
 
-```yaml {caption="[Config 2] istio-ingressgateway Service Port Mapping (발췌)", linenos=table}
+#### 1.1.1. Outbound Configuration
+
+```yaml {caption="[Config 2] Default Outbound Configuration (shell Pod 발췌)", linenos=table}
+# LDS: virtualOutbound - entry point for all outbound traffic (iptables redirect)
+- '@type': type.googleapis.com/envoy.config.listener.v3.Listener
+  address:
+    socket_address:
+      address: 0.0.0.0
+      port_value: 15001
+  filter_chains:
+  ...
+  - filters:
+    - name: envoy.filters.network.tcp_proxy
+      typed_config:
+        '@type': type.googleapis.com/envoy.extensions.filters.network.tcp_proxy.v3.TcpProxy
+        cluster: PassthroughCluster
+        stat_prefix: PassthroughCluster
+    name: virtualOutbound-catchall-tcp
+  name: virtualOutbound
+  traffic_direction: OUTBOUND
+  use_original_dst: true
+
+# LDS: per-port outbound Listener (one per Service Port in the Mesh)
+- '@type': type.googleapis.com/envoy.config.listener.v3.Listener
+  address:
+    socket_address:
+      address: 0.0.0.0
+      port_value: 8080
+  filter_chains:
+  - filters:
+    - name: envoy.filters.network.http_connection_manager
+      typed_config:
+        '@type': type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+        http_filters:
+        - name: istio.metadata_exchange        # exchange peer metadata via HTTP headers
+          ...
+        - name: envoy.filters.http.grpc_stats
+          ...
+        - name: istio.alpn                     # advertise Istio ALPN for upstream mTLS
+          ...
+        - name: envoy.filters.http.fault       # VirtualService fault injection
+          ...
+        - name: envoy.filters.http.cors        # VirtualService corsPolicy
+          ...
+        - name: istio.stats                    # Istio standard metrics
+          ...
+        - name: envoy.filters.http.router
+          ...
+        rds:
+          config_source:
+            ads: {}
+          route_config_name: "8080"
+        ...
+  listener_filters:
+  - name: envoy.filters.listener.tls_inspector
+    ...
+  - name: envoy.filters.listener.http_inspector
+    ...
+  name: 0.0.0.0_8080
+  traffic_direction: OUTBOUND
+
+# RDS: "8080" Route Table - one Virtual Host per Service + allow_any catch-all
+- route_config:
+    name: "8080"
+    virtual_hosts:
+    - domains:
+      - mock-server.default.svc.cluster.local
+      - mock-server
+      ...
+      name: mock-server.default.svc.cluster.local:8080
+      routes:
+      - match:
+          prefix: /
+        name: default
+        route:
+          cluster: outbound|8080||mock-server.default.svc.cluster.local
+    - domains:
+      - '*'
+      name: allow_any
+      routes:
+      - match:
+          prefix: /
+        name: allow_any
+        route:
+          cluster: PassthroughCluster
+
+# CDS: per-Service outbound Cluster (Endpoints via EDS)
+- cluster:
+    eds_cluster_config:
+      eds_config:
+        ads: {}
+      service_name: outbound|8080||mock-server.default.svc.cluster.local
+    lb_policy: LEAST_REQUEST
+    name: outbound|8080||mock-server.default.svc.cluster.local
+    ...
+    type: EDS
+
+# CDS: PassthroughCluster - forward to the original destination address
+- cluster:
+    lb_policy: CLUSTER_PROVIDED
+    name: PassthroughCluster
+    type: ORIGINAL_DST
+    ...
+```
+
+App Container가 보내는 모든 요청은 iptables에 의해 `15001` Port의 virtualOutbound Listener로 Redirect된다. virtualOutbound는 요청을 직접 처리하지 않고, `use_original_dst` 설정에 따라 요청의 원래 목적지 Port와 일치하는 `0.0.0.0_<Port>` Listener로 넘긴다. 일치하는 Listener가 없으면 catch-all Filter Chain이 PassthroughCluster로 보낸다.
+
+Port별 Outbound Listener는 tls_inspector와 http_inspector로 Protocol을 판별하고, HTTP 요청이면 HTTP Connection Manager가 RDS로 받은 Route Table(`"8080"`)을 참조한다. Route Table에는 해당 Port를 노출하는 Mesh의 Service마다 Virtual Host가 하나씩 생성되며, 각 Virtual Host에는 istiod가 만든 기본 Route(`name: default`)가 들어 있다. 어느 Virtual Host에도 매칭되지 않는 요청은 Catch-all인 `allow_any` Virtual Host를 통해 PassthroughCluster로 전달된다.
+
+HTTP Connection Manager에는 기본 HTTP Filter들이 순서대로 들어 있다. `istio.metadata_exchange`는 요청 Header를 통해 Peer의 메타데이터(Workload 이름, Namespace 등)를 교환하고, `istio.alpn`은 Upstream이 Sidecar mTLS 대상일 때 Istio 전용 ALPN을 광고한다 (1.2.10에서 Inbound의 `application_protocols` Match와 짝을 이루는 부분이다). `fault`와 `cors`는 VirtualService의 fault/corsPolicy 설정이 반영되는 자리이며, `istio.stats`는 Istio 표준 Metrics를 생성하고, 마지막의 `router`가 Route Table을 참조해 실제 라우팅을 수행한다.
+
+Cluster는 Service Port마다 `outbound|<Port>||<Host>` 이름의 `EDS` Type Cluster가 생성되어 Endpoint 목록을 EDS로 전달받는다. PassthroughCluster는 `ORIGINAL_DST` Type이므로 별도의 Endpoint 없이 요청의 원래 목적지 IP:Port로 그대로 연결한다. 이 Outbound 설정은 특정 Pod에 종속되지 않으며, Mesh의 모든 Sidecar가 동일하게 전달받는다.
+
+#### 1.1.2. Inbound Configuration
+
+```yaml {caption="[Config 3] Default Inbound Configuration (mock-server Pod 발췌)", linenos=table}
+# LDS: virtualInbound - entry point for all inbound traffic (iptables redirect)
+- '@type': type.googleapis.com/envoy.config.listener.v3.Listener
+  address:
+    socket_address:
+      address: 0.0.0.0
+      port_value: 15006
+  filter_chains:
+  ...
+  - filter_chain_match:                # mTLS Chain
+      application_protocols:
+      - istio
+      - istio-peer-exchange
+      - istio-http/1.0
+      - istio-http/1.1
+      - istio-h2
+      destination_port: 8080
+      transport_protocol: tls
+    filters:
+    - name: istio.metadata_exchange            # network filter: exchange peer metadata (TCP)
+      ...
+    - name: envoy.filters.network.http_connection_manager
+      typed_config:
+        '@type': type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+        http_filters:
+        - name: istio.metadata_exchange        # exchange peer metadata via HTTP headers
+          ...
+        - name: envoy.filters.http.grpc_stats
+          ...
+        - name: envoy.filters.http.fault
+          ...
+        - name: envoy.filters.http.cors
+          ...
+        - name: istio.stats                    # Istio standard metrics
+          ...
+        - name: envoy.filters.http.router
+          ...
+        route_config:                  # inline route config (no RDS)
+          name: inbound|8080||
+          virtual_hosts:
+          - domains:
+            - '*'
+            name: inbound|http|8080
+            routes:
+            - match:
+                prefix: /
+              name: default
+              route:
+                cluster: inbound|8080||
+        ...
+    transport_socket:
+      name: envoy.transport_sockets.tls
+      typed_config:
+        ...
+        require_client_certificate: true
+  - filter_chain_match:                # Plaintext Chain
+      destination_port: 8080
+      transport_protocol: raw_buffer
+    ...
+  listener_filters:
+  - name: envoy.filters.listener.original_dst
+  - name: envoy.filters.listener.tls_inspector
+    ...
+  - name: envoy.filters.listener.http_inspector
+    ...
+  name: virtualInbound
+  traffic_direction: INBOUND
+
+# CDS: inbound Cluster - forward to the App Container
+- cluster:
+    lb_policy: CLUSTER_PROVIDED
+    name: inbound|8080||
+    type: ORIGINAL_DST
+    upstream_bind_config:
+      source_address:
+        address: 127.0.0.6
+        port_value: 0
+```
+
+다른 Pod로부터 들어오는 요청은 iptables에 의해 `15006` Port의 virtualInbound Listener로 Redirect된다. virtualInbound는 Service가 노출하는 Port마다 `destination_port`로 매칭되는 Filter Chain을 가지며, 기본값인 `PERMISSIVE` Mode에서는 mTLS용 `tls` Chain과 Plaintext용 `raw_buffer` Chain이 쌍으로 존재한다 (1.2.10에서 자세히 다룬다).
+
+Filter 구성은 Outbound와 유사하지만, Chain 앞단에 TCP 수준에서 메타데이터를 교환하는 `istio.metadata_exchange` Network Filter가 추가로 있고, Upstream ALPN을 광고할 필요가 없으므로 `istio.alpn`은 없다. 기본 상태의 HTTP Filter는 이것이 전부이며, `jwt_authn`(RequestAuthentication), `rbac`(AuthorizationPolicy), Wasm Filter(WasmPlugin) 등은 1.2에서 해당 CR을 적용할 때 이 Filter Chain 사이에 삽입된다.
+
+Inbound Route는 Outbound와 달리 RDS를 사용하지 않고 HTTP Connection Manager에 `route_config`로 Inline되어 있으며, 모든 요청을 `inbound|8080||` Cluster로 보내는 단순한 구조이다. Route가 항상 하나뿐이므로 동적으로 갱신할 필요가 없기 때문이다.
+
+`inbound|8080||` Cluster는 `ORIGINAL_DST` Type으로 요청의 원래 목적지인 App Container의 `8080` Port로 전달한다. 이때 `127.0.0.6`을 Source 주소로 사용하는데, iptables가 이 주소에서 나온 Traffic을 다시 Outbound로 Redirect하지 않도록 하는 Loop 방지 장치이다.
+
+### 1.2. Envoy Configuration with Istio and Kubernetes Resources
+
+1.1의 기본 설정을 기준으로, Istio의 각 CR (Custom Resource)이 Envoy 설정에 어떻게 반영되는지 살펴본다. 각 CR을 적용하기 전후의 `istioctl proxy-config all <pod> -o yaml` 출력을 비교하여, Envoy Config Dump의 어느 부분이 변경되는지 앞뒤 Context와 함께 diff로 기록한다. 변경과 무관한 부분은 `...`으로 표기한다.
+
+#### 1.2.1. Gateway
+
+```yaml {caption="[Config 4] istio-ingressgateway Service Port Mapping (발췌)", linenos=table}
 apiVersion: v1
 kind: Service
 metadata:
@@ -100,7 +286,7 @@ spec:
   ...
 ```
 
-```yaml {caption="[Config 3] Gateway Example", linenos=table}
+```yaml {caption="[Config 5] Gateway Example", linenos=table}
 apiVersion: networking.istio.io/v1
 kind: Gateway
 metadata:
@@ -118,7 +304,7 @@ spec:
     - "mock-server.dev"
 ```
 
-```diff {caption="[Diff 3] Gateway 적용 전후 istio-ingressgateway Pod의 proxy-config"}
+```diff {caption="[Diff 5] Gateway 적용 전후 istio-ingressgateway Pod의 proxy-config"}
  - '@type': type.googleapis.com/envoy.admin.v3.ListenersConfigDump
 +  dynamic_listeners:
 +  - active_state:
@@ -155,11 +341,11 @@ spec:
    static_route_configs:
 ```
 
-Gateway는 Sidecar가 아닌 **selector로 선택된 Gateway Pod(`istio-ingressgateway`)의 Envoy에 반영**된다. Gateway CR에는 `80` Port를 선언했지만 Listener는 `0.0.0.0_8080`에 생성되는데, istiod가 `istio-ingressgateway` Service의 Port 매핑([Config 2]의 `80` Port → `8080` targetPort)을 따라 실제 Traffic을 받는 targetPort에 Listener를 생성하기 때문이다. Listener와 Route 이름(`http.8080`)은 실제 바인딩 포트 기준이고, Virtual Host 이름(`blackhole:80`)은 Gateway CR에 선언된 Server Port 기준이다. 아직 이 Gateway에 연결된 VirtualService가 없으므로 모든 요청은 `blackhole` Virtual Host에 의해 `404`로 처리된다.
+Gateway는 Sidecar가 아닌 **selector로 선택된 Gateway Pod(`istio-ingressgateway`)의 Envoy에 반영**된다. Gateway CR에는 `80` Port를 선언했지만 Listener는 `0.0.0.0_8080`에 생성되는데, istiod가 `istio-ingressgateway` Service의 Port 매핑([Config 4]의 `80` Port → `8080` targetPort)을 따라 실제 Traffic을 받는 targetPort에 Listener를 생성하기 때문이다. Listener와 Route 이름(`http.8080`)은 실제 바인딩 포트 기준이고, Virtual Host 이름(`blackhole:80`)은 Gateway CR에 선언된 Server Port 기준이다. 아직 이 Gateway에 연결된 VirtualService가 없으므로 모든 요청은 `blackhole` Virtual Host에 의해 `404`로 처리된다.
 
-### 3.2. VirtualService
+#### 1.2.2. VirtualService
 
-```yaml {caption="[Config 4] VirtualService Example", linenos=table}
+```yaml {caption="[Config 6] VirtualService Example", linenos=table}
 apiVersion: networking.istio.io/v1
 kind: VirtualService
 metadata:
@@ -185,7 +371,7 @@ spec:
           number: 8080
 ```
 
-```diff {caption="[Diff 4] VirtualService 적용 전후 shell Pod의 proxy-config"}
+```diff {caption="[Diff 6] VirtualService 적용 전후 shell Pod의 proxy-config"}
  - '@type': type.googleapis.com/envoy.admin.v3.RoutesConfigDump
    dynamic_route_configs:
    - route_config:
@@ -226,7 +412,7 @@ spec:
 
 VirtualService는 **Sidecar의 Outbound Route(RDS)에 반영**된다. 기존에 `/*` 하나였던 `mock-server` Virtual Host의 Route Entry가 `/api*` Match와 Catch-all 두 개로 늘어나고, `timeout: 3s`가 Route에 반영된다. 사라진 `name: default`는 VirtualService가 없을 때 istiod가 자동 생성하는 기본 Route에 붙이는 이름이며, VirtualService 유래 Route는 `spec.http[].name`을 지정하지 않는 한 이름 없이 생성된다. 대신 각 Route Entry의 `metadata.filter_metadata.istio.config`에 이 설정을 만든 VirtualService의 경로가 기록되어 설정의 출처를 추적할 수 있다. Cluster나 Listener는 변하지 않는다.
 
-```yaml {caption="[Config 5] VirtualService with Gateway Example", linenos=table}
+```yaml {caption="[Config 7] VirtualService with Gateway Example", linenos=table}
 apiVersion: networking.istio.io/v1
 kind: VirtualService
 metadata:
@@ -245,7 +431,7 @@ spec:
           number: 8080
 ```
 
-```diff {caption="[Diff 5] Gateway에 VirtualService 연결 전후 istio-ingressgateway Pod의 proxy-config"}
+```diff {caption="[Diff 7] Gateway에 VirtualService 연결 전후 istio-ingressgateway Pod의 proxy-config"}
  - '@type': type.googleapis.com/envoy.admin.v3.RoutesConfigDump
    dynamic_route_configs:
    - route_config:
@@ -271,11 +457,11 @@ spec:
 +            ...
 ```
 
-[Config 5]는 `gateways` 필드로 [Config 3]의 Gateway에 연결한 VirtualService 예시이다. 이 경우 Sidecar가 아닌 **Gateway Pod(istio-ingressgateway)의 Route에 반영**되며, [Diff 3]에서 `blackhole` Virtual Host뿐이었던 `http.8080` Route Table이 `mock-server.dev` Virtual Host로 교체되어 `mock-server` Cluster로 라우팅되기 시작한다. Gateway Pod도 Sidecar와 동일하게 Mesh 전체 서비스의 Cluster 설정을 받고 있으므로, 라우팅 대상인 `outbound|8080||mock-server...` Cluster는 이미 존재한다.
+[Config 7]은 `gateways` 필드로 [Config 5]의 Gateway에 연결한 VirtualService 예시이다. 이 경우 Sidecar가 아닌 **Gateway Pod(istio-ingressgateway)의 Route에 반영**되며, [Diff 5]에서 `blackhole` Virtual Host뿐이었던 `http.8080` Route Table이 `mock-server.dev` Virtual Host로 교체되어 `mock-server` Cluster로 라우팅되기 시작한다. Gateway Pod도 Sidecar와 동일하게 Mesh 전체 서비스의 Cluster 설정을 받고 있으므로, 라우팅 대상인 `outbound|8080||mock-server...` Cluster는 이미 존재한다.
 
-### 3.3. DestinationRule
+#### 1.2.3. DestinationRule
 
-```yaml {caption="[Config 6] DestinationRule Example", linenos=table}
+```yaml {caption="[Config 8] DestinationRule Example", linenos=table}
 apiVersion: networking.istio.io/v1
 kind: DestinationRule
 metadata:
@@ -292,7 +478,7 @@ spec:
       version: v1
 ```
 
-```diff {caption="[Diff 6] DestinationRule 적용 전후 shell Pod의 proxy-config"}
+```diff {caption="[Diff 8] DestinationRule 적용 전후 shell Pod의 proxy-config"}
  - '@type': type.googleapis.com/envoy.admin.v3.ClustersConfigDump
    dynamic_active_clusters:
    ...
@@ -326,9 +512,9 @@ spec:
 
 DestinationRule은 **Sidecar의 Outbound Cluster(CDS)에 반영**된다. 기존 Cluster의 `lb_policy`가 기본값 `LEAST_REQUEST`에서 `RANDOM`으로 변경되고, Subset을 정의하면 Subset마다 별도의 Cluster(`outbound|8080|v1|...`)가 추가로 생성된다. Route는 변하지 않으므로, Subset Cluster로 Traffic을 보내려면 VirtualService에서 Subset을 지정해야 한다.
 
-### 3.4. ServiceEntry
+#### 1.2.4. ServiceEntry
 
-```yaml {caption="[Config 7] ServiceEntry Example", linenos=table}
+```yaml {caption="[Config 9] ServiceEntry Example", linenos=table}
 apiVersion: networking.istio.io/v1
 kind: ServiceEntry
 metadata:
@@ -345,7 +531,7 @@ spec:
   location: MESH_EXTERNAL
 ```
 
-```diff {caption="[Diff 7] ServiceEntry 적용 전후 shell Pod의 proxy-config"}
+```diff {caption="[Diff 9] ServiceEntry 적용 전후 shell Pod의 proxy-config"}
  - '@type': type.googleapis.com/envoy.admin.v3.ClustersConfigDump
    dynamic_active_clusters:
    ...
@@ -410,9 +596,9 @@ ServiceEntry는 외부 서비스를 Mesh의 Service Registry에 등록하며, **
 
 적용 전에는 Mesh에 등록되지 않은 외부 Host로 향하는 요청이 Catch-all인 `allow_any` Virtual Host에 매칭되어 `PassthroughCluster`로 전달되었지만, 적용 후에는 앞에 추가된 전용 Virtual Host가 먼저 매칭되어 전용 Cluster를 통해 처리된다. `allow_any` Virtual Host 자체는 변하지 않고 그대로 남는다.
 
-### 3.5. Sidecar
+#### 1.2.5. Sidecar
 
-```yaml {caption="[Config 8] Sidecar Example", linenos=table}
+```yaml {caption="[Config 10] Sidecar Example", linenos=table}
 apiVersion: networking.istio.io/v1
 kind: Sidecar
 metadata:
@@ -424,7 +610,7 @@ spec:
     - "./mock-server.default.svc.cluster.local"
 ```
 
-```diff {caption="[Diff 8] Sidecar 적용 전후 shell Pod의 proxy-config"}
+```diff {caption="[Diff 10] Sidecar 적용 전후 shell Pod의 proxy-config"}
  - '@type': type.googleapis.com/envoy.admin.v3.ClustersConfigDump
    dynamic_active_clusters:
 -  - cluster:
@@ -444,9 +630,9 @@ spec:
 
 Sidecar CR은 Envoy에 새로운 설정을 추가하는 것이 아니라 **Sidecar가 받는 설정의 범위를 제한**한다. 기본적으로 모든 Sidecar는 Mesh 전체 서비스의 Cluster, Listener, Route를 받는데, egress hosts를 `mock-server`로 제한하면 나머지 서비스의 Outbound 설정이 모두 제거된다. egress만 제한하는 예시이므로 Inbound 설정(virtualInbound Listener)은 변하지 않는다. 대규모 Cluster에서 Sidecar의 Memory 사용량과 xDS Push 비용을 줄이는 핵심 수단이다.
 
-### 3.6. EnvoyFilter
+#### 1.2.6. EnvoyFilter
 
-```yaml {caption="[Config 9] EnvoyFilter Example", linenos=table}
+```yaml {caption="[Config 11] EnvoyFilter Example", linenos=table}
 apiVersion: networking.istio.io/v1alpha3
 kind: EnvoyFilter
 metadata:
@@ -478,7 +664,7 @@ spec:
             end
 ```
 
-```diff {caption="[Diff 9] EnvoyFilter 적용 전후 mock-server Pod의 proxy-config (virtualInbound Listener)"}
+```diff {caption="[Diff 11] EnvoyFilter 적용 전후 mock-server Pod의 proxy-config (virtualInbound Listener)"}
            - name: envoy.filters.network.http_connection_manager
              typed_config:
                '@type': type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
@@ -503,11 +689,11 @@ spec:
 
 EnvoyFilter는 istiod가 생성한 Envoy 설정을 **직접 Patch하는 CR**로, 다른 CR이 추상화하지 않는 Envoy 기능에 접근할 수 있다. 예시는 mock-server Sidecar의 Inbound HTTP Filter Chain에 Lua Filter를 삽입하여 응답 Header를 추가한다. `context: SIDECAR_INBOUND`는 Patch 대상을 Sidecar의 Inbound 설정으로 한정하며, Outbound 설정은 `SIDECAR_OUTBOUND`, Gateway Pod는 `GATEWAY`로 지정한다. `applyTo: HTTP_FILTER`는 HTTP Connection Manager의 `http_filters` 배열이 Patch 대상임을 의미한다.
 
-`operation: INSERT_BEFORE`는 match의 `subFilter`로 지정한 기준 Filter 앞에 새 Filter를 삽입하는 연산이다. [Diff 9]에서 Lua Filter가 기준 Filter인 `envoy.filters.http.router` 바로 앞에 추가된 것을 확인할 수 있으며, `subFilter`를 지정하지 않으면 배열의 맨 앞에 삽입된다. 이처럼 EnvoyFilter는 Envoy 내부 구현에 직접 의존하므로 Istio Upgrade 시 깨질 수 있어 주의가 필요하다.
+`operation: INSERT_BEFORE`는 match의 `subFilter`로 지정한 기준 Filter 앞에 새 Filter를 삽입하는 연산이다. [Diff 11]에서 Lua Filter가 기준 Filter인 `envoy.filters.http.router` 바로 앞에 추가된 것을 확인할 수 있으며, `subFilter`를 지정하지 않으면 배열의 맨 앞에 삽입된다. 이처럼 EnvoyFilter는 Envoy 내부 구현에 직접 의존하므로 Istio Upgrade 시 깨질 수 있어 주의가 필요하다.
 
-### 3.7. WorkloadEntry
+#### 1.2.7. WorkloadEntry
 
-```yaml {caption="[Config 10] WorkloadEntry Example", linenos=table}
+```yaml {caption="[Config 12] WorkloadEntry Example", linenos=table}
 apiVersion: networking.istio.io/v1
 kind: ServiceEntry
 metadata:
@@ -537,7 +723,7 @@ spec:
     app: vm-server
 ```
 
-```diff {caption="[Diff 10] WorkloadEntry 적용 전후 shell Pod의 proxy-config"}
+```diff {caption="[Diff 12] WorkloadEntry 적용 전후 shell Pod의 proxy-config"}
  - '@type': type.googleapis.com/envoy.admin.v3.ClustersConfigDump
    dynamic_active_clusters:
    ...
@@ -568,9 +754,9 @@ spec:
 
 WorkloadEntry는 **Kubernetes Cluster 외부에서 동작하는 Workload를 Pod와 동일한 방식으로 Mesh에 등록**하는 CR이다. 대표적인 대상은 Cluster 밖의 VM에서 동작하는 Server Process이다. 단독으로는 효과가 없고, workloadSelector로 이를 선택하는 ServiceEntry와 함께 사용해야 한다. Label이 매칭되면 WorkloadEntry의 address가 해당 Outbound Cluster의 Endpoint(EDS)로 등록되어, Pod의 Endpoint와 동일한 방식으로 LB 대상이 된다.
 
-### 3.8. WorkloadGroup
+#### 1.2.8. WorkloadGroup
 
-```yaml {caption="[Config 11] WorkloadGroup Example", linenos=table}
+```yaml {caption="[Config 13] WorkloadGroup Example", linenos=table}
 apiVersion: networking.istio.io/v1
 kind: WorkloadGroup
 metadata:
@@ -589,9 +775,9 @@ WorkloadGroup은 적용해도 **Envoy 설정에 아무 변화가 없다**. Workl
 
 Kubernetes Cluster 외부에서 istio-agent를 실행하면 istio-agent가 istiod의 xDS Server에 접속하는데, 이때 자신이 속한 WorkloadGroup과 자신의 address를 함께 알린다. istiod는 해당 WorkloadGroup의 `template`(serviceAccount, network 등)에 전달받은 address를 채운 WorkloadEntry 오브젝트를 Kubernetes API Server에 생성하며, istio-agent와의 연결이 끊어진 뒤 유예 시간 동안 재연결이 없으면 자동으로 삭제한다. 이렇게 생성된 WorkloadEntry가 앞 절의 WorkloadEntry와 동일한 방식으로 Cluster의 Endpoint에 반영되므로, Envoy 설정의 변화는 이 시점에 비로소 나타난다.
 
-### 3.9. ProxyConfig
+#### 1.2.9. ProxyConfig
 
-```yaml {caption="[Config 12] ProxyConfig Example", linenos=table}
+```yaml {caption="[Config 14] ProxyConfig Example", linenos=table}
 apiVersion: networking.istio.io/v1beta1
 kind: ProxyConfig
 metadata:
@@ -606,9 +792,9 @@ spec:
 
 ProxyConfig도 적용 시점에는 **동작 중인 Envoy에 변화가 없다**. `concurrency` 같은 설정은 xDS로 동적 전달되는 것이 아니라 Envoy Bootstrap Configuration에 속하기 때문이다. Sidecar Injection 시점에 주입되므로, Pod를 재생성해야 반영된다.
 
-### 3.10. PeerAuthentication
+#### 1.2.10. PeerAuthentication
 
-```yaml {caption="[Config 13] PeerAuthentication Example", linenos=table}
+```yaml {caption="[Config 15] PeerAuthentication Example", linenos=table}
 apiVersion: security.istio.io/v1
 kind: PeerAuthentication
 metadata:
@@ -619,7 +805,7 @@ spec:
     mode: STRICT
 ```
 
-```diff {caption="[Diff 13] PeerAuthentication 적용 전후 mock-server Pod의 proxy-config (virtualInbound Listener)"}
+```diff {caption="[Diff 15] PeerAuthentication 적용 전후 mock-server Pod의 proxy-config (virtualInbound Listener)"}
          name: virtualInbound
          filter_chains:
          ...
@@ -647,9 +833,9 @@ PeerAuthentication은 **Sidecar의 Inbound `virtualInbound` Listener Filter Chai
 
 `STRICT` Mode에서는 이 Match 조건도 사라지는데, Plaintext Chain이 제거되어 더 이상 구분할 대상이 없고, Istio mTLS가 아닌 연결은 어차피 Client 인증서 검증에서 실패하기 때문이다.
 
-### 3.11. RequestAuthentication
+#### 1.2.11. RequestAuthentication
 
-```yaml {caption="[Config 14] RequestAuthentication Example", linenos=table}
+```yaml {caption="[Config 16] RequestAuthentication Example", linenos=table}
 apiVersion: security.istio.io/v1
 kind: RequestAuthentication
 metadata:
@@ -664,7 +850,7 @@ spec:
     jwksUri: "https://raw.githubusercontent.com/istio/istio/release-1.24/security/tools/jwt/samples/jwks.json"
 ```
 
-```diff {caption="[Diff 14] RequestAuthentication 적용 전후 mock-server Pod의 proxy-config (virtualInbound Listener)"}
+```diff {caption="[Diff 16] RequestAuthentication 적용 전후 mock-server Pod의 proxy-config (virtualInbound Listener)"}
                http_filters:
                - name: istio.metadata_exchange
                  ...
@@ -695,9 +881,9 @@ RequestAuthentication은 **Sidecar의 Inbound HTTP Filter Chain에 `jwt_authn` F
 
 덕분에 각 Envoy는 외부 JWKS Endpoint에 직접 접근할 필요 없이 설정에 포함된 키로 바로 JWT를 검증할 수 있으며, 키 갱신도 istiod가 주기적으로 다시 가져와 xDS Push로 반영한다. 이 Filter는 요청의 JWT를 검증하여 유효하지 않으면 401로 거부하고, 유효하면 Claim 정보를 뒤의 Filter(AuthorizationPolicy의 RBAC 등)에서 사용할 수 있게 한다. `allow_missing` Rule에 의해 JWT가 없는 요청은 통과되므로, 미인증 요청 차단은 AuthorizationPolicy와 조합해야 한다.
 
-### 3.12. AuthorizationPolicy
+#### 1.2.12. AuthorizationPolicy
 
-```yaml {caption="[Config 15] AuthorizationPolicy Example", linenos=table}
+```yaml {caption="[Config 17] AuthorizationPolicy Example", linenos=table}
 apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
 metadata:
@@ -714,7 +900,7 @@ spec:
         paths: ["/admin"]
 ```
 
-```diff {caption="[Diff 15] AuthorizationPolicy 적용 전후 mock-server Pod의 proxy-config (virtualInbound Listener)"}
+```diff {caption="[Diff 17] AuthorizationPolicy 적용 전후 mock-server Pod의 proxy-config (virtualInbound Listener)"}
                http_filters:
                - name: istio.metadata_exchange
                  ...
@@ -744,9 +930,9 @@ spec:
 
 AuthorizationPolicy는 **Sidecar의 Inbound HTTP Filter Chain에 `rbac` Filter를 추가**한다. 예시는 `/admin` 경로 요청을 거부하는 DENY 정책으로, RBAC Filter의 Rule로 변환되어 매칭되는 요청은 403으로 거부된다. L7 속성(경로, Method 등)을 사용하는 정책이므로 HTTP Filter로 구현되며, TCP Port에는 별도 Network Filter가 사용된다.
 
-### 3.13. Telemetry
+#### 1.2.13. Telemetry
 
-```yaml {caption="[Config 16] Telemetry Example", linenos=table}
+```yaml {caption="[Config 18] Telemetry Example", linenos=table}
 apiVersion: telemetry.istio.io/v1
 kind: Telemetry
 metadata:
@@ -758,7 +944,7 @@ spec:
     - name: otel
 ```
 
-```diff {caption="[Diff 16] Telemetry 적용 전후 mock-server Pod의 proxy-config (Listener Access Logger 8개 전부 교체)"}
+```diff {caption="[Diff 18] Telemetry 적용 전후 mock-server Pod의 proxy-config (Listener Access Logger 8개 전부 교체)"}
              typed_config:
                '@type': type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
                access_log:
@@ -786,9 +972,9 @@ spec:
 
 Telemetry는 **Inbound/Outbound 구분 없이 모든 Listener와 HTTP Connection Manager의 Access Logger, Tracing, Stats 설정에 반영**된다. 예시 환경은 meshConfig의 `accessLogFile`로 전역 File Logger(`/dev/stdout`)가 켜져 있는 상태인데, Telemetry로 `otel` Provider(meshConfig의 extensionProviders에 정의된 OpenTelemetry ALS)를 지정하면 해당 Workload의 File Logger가 모두 OpenTelemetry Logger로 교체된다. Provider가 가리키는 Service가 Cluster에 존재해야 반영된다는 점에 주의한다.
 
-### 3.14. WasmPlugin
+#### 1.2.14. WasmPlugin
 
-```yaml {caption="[Config 17] WasmPlugin Example", linenos=table}
+```yaml {caption="[Config 19] WasmPlugin Example", linenos=table}
 apiVersion: extensions.istio.io/v1alpha1
 kind: WasmPlugin
 metadata:
@@ -809,7 +995,7 @@ spec:
       - admin:admin
 ```
 
-```diff {caption="[Diff 17] WasmPlugin 적용 전후 mock-server Pod의 proxy-config (ECDS, virtualInbound Listener)"}
+```diff {caption="[Diff 19] WasmPlugin 적용 전후 mock-server Pod의 proxy-config (ECDS, virtualInbound Listener)"}
  - '@type': type.googleapis.com/envoy.admin.v3.EcdsConfigDump
 +  ecds_filters:
 +  - ecds_filter:
@@ -845,6 +1031,6 @@ spec:
 
 WasmPlugin은 **Inbound HTTP Filter Chain에 Wasm Filter를 추가**하며, Filter의 실제 설정은 다른 Filter와 달리 ECDS (Extension Config Discovery Service)를 통해 별도 Resource로 전달된다. Wasm 모듈은 pilot-agent가 OCI Registry에서 대신 다운로드하여 로컬 경로로 변환 후 Envoy에 전달한다.
 
-`phase`는 Filter Chain 내 삽입 위치를 단계로 지정하는 필드이다. `AUTHN`은 Istio 인증 Filter 앞, `AUTHZ`는 인증 Filter 뒤이자 인가 Filter(`rbac`) 앞, `STATS`는 인가 Filter 뒤이자 Stats Filter(`istio.stats`) 앞에 삽입되며, 지정하지 않으면 Filter Chain의 끝(Router Filter 앞)에 삽입된다. 예시는 `phase: AUTHN`이므로 [Diff 17]에서 항상 맨 앞에 위치하는 `istio.metadata_exchange` 바로 뒤에 삽입되었다. EnvoyFilter의 `subFilter`처럼 특정 Filter 이름에 의존하지 않고 단계로 위치를 지정하므로, Istio Upgrade에 더 안전한 확장 수단이다.
+`phase`는 Filter Chain 내 삽입 위치를 단계로 지정하는 필드이다. `AUTHN`은 Istio 인증 Filter 앞, `AUTHZ`는 인증 Filter 뒤이자 인가 Filter(`rbac`) 앞, `STATS`는 인가 Filter 뒤이자 Stats Filter(`istio.stats`) 앞에 삽입되며, 지정하지 않으면 Filter Chain의 끝(Router Filter 앞)에 삽입된다. 예시는 `phase: AUTHN`이므로 [Diff 19]에서 항상 맨 앞에 위치하는 `istio.metadata_exchange` 바로 뒤에 삽입되었다. EnvoyFilter의 `subFilter`처럼 특정 Filter 이름에 의존하지 않고 단계로 위치를 지정하므로, Istio Upgrade에 더 안전한 확장 수단이다.
 
-## 4. 참조
+## 2. 참조

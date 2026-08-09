@@ -1,18 +1,21 @@
-# envoy-istio 문서 작업 컨텍스트
+# envoy-configuration-istio 문서 작업 컨텍스트
 
-Istio 환경에서 Envoy의 동작을 다루는 문서. 1장은 Sidecar Proxy 구조(pilot-agent와의 관계),
-3장은 Istio CR별 Envoy 설정 변화를 실측 diff로 기록한다.
+Istio가 Envoy 설정을 어떻게 만드는지 실측으로 기록하는 문서 (envoy-architecture-istio 문서에서 2026-08-09에 분리됨).
+1.1은 CR 없는 기본 Envoy 설정(baseline), 1.2는 Istio CR별 Envoy 설정 변화를 실측 diff로 기록한다.
 
 ## 문서 구성 및 상태
 
-- **1장 (Envoy as Sidecar Proxy)**: 완료. Pod 내부 Traffic 흐름 + pilot-agent를 xDS Proxy로 두는 이유.
-- **2장 (Envoy as Ingress/Egress Gateway)**: 미작성.
-- **3장 (Envoy Configuration with Istio CR)**: 완료. 3장 도입부에 실험 환경 yaml([Config 1], 별도 소제목 없음),
-  3.1~3.14 = Gateway, VirtualService, DestinationRule, ServiceEntry, Sidecar, EnvoyFilter, WorkloadEntry,
-  WorkloadGroup, ProxyConfig, PeerAuthentication, RequestAuthentication, AuthorizationPolicy, Telemetry, WasmPlugin.
-- **4장 (참조)**: 링크 미채움.
+- **1장 (Envoy Configuration with Istio)**: 완료. 장 도입부에 실험 환경 yaml([Config 1])과 Workload 설명
+  (1.1과 1.2가 공유하는 환경이라 장 바로 아래에 배치).
+  - **1.1 (Default Configuration)**: 1.1.1 = Outbound 기본 설정(shell Pod 발췌, 기본 HTTP Filter 목록 포함),
+    1.1.2 = Inbound 기본 설정(mock-server Pod 발췌, listener_filters·Filter Chain·기본 HTTP Filter 목록 포함).
+    발췌는 envoy_configs/base/의 실측 dump 기반.
+  - **1.2 (Envoy Configuration with Istio and Kubernetes Resources)**:
+    1.2.1~1.2.14 = Gateway, VirtualService, DestinationRule, ServiceEntry, Sidecar, EnvoyFilter, WorkloadEntry,
+    WorkloadGroup, ProxyConfig, PeerAuthentication, RequestAuthentication, AuthorizationPolicy, Telemetry, WasmPlugin.
+- **2장 (참조)**: 링크 미채움.
 
-## 실험 환경 (3장 diff 재현 방법)
+## 실험 환경 (1.2 diff 재현 방법)
 
 - kind Cluster (`kind-kind` context) + Istio **1.24.2** (istiod, ingress/egress gateway 설치됨).
 - `default` Namespace: `istio-injection=enabled`. Pod 2개 상주:
@@ -31,8 +34,8 @@ Istio 환경에서 Envoy의 동작을 다루는 문서. 1장은 Sidecar Proxy �
 3. 노이즈 정규화 (이거 없으면 diff가 수천 줄):
    - **EndpointsConfigDump 섹션 제거** — 캡처마다 순서가 뒤바뀜:
      `awk '/envoy.admin.v3.EndpointsConfigDump/{skip=1;next} skip && /^- .@type.:/{skip=0} !skip'`
-   - **last_updated 라인 제거** — push마다 내용이 같아도 갱신됨: `grep -v '^\s*last_updated:'`
-   - `version_info` 라인도 push마다 변하는 노이즈 (hunk 선별로 회피).
+   - **last_updated 라인 제거** — push마다 내용이 같아도 갱신됨 (`- last_updated:` 리스트 항목 형태 포함).
+   - `version_info` 라인도 push마다 변하는 노이즈.
 4. 정규화 후 self-diff(같은 상태 두 번 캡처)가 0줄임을 확인하고 진행.
 5. CR 적용 직후 dump에는 **draining 상태의 구 Listener가 함께 남는다** (PeerAuthentication 실험에서
    raw_buffer chain이 남아 보였던 원인). active_state 기준으로 판단할 것. 무변화 검증(WorkloadGroup,
@@ -48,21 +51,24 @@ Istio 환경에서 Envoy의 동작을 다루는 문서. 1장은 Sidecar Proxy �
   존재해야 istiod가 반영한다 (실험 시 dummy Service 임시 생성 후 삭제했음).
 - WorkloadGroup, ProxyConfig는 proxy-config 변화가 없는 것이 정상 (WorkloadGroup은 WorkloadEntry의
   Template, ProxyConfig는 Bootstrap 설정이라 Pod 재생성 시 반영). 문서에 이유를 서술했다.
-- RequestAuthentication의 `jwksUri`는 Envoy에 `local_jwks` 인라인으로 반영된다 (istiod가 미리 fetch).
+- RequestAuthentication의 `jwksUri`는 istiod가 JWKS를 대신 fetch하여 `local_jwks.inline_string`으로
+  xDS 설정에 embed한다.
 - WasmPlugin은 `oci://ghcr.io/istio-ecosystem/wasm-extensions/basic_auth:1.12.0` 사용. Filter Chain에는
   `config_discovery` 참조가 들어가고 실제 설정은 EcdsConfigDump에 실린다.
+- EnvoyFilter 예시는 `subFilter: envoy.filters.http.router` 기준 INSERT_BEFORE
+  (subFilter 미지정 시 배열 맨 앞에 삽입됨은 본문에 설명).
 
 ## 폴더 구조
 
 - `index.md` — 문서 본문.
-- `manifests/<cr이름>/<cr이름>.yaml` — 3장 예제 CR (전부 클러스터에 적용해 검증된 상태).
+- `manifests/<cr이름>/<cr이름>.yaml` — 1.2 예제 CR (전부 클러스터에 적용해 검증된 상태).
   workloadentry는 ServiceEntry+WorkloadEntry 2개 리소스가 한 파일에 있음.
   virtualservice에는 mesh용(virtualservice.yaml)과 Gateway-bound용(virtualservice-gateway.yaml) 2개 파일.
 - `manifests/base/` — 실험 환경 Workload (mock-server.yaml = Pod+Service, shell.yaml = Pod).
-- `images/` — Figure 이미지.
 - `envoy_configs/` — CR별 적용 상태의 proxy-config dump 저장소 (manifests와 같은 하위폴더 구조).
   질문/diff 요청 시 클러스터에 다시 실험하지 말고 여기 저장된 dump를 우선 활용할 것.
   - `base/{shell,mock-server,istio-ingressgateway}.yaml` — CR 미적용 baseline (상시 VS/DR 삭제 상태).
+    1.1의 [Config 2], [Config 3] 발췌 원본이기도 하다.
   - `<cr이름>/<관찰pod>.yaml` — 해당 CR만 적용된 상태의 dump. diff는 `base/<같은 pod>.yaml`과 뜬다.
     예외: `virtualservice/virtualservice-gateway_istio-ingressgateway.yaml`은 Gateway+VS 적용 상태라
     `gateway/istio-ingressgateway.yaml`과 diff.
@@ -74,13 +80,15 @@ Istio 환경에서 Envoy의 동작을 다루는 문서. 1장은 Sidecar Proxy �
 ## 문서 컨벤션
 
 - Code Block caption: yaml은 `[Config N] <CR> Example`, diff는 `[Diff N] <CR> 적용 전후 <pod>의 proxy-config`.
-  번호는 등장 순서 기준 — [Config 1] = 도입부 실험 환경,
-  [Config 2] = 3.1의 istio-ingressgateway Service Port 매핑 발췌(diff 없음, 클러스터 실측, Gateway 예시보다 앞에 배치),
-  [Config/Diff 3] = 3.1 Gateway, [Config/Diff 4~17] = 3.2~3.14 CR. Diff 2는 없음(Config/Diff 번호는 쌍 기준).
-  3.2 VirtualService에는 mesh용([Config/Diff 4])과 Gateway-bound용([Config/Diff 5]) 두 쌍이 있고,
-  3.8 WorkloadGroup, 3.9 ProxyConfig는 diff 블록 없음. 전체 diff는 2026-08-02에 8080-only 환경에서 재실측함.
+  번호는 등장 순서 기준 — [Config 1] = 1장 도입부 실험 환경,
+  [Config 2] = 1.1.1 Outbound 기본 설정 발췌, [Config 3] = 1.1.2 Inbound 기본 설정 발췌,
+  [Config 4] = 1.2.1의 istio-ingressgateway Service Port 매핑 발췌(Gateway 예시보다 앞에 배치),
+  [Config/Diff 5] = 1.2.1 Gateway, [Config/Diff 6~19] = 1.2.2~1.2.14 CR.
+  Diff 2~4는 없음(발췌 블록, Config/Diff 번호는 쌍 기준).
+  1.2.2 VirtualService에는 mesh용([Config/Diff 6])과 Gateway-bound용([Config/Diff 7]) 두 쌍이 있고,
+  1.2.8 WorkloadGroup, 1.2.9 ProxyConfig는 diff 블록 없음. 전체 diff는 2026-08-02에 8080-only 환경에서 재실측함.
 - diff 블록은 unified diff 스타일: 변경 라인(+/-) 앞뒤로 context 라인을 남기고,
   무관한 부분은 `...`으로 표기. 내용은 실측 dump에서 발췌 (창작 금지).
 - 리소스 이름/설정값은 백틱(`mock-server`, `lb_policy` 등), 일반 기술 용어는 영어 표기(Listener, Cluster 등).
-- YAML 주석은 xDS 이름을 대문자로 (`# SDS: ...`, `# RDS: ...`), 간결하게.
-- Istio 언급은 필요한 곳에만 최소화 (envoy-xds-configuration 문서와의 공통 방침).
+- YAML 주석은 영어로, xDS 이름을 대문자로 (`# LDS: ...`, `# RDS: ...`), 간결하게.
+- Istio 언급은 필요한 곳에만 최소화 (envoy-configuration-xds 문서와의 공통 방침).
