@@ -26,8 +26,8 @@ Envoy Configuration은 Root Configration 역할을 수행하는 **Bootstrap Conf
 * **CDS (Cluster Discovery Service)** : Cluster 설정을 동적으로 전달한다.
 * **EDS (Endpoint Discovery Service)** : Endpoint 설정을 동적으로 전달한다.
 * **SDS (Secret Discovery Service)** : Secret 설정을 동적으로 전달한다.
-* **ECDS (Extension Config Discovery Service)** : Listener에 이름으로만 참조해 둔 Filter(Extension)의 실제 설정을 별도 Resource로 전달한다. Listener 전체를 다시 받지 않고 Filter 설정만 독립적으로 갱신할 수 있다.
-* **ADS (Aggregated Discovery Service)** : 새로운 설정을 전달하는 API가 아니라, LDS/RDS/CDS/EDS/SDS/ECDS를 별도의 연결 대신 하나의 gRPC Stream으로 묶어 전달하는 전송 메커니즘이다. 이를 통해 Management Server가 CDS → EDS → LDS → RDS와 같이 의존성에 맞는 적용 순서를 보장할 수 있으며, 설정 갱신 과정에서 발생할 수 있는 Traffic 유실을 방지할 수 있다.
+* **ECDS (Extension Config Discovery Service)** : HTTP Filter, Listener Filter 등 Envoy의 다양한 확장(Extension) 지점에 범용적으로 쓰이는 동적 설정 기법이다. Listener나 Route 안에 확장 설정을 통째로 넣는 대신 "이 설정은 ECDS에서 가져와"라는 참조만 남겨두면, Envoy가 필요할 때 해당 확장의 설정만 별도로 받아온다. 따라서 확장 하나의 설정을 바꾸고 싶을 때 Listener나 Route 전체를 다시 받을 필요 없이, 해당 설정만 독립적으로 갱신할 수 있다.
+* **ADS (Aggregated Discovery Service)** : 새로운 설정을 전달하는 API가 아니라, LDS/RDS/CDS/EDS/SDS/ECDS를 별도의 연결 대신 하나의 gRPC Stream으로 묶어 전달하는 전송 기법이다. 이를 통해 Management Server가 CDS → EDS → LDS → RDS와 같이 의존성에 맞는 적용 순서를 보장할 수 있으며, 설정 갱신 과정에서 발생할 수 있는 Traffic 유실을 방지할 수 있다.
 
 #### 1.1.1. LDS (Listener Discovery Service)
 
@@ -61,7 +61,7 @@ resources:
           route_config_name: internal-routes   # RDS: Route table to read (L7 only)
           config_source: { ads: {} }
         http_filters:
-        - name: internal-wasm-filter           # ECDS: config fetched separately BY NAME
+        - name: internal-wasm           # ECDS: config fetched separately BY NAME
           config_discovery:
             config_source: { ads: {} }
             type_urls:
@@ -122,7 +122,7 @@ resources:
         cluster: kafka                         # straight to cluster, no Route table
 ```
 
-[Config 1]은 [Figure 1]의 Listener 부분에 해당하는 LDS 설정 예시를 나타내고 있다. `internal-listener`는 `8080` Port에서 mTLS로 Traffic을 수신하며, `internal-cert` Secret으로 자신을 증명하고 `internal-ca` Secret으로 Client를 검증한 뒤 요청을 `internal-routes` Route Table로 넘긴다. HTTP Filter Chain에는 Wasm Filter가 `internal-wasm-filter`라는 이름의 `config_discovery` 참조로만 들어 있으며, 실제 Filter 설정은 ECDS를 통해 별도로 전달받는다 (1.1.6에서 다룬다). `external-listener`는 `443` Port에서 TLS Inspector로 SNI를 확인하여 Filter Chain을 선택한다. `web.com` Chain은 `web-cert` Secret으로 TLS를 종료한 뒤 `external-routes` Route Table로 요청을 넘기고, `kafka.com` Chain은 `kafka-cert` Secret으로 TLS를 종료한 뒤 Route Table을 거치지 않고 TCP Proxy를 통해 `kafka` Cluster로 바로 전달한다.
+[Config 1]은 [Figure 1]의 Listener 부분에 해당하는 LDS 설정 예시를 나타내고 있다. `internal-listener`는 `8080` Port에서 mTLS로 Traffic을 수신하며, `internal-cert` Secret으로 자신을 증명하고 `internal-ca` Secret으로 Client를 검증한 뒤 요청을 `internal-routes` Route Table로 넘긴다. HTTP Filter Chain에는 Wasm Filter가 `internal-wasm`라는 이름의 `config_discovery` 참조로만 들어 있으며, 실제 Filter 설정은 ECDS를 통해 별도로 전달받는다 (1.1.6에서 다룬다). `external-listener`는 `443` Port에서 TLS Inspector로 SNI를 확인하여 Filter Chain을 선택한다. `web.com` Chain은 `web-cert` Secret으로 TLS를 종료한 뒤 `external-routes` Route Table로 요청을 넘기고, `kafka.com` Chain은 `kafka-cert` Secret으로 TLS를 종료한 뒤 Route Table을 거치지 않고 TCP Proxy를 통해 `kafka` Cluster로 바로 전달한다.
 
 #### 1.1.2. RDS (Route Discovery Service)
 
@@ -319,7 +319,7 @@ resources:
 
 # ── Extension Config referenced by internal-listener (BY NAME) ────────
 - "@type": type.googleapis.com/envoy.config.core.v3.TypedExtensionConfig
-  name: internal-wasm-filter                   # must match config_discovery name
+  name: internal-wasm                   # must match config_discovery name
   typed_config:
     "@type": type.googleapis.com/envoy.extensions.filters.http.wasm.v3.Wasm
     config:
@@ -329,7 +329,7 @@ resources:
           local: { filename: "/etc/envoy/filter.wasm" }
 ```
 
-[Config 6]은 [Config 1]의 `internal-listener`가 `config_discovery`로 참조하고 있는 `internal-wasm-filter`의 실제 설정을 전달하는 ECDS 예시를 나타내고 있다. Listener의 HTTP Filter 자리에는 설정 본문 대신 참조(이름과 type_url)만 두고, 실제 Filter 설정은 같은 이름의 TypedExtensionConfig Resource로 별도 전달받는다.
+[Config 6]은 [Config 1]의 `internal-listener`가 `config_discovery`로 참조하고 있는 `internal-wasm`의 실제 설정을 전달하는 ECDS 예시를 나타내고 있다. Listener의 HTTP Filter 자리에는 설정 본문 대신 참조(이름과 type_url)만 두고, 실제 Filter 설정은 같은 이름의 TypedExtensionConfig Resource로 별도 전달받는다.
 
 Filter 설정이 Listener 안에 Inline으로 들어 있으면 Filter 설정 변경도 Listener 변경이 된다. Envoy는 동작 중인 Listener의 설정을 직접 변경하지 못하므로, 변경된 설정으로 새 Listener를 만들어 교체한다. 이 과정에서 기존 Listener가 처리하던 연결들은 Drain을 거쳐 일정 시간 안에 모두 끊어진다. 즉 Filter 설정 한 줄을 바꿔도 해당 Port의 Long-lived 연결이 끊길 수 있다.
 
@@ -361,7 +361,7 @@ DiscoveryRequest:
   resource_names: [reviews-v1, reviews-v2, ratings, web, kafka]   # names came from CDS
 # ... the same pattern repeats — LDS (wildcard) → RDS / SDS / ECDS (by name):
 #     RDS: [internal-routes, external-routes]  ·  SDS: [internal-cert, internal-ca, web-cert, kafka-cert]
-#     ECDS: [internal-wasm-filter]
+#     ECDS: [internal-wasm]
  
 # ── 4 · NACK: reject a broken update, keep the last good version ──────
 DiscoveryRequest:
