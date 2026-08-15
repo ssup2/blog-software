@@ -23,4 +23,5 @@ CR별 Envoy 설정 변화(실측 diff)는 2026-08-09에 **envoy-configuration-is
 
 - 백틱 기준: "복사해서 붙여넣을 수 있는 리터럴 값"만 백틱 — Port 번호, Path, Socket 주소, 설정 Key/Value(`enablePrometheusMerge: true`, `selector`, `targetPort`), Annotation, Label, 명령어/인자. 문장의 구성 요소로 쓰이는 이름(istiod, pilot-agent, Envoy, istio-proxy Container 등)은 평문. 같은 단어라도 용법으로 구분 (예: Type 값 `LoadBalancer`는 백틱, 장비를 가리키는 LoadBalancer는 평문).
 - 일반 기술 용어는 영어 표기(Listener, Cluster 등).
+- 볼드 강조: 케이스를 구분 짓거나 문단의 결론이 되는 핵심 구절만 문단당 1~2개 (예: "**외부로 보내는 요청**은" ↔ "**다른 App Pod로부터 들어오는 요청**은"). 조사는 볼드 밖에 둔다.
 - Istio 언급은 필요한 곳에만 최소화 (envoy-configuration-xds 문서와의 공통 방침).
