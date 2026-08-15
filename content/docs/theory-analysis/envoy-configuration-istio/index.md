@@ -2,6 +2,8 @@
 title: "Envoy Configuration with Istio"
 ---
 
+Istio의 CR (Custom Resource)에 따른 Envoy의 설정 변경을 정리한다.
+
 ## 1. Envoy Configuration with Istio
 
 ```yaml {caption="[Config 1] Experiment Environment (mock-server, shell)", linenos=table}
@@ -55,11 +57,11 @@ spec:
 
 ### 1.1. Default Configuration
 
-Istio CR을 하나도 적용하지 않은 상태에서도, istiod는 Kubernetes의 Service와 Endpoint 정보만으로 Mesh 전체 통신에 필요한 기본 설정을 만들어 모든 Sidecar에 배포한다. 이 절에서는 `shell` Pod의 Outbound 설정과 `mock-server` Pod의 Inbound 설정을 발췌하여, 1.2에서 각 CR이 변경하게 될 기준 상태를 살펴본다.
+Istio CR을 하나도 적용하지 않은 상태에서도, istiod는 Kubernetes의 Service와 Endpoint 정보만으로 Mesh 전체 통신에 필요한 기본 설정을 만들어 모든 Sidecar에 배포한다. 이 절에서는 `shell` Pod의 Envoy Configuration의 Outbound 설정과 `mock-server` Pod의 Envoy Configuration의 Inbound 설정을 가져와 기본 설정을 살펴본다.
 
 #### 1.1.1. Outbound Configuration
 
-```yaml {caption="[Config 2] Default Outbound Configuration (shell Pod 발췌)", linenos=table}
+```yaml {caption="[Config 2] shell Pod의 Default Outbound Configuration", linenos=table}
 # LDS: virtualOutbound - entry point for all outbound traffic (iptables redirect)
 - '@type': type.googleapis.com/envoy.config.listener.v3.Listener
   address:
@@ -67,8 +69,16 @@ Istio CR을 하나도 적용하지 않은 상태에서도, istiod는 Kubernetes�
       address: 0.0.0.0
       port_value: 15001
   filter_chains:
-  ...
-  - filters:
+  - filter_chain_match:                # branch 2: original destination is 15001 itself -> block
+      destination_port: 15001
+    filters:
+    - name: envoy.filters.network.tcp_proxy
+      typed_config:
+        '@type': type.googleapis.com/envoy.extensions.filters.network.tcp_proxy.v3.TcpProxy
+        cluster: BlackHoleCluster
+        stat_prefix: BlackHoleCluster
+    name: virtualOutbound-blackhole
+  - filters:                           # branch 3: no matching 0.0.0.0_<Port> Listener -> passthrough
     - name: envoy.filters.network.tcp_proxy
       typed_config:
         '@type': type.googleapis.com/envoy.extensions.filters.network.tcp_proxy.v3.TcpProxy
@@ -77,7 +87,7 @@ Istio CR을 하나도 적용하지 않은 상태에서도, istiod는 Kubernetes�
     name: virtualOutbound-catchall-tcp
   name: virtualOutbound
   traffic_direction: OUTBOUND
-  use_original_dst: true
+  use_original_dst: true               # branch 1: hand off to the 0.0.0.0_<Port> Listener matching the original destination
 
 # LDS: per-port outbound Listener (one per Service Port in the Mesh)
 - '@type': type.googleapis.com/envoy.config.listener.v3.Listener
@@ -154,6 +164,13 @@ Istio CR을 하나도 적용하지 않은 상태에서도, istiod는 Kubernetes�
     ...
     type: EDS
 
+# CDS: BlackHoleCluster - STATIC Cluster without Endpoints, blocks traffic
+- cluster:
+    connect_timeout: 10s
+    name: BlackHoleCluster
+    type: STATIC
+    ...
+
 # CDS: PassthroughCluster - forward to the original destination address
 - cluster:
     lb_policy: CLUSTER_PROVIDED
@@ -162,13 +179,15 @@ Istio CR을 하나도 적용하지 않은 상태에서도, istiod는 Kubernetes�
     ...
 ```
 
-App Container가 보내는 모든 요청은 iptables에 의해 `15001` Port의 virtualOutbound Listener로 Redirect된다. virtualOutbound는 요청을 직접 처리하지 않고, `use_original_dst` 설정에 따라 요청의 원래 목적지 Port와 일치하는 `0.0.0.0_<Port>` Listener로 넘긴다. 일치하는 Listener가 없으면 catch-all Filter Chain이 PassthroughCluster로 보낸다.
+[Config 2]는 `shell` Pod의 Envoy Configuration의 Outbound 설정을 나타내고 있다. App Container가 보내는 모든 요청은 iptables에 의해 `15001` Port의 virtualOutbound Listener로 Redirect된다. virtualOutbound는 요청을 직접 처리하지 않고 세 갈래로 분기한다. 기본 경로는 `use_original_dst` 설정에 따라 요청의 원래 목적지 Port와 일치하는 `0.0.0.0_<Port>` Listener로 넘기는 것이다. 원래 목적지가 `15001` Port 자체인 요청은 `virtualOutbound-blackhole` Filter Chain이 BlackHoleCluster로 보내 차단하고, 일치하는 Listener가 없는 요청은 `virtualOutbound-catchall-tcp` Filter Chain이 PassthroughCluster로 보낸다. 
+
+BlackHoleCluster는 Endpoint가 하나도 없는 `STATIC` Type Cluster라 연결 시도가 즉시 실패하여 Traffic을 차단하는 용도로 쓰이고, PassthroughCluster는 `ORIGINAL_DST` Type Cluster라 별도의 Endpoint 없이 요청의 원래 목적지 IP:Port로 그대로 연결한다.
 
 Port별 Outbound Listener는 tls_inspector와 http_inspector로 Protocol을 판별하고, HTTP 요청이면 HTTP Connection Manager가 RDS로 받은 Route Table(`"8080"`)을 참조한다. Route Table에는 해당 Port를 노출하는 Mesh의 Service마다 Virtual Host가 하나씩 생성되며, 각 Virtual Host에는 istiod가 만든 기본 Route(`name: default`)가 들어 있다. 어느 Virtual Host에도 매칭되지 않는 요청은 Catch-all인 `allow_any` Virtual Host를 통해 PassthroughCluster로 전달된다.
 
 HTTP Connection Manager에는 기본 HTTP Filter들이 순서대로 들어 있다. `istio.metadata_exchange`는 요청 Header를 통해 Peer의 메타데이터(Workload 이름, Namespace 등)를 교환하고, `istio.alpn`은 Upstream이 Sidecar mTLS 대상일 때 Istio 전용 ALPN을 광고한다 (1.2.10에서 Inbound의 `application_protocols` Match와 짝을 이루는 부분이다). `fault`와 `cors`는 VirtualService의 fault/corsPolicy 설정이 반영되는 자리이며, `istio.stats`는 Istio 표준 Metrics를 생성하고, 마지막의 `router`가 Route Table을 참조해 실제 라우팅을 수행한다.
 
-Cluster는 Service Port마다 `outbound|<Port>||<Host>` 이름의 `EDS` Type Cluster가 생성되어 Endpoint 목록을 EDS로 전달받는다. PassthroughCluster는 `ORIGINAL_DST` Type이므로 별도의 Endpoint 없이 요청의 원래 목적지 IP:Port로 그대로 연결한다. 이 Outbound 설정은 특정 Pod에 종속되지 않으며, Mesh의 모든 Sidecar가 동일하게 전달받는다.
+Cluster는 Service Port마다 `outbound|<Port>||<Host>` 이름의 `EDS` Type Cluster가 생성되어 Endpoint 목록을 EDS로 전달받는다. 이 Outbound 설정은 특정 Pod에 종속되지 않으며, Mesh의 모든 Sidecar가 동일하게 전달받는다.
 
 #### 1.1.2. Inbound Configuration
 
@@ -687,7 +706,7 @@ spec:
                    '@type': type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
 ```
 
-EnvoyFilter는 istiod가 생성한 Envoy 설정을 **직접 Patch하는 CR**로, 다른 CR이 추상화하지 않는 Envoy 기능에 접근할 수 있다. 예시는 mock-server Sidecar의 Inbound HTTP Filter Chain에 Lua Filter를 삽입하여 응답 Header를 추가한다. `context: SIDECAR_INBOUND`는 Patch 대상을 Sidecar의 Inbound 설정으로 한정하며, Outbound 설정은 `SIDECAR_OUTBOUND`, Gateway Pod는 `GATEWAY`로 지정한다. `applyTo: HTTP_FILTER`는 HTTP Connection Manager의 `http_filters` 배열이 Patch 대상임을 의미한다.
+EnvoyFilter는 istiod가 생성한 Envoy 설정을 **직접 Patch하는 CR**로, 다른 CR이 추상화하지 않는 Envoy 기능에 접근할 수 있다. 예시는 `mock-server` Sidecar의 Inbound HTTP Filter Chain에 Lua Filter를 삽입하여 응답 Header를 추가한다. `context: SIDECAR_INBOUND`는 Patch 대상을 Sidecar의 Inbound 설정으로 한정하며, Outbound 설정은 `SIDECAR_OUTBOUND`, Gateway Pod는 `GATEWAY`로 지정한다. `applyTo: HTTP_FILTER`는 HTTP Connection Manager의 `http_filters` 배열이 Patch 대상임을 의미한다.
 
 `operation: INSERT_BEFORE`는 match의 `subFilter`로 지정한 기준 Filter 앞에 새 Filter를 삽입하는 연산이다. [Diff 11]에서 Lua Filter가 기준 Filter인 `envoy.filters.http.router` 바로 앞에 추가된 것을 확인할 수 있으며, `subFilter`를 지정하지 않으면 배열의 맨 앞에 삽입된다. 이처럼 EnvoyFilter는 Envoy 내부 구현에 직접 의존하므로 Istio Upgrade 시 깨질 수 있어 주의가 필요하다.
 

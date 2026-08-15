@@ -90,5 +90,7 @@ Istio가 Envoy 설정을 어떻게 만드는지 실측으로 기록하는 문서
 - diff 블록은 unified diff 스타일: 변경 라인(+/-) 앞뒤로 context 라인을 남기고,
   무관한 부분은 `...`으로 표기. 내용은 실측 dump에서 발췌 (창작 금지).
 - 리소스 이름/설정값은 백틱(`mock-server`, `lb_policy` 등), 일반 기술 용어는 영어 표기(Listener, Cluster 등).
+  단 잘 알려진 컴포넌트 고유명사(Envoy, istiod, pilot-agent, istio-ingressgateway 등)는 평문 — 백틱은 "이 클러스터/dump에 존재하는 리터럴 문자열"(사용자 정의 리소스 이름, 설정 Key/Value)에만.
+  code block caption 안에서는 백틱을 쓰지 않는다 (mock-server Pod 등 평문 유지).
 - YAML 주석은 영어로, xDS 이름을 대문자로 (`# LDS: ...`, `# RDS: ...`), 간결하게.
 - Istio 언급은 필요한 곳에만 최소화 (envoy-configuration-xds 문서와의 공통 방침).
