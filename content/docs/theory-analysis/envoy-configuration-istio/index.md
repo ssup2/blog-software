@@ -166,10 +166,10 @@ Istio CR을 하나도 적용하지 않은 상태에서도, istiod는 Kubernetes�
 
 # CDS: BlackHoleCluster - STATIC Cluster without Endpoints, blocks traffic
 - cluster:
+    alt_stat_name: BlackHoleCluster;
     connect_timeout: 10s
     name: BlackHoleCluster
     type: STATIC
-    ...
 
 # CDS: PassthroughCluster - forward to the original destination address
 - cluster:
@@ -179,15 +179,30 @@ Istio CR을 하나도 적용하지 않은 상태에서도, istiod는 Kubernetes�
     ...
 ```
 
-[Config 2]는 `shell` Pod의 Envoy Configuration의 Outbound 설정을 나타내고 있다. App Container가 보내는 모든 요청은 iptables에 의해 `15001` Port의 virtualOutbound Listener로 Redirect된다. virtualOutbound는 요청을 직접 처리하지 않고 세 갈래로 분기한다. 기본 경로는 `use_original_dst` 설정에 따라 요청의 원래 목적지 Port와 일치하는 `0.0.0.0_<Port>` Listener로 넘기는 것이다. 원래 목적지가 `15001` Port 자체인 요청은 `virtualOutbound-blackhole` Filter Chain이 BlackHoleCluster로 보내 차단하고, 일치하는 Listener가 없는 요청은 `virtualOutbound-catchall-tcp` Filter Chain이 PassthroughCluster로 보낸다. 
+[Config 2]는 `shell` Pod의 Envoy Configuration의 Outbound 설정을 나타내고 있다. App Container가 보내는 모든 요청은 iptables에 의해 `15001` Port의 virtualOutbound Listener로 Redirect된다. [Config 2]에 있는 각 Listener의 역할은 다음과 같다.
 
-BlackHoleCluster는 Endpoint가 하나도 없는 `STATIC` Type Cluster라 연결 시도가 즉시 실패하여 Traffic을 차단하는 용도로 쓰이고, PassthroughCluster는 `ORIGINAL_DST` Type Cluster라 별도의 Endpoint 없이 요청의 원래 목적지 IP:Port로 그대로 연결한다.
+* **virtualOutbound Listener** : 모든 Outbound 요청의 진입점이며, 요청을 직접 처리하지 않고 세 갈래로 분기한다. 기본 경로는 `use_original_dst` 설정에 따라 요청의 원래 목적지 Port와 일치하는 `0.0.0.0_<Port>` Listener로 넘기는 것이다. 원래 목적지가 `15001` Port 자체인 요청은 `virtualOutbound-blackhole` Filter Chain이 BlackHoleCluster로 보내 차단하고, 일치하는 Listener가 없는 요청은 `virtualOutbound-catchall-tcp` Filter Chain이 PassthroughCluster로 보낸다.
+* **`0.0.0.0_8080` Listener** : Port별 Outbound Listener이며, 해당 Pod 자신이 여는 Port가 아니라 **Mesh에 존재하는 Service의 Port** 기준으로 생성된다. istiod는 어떤 Pod가 어디로 요청을 보낼지 미리 알 수 없으므로 Mesh의 모든 Service Port마다 Outbound Listener를 만들어 모든 Sidecar에 배포하며, `shell` Pod에 `0.0.0.0_8080` Listener가 존재하는 것도 `shell` 자신과는 무관하게 `mock-server` Service가 `8080` Port를 노출하고 있기 때문이다. tls_inspector와 http_inspector로 Protocol을 판별하고, HTTP 요청이면 HTTP Connection Manager가 RDS로 받은 Route Table(`"8080"`)을 참조한다.
 
-Port별 Outbound Listener는 tls_inspector와 http_inspector로 Protocol을 판별하고, HTTP 요청이면 HTTP Connection Manager가 RDS로 받은 Route Table(`"8080"`)을 참조한다. Route Table에는 해당 Port를 노출하는 Mesh의 Service마다 Virtual Host가 하나씩 생성되며, 각 Virtual Host에는 istiod가 만든 기본 Route(`name: default`)가 들어 있다. 어느 Virtual Host에도 매칭되지 않는 요청은 Catch-all인 `allow_any` Virtual Host를 통해 PassthroughCluster로 전달된다.
+Route Table에는 해당 Port를 노출하는 Mesh의 Service마다 Virtual Host가 하나씩 생성되며, 각 Virtual Host에는 istiod가 만든 기본 Route(`name: default`)가 들어 있다. 어느 Virtual Host에도 매칭되지 않는 요청은 Catch-all인 `allow_any` Virtual Host를 통해 PassthroughCluster로 전달된다.
 
-HTTP Connection Manager에는 기본 HTTP Filter들이 순서대로 들어 있다. `istio.metadata_exchange`는 요청 Header를 통해 Peer의 메타데이터(Workload 이름, Namespace 등)를 교환하고, `istio.alpn`은 Upstream이 Sidecar mTLS 대상일 때 Istio 전용 ALPN을 광고한다 (1.2.10에서 Inbound의 `application_protocols` Match와 짝을 이루는 부분이다). `fault`와 `cors`는 VirtualService의 fault/corsPolicy 설정이 반영되는 자리이며, `istio.stats`는 Istio 표준 Metrics를 생성하고, 마지막의 `router`가 Route Table을 참조해 실제 라우팅을 수행한다.
+HTTP Connection Manager에는 기본 HTTP Filter들이 다음의 순서대로 들어 있다.
 
-Cluster는 Service Port마다 `outbound|<Port>||<Host>` 이름의 `EDS` Type Cluster가 생성되어 Endpoint 목록을 EDS로 전달받는다. 이 Outbound 설정은 특정 Pod에 종속되지 않으며, Mesh의 모든 Sidecar가 동일하게 전달받는다.
+* **`istio.metadata_exchange`** : 요청 Header를 통해 Peer의 메타데이터(Workload 이름, Namespace 등)를 교환한다.
+* **`envoy.filters.http.grpc_stats`** : gRPC 요청일 때 Message 수 등의 gRPC 통계를 생성한다.
+* **`istio.alpn`** : Upstream이 Sidecar mTLS 대상일 때 Istio 전용 ALPN을 광고한다 (1.2.10에서 Inbound의 `application_protocols` Match와 짝을 이루는 부분이다).
+* **`envoy.filters.http.fault`** : VirtualService의 fault 설정이 반영되는 자리이다.
+* **`envoy.filters.http.cors`** : VirtualService의 corsPolicy 설정이 반영되는 자리이다.
+* **`istio.stats`** : Istio 표준 Metrics를 생성한다.
+* **`envoy.filters.http.router`** : Route Table을 참조해 실제 라우팅을 수행하는 마지막 Filter이다.
+
+[Config 2]에 있는 각 Cluster의 역할은 다음과 같다.
+
+* **`outbound|8080||mock-server.default.svc.cluster.local` Cluster** : Mesh의 Service Port마다 `outbound|<Port>||<Host>` 이름으로 생성되는 `EDS` Type Cluster이며, Endpoint 목록을 EDS로 전달받는다. Route Table의 기본 Route(`name: default`)가 라우팅하는 대상이다.
+* **BlackHoleCluster** : Endpoint가 하나도 없는 `STATIC` Type Cluster라 연결 시도가 즉시 실패하며, virtualOutbound Listener가 원래 목적지가 `15001` Port 자체인 요청을 차단하는 데 쓰인다.
+* **PassthroughCluster** : `ORIGINAL_DST` Type Cluster라 별도의 Endpoint 없이 요청의 원래 목적지 IP:Port로 그대로 연결하며, virtualOutbound Listener의 `virtualOutbound-catchall-tcp` Filter Chain과 Route Table의 `allow_any` Virtual Host가 라우팅하는 대상이다.
+
+이 Outbound 설정은 특정 Pod에 종속되지 않으며, Mesh의 모든 Sidecar가 동일하게 전달받는다.
 
 #### 1.1.2. Inbound Configuration
 
