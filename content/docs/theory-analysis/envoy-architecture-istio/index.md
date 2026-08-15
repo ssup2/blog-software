@@ -44,19 +44,28 @@ kubelet이 수행하는 Probe는 대상에 따라 두 가지로 나뉜다. **ist
 
 istioctl은 Envoy의 `15000` Port Admin Interface에 접근하여 **Envoy에 적용된 설정과 상태를 확인**한다 (검정색). `istioctl proxy-config` 명령어가 이 경로를 통해 Listener, Route, Cluster 등의 설정을 조회하는 대표적인 예이다.
 
-## 2. Envoy as Ingress/Egress Gateway with Istio
+## 2. Envoy as Ingress Gateway with Istio
 
-Istio는 Mesh의 경계에서 Traffic을 처리하기 위해 Envoy를 Gateway로도 배치한다. istio-ingressgateway는 외부에서 Mesh로 들어오는 **Traffic의 진입점** 역할을, istio-egressgateway는 Mesh에서 외부로 나가는 **Traffic의 통제된 출구** 역할을 수행한다.
+{{< figure caption="[Figure 2] Ingress Gateway with Istio" src="images/envoy-istio-ingress-gateway.png" width="700px" >}}
 
-Gateway Pod의 내부 구조는 [Figure 1]의 Sidecar와 거의 동일하다. istio-proxy Container 안에서 pilot-agent와 Envoy가 함께 동작하고, pilot-agent가 xDS Proxy와 인증서 공급을 담당하는 구조도 그대로 유지된다. 차이는 두 가지다. 첫째, App Container가 없으므로 **Envoy가 Pod의 유일한 Process** 역할을 하며, `proxy router` 모드로 실행된다. 둘째, 가로챌 App Traffic이 없으므로 **istio-init Container와 iptables Redirect도 없다**. Traffic은 Redirect가 아니라 Kubernetes Service를 통해 Envoy의 Listener Port로 직접 도착한다.
+[Figure 2]는 Istio 환경에서 Envoy가 Ingress Gateway로 동작할 때 istio-ingressgateway Pod 내부의 구성 요소와 Traffic 흐름을 나타내고 있다. istio-ingressgateway는 외부에서 Mesh로 들어오는 **Traffic의 진입점** 역할을 수행한다.
 
-Gateway Pod의 Envoy는 **빈 상태로 시작**한다. 기본 Listener는 Health Check용 `15021`과 Prometheus Metrics용 `15090` 두 개뿐이며, Gateway CR이 `selector`로 해당 Pod를 선택하고 Server를 선언해야 비로소 Traffic을 수신할 Listener가 생성된다. 이때 Listener가 열리는 Port는 Gateway CR에 선언한 번호와 다를 수 있다. Gateway CR의 `port`는 클라이언트가 접속하는 Service Port 관점의 번호인데, 실제 Traffic은 Service의 `targetPort` 매핑을 거쳐 Pod에 도착하기 때문이다. 예를 들어 기본 설치에서 Gateway CR에 `port: 80`을 선언하면, Traffic은 Service의 `80` → `8080` 매핑에 따라 Pod의 `8080`으로 도착하므로, istiod도 이 매핑을 따라 Envoy에 **`8080` Listener를 생성**한다. 반면 Service에 매핑이 없는 Port를 선언하면 변환 없이 선언한 번호 그대로 Listener가 열린다. `80`이 `8080`으로 매핑되어 있는 이유는 Gateway의 Envoy가 non-root로 실행되어 1024 미만의 Port를 bind할 수 없기 때문이다. 반면 Cluster는 Sidecar와 동일하게 Mesh 전체 서비스의 설정을 항상 받고 있으므로, **Listener만 열리면 어느 서비스로든 라우팅**할 수 있다. Gateway CR이 Listener를 만드는 과정은 Envoy Configuration with Istio 문서에서 실측 diff로 다룬다.
+Pod 내부 구조는 [Figure 1]의 Sidecar와 거의 동일하다. istio-proxy Container 안에서 pilot-agent와 Envoy가 함께 동작하고, pilot-agent가 xDS Proxy와 인증서 공급을 담당하는 구조, kubelet의 Envoy Probe와 istioctl의 Envoy Admin 접근 경로도 그대로 유지된다. 차이는 두 가지다. 첫째, App Container가 없으므로 **Envoy가 Pod의 유일한 Process** 역할을 하며, `proxy router` 모드로 실행된다. 둘째, 가로챌 App Traffic이 없으므로 **istio-init Container와 iptables Redirect도 없다**. Traffic은 Redirect가 아니라 Kubernetes Service를 통해 Envoy의 Listener Port로 직접 도착한다. 또한 App Container가 없으므로 Metrics 수집도 pilot-agent를 경유하여 Envoy의 Metrics만 수집하는 경로 하나만 존재한다 (남색).
 
-ingressgateway와 egressgateway는 **이 구조를 완전히 공유**한다. 두 Deployment는 동일한 이미지와 실행 인자를 사용하며, 기본 상태의 Envoy 설정(Listener, Cluster, Secret)도 동일하다. 둘을 구분 짓는 것은 Envoy가 아니라 **배치와 Traffic 방향**이다.
+**Inbound Traffic (노란색)** 은 외부 Client의 요청이 Mesh 내부로 들어오는 흐름이다. istio-ingressgateway Service는 `LoadBalancer` Type으로 외부에 노출되므로, 요청은 외부 Load Balancer를 거쳐 Service의 `80`, `443` Port로 들어오고, `targetPort` 매핑에 따라 Envoy의 `8080`, `8443` Listener에 도착한다. Envoy는 Gateway에 연결된 VirtualService의 Route에 따라 요청을 Mesh 내부 서비스의 Cluster로 전달하며, Upstream Sidecar와는 mTLS로 통신한다. istio-ingressgateway Service는 Envoy의 `15021` Port도 `status-port`로 함께 노출하는데, **외부 Load Balancer가 Gateway의 Health를 확인**하기 위한 용도이다 (연두색).
 
-* **Service 노출** : istio-ingressgateway Service는 `LoadBalancer` Type으로 외부에 노출되고, istio-egressgateway Service는 `ClusterIP` Type으로 Mesh 내부에서만 접근할 수 있다. 또한 istio-ingressgateway Service만 Envoy의 `15021` Port를 `status-port`로 노출하는데, 외부 LoadBalancer가 Gateway의 Health를 확인할 수 있도록 하기 위함이다. 외부 LoadBalancer가 없는 istio-egressgateway Service는 이를 노출하지 않는다.
-* **Label** : Pod에 각각 `istio: ingressgateway`, `istio: egressgateway` Label이 있으며, Gateway CR의 `selector`가 어느 Label을 선택하느냐에 따라 어떤 Traffic을 받을지 정해진다.
-* **Ingress Traffic 흐름** : 외부 Client의 요청은 LoadBalancer를 거쳐 istio-ingressgateway Service의 `80` Port로 들어오고, `targetPort` 매핑에 따라 Envoy의 `8080` Listener에 도착한다. Envoy는 Gateway에 연결된 VirtualService의 Route에 따라 요청을 Mesh 내부 서비스의 Cluster로 전달하며, Upstream Sidecar와는 mTLS로 통신한다.
-* **Egress Traffic 흐름** : App이 외부로 보내는 요청을 Sidecar가 VirtualService Route에 따라 egressgateway로 먼저 전달하고, egressgateway가 이를 받아 외부 서비스로 내보낸다. 모든 Outbound Traffic이 하나의 지점을 거치므로, 고정된 출구 IP 확보, TLS Origination, 외부 접근 정책 집행을 한 곳에서 수행할 수 있다.
+istio-ingressgateway Service에는 `8080`, `8443` 외에 두 개의 입구가 더 열려 있다. `31400` Port는 HTTP가 아닌 raw TCP Traffic을 받기 위한 범용 입구이고, `15443` Port는 TLS를 종료하지 않고 SNI 기반으로 라우팅하는 Passthrough 입구로 Multi-cluster 환경의 클러스터 간 Traffic에 사용된다. 두 Port 역시 Service에 미리 노출되어 있을 뿐, Gateway CR로 Server를 선언해야 Envoy에 Listener가 열린다.
 
-## 3. 참조
+## 3. Envoy as Egress Gateway with Istio
+
+{{< figure caption="[Figure 3] Egress Gateway with Istio" src="images/envoy-istio-egress-gateway.png" width="700px" >}}
+
+[Figure 3]은 Istio 환경에서 Envoy가 Egress Gateway로 동작할 때 istio-egressgateway Pod 내부의 구성 요소와 Traffic 흐름을 나타내고 있다. istio-egressgateway는 Mesh에서 외부로 나가는 **Traffic의 통제된 출구** 역할을 수행한다.
+
+istio-egressgateway는 [Figure 2]의 istio-ingressgateway와 **내부 구조를 완전히 공유**한다. 두 Deployment는 동일한 이미지와 실행 인자를 사용하며, 기본 상태의 Envoy 설정(Listener, Cluster, Secret)도 동일하다. Pod의 Label만 `istio: egressgateway`로 달라서, Gateway CR의 `selector`가 어느 Label을 선택하느냐에 따라 어떤 Traffic을 받을지 정해진다. 둘을 구분 짓는 것은 Envoy가 아니라 **배치와 Traffic 방향**이다.
+
+istio-egressgateway Service는 `ClusterIP` Type으로 Mesh 내부에서만 접근할 수 있다. 외부 Load Balancer가 없으므로 `status-port`를 노출하지 않으며, 외부에서 들어오는 Traffic을 받을 일이 없으므로 `31400`, `15443` Port도 존재하지 않는다. Service에는 `80` → `8080`, `443` → `8443` 두 개의 매핑만 남는다.
+
+**Outbound Traffic (주황색)** 은 App이 외부로 보내는 요청을 Sidecar가 VirtualService Route에 따라 Egress Gateway로 먼저 전달하고, Egress Gateway가 이를 받아 외부 서비스로 내보내는 흐름이다. Egress Gateway를 통해서 모든 Outbound Traffic이 하나의 지점을 거치므로서 고정된 출구 IP 확보, TLS Origination, 외부 접근 정책 설정을 한 곳에서 수행할 수 있다.
+
+## 4. 참조

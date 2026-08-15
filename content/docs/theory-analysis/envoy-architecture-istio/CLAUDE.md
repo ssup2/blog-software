@@ -11,14 +11,17 @@ CR별 Envoy 설정 변화(실측 diff)는 2026-08-09에 **envoy-configuration-is
 - **1장 (Envoy as Sidecar Proxy)**: 완료. Pod 내부 Traffic 흐름 + pilot-agent를 xDS Proxy로 두는 이유.
   Metrics 수집(직접/병합)·DNS Lookup(Capture on/off)·Probe(Envoy/App)를 케이스별 하위 항목으로 서술 (2026-08-15, Figure 갱신 반영).
 - **TODO**: `images.pptx`의 `/app-health/app/readys` 표기는 오타 — 실제 Istio Rewrite 경로는 `/app-health/<container>/readyz`. 문서 본문은 `readyz`로 적어둠. pptx 수정 후 PNG 재추출 필요.
-- **2장 (Envoy as Ingress/Egress Gateway)**: 초안 작성됨 (2026-08-09). 공통 구조(router 모드, 빈 Envoy) + Ingress/Egress 차이(Service 노출·Label·Traffic 흐름)를 소절 없이 한 장에 서술. ingress/egress 동일성은 클러스터 실측으로 검증됨(Deployment args·Envoy bootstrap/Listener/Cluster diff 0, 2026-08-15 재확인).
-  차이는 노출 계층에만 존재: Service Type, Service Port 구성(ingress만 `15021` status-port·`31400`·`15443` 노출), containerPort 선언, Label. status-port는 외부 LB Health Check용 — 본문 "Service 노출"에 반영됨. Figure 미추가.
-- **3장 (참조)**: 링크 미채움.
+- **2장 (Envoy as Ingress Gateway)**: 2026-08-16에 Ingress/Egress 통합 장에서 분리, Figure 2 추가. 공통 구조(router 모드) + Inbound Traffic 흐름 + status-port(외부 LB Health Check용)·`31400`·`15443` 설명.
+  "빈 Envoy로 시작 + Gateway CR의 Listener 생성 + Port 결정 규칙(`targetPort` 번역, 실측 완료)" 문단은 2026-08-16에 본문에서 제거 — envoy-configuration-istio 문서로 옮길 후보.
+- **3장 (Envoy as Egress Gateway)**: 2026-08-16 분리, Figure 3 추가. ingress와 내부 구조 동일(실측: Deployment args·Envoy bootstrap/Listener/Cluster diff 0) + `ClusterIP`·Port 축소 + Outbound Traffic 흐름.
+  ingress/egress 차이는 노출 계층에만 존재: Service Type, Service Port 구성(ingress만 `15021` status-port·`31400`·`15443` 노출), containerPort 선언, Label.
+  `31400`은 raw TCP 입구, `15443`은 SNI Passthrough 입구(Multi-cluster east-west). TCP Server는 Gateway CR만으로 Listener가 안 열리고 tcp VirtualService Route까지 있어야 열림(실측).
+- **4장 (참조)**: 링크 미채움.
 
 ## 폴더 구조
 
 - `index.md` — 문서 본문.
-- `images/` — Figure 이미지 (envoy-istio-sidecar.png).
+- `images/` — Figure 이미지 (envoy-istio-sidecar.png, envoy-istio-ingress-gateway.png, envoy-istio-egress-gateway.png). gateway-figure-draft.md는 Figure 2/3 작도용 초안으로 이제 삭제 가능.
 
 ## 문서 컨벤션
 
