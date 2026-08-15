@@ -54,7 +54,7 @@ Gateway Pod의 Envoy는 **빈 상태로 시작**한다. 기본 Listener는 Healt
 
 ingressgateway와 egressgateway는 **이 구조를 완전히 공유**한다. 두 Deployment는 동일한 이미지와 실행 인자를 사용하며, 기본 상태의 Envoy 설정(Listener, Cluster, Secret)도 동일하다. 둘을 구분 짓는 것은 Envoy가 아니라 **배치와 Traffic 방향**이다.
 
-* **Service 노출** : istio-ingressgateway Service는 `LoadBalancer` Type으로 외부에 노출되고, istio-egressgateway Service는 `ClusterIP` Type으로 Mesh 내부에서만 접근할 수 있다.
+* **Service 노출** : istio-ingressgateway Service는 `LoadBalancer` Type으로 외부에 노출되고, istio-egressgateway Service는 `ClusterIP` Type으로 Mesh 내부에서만 접근할 수 있다. 또한 istio-ingressgateway Service만 Envoy의 `15021` Port를 `status-port`로 노출하는데, 외부 LoadBalancer가 Gateway의 Health를 확인할 수 있도록 하기 위함이다. 외부 LoadBalancer가 없는 istio-egressgateway Service는 이를 노출하지 않는다.
 * **Label** : Pod에 각각 `istio: ingressgateway`, `istio: egressgateway` Label이 있으며, Gateway CR의 `selector`가 어느 Label을 선택하느냐에 따라 어떤 Traffic을 받을지 정해진다.
 * **Ingress Traffic 흐름** : 외부 Client의 요청은 LoadBalancer를 거쳐 istio-ingressgateway Service의 `80` Port로 들어오고, `targetPort` 매핑에 따라 Envoy의 `8080` Listener에 도착한다. Envoy는 Gateway에 연결된 VirtualService의 Route에 따라 요청을 Mesh 내부 서비스의 Cluster로 전달하며, Upstream Sidecar와는 mTLS로 통신한다.
 * **Egress Traffic 흐름** : App이 외부로 보내는 요청을 Sidecar가 VirtualService Route에 따라 egressgateway로 먼저 전달하고, egressgateway가 이를 받아 외부 서비스로 내보낸다. 모든 Outbound Traffic이 하나의 지점을 거치므로, 고정된 출구 IP 확보, TLS Origination, 외부 접근 정책 집행을 한 곳에서 수행할 수 있다.
