@@ -9,6 +9,8 @@ CR별 Envoy 설정 변화(실측 diff)는 2026-08-09에 **envoy-configuration-is
 ## 문서 구성 및 상태
 
 - **1장 (Envoy as Sidecar Proxy)**: 완료. Pod 내부 Traffic 흐름 + pilot-agent를 xDS Proxy로 두는 이유.
+  Metrics 수집(직접/병합)·DNS Lookup(Capture on/off)·Probe(Envoy/App)를 케이스별 하위 항목으로 서술 (2026-08-15, Figure 갱신 반영).
+- **TODO**: `images.pptx`의 `/app-health/app/readys` 표기는 오타 — 실제 Istio Rewrite 경로는 `/app-health/<container>/readyz`. 문서 본문은 `readyz`로 적어둠. pptx 수정 후 PNG 재추출 필요.
 - **2장 (Envoy as Ingress/Egress Gateway)**: 초안 작성됨 (2026-08-09). 공통 구조(router 모드, 빈 Envoy) + Ingress/Egress 차이(Service 노출·Label·Traffic 흐름)를 소절 없이 한 장에 서술. ingress/egress 동일성은 클러스터 실측으로 검증됨(Deployment args·Envoy 설정 diff 0). Figure 미추가.
 - **3장 (참조)**: 링크 미채움.
 
