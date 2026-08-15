@@ -11,9 +11,17 @@ title: "Envoy Architecture with Istio"
 * **xDS 설정 전달 (하늘색)** : istiod의 `15012` Port xDS Server는 LDS, RDS, CDS, EDS, SDS, NDS 설정을 하나의 ADS Stream으로 pilot-agent에 전달한다. pilot-agent는 받은 설정을 `unix:///etc/istio/proxy/XDS` Socket을 통해 다시 ADS로 Envoy에 중계하며, Workload 인증서는 `unix:///var/run/secrets/workload-spiffe-uds/socket` Socket을 통해 SDS로 전달한다. 인증서를 별도의 SDS Socket으로 분리하여 전달하는 이유는 Private Key와 같은 민감 정보를 일반 설정과 분리하기 위함이다. 즉 Envoy는 istiod와 직접 통신하지 않으며, pilot-agent가 xDS Proxy 역할을 수행한다.
 * **Outbound Traffic (주황색)** : App Container가 외부로 보내는 요청은 iptables에 의해 Envoy의 `15001` Port로 Redirect된 뒤, Envoy의 라우팅을 거쳐 상대 App Pod로 전달된다.
 * **Inbound Traffic (노란색)** : 다른 App Pod로부터 들어오는 요청은 iptables에 의해 Envoy의 `15006` Port로 Redirect된 뒤, App Container의 `8080` Port로 전달된다.
-* **DNS Lookup (초록색)** : DNS Capture가 활성화된 경우 App Container의 DNS 질의는 pilot-agent의 `15053` Port DNS Proxy로 Redirect되어 처리된다. 이때 DNS Proxy가 사용하는 Hostname 정보가 istiod로부터 NDS를 통해 전달되며, NDS가 Envoy로 중계되지 않고 pilot-agent에서 소비되는 이유이다.
-* **Metrics 수집 (파란색)** : Prometheus Server는 pilot-agent의 `15020` Port `/stats/prometheus` 하나만 Scrape한다. pilot-agent는 Envoy의 `15090` Port `/stats/prometheus`와 App Container의 `8080` Port `/metrics`를 함께 수집하여 병합된 Metrics를 제공한다.
-* **Health Check (빨간색)** : kubelet은 Envoy의 `15021` Port `/healthz/ready`로 istio-proxy Container의 Health Check를 수행하며, Envoy는 이 요청을 pilot-agent의 `15020` Port `/healthz/ready`로 전달한다.
+* **DNS Lookup (연두색, 초록색)** : DNS Capture 활성화 여부에 따라 App Container의 DNS 질의 경로가 달라진다.
+  * **DNS Capture 비활성화 (연두색)** : App Container의 DNS 질의는 iptables를 거쳐 CoreDNS로 그대로 전달된다.
+  * **DNS Capture 활성화 (초록색)** : App Container의 DNS 질의는 iptables에 의해 pilot-agent의 `15053` Port DNS Proxy로 Redirect되어 처리된다. 이때 DNS Proxy가 사용하는 Hostname 정보가 istiod로부터 NDS를 통해 전달되며, NDS가 Envoy로 중계되지 않고 pilot-agent에서 소비되는 이유이다.
+* **Metrics 수집 (파란색, 남색)** : Prometheus Server가 Metrics를 수집하는 경로는 두 가지가 존재한다.
+  * **App Metrics 직접 수집 (파란색)** : Prometheus Server가 App Container의 `8080` Port `/metrics`를 직접 Scrape하여 App의 Metrics만 수집한다.
+  * **병합 Metrics 수집 (남색)** : Prometheus Server가 pilot-agent의 `15020` Port `/stats/prometheus`를 Scrape하여 Envoy와 App의 Metrics를 한 번에 수집한다. pilot-agent가 Envoy의 `15090` Port `/stats/prometheus`와 App Container의 `8080` Port `/metrics`를 함께 수집하여 병합된 Metrics를 제공하기 때문이다.
+  * **병합 수집 조건** : 병합 수집은 App Pod에 `prometheus.io/scrape`, `prometheus.io/port`, `prometheus.io/path`와 같은 Prometheus Scrape Annotation이 붙어 있고, Istio에 `enablePrometheusMerge: true` 설정이 되어 있는 경우에만 동작한다.
+  * **병합 수집 이유** : Annotation 기반 방식은 `prometheus.io/port` Annotation에 하나의 Port만 지정할 수 있어, Pod당 하나의 Metrics Endpoint만 Scrape할 수 있다. 따라서 Envoy와 App의 Metrics를 모두 수집하려면 하나의 Endpoint로 병합하는 과정이 필요하다. 반면 Prometheus Operator의 PodMonitor/ServiceMonitor 방식은 하나의 Pod에 여러 Metrics Port를 지정할 수 있으므로 병합 수집이 필요 없다.
+* **Health Check (빨간색, 보라색)** : kubelet이 수행하는 Probe는 대상에 따라 두 가지로 나뉜다.
+  * **Envoy Probe (빨간색)** : kubelet은 Envoy의 `15021` Port `/healthz/ready`로 istio-proxy Container의 Health Check를 수행하며, Envoy는 이 요청을 pilot-agent의 `15020` Port `/healthz/ready`로 전달한다.
+  * **App Probe (보라색)** : App Container의 Probe는 kubelet이 App Container로 직접 수행하지 않는다. Sidecar 주입 시 Probe 설정이 pilot-agent의 `15020` Port `/app-health/app/livez`, `/app-health/app/readyz`, `/app-health/app/startupz`로 Rewrite되며, pilot-agent가 이 요청을 App Container의 `8080` Port `/livez`, `/readyz`, `/startupz`로 전달한다. Probe 요청이 iptables Redirect에 의해 Envoy를 경유하면서 mTLS 정책에 걸려 실패하는 것을 막기 위함이다.
 * **Envoy Admin (검정색)** : istioctl은 Envoy의 `15000` Port Admin Interface에 접근하여 Envoy에 적용된 설정과 상태를 확인한다. `istioctl proxy-config` 명령어가 이 경로를 통해 Listener, Route, Cluster 등의 설정을 조회하는 대표적인 예이다.
 
 이처럼 Envoy가 istiod와 직접 통신하지 않고 pilot-agent를 xDS Proxy로 경유하는 이유는 다음과 같다.
