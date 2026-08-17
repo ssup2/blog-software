@@ -342,6 +342,8 @@ Istio CR을 하나도 적용하지 않은 상태에서도, istiod는 Kubernetes�
   * **HTTP 연결** : `filter_chain_match`에 매칭되어 HTTP Connection Manager가 처리한다. RDS로 받은 같은 이름의 Route Table(`"8080"`, `"9090"`)을 참조하여 라우팅된다.
   * **HTTP가 아닌 연결** : 어느 Chain에도 매칭되지 않아 `default_filter_chain`으로 떨어진다. `istio.stats`로 TCP 수준 Metrics만 남기고, `tcp_proxy`가 PassthroughCluster를 통해 원래 목적지로 그대로 통과시킨다.
 
+Outbound의 Network Filter 구성도 대부분 공통이며, Chain마다 다른 것은 주로 목적지를 지정하는 부분이다. `istio.stats`는 모든 TCP 계열 Chain(virtualOutbound의 Chain들과 Port별 Listener의 `default_filter_chain`)에서 설정까지 동일하다. `tcp_proxy`는 PassthroughCluster로 보내는 Chain들끼리 동일하고, `virtualOutbound-blackhole` Chain만 목적지 Cluster(BlackHoleCluster)와 Access Log 유무가 다르다. HTTP Connection Manager도 참조할 Route Table을 지정하는 `rds`의 `route_config_name`과 `stat_prefix`를 제외한 나머지 설정이 모든 Port별 Listener에서 동일하며, 내부의 HTTP Filter 구성도 완전히 같다.
+
 Port별 Outbound Listener는 Network Filter Chain을 선택하기 전에 Listener Filter로 연결의 Protocol을 판별한다. virtualOutbound Listener는 요청을 Port별 Listener로 넘기기만 하므로 Listener Filter가 없다. [Config 2]에 있는 각 Listener Filter의 역할은 다음과 같다.
 
 * **`tls_inspector`** : 연결의 첫 Bytes를 검사하여 TLS 여부를 판별한다. 판별 결과는 Network Filter Chain 매칭의 `transport_protocol` 값(`tls`, `raw_buffer`)으로 사용된다.
@@ -537,7 +539,7 @@ Port별 Outbound Listener의 HTTP Connection Manager에는 기본 HTTP Filter들
 * **`tls_inspector`** : 연결의 첫 Bytes를 검사하여 TLS 여부를 판별하고, TLS 연결이면 Handshake에서 광고된 ALPN 값도 읽는다. 판별 결과는 Network Filter Chain 매칭의 `transport_protocol` 값과 `tls` Chain의 `application_protocols` 매칭에 사용된다.
 * **`http_inspector`** : Plaintext 연결에서 HTTP 여부와 버전을 판별한다.
 
-virtualInbound Listener는 차단용 Chain 1개, Catch-all Chain 5개, 그리고 Service가 노출하는 Port마다 `destination_port`로 매칭되는 Chain 쌍(`server-a`는 `8080` Port용 2개)까지 총 8개의 Network Filter Chain을 가진다. [Config 3]에 있는 각 Network Filter Chain의 역할은 다음과 같다.
+virtualInbound Listener는 차단용 Chain 1개와 Catch-all Chain 5개, 그리고 Service가 노출하는 Port마다 `destination_port`로 매칭되는 Chain 쌍을 가진다. [Config 3]에 있는 각 Network Filter Chain의 역할은 다음과 같다.
 
 * **`virtualInbound-blackhole` Chain** : 원래 목적지가 `15006` Port 자체인 요청을 BlackHoleCluster로 보내 차단한다. virtualOutbound Listener의 `virtualOutbound-blackhole` Network Filter Chain과 같은 역할이다.
 * **`virtualInbound-catchall-http` Chain** : 어느 Service도 노출하지 않는 Port로 들어온 HTTP 요청을 처리하는 Fallback이다. HTTP Connection Manager를 거치므로 HTTP 수준의 Metrics와 Access Log를 남긴 뒤, Route를 통해 InboundPassthroughCluster로 전달한다.
@@ -552,10 +554,12 @@ virtualInbound Listener는 차단용 Chain 1개, Catch-all Chain 5개, 그리고
 
 Catch-all Chain이 존재하는 이유는 Service에 선언되지 않은 Port로도 요청이 들어올 수 있기 때문이다. Service는 방화벽이 아니라서 Pod IP로는 App이 열어둔 어떤 Port로든 직접 접근할 수 있다. App이 열었지만 Service에 선언하지 않은 Port, Prometheus가 Pod IP로 직접 Scrape하는 Metrics Port, Headless Service를 통한 Pod 직접 통신 등이 그 예이다. Sidecar가 주입되어도 Kubernetes에서 가능하던 Pod 간 통신은 그대로 가능해야 하므로, istiod는 이런 요청을 차단하지 않고 App으로 통과시키는 Catch-all Chain을 만든다. Outbound에서 Mesh에 등록되지 않은 목적지로 향하는 요청을 PassthroughCluster로 통과시키는 것과 대칭 구조이다.
 
-HTTP Connection Manager를 가진 4개의 Network Filter Chain(HTTP Catch-all Chain 2개, `0.0.0.0_8080` Chain 쌍 2개)의 HTTP Filter 구성은 순서와 설정까지 모두 동일하며, [Config 3]에는 mTLS Chain의 것만 표시했다. 그래서 1.2에서 CR이 HTTP Filter를 삽입할 때에도 4개 Chain에 동일하게 반영된다. Network Filter도 마찬가지로 `istio.metadata_exchange`는 8개 Chain 전부에서, `istio.stats`는 TCP 계열 Chain 4개 전부에서 설정까지 동일하다. Chain마다 다른 것은 목적지를 지정하는 부분(`tcp_proxy`의 `cluster`, HTTP Connection Manager의 `route_config`)뿐이다. HTTP Filter 구성은 Outbound와 유사하지만 다음의 차이가 있다.
+virtualInbound의 Network Filter 구성은 대부분 공통이며, Chain마다 다른 것은 주로 목적지를 지정하는 부분이다. `istio.metadata_exchange`는 모든 Chain에서, `istio.stats`는 모든 TCP 계열 Chain에서 설정까지 동일하다. `tcp_proxy`는 TCP Catch-all Chain들끼리 동일하고, `virtualInbound-blackhole` Chain만 목적지 Cluster(BlackHoleCluster)와 Access Log 유무가 다르다.
+
+HTTP Connection Manager도 목적지를 지정하는 `route_config`(Catch-all Chain은 InboundPassthroughCluster, `0.0.0.0_8080` Chain은 `inbound|8080||`)와 `stat_prefix`를 제외한 나머지 설정이 HTTP Connection Manager를 가진 모든 Chain에서 동일하다. 따라서 그 내부의 HTTP Filter 구성도 모든 Chain에서 완전히 같으며, Istio CR로 인해 HTTP Filter가 삽입될 때에도 모든 Chain에 동일하게 반영된다. [Config 3]에는 그중 mTLS Chain의 것만 표시했다. Inbound의 Filter 구성은 Outbound의 것과도 대부분 같으며, 다음의 두 가지만 다르다.
 
 * **`istio.metadata_exchange` Network Filter 추가** : HTTP Filter 버전과 별개로 Chain 앞단에 추가로 있으며, HTTP Header를 쓸 수 없는 TCP 연결에서도 같은 방식의 메타데이터 교환을 수행한다.
-* **`istio.alpn` 부재** : Inbound는 Upstream으로 요청을 보내는 쪽이 아니므로 ALPN을 광고할 필요가 없다.
+* **`istio.alpn` HTTP Filter 부재** : Inbound는 Upstream으로 요청을 보내는 쪽이 아니므로 ALPN을 광고할 필요가 없다.
 
 [Config 3]에 있는 Route와 Cluster의 역할은 다음과 같다.
 
