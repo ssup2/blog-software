@@ -74,6 +74,8 @@ Istio가 Envoy 설정을 어떻게 만드는지 실측으로 기록하는 문서
   질문/diff 요청 시 클러스터에 다시 실험하지 말고 여기 저장된 dump를 우선 활용할 것.
   - `base/{client,server-a,server-b,server-c,istio-ingressgateway}.yaml` — CR 미적용 baseline.
     1.1의 [Config 2], [Config 3] 발췌 원본이기도 하다.
+    예외: [Config 2]의 EDS 발췌는 저장된 dump에 없고(정규화로 EndpointsConfigDump 제거),
+    2026-08-17에 `istioctl proxy-config all client` 라이브 출력에서 캡처한 것 (server-a Pod IP 10.244.2.4).
   - `<cr이름>/<관찰pod>.yaml` — 해당 CR만 적용된 상태의 dump. diff는 `base/<같은 pod>.yaml`과 뜬다.
     예외: `virtualservice/virtualservice-gateway_istio-ingressgateway.yaml`은 Gateway+VS 적용 상태라
     `gateway/istio-ingressgateway.yaml`과 diff.

@@ -126,8 +126,23 @@ Istio CR을 하나도 적용하지 않은 상태에서도, istiod는 Kubernetes�
     socket_address:
       address: 0.0.0.0
       port_value: 8080
+  default_filter_chain:                # fallback chain for non-HTTP traffic
+    filters:
+    - name: istio.stats                # TCP-level Istio standard metrics
+      ...
+    - name: envoy.filters.network.tcp_proxy
+      typed_config:
+        '@type': type.googleapis.com/envoy.extensions.filters.network.tcp_proxy.v3.TcpProxy
+        cluster: PassthroughCluster
+        ...
+    name: PassthroughFilterChain
   filter_chains:
-  - filters:
+  - filter_chain_match:                # HTTP traffic detected by the Listener Filters
+      application_protocols:
+      - http/1.1
+      - h2c
+      transport_protocol: raw_buffer
+    filters:
     - name: envoy.filters.network.http_connection_manager
       typed_config:
         '@type': type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
@@ -285,6 +300,26 @@ Istio CR을 하나도 적용하지 않은 상태에서도, istiod는 Kubernetes�
     ...
     type: EDS
 
+# EDS: Endpoints of the server-a Cluster - the Pod IPs behind the Service
+# server-b, server-c Clusters have their own ClusterLoadAssignment in the same shape
+- endpoint_config:
+    '@type': type.googleapis.com/envoy.config.endpoint.v3.ClusterLoadAssignment
+    cluster_name: outbound|8080||server-a.default.svc.cluster.local
+    endpoints:
+    - lb_endpoints:
+      - endpoint:
+          address:
+            socket_address:
+              address: 10.244.2.4  # server-a Pod IP
+              port_value: 8080
+        health_status: HEALTHY
+        load_balancing_weight: 1
+        metadata:
+          filter_metadata:
+            envoy.transport_socket_match:
+              tlsMode: istio       # endpoint has a sidecar -> mTLS transport socket is selected
+            ...
+
 # CDS: BlackHoleCluster - STATIC Cluster without Endpoints, blocks traffic
 - cluster:
     alt_stat_name: BlackHoleCluster;
@@ -303,7 +338,9 @@ Istio CR을 하나도 적용하지 않은 상태에서도, istiod는 Kubernetes�
 [Config 2]는 `client` Pod의 Envoy Configuration의 Outbound 설정을 나타내고 있다. App Container가 보내는 모든 요청은 iptables에 의해 `15001` Port의 virtualOutbound Listener로 Redirect된다. [Config 2]에 있는 각 Listener의 역할은 다음과 같다.
 
 * **virtualOutbound Listener** : 모든 Outbound 요청의 진입점이며, 요청을 직접 처리하지 않고 세 갈래로 분기한다. 기본 경로는 `use_original_dst` 설정에 따라 요청의 원래 목적지 Port와 일치하는 `0.0.0.0_<Port>` Listener로 넘기는 것이다. 원래 목적지가 `15001` Port 자체인 요청은 `virtualOutbound-blackhole` Filter Chain이 BlackHoleCluster로 보내 차단하고, 일치하는 Listener가 없는 요청은 `virtualOutbound-catchall-tcp` Filter Chain이 PassthroughCluster로 보낸다.
-* **`0.0.0.0_8080`, `0.0.0.0_9090` Listener** : Port별 Outbound Listener이며, 해당 Pod 자신이 여는 Port가 아니라 **Mesh에 존재하는 Service의 Port** 기준으로 생성된다. istiod는 어떤 Pod가 어디로 요청을 보낼지 미리 알 수 없으므로 Mesh의 모든 Service Port마다 Outbound Listener를 만들어 모든 Sidecar에 배포하며, 아무 Port도 열지 않는 `client` Pod에 이 Listener들이 존재하는 것도 `client` 자신과는 무관하게 `server-a`, `server-b` Service가 `8080` Port를, `server-c` Service가 `9090` Port를 노출하고 있기 때문이다. 같은 Port를 노출하는 Service가 몇 개든 Port당 Listener는 하나이다. Listener Filter로 Protocol을 판별한 뒤, HTTP 요청이면 HTTP Connection Manager가 RDS로 받은 같은 이름의 Route Table(`"8080"`, `"9090"`)을 참조한다.
+* **`0.0.0.0_8080`, `0.0.0.0_9090` Listener** : Port별 Outbound Listener이다. 해당 Pod 자신이 여는 Port가 아니라 **Mesh에 존재하는 Service의 Port** 기준으로 생성되는데, istiod는 어떤 Pod가 어디로 요청을 보낼지 미리 알 수 없어 Mesh의 모든 Service Port마다 Outbound Listener를 만들어 모든 Sidecar에 배포하기 때문이다. 아무 Port도 열지 않는 `client` Pod에 이 Listener들이 존재하는 것도 `client` 자신과는 무관하게 `server-a`, `server-b` Service가 `8080` Port를, `server-c` Service가 `9090` Port를 노출하고 있기 때문이다. 같은 Port를 노출하는 Service가 몇 개든 Port당 Listener는 하나이다. 요청은 Listener Filter가 판별한 Protocol에 따라 두 갈래의 Filter Chain으로 나뉜다.
+  * **HTTP 연결** : `filter_chain_match`에 매칭되어 HTTP Connection Manager가 처리한다. RDS로 받은 같은 이름의 Route Table(`"8080"`, `"9090"`)을 참조하여 라우팅된다.
+  * **HTTP가 아닌 연결** : 어느 Chain에도 매칭되지 않아 `default_filter_chain`으로 떨어진다. `istio.stats`로 TCP 수준 Metrics만 남기고, `tcp_proxy`가 PassthroughCluster를 통해 원래 목적지로 그대로 통과시킨다.
 
 Port별 Outbound Listener는 Filter Chain을 선택하기 전에 Listener Filter로 연결의 Protocol을 판별한다. virtualOutbound Listener는 요청을 Port별 Listener로 넘기기만 하므로 Listener Filter가 없다. [Config 2]에 있는 각 Listener Filter의 역할은 다음과 같다.
 
@@ -329,7 +366,7 @@ Port별 Outbound Listener의 HTTP Connection Manager에는 기본 HTTP Filter들
 
 [Config 2]에 있는 각 Cluster의 역할은 다음과 같다.
 
-* **`outbound|8080||server-a...`, `outbound|8080||server-b...`, `outbound|9090||server-c...` Cluster** : Mesh의 Service Port마다 `outbound|<Port>||<Host>` 이름으로 생성되는 `EDS` Type Cluster이며, Endpoint 목록을 EDS로 전달받는다. 각 Route Table의 기본 Route(`name: default`)가 라우팅하는 대상이다. `0.0.0.0_8080` Listener와 `"8080"` Route Table을 공유하는 `server-a`, `server-b`도 Cluster는 각각 따로 가지는데, Listener나 Route Table과 달리 Cluster는 Port가 아니라 Service 단위이기 때문이다.
+* **`outbound|8080||server-a...`, `outbound|8080||server-b...`, `outbound|9090||server-c...` Cluster** : Mesh의 Service Port마다 `outbound|<Port>||<Host>` 이름으로 생성되는 `EDS` Type Cluster이며, Endpoint 목록을 EDS로 전달받는다. 각 Route Table의 기본 Route(`name: default`)가 라우팅하는 대상이다. `0.0.0.0_8080` Listener와 `"8080"` Route Table을 공유하는 `server-a`, `server-b`도 Cluster는 각각 따로 가지는데, Listener나 Route Table과 달리 Cluster는 Port가 아니라 Service 단위이기 때문이다. EDS로 전달받는 Endpoint는 [Config 2]의 EDS 발췌처럼 해당 Service에 속한 Pod의 IP:Port이며, istiod가 Kubernetes의 Endpoint 정보를 지켜보다가 Pod가 생기거나 사라질 때마다 갱신하여 Push한다. Endpoint metadata의 `tlsMode: istio` 표식은 해당 Pod에 Sidecar가 주입되어 있음을 나타내며, Cluster의 `transport_socket_matches`와 매칭되어 이 Endpoint로의 연결에 mTLS transport socket이 선택된다.
 * **BlackHoleCluster** : Endpoint가 하나도 없는 `STATIC` Type Cluster라 연결 시도가 즉시 실패하며, virtualOutbound Listener가 원래 목적지가 `15001` Port 자체인 요청을 차단하는 데 쓰인다.
 * **PassthroughCluster** : `ORIGINAL_DST` Type Cluster라 별도의 Endpoint 없이 요청의 원래 목적지 IP:Port로 그대로 연결하며, virtualOutbound Listener의 `virtualOutbound-catchall-tcp` Filter Chain과 Route Table의 `allow_any` Virtual Host가 라우팅하는 대상이다.
 
@@ -345,7 +382,34 @@ Port별 Outbound Listener의 HTTP Connection Manager에는 기본 HTTP Filter들
       address: 0.0.0.0
       port_value: 15006
   filter_chains:
-  ...
+  - filter_chain_match:                # block requests whose original destination is 15006 itself
+      destination_port: 15006
+    filters:
+    - name: istio.metadata_exchange
+      ...
+    - name: istio.stats
+      ...
+    - name: envoy.filters.network.tcp_proxy
+      typed_config:
+        '@type': type.googleapis.com/envoy.extensions.filters.network.tcp_proxy.v3.TcpProxy
+        cluster: BlackHoleCluster
+        ...
+    name: virtualInbound-blackhole
+  # catch-all chains for ports not exposed by any Service
+  # HTTP chains (mTLS/plaintext) use HCM, TCP chains use tcp_proxy - all to InboundPassthroughCluster
+  - filter_chain_match:
+      application_protocols:
+      - istio-http/1.0
+      - istio-http/1.1
+      - istio-h2
+      transport_protocol: tls
+    filters:
+    - name: istio.metadata_exchange
+      ...
+    - name: envoy.filters.network.http_connection_manager
+      ...                              # route_config -> InboundPassthroughCluster
+    name: virtualInbound-catchall-http
+  ...                                  # plaintext HTTP catch-all + 3 TCP catch-all chains
   - filter_chain_match:                # mTLS Chain
       application_protocols:
       - istio
@@ -414,6 +478,16 @@ Port별 Outbound Listener의 HTTP Connection Manager에는 기본 HTTP Filter들
       source_address:
         address: 127.0.0.6
         port_value: 0
+
+# CDS: InboundPassthroughCluster - same shape, used by the catch-all chains
+- cluster:
+    lb_policy: CLUSTER_PROVIDED
+    name: InboundPassthroughCluster
+    type: ORIGINAL_DST
+    upstream_bind_config:
+      source_address:
+        address: 127.0.0.6
+        port_value: 0
 ```
 
 [Config 3]은 `server-a` Pod의 Envoy Configuration의 Inbound 설정을 나타내고 있다. 다른 Pod로부터 들어오는 요청은 iptables에 의해 `15006` Port의 virtualInbound Listener로 Redirect된다. virtualInbound Listener는 모든 Inbound 요청의 진입점이며, Filter Chain을 선택하기 전에 Listener Filter로 요청의 정보를 얻는다. [Config 3]에 있는 각 Listener Filter의 역할은 다음과 같다.
@@ -422,8 +496,10 @@ Port별 Outbound Listener의 HTTP Connection Manager에는 기본 HTTP Filter들
 * **`tls_inspector`** : 연결의 첫 Bytes를 검사하여 TLS 여부를 판별하고, TLS 연결이면 Handshake에서 광고된 ALPN 값도 읽는다. 판별 결과는 Filter Chain 매칭의 `transport_protocol` 값과 `tls` Chain의 `application_protocols` 매칭에 사용된다.
 * **`http_inspector`** : Plaintext 연결에서 HTTP 여부와 버전을 판별한다.
 
-virtualInbound는 Service가 노출하는 Port마다 `destination_port`로 매칭되는 Filter Chain을 가진다. [Config 3]에 있는 각 Filter Chain의 역할은 다음과 같다.
+virtualInbound는 Service가 노출하는 Port마다 `destination_port`로 매칭되는 Filter Chain 쌍을 가지며, 그 앞에 차단용 Chain과 Catch-all Chain들이 있다. [Config 3]에 있는 각 Filter Chain의 역할은 다음과 같다.
 
+* **`virtualInbound-blackhole` Chain** : 원래 목적지가 `15006` Port 자체인 요청을 BlackHoleCluster로 보내 차단한다. virtualOutbound Listener의 `virtualOutbound-blackhole` Filter Chain과 같은 역할이다.
+* **Catch-all Chain** : 어느 Service도 노출하지 않는 Port로 들어온 요청을 처리하는 Fallback이다. HTTP용 Chain(mTLS/Plaintext 2개)은 HTTP Connection Manager로, TCP용 Chain(3개)은 `tcp_proxy`로 처리하며, 모두 InboundPassthroughCluster를 통해 원래 목적지 Port의 App Container로 그대로 전달한다.
 * **`tls` Chain** : Sidecar 간 mTLS 연결을 처리하는 Chain이다. `transport_protocol: tls`와 `application_protocols` Match로 보내는 쪽 Sidecar가 만든 mTLS 연결을 선별한다. `application_protocols`에 나열된 값은 모두 Istio 전용 ALPN으로, `istio`는 Sidecar mTLS임을 알리는 기본 표식, `istio-peer-exchange`는 TCP 연결에서 Network Filter 버전 `istio.metadata_exchange`로 메타데이터를 교환할 수 있다는 표식, `istio-http/1.0`·`istio-http/1.1`·`istio-h2`는 mTLS 표식에 Tunnel 내부의 HTTP 버전을 함께 담은 값이다. App이 자체적으로 처리하는 TLS 연결은 표준 ALPN을 광고하므로 이 Chain에 매칭되지 않는다. 매칭된 연결은 `require_client_certificate` 설정에 따라 Client 인증서를 검증하며 TLS를 Termination한 뒤 요청을 처리한다.
 * **`raw_buffer` Chain** : Plaintext 연결을 처리하는 Chain이다. 기본값인 `PERMISSIVE` Mode에서는 Port마다 `tls` Chain과 쌍으로 존재하며, `STRICT` Mode로 바꾸면 제거된다.
 
@@ -438,6 +514,7 @@ Filter 구성은 Outbound와 유사하지만 다음의 차이가 있다.
 
 * **`inbound|8080||` Route** : Outbound와 달리 RDS를 사용하지 않고 HTTP Connection Manager에 `route_config`로 Inline되어 있으며, 모든 요청을 `inbound|8080||` Cluster로 보내는 단순한 구조이다. Route가 항상 하나뿐이므로 동적으로 갱신할 필요가 없기 때문이다.
 * **`inbound|8080||` Cluster** : `ORIGINAL_DST` Type으로 요청의 원래 목적지인 App Container의 `8080` Port로 전달한다. 이때 `127.0.0.6`을 Source 주소로 사용하는데, iptables가 이 주소에서 나온 Traffic을 다시 Outbound로 Redirect하지 않도록 하는 Loop 방지 장치이다.
+* **InboundPassthroughCluster** : Catch-all Chain이 라우팅하는 대상이다. `inbound|8080||` Cluster와 같은 구조의 `ORIGINAL_DST` Type Cluster로, Service가 노출하지 않는 Port로 들어온 요청을 원래 목적지 Port 그대로 App Container에 전달한다.
 
 ### 1.2. Envoy Configuration with Istio and Kubernetes Resources
 
