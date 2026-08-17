@@ -397,7 +397,7 @@ Port별 Outbound Listener의 HTTP Connection Manager에는 기본 HTTP Filter들
     name: virtualInbound-blackhole
   # catch-all chains for ports not exposed by any Service
   # HTTP chains (mTLS/plaintext) use HCM, TCP chains use tcp_proxy - all to InboundPassthroughCluster
-  - filter_chain_match:
+  - filter_chain_match:                # HTTP catch-all (sidecar mTLS)
       application_protocols:
       - istio-http/1.0
       - istio-http/1.1
@@ -409,7 +409,46 @@ Port별 Outbound Listener의 HTTP Connection Manager에는 기본 HTTP Filter들
     - name: envoy.filters.network.http_connection_manager
       ...                              # route_config -> InboundPassthroughCluster
     name: virtualInbound-catchall-http
-  ...                                  # plaintext HTTP catch-all + 3 TCP catch-all chains
+    transport_socket:                  # mTLS termination
+      name: envoy.transport_sockets.tls
+      ...
+  - filter_chain_match:                # HTTP catch-all (plaintext)
+      application_protocols:
+      - http/1.1
+      - h2c
+      transport_protocol: raw_buffer
+    filters:
+      ...                              # same as the mTLS variant
+    name: virtualInbound-catchall-http
+  - filter_chain_match:                # TCP catch-all (sidecar mTLS)
+      application_protocols:
+      - istio-peer-exchange
+      - istio
+      transport_protocol: tls
+    filters:
+    - name: istio.metadata_exchange
+      ...
+    - name: istio.stats
+      ...
+    - name: envoy.filters.network.tcp_proxy
+      typed_config:
+        '@type': type.googleapis.com/envoy.extensions.filters.network.tcp_proxy.v3.TcpProxy
+        cluster: InboundPassthroughCluster
+        ...
+    name: virtualInbound
+    transport_socket:                  # mTLS termination
+      name: envoy.transport_sockets.tls
+      ...
+  - filter_chain_match:                # TCP catch-all (plaintext)
+      transport_protocol: raw_buffer
+    filters:
+      ...                              # same as the mTLS variant
+    name: virtualInbound
+  - filter_chain_match:                # TCP catch-all (any other TLS, passed through still encrypted)
+      transport_protocol: tls
+    filters:
+      ...                              # same as the plaintext variant
+    name: virtualInbound
   - filter_chain_match:                # mTLS Chain
       application_protocols:
       - istio
@@ -451,6 +490,7 @@ Port별 Outbound Listener의 HTTP Connection Manager에는 기본 HTTP Filter들
               route:
                 cluster: inbound|8080||
         ...
+    name: 0.0.0.0_8080
     transport_socket:
       name: envoy.transport_sockets.tls
       typed_config:
@@ -460,6 +500,7 @@ Port별 Outbound Listener의 HTTP Connection Manager에는 기본 HTTP Filter들
       destination_port: 8080
       transport_protocol: raw_buffer
     ...
+    name: 0.0.0.0_8080
   listener_filters:
   - name: envoy.filters.listener.original_dst
   - name: envoy.filters.listener.tls_inspector
@@ -496,11 +537,21 @@ Port별 Outbound Listener의 HTTP Connection Manager에는 기본 HTTP Filter들
 * **`tls_inspector`** : 연결의 첫 Bytes를 검사하여 TLS 여부를 판별하고, TLS 연결이면 Handshake에서 광고된 ALPN 값도 읽는다. 판별 결과는 Filter Chain 매칭의 `transport_protocol` 값과 `tls` Chain의 `application_protocols` 매칭에 사용된다.
 * **`http_inspector`** : Plaintext 연결에서 HTTP 여부와 버전을 판별한다.
 
-virtualInbound는 Service가 노출하는 Port마다 `destination_port`로 매칭되는 Filter Chain 쌍을 가지며, 그 앞에 차단용 Chain과 Catch-all Chain들이 있다. [Config 3]에 있는 각 Filter Chain의 역할은 다음과 같다.
+virtualInbound는 차단용 Chain 1개, Catch-all Chain 5개, 그리고 Service가 노출하는 Port마다 `destination_port`로 매칭되는 Chain 쌍(`server-a`는 `8080` Port용 2개)까지 총 8개의 Filter Chain을 가진다.
+
+Catch-all Chain이 존재하는 이유는 Service에 선언되지 않은 Port로도 요청이 들어올 수 있기 때문이다. Service는 방화벽이 아니라서 Pod IP로는 App이 열어둔 어떤 Port로든 직접 접근할 수 있다. App이 열었지만 Service에 선언하지 않은 Port(이 환경에서는 `server-a`의 App이 `9090` Port도 수신하지만 Service에는 `8080`만 선언되어 있다), Prometheus가 Pod IP로 직접 Scrape하는 Metrics Port, Headless Service를 통한 Pod 직접 통신 등이 그 예이다. Sidecar가 주입되어도 Kubernetes에서 가능하던 Pod 간 통신은 그대로 가능해야 하므로, istiod는 이런 요청을 차단하지 않고 App으로 통과시키는 Catch-all Chain을 만든다. Outbound에서 Mesh에 등록되지 않은 목적지로 향하는 요청을 PassthroughCluster로 통과시키는 것과 대칭 구조이다.
+
+[Config 3]에 있는 각 Filter Chain의 역할은 다음과 같다.
 
 * **`virtualInbound-blackhole` Chain** : 원래 목적지가 `15006` Port 자체인 요청을 BlackHoleCluster로 보내 차단한다. virtualOutbound Listener의 `virtualOutbound-blackhole` Filter Chain과 같은 역할이다.
-* **Catch-all Chain** : 어느 Service도 노출하지 않는 Port로 들어온 요청을 처리하는 Fallback이다. HTTP용 Chain(mTLS/Plaintext 2개)은 HTTP Connection Manager로, TCP용 Chain(3개)은 `tcp_proxy`로 처리하며, 모두 InboundPassthroughCluster를 통해 원래 목적지 Port의 App Container로 그대로 전달한다.
-* **`tls` Chain** : Sidecar 간 mTLS 연결을 처리하는 Chain이다. `transport_protocol: tls`와 `application_protocols` Match로 보내는 쪽 Sidecar가 만든 mTLS 연결을 선별한다. `application_protocols`에 나열된 값은 모두 Istio 전용 ALPN으로, `istio`는 Sidecar mTLS임을 알리는 기본 표식, `istio-peer-exchange`는 TCP 연결에서 Network Filter 버전 `istio.metadata_exchange`로 메타데이터를 교환할 수 있다는 표식, `istio-http/1.0`·`istio-http/1.1`·`istio-h2`는 mTLS 표식에 Tunnel 내부의 HTTP 버전을 함께 담은 값이다. App이 자체적으로 처리하는 TLS 연결은 표준 ALPN을 광고하므로 이 Chain에 매칭되지 않는다. 매칭된 연결은 `require_client_certificate` 설정에 따라 Client 인증서를 검증하며 TLS를 Termination한 뒤 요청을 처리한다.
+* **`virtualInbound-catchall-http` Chain** : 어느 Service도 노출하지 않는 Port로 들어온 HTTP 요청을 처리하는 Fallback이다. HTTP Connection Manager를 거치므로 HTTP 수준의 Metrics와 Access Log를 남긴 뒤, Route를 통해 InboundPassthroughCluster로 전달한다.
+  * **Sidecar mTLS용** : ALPN `istio-http/1.0`·`istio-http/1.1`·`istio-h2` Match로 Sidecar가 만든 mTLS 연결을 선별하며, TLS Termination을 수행한다.
+  * **Plaintext용** : `http/1.1`·`h2c` Match로 Plaintext HTTP 연결을 선별한다.
+* **`virtualInbound` Chain** : HTTP Catch-all에도 걸리지 않은 나머지 연결 전부를 처리하는 최종 Fallback이다. `tcp_proxy`가 TCP 수준 기록만 남기고 InboundPassthroughCluster로 전달한다. Plaintext용과 그 외 TLS용 Chain은 Match 조건이 `transport_protocol`뿐이라 어떤 연결이든 반드시 걸리며, 덕분에 virtualInbound에는 Port별 Outbound Listener와 달리 `default_filter_chain`이 없다.
+  * **Sidecar mTLS용** : ALPN `istio-peer-exchange`·`istio` Match로 Sidecar가 만든 mTLS TCP 연결을 선별하며, TLS Termination을 수행한다.
+  * **Plaintext용** : `transport_protocol: raw_buffer`만으로 매칭하여 나머지 Plaintext 연결 전부를 받는다.
+  * **그 외 TLS용** : `transport_protocol: tls`만으로 매칭하며, App이 자체 처리하는 TLS처럼 Istio ALPN이 없는 TLS 연결을 Termination 없이 암호화된 채 그대로 통과시킨다.
+* **`tls` Chain** : `8080` Port로 들어온 Sidecar 간 mTLS 연결을 처리하는 Chain이며, Plaintext Chain과 함께 `0.0.0.0_8080`이라는 이름을 가진다. `transport_protocol: tls`와 `application_protocols` Match로 보내는 쪽 Sidecar가 만든 mTLS 연결을 선별한다. `application_protocols`에 나열된 값은 모두 Istio 전용 ALPN으로, `istio`는 Sidecar mTLS임을 알리는 기본 표식, `istio-peer-exchange`는 TCP 연결에서 Network Filter 버전 `istio.metadata_exchange`로 메타데이터를 교환할 수 있다는 표식, `istio-http/1.0`·`istio-http/1.1`·`istio-h2`는 mTLS 표식에 Tunnel 내부의 HTTP 버전을 함께 담은 값이다. App이 자체적으로 처리하는 TLS 연결은 표준 ALPN을 광고하므로 이 Chain에 매칭되지 않는다. 매칭된 연결은 `require_client_certificate` 설정에 따라 Client 인증서를 검증하며 TLS를 Termination한 뒤 요청을 처리한다.
 * **`raw_buffer` Chain** : Plaintext 연결을 처리하는 Chain이다. 기본값인 `PERMISSIVE` Mode에서는 Port마다 `tls` Chain과 쌍으로 존재하며, `STRICT` Mode로 바꾸면 제거된다.
 
 Filter 구성은 Outbound와 유사하지만 다음의 차이가 있다.
