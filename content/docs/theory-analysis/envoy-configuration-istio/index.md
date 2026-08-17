@@ -78,12 +78,11 @@ spec:
     command: ["sleep", "infinity"]
 ```
 
-실험 환경은 kind Cluster + Istio 1.24이며, `istio-system` Namespace에는 istiod와 istio-ingressgateway가 설치되어 있다. [Config 1]은 실험에 사용하는 Workload를 나타내고 있다. `default` Namespace에 `istio-injection=enabled` Label이 설정되어 있어 모든 Pod에 istio-proxy Sidecar가 주입된 상태로 동작한다. 각 Workload의 역할은 다음과 같다.
+실험 환경은 kind Cluster + Istio 1.24이며, `istio-system` Namespace에는 istiod와 istio-ingressgateway Pod가 설치되어 있다. [Config 1]은 실험에 사용하는 Workload를 나타내고 있다. `default` Namespace에 `istio-injection=enabled` Label이 설정되어 있어 모든 Pod에 istio-proxy Sidecar가 주입된 상태로 동작한다. 각 Workload의 역할은 다음과 같다.
 
 * **`server-a`, `server-b` Pod/Service** : 요청을 받는 서버이며, 각각 `8080` Port를 노출한다. 같은 Port를 노출하는 Service가 여러 개일 때의 설정을 확인하기 위해 두 개를 배치했다.
 * **`server-c` Pod/Service** : 요청을 받는 서버이며, `9090` Port를 노출한다. 다른 Port를 노출하는 Service가 있을 때의 설정을 확인하기 위해 배치했다.
 * **`client` Pod** : 요청을 보내는 Client 역할이다.
-* **istio-ingressgateway Pod** : Gateway CR 실험의 관찰 대상이다.
 
 1.2의 CR 실험은 서버 중에서는 `server-a` Pod만을 대상으로 적용하며, Inbound 설정을 변경하는 CR(PeerAuthentication, AuthorizationPolicy 등)은 `server-a` Pod에서, Outbound 설정을 변경하는 CR(VirtualService, DestinationRule 등)은 `client` Pod에서 변경 내역을 관찰한다.
 
@@ -486,7 +485,7 @@ spec:
    static_route_configs:
 ```
 
-Gateway는 Sidecar가 아닌 **selector로 선택된 Gateway Pod(`istio-ingressgateway`)의 Envoy에 반영**된다. Gateway CR에는 `80` Port를 선언했지만 Listener는 `0.0.0.0_8080`에 생성되는데, istiod가 `istio-ingressgateway` Service의 Port 매핑([Config 4]의 `80` Port → `8080` targetPort)을 따라 실제 Traffic을 받는 targetPort에 Listener를 생성하기 때문이다. Listener와 Route 이름(`http.8080`)은 실제 바인딩 포트 기준이고, Virtual Host 이름(`blackhole:80`)은 Gateway CR에 선언된 Server Port 기준이다. 아직 이 Gateway에 연결된 VirtualService가 없으므로 모든 요청은 `blackhole` Virtual Host에 의해 `404`로 처리된다.
+Gateway는 Sidecar가 아닌 **selector로 선택된 Gateway Pod(istio-ingressgateway)의 Envoy에 반영**된다. Gateway CR에는 `80` Port를 선언했지만 Listener는 `0.0.0.0_8080`에 생성되는데, istiod가 istio-ingressgateway Service의 Port 매핑([Config 4]의 `80` Port → `8080` targetPort)을 따라 실제 Traffic을 받는 targetPort에 Listener를 생성하기 때문이다. Listener와 Route 이름(`http.8080`)은 실제 바인딩 포트 기준이고, Virtual Host 이름(`blackhole:80`)은 Gateway CR에 선언된 Server Port 기준이다. 아직 이 Gateway에 연결된 VirtualService가 없으므로 모든 요청은 `blackhole` Virtual Host에 의해 `404`로 처리된다.
 
 #### 1.2.2. VirtualService
 
