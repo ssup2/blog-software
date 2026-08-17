@@ -342,7 +342,9 @@ Istio CR을 하나도 적용하지 않은 상태에서도, istiod는 Kubernetes�
   * **HTTP 연결** : `filter_chain_match`에 매칭되어 HTTP Connection Manager가 처리한다. RDS로 받은 같은 이름의 Route Table(`"8080"`, `"9090"`)을 참조하여 라우팅된다.
   * **HTTP가 아닌 연결** : 어느 Chain에도 매칭되지 않아 `default_filter_chain`으로 떨어진다. `istio.stats`로 TCP 수준 Metrics만 남기고, `tcp_proxy`가 PassthroughCluster를 통해 원래 목적지로 그대로 통과시킨다.
 
-Outbound의 Network Filter 구성도 대부분 공통이며, Chain마다 다른 것은 주로 목적지를 지정하는 부분이다. `istio.stats`는 모든 TCP 계열 Chain(virtualOutbound의 Chain들과 Port별 Listener의 `default_filter_chain`)에서 설정까지 동일하다. `tcp_proxy`는 PassthroughCluster로 보내는 Chain들끼리 동일하고, `virtualOutbound-blackhole` Chain만 목적지 Cluster(BlackHoleCluster)와 Access Log 유무가 다르다. HTTP Connection Manager도 참조할 Route Table을 지정하는 `rds`의 `route_config_name`과 `stat_prefix`를 제외한 나머지 설정이 모든 Port별 Listener에서 동일하며, 내부의 HTTP Filter 구성도 완전히 같다.
+Outbound의 Network Filter 설정은 Chain이 달라도 대부분 같으며, Chain마다 다른 것은 주로 목적지를 지정하는 부분이다. TCP 계열 Chain(virtualOutbound의 Chain들과 Port별 Outbound Listener의 `default_filter_chain`)에서 `istio.stats`는 모든 Chain에서 설정까지 동일하고, `tcp_proxy`도 PassthroughCluster로 보내는 Chain들끼리는 동일하다. `virtualOutbound-blackhole` Chain의 `tcp_proxy`만 목적지 Cluster(BlackHoleCluster)와 Access Log 유무가 다르다. HTTP Connection Manager는 참조할 Route Table을 지정하는 `rds`의 `route_config_name`과 `stat_prefix`만 Port별 Outbound Listener마다 다르고, 내부의 HTTP Filter 구성을 포함한 나머지 설정은 모두 동일하다.
+
+이처럼 설정이 동일한 것은 istiod가 같은 설정을 각 Chain에 복제해 배포하기 때문이며, Envoy가 Filter 인스턴스를 공유한다는 의미는 아니다. Filter 인스턴스는 연결마다(HTTP Filter는 요청마다) 새로 생성되어 상태를 공유하지 않으며, Filter가 이름으로 참조하는 Cluster와 Stats만 공유된다.
 
 Port별 Outbound Listener는 Network Filter Chain을 선택하기 전에 Listener Filter로 연결의 Protocol을 판별한다. virtualOutbound Listener는 요청을 Port별 Listener로 넘기기만 하므로 Listener Filter가 없다. [Config 2]에 있는 각 Listener Filter의 역할은 다음과 같다.
 
@@ -565,7 +567,7 @@ virtualInbound Listener는 차단용 Chain 1개와 Catch-all Chain 5개, 그리�
 
 Catch-all Chain이 존재하는 이유는 Service에 선언되지 않은 Port로도 요청이 들어올 수 있기 때문이다. Service는 방화벽이 아니라서 Pod IP로는 App이 열어둔 어떤 Port로든 직접 접근할 수 있다. App이 열었지만 Service에 선언하지 않은 Port, Prometheus가 Pod IP로 직접 Scrape하는 Metrics Port, Headless Service를 통한 Pod 직접 통신 등이 그 예이다. Sidecar가 주입되어도 Kubernetes에서 가능하던 Pod 간 통신은 그대로 가능해야 하므로, istiod는 이런 요청을 차단하지 않고 App으로 통과시키는 Catch-all Chain을 만든다. Outbound에서 Mesh에 등록되지 않은 목적지로 향하는 요청을 PassthroughCluster로 통과시키는 것과 대칭 구조이다.
 
-virtualInbound의 Network Filter 구성은 대부분 공통이며, Chain마다 다른 것은 주로 목적지를 지정하는 부분이다. `istio.metadata_exchange`는 모든 Chain에서, `istio.stats`는 모든 TCP 계열 Chain에서 설정까지 동일하다. `tcp_proxy`는 TCP Catch-all Chain들끼리 동일하고, `virtualInbound-blackhole` Chain만 목적지 Cluster(BlackHoleCluster)와 Access Log 유무가 다르다.
+virtualInbound의 Network Filter 설정은 Chain이 달라도 대부분 같으며, Chain마다 다른 것은 주로 목적지를 지정하는 부분이다. `istio.metadata_exchange`는 모든 Chain에서, `istio.stats`는 모든 TCP 계열 Chain에서 설정까지 동일하다. `tcp_proxy`는 TCP Catch-all Chain들끼리 동일하고, `virtualInbound-blackhole` Chain만 목적지 Cluster(BlackHoleCluster)와 Access Log 유무가 다르다.
 
 HTTP Connection Manager도 목적지를 지정하는 `route_config`(Catch-all Chain은 InboundPassthroughCluster, `0.0.0.0_8080` Chain은 `inbound|8080||`)와 `stat_prefix`를 제외한 나머지 설정이 HTTP Connection Manager를 가진 모든 Chain에서 동일하다. 따라서 그 내부의 HTTP Filter 구성도 모든 Chain에서 완전히 같으며, Istio CR로 인해 HTTP Filter가 삽입될 때에도 모든 Chain에 동일하게 반영된다. [Config 3]에는 그중 mTLS Chain의 것만 표시했다. Inbound의 Filter 구성은 Outbound의 것과도 대부분 같으며, 다음의 두 가지만 다르다.
 
