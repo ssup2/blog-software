@@ -180,13 +180,17 @@ Istio CR을 하나도 적용하지 않은 상태에서도, istiod는 Kubernetes�
   traffic_direction: OUTBOUND
 
 # RDS: "8080" Route Table - one Virtual Host per Service + allow_any catch-all
+# Virtual Host is selected by matching the request's Host header against domains
 - route_config:
+    ignore_port_in_host_matching: true     # strip ":<Port>" from the Host header before matching
     name: "8080"
     virtual_hosts:
-    - domains:
+    - domains:                             # all name variants + ClusterIP of the server-a Service
       - server-a.default.svc.cluster.local
       - server-a
-      ...
+      - server-a.default.svc
+      - server-a.default
+      - 10.96.202.153
       name: server-a.default.svc.cluster.local:8080
       routes:
       - match:
@@ -194,10 +198,12 @@ Istio CR을 하나도 적용하지 않은 상태에서도, istiod는 Kubernetes�
         name: default
         route:
           cluster: outbound|8080||server-a.default.svc.cluster.local
-    - domains:
+    - domains:                             # all name variants + ClusterIP of the server-b Service
       - server-b.default.svc.cluster.local
       - server-b
-      ...
+      - server-b.default.svc
+      - server-b.default
+      - 10.96.118.1
       name: server-b.default.svc.cluster.local:8080
       routes:
       - match:
@@ -217,12 +223,15 @@ Istio CR을 하나도 적용하지 않은 상태에서도, istiod는 Kubernetes�
 
 # RDS: "9090" Route Table - server-c Virtual Host + allow_any catch-all
 - route_config:
+    ignore_port_in_host_matching: true
     name: "9090"
     virtual_hosts:
-    - domains:
+    - domains:                             # all name variants + ClusterIP of the server-c Service
       - server-c.default.svc.cluster.local
       - server-c
-      ...
+      - server-c.default.svc
+      - server-c.default
+      - 10.96.77.59
       name: server-c.default.svc.cluster.local:9090
       routes:
       - match:
@@ -236,7 +245,6 @@ Istio CR을 하나도 적용하지 않은 상태에서도, istiod는 Kubernetes�
       ...
 
 # CDS: per-Service outbound Cluster (Endpoints via EDS)
-# outbound|8080||server-b..., outbound|9090||server-c... follow the same structure
 - cluster:
     eds_cluster_config:
       eds_config:
@@ -244,6 +252,24 @@ Istio CR을 하나도 적용하지 않은 상태에서도, istiod는 Kubernetes�
       service_name: outbound|8080||server-a.default.svc.cluster.local
     lb_policy: LEAST_REQUEST
     name: outbound|8080||server-a.default.svc.cluster.local
+    ...
+    type: EDS
+- cluster:
+    eds_cluster_config:
+      eds_config:
+        ads: {}
+      service_name: outbound|8080||server-b.default.svc.cluster.local
+    lb_policy: LEAST_REQUEST
+    name: outbound|8080||server-b.default.svc.cluster.local
+    ...
+    type: EDS
+- cluster:
+    eds_cluster_config:
+      eds_config:
+        ads: {}
+      service_name: outbound|9090||server-c.default.svc.cluster.local
+    lb_policy: LEAST_REQUEST
+    name: outbound|9090||server-c.default.svc.cluster.local
     ...
     type: EDS
 
@@ -267,7 +293,9 @@ Istio CR을 하나도 적용하지 않은 상태에서도, istiod는 Kubernetes�
 * **virtualOutbound Listener** : 모든 Outbound 요청의 진입점이며, 요청을 직접 처리하지 않고 세 갈래로 분기한다. 기본 경로는 `use_original_dst` 설정에 따라 요청의 원래 목적지 Port와 일치하는 `0.0.0.0_<Port>` Listener로 넘기는 것이다. 원래 목적지가 `15001` Port 자체인 요청은 `virtualOutbound-blackhole` Filter Chain이 BlackHoleCluster로 보내 차단하고, 일치하는 Listener가 없는 요청은 `virtualOutbound-catchall-tcp` Filter Chain이 PassthroughCluster로 보낸다.
 * **`0.0.0.0_8080`, `0.0.0.0_9090` Listener** : Port별 Outbound Listener이며, 해당 Pod 자신이 여는 Port가 아니라 **Mesh에 존재하는 Service의 Port** 기준으로 생성된다. istiod는 어떤 Pod가 어디로 요청을 보낼지 미리 알 수 없으므로 Mesh의 모든 Service Port마다 Outbound Listener를 만들어 모든 Sidecar에 배포하며, 아무 Port도 열지 않는 `client` Pod에 이 Listener들이 존재하는 것도 `client` 자신과는 무관하게 `server-a`, `server-b` Service가 `8080` Port를, `server-c` Service가 `9090` Port를 노출하고 있기 때문이다. 같은 Port를 노출하는 Service가 몇 개든 Port당 Listener는 하나이다. tls_inspector와 http_inspector로 Protocol을 판별하고, HTTP 요청이면 HTTP Connection Manager가 RDS로 받은 같은 이름의 Route Table(`"8080"`, `"9090"`)을 참조한다.
 
-Route Table에는 해당 Port를 노출하는 Mesh의 Service마다 Virtual Host가 하나씩 생성되며, 각 Virtual Host에는 istiod가 만든 기본 Route(`name: default`)가 들어 있다. `8080` Port는 `server-a`, `server-b` 두 Service가 함께 노출하므로 `"8080"` Route Table에 Virtual Host가 두 개 생기고, 요청의 Host Header의 Domain 매칭으로 Virtual Host가 선택된다. 어느 Virtual Host에도 매칭되지 않는 요청은 Catch-all인 `allow_any` Virtual Host를 통해 PassthroughCluster로 전달된다.
+Route Table에는 해당 Port를 노출하는 Mesh의 Service마다 Virtual Host가 하나씩 생성되며, `8080` Port는 `server-a`, `server-b` 두 Service가 함께 노출하므로 `"8080"` Route Table에 Virtual Host가 두 개 생긴다. `0.0.0.0_8080` Listener는 목적지 Service가 무엇이든 `8080` Port로 향하는 요청을 모두 받으므로, 요청을 Service별로 구분하는 것은 Listener가 아니라 Route Table의 Domain 매칭이다. 각 Virtual Host의 `domains`에는 해당 Service의 모든 이름 축약형(`server-a`, `server-a.default`, `server-a.default.svc`, FQDN)과 Service의 ClusterIP가 나열되어 있어, App이 어떤 형태로 호출하든 요청의 Host Header가 해당 Service의 Virtual Host로 매칭된다. `ignore_port_in_host_matching` 설정에 의해 Host Header에 붙는 `:8080` 같은 Port 표기는 매칭 전에 제거된다.
+
+매칭된 Virtual Host에는 istiod가 만든 기본 Route(`name: default`)가 들어 있으며, 이 Route가 요청을 각 Service의 Cluster로 라우팅한다. Host Header가 `server-a`인 요청은 `outbound|8080||server-a.default.svc.cluster.local` Cluster로, `server-b`인 요청은 `outbound|8080||server-b.default.svc.cluster.local` Cluster로 전달되어, 같은 Listener로 들어온 요청이 여기서 서로 다른 Service로 갈라진다. 어느 Virtual Host에도 매칭되지 않는 요청은 Catch-all인 `allow_any` Virtual Host를 통해 PassthroughCluster로 전달된다.
 
 HTTP Connection Manager에는 기본 HTTP Filter들이 다음의 순서대로 들어 있다.
 
@@ -281,7 +309,7 @@ HTTP Connection Manager에는 기본 HTTP Filter들이 다음의 순서대로 �
 
 [Config 2]에 있는 각 Cluster의 역할은 다음과 같다.
 
-* **`outbound|8080||server-a.default.svc.cluster.local` Cluster** : Mesh의 Service Port마다 `outbound|<Port>||<Host>` 이름으로 생성되는 `EDS` Type Cluster이며, Endpoint 목록을 EDS로 전달받는다. Route Table의 기본 Route(`name: default`)가 라우팅하는 대상이다. Listener나 Route Table과 달리 Cluster는 Port가 아니라 Service 단위이므로, `server-b`, `server-c` Service의 Cluster도 같은 형태로 각각 존재한다.
+* **`outbound|8080||server-a...`, `outbound|8080||server-b...`, `outbound|9090||server-c...` Cluster** : Mesh의 Service Port마다 `outbound|<Port>||<Host>` 이름으로 생성되는 `EDS` Type Cluster이며, Endpoint 목록을 EDS로 전달받는다. 각 Route Table의 기본 Route(`name: default`)가 라우팅하는 대상이다. `0.0.0.0_8080` Listener와 `"8080"` Route Table을 공유하는 `server-a`, `server-b`도 Cluster는 각각 따로 가지는데, Listener나 Route Table과 달리 Cluster는 Port가 아니라 Service 단위이기 때문이다.
 * **BlackHoleCluster** : Endpoint가 하나도 없는 `STATIC` Type Cluster라 연결 시도가 즉시 실패하며, virtualOutbound Listener가 원래 목적지가 `15001` Port 자체인 요청을 차단하는 데 쓰인다.
 * **PassthroughCluster** : `ORIGINAL_DST` Type Cluster라 별도의 Endpoint 없이 요청의 원래 목적지 IP:Port로 그대로 연결하며, virtualOutbound Listener의 `virtualOutbound-catchall-tcp` Filter Chain과 Route Table의 `allow_any` Virtual Host가 라우팅하는 대상이다.
 
