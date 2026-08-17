@@ -6,7 +6,7 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: mock-server
+      app: server-a
   url: oci://ghcr.io/istio-ecosystem/wasm-extensions/basic_auth:1.12.0
   phase: AUTHN
   pluginConfig:

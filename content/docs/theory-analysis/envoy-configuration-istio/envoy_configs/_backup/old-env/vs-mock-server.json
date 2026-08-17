@@ -1,0 +1,28 @@
+{
+  "apiVersion": "networking.istio.io/v1",
+  "kind": "VirtualService",
+  "metadata": {
+    "name": "mock-server",
+    "namespace": "default",
+    "labels": null
+  },
+  "spec": {
+    "hosts": [
+      "mock-server"
+    ],
+    "http": [
+      {
+        "retries": {
+          "attempts": 2
+        },
+        "route": [
+          {
+            "destination": {
+              "host": "mock-server"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

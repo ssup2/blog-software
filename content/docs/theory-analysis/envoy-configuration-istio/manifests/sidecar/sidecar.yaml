@@ -1,9 +1,12 @@
 apiVersion: networking.istio.io/v1
 kind: Sidecar
 metadata:
-  name: default
+  name: client
   namespace: default
 spec:
+  workloadSelector:
+    labels:
+      app: client
   egress:
   - hosts:
-    - "./mock-server.default.svc.cluster.local"
+    - "./server-a.default.svc.cluster.local"

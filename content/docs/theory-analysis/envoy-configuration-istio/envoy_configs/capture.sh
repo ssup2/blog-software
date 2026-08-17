@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # envoy_configs 캡처 스크립트.
 # manifests/의 각 CR을 순서대로 적용/캡처/삭제하며, 정규화된 proxy-config dump를
-# envoy_configs/<cr이름>/<pod>.yaml 로 저장한다. 실행 전 상시 운영 중인
-# mock-server VS/DR을 백업/삭제하고, 종료 시 복원한다.
+# envoy_configs/<cr이름>/<pod>.yaml 로 저장한다.
+# 실험 환경: manifests/base/의 server-a, server-b, server-c, client Pod가
+# default Namespace(istio-injection=enabled)에 상주해야 한다.
 set -euo pipefail
 
 CTX=kind-kind
@@ -31,72 +32,59 @@ cap() { # <pod> <namespace> <outfile>
 GW_POD=$($K -n istio-system get pods -l istio=ingressgateway -o jsonpath='{.items[0].metadata.name}')
 log "ingressgateway pod: $GW_POD"
 
-# 0. 상시 운영 VS/DR 백업 후 삭제 (백업은 name/namespace/spec만 남긴다)
-mkdir -p "$OUT/_backup"
-clean() { jq '{apiVersion, kind, metadata: {name: .metadata.name, namespace: .metadata.namespace}, spec}'; }
-$K -n default get vs mock-server -o json | clean > "$OUT/_backup/vs-mock-server.json"
-$K -n default get dr mock-server -o json | clean > "$OUT/_backup/dr-mock-server.json"
-restore() {
-  log "restoring standing VS/DR"
-  $K apply -f "$OUT/_backup/vs-mock-server.json"
-  $K apply -f "$OUT/_backup/dr-mock-server.json"
-}
-trap restore EXIT
-$K -n default delete vs mock-server
-$K -n default delete dr mock-server
-sleep 15
-
 # 1. baseline 캡처 + self-diff 검증
-cap shell default "$OUT/base/shell.yaml"
-cap shell default /tmp/envoy-configs-selfcheck.yaml
-if diff -q "$OUT/base/shell.yaml" /tmp/envoy-configs-selfcheck.yaml > /dev/null; then
+cap client default "$OUT/base/client.yaml"
+cap client default /tmp/envoy-configs-selfcheck.yaml
+if diff -q "$OUT/base/client.yaml" /tmp/envoy-configs-selfcheck.yaml > /dev/null; then
   log "self-diff OK (0 lines)"
 else
   log "WARNING: self-diff not clean"
-  diff "$OUT/base/shell.yaml" /tmp/envoy-configs-selfcheck.yaml | head -20 || true
+  diff "$OUT/base/client.yaml" /tmp/envoy-configs-selfcheck.yaml | head -20 || true
 fi
-cap mock-server default "$OUT/base/mock-server.yaml"
+cap server-a default "$OUT/base/server-a.yaml"
+cap server-b default "$OUT/base/server-b.yaml"
+cap server-c default "$OUT/base/server-c.yaml"
 cap "$GW_POD" istio-system "$OUT/base/istio-ingressgateway.yaml"
 
-# 2. shell Pod 관찰 대상 CR (outbound)
+# 2. client Pod 관찰 대상 CR (outbound)
 for cr in virtualservice destinationrule serviceentry sidecar workloadentry workloadgroup proxyconfig; do
   f="$MAN/$cr/$cr.yaml"
-  log "=== $cr (shell) ==="
+  log "=== $cr (client) ==="
   $K apply -f "$f"
   sleep $PUSH_WAIT
-  cap shell default "$OUT/$cr/shell.yaml"
+  cap client default "$OUT/$cr/client.yaml"
   $K delete -f "$f"
   sleep $DRAIN_WAIT
 done
 
-# 3. mock-server Pod 관찰 대상 CR (inbound)
+# 3. server-a Pod 관찰 대상 CR (inbound)
 for cr in envoyfilter peerauthentication requestauthentication authorizationpolicy; do
   f="$MAN/$cr/$cr.yaml"
-  log "=== $cr (mock-server) ==="
+  log "=== $cr (server-a) ==="
   $K apply -f "$f"
   sleep $PUSH_WAIT
-  cap mock-server default "$OUT/$cr/mock-server.yaml"
+  cap server-a default "$OUT/$cr/server-a.yaml"
   $K delete -f "$f"
   sleep $DRAIN_WAIT
 done
 
 # 3-1. telemetry: otel provider 대상 dummy Service 필요 (meshConfig extensionProviders 참조)
-log "=== telemetry (mock-server) ==="
+log "=== telemetry (server-a) ==="
 $K create ns observability
 $K -n observability create service clusterip opentelemetry-collector --tcp=4317:4317
 sleep 5
 $K apply -f "$MAN/telemetry/telemetry.yaml"
 sleep $PUSH_WAIT
-cap mock-server default "$OUT/telemetry/mock-server.yaml"
+cap server-a default "$OUT/telemetry/server-a.yaml"
 $K delete -f "$MAN/telemetry/telemetry.yaml"
 $K delete ns observability
 sleep $DRAIN_WAIT
 
 # 3-2. wasmplugin: pilot-agent의 OCI 모듈 다운로드 시간 필요
-log "=== wasmplugin (mock-server) ==="
+log "=== wasmplugin (server-a) ==="
 $K apply -f "$MAN/wasmplugin/wasmplugin.yaml"
 sleep 20
-cap mock-server default "$OUT/wasmplugin/mock-server.yaml"
+cap server-a default "$OUT/wasmplugin/server-a.yaml"
 $K delete -f "$MAN/wasmplugin/wasmplugin.yaml"
 sleep $DRAIN_WAIT
 

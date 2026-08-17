@@ -1,10 +1,10 @@
 apiVersion: networking.istio.io/v1
 kind: DestinationRule
 metadata:
-  name: mock-server
+  name: server-a
   namespace: default
 spec:
-  host: mock-server
+  host: server-a
   trafficPolicy:
     loadBalancer:
       simple: RANDOM

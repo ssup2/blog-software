@@ -1,9 +1,12 @@
 apiVersion: telemetry.istio.io/v1
 kind: Telemetry
 metadata:
-  name: mock-server
+  name: server-a
   namespace: default
 spec:
+  selector:
+    matchLabels:
+      app: server-a
   accessLogging:
   - providers:
     - name: otel

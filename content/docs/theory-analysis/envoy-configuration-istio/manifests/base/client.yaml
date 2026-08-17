@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: shell
+  name: client
   namespace: default
   labels:
-    app: shell
+    app: client
 spec:
   containers:
-  - name: shell
+  - name: client
     image: nicolaka/netshoot
     command: ["sleep", "infinity"]

@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: server-b
+  namespace: default
+  labels:
+    app: server-b
+spec:
+  containers:
+  - name: server-b
+    image: ghcr.io/ssup2/mock-go-server:commit-f8ad4477
+    ports:
+    - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: server-b
+  namespace: default
+spec:
+  selector:
+    app: server-b
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080

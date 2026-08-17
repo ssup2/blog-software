@@ -6,7 +6,7 @@ metadata:
 spec:
   workloadSelector:
     labels:
-      app: mock-server
+      app: server-a
   configPatches:
   - applyTo: HTTP_FILTER
     match:

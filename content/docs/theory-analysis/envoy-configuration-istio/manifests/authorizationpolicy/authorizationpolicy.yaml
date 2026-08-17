@@ -1,12 +1,12 @@
 apiVersion: security.istio.io/v1
 kind: AuthorizationPolicy
 metadata:
-  name: mock-server
+  name: server-a
   namespace: default
 spec:
   selector:
     matchLabels:
-      app: mock-server
+      app: server-a
   action: DENY
   rules:
   - to:
