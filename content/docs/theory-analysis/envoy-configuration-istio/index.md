@@ -443,6 +443,25 @@ Filter 구성은 Outbound와 유사하지만 다음의 차이가 있다.
 
 1.1의 기본 설정을 기준으로, Istio의 각 CR (Custom Resource)이 Envoy 설정에 어떻게 반영되는지 살펴본다. 각 CR을 적용하기 전후의 `istioctl proxy-config all <pod> -o yaml` 출력을 비교하여, Envoy Config Dump의 어느 부분이 변경되는지 앞뒤 Context와 함께 diff로 기록한다. 변경과 무관한 부분은 `...`으로 표기한다.
 
+각 CR이 Envoy 설정의 어느 리소스 타입에 반영되는지 정리하면 다음과 같다.
+
+| CR | Listener | Route | Cluster | Endpoint | 비고 |
+|---|:---:|:---:|:---:|:---:|---|
+| Gateway | O | O | - | - | Sidecar가 아닌 Gateway Pod에 반영 |
+| VirtualService | - | O | - | - | Gateway에 연결하면 Gateway Pod의 Route에 반영 |
+| DestinationRule | - | - | O | - | Subset마다 Cluster 추가 생성 |
+| ServiceEntry | - | O | O | - | 외부 Host의 Virtual Host와 Cluster 추가 |
+| Sidecar | O | O | O | - | 설정 추가가 아니라 전달받는 범위 제한 |
+| EnvoyFilter | O | - | - | - | applyTo에 따라 임의 위치 Patch 가능 (예시는 HTTP Filter) |
+| WorkloadEntry | - | - | O | O | ServiceEntry와 조합, address가 Endpoint로 등록 |
+| WorkloadGroup | - | - | - | - | WorkloadEntry의 Template이라 자체로는 무변화 |
+| ProxyConfig | - | - | - | - | Bootstrap 설정이라 Pod 재생성 시 반영 |
+| PeerAuthentication | O | - | - | - | virtualInbound Filter Chain 변경 |
+| RequestAuthentication | O | - | - | - | jwt_authn HTTP Filter 추가 |
+| AuthorizationPolicy | O | - | - | - | rbac HTTP Filter 추가 |
+| Telemetry | O | - | - | - | Listener의 Access Logger 교체 |
+| WasmPlugin | O | - | - | - | Wasm HTTP Filter 추가, 설정은 ECDS로 전달 |
+
 #### 1.2.1. Gateway
 
 ```yaml {caption="[Config 4] istio-ingressgateway Service Port Mapping (발췌)", linenos=table}
