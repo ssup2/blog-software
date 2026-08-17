@@ -6,7 +6,9 @@ Istio의 CR (Custom Resource)에 따른 Envoy의 설정 변경을 정리한다.
 
 ## 1. Envoy Configuration with Istio
 
-```yaml {caption="[Config 1] Experiment Environment (server-a, server-b, server-c, client)", linenos=table}
+{{< figure caption="[Figure 1] Test Environment" src="images/test-environment.png" width="600px" >}}
+
+```yaml {caption="[Config 1] Test Environment Workload Manifest", linenos=table}
 # kubectl label namespace default istio-injection=enabled
 apiVersion: v1
 kind: Pod
@@ -78,13 +80,13 @@ spec:
     command: ["sleep", "infinity"]
 ```
 
-실험 환경은 kind Cluster + Istio 1.24이며, `istio-system` Namespace에는 istiod와 istio-ingressgateway Pod가 설치되어 있다. [Config 1]은 실험에 사용하는 Workload를 나타내고 있다. `default` Namespace에 `istio-injection=enabled` Label이 설정되어 있어 모든 Pod에 istio-proxy Sidecar가 주입된 상태로 동작한다. 각 Workload의 역할은 다음과 같다.
+[Figure 1]은 Envoy Configuration Test에 이용할 Workload를 나타내고 있으며, [Config 1]은 이를 구성하성 Workload Manifest를 나타내고 있다. Test 환경은 kind Cluster + Istio 1.24이며, `istio-system` Namespace에는 istiod와 istio-ingressgateway Pod가 설치되어 있다. `default` Namespace에 `istio-injection=enabled` Label이 설정되어 있어 모든 Pod에 istio-proxy Sidecar가 주입된 상태로 동작한다. 각 Workload의 역할은 다음과 같다.
 
 * **`server-a`, `server-b` Pod/Service** : 요청을 받는 서버이며, 각각 `8080` Port를 노출한다. 같은 Port를 노출하는 Service가 여러 개일 때의 설정을 확인하기 위해 두 개를 배치했다.
 * **`server-c` Pod/Service** : 요청을 받는 서버이며, `9090` Port를 노출한다. 다른 Port를 노출하는 Service가 있을 때의 설정을 확인하기 위해 배치했다.
 * **`client` Pod** : 요청을 보내는 Client 역할이다.
 
-1.2의 CR 실험은 서버 중에서는 `server-a` Pod만을 대상으로 적용하며, Inbound 설정을 변경하는 CR(PeerAuthentication, AuthorizationPolicy 등)은 `server-a` Pod에서, Outbound 설정을 변경하는 CR(VirtualService, DestinationRule 등)은 `client` Pod에서 변경 내역을 관찰한다.
+Istio CR을 이용한 Envoy Configuration Test는 서버 중에서는 `server-a` Pod만을 대상으로 적용하며, Inbound 설정을 변경하는 CR(PeerAuthentication, AuthorizationPolicy 등)은 `server-a` Pod에서, Outbound 설정을 변경하는 CR(VirtualService, DestinationRule 등)은 `client` Pod에서 변경 내역을 관찰한다.
 
 ### 1.1. Default Configuration
 
@@ -92,7 +94,9 @@ Istio CR을 하나도 적용하지 않은 상태에서도, istiod는 Kubernetes�
 
 #### 1.1.1. Outbound Configuration
 
-```yaml {caption="[Config 2] client Pod의 Default Outbound Configuration", linenos=table}
+{{< figure caption="[Figure 2] client Pod의 Default Outbound Configuration" src="images/envoy-outbound-configs.png" width="1100px" >}}
+
+```yaml {caption="[Config 2] client Pod의 Default Outbound Configuration Dump", linenos=table}
 # LDS: virtualOutbound - entry point for all outbound traffic (iptables redirect)
 - '@type': type.googleapis.com/envoy.config.listener.v3.Listener
   address:
@@ -335,7 +339,7 @@ Istio CR을 하나도 적용하지 않은 상태에서도, istiod는 Kubernetes�
     ...
 ```
 
-[Config 2]는 `client` Pod의 Envoy Configuration의 Outbound 설정을 나타내고 있다. App Container가 보내는 모든 요청은 iptables에 의해 `15001` Port의 virtualOutbound Listener로 Redirect된다. [Config 2]에 있는 각 Listener의 역할은 다음과 같다.
+[Figure 2]는 `client` Pod의 Envoy Configruation의 Outbound를 나타내고 있으며, [Config 2]는 이를 구성하는 Dump를 나타내고 있다. App Container가 보내는 모든 요청은 iptables에 의해 `15001` Port의 virtualOutbound Listener로 Redirect된다. [Config 2]에 있는 각 Listener의 역할은 다음과 같다.
 
 * **virtualOutbound Listener** : 모든 Outbound 요청의 진입점이며, 요청을 직접 처리하지 않고 세 갈래로 분기한다. 기본 경로는 `use_original_dst` 설정에 따라 요청의 원래 목적지 Port와 일치하는 `0.0.0.0_<Port>` Listener로 넘기는 것이다. 원래 목적지가 `15001` Port 자체인 요청은 `virtualOutbound-blackhole` Network Filter Chain이 BlackHoleCluster로 보내 차단하고, 일치하는 Listener가 없는 요청은 `virtualOutbound-catchall-tcp` Network Filter Chain이 PassthroughCluster로 보낸다.
 * **`0.0.0.0_8080`, `0.0.0.0_9090` Listener** : Port별 Outbound Listener이다. 해당 Pod 자신이 여는 Port가 아니라 **Mesh에 존재하는 Service의 Port** 기준으로 생성되는데, istiod는 어떤 Pod가 어디로 요청을 보낼지 미리 알 수 없어 Mesh의 모든 Service Port마다 Outbound Listener를 만들어 모든 Sidecar에 배포하기 때문이다. 아무 Port도 열지 않는 `client` Pod에 이 Listener들이 존재하는 것도 `client` 자신과는 무관하게 `server-a`, `server-b` Service가 `8080` Port를, `server-c` Service가 `9090` Port를 노출하고 있기 때문이다. 같은 Port를 노출하는 Service가 몇 개든 Port당 Listener는 하나이다. 요청은 Listener Filter가 판별한 Protocol에 따라 두 갈래의 Network Filter Chain으로 나뉜다.
@@ -378,7 +382,9 @@ Port별 Outbound Listener의 HTTP Connection Manager에는 기본 HTTP Filter들
 
 #### 1.1.2. Inbound Configuration
 
-```yaml {caption="[Config 3] Default Inbound Configuration (server-a Pod 발췌)", linenos=table}
+{{< figure caption="[Figure 3] server-a Pod의 Default Inbound Configuration" src="images/envoy-inbound-configs.png" width="1100px" >}}
+
+```yaml {caption="[Config 3] server-a Pod의 Default Inbound Configuration Dump", linenos=table}
 # LDS: virtualInbound - entry point for all inbound traffic (iptables redirect)
 - '@type': type.googleapis.com/envoy.config.listener.v3.Listener
   address:
