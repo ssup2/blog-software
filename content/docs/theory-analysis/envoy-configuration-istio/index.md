@@ -418,7 +418,7 @@ Port별 Outbound Listener의 HTTP Connection Manager에는 기본 HTTP Filter들
       - h2c
       transport_protocol: raw_buffer
     filters:
-      ...                              # same as the mTLS variant
+      ...                              # same filters as the HTTP catch-all (sidecar mTLS) chain above
     name: virtualInbound-catchall-http
   - filter_chain_match:                # TCP catch-all (sidecar mTLS)
       application_protocols:
@@ -442,12 +442,12 @@ Port별 Outbound Listener의 HTTP Connection Manager에는 기본 HTTP Filter들
   - filter_chain_match:                # TCP catch-all (plaintext)
       transport_protocol: raw_buffer
     filters:
-      ...                              # same as the mTLS variant
+      ...                              # same filters as the TCP catch-all (sidecar mTLS) chain above
     name: virtualInbound
   - filter_chain_match:                # TCP catch-all (any other TLS, passed through still encrypted)
       transport_protocol: tls
     filters:
-      ...                              # same as the plaintext variant
+      ...                              # same filters as the TCP catch-all (sidecar mTLS) chain above
     name: virtualInbound
   - filter_chain_match:                # mTLS Chain
       application_protocols:
@@ -1026,6 +1026,14 @@ spec:
 ```
 
 ```diff {caption="[Diff 11] EnvoyFilter 적용 전후 server-a Pod의 proxy-config (virtualInbound Listener)"}
+         name: virtualInbound
+         filter_chains:
+         ...
+         - filter_chain_match:          # 0.0.0.0_8080 mTLS Chain - the same Filter is inserted into all 4 inbound HTTP Chains
+             destination_port: 8080
+             transport_protocol: tls
+             ...
+           filters:
            - name: envoy.filters.network.http_connection_manager
              typed_config:
                '@type': type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
@@ -1215,6 +1223,17 @@ spec:
 ```
 
 ```diff {caption="[Diff 16] RequestAuthentication 적용 전후 server-a Pod의 proxy-config (virtualInbound Listener)"}
+         name: virtualInbound
+         filter_chains:
+         ...
+         - filter_chain_match:          # 0.0.0.0_8080 mTLS Chain - the same Filter is inserted into all 4 inbound HTTP Chains
+             destination_port: 8080
+             transport_protocol: tls
+             ...
+           filters:
+           - name: envoy.filters.network.http_connection_manager
+             typed_config:
+               ...
                http_filters:
                - name: istio.metadata_exchange
                  ...
@@ -1265,6 +1284,17 @@ spec:
 ```
 
 ```diff {caption="[Diff 17] AuthorizationPolicy 적용 전후 server-a Pod의 proxy-config (virtualInbound Listener)"}
+         name: virtualInbound
+         filter_chains:
+         ...
+         - filter_chain_match:          # 0.0.0.0_8080 mTLS Chain - the same Filter is inserted into all 4 inbound HTTP Chains
+             destination_port: 8080
+             transport_protocol: tls
+             ...
+           filters:
+           - name: envoy.filters.network.http_connection_manager
+             typed_config:
+               ...
                http_filters:
                - name: istio.metadata_exchange
                  ...
@@ -1312,6 +1342,9 @@ spec:
 ```
 
 ```diff {caption="[Diff 18] Telemetry 적용 전후 server-a Pod의 proxy-config (모든 Listener의 Access Logger 교체)"}
+         name: virtualInbound           # every Listener's Access Logger is replaced in the same way
+         ...
+           - name: envoy.filters.network.http_connection_manager
              typed_config:
                '@type': type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
                access_log:
@@ -1382,6 +1415,17 @@ spec:
 +            runtime: envoy.wasm.runtime.v8
  - '@type': type.googleapis.com/envoy.admin.v3.ListenersConfigDump
    ...
+         name: virtualInbound
+         filter_chains:
+         ...
+         - filter_chain_match:          # 0.0.0.0_8080 mTLS Chain - the same Filter is inserted into all 4 inbound HTTP Chains
+             destination_port: 8080
+             transport_protocol: tls
+             ...
+           filters:
+           - name: envoy.filters.network.http_connection_manager
+             typed_config:
+               ...
                http_filters:
                - name: istio.metadata_exchange
                  ...
@@ -1399,5 +1443,3 @@ spec:
 WasmPlugin은 **Inbound HTTP Filter Chain에 Wasm Filter를 추가**하며, Filter의 실제 설정은 다른 Filter와 달리 ECDS (Extension Config Discovery Service)를 통해 별도 Resource로 전달된다. Wasm 모듈은 pilot-agent가 OCI Registry에서 대신 다운로드하여 로컬 경로로 변환 후 Envoy에 전달한다.
 
 `phase`는 Filter Chain 내 삽입 위치를 단계로 지정하는 필드이다. `AUTHN`은 Istio 인증 Filter 앞, `AUTHZ`는 인증 Filter 뒤이자 인가 Filter(`rbac`) 앞, `STATS`는 인가 Filter 뒤이자 Stats Filter(`istio.stats`) 앞에 삽입되며, 지정하지 않으면 Filter Chain의 끝(Router Filter 앞)에 삽입된다. 예시는 `phase: AUTHN`이므로 [Diff 19]에서 항상 맨 앞에 위치하는 `istio.metadata_exchange` 바로 뒤에 삽입되었다. EnvoyFilter의 `subFilter`처럼 특정 Filter 이름에 의존하지 않고 단계로 위치를 지정하므로, Istio Upgrade에 더 안전한 확장 수단이다.
-
-## 2. 참조
