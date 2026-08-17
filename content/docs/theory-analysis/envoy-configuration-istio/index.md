@@ -292,19 +292,22 @@ Istio CR을 하나도 적용하지 않은 상태에서도, istiod는 Kubernetes�
 * **virtualOutbound Listener** : 모든 Outbound 요청의 진입점이며, 요청을 직접 처리하지 않고 세 갈래로 분기한다. 기본 경로는 `use_original_dst` 설정에 따라 요청의 원래 목적지 Port와 일치하는 `0.0.0.0_<Port>` Listener로 넘기는 것이다. 원래 목적지가 `15001` Port 자체인 요청은 `virtualOutbound-blackhole` Filter Chain이 BlackHoleCluster로 보내 차단하고, 일치하는 Listener가 없는 요청은 `virtualOutbound-catchall-tcp` Filter Chain이 PassthroughCluster로 보낸다.
 * **`0.0.0.0_8080`, `0.0.0.0_9090` Listener** : Port별 Outbound Listener이며, 해당 Pod 자신이 여는 Port가 아니라 **Mesh에 존재하는 Service의 Port** 기준으로 생성된다. istiod는 어떤 Pod가 어디로 요청을 보낼지 미리 알 수 없으므로 Mesh의 모든 Service Port마다 Outbound Listener를 만들어 모든 Sidecar에 배포하며, 아무 Port도 열지 않는 `client` Pod에 이 Listener들이 존재하는 것도 `client` 자신과는 무관하게 `server-a`, `server-b` Service가 `8080` Port를, `server-c` Service가 `9090` Port를 노출하고 있기 때문이다. 같은 Port를 노출하는 Service가 몇 개든 Port당 Listener는 하나이다. tls_inspector와 http_inspector로 Protocol을 판별하고, HTTP 요청이면 HTTP Connection Manager가 RDS로 받은 같은 이름의 Route Table(`"8080"`, `"9090"`)을 참조한다.
 
-Route Table에는 해당 Port를 노출하는 Mesh의 Service마다 Virtual Host가 하나씩 생성되며, `8080` Port는 `server-a`, `server-b` 두 Service가 함께 노출하므로 `"8080"` Route Table에 Virtual Host가 두 개 생긴다. `0.0.0.0_8080` Listener는 목적지 Service가 무엇이든 `8080` Port로 향하는 요청을 모두 받으므로, 요청을 Service별로 구분하는 것은 Listener가 아니라 Route Table의 Domain 매칭이다. 각 Virtual Host의 `domains`에는 해당 Service의 모든 이름 축약형(`server-a`, `server-a.default`, `server-a.default.svc`, FQDN)과 Service의 ClusterIP가 나열되어 있어, App이 어떤 형태로 호출하든 요청의 Host Header가 해당 Service의 Virtual Host로 매칭된다. `ignore_port_in_host_matching` 설정에 의해 Host Header에 붙는 `:8080` 같은 Port 표기는 매칭 전에 제거된다.
+Port별 Outbound Listener의 HTTP Connection Manager에는 기본 HTTP Filter들이 다음의 순서대로 들어 있다.
 
-매칭된 Virtual Host에는 istiod가 만든 기본 Route(`name: default`)가 들어 있으며, 이 Route가 요청을 각 Service의 Cluster로 라우팅한다. Host Header가 `server-a`인 요청은 `outbound|8080||server-a.default.svc.cluster.local` Cluster로, `server-b`인 요청은 `outbound|8080||server-b.default.svc.cluster.local` Cluster로 전달되어, 같은 Listener로 들어온 요청이 여기서 서로 다른 Service로 갈라진다. 어느 Virtual Host에도 매칭되지 않는 요청은 Catch-all인 `allow_any` Virtual Host를 통해 PassthroughCluster로 전달된다.
-
-HTTP Connection Manager에는 기본 HTTP Filter들이 다음의 순서대로 들어 있다.
-
-* **`istio.metadata_exchange`** : 요청 Header를 통해 Peer의 메타데이터(Workload 이름, Namespace 등)를 교환한다.
+* **`istio.metadata_exchange`** : 요청과 응답에 자신의 Workload 정보(Workload 이름, Namespace, Label 등)를 `x-envoy-peer-metadata` Header로 실어 보내고, 반대로 상대 Sidecar가 실어 보낸 Header를 읽고 제거하는 방식으로 양쪽 Sidecar가 서로의 Workload 정보를 주고받는다. Envoy가 네트워크 수준에서 알 수 있는 것은 상대의 IP:Port뿐이므로, 이렇게 교환한 Peer 정보를 이용하여 `istio.stats` Filter가 Metrics의 `source_workload`, `destination_workload` 같은 Label을 채운다.
 * **`envoy.filters.http.grpc_stats`** : gRPC 요청일 때 Message 수 등의 gRPC 통계를 생성한다.
-* **`istio.alpn`** : Upstream이 Sidecar mTLS 대상일 때 Istio 전용 ALPN을 광고한다 (1.2.10에서 Inbound의 `application_protocols` Match와 짝을 이루는 부분이다).
+* **`istio.alpn`** : Upstream이 Sidecar mTLS 대상일 때 Istio 전용 ALPN을 광고한다.
 * **`envoy.filters.http.fault`** : VirtualService의 fault 설정이 반영되는 자리이다.
 * **`envoy.filters.http.cors`** : VirtualService의 corsPolicy 설정이 반영되는 자리이다.
 * **`istio.stats`** : Istio 표준 Metrics를 생성한다.
 * **`envoy.filters.http.router`** : Route Table을 참조해 실제 라우팅을 수행하는 마지막 Filter이다.
+
+마지막 router Filter가 참조하는 Route Table은 Port별 Outbound Listener와 같은 이름으로 Port마다 하나씩 생성되며, 해당 Port를 노출하는 Mesh의 Service마다 Virtual Host가 하나씩 들어 있다. [Config 2]에 있는 각 Route Table과 모든 Route Table에 공통으로 들어 있는 구성 요소의 역할은 다음과 같다.
+
+* **`"8080"` Route Table** : `server-a`, `server-b` 두 Service가 함께 `8080` Port를 노출하므로 Virtual Host가 두 개 있다. `0.0.0.0_8080` Listener는 목적지 Service가 무엇이든 `8080` Port로 향하는 요청을 모두 받으므로, 요청을 Service별로 구분하는 것은 Listener가 아니라 Route Table의 Domain 매칭이다. 각 Virtual Host의 `domains`에는 해당 Service의 모든 이름 축약형(`server-a`, `server-a.default`, `server-a.default.svc`, FQDN)과 Service의 ClusterIP가 나열되어 있어, App이 어떤 형태로 호출하든 요청의 Host Header가 해당 Service의 Virtual Host로 매칭된다. 그리고 각 Virtual Host에는 istiod가 만든 `default`라는 이름의 기본 Route가 하나 들어 있으며, 이 Route가 요청을 해당 Service의 Cluster(`outbound|8080||server-a...`, `outbound|8080||server-b...`)로 라우팅한다. 결국 같은 Listener로 들어온 요청이 Route Table에서 서로 다른 Service로 갈라진다.
+* **`"9090"` Route Table** : `server-c` Service의 Virtual Host 하나만 있으며, 같은 방식으로 `outbound|9090||server-c...` Cluster로 라우팅한다.
+* **`allow_any` Virtual Host** : 모든 Route Table의 마지막에 있는 Catch-all Virtual Host이며, 어느 Virtual Host에도 매칭되지 않는 요청을 PassthroughCluster로 전달한다.
+* **`ignore_port_in_host_matching` 설정** : 모든 Route Table에 공통으로 설정되어 있으며, Domain 매칭 전에 Host Header에 붙어 있는 `server-a:8080` 같은 Port 표기를 제거한다. 덕분에 App이 Port를 붙여 호출하든 붙이지 않고 호출하든 같은 Virtual Host로 매칭된다.
 
 [Config 2]에 있는 각 Cluster의 역할은 다음과 같다.
 
@@ -312,7 +315,7 @@ HTTP Connection Manager에는 기본 HTTP Filter들이 다음의 순서대로 �
 * **BlackHoleCluster** : Endpoint가 하나도 없는 `STATIC` Type Cluster라 연결 시도가 즉시 실패하며, virtualOutbound Listener가 원래 목적지가 `15001` Port 자체인 요청을 차단하는 데 쓰인다.
 * **PassthroughCluster** : `ORIGINAL_DST` Type Cluster라 별도의 Endpoint 없이 요청의 원래 목적지 IP:Port로 그대로 연결하며, virtualOutbound Listener의 `virtualOutbound-catchall-tcp` Filter Chain과 Route Table의 `allow_any` Virtual Host가 라우팅하는 대상이다.
 
-이 Outbound 설정은 특정 Pod에 종속되지 않으며, Mesh의 모든 Sidecar가 동일하게 전달받는다.
+이 Outbound 설정은 특정 Pod에 종속되지 않으며, Mesh의 모든 Sidecar가 동일하게 전달받는다. 전달받는 설정의 범위는 Sidecar CR로 제한할 수 있다.
 
 #### 1.1.2. Inbound Configuration
 
