@@ -552,7 +552,7 @@ virtualInbound Listener는 차단용 Chain 1개, Catch-all Chain 5개, 그리고
 
 Catch-all Chain이 존재하는 이유는 Service에 선언되지 않은 Port로도 요청이 들어올 수 있기 때문이다. Service는 방화벽이 아니라서 Pod IP로는 App이 열어둔 어떤 Port로든 직접 접근할 수 있다. App이 열었지만 Service에 선언하지 않은 Port, Prometheus가 Pod IP로 직접 Scrape하는 Metrics Port, Headless Service를 통한 Pod 직접 통신 등이 그 예이다. Sidecar가 주입되어도 Kubernetes에서 가능하던 Pod 간 통신은 그대로 가능해야 하므로, istiod는 이런 요청을 차단하지 않고 App으로 통과시키는 Catch-all Chain을 만든다. Outbound에서 Mesh에 등록되지 않은 목적지로 향하는 요청을 PassthroughCluster로 통과시키는 것과 대칭 구조이다.
 
-HTTP Connection Manager를 가진 4개의 Network Filter Chain(HTTP Catch-all Chain 2개, `0.0.0.0_8080` Chain 쌍 2개)의 HTTP Filter 구성은 순서와 설정까지 모두 동일하며, [Config 3]에는 mTLS Chain의 것만 표시했다. 그래서 1.2에서 CR이 HTTP Filter를 삽입할 때에도 4개 Chain에 동일하게 반영된다. HTTP Filter 구성은 Outbound와 유사하지만 다음의 차이가 있다.
+HTTP Connection Manager를 가진 4개의 Network Filter Chain(HTTP Catch-all Chain 2개, `0.0.0.0_8080` Chain 쌍 2개)의 HTTP Filter 구성은 순서와 설정까지 모두 동일하며, [Config 3]에는 mTLS Chain의 것만 표시했다. 그래서 1.2에서 CR이 HTTP Filter를 삽입할 때에도 4개 Chain에 동일하게 반영된다. Network Filter도 마찬가지로 `istio.metadata_exchange`는 8개 Chain 전부에서, `istio.stats`는 TCP 계열 Chain 4개 전부에서 설정까지 동일하다. Chain마다 다른 것은 목적지를 지정하는 부분(`tcp_proxy`의 `cluster`, HTTP Connection Manager의 `route_config`)뿐이다. HTTP Filter 구성은 Outbound와 유사하지만 다음의 차이가 있다.
 
 * **`istio.metadata_exchange` Network Filter 추가** : HTTP Filter 버전과 별개로 Chain 앞단에 추가로 있으며, HTTP Header를 쓸 수 없는 TCP 연결에서도 같은 방식의 메타데이터 교환을 수행한다.
 * **`istio.alpn` 부재** : Inbound는 Upstream으로 요청을 보내는 쪽이 아니므로 ALPN을 광고할 필요가 없다.
