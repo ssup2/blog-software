@@ -498,10 +498,14 @@ Port별 Outbound Listener의 HTTP Connection Manager에는 기본 HTTP Filter들
       typed_config:
         ...
         require_client_certificate: true
-  - filter_chain_match:                # Plaintext Chain
+  - filter_chain_match:                # Plaintext Chain - no transport_socket (no TLS termination)
       destination_port: 8080
       transport_protocol: raw_buffer
-    ...
+    filters:
+    - name: istio.metadata_exchange
+      ...
+    - name: envoy.filters.network.http_connection_manager
+      ...                              # same http_filters and route_config as the mTLS Chain
     name: 0.0.0.0_8080
   listener_filters:
   - name: envoy.filters.listener.original_dst
@@ -531,6 +535,13 @@ Port별 Outbound Listener의 HTTP Connection Manager에는 기본 HTTP Filter들
       source_address:
         address: 127.0.0.6
         port_value: 0
+
+# CDS: BlackHoleCluster - used by the virtualInbound-blackhole chain (shared with outbound)
+- cluster:
+    alt_stat_name: BlackHoleCluster;
+    connect_timeout: 10s
+    name: BlackHoleCluster
+    type: STATIC
 ```
 
 [Config 3]은 `server-a` Pod의 Envoy Configuration의 Inbound 설정을 나타내고 있다. 다른 Pod로부터 들어오는 요청은 iptables에 의해 `15006` Port의 virtualInbound Listener로 Redirect된다. virtualInbound Listener는 모든 Inbound 요청의 진입점이며, Network Filter Chain을 선택하기 전에 Listener Filter로 요청의 정보를 얻는다. [Config 3]에 있는 각 Listener Filter의 역할은 다음과 같다.
@@ -566,6 +577,7 @@ HTTP Connection Manager도 목적지를 지정하는 `route_config`(Catch-all Ch
 * **`inbound|8080||` Route** : Outbound와 달리 RDS를 사용하지 않고 HTTP Connection Manager에 `route_config`로 Inline되어 있으며, 모든 요청을 `inbound|8080||` Cluster로 보내는 단순한 구조이다. Route가 항상 하나뿐이므로 동적으로 갱신할 필요가 없기 때문이다.
 * **`inbound|8080||` Cluster** : `ORIGINAL_DST` Type으로 요청의 원래 목적지인 App Container의 `8080` Port로 전달한다. 이때 `127.0.0.6`을 Source 주소로 사용하는데, iptables가 이 주소에서 나온 Traffic을 다시 Outbound로 Redirect하지 않도록 하는 Loop 방지 장치이다.
 * **InboundPassthroughCluster** : Catch-all Chain이 라우팅하는 대상이다. `inbound|8080||` Cluster와 같은 구조의 `ORIGINAL_DST` Type Cluster로, Service가 노출하지 않는 Port로 들어온 요청을 원래 목적지 Port 그대로 App Container에 전달한다.
+* **BlackHoleCluster** : `virtualInbound-blackhole` Chain이 라우팅하는 대상이다. Envoy에 BlackHoleCluster는 하나만 존재하며, Outbound의 `virtualOutbound-blackhole` Chain이 참조하는 [Config 2]의 Cluster와 같은 것이다.
 
 ### 1.2. Envoy Configuration with Istio and Kubernetes Resources
 
