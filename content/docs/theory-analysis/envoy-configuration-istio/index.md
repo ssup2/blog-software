@@ -337,15 +337,15 @@ Istio CR을 하나도 적용하지 않은 상태에서도, istiod는 Kubernetes�
 
 [Config 2]는 `client` Pod의 Envoy Configuration의 Outbound 설정을 나타내고 있다. App Container가 보내는 모든 요청은 iptables에 의해 `15001` Port의 virtualOutbound Listener로 Redirect된다. [Config 2]에 있는 각 Listener의 역할은 다음과 같다.
 
-* **virtualOutbound Listener** : 모든 Outbound 요청의 진입점이며, 요청을 직접 처리하지 않고 세 갈래로 분기한다. 기본 경로는 `use_original_dst` 설정에 따라 요청의 원래 목적지 Port와 일치하는 `0.0.0.0_<Port>` Listener로 넘기는 것이다. 원래 목적지가 `15001` Port 자체인 요청은 `virtualOutbound-blackhole` Filter Chain이 BlackHoleCluster로 보내 차단하고, 일치하는 Listener가 없는 요청은 `virtualOutbound-catchall-tcp` Filter Chain이 PassthroughCluster로 보낸다.
-* **`0.0.0.0_8080`, `0.0.0.0_9090` Listener** : Port별 Outbound Listener이다. 해당 Pod 자신이 여는 Port가 아니라 **Mesh에 존재하는 Service의 Port** 기준으로 생성되는데, istiod는 어떤 Pod가 어디로 요청을 보낼지 미리 알 수 없어 Mesh의 모든 Service Port마다 Outbound Listener를 만들어 모든 Sidecar에 배포하기 때문이다. 아무 Port도 열지 않는 `client` Pod에 이 Listener들이 존재하는 것도 `client` 자신과는 무관하게 `server-a`, `server-b` Service가 `8080` Port를, `server-c` Service가 `9090` Port를 노출하고 있기 때문이다. 같은 Port를 노출하는 Service가 몇 개든 Port당 Listener는 하나이다. 요청은 Listener Filter가 판별한 Protocol에 따라 두 갈래의 Filter Chain으로 나뉜다.
+* **virtualOutbound Listener** : 모든 Outbound 요청의 진입점이며, 요청을 직접 처리하지 않고 세 갈래로 분기한다. 기본 경로는 `use_original_dst` 설정에 따라 요청의 원래 목적지 Port와 일치하는 `0.0.0.0_<Port>` Listener로 넘기는 것이다. 원래 목적지가 `15001` Port 자체인 요청은 `virtualOutbound-blackhole` Network Filter Chain이 BlackHoleCluster로 보내 차단하고, 일치하는 Listener가 없는 요청은 `virtualOutbound-catchall-tcp` Network Filter Chain이 PassthroughCluster로 보낸다.
+* **`0.0.0.0_8080`, `0.0.0.0_9090` Listener** : Port별 Outbound Listener이다. 해당 Pod 자신이 여는 Port가 아니라 **Mesh에 존재하는 Service의 Port** 기준으로 생성되는데, istiod는 어떤 Pod가 어디로 요청을 보낼지 미리 알 수 없어 Mesh의 모든 Service Port마다 Outbound Listener를 만들어 모든 Sidecar에 배포하기 때문이다. 아무 Port도 열지 않는 `client` Pod에 이 Listener들이 존재하는 것도 `client` 자신과는 무관하게 `server-a`, `server-b` Service가 `8080` Port를, `server-c` Service가 `9090` Port를 노출하고 있기 때문이다. 같은 Port를 노출하는 Service가 몇 개든 Port당 Listener는 하나이다. 요청은 Listener Filter가 판별한 Protocol에 따라 두 갈래의 Network Filter Chain으로 나뉜다.
   * **HTTP 연결** : `filter_chain_match`에 매칭되어 HTTP Connection Manager가 처리한다. RDS로 받은 같은 이름의 Route Table(`"8080"`, `"9090"`)을 참조하여 라우팅된다.
   * **HTTP가 아닌 연결** : 어느 Chain에도 매칭되지 않아 `default_filter_chain`으로 떨어진다. `istio.stats`로 TCP 수준 Metrics만 남기고, `tcp_proxy`가 PassthroughCluster를 통해 원래 목적지로 그대로 통과시킨다.
 
-Port별 Outbound Listener는 Filter Chain을 선택하기 전에 Listener Filter로 연결의 Protocol을 판별한다. virtualOutbound Listener는 요청을 Port별 Listener로 넘기기만 하므로 Listener Filter가 없다. [Config 2]에 있는 각 Listener Filter의 역할은 다음과 같다.
+Port별 Outbound Listener는 Network Filter Chain을 선택하기 전에 Listener Filter로 연결의 Protocol을 판별한다. virtualOutbound Listener는 요청을 Port별 Listener로 넘기기만 하므로 Listener Filter가 없다. [Config 2]에 있는 각 Listener Filter의 역할은 다음과 같다.
 
-* **`tls_inspector`** : 연결의 첫 Bytes를 검사하여 TLS 여부를 판별한다. 판별 결과는 Filter Chain 매칭의 `transport_protocol` 값(`tls`, `raw_buffer`)으로 사용된다.
-* **`http_inspector`** : Plaintext 연결에서 HTTP 여부와 버전을 판별한다. 판별 결과는 Filter Chain 매칭의 `application_protocols` 값(`http/1.1`, `h2c` 등)으로 사용된다.
+* **`tls_inspector`** : 연결의 첫 Bytes를 검사하여 TLS 여부를 판별한다. 판별 결과는 Network Filter Chain 매칭의 `transport_protocol` 값(`tls`, `raw_buffer`)으로 사용된다.
+* **`http_inspector`** : Plaintext 연결에서 HTTP 여부와 버전을 판별한다. 판별 결과는 Network Filter Chain 매칭의 `application_protocols` 값(`http/1.1`, `h2c` 등)으로 사용된다.
 
 Port별 Outbound Listener의 HTTP Connection Manager에는 기본 HTTP Filter들이 다음의 순서대로 들어 있다.
 
@@ -368,7 +368,7 @@ Port별 Outbound Listener의 HTTP Connection Manager에는 기본 HTTP Filter들
 
 * **`outbound|8080||server-a...`, `outbound|8080||server-b...`, `outbound|9090||server-c...` Cluster** : Mesh의 Service Port마다 `outbound|<Port>||<Host>` 이름으로 생성되는 `EDS` Type Cluster이며, Endpoint 목록을 EDS로 전달받는다. 각 Route Table의 기본 Route(`name: default`)가 라우팅하는 대상이다. `0.0.0.0_8080` Listener와 `"8080"` Route Table을 공유하는 `server-a`, `server-b`도 Cluster는 각각 따로 가지는데, Listener나 Route Table과 달리 Cluster는 Port가 아니라 Service 단위이기 때문이다. EDS로 전달받는 Endpoint는 [Config 2]의 EDS 발췌처럼 해당 Service에 속한 Pod의 IP:Port이며, istiod가 Kubernetes의 Endpoint 정보를 지켜보다가 Pod가 생기거나 사라질 때마다 갱신하여 Push한다. Endpoint metadata의 `tlsMode: istio` 표식은 해당 Pod에 Sidecar가 주입되어 있음을 나타내며, Cluster의 `transport_socket_matches`와 매칭되어 이 Endpoint로의 연결에 mTLS transport socket이 선택된다.
 * **BlackHoleCluster** : Endpoint가 하나도 없는 `STATIC` Type Cluster라 연결 시도가 즉시 실패하며, virtualOutbound Listener가 원래 목적지가 `15001` Port 자체인 요청을 차단하는 데 쓰인다.
-* **PassthroughCluster** : `ORIGINAL_DST` Type Cluster라 별도의 Endpoint 없이 요청의 원래 목적지 IP:Port로 그대로 연결하며, virtualOutbound Listener의 `virtualOutbound-catchall-tcp` Filter Chain과 Route Table의 `allow_any` Virtual Host가 라우팅하는 대상이다.
+* **PassthroughCluster** : `ORIGINAL_DST` Type Cluster라 별도의 Endpoint 없이 요청의 원래 목적지 IP:Port로 그대로 연결하며, virtualOutbound Listener의 `virtualOutbound-catchall-tcp` Network Filter Chain과 Route Table의 `allow_any` Virtual Host가 라우팅하는 대상이다.
 
 이 Outbound 설정은 특정 Pod에 종속되지 않으며, Mesh의 모든 Sidecar가 동일하게 전달받는다. 전달받는 설정의 범위는 Sidecar CR로 제한할 수 있다.
 
@@ -531,19 +531,15 @@ Port별 Outbound Listener의 HTTP Connection Manager에는 기본 HTTP Filter들
         port_value: 0
 ```
 
-[Config 3]은 `server-a` Pod의 Envoy Configuration의 Inbound 설정을 나타내고 있다. 다른 Pod로부터 들어오는 요청은 iptables에 의해 `15006` Port의 virtualInbound Listener로 Redirect된다. virtualInbound Listener는 모든 Inbound 요청의 진입점이며, Filter Chain을 선택하기 전에 Listener Filter로 요청의 정보를 얻는다. [Config 3]에 있는 각 Listener Filter의 역할은 다음과 같다.
+[Config 3]은 `server-a` Pod의 Envoy Configuration의 Inbound 설정을 나타내고 있다. 다른 Pod로부터 들어오는 요청은 iptables에 의해 `15006` Port의 virtualInbound Listener로 Redirect된다. virtualInbound Listener는 모든 Inbound 요청의 진입점이며, Network Filter Chain을 선택하기 전에 Listener Filter로 요청의 정보를 얻는다. [Config 3]에 있는 각 Listener Filter의 역할은 다음과 같다.
 
-* **`original_dst`** : iptables Redirect 전의 원래 목적지 주소(IP:Port)를 복원한다. 복원된 Port는 Filter Chain 매칭의 `destination_port` 값으로 사용된다.
-* **`tls_inspector`** : 연결의 첫 Bytes를 검사하여 TLS 여부를 판별하고, TLS 연결이면 Handshake에서 광고된 ALPN 값도 읽는다. 판별 결과는 Filter Chain 매칭의 `transport_protocol` 값과 `tls` Chain의 `application_protocols` 매칭에 사용된다.
+* **`original_dst`** : iptables Redirect 전의 원래 목적지 주소(IP:Port)를 복원한다. 복원된 Port는 Network Filter Chain 매칭의 `destination_port` 값으로 사용된다.
+* **`tls_inspector`** : 연결의 첫 Bytes를 검사하여 TLS 여부를 판별하고, TLS 연결이면 Handshake에서 광고된 ALPN 값도 읽는다. 판별 결과는 Network Filter Chain 매칭의 `transport_protocol` 값과 `tls` Chain의 `application_protocols` 매칭에 사용된다.
 * **`http_inspector`** : Plaintext 연결에서 HTTP 여부와 버전을 판별한다.
 
-virtualInbound는 차단용 Chain 1개, Catch-all Chain 5개, 그리고 Service가 노출하는 Port마다 `destination_port`로 매칭되는 Chain 쌍(`server-a`는 `8080` Port용 2개)까지 총 8개의 Filter Chain을 가진다.
+virtualInbound Listener는 차단용 Chain 1개, Catch-all Chain 5개, 그리고 Service가 노출하는 Port마다 `destination_port`로 매칭되는 Chain 쌍(`server-a`는 `8080` Port용 2개)까지 총 8개의 Network Filter Chain을 가진다. [Config 3]에 있는 각 Network Filter Chain의 역할은 다음과 같다.
 
-Catch-all Chain이 존재하는 이유는 Service에 선언되지 않은 Port로도 요청이 들어올 수 있기 때문이다. Service는 방화벽이 아니라서 Pod IP로는 App이 열어둔 어떤 Port로든 직접 접근할 수 있다. App이 열었지만 Service에 선언하지 않은 Port(이 환경에서는 `server-a`의 App이 `9090` Port도 수신하지만 Service에는 `8080`만 선언되어 있다), Prometheus가 Pod IP로 직접 Scrape하는 Metrics Port, Headless Service를 통한 Pod 직접 통신 등이 그 예이다. Sidecar가 주입되어도 Kubernetes에서 가능하던 Pod 간 통신은 그대로 가능해야 하므로, istiod는 이런 요청을 차단하지 않고 App으로 통과시키는 Catch-all Chain을 만든다. Outbound에서 Mesh에 등록되지 않은 목적지로 향하는 요청을 PassthroughCluster로 통과시키는 것과 대칭 구조이다.
-
-[Config 3]에 있는 각 Filter Chain의 역할은 다음과 같다.
-
-* **`virtualInbound-blackhole` Chain** : 원래 목적지가 `15006` Port 자체인 요청을 BlackHoleCluster로 보내 차단한다. virtualOutbound Listener의 `virtualOutbound-blackhole` Filter Chain과 같은 역할이다.
+* **`virtualInbound-blackhole` Chain** : 원래 목적지가 `15006` Port 자체인 요청을 BlackHoleCluster로 보내 차단한다. virtualOutbound Listener의 `virtualOutbound-blackhole` Network Filter Chain과 같은 역할이다.
 * **`virtualInbound-catchall-http` Chain** : 어느 Service도 노출하지 않는 Port로 들어온 HTTP 요청을 처리하는 Fallback이다. HTTP Connection Manager를 거치므로 HTTP 수준의 Metrics와 Access Log를 남긴 뒤, Route를 통해 InboundPassthroughCluster로 전달한다.
   * **Sidecar mTLS용** : ALPN `istio-http/1.0`·`istio-http/1.1`·`istio-h2` Match로 Sidecar가 만든 mTLS 연결을 선별하며, TLS Termination을 수행한다.
   * **Plaintext용** : `http/1.1`·`h2c` Match로 Plaintext HTTP 연결을 선별한다.
@@ -552,14 +548,14 @@ Catch-all Chain이 존재하는 이유는 Service에 선언되지 않은 Port로
   * **Plaintext용** : `transport_protocol: raw_buffer`만으로 매칭하여 나머지 Plaintext 연결 전부를 받는다.
   * **그 외 TLS용** : `transport_protocol: tls`만으로 매칭하며, App이 자체 처리하는 TLS처럼 Istio ALPN이 없는 TLS 연결을 Termination 없이 암호화된 채 그대로 통과시킨다.
 * **`tls` Chain** : `8080` Port로 들어온 Sidecar 간 mTLS 연결을 처리하는 Chain이며, Plaintext Chain과 함께 `0.0.0.0_8080`이라는 이름을 가진다. `transport_protocol: tls`와 `application_protocols` Match로 보내는 쪽 Sidecar가 만든 mTLS 연결을 선별한다. `application_protocols`에 나열된 값은 모두 Istio 전용 ALPN으로, `istio`는 Sidecar mTLS임을 알리는 기본 표식, `istio-peer-exchange`는 TCP 연결에서 Network Filter 버전 `istio.metadata_exchange`로 메타데이터를 교환할 수 있다는 표식, `istio-http/1.0`·`istio-http/1.1`·`istio-h2`는 mTLS 표식에 Tunnel 내부의 HTTP 버전을 함께 담은 값이다. App이 자체적으로 처리하는 TLS 연결은 표준 ALPN을 광고하므로 이 Chain에 매칭되지 않는다. 매칭된 연결은 `require_client_certificate` 설정에 따라 Client 인증서를 검증하며 TLS를 Termination한 뒤 요청을 처리한다.
-* **`raw_buffer` Chain** : Plaintext 연결을 처리하는 Chain이다. 기본값인 `PERMISSIVE` Mode에서는 Port마다 `tls` Chain과 쌍으로 존재하며, `STRICT` Mode로 바꾸면 제거된다.
+* **`raw_buffer` Chain** : Plaintext 연결을 처리하는 Chain이다. Istio의 mTLS Mode 기본값인 `PERMISSIVE`는 mTLS 연결과 Plaintext 연결을 모두 받아주는 Mode로, Sidecar가 없는 Pod처럼 mTLS를 사용할 수 없는 Client와의 통신도 끊기지 않도록 하기 위한 것이다. 그래서 `PERMISSIVE` Mode에서는 Port마다 mTLS용 `tls` Chain과 Plaintext용 `raw_buffer` Chain이 쌍으로 존재하며, mTLS 연결만 허용하는 `STRICT` Mode로 바꾸면 `raw_buffer` Chain이 제거된다.
 
-Filter 구성은 Outbound와 유사하지만 다음의 차이가 있다.
+Catch-all Chain이 존재하는 이유는 Service에 선언되지 않은 Port로도 요청이 들어올 수 있기 때문이다. Service는 방화벽이 아니라서 Pod IP로는 App이 열어둔 어떤 Port로든 직접 접근할 수 있다. App이 열었지만 Service에 선언하지 않은 Port, Prometheus가 Pod IP로 직접 Scrape하는 Metrics Port, Headless Service를 통한 Pod 직접 통신 등이 그 예이다. Sidecar가 주입되어도 Kubernetes에서 가능하던 Pod 간 통신은 그대로 가능해야 하므로, istiod는 이런 요청을 차단하지 않고 App으로 통과시키는 Catch-all Chain을 만든다. Outbound에서 Mesh에 등록되지 않은 목적지로 향하는 요청을 PassthroughCluster로 통과시키는 것과 대칭 구조이다.
+
+HTTP Connection Manager를 가진 4개의 Network Filter Chain(HTTP Catch-all Chain 2개, `0.0.0.0_8080` Chain 쌍 2개)의 HTTP Filter 구성은 순서와 설정까지 모두 동일하며, [Config 3]에는 mTLS Chain의 것만 표시했다. 그래서 1.2에서 CR이 HTTP Filter를 삽입할 때에도 4개 Chain에 동일하게 반영된다. HTTP Filter 구성은 Outbound와 유사하지만 다음의 차이가 있다.
 
 * **`istio.metadata_exchange` Network Filter 추가** : HTTP Filter 버전과 별개로 Chain 앞단에 추가로 있으며, HTTP Header를 쓸 수 없는 TCP 연결에서도 같은 방식의 메타데이터 교환을 수행한다.
 * **`istio.alpn` 부재** : Inbound는 Upstream으로 요청을 보내는 쪽이 아니므로 ALPN을 광고할 필요가 없다.
-
-기본 상태의 HTTP Filter는 이것이 전부이며, `jwt_authn`(RequestAuthentication), `rbac`(AuthorizationPolicy), Wasm Filter(WasmPlugin) 등은 1.2에서 해당 CR을 적용할 때 이 Filter Chain 사이에 삽입된다.
 
 [Config 3]에 있는 Route와 Cluster의 역할은 다음과 같다.
 
@@ -582,7 +578,7 @@ Filter 구성은 Outbound와 유사하지만 다음의 차이가 있다.
 | WorkloadEntry | - | - | O | O | ServiceEntry와 조합, address가 Endpoint로 등록 |
 | WorkloadGroup | - | - | - | - | WorkloadEntry의 Template이라 자체로는 무변화 |
 | ProxyConfig | - | - | - | - | Bootstrap 설정이라 Pod 재생성 시 반영 |
-| PeerAuthentication | O | - | - | - | virtualInbound Filter Chain 변경 |
+| PeerAuthentication | O | - | - | - | virtualInbound Network Filter Chain 변경 |
 | RequestAuthentication | O | - | - | - | jwt_authn HTTP Filter 추가 |
 | AuthorizationPolicy | O | - | - | - | rbac HTTP Filter 추가 |
 | Telemetry | O | - | - | - | Listener의 Access Logger 교체 |
@@ -1199,7 +1195,7 @@ spec:
 -          ... (inbound|8080|| Plaintext Chain 전체 제거)
 ```
 
-PeerAuthentication은 **selector로 선택된 Workload의 Inbound `virtualInbound` Listener Filter Chain에 반영**된다. 기본값인 `PERMISSIVE` Mode에서는 Port마다 mTLS용 `tls` Chain과 Plaintext용 `raw_buffer` Chain이 함께 존재하지만, `STRICT` Mode로 변경하면 `raw_buffer` Chain이 모두 제거되어 mTLS가 아닌 연결은 수립 자체가 불가능해진다.
+PeerAuthentication은 **selector로 선택된 Workload의 Inbound `virtualInbound` Listener의 Network Filter Chain에 반영**된다. 기본값인 `PERMISSIVE` Mode에서는 Port마다 mTLS용 `tls` Chain과 Plaintext용 `raw_buffer` Chain이 함께 존재하지만, `STRICT` Mode로 변경하면 `raw_buffer` Chain이 모두 제거되어 mTLS가 아닌 연결은 수립 자체가 불가능해진다.
 
 `tls` Chain의 `application_protocols` Match에 나열된 `istio`, `istio-peer-exchange`, `istio-http/1.1`, `istio-h2`는 Istio 전용 ALPN 값으로, 보내는 쪽 Sidecar가 mTLS Handshake 시 광고하여 Sidecar가 만든 mTLS 연결임을 알린다. `PERMISSIVE` Mode에서는 App이 자체적으로 TLS를 처리하는 연결도 같은 Port로 들어올 수 있으므로, 이 ALPN 조건으로 선별한 Sidecar mTLS 연결만 Envoy가 TLS Termination을 수행하여 복호화하고, 그 외의 TLS 연결은 암호화된 상태 그대로 App에 전달한다.
 
@@ -1442,4 +1438,4 @@ spec:
 
 WasmPlugin은 **Inbound HTTP Filter Chain에 Wasm Filter를 추가**하며, Filter의 실제 설정은 다른 Filter와 달리 ECDS (Extension Config Discovery Service)를 통해 별도 Resource로 전달된다. Wasm 모듈은 pilot-agent가 OCI Registry에서 대신 다운로드하여 로컬 경로로 변환 후 Envoy에 전달한다.
 
-`phase`는 Filter Chain 내 삽입 위치를 단계로 지정하는 필드이다. `AUTHN`은 Istio 인증 Filter 앞, `AUTHZ`는 인증 Filter 뒤이자 인가 Filter(`rbac`) 앞, `STATS`는 인가 Filter 뒤이자 Stats Filter(`istio.stats`) 앞에 삽입되며, 지정하지 않으면 Filter Chain의 끝(Router Filter 앞)에 삽입된다. 예시는 `phase: AUTHN`이므로 [Diff 19]에서 항상 맨 앞에 위치하는 `istio.metadata_exchange` 바로 뒤에 삽입되었다. EnvoyFilter의 `subFilter`처럼 특정 Filter 이름에 의존하지 않고 단계로 위치를 지정하므로, Istio Upgrade에 더 안전한 확장 수단이다.
+`phase`는 HTTP Filter Chain 내 삽입 위치를 단계로 지정하는 필드이다. `AUTHN`은 Istio 인증 Filter 앞, `AUTHZ`는 인증 Filter 뒤이자 인가 Filter(`rbac`) 앞, `STATS`는 인가 Filter 뒤이자 Stats Filter(`istio.stats`) 앞에 삽입되며, 지정하지 않으면 HTTP Filter Chain의 끝(Router Filter 앞)에 삽입된다. 예시는 `phase: AUTHN`이므로 [Diff 19]에서 항상 맨 앞에 위치하는 `istio.metadata_exchange` 바로 뒤에 삽입되었다. EnvoyFilter의 `subFilter`처럼 특정 Filter 이름에 의존하지 않고 단계로 위치를 지정하므로, Istio Upgrade에 더 안전한 확장 수단이다.
