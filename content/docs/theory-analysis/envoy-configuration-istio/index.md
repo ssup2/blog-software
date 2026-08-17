@@ -591,6 +591,7 @@ HTTP Connection Manager도 목적지를 지정하는 `route_config`(Catch-all Ch
 
 1.1의 기본 설정을 기준으로, Istio의 각 CR (Custom Resource)이 Envoy 설정에 어떻게 반영되는지 살펴본다. 각 CR을 적용하기 전후의 `istioctl proxy-config all <pod> -o yaml` 출력을 비교하여, Envoy Config Dump의 어느 부분이 변경되는지 앞뒤 Context와 함께 diff로 기록한다. 변경과 무관한 부분은 `...`으로 표기한다. 각 Istio CR이 Envoy 설정의 어느 리소스 타입에 반영되는지 정리하면 다음과 같다.
 
+{{< table caption="[Table 1] Istio CR이 Envoy 설정에 반영되는 리소스 타입" >}}
 | CR | Listener | Route | Cluster | Endpoint | 비고 |
 |---|:---:|:---:|:---:|:---:|---|
 | Gateway | O | O | - | - | Workload의 Sidecar가 아닌 Gateway Pod에 반영 |
@@ -607,6 +608,7 @@ HTTP Connection Manager도 목적지를 지정하는 `route_config`(Catch-all Ch
 | AuthorizationPolicy | O | - | - | - | rbac HTTP Filter 추가 |
 | Telemetry | O | - | - | - | Listener의 Access Logger 교체 |
 | WasmPlugin | O | - | - | - | Wasm HTTP Filter 추가, 설정은 ECDS로 전달 |
+{{< /table >}}
 
 #### 1.2.1. Gateway
 
