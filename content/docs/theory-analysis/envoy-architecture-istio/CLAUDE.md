@@ -16,7 +16,7 @@ CR별 Envoy 설정 변화(실측 diff)는 2026-08-09에 **envoy-configuration-is
 - **3장 (Envoy as Egress Gateway)**: 2026-08-16 분리, Figure 3 추가. ingress와 내부 구조 동일(실측: Deployment args·Envoy bootstrap/Listener/Cluster diff 0) + `ClusterIP`·Port 축소 + Outbound Traffic 흐름.
   ingress/egress 차이는 노출 계층에만 존재: Service Type, Service Port 구성(ingress만 `15021` status-port·`31400`·`15443` 노출), containerPort 선언, Label.
   `31400`은 raw TCP 입구, `15443`은 SNI Passthrough 입구(Multi-cluster east-west). TCP Server는 Gateway CR만으로 Listener가 안 열리고 tcp VirtualService Route까지 있어야 열림(실측).
-- **4장 (참조)**: 링크 미채움.
+- **4장 (참조)**: 2026-08-18에 제거 (빈 절이었음).
 
 ## 폴더 구조
 

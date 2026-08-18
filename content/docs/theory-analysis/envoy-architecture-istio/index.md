@@ -52,9 +52,14 @@ istioctl은 Envoy의 `15000` Port Admin Interface에 접근하여 **Envoy에 적
 
 Pod 내부 구조는 [Figure 1]의 Sidecar와 거의 동일하다. istio-proxy Container 안에서 pilot-agent와 Envoy가 함께 동작하고, pilot-agent가 xDS Proxy와 인증서 공급을 담당하는 구조, kubelet의 Envoy Probe와 istioctl의 Envoy Admin 접근 경로도 그대로 유지된다. 차이는 두 가지다. 첫째, App Container가 없으므로 **Envoy가 Pod의 유일한 Process** 역할을 하며, `proxy router` 모드로 실행된다. 둘째, 가로챌 App Traffic이 없으므로 **istio-init Container와 iptables Redirect도 없다**. Traffic은 Redirect가 아니라 Kubernetes Service를 통해 Envoy의 Listener Port로 직접 도착한다. 또한 App Container가 없으므로 Metrics 수집도 pilot-agent를 경유하여 Envoy의 Metrics만 수집하는 경로 하나만 존재한다 (남색).
 
-**Inbound Traffic (노란색)** 은 외부 Client의 요청이 Mesh 내부로 들어오는 흐름이다. istio-ingressgateway Service는 `LoadBalancer` Type으로 외부에 노출되므로, 요청은 외부 Load Balancer를 거쳐 Service의 `80`, `443` Port로 들어오고, `targetPort` 매핑에 따라 Envoy의 `8080`, `8443` Listener에 도착한다. Envoy는 Gateway에 연결된 VirtualService의 Route에 따라 요청을 Mesh 내부 서비스의 Cluster로 전달하며, Upstream Sidecar와는 mTLS로 통신한다. istio-ingressgateway Service는 Envoy의 `15021` Port도 `status-port`로 함께 노출하는데, **외부 Load Balancer가 Gateway의 Health를 확인**하기 위한 용도이다 (연두색).
+**Inbound Traffic (노란색)** 은 외부 Client의 요청이 Mesh 내부로 들어오는 흐름이다. istio-ingressgateway Service는 `LoadBalancer` Type으로 외부에 노출되므로, 요청은 외부 Load Balancer를 거쳐 Service의 Port로 들어오고, `targetPort` 매핑에 따라 Envoy의 Listener에 도착한다. Envoy는 Gateway에 연결된 VirtualService의 Route에 따라 요청을 Mesh 내부 서비스의 Cluster로 전달하며, Upstream Sidecar와는 mTLS로 통신한다. istio-ingressgateway Service가 노출하는 각 Port의 역할은 다음과 같다.
 
-istio-ingressgateway Service에는 `8080`, `8443` 외에 두 개의 입구가 더 열려 있다. `31400` Port는 HTTP가 아닌 raw TCP Traffic을 받기 위한 범용 입구이고, `15443` Port는 TLS를 종료하지 않고 SNI 기반으로 라우팅하는 Passthrough 입구로 Multi-cluster 환경의 클러스터 간 Traffic에 사용된다. 두 Port 역시 Service에 미리 노출되어 있을 뿐, Gateway CR로 Server를 선언해야 Envoy에 Listener가 열린다.
+* **`80`, `443` Port** : HTTP/HTTPS 요청을 받는 기본 입구이다. `targetPort` 매핑에 따라 각각 Envoy의 `8080`, `8443` Listener로 전달된다.
+* **`15021` Port (`status-port`)** : 외부 Load Balancer가 Gateway의 Health를 확인하기 위한 용도이다 (연두색).
+* **`31400` Port** : HTTP가 아닌 raw TCP Traffic을 받기 위한 범용 입구이다.
+* **`15443` Port** : TLS를 종료하지 않고 SNI 기반으로 라우팅하는 Passthrough 입구로, Multi-cluster 환경의 클러스터 간 Traffic에 사용된다.
+
+`status-port`를 제외한 이 Port들은 Service에 미리 노출되어 있을 뿐, Gateway CR로 Server를 선언해야 Envoy에 Listener가 열린다.
 
 ## 3. Envoy as Egress Gateway with Istio
 
@@ -68,4 +73,3 @@ istio-egressgateway Service는 `ClusterIP` Type으로 Mesh 내부에서만 접�
 
 **Outbound Traffic (주황색)** 은 App이 외부로 보내는 요청을 Sidecar가 VirtualService Route에 따라 Egress Gateway로 먼저 전달하고, Egress Gateway가 이를 받아 외부 서비스로 내보내는 흐름이다. Egress Gateway를 통해서 모든 Outbound Traffic이 하나의 지점을 거치므로서 고정된 출구 IP 확보, TLS Origination, 외부 접근 정책 설정을 한 곳에서 수행할 수 있다.
 
-## 4. 참조
