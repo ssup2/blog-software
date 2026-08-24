@@ -456,20 +456,20 @@ $ kubectl exec -it shell -- curl -s mock-server:8080/status/503
 
 [Text 4]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 5]는 `mock-server`의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/status/503` Endpoint에 접근하는 내역와 `503 Service Unavailable` 응답도 확인이 가능하다.
 
-#### 1.2.3. Downstream TCP RST Case
+#### 1.2.3. Downstream TCP Close Case
 
-{{< figure caption="[Figure 4] Downstream TCP RST Case" src="images/http-downstream-tcp-rst-case.png" width="1000px" >}}
+{{< figure caption="[Figure 4] Downstream TCP Close Case" src="images/http-downstream-tcp-close-case.png" width="1000px" >}}
 
-```shell {caption="[Shell 5] Downstream TCP RST Case / curl Command", linenos=table}
+```shell {caption="[Shell 5] Downstream TCP Close Case / curl Command", linenos=table}
 $ kubectl exec -it shell -- curl -s mock-server:8080/delay/5000
 ^C
 ```
 
-[Figure 4]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/delay/10000` Endpoint에 `GET` 요청을 전달하고, 5000ms가 지나기 전에 `Ctrl+C` 명령어를 이용하여 요청을 강제로 종료하는 Downstream TCP RST Case를 나타내고 있다. [Shell 5]은 [Figure 4]의 내용을 실행하는 예시를 나타내고 있다.
+[Figure 4]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/delay/5000` Endpoint에 `GET` 요청을 전달하고, 5000ms가 지나기 전에 `Ctrl+C` 명령어를 이용하여 요청을 강제로 종료하는 Downstream TCP Close Case를 나타내고 있다. [Shell 5]은 [Figure 4]의 내용을 실행하는 예시를 나타내고 있다.
 
 `curl` 명령어 실행 중 강제로 종료하면 `curl` 명령어는 내부적으로 Connection을 종료하면서 TCP FIN Flag를 `curl` Pod의 `istio-proxy`에게 전송한며, TCP FIN Flag를 받은 `curl` Pod의 `istio-proxy`는 TCP RST Flag를 `mock-server` Pod에게 전송하여 최종적으로 `mock-server` Container에게 전달된다. 이후에 `mock-server` Pod의 `istio-proxy`는 예상치 못한 Client의  Connection 종료였기 때문에 TCP RST Flag를 TCP FIN Flag 이후에 전송한다.
 
-```json {caption="[Text 6] Downstream TCP RST Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 6] Downstream TCP Close Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-01T11:29:33.615Z",
   "method": "GET",
@@ -502,7 +502,7 @@ $ kubectl exec -it shell -- curl -s mock-server:8080/delay/5000
 }
 ```
 
-```json {caption="[Text 7] Downstream TCP RST Case / mock-server Pod Access Log", linenos=table}
+```json {caption="[Text 7] Downstream TCP Close Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-01T11:29:33.616Z",
   "method": "GET",

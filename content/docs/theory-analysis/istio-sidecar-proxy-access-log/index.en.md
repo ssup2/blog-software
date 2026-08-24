@@ -456,20 +456,20 @@ $ kubectl exec -it shell -- curl -s mock-server:8080/status/503
 
 [Text 4] shows the Access Log of the `shell` Pod's `istio-proxy`, and [Text 5] shows the Access Log of the `mock-server`'s `istio-proxy`. Both Access Logs confirm the access to the `/status/503` Endpoint and the `503 Service Unavailable` response.
 
-#### 1.2.3. Downstream TCP RST Case
+#### 1.2.3. Downstream TCP Close Case
 
-{{< figure caption="[Figure 4] Downstream TCP RST Case" src="images/http-downstream-tcp-rst-case.png" width="1000px" >}}
+{{< figure caption="[Figure 4] Downstream TCP Close Case" src="images/http-downstream-tcp-close-case.png" width="1000px" >}}
 
-```shell {caption="[Shell 5] Downstream TCP RST Case / curl Command", linenos=table}
+```shell {caption="[Shell 5] Downstream TCP Close Case / curl Command", linenos=table}
 $ kubectl exec -it shell -- curl -s mock-server:8080/delay/5000
 ^C
 ```
 
-[Figure 4] shows the Downstream TCP RST Case where a `GET` request is sent to the `mock-server`'s `/delay/10000` Endpoint using the `curl` command from the `shell` Pod, and the request is forcefully terminated using `Ctrl+C` before 5000ms passes. [Shell 5] shows an example of executing [Figure 4].
+[Figure 4] shows the Downstream TCP Close Case where a `GET` request is sent to the `mock-server`'s `/delay/5000` Endpoint using the `curl` command from the `shell` Pod, and the request is forcefully terminated using `Ctrl+C` before 5000ms passes. [Shell 5] shows an example of executing [Figure 4].
 
 When the `curl` command is forcefully terminated during execution, the `curl` command internally terminates the Connection and sends a TCP FIN Flag to the `curl` Pod's `istio-proxy`. The `curl` Pod's `istio-proxy` that received the TCP FIN Flag sends a TCP RST Flag to the `mock-server` Pod, which is ultimately delivered to the `mock-server` Container. Afterward, the `mock-server` Pod's `istio-proxy` sends a TCP RST Flag after the TCP FIN Flag because it was an unexpected client Connection termination.
 
-```json {caption="[Text 6] Downstream TCP RST Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 6] Downstream TCP Close Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-01T11:29:33.615Z",
   "method": "GET",
@@ -502,7 +502,7 @@ When the `curl` command is forcefully terminated during execution, the `curl` co
 }
 ```
 
-```json {caption="[Text 7] Downstream TCP RST Case / mock-server Pod Access Log", linenos=table}
+```json {caption="[Text 7] Downstream TCP Close Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-01T11:29:33.616Z",
   "method": "GET",
