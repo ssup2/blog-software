@@ -1,0 +1,68 @@
+2026-08-24T23:26:57.520817Z	info	FLAG: --concurrency="0"
+2026-08-24T23:26:57.521273Z	info	FLAG: --domain="default.svc.cluster.local"
+2026-08-24T23:26:57.521291Z	info	FLAG: --help="false"
+2026-08-24T23:26:57.521293Z	info	FLAG: --log_as_json="false"
+2026-08-24T23:26:57.521295Z	info	FLAG: --log_caller=""
+2026-08-24T23:26:57.521297Z	info	FLAG: --log_output_level="default:info"
+2026-08-24T23:26:57.521298Z	info	FLAG: --log_stacktrace_level="default:none"
+2026-08-24T23:26:57.521672Z	info	FLAG: --log_target="[stdout]"
+2026-08-24T23:26:57.521701Z	info	FLAG: --meshConfig="./etc/istio/config/mesh"
+2026-08-24T23:26:57.521703Z	info	FLAG: --outlierLogPath=""
+2026-08-24T23:26:57.521705Z	info	FLAG: --profiling="true"
+2026-08-24T23:26:57.521707Z	info	FLAG: --proxyComponentLogLevel="misc:error"
+2026-08-24T23:26:57.521709Z	info	FLAG: --proxyLogLevel="warning"
+2026-08-24T23:26:57.521710Z	info	FLAG: --serviceCluster="istio-proxy"
+2026-08-24T23:26:57.521712Z	info	FLAG: --stsPort="0"
+2026-08-24T23:26:57.521714Z	info	FLAG: --templateFile=""
+2026-08-24T23:26:57.521718Z	info	FLAG: --tokenManagerPlugin=""
+2026-08-24T23:26:57.521738Z	info	FLAG: --vklog="0"
+2026-08-24T23:26:57.521744Z	info	Version 1.24.2-7754674f65d38523e49b692cbb95a5bb1e2a93b8-Clean
+2026-08-24T23:26:57.521749Z	info	Set max file descriptors (ulimit -n) to: 1073741816
+2026-08-24T23:26:57.522286Z	info	Proxy role	ips=[10.244.2.6] type=sidecar id=my-shell.default domain=default.svc.cluster.local
+2026-08-24T23:26:57.522324Z	info	Apply proxy config from env {}
+
+2026-08-24T23:26:57.524239Z	info	cpu limit detected as 2, setting concurrency
+2026-08-24T23:26:57.524409Z	info	Effective config: binaryPath: /usr/local/bin/envoy
+concurrency: 2
+configPath: ./etc/istio/proxy
+controlPlaneAuthPolicy: MUTUAL_TLS
+discoveryAddress: istiod.istio-system.svc:15012
+drainDuration: 45s
+proxyAdminPort: 15000
+serviceCluster: istio-proxy
+statNameLength: 189
+statusPort: 15020
+terminationDrainDuration: 5s
+
+2026-08-24T23:26:57.524418Z	info	JWT policy is third-party-jwt
+2026-08-24T23:26:57.524422Z	info	using credential fetcher of JWT type in cluster.local trust domain
+2026-08-24T23:26:57.686152Z	info	platform detected is GCP
+2026-08-24T23:26:57.686852Z	info	Opening status port 15020
+2026-08-24T23:26:57.687391Z	info	Starting default Istio SDS Server
+2026-08-24T23:26:57.687406Z	info	CA Endpoint istiod.istio-system.svc:15012, provider Citadel
+2026-08-24T23:26:57.687438Z	info	Using CA istiod.istio-system.svc:15012 cert with certs: var/run/secrets/istio/root-cert.pem
+2026-08-24T23:26:57.688252Z	info	xdsproxy	Initializing with upstream address "istiod.istio-system.svc:15012" and cluster "Kubernetes"
+2026-08-24T23:26:57.689256Z	info	sds	Starting SDS grpc server
+2026-08-24T23:26:57.689317Z	info	sds	Starting SDS server for workload certificates, will listen on "var/run/secrets/workload-spiffe-uds/socket"
+2026-08-24T23:26:57.689409Z	info	starting Http service at 127.0.0.1:15004
+2026-08-24T23:26:57.791361Z	info	cache	generated new workload certificate	resourceName=default latency=103.399504ms ttl=23h59m59.208642827s
+2026-08-24T23:26:57.791383Z	info	cache	Root cert has changed, start rotating root cert
+2026-08-24T23:26:57.791415Z	info	cache	returned workload trust anchor from cache	ttl=23h59m59.208585366s
+2026-08-24T23:27:02.693620Z	warn	cannot reach the Google Instance metadata endpoint dial tcp 169.254.169.254:80: i/o timeout
+2026-08-24T23:27:02.695698Z	warn	Error fetching GCP zone: 
+2026-08-24T23:27:02.697653Z	warn	Error fetching GCP zone: 
+2026-08-24T23:27:02.697661Z	info	Pilot SAN: [istiod.istio-system.svc]
+2026-08-24T23:27:02.714395Z	info	Starting proxy agent
+2026-08-24T23:27:02.714548Z	info	Envoy command: [-c etc/istio/proxy/envoy-rev.json --drain-time-s 45 --drain-strategy immediate --local-address-ip-version v4 --file-flush-interval-msec 1000 --disable-hot-restart --allow-unknown-static-fields -l warning --component-log-level misc:error --concurrency 2]
+2026-08-24T23:27:04.529064Z	warning	envoy main external/envoy/source/server/server.cc:852	Usage of the deprecated runtime key overload.global_downstream_max_connections, consider switching to `envoy.resource_monitors.global_downstream_max_connections` instead.This runtime key will be removed in future.	thread=16
+2026-08-24T23:27:04.529798Z	warning	envoy main external/envoy/source/server/server.cc:948	There is no configured limit to the number of allowed active downstream connections. Configure a limit in `envoy.resource_monitors.global_downstream_max_connections` resource monitor.	thread=16
+2026-08-24T23:27:04.558957Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=1
+2026-08-24T23:27:04.698484Z	info	ads	ADS: new connection for node:1
+2026-08-24T23:27:04.698625Z	info	cache	returned workload trust anchor from cache	ttl=23h59m52.301376637s
+2026-08-24T23:27:04.700209Z	info	ads	ADS: new connection for node:2
+2026-08-24T23:27:04.700458Z	info	cache	returned workload certificate from cache	ttl=23h59m52.299545721s
+2026-08-24T23:27:05.635370Z	info	Readiness succeeded in 8.116586102s
+2026-08-24T23:27:05.636498Z	info	Envoy proxy is ready
+[2026-08-24T23:28:46.929Z] "HEAD /status/501" 501 retry_attempts=1 flags=- details=via_upstream
+[2026-08-24T23:28:47.026Z] "HEAD /status/502" 502 retry_attempts=1 flags=- details=via_upstream
+[2026-08-24T23:28:47.035Z] "HEAD /status/503" 503 retry_attempts=4 flags=URX details=via_upstream

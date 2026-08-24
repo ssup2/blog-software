@@ -140,43 +140,56 @@ $ kubectl exec -it my-shell -- bash
 (my-shell)# curl -I http://httpbin/status/501
 HTTP/1.1 501 Not Implemented
 server: envoy
-date: Sat, 27 Sep 2025 01:13:56 GMT
+date: Mon, 24 Aug 2026 23:28:47 GMT
 content-type: text/html; charset=utf-8
 access-control-allow-origin: *
 access-control-allow-credentials: true
 content-length: 0
-x-envoy-upstream-service-time: 234
+x-envoy-upstream-service-time: 63
 
 (my-shell)# curl -I http://httpbin/status/502
 HTTP/1.1 502 Bad Gateway
 server: envoy
-date: Sat, 27 Sep 2025 01:14:00 GMT
+date: Mon, 24 Aug 2026 23:28:47 GMT
 content-type: text/html; charset=utf-8
 access-control-allow-origin: *
 access-control-allow-credentials: true
 content-length: 0
-x-envoy-upstream-service-time: 24
+x-envoy-upstream-service-time: 2
 
 (my-shell)# curl -I http://httpbin/status/503
 HTTP/1.1 503 Service Unavailable
 server: envoy
-date: Sat, 27 Sep 2025 01:14:06 GMT
+date: Mon, 24 Aug 2026 23:28:47 GMT
 content-type: text/html; charset=utf-8
 access-control-allow-origin: *
 access-control-allow-credentials: true
 content-length: 0
-x-envoy-upstream-service-time: 69
+x-envoy-upstream-service-time: 107
 ```
 
 [Shell 1] shows an example of applying the Kubernetes Manifest for Retry Policy testing and sending requests to the `httpbin` service from inside the `my-shell` pod. The `httpbin` service returns the corresponding Status Code when a request is sent to the `/status/{status_code}` path. Therefore, the curl commands receive `501`, `502`, and `503` Status Code responses respectively.
 
 ```shell {caption="[Shell 2] my-shell istio-proxy Log"}
 $ kubectl logs my-shell istio-proxy
-[2025-09-27T01:13:55.899Z] "HEAD /status/501" 501 retry_attempts=1 flags=- details=via_upstream
-[2025-09-27T01:14:00.419Z] "HEAD /status/502" 502 retry_attempts=1 flags=- details=via_upstream
-[2025-09-27T01:14:05.930Z] "HEAD /status/503" 503 retry_attempts=4 flags=URX details=via_upstream
+[2026-08-24T23:28:46.929Z] "HEAD /status/501" 501 retry_attempts=1 flags=- details=via_upstream
+[2026-08-24T23:28:47.026Z] "HEAD /status/502" 502 retry_attempts=1 flags=- details=via_upstream
+[2026-08-24T23:28:47.035Z] "HEAD /status/503" 503 retry_attempts=4 flags=URX details=via_upstream
 ```
+
 [Shell 2] shows an example of checking the istio-proxy log of the `my-shell` pod afterwards. Since no retry occurred for 501, 502 Status Codes, `retry_attempts=1` was recorded, and since retry occurred for 503 Status Code, `retry_attempts=4` was recorded.
+
+```shell {caption="[Shell 3] httpbin istio-proxy Log"}
+$ kubectl logs httpbin-7598dddc74-5zfpx istio-proxy
+[2026-08-24T23:28:46.969Z] "HEAD /status/501" 501 retry_attempts=1 flags=- details=via_upstream
+[2026-08-24T23:28:47.026Z] "HEAD /status/502" 502 retry_attempts=1 flags=- details=via_upstream
+[2026-08-24T23:28:47.035Z] "HEAD /status/503" 503 retry_attempts=1 flags=- details=via_upstream
+[2026-08-24T23:28:47.063Z] "HEAD /status/503" 503 retry_attempts=1 flags=- details=via_upstream
+[2026-08-24T23:28:47.101Z] "HEAD /status/503" 503 retry_attempts=1 flags=- details=via_upstream
+[2026-08-24T23:28:47.141Z] "HEAD /status/503" 503 retry_attempts=1 flags=- details=via_upstream
+```
+
+[Shell 3] shows an example of checking the istio-proxy log of the `httpbin` pod that serves as a server. While the 501, 502 Status Code requests were recorded only once since no retry occurred, the 503 Status Code request was recorded a total of 4 times due to the retries performed by the Sidecar Proxy of the `my-shell` pod. Since retries are performed by the Sidecar Proxy of the client pod, each retry is handled as a separate request from the perspective of the server pod's Sidecar Proxy, so `retry_attempts=1` is recorded for every request.
 
 ## 2. References
 
