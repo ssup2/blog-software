@@ -1,0 +1,155 @@
+2026-08-25T00:16:24.840085Z	info	FLAG: --concurrency="0"
+2026-08-25T00:16:24.840168Z	info	FLAG: --domain="default.svc.cluster.local"
+2026-08-25T00:16:24.840200Z	info	FLAG: --help="false"
+2026-08-25T00:16:24.840205Z	info	FLAG: --log_as_json="false"
+2026-08-25T00:16:24.840207Z	info	FLAG: --log_caller=""
+2026-08-25T00:16:24.840208Z	info	FLAG: --log_output_level="default:info"
+2026-08-25T00:16:24.840212Z	info	FLAG: --log_stacktrace_level="default:none"
+2026-08-25T00:16:24.840233Z	info	FLAG: --log_target="[stdout]"
+2026-08-25T00:16:24.840237Z	info	FLAG: --meshConfig="./etc/istio/config/mesh"
+2026-08-25T00:16:24.840238Z	info	FLAG: --outlierLogPath=""
+2026-08-25T00:16:24.840240Z	info	FLAG: --profiling="true"
+2026-08-25T00:16:24.840242Z	info	FLAG: --proxyComponentLogLevel="misc:error"
+2026-08-25T00:16:24.840243Z	info	FLAG: --proxyLogLevel="warning"
+2026-08-25T00:16:24.840243Z	info	FLAG: --serviceCluster="istio-proxy"
+2026-08-25T00:16:24.840244Z	info	FLAG: --stsPort="0"
+2026-08-25T00:16:24.840245Z	info	FLAG: --templateFile=""
+2026-08-25T00:16:24.840246Z	info	FLAG: --tokenManagerPlugin=""
+2026-08-25T00:16:24.840249Z	info	FLAG: --vklog="0"
+2026-08-25T00:16:24.840254Z	info	Version 1.24.2-7754674f65d38523e49b692cbb95a5bb1e2a93b8-Clean
+2026-08-25T00:16:24.840352Z	info	Set max file descriptors (ulimit -n) to: 1073741816
+2026-08-25T00:16:24.840860Z	info	Proxy role	ips=[10.244.1.9] type=sidecar id=mock-server.default domain=default.svc.cluster.local
+2026-08-25T00:16:24.840919Z	info	Apply proxy config from env {}
+
+2026-08-25T00:16:24.845870Z	info	cpu limit detected as 2, setting concurrency
+2026-08-25T00:16:24.846453Z	info	Effective config: binaryPath: /usr/local/bin/envoy
+concurrency: 2
+configPath: ./etc/istio/proxy
+controlPlaneAuthPolicy: MUTUAL_TLS
+discoveryAddress: istiod.istio-system.svc:15012
+drainDuration: 45s
+proxyAdminPort: 15000
+serviceCluster: istio-proxy
+statNameLength: 189
+statusPort: 15020
+terminationDrainDuration: 5s
+
+2026-08-25T00:16:24.846485Z	info	JWT policy is third-party-jwt
+2026-08-25T00:16:24.846494Z	info	using credential fetcher of JWT type in cluster.local trust domain
+2026-08-25T00:16:24.853386Z	info	platform detected is GCP
+2026-08-25T00:16:24.853920Z	info	Starting default Istio SDS Server
+2026-08-25T00:16:24.853934Z	info	CA Endpoint istiod.istio-system.svc:15012, provider Citadel
+2026-08-25T00:16:24.853965Z	info	Using CA istiod.istio-system.svc:15012 cert with certs: var/run/secrets/istio/root-cert.pem
+2026-08-25T00:16:24.854145Z	info	Opening status port 15020
+2026-08-25T00:16:24.856072Z	info	xdsproxy	Initializing with upstream address "istiod.istio-system.svc:15012" and cluster "Kubernetes"
+2026-08-25T00:16:24.857616Z	info	sds	Starting SDS grpc server
+2026-08-25T00:16:24.857655Z	info	sds	Starting SDS server for workload certificates, will listen on "var/run/secrets/workload-spiffe-uds/socket"
+2026-08-25T00:16:24.857863Z	info	starting Http service at 127.0.0.1:15004
+2026-08-25T00:16:24.927413Z	info	cache	generated new workload certificate	resourceName=default latency=69.586952ms ttl=23h59m59.072590787s
+2026-08-25T00:16:24.927448Z	info	cache	Root cert has changed, start rotating root cert
+2026-08-25T00:16:24.927479Z	info	cache	returned workload trust anchor from cache	ttl=23h59m59.072520746s
+2026-08-25T00:16:29.858306Z	warn	cannot reach the Google Instance metadata endpoint dial tcp 169.254.169.254:80: i/o timeout
+2026-08-25T00:16:29.859119Z	warn	Error fetching GCP zone: 
+2026-08-25T00:16:29.865078Z	warn	Error fetching GCP zone: 
+2026-08-25T00:16:29.865121Z	info	Pilot SAN: [istiod.istio-system.svc]
+2026-08-25T00:16:29.869769Z	info	Starting proxy agent
+2026-08-25T00:16:29.870088Z	info	Envoy command: [-c etc/istio/proxy/envoy-rev.json --drain-time-s 45 --drain-strategy immediate --local-address-ip-version v4 --file-flush-interval-msec 1000 --disable-hot-restart --allow-unknown-static-fields -l warning --component-log-level misc:error --concurrency 2]
+2026-08-25T00:16:29.967236Z	warning	envoy main external/envoy/source/server/server.cc:852	Usage of the deprecated runtime key overload.global_downstream_max_connections, consider switching to `envoy.resource_monitors.global_downstream_max_connections` instead.This runtime key will be removed in future.	thread=17
+2026-08-25T00:16:29.967652Z	warning	envoy main external/envoy/source/server/server.cc:948	There is no configured limit to the number of allowed active downstream connections. Configure a limit in `envoy.resource_monitors.global_downstream_max_connections` resource monitor.	thread=17
+2026-08-25T00:16:29.972028Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=1
+2026-08-25T00:16:29.984426Z	info	ads	ADS: new connection for node:1
+2026-08-25T00:16:29.984499Z	info	cache	returned workload certificate from cache	ttl=23h59m54.015502353s
+2026-08-25T00:16:29.985142Z	info	ads	ADS: new connection for node:2
+2026-08-25T00:16:29.985179Z	info	cache	returned workload trust anchor from cache	ttl=23h59m54.014821604s
+2026-08-25T00:16:30.925990Z	info	Readiness succeeded in 6.087171105s
+2026-08-25T00:16:30.926711Z	info	Envoy proxy is ready
+{
+  "start_time": "2026-08-25T00:19:18.761Z",
+  "method": "GET",
+  "path": "/status/502",
+  "protocol": "HTTP/1.1",
+  "response_code": "502",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "68",
+  "duration": "13",
+  "upstream_service_time": "7",
+  "x_forwarded_for": "-",
+  "user_agent": "curl/8.21.0",
+  "request_id": "c0ace0c7-fe4b-9244-81cd-72cda95dee0b",
+  "authority": "mock-server:8080",
+  "upstream_host": "10.244.1.9:8080",
+  "upstream_cluster": "inbound|8080||",
+  "upstream_local_address": "127.0.0.6:51459",
+  "downstream_local_address": "10.244.1.9:8080",
+  "downstream_remote_address": "10.244.2.7:41132",
+  "requested_server_name": "outbound_.8080_._.mock-server.default.svc.cluster.local",
+  "route_name": "default",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "13"
+}
+{
+  "start_time": "2026-08-25T00:19:18.802Z",
+  "method": "GET",
+  "path": "/status/502",
+  "protocol": "HTTP/1.1",
+  "response_code": "502",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "68",
+  "duration": "0",
+  "upstream_service_time": "0",
+  "x_forwarded_for": "-",
+  "user_agent": "curl/8.21.0",
+  "request_id": "c0ace0c7-fe4b-9244-81cd-72cda95dee0b",
+  "authority": "mock-server:8080",
+  "upstream_host": "10.244.1.9:8080",
+  "upstream_cluster": "inbound|8080||",
+  "upstream_local_address": "127.0.0.6:51459",
+  "downstream_local_address": "10.244.1.9:8080",
+  "downstream_remote_address": "10.244.2.7:41148",
+  "requested_server_name": "outbound_.8080_._.mock-server.default.svc.cluster.local",
+  "route_name": "default",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "0"
+}
+{
+  "start_time": "2026-08-25T00:19:18.819Z",
+  "method": "GET",
+  "path": "/status/502",
+  "protocol": "HTTP/1.1",
+  "response_code": "502",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "68",
+  "duration": "0",
+  "upstream_service_time": "0",
+  "x_forwarded_for": "-",
+  "user_agent": "curl/8.21.0",
+  "request_id": "c0ace0c7-fe4b-9244-81cd-72cda95dee0b",
+  "authority": "mock-server:8080",
+  "upstream_host": "10.244.1.9:8080",
+  "upstream_cluster": "inbound|8080||",
+  "upstream_local_address": "127.0.0.6:51459",
+  "downstream_local_address": "10.244.1.9:8080",
+  "downstream_remote_address": "10.244.2.7:41160",
+  "requested_server_name": "outbound_.8080_._.mock-server.default.svc.cluster.local",
+  "route_name": "default",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "0"
+}
