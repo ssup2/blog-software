@@ -539,6 +539,10 @@ When the `curl` command is forcefully terminated during execution, the `curl` co
 
 #### 1.2.4. Downstream TCP RST Case
 
+**TODO: Add figure `images/http-downstream-tcp-rst-case.png`**
+
+{{< figure caption="[Figure 5] Downstream TCP RST Case" src="images/http-downstream-tcp-rst-case.png" width="1000px" >}}
+
 ```shell {caption="[Shell 6] Downstream TCP RST Case / python3 Command", linenos=table}
 $ kubectl exec -it shell -- python3 -c '
 import socket, struct, time
@@ -550,7 +554,7 @@ s.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER, struct.pack("ii", 1, 0))
 s.close()'
 ```
 
-[Shell 6] shows the Downstream TCP RST Case where a `GET` request is sent to the `mock-server`'s `/delay/5000` Endpoint from the `shell` Pod, and the request is forcefully terminated by sending a TCP RST Flag instead of a TCP FIN Flag before 5000ms passes. Since the `curl` command cannot control the Socket's `SO_LINGER` Option and therefore cannot send a TCP RST Flag, the `python3` command is used to set the `SO_LINGER` Option to `0` and close the Socket 1000ms after sending the request, which sends a TCP RST Flag.
+[Figure 5] shows the Downstream TCP RST Case where a `GET` request is sent to the `mock-server`'s `/delay/5000` Endpoint from the `shell` Pod, and the request is forcefully terminated by sending a TCP RST Flag instead of a TCP FIN Flag before 5000ms passes. [Shell 6] shows an example of executing [Figure 5]. Since the `curl` command cannot control the Socket's `SO_LINGER` Option and therefore cannot send a TCP RST Flag, the `python3` command is used to set the `SO_LINGER` Option to `0` and close the Socket 1000ms after sending the request, which sends a TCP RST Flag.
 
 The `shell` Pod's `istio-proxy` that received the TCP RST Flag does not forward the TCP RST Flag to the `mock-server` Pod as-is, but instead sends a TCP FIN Flag to terminate the Connection, identical to the Downstream TCP Close Case. Since `istio-proxy` manages the Downstream Connection and the Upstream Connection as separate TCP Connections, even if the Downstream Connection is abnormally terminated with a TCP RST Flag, the Upstream Connection is gracefully terminated with a TCP FIN Flag. The `mock-server` Pod's `istio-proxy` that received the TCP FIN Flag also sends a TCP FIN Flag to the `mock-server` Container. Afterward, the `mock-server` Container sends the response after 5000ms, but since the Connection is already terminated, it receives a TCP RST Flag from the `mock-server` Pod's `istio-proxy`.
 
@@ -624,6 +628,10 @@ The `shell` Pod's `istio-proxy` that received the TCP RST Flag does not forward 
 
 #### 1.2.5. Upstream Request Retry Case
 
+**TODO: Add figure `images/http-upstream-request-retry-case.png`**
+
+{{< figure caption="[Figure 6] Upstream Request Retry Case" src="images/http-upstream-request-retry-case.png" width="1000px" >}}
+
 Since the `retryOn` Field of the Virtual Service in [File 1] includes the `502` Status Code, up to 2 retries are performed when a `502` Status Code response is received, so up to 3 requests are sent.
 
 ```shell {caption="[Shell 7] Upstream Request Retry Case / curl Command", linenos=table}
@@ -631,7 +639,7 @@ $ kubectl exec -it shell -- curl -s mock-server:8080/status/502
 {"message":"Bad Gateway","service":"mock-server","status_code":502}
 ```
 
-[Shell 7] shows the Upstream Request Retry Case where a `GET` request is sent to the `mock-server`'s `/status/502` Endpoint using the `curl` command from the `shell` Pod. Since the `mock-server` returns a `502 Bad Gateway` response for every request, the `shell` Pod's `istio-proxy` delivers the last received `502 Bad Gateway` response to the `curl` command after performing both retries.
+[Figure 6] shows the Upstream Request Retry Case where a `GET` request is sent to the `mock-server`'s `/status/502` Endpoint using the `curl` command from the `shell` Pod. [Shell 7] shows an example of executing [Figure 6]. Since the `mock-server` returns a `502 Bad Gateway` response for every request, the `shell` Pod's `istio-proxy` delivers the last received `502 Bad Gateway` response to the `curl` command after performing both retries.
 
 ```json {caption="[Text 10] Upstream Request Retry Case / shell Pod Access Log", linenos=table}
 {
@@ -765,14 +773,14 @@ In [Text 11], three logs with the same `request_id` are recorded. Since retries 
 
 #### 1.2.6. Upstream TCP RST before Response Case
 
-{{< figure caption="[Figure 6] Upstream TCP RST before Response Case" src="images/http-upstream-tcp-rst-before-response-case.png" width="1000px" >}}
+{{< figure caption="[Figure 7] Upstream TCP RST before Response Case" src="images/http-upstream-tcp-rst-before-response-case.png" width="1000px" >}}
 
 ```shell {caption="[Shell 8] Upstream TCP RST before Response Case / curl Command", linenos=table}
 $ kubectl exec -it shell -- curl -s mock-server:8080/reset-before-response/1000
 upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
-[Figure 6] shows the Upstream TCP RST before Response Case where a `GET` request is sent to the `mock-server`'s `/reset-before-response/1000` Endpoint using the `curl` command from the `shell` Pod, and after `1000ms`, the `mock-server` Pod sends a TCP RST Flag to forcefully terminate the Connection. [Shell 8] shows an example of executing [Figure 6].
+[Figure 7] shows the Upstream TCP RST before Response Case where a `GET` request is sent to the `mock-server`'s `/reset-before-response/1000` Endpoint using the `curl` command from the `shell` Pod, and after `1000ms`, the `mock-server` Pod sends a TCP RST Flag to forcefully terminate the Connection. [Shell 8] shows an example of executing [Figure 7].
 
 When the `mock-server` Pod's `istio-proxy` receives a TCP RST Flag from the `mock-server` Container, it does not send a TCP RST Flag to the `shell` Pod but sends a `503 Service Unavailable` response. Therefore, the `shell` Pod's `istio-proxy` Access Log does not have `response_flags` and only shows the `503 Service Unavailable` response.
 
@@ -846,7 +854,7 @@ When the `mock-server` Pod's `istio-proxy` receives a TCP RST Flag from the `moc
 
 #### 1.2.7. Upstream TCP RST after Response Case
 
-{{< figure caption="[Figure 7] Upstream TCP RST after Response Case" src="images/http-upstream-tcp-rst-after-response-case.png" width="1000px" >}}
+{{< figure caption="[Figure 8] Upstream TCP RST after Response Case" src="images/http-upstream-tcp-rst-after-response-case.png" width="1000px" >}}
 
 ```shell {caption="[Shell 9] Upstream TCP RST after Response Case / curl Command", linenos=table}
 $ kubectl exec -it shell -- curl -s mock-server:8080/reset-after-response/1000
@@ -854,7 +862,7 @@ curl: (18) transfer closed with outstanding read data remaining
 dummy datacommand terminated with exit code 18
 ```
 
-[Figure 7] shows the Upstream TCP RST after Response Case where a `GET` request is sent to the `mock-server`'s `/reset-after-response/1000` Endpoint using the `curl` command from the `shell` Pod, and after `1000ms`, the `mock-server` Pod sends a partial response and then sends a TCP RST Flag to forcefully terminate the Connection. [Shell 9] shows an example of executing [Figure 7].
+[Figure 8] shows the Upstream TCP RST after Response Case where a `GET` request is sent to the `mock-server`'s `/reset-after-response/1000` Endpoint using the `curl` command from the `shell` Pod, and after `1000ms`, the `mock-server` Pod sends a partial response and then sends a TCP RST Flag to forcefully terminate the Connection. [Shell 9] shows an example of executing [Figure 8].
 
 When the `mock-server` Pod's `istio-proxy` receives a TCP RST Flag, it sends a TCP FIN Flag to the `shell` Pod to terminate the TCP Connection. Also, since it was an unexpected Connection termination, a TCP RST Flag is sent after the TCP RST Flag.
 
@@ -930,14 +938,14 @@ When the `mock-server` Pod's `istio-proxy` receives a TCP RST Flag, it sends a T
 
 #### 1.2.8. Upstream TCP Close before Response Case
 
-{{< figure caption="[Figure 8] Upstream TCP Close before Response Case" src="images/http-upstream-tcp-close-before-response-case.png" width="1000px" >}}
+{{< figure caption="[Figure 9] Upstream TCP Close before Response Case" src="images/http-upstream-tcp-close-before-response-case.png" width="1000px" >}}
 
 ```shell {caption="[Shell 10] Upstream TCP Close before Response Case / curl Command", linenos=table}
 $ kubectl exec -it shell -- curl -s mock-server:8080/close-before-response/1000
 upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
-[Figure 8] shows the Upstream TCP Close before Response Case where a `GET` request is sent to the `mock-server`'s `/close-before-response/1000` Endpoint using the `curl` command from the `shell` Pod, and after `1000ms`, the `mock-server` Pod forcefully terminates the Connection. [Shell 10] shows an example of executing [Figure 8].
+[Figure 9] shows the Upstream TCP Close before Response Case where a `GET` request is sent to the `mock-server`'s `/close-before-response/1000` Endpoint using the `curl` command from the `shell` Pod, and after `1000ms`, the `mock-server` Pod forcefully terminates the Connection. [Shell 10] shows an example of executing [Figure 9].
 
 When the `mock-server` Pod's `istio-proxy` receives a TCP FIN Flag from the `mock-server` Container, it sends a 503 Service Unavailable response to the `shell` Pod to indicate that the request was abnormally terminated.
 
@@ -1009,18 +1017,18 @@ When the `mock-server` Pod's `istio-proxy` receives a TCP FIN Flag from the `moc
 
 [Text 16] shows the Access Log of the `shell` Pod's `istio-proxy`, and [Text 17] shows the Access Log of the `mock-server`'s `istio-proxy`. Both Access Logs confirm the access to the `/disconnect/1000` Endpoint and the `503 Service Unavailable` response. Also, `response_flags` showing as `UC (UpstreamConnectionTermination)` can be confirmed.
 
-`response_code_details` shows `upstream_reset_before_response_started{connection_termination}`, indicating that a TCP FIN Flag was sent from the Upstream before the response started. This is the same detail as when receiving a TCP RST Flag in [Figure 6], confirming that the `mock-server` Pod's `istio-proxy` logs the same `response_code_details` when receiving either a TCP FIN Flag or TCP RST Flag before the response is sent.
+`response_code_details` shows `upstream_reset_before_response_started{connection_termination}`, indicating that a TCP FIN Flag was sent from the Upstream before the response started. This is the same detail as when receiving a TCP RST Flag in [Figure 7], confirming that the `mock-server` Pod's `istio-proxy` logs the same `response_code_details` when receiving either a TCP FIN Flag or TCP RST Flag before the response is sent.
 
 #### 1.2.9. Upstream TCP Close after Response Case
 
-{{< figure caption="[Figure 9] Upstream TCP Close after Response Case" src="images/http-upstream-tcp-close-after-response-case.png" width="1000px" >}}
+{{< figure caption="[Figure 10] Upstream TCP Close after Response Case" src="images/http-upstream-tcp-close-after-response-case.png" width="1000px" >}}
 
 ```shell {caption="[Shell 11] Upstream TCP Close after Response Case / curl Command", linenos=table}
 $ kubectl exec -it shell -- curl -s mock-server:8080/close-after-response/1000
 dummy datacommand terminated with exit code 18
 ```
 
-[Figure 9] shows the Upstream TCP Close after Response Case where a `GET` request is sent to the `mock-server`'s `/close-after-response/1000` Endpoint using the `curl` command from the `shell` Pod, and after `1000ms`, the `mock-server` Pod sends a response and then forcefully terminates the Connection. [Shell 11] shows an example of executing [Figure 9].
+[Figure 10] shows the Upstream TCP Close after Response Case where a `GET` request is sent to the `mock-server`'s `/close-after-response/1000` Endpoint using the `curl` command from the `shell` Pod, and after `1000ms`, the `mock-server` Pod sends a response and then forcefully terminates the Connection. [Shell 11] shows an example of executing [Figure 10].
 
 When the `mock-server` Pod's `istio-proxy` receives a TCP FIN Flag from the `mock-server` Container, it sends a 503 Service Unavailable response to the `shell` Pod to indicate that the request was abnormally terminated.
 
@@ -1092,11 +1100,11 @@ When the `mock-server` Pod's `istio-proxy` receives a TCP FIN Flag from the `moc
 
 [Text 18] shows the Access Log of the `shell` Pod's `istio-proxy`, and [Text 19] shows the Access Log of the `mock-server`'s `istio-proxy`. Both Access Logs confirm the access to the `/close-after-response/1000` Endpoint and the `200 OK` response. Also, `response_flags` showing as `UPE (UpstreamProtocolError)` can be confirmed.
 
-`response_code_details` shows `upstream_reset_after_response_started{protocol_error}`, indicating that a Protocol Error occurred and the Connection was forcefully terminated after the response started. This is the same detail as when receiving a TCP RST Flag in [Figure 7], confirming that the `mock-server` Pod's `istio-proxy` logs the same `response_code_details` when receiving either a TCP FIN Flag or TCP RST Flag after partial response transmission.
+`response_code_details` shows `upstream_reset_after_response_started{protocol_error}`, indicating that a Protocol Error occurred and the Connection was forcefully terminated after the response started. This is the same detail as when receiving a TCP RST Flag in [Figure 8], confirming that the `mock-server` Pod's `istio-proxy` logs the same `response_code_details` when receiving either a TCP FIN Flag or TCP RST Flag after partial response transmission.
 
 #### 1.2.10. Circuit Breaking with Upstream Connection Pool Overflow Case
 
-{{< figure caption="[Figure 10] Circuit Breaking with Upstream Connection Pool Overflow Case" src="images/http-circuit-breaking-with-upstream-connection-pool-overflow-case.png" width="1000px" >}}
+{{< figure caption="[Figure 11] Circuit Breaking with Upstream Connection Pool Overflow Case" src="images/http-circuit-breaking-with-upstream-connection-pool-overflow-case.png" width="1000px" >}}
 
 ```shell {caption="[Shell 12] Circuit Breaking with Upstream Connection Pool Overflow Case / curl Command", linenos=table}
 $ kubectl exec shell -- curl -s mock-server:8080/delay/5000 &
@@ -1107,7 +1115,7 @@ upstream connect error or disconnect/reset before headers. reset reason: overflo
 {"delayed_ms":5000,"message":"Response delayed by 5000ms","service":"mock-server"}
 ```
 
-[Figure 10] shows the Case where 3 consecutive `GET` requests are sent to the `mock-server`'s `/delay/5000` Endpoint using the `curl` command from the `shell` Pod, causing Upstream Connection Pool Overflow and triggering Circuit Breaking. [Shell 12] shows an example of executing [Figure 10].
+[Figure 11] shows the Case where 3 consecutive `GET` requests are sent to the `mock-server`'s `/delay/5000` Endpoint using the `curl` command from the `shell` Pod, causing Upstream Connection Pool Overflow and triggering Circuit Breaking. [Shell 12] shows an example of executing [Figure 11].
 
 Due to the Destination Rule in [File 1], the first request is immediately forwarded to the `mock-server` Pod and completes with a `200 OK` response after waiting 5000ms. The second request is Pending because the first request is being processed and waits until the first request finishes before being forwarded to the `mock-server` Pod. Therefore, the time for the second request to be processed is 5000ms + 5000ms = 10000ms. The third request cannot even be Pending, so `istio-proxy` considers it Upstream Overflow and triggers Circuit Breaking, sending a `503 Service Unavailable` response.
 
@@ -1273,7 +1281,7 @@ In the `mock-server` Pod's `istio-proxy` Access Log, only logs for the first and
 
 #### 1.2.11. Circuit Breaking with Upstream Request Limit Overflow Case
 
-{{< figure caption="[Figure 11] Circuit Breaking with Upstream Request Limit Overflow Case" src="images/http-circuit-breaking-with-upstream-request-limit-overflow-case.png" width="1000px" >}}
+{{< figure caption="[Figure 12] Circuit Breaking with Upstream Request Limit Overflow Case" src="images/http-circuit-breaking-with-upstream-request-limit-overflow-case.png" width="1000px" >}}
 
 ```shell {caption="[Shell 13] Circuit Breaking with Upstream Request Limit Overflow Case / curl Command", linenos=table}
 $ kubectl exec shell -- curl -s mock-server:8080/delay/5000 &
@@ -1284,7 +1292,7 @@ upstream connect error or disconnect/reset before headers. reset reason: overflo
 {"delayed_ms":5000,"message":"Response delayed by 5000ms","service":"mock-server"}
 ```
 
-[Figure 11] shows the Case where 3 consecutive `GET` requests are sent to the `mock-server`'s `/delay/5000` Endpoint using the `curl` command from the `shell` Pod, causing Upstream Request Limit Overflow. To reproduce this Case, the Destination Rule set in [File 2] must be applied. [Shell 13] shows an example of executing [Figure 11].
+[Figure 12] shows the Case where 3 consecutive `GET` requests are sent to the `mock-server`'s `/delay/5000` Endpoint using the `curl` command from the `shell` Pod, causing Upstream Request Limit Overflow. To reproduce this Case, the Destination Rule set in [File 2] must be applied. [Shell 13] shows an example of executing [Figure 12].
 
 Due to the Destination Rule settings in [File 2], the maximum concurrent requests that can be processed is one and request Pending is not possible, so the second and third requests are not forwarded to the `mock-server` Pod due to Upstream Overflow.
 
@@ -1418,7 +1426,7 @@ Due to the Destination Rule settings in [File 2], the maximum concurrent request
 
 #### 1.2.12. Circuit Breaking with No Healthy Upstream Case
 
-{{< figure caption="[Figure 12] Circuit Breaking with No Healthy Upstream Case" src="images/http-circuit-breaking-with-no-healthy-upstream-case.png" width="1000px" >}}
+{{< figure caption="[Figure 13] Circuit Breaking with No Healthy Upstream Case" src="images/http-circuit-breaking-with-no-healthy-upstream-case.png" width="1000px" >}}
 
 ```shell {caption="[Shell 14] Circuit Breaking with No Healthy Upstream Case / curl Command", linenos=table}
 $ kubectl exec -it shell -- curl -s mock-server:8080/status/503
@@ -1439,7 +1447,7 @@ $ kubectl exec -it shell -- curl -s mock-server:8080/status/200
 no healthy upstream
 ```
 
-[Figure 12] shows the Case where 8 consecutive `GET` requests are sent to the `mock-server`'s `/status/503` Endpoint using the `curl` command from the `shell` Pod, causing Circuit Breaking through No Healthy Upstream. [Shell 14] shows an example of executing [Figure 12].
+[Figure 13] shows the Case where 8 consecutive `GET` requests are sent to the `mock-server`'s `/status/503` Endpoint using the `curl` command from the `shell` Pod, causing Circuit Breaking through No Healthy Upstream. [Shell 14] shows an example of executing [Figure 13].
 
 Due to the Destination Rule in [File 1], Circuit Breaking activates when 5 consecutive 5XX Errors occur. Therefore, the first 5 requests from the `shell` Pod are all forwarded to the `mock-server` Pod, but the subsequent 3 requests are not forwarded to the `mock-server` Pod due to Circuit Breaking.
 
@@ -1843,7 +1851,7 @@ Due to the Destination Rule in [File 1], Circuit Breaking activates when 5 conse
 
 #### 1.2.13. Upstream Connection Failure with Timeout Case
 
-{{< figure caption="[Figure 13] Upstream Connection Failure with Timeout Case" src="images/http-upstream-connection-failure-case-with-timeout.png" width="1000px" >}}
+{{< figure caption="[Figure 14] Upstream Connection Failure with Timeout Case" src="images/http-upstream-connection-failure-case-with-timeout.png" width="1000px" >}}
 
 ```shell {caption="[Shell 15] Upstream Connection Failure with Timeout Case / iptables & curl Command", linenos=table}
 $ SHELL_IP=$(kubectl get pod shell -o jsonpath='{.status.podIP}')
@@ -1858,7 +1866,7 @@ $ kubectl exec -it shell -- curl -s mock-server:8080/status/200
 no healthy upstream
 ```
 
-[Figure 13] shows the Upstream Connection Failure with Timeout Case where a connection to the `mock-server`'s `/status/200` Endpoint from the `shell` Pod using the `curl` command fails due to Timeout and is Retried. [Shell 15] shows an example of executing [Figure 13]. To trigger the Timeout, a rule is added using the `iptables` command to `DROP` traffic from the `shell` Pod's IP Address, and then a request is sent using the `curl` command.
+[Figure 14] shows the Upstream Connection Failure with Timeout Case where a connection to the `mock-server`'s `/status/200` Endpoint from the `shell` Pod using the `curl` command fails due to Timeout and is Retried. [Shell 15] shows an example of executing [Figure 14]. To trigger the Timeout, a rule is added using the `iptables` command to `DROP` traffic from the `shell` Pod's IP Address, and then a request is sent using the `curl` command.
 
 Due to the Virtual Service's `connect-failure` setting in [File 1], 2 retries occur for a total of 3 requests. Therefore, the first request from the `shell` Pod performs 3 retries and then outputs a `connection timeout` error. The second request from the `shell` Pod triggers only 1 retry for a total of 2 requests, because Circuit Breaking activates when 5 consecutive 5XX Errors occur due to the Destination Rule in [File 1].
 
@@ -1963,7 +1971,7 @@ The second and third requests show `response_flags` as `UH (NoHealthyUpstream)` 
 
 #### 1.2.14. Upstream Connection Failure with TCP Reset Case
 
-{{< figure caption="[Figure 14] Upstream Connection Failure with TCP Reset Case" src="images/http-upstream-connection-failure-case-with-tcp-reset.png" width="1000px" >}}
+{{< figure caption="[Figure 15] Upstream Connection Failure with TCP Reset Case" src="images/http-upstream-connection-failure-case-with-tcp-reset.png" width="1000px" >}}
 
 ```shell {caption="[Shell 16] Upstream Connection Failure with TCP Reset Case / iptables & curl Command", linenos=table}
 $ SHELL_IP=$(kubectl get pod shell -o jsonpath='{.status.podIP}')
@@ -1978,7 +1986,7 @@ $ kubectl exec -it shell -- curl -s mock-server:8080/status/200
 no healthy upstream
 ```
 
-[Figure 14] shows the Upstream Connection Failure with TCP Reset Case where a connection to the `mock-server`'s `/status/200` Endpoint from the `shell` Pod using the `curl` command fails due to TCP Reset and is Retried. [Shell 16] shows an example of executing [Figure 14]. To trigger TCP Reset, a rule is added using the `iptables` command to `REJECT` traffic from the `shell` Pod's IP Address, and then a request is sent using the `curl` command. Except for the `Connection Refused` error message, it shows the same results as the Case where Retry is performed due to Timeout.
+[Figure 15] shows the Upstream Connection Failure with TCP Reset Case where a connection to the `mock-server`'s `/status/200` Endpoint from the `shell` Pod using the `curl` command fails due to TCP Reset and is Retried. [Shell 16] shows an example of executing [Figure 15]. To trigger TCP Reset, a rule is added using the `iptables` command to `REJECT` traffic from the `shell` Pod's IP Address, and then a request is sent using the `curl` command. Except for the `Connection Refused` error message, it shows the same results as the Case where Retry is performed due to Timeout.
 
 ```json {caption="[Text 27] Upstream Connection Failure with TCP Reset Case / shell Pod Access Log", linenos=table}
 {
@@ -2077,13 +2085,13 @@ no healthy upstream
 
 #### 1.2.15. Upstream Request Timeout Case
 
-{{< figure caption="[Figure 15] Upstream Request Timeout Case" src="images/http-upstream-request-timeout-case.png" width="1000px" >}}
+{{< figure caption="[Figure 16] Upstream Request Timeout Case" src="images/http-upstream-request-timeout-case.png" width="1000px" >}}
 
 ```shell {caption="[Shell 17] Upstream Request Timeout Case / curl Command", linenos=table}
 $ kubectl exec -it shell -- curl -s mock-server:8080/delay/70000
 ```
 
-[Figure 15] shows the Upstream Request Timeout Case where a `GET` request is sent to the `mock-server`'s `/delay/70000` Endpoint from the `shell` Pod using the `curl` command, but the `mock-server` Pod's `istio-proxy` does not receive a response after waiting 60000ms and processes the Request as Timeout. [Shell 17] shows an example of executing [Figure 15].
+[Figure 16] shows the Upstream Request Timeout Case where a `GET` request is sent to the `mock-server`'s `/delay/70000` Endpoint from the `shell` Pod using the `curl` command, but the `mock-server` Pod's `istio-proxy` does not receive a response after waiting 60000ms and processes the Request as Timeout. [Shell 17] shows an example of executing [Figure 16].
 
 Due to the Virtual Service in [File 1], requests sent to the `mock-server` Pod can wait up to 60000ms. However, the request sent to the `mock-server` Pod's `/delay/70000` Endpoint requires 70000ms, so a Timeout occurs. When a Timeout occurs, the `mock-server` Pod's `istio-proxy` sends TCP FIN Flag and TCP RST Flag sequentially to terminate the connection with the `mock-server` Pod. It also sends a `504 Gateway Timeout` response to the `shell` Container.
 
@@ -2159,7 +2167,7 @@ Due to the Virtual Service in [File 1], requests sent to the `mock-server` Pod c
 
 #### 1.3.1. OK Case
 
-{{< figure caption="[Figure 16] OK Case" src="images/grpc-ok-case.png" width="1000px" >}}
+{{< figure caption="[Figure 17] OK Case" src="images/grpc-ok-case.png" width="1000px" >}}
 
 ```shell {caption="[Shell 18] OK Case / grpcurl Command", linenos=table}
 $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 0}' mock-server:9090 mock.MockService/Status
@@ -2169,7 +2177,7 @@ $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 0}
 }
 ```
 
-[Figure 16] shows the OK Case where the `grpcurl` command is used from the `shell` Pod to send a `code: 0` request to the `mock-server`'s `/mock.MockService/Status` function and receive an `OK` response. [Shell 18] shows an example of executing [Figure 16].
+[Figure 17] shows the OK Case where the `grpcurl` command is used from the `shell` Pod to send a `code: 0` request to the `mock-server`'s `/mock.MockService/Status` function and receive an `OK` response. [Shell 18] shows an example of executing [Figure 17].
 
 ```json {caption="[Text 30] OK Case / shell Pod Access Log", linenos=table}
 {
@@ -2241,7 +2249,7 @@ $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 0}
 
 #### 1.3.2. Internal Case
 
-{{< figure caption="[Figure 17] Internal Case" src="images/grpc-internal-case.png" width="1000px" >}}
+{{< figure caption="[Figure 18] Internal Case" src="images/grpc-internal-case.png" width="1000px" >}}
 
 ```shell {caption="[Shell 19] Internal Case / grpcurl Command", linenos=table}
 $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 13}' mock-server:9090 mock.MockService/Status
@@ -2251,7 +2259,7 @@ ERROR:
 command terminated with exit code 77
 ```
 
-[Figure 17] shows the Internal Case where the `grpcurl` command is used from the `shell` Pod to send a `code: 13` request to the `mock-server`'s `/mock.MockService/Status` function and receive an `Internal` response. [Shell 19] shows an example of executing [Figure 17].
+[Figure 18] shows the Internal Case where the `grpcurl` command is used from the `shell` Pod to send a `code: 13` request to the `mock-server`'s `/mock.MockService/Status` function and receive an `Internal` response. [Shell 19] shows an example of executing [Figure 18].
 
 ```json {caption="[Text 32] Internal Case / shell Pod Access Log", linenos=table}
 {
@@ -2321,20 +2329,20 @@ command terminated with exit code 77
 
 [Text 32] shows the Access Log of the `shell` Pod's `istio-proxy`, and [Text 33] shows the Access Log of the `mock-server` Pod's `istio-proxy`. Both Access Logs show the access to the `/mock.MockService/Status` function and `grpc_status` as `Internal`. Also, `response_code` shows `200 OK`, and when using gRPC, `response_code` always shows `200 OK` regardless of the gRPC result. Since the `INTERNAL (13)` Status Code is not included in the `retryOn` Field of the Virtual Service in [File 1], no retry occurs, and `upstream_request_attempt_count` is recorded as `1`.
 
-#### 1.3.3. Downstream HTTP/2 RST_STREAM Case
+#### 1.3.3. Downstream TCP Close Case
 
-{{< figure caption="[Figure 18] Downstream HTTP/2 RST_STREAM Case" src="images/grpc-downstream-http2-rst-stream-case.png" width="1000px" >}}
+{{< figure caption="[Figure 19] Downstream TCP Close Case" src="images/grpc-downstream-tcp-close-case.png" width="1000px" >}}
 
-```shell {caption="[Shell 20] Downstream HTTP/2 RST_STREAM Case / grpcurl Command", linenos=table}
+```shell {caption="[Shell 20] Downstream TCP Close Case / grpcurl Command", linenos=table}
 $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 5000}' mock-server:9090 mock.MockService/Delay
 ^C
 ```
 
-[Figure 18] shows the Downstream HTTP/2 RST_STREAM Case where the `grpcurl` command is used from the `shell` Pod to send a `milliseconds: 5000` request to the `mock-server`'s `/mock.MockService/Delay` function, and forcefully terminates the request using `Ctrl+C` before 5000ms passes. [Shell 20] shows an example of executing [Figure 18].
+[Figure 19] shows the Downstream TCP Close Case where the `grpcurl` command is used from the `shell` Pod to send a `milliseconds: 5000` request to the `mock-server`'s `/mock.MockService/Delay` function, and forcefully terminates the request using `Ctrl+C` before 5000ms passes. [Shell 20] shows an example of executing [Figure 19].
 
-When the `grpcurl` command is forcefully terminated during execution, the `grpcurl` command sends a TCP FIN Flag to the `shell` Pod's `istio-proxy`, and the `shell` Pod's `istio-proxy` sends an HTTP/2 RST_STREAM Frame instead of TCP FIN Flag to the `mock-server` Pod, which is ultimately delivered to the `mock-server` Container to terminate the connection.
+When the `grpcurl` command is forcefully terminated during execution, the `grpcurl` command internally terminates the Connection and sends a TCP FIN Flag to the `shell` Pod's `istio-proxy`, and the `shell` Pod's `istio-proxy` that received the TCP FIN Flag sends an HTTP/2 RST_STREAM Frame to the `mock-server` Pod, which is ultimately delivered to the `mock-server` Container to terminate the request. Unlike the HTTP/1.1 Protocol, the TCP Connection between Pods using the HTTP/2 Protocol is shared by multiple requests through Stream multiplexing, so the `shell` Pod's `istio-proxy` does not terminate the TCP Connection between Pods and only terminates the Stream of the request through the HTTP/2 RST_STREAM Frame.
 
-```json {caption="[Text 34] Downstream Reset Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 34] Downstream TCP Close Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-05T14:41:20.286Z",
   "method": "POST",
@@ -2367,7 +2375,7 @@ When the `grpcurl` command is forcefully terminated during execution, the `grpcu
 }
 ```
 
-```json {caption="[Text 35] Downstream Remote Disconnect Case / mock-server Pod Access Log", linenos=table} 
+```json {caption="[Text 35] Downstream TCP Close Case / mock-server Pod Access Log", linenos=table} 
 {
   "start_time": "2026-01-05T14:41:20.300Z",
   "method": "POST",
@@ -2404,20 +2412,138 @@ When the `grpcurl` command is forcefully terminated during execution, the `grpcu
 
 Also, the `shell` Pod's `istio-proxy` shows `response_flags` as `DC (DownstreamConnectionTermination)` because it receives TCP FIN Flag from the `grpcurl` command, and the `mock-server` Pod's `istio-proxy` shows `response_flags` as `DR (DownstreamRemoteReset)` because it receives HTTP/2 RST_STREAM Frame.
 
-#### 1.3.4. Upstream Request Retry Case
+#### 1.3.4. Downstream TCP RST Case
+
+**TODO: Add figure `images/grpc-downstream-tcp-rst-case.png`**
+
+{{< figure caption="[Figure 20] Downstream TCP RST Case" src="images/grpc-downstream-tcp-rst-case.png" width="1000px" >}}
+
+```shell {caption="[Shell 21] Downstream TCP RST Case / python3 Command", linenos=table}
+$ kubectl exec -i shell -- python3 - <<'EOF'
+import socket, struct, time
+
+def hdr(name, value):
+    # HPACK literal header field without indexing, new name
+    return b"\x00" + bytes([len(name)]) + name + bytes([len(value)]) + value
+
+def frame(ftype, flags, stream_id, payload):
+    return struct.pack(">I", len(payload))[1:] + bytes([ftype, flags]) + struct.pack(">I", stream_id) + payload
+
+headers = b"".join([
+    hdr(b":method", b"POST"),
+    hdr(b":scheme", b"http"),
+    hdr(b":path", b"/mock.MockService/Delay"),
+    hdr(b":authority", b"mock-server:9090"),
+    hdr(b"content-type", b"application/grpc"),
+    hdr(b"te", b"trailers"),
+    hdr(b"user-agent", b"python-rst-client"),
+])
+# DelayRequest{milliseconds: 5000} protobuf + gRPC length prefix
+grpc_msg = b"\x00" + struct.pack(">I", 3) + b"\x08\x88\x27"
+
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect(("mock-server", 9090))
+s.sendall(b"PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n")            # HTTP/2 preface
+s.sendall(frame(0x4, 0x0, 0, b""))                        # empty SETTINGS
+s.sendall(frame(0x1, 0x4, 1, headers))                    # HEADERS (END_HEADERS)
+s.sendall(frame(0x0, 0x1, 1, grpc_msg))                   # DATA (END_STREAM)
+time.sleep(1)
+# Close with SO_LINGER(on, 0) so the kernel sends TCP RST instead of FIN
+s.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER, struct.pack("ii", 1, 0))
+s.close()
+EOF
+```
+
+[Figure 20] shows the Downstream TCP RST Case where a `milliseconds: 5000` request is sent to the `mock-server`'s `/mock.MockService/Delay` function from the `shell` Pod, and the request is forcefully terminated by sending a TCP RST Flag instead of a TCP FIN Flag before 5000ms passes. [Shell 21] shows an example of executing [Figure 20]. Since the `grpcurl` command cannot control the Socket's `SO_LINGER` Option and therefore cannot send a TCP RST Flag, the `python3` command is used to construct the HTTP/2 Frames and the gRPC Message directly to send the request, and 1000ms after sending the request, the `SO_LINGER` Option is set to `0` and the Socket is closed, which sends a TCP RST Flag.
+
+The `shell` Pod's `istio-proxy` that received the TCP RST Flag does not forward the TCP RST Flag to the `mock-server` Pod as-is, identical to the Downstream TCP Close Case, but sends an HTTP/2 RST_STREAM Frame to terminate only the Stream of the request. In other words, regardless of whether the Downstream Connection is gracefully terminated with a TCP FIN Flag or abnormally terminated with a TCP RST Flag, the TCP Connection between Pods is maintained and only the HTTP/2 RST_STREAM Frame is sent.
+
+```json {caption="[Text 36] Downstream TCP RST Case / shell Pod Access Log", linenos=table}
+{
+  "start_time": "2026-08-26T15:16:13.003Z",
+  "method": "POST",
+  "path": "/mock.MockService/Delay",
+  "protocol": "HTTP/2",
+  "response_code": "0",
+  "response_flags": "DC",
+  "response_code_details": "downstream_remote_disconnect",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "8",
+  "bytes_sent": "0",
+  "duration": "988",
+  "upstream_service_time": "-",
+  "x_forwarded_for": "-",
+  "user_agent": "python-rst-client",
+  "request_id": "7ccbd0bb-976a-904f-bd45-349ba1dce793",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.1.9:9090",
+  "upstream_cluster": "outbound|9090||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "10.244.2.7:34766",
+  "downstream_local_address": "10.96.221.63:9090",
+  "downstream_remote_address": "10.244.2.7:33084",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "14",
+  "response_duration": "-"
+}
+```
+
+```json {caption="[Text 37] Downstream TCP RST Case / mock-server Pod Access Log", linenos=table}
+{
+  "start_time": "2026-08-26T15:16:13.026Z",
+  "method": "POST",
+  "path": "/mock.MockService/Delay",
+  "protocol": "HTTP/2",
+  "response_code": "0",
+  "response_flags": "DR",
+  "response_code_details": "http2.remote_reset",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "8",
+  "bytes_sent": "0",
+  "duration": "979",
+  "upstream_service_time": "-",
+  "x_forwarded_for": "-",
+  "user_agent": "python-rst-client",
+  "request_id": "7ccbd0bb-976a-904f-bd45-349ba1dce793",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.1.9:9090",
+  "upstream_cluster": "inbound|9090||",
+  "upstream_local_address": "127.0.0.6:34371",
+  "downstream_local_address": "10.244.1.9:9090",
+  "downstream_remote_address": "10.244.2.7:34766",
+  "requested_server_name": "outbound_.9090_._.mock-server.default.svc.cluster.local",
+  "route_name": "default",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "13",
+  "response_duration": "-"
+}
+```
+
+[Text 36] shows the Access Log of the `shell` Pod's `istio-proxy`, and [Text 37] shows the Access Log of the `mock-server` Pod's `istio-proxy`. Both Access Logs are identical to the Downstream TCP Close Case: the `shell` Pod shows `response_flags` as `DC (DownstreamConnectionTermination)` with `response_code_details` as `downstream_remote_disconnect`, and the `mock-server` Pod shows `response_flags` as `DR (DownstreamRemoteReset)` with `response_code_details` as `http2.remote_reset`. In other words, just like the HTTP/1.1 Protocol, it can be confirmed that `istio-proxy` does not distinguish between receiving a TCP FIN Flag and a TCP RST Flag from the Downstream in the Access Log for the gRPC Protocol as well.
+
+#### 1.3.5. Upstream Request Retry Case
+
+**TODO: Add figure `images/grpc-upstream-request-retry-case.png`**
+
+{{< figure caption="[Figure 21] Upstream Request Retry Case" src="images/grpc-upstream-request-retry-case.png" width="1000px" >}}
 
 Since the `retryOn` Field of the Virtual Service in [File 1] includes the gRPC retry conditions `unavailable` and `cancelled`, up to 2 retries are performed when an `UNAVAILABLE (14)` Status Code response is received, so up to 3 requests are sent.
 
-```shell {caption="[Shell 21] Upstream Request Retry Case / grpcurl Command", linenos=table}
+```shell {caption="[Shell 22] Upstream Request Retry Case / grpcurl Command", linenos=table}
 $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 14}' mock-server:9090 mock.MockService/Status
 ERROR:
   Code: Unavailable
   Message: Simulated error with gRPC code 14 (Unavailable)
 ```
 
-[Shell 21] shows the Upstream Request Retry Case where the `grpcurl` command is used from the `shell` Pod to send a `code: 14` (Unavailable) request to the `mock-server`'s `/mock.MockService/Status` function.
+[Figure 21] shows the Upstream Request Retry Case where the `grpcurl` command is used from the `shell` Pod to send a `code: 14` (Unavailable) request to the `mock-server`'s `/mock.MockService/Status` function. [Shell 22] shows an example of executing [Figure 21].
 
-```json {caption="[Text 36] Upstream Request Retry Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 38] Upstream Request Retry Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2026-08-25T02:32:08.437Z",
   "method": "POST",
@@ -2450,7 +2576,7 @@ ERROR:
 }
 ```
 
-```json {caption="[Text 37] Upstream Request Retry Case / mock-server Pod Access Log", linenos=table}
+```json {caption="[Text 39] Upstream Request Retry Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2026-08-25T02:32:08.437Z",
   "method": "POST",
@@ -2543,15 +2669,15 @@ ERROR:
 }
 ```
 
-[Text 36] shows the Access Log of the `shell` Pod's `istio-proxy`. `upstream_request_attempt_count` is recorded as `3`, which includes the first attempt and both retries, and `response_flags` is recorded as `URX (UpstreamRetryLimitExceeded)`, indicating that the retry limit was exhausted.
+[Text 38] shows the Access Log of the `shell` Pod's `istio-proxy`. `upstream_request_attempt_count` is recorded as `3`, which includes the first attempt and both retries, and `response_flags` is recorded as `URX (UpstreamRetryLimitExceeded)`, indicating that the retry limit was exhausted.
 
-In [Text 37], three logs with the same `request_id` are recorded. Since retries are performed by the `istio-proxy` of the `shell` Pod that serves as the client, the `mock-server` Pod's `istio-proxy` handles each retry as a separate request, so `upstream_request_attempt_count` is recorded as `1` in every log.
+In [Text 39], three logs with the same `request_id` are recorded. Since retries are performed by the `istio-proxy` of the `shell` Pod that serves as the client, the `mock-server` Pod's `istio-proxy` handles each retry as a separate request, so `upstream_request_attempt_count` is recorded as `1` in every log.
 
-#### 1.3.5. Upstream TCP RST before Response Case
+#### 1.3.6. Upstream TCP RST before Response Case
 
-{{< figure caption="[Figure 20] Upstream TCP RST before Response Case" src="images/grpc-upstream-tcp-rst-before-response-case.png" width="1000px" >}}
+{{< figure caption="[Figure 22] Upstream TCP RST before Response Case" src="images/grpc-upstream-tcp-rst-before-response-case.png" width="1000px" >}}
 
-```shell {caption="[Shell 22] Upstream TCP RST before Response Case / grpcurl Command", linenos=table}
+```shell {caption="[Shell 23] Upstream TCP RST before Response Case / grpcurl Command", linenos=table}
 $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 1000}' mock-server:9090 mock.MockService/ResetBeforeResponse
 ERROR:
   Code: Unavailable
@@ -2559,11 +2685,11 @@ ERROR:
 command terminated with exit code 78
 ```
 
-[Figure 20] shows the Upstream TCP RST before Response Case where the `grpcurl` command is used from the `shell` Pod to send a `milliseconds: 1000` request to the `mock-server`'s `/mock.MockService/ResetBeforeResponse` function, and after waiting 1000ms, a TCP RST Flag is sent to forcefully terminate the Connection. [Shell 22] shows an example of executing [Figure 20].
+[Figure 22] shows the Upstream TCP RST before Response Case where the `grpcurl` command is used from the `shell` Pod to send a `milliseconds: 1000` request to the `mock-server`'s `/mock.MockService/ResetBeforeResponse` function, and after waiting 1000ms, a TCP RST Flag is sent to forcefully terminate the Connection. [Shell 23] shows an example of executing [Figure 22].
 
 The `mock-server` Pod's `istio-proxy` that receives the TCP RST Flag returns an `Unavailable` status code to notify the `shell` Pod's `istio-proxy` that the request was abnormally terminated. Due to the `unavailable` setting in the Virtual Service in [File 1], the `shell` Pod's `istio-proxy` performs 2 retries for a total of 3 requests.
 
-```json {caption="[Text 38] Upstream TCP RST before Response Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 40] Upstream TCP RST before Response Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-10T15:25:19.861Z",
   "method": "POST",
@@ -2596,7 +2722,7 @@ The `mock-server` Pod's `istio-proxy` that receives the TCP RST Flag returns an 
 }
 ```
 
-```json {caption="[Text 39] Upstream TCP RST before Response Case / mock-server Pod Access Log", linenos=table}
+```json {caption="[Text 41] Upstream TCP RST before Response Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-10T15:25:19.863Z",
   "method": "POST",
@@ -2689,15 +2815,15 @@ The `mock-server` Pod's `istio-proxy` that receives the TCP RST Flag returns an 
 }
 ```
 
-[Text 38] shows the Access Log of the `shell` Pod's `istio-proxy`, and [Text 39] shows the Access Log of the `mock-server` Pod's `istio-proxy`. Both Access Logs show the access to the `/mock.MockService/ResetBeforeResponse` function with `response_code` as `200` and `grpc_status` as `Unavailable`. Also, both Access Logs show `response_flags` as `UC (UpstreamConnectionTermination)`.
+[Text 40] shows the Access Log of the `shell` Pod's `istio-proxy`, and [Text 41] shows the Access Log of the `mock-server` Pod's `istio-proxy`. Both Access Logs show the access to the `/mock.MockService/ResetBeforeResponse` function with `response_code` as `200` and `grpc_status` as `Unavailable`. Also, both Access Logs show `response_flags` as `UC (UpstreamConnectionTermination)`.
 
 Since the `shell` Pod's `istio-proxy` sends 3 requests, `upstream_request_attempt_count` shows `3` in the `shell Pod`'s `istio-proxy` Access Log. Also, 3 Access Logs are left in the `mock-server` Pod's `istio-proxy`.
 
-#### 1.3.6. Upstream TCP RST after Response Case
+#### 1.3.7. Upstream TCP RST after Response Case
 
-{{< figure caption="[Figure 21] Upstream TCP RST after Response Case" src="images/grpc-upstream-tcp-rst-after-response-case.png" width="1000px" >}}
+{{< figure caption="[Figure 23] Upstream TCP RST after Response Case" src="images/grpc-upstream-tcp-rst-after-response-case.png" width="1000px" >}}
 
-```shell {caption="[Shell 23] Upstream TCP RST after Response Case / grpcurl Command", linenos=table}
+```shell {caption="[Shell 24] Upstream TCP RST after Response Case / grpcurl Command", linenos=table}
 $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 1000}' mock-server:9090 mock.MockService/ResetAfterResponse
 kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 1000}' mock-server:9090 mock.MockService/ResetAfterResponse
 {
@@ -2709,9 +2835,9 @@ ERROR:
 command terminated with exit code 77
 ```
 
-[Figure 21] shows the Upstream TCP RST after Response Case where the `grpcurl` command is used from the `shell` Pod to send a `milliseconds: 1000` request to the `mock-server`'s `/mock.MockService/ResetAfterResponse` function, and after `1000ms`, the `mock-server` Pod sends a partial response and then sends a TCP RST Flag to forcefully terminate the Connection. [Shell 23] shows an example of executing [Figure 21].
+[Figure 23] shows the Upstream TCP RST after Response Case where the `grpcurl` command is used from the `shell` Pod to send a `milliseconds: 1000` request to the `mock-server`'s `/mock.MockService/ResetAfterResponse` function, and after `1000ms`, the `mock-server` Pod sends a partial response and then sends a TCP RST Flag to forcefully terminate the Connection. [Shell 24] shows an example of executing [Figure 23].
 
-```json {caption="[Text 40] Upstream TCP RST after Response Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 42] Upstream TCP RST after Response Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-11T06:37:13.914Z",
   "method": "POST",
@@ -2744,7 +2870,7 @@ command terminated with exit code 77
 }
 ```
 
-```json {caption="[Text 41] Upstream TCP RST after Response Case / mock-server Pod Access Log", linenos=table}
+```json {caption="[Text 43] Upstream TCP RST after Response Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-11T06:37:13.949Z",
   "method": "POST",
@@ -2777,13 +2903,13 @@ command terminated with exit code 77
 }
 ```
 
-[Text 40] shows the Access Log of the `shell` Pod's `istio-proxy`, and [Text 41] shows the Access Log of the `mock-server` Pod's `istio-proxy`. Both Access Logs show the access to the `/mock.MockService/ResetAfterResponse` function with `response_code` as `200` and `grpc_status` as `Unknown`. The `shell` Pod's `istio-proxy` Access Log shows `response_flags` as `UR (UpstreamRemoteReset)`, and the `mock-server` Pod's `istio-proxy` Access Log shows `response_flags` as `UC (UpstreamConnectionTermination)`.
+[Text 42] shows the Access Log of the `shell` Pod's `istio-proxy`, and [Text 43] shows the Access Log of the `mock-server` Pod's `istio-proxy`. Both Access Logs show the access to the `/mock.MockService/ResetAfterResponse` function with `response_code` as `200` and `grpc_status` as `Unknown`. The `shell` Pod's `istio-proxy` Access Log shows `response_flags` as `UR (UpstreamRemoteReset)`, and the `mock-server` Pod's `istio-proxy` Access Log shows `response_flags` as `UC (UpstreamConnectionTermination)`.
 
-#### 1.3.7. Upstream TCP Close before Response Case
+#### 1.3.8. Upstream TCP Close before Response Case
 
-{{< figure caption="[Figure 22] Upstream TCP Close before Response Case" src="images/grpc-upstream-tcp-close-before-response-case.png" width="1000px" >}}
+{{< figure caption="[Figure 24] Upstream TCP Close before Response Case" src="images/grpc-upstream-tcp-close-before-response-case.png" width="1000px" >}}
 
-```shell {caption="[Shell 24] Upstream TCP Close before Response Case / grpcurl Command", linenos=table}
+```shell {caption="[Shell 25] Upstream TCP Close before Response Case / grpcurl Command", linenos=table}
 $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 1000}' mock-server:9090 mock.MockService/CloseBeforeResponse
 ERROR:
   Code: Unavailable
@@ -2791,11 +2917,11 @@ ERROR:
 command terminated with exit code 78
 ```
 
-[Figure 22] shows the Upstream TCP Close before Response Case where the `grpcurl` command is used from the `shell` Pod to send a `milliseconds: 1000` request to the `mock-server`'s `/mock.MockService/CloseBeforeResponse` function, and after `1000ms`, the `mock-server` Pod forcefully terminates the Connection. [Shell 24] shows an example of executing [Figure 22].
+[Figure 24] shows the Upstream TCP Close before Response Case where the `grpcurl` command is used from the `shell` Pod to send a `milliseconds: 1000` request to the `mock-server`'s `/mock.MockService/CloseBeforeResponse` function, and after `1000ms`, the `mock-server` Pod forcefully terminates the Connection. [Shell 25] shows an example of executing [Figure 24].
 
-Except for the fact that the `mock-server` Container sends TCP FIN Flag, the same process as [Figure 20] which receives TCP RST Flag is performed.
+Except for the fact that the `mock-server` Container sends TCP FIN Flag, the same process as [Figure 22] which receives TCP RST Flag is performed.
 
-```json {caption="[Text 42] Upstream TCP Close before Response Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 44] Upstream TCP Close before Response Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-11T11:55:39.852Z",
   "method": "POST",
@@ -2828,7 +2954,7 @@ Except for the fact that the `mock-server` Container sends TCP FIN Flag, the sam
 }
 ```
 
-```json {caption="[Text 43] Upstream TCP Close before Response Case / mock-server Pod Access Log", linenos=table}
+```json {caption="[Text 45] Upstream TCP Close before Response Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-11T11:55:39.855Z",
   "method": "POST",
@@ -2921,13 +3047,13 @@ Except for the fact that the `mock-server` Container sends TCP FIN Flag, the sam
 }
 ```
 
-[Text 42] shows the Access Log of the `shell` Pod's `istio-proxy`, and [Text 43] shows the Access Log of the `mock-server` Pod's `istio-proxy`. Both Access Logs show the access to the `/mock.MockService/CloseBeforeResponse` function with `response_code` as `200` and `grpc_status` as `Unavailable`. The same process as [Figure 20] which receives TCP RST Flag is performed.
+[Text 44] shows the Access Log of the `shell` Pod's `istio-proxy`, and [Text 45] shows the Access Log of the `mock-server` Pod's `istio-proxy`. Both Access Logs show the access to the `/mock.MockService/CloseBeforeResponse` function with `response_code` as `200` and `grpc_status` as `Unavailable`. The same process as [Figure 22] which receives TCP RST Flag is performed.
 
-#### 1.3.8. Upstream TCP Close after Response Case
+#### 1.3.9. Upstream TCP Close after Response Case
 
-{{< figure caption="[Figure 23] Upstream TCP Close after Response Case" src="images/grpc-upstream-tcp-close-after-response-case.png" width="1000px" >}}
+{{< figure caption="[Figure 25] Upstream TCP Close after Response Case" src="images/grpc-upstream-tcp-close-after-response-case.png" width="1000px" >}}
 
-```shell {caption="[Shell 25] Upstream TCP Close after Response Case / grpcurl Command", linenos=table}
+```shell {caption="[Shell 26] Upstream TCP Close after Response Case / grpcurl Command", linenos=table}
 $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 1000}' mock-server:9090 mock.MockService/CloseAfterResponse
 ERROR:
   Code: Internal
@@ -2935,11 +3061,11 @@ ERROR:
 command terminated with exit code 77
 ```
 
-[Figure 23] shows the Upstream TCP Close after Response Case where the `grpcurl` command is used from the `shell` Pod to send a `milliseconds: 1000` request to the `mock-server`'s `/mock.MockService/CloseAfterResponse` function, and after `1000ms`, the `mock-server` Pod sends a partial response and then forcefully terminates the Connection. [Shell 25] shows an example of executing [Figure 23].
+[Figure 25] shows the Upstream TCP Close after Response Case where the `grpcurl` command is used from the `shell` Pod to send a `milliseconds: 1000` request to the `mock-server`'s `/mock.MockService/CloseAfterResponse` function, and after `1000ms`, the `mock-server` Pod sends a partial response and then forcefully terminates the Connection. [Shell 26] shows an example of executing [Figure 25].
 
-Except for the fact that the `mock-server` Container sends TCP FIN Flag, the same process as [Figure 21] which receives TCP RST Flag is performed.
+Except for the fact that the `mock-server` Container sends TCP FIN Flag, the same process as [Figure 23] which receives TCP RST Flag is performed.
 
-```json {caption="[Text 44] Upstream TCP Close after Response Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 46] Upstream TCP Close after Response Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-11T12:12:56.184Z",
   "method": "POST",
@@ -2972,7 +3098,7 @@ Except for the fact that the `mock-server` Container sends TCP FIN Flag, the sam
 }
 ```
 
-```json {caption="[Text 45] Upstream TCP Close before Response Case / mock-server Pod Access Log", linenos=table}
+```json {caption="[Text 47] Upstream TCP Close before Response Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-11T12:12:56.215Z",
   "method": "POST",
@@ -3005,13 +3131,13 @@ Except for the fact that the `mock-server` Container sends TCP FIN Flag, the sam
 }
 ```
 
-[Text 44] shows the Access Log of the `shell` Pod's `istio-proxy`, and [Text 45] shows the Access Log of the `mock-server` Pod's `istio-proxy`. Both Access Logs show the access to the `/mock.MockService/CloseAfterResponse` function with `response_code` as `200` and `grpc_status` as `Unknown`. The same process as [Figure 21] which receives TCP RST Flag is performed.
+[Text 46] shows the Access Log of the `shell` Pod's `istio-proxy`, and [Text 47] shows the Access Log of the `mock-server` Pod's `istio-proxy`. Both Access Logs show the access to the `/mock.MockService/CloseAfterResponse` function with `response_code` as `200` and `grpc_status` as `Unknown`. The same process as [Figure 23] which receives TCP RST Flag is performed.
 
-#### 1.3.9. Circuit Breaking with Upstream Connection Pool Overflow Case
+#### 1.3.10. Circuit Breaking with Upstream Connection Pool Overflow Case
 
-{{< figure caption="[Figure 24] Circuit Breaking with Upstream Connection Pool Overflow Case" src="images/grpc-circuit-breaking-with-upstream-connection-pool-overflow-case.png" width="1000px" >}}
+{{< figure caption="[Figure 26] Circuit Breaking with Upstream Connection Pool Overflow Case" src="images/grpc-circuit-breaking-with-upstream-connection-pool-overflow-case.png" width="1000px" >}}
 
-```shell {caption="[Shell 26] Circuit Breaking with Upstream Connection Pool Overflow Case / grpcurl Command", linenos=table}
+```shell {caption="[Shell 27] Circuit Breaking with Upstream Connection Pool Overflow Case / grpcurl Command", linenos=table}
 $ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 5000}' mock-server:9090 mock.MockService/Delay &
 $ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 5000}' mock-server:9090 mock.MockService/Delay &
 $ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 5000}' mock-server:9090 mock.MockService/Delay &
@@ -3031,9 +3157,9 @@ command terminated with exit code 78
 }
 ```
 
-[Figure 24] shows the Case where `grpcurl` command is used from the `shell` Pod to send 3 consecutive `milliseconds: 5000` requests to the `mock-server`'s `/mock.MockService/Delay` function, causing Upstream Connection Pool Overflow. [Shell 26] shows an example of executing [Figure 24]. Except for the fact that requests and responses occur via GRPC, the same process as described in [Figure 10] is performed.
+[Figure 26] shows the Case where `grpcurl` command is used from the `shell` Pod to send 3 consecutive `milliseconds: 5000` requests to the `mock-server`'s `/mock.MockService/Delay` function, causing Upstream Connection Pool Overflow. [Shell 27] shows an example of executing [Figure 26]. Except for the fact that requests and responses occur via GRPC, the same process as described in [Figure 11] is performed.
 
-```json {caption="[Text 46] Circuit Breaking with Upstream Connection Pool Overflow Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 48] Circuit Breaking with Upstream Connection Pool Overflow Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-11T16:00:42.913Z",
   "method": "POST",
@@ -3126,7 +3252,7 @@ command terminated with exit code 78
 }
 ```
 
-```json {caption="[Text 47] Circuit Breaking with Upstream Connection Pool Overflow Case / mock-server Pod Access Log", linenos=table}
+```json {caption="[Text 49] Circuit Breaking with Upstream Connection Pool Overflow Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-11T16:00:42.395Z",
   "method": "POST",
@@ -3189,13 +3315,13 @@ command terminated with exit code 78
 }
 ```
 
-[Text 46] shows the Access Log of the `shell` Pod's `istio-proxy`, and [Text 47] shows the Access Log of the `mock-server` Pod's `istio-proxy`. Except for the fact that requests and responses occur via GRPC, the same process as [Text 20] and [Text 21] is performed.
+[Text 48] shows the Access Log of the `shell` Pod's `istio-proxy`, and [Text 49] shows the Access Log of the `mock-server` Pod's `istio-proxy`. Except for the fact that requests and responses occur via GRPC, the same process as [Text 20] and [Text 21] is performed.
 
-#### 1.3.10. Circuit Breaking with Upstream Request Limit Overflow Case
+#### 1.3.11. Circuit Breaking with Upstream Request Limit Overflow Case
 
-{{< figure caption="[Figure 25] Circuit Breaking with Upstream Request Limit Overflow Case" src="images/grpc-circuit-breaking-with-upstream-request-limit-overflow-case.png" width="1000px" >}}
+{{< figure caption="[Figure 27] Circuit Breaking with Upstream Request Limit Overflow Case" src="images/grpc-circuit-breaking-with-upstream-request-limit-overflow-case.png" width="1000px" >}}
 
-```shell {caption="[Shell 27] Circuit Breaking with Upstream Request Limit Overflow Case / grpcurl Command", linenos=table}
+```shell {caption="[Shell 28] Circuit Breaking with Upstream Request Limit Overflow Case / grpcurl Command", linenos=table}
 $ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 5000}' mock-server:9090 mock.MockService/Delay &
 $ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 5000}' mock-server:9090 mock.MockService/Delay &
 ERROR:
@@ -3209,9 +3335,9 @@ ERROR:
 command terminated with exit code 78
 ```
 
-[Figure 25] shows the Case where `grpcurl` command is used from the `shell` Pod to send 3 consecutive `milliseconds: 5000` requests to the `mock-server`'s `/mock.MockService/Delay` function, causing Upstream Request Limit Overflow. To reproduce this Case, the Destination Rule configured in [File 2] must be applied. [Shell 27] shows an example of executing [Figure 25]. Except for the fact that requests and responses occur via GRPC, the same process as described in [Figure 11] is performed.
+[Figure 27] shows the Case where `grpcurl` command is used from the `shell` Pod to send 3 consecutive `milliseconds: 5000` requests to the `mock-server`'s `/mock.MockService/Delay` function, causing Upstream Request Limit Overflow. To reproduce this Case, the Destination Rule configured in [File 2] must be applied. [Shell 28] shows an example of executing [Figure 27]. Except for the fact that requests and responses occur via GRPC, the same process as described in [Figure 12] is performed.
 
-```json {caption="[Text 48] Circuit Breaking with Upstream Request Limit Overflow Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 50] Circuit Breaking with Upstream Request Limit Overflow Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2025-12-25T14:45:01.595Z",
   "method": "POST",
@@ -3304,7 +3430,7 @@ command terminated with exit code 78
 }
 ```
 
-```json {caption="[Text 49] Circuit Breaking with Upstream Request Limit Overflow Case / mock-server Pod Access Log", linenos=table}
+```json {caption="[Text 51] Circuit Breaking with Upstream Request Limit Overflow Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2025-12-25T14:45:01.241Z",
   "method": "POST",
@@ -3337,13 +3463,13 @@ command terminated with exit code 78
 }
 ```
 
-[Text 48] shows the Access Log of the `shell` Pod's `istio-proxy`, and [Text 49] shows the Access Log of the `mock-server` Pod's `istio-proxy`. Except for the fact that requests and responses occur via GRPC, the same process as [Text 22] and [Text 23] is performed.
+[Text 50] shows the Access Log of the `shell` Pod's `istio-proxy`, and [Text 51] shows the Access Log of the `mock-server` Pod's `istio-proxy`. Except for the fact that requests and responses occur via GRPC, the same process as [Text 22] and [Text 23] is performed.
 
-#### 1.3.11. Circuit Breaking with No Healthy Upstream Case
+#### 1.3.12. Circuit Breaking with No Healthy Upstream Case
 
-{{< figure caption="[Figure 26] Circuit Breaking with No Healthy Upstream Case" src="images/grpc-circuit-breaking-with-no-healthy-upstream-case.png" width="1000px" >}}
+{{< figure caption="[Figure 28] Circuit Breaking with No Healthy Upstream Case" src="images/grpc-circuit-breaking-with-no-healthy-upstream-case.png" width="1000px" >}}
 
-```shell {caption="[Shell 28] Circuit Breaking with No Healthy Upstream Case / grpcurl Command", linenos=table}
+```shell {caption="[Shell 29] Circuit Breaking with No Healthy Upstream Case / grpcurl Command", linenos=table}
 $ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 13}' mock-server:9090 mock.MockService/Status
 ERROR:
   Code: Internal
@@ -3386,11 +3512,11 @@ ERROR:
 command terminated with exit code 78
 ```
 
-[Figure 26] shows the Case where `grpcurl` command is used from the `shell` Pod to send 8 consecutive `code: 13` requests to the `mock-server`'s `/mock.MockService/Status` function, causing Circuit Breaking via No Healthy Upstream. [Shell 28] shows an example of executing [Figure 26].
+[Figure 28] shows the Case where `grpcurl` command is used from the `shell` Pod to send 8 consecutive `code: 13` requests to the `mock-server`'s `/mock.MockService/Status` function, causing Circuit Breaking via No Healthy Upstream. [Shell 29] shows an example of executing [Figure 28].
 
 According to the Destination Rule in [File 1], Circuit Breaking is activated when 5 consecutive 5XX Errors occur. Therefore, the first 5 requests from the `shell` Pod are all delivered to the `mock-server` Pod, but the subsequent 3 requests are not delivered to the `mock-server` Pod due to Circuit Breaking. Therefore, the response to the first 5 requests shows `Internal`, and the response to the subsequent 3 requests shows `Unavailable`.
 
-```json {caption="[Text 50] Circuit Breaking Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 52] Circuit Breaking Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-12T15:02:58.363Z",
   "method": "POST",
@@ -3633,7 +3759,7 @@ According to the Destination Rule in [File 1], Circuit Breaking is activated whe
 }
 ```
 
-```json {caption="[Text 51] Circuit Breaking Case / mock-server Pod Access Log", linenos=table}
+```json {caption="[Text 53] Circuit Breaking Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-12T15:02:58.454Z",
   "method": "POST",
@@ -3786,13 +3912,13 @@ According to the Destination Rule in [File 1], Circuit Breaking is activated whe
 }
 ```
 
-[Text 50] shows the Access Log of the `shell` Pod's `istio-proxy`, and [Text 51] shows the Access Log of the `mock-server` Pod's `istio-proxy`. In the `shell` Pod's `istio-proxy` Access Log, only the last 3 requests show `response_flags` as `UH (NoHealthyUpstream)` along with confirmation that requests were not delivered to the `mock-server` Pod. Also, only the first 5 request logs are present in the `mock-server` Pod's `istio-proxy` Access Log.
+[Text 52] shows the Access Log of the `shell` Pod's `istio-proxy`, and [Text 53] shows the Access Log of the `mock-server` Pod's `istio-proxy`. In the `shell` Pod's `istio-proxy` Access Log, only the last 3 requests show `response_flags` as `UH (NoHealthyUpstream)` along with confirmation that requests were not delivered to the `mock-server` Pod. Also, only the first 5 request logs are present in the `mock-server` Pod's `istio-proxy` Access Log.
 
-#### 1.3.12. Upstream Connection Failure with Timeout Case
+#### 1.3.13. Upstream Connection Failure with Timeout Case
 
-{{< figure caption="[Figure 27] Upstream Connection Failure with Timeout Case" src="images/grpc-upstream-connection-failure-case-with-timeout.png" width="1000px" >}}
+{{< figure caption="[Figure 29] Upstream Connection Failure with Timeout Case" src="images/grpc-upstream-connection-failure-case-with-timeout.png" width="1000px" >}}
 
-```shell {caption="[Shell 29] Upstream Connection Failure with Timeout Case / iptables Command", linenos=table}
+```shell {caption="[Shell 30] Upstream Connection Failure with Timeout Case / iptables Command", linenos=table}
 $ SHELL_IP=$(kubectl get pod shell -o jsonpath='{.status.podIP}')
 $ kubectl exec mock-server -c mock-server -- iptables -A INPUT -s ${SHELL_IP} -j DROP
 # $ kubectl exec mock-server -c mock-server -- iptables -D INPUT 1 remove rule after case execution
@@ -3814,9 +3940,9 @@ ERROR:
 command terminated with exit code 78
 ```
 
-[Figure 27] shows the Upstream Connection Failure with Timeout Case where `grpcurl` command is used from the `shell` Pod to send 3 consecutive `code: 0` requests to the `mock-server`'s `/mock.MockService/Status` function, causing Retry due to Timeout. [Shell 29] shows an example of executing [Figure 27]. Except for the fact that requests and responses occur via GRPC, the same process as described in [Figure 13] is performed.
+[Figure 29] shows the Upstream Connection Failure with Timeout Case where `grpcurl` command is used from the `shell` Pod to send 3 consecutive `code: 0` requests to the `mock-server`'s `/mock.MockService/Status` function, causing Retry due to Timeout. [Shell 30] shows an example of executing [Figure 29]. Except for the fact that requests and responses occur via GRPC, the same process as described in [Figure 14] is performed.
 
-```json {caption="[Text 52] Upstream Connection Failure with Timeout Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 54] Upstream Connection Failure with Timeout Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-12T16:03:05.367Z",
   "method": "POST",
@@ -3909,13 +4035,13 @@ command terminated with exit code 78
 }
 ```
 
-[Text 52] shows the Access Log of the `shell` Pod's `istio-proxy`. Except for the fact that requests and responses occur via GRPC, the same process as [Text 26] is performed.
+[Text 54] shows the Access Log of the `shell` Pod's `istio-proxy`. Except for the fact that requests and responses occur via GRPC, the same process as [Text 26] is performed.
 
-#### 1.3.13. Upstream Connection Failure with TCP Reset Case
+#### 1.3.14. Upstream Connection Failure with TCP Reset Case
 
-{{< figure caption="[Figure 28] Upstream Connection Failure with TCP Reset Case" src="images/grpc-upstream-connection-failure-case-with-tcp-reset.png" width="1000px" >}}
+{{< figure caption="[Figure 30] Upstream Connection Failure with TCP Reset Case" src="images/grpc-upstream-connection-failure-case-with-tcp-reset.png" width="1000px" >}}
 
-```shell {caption="[Shell 30] Upstream Connection Failure with TCP Reset Case / iptables Command", linenos=table}
+```shell {caption="[Shell 31] Upstream Connection Failure with TCP Reset Case / iptables Command", linenos=table}
 $ SHELL_IP=$(kubectl get pod shell -o jsonpath='{.status.podIP}')
 $ kubectl exec mock-server -c mock-server -- iptables-legacy -A INPUT -p tcp -s ${SHELL_IP} -j REJECT --reject-with tcp-reset
 # $ kubectl exec mock-server -c mock-server -- iptables-legacy -D INPUT 1 remove rule after case execution
@@ -3937,9 +4063,9 @@ ERROR:
 command terminated with exit code 78
 ```
 
-[Figure 28] shows the Upstream Connection Failure with TCP Reset Case where `grpcurl` command is used from the `shell` Pod to send 3 consecutive `code: 0` requests to the `mock-server`'s `/mock.MockService/Status` function, causing Retry due to TCP Reset. [Shell 30] shows an example of executing [Figure 28]. Except for the fact that requests and responses occur via GRPC, the same process as described in [Figure 14] is performed.
+[Figure 30] shows the Upstream Connection Failure with TCP Reset Case where `grpcurl` command is used from the `shell` Pod to send 3 consecutive `code: 0` requests to the `mock-server`'s `/mock.MockService/Status` function, causing Retry due to TCP Reset. [Shell 31] shows an example of executing [Figure 30]. Except for the fact that requests and responses occur via GRPC, the same process as described in [Figure 15] is performed.
 
-```json {caption="[Text 53] Upstream Connection Failure with TCP Reset Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 55] Upstream Connection Failure with TCP Reset Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-12T15:38:06.556Z",
   "method": "POST",
@@ -4032,21 +4158,21 @@ command terminated with exit code 78
 }
 ```
 
-[Text 53] shows the Access Log of the `shell` Pod's `istio-proxy`. Except for the fact that requests and responses occur via GRPC, the same process as [Text 27] is performed.
+[Text 55] shows the Access Log of the `shell` Pod's `istio-proxy`. Except for the fact that requests and responses occur via GRPC, the same process as [Text 27] is performed.
 
-#### 1.3.14. Upstream Request Timeout Case
+#### 1.3.15. Upstream Request Timeout Case
 
-{{< figure caption="[Figure 29] Upstream Request Timeout Case" src="images/grpc-upstream-request-timeout-case.png" width="1000px" >}}
+{{< figure caption="[Figure 31] Upstream Request Timeout Case" src="images/grpc-upstream-request-timeout-case.png" width="1000px" >}}
 
-```shell {caption="[Shell 31] Upstream Request Timeout Case / grpcurl Command", linenos=table}
+```shell {caption="[Shell 32] Upstream Request Timeout Case / grpcurl Command", linenos=table}
 $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 70000}' mock-server:9090 mock.MockService/Delay
 ```
 
-[Figure 29] shows the Upstream Request Timeout Case where the `grpcurl` command is used from the `shell` Pod to send a `milliseconds: 70000` request to the `mock-server`'s `/mock.MockService/Delay` function, but the `mock-server` Pod's `istio-proxy` does not receive a response after waiting 60000ms and processes the Request as Timeout.
+[Figure 31] shows the Upstream Request Timeout Case where the `grpcurl` command is used from the `shell` Pod to send a `milliseconds: 70000` request to the `mock-server`'s `/mock.MockService/Delay` function, but the `mock-server` Pod's `istio-proxy` does not receive a response after waiting 60000ms and processes the Request as Timeout.
 
 Due to the Virtual Service in [File 1], requests sent to the `mock-server` Pod can wait up to 60000ms. However, the request sent to the `mock-server` Pod's `/mock.MockService/Delay` function with `milliseconds: 70000` requires 70000ms, so a Timeout occurs. The `mock-server` Pod's `istio-proxy` sends an HTTP/2 RST_STREAM Frame to terminate the connection with the `mock-server` Pod when a Timeout occurs. It also returns an `Unavailable` status code to notify the `shell` Pod's `istio-proxy` that the request was abnormally terminated.
 
-```json {caption="[Text 54] Upstream Request Timeout Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 56] Upstream Request Timeout Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-12T16:10:41.589Z",
   "method": "POST",
@@ -4079,7 +4205,7 @@ Due to the Virtual Service in [File 1], requests sent to the `mock-server` Pod c
 }
 ```
 
-```json {caption="[Text 55] Upstream Request Timeout Case / mock-server Pod Access Log", linenos=table}
+```json {caption="[Text 57] Upstream Request Timeout Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-12T16:10:41.644Z",
   "method": "POST",
@@ -4112,7 +4238,7 @@ Due to the Virtual Service in [File 1], requests sent to the `mock-server` Pod c
 }
 ```
 
-[Text 54] shows the Access Log of the `shell` Pod's `istio-proxy`, and [Text 55] shows the Access Log of the `mock-server` Pod's `istio-proxy`. The `shell` Pod's `istio-proxy` shows `response_flags` as `UT (UpstreamTimeout)`. The `mock-server` Pod's `istio-proxy` shows `response_flags` as `DR (DownstreamRemoteReset)`.
+[Text 56] shows the Access Log of the `shell` Pod's `istio-proxy`, and [Text 57] shows the Access Log of the `mock-server` Pod's `istio-proxy`. The `shell` Pod's `istio-proxy` shows `response_flags` as `UT (UpstreamTimeout)`. The `mock-server` Pod's `istio-proxy` shows `response_flags` as `DR (DownstreamRemoteReset)`.
 
 ## 2. References
 
