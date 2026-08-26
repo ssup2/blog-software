@@ -1,0 +1,13 @@
+tcpdump: WARNING: any: That device doesn't support promiscuous mode
+(Promiscuous mode not supported on the "any" device)
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on any, link-type LINUX_SLL2 (Linux cooked v2), snapshot length 262144 bytes
+17:10:20.667819 eth0  In  IP 10.244.2.7.44022 > 10.244.1.9.9090: Flags [P.], seq 3035512005:3035512116, ack 1613947575, win 74, options [nop,nop,TS val 3987292169 ecr 352449253], length 111
+17:10:20.667944 eth0  Out IP 10.244.1.9.9090 > 10.244.2.7.44022: Flags [R], seq 1613947575, win 0, length 0
+17:10:20.778452 eth0  In  IP 10.244.2.7.46558 > 10.244.1.9.9090: Flags [S], seq 1044447669, win 64240, options [mss 1460,sackOK,TS val 4062051583 ecr 0,nop,wscale 10], length 0
+17:10:20.778466 eth0  Out IP 10.244.1.9.9090 > 10.244.2.7.46558: Flags [R.], seq 0, ack 1044447670, win 0, length 0
+17:10:20.804536 eth0  In  IP 10.244.2.7.46570 > 10.244.1.9.9090: Flags [S], seq 2469574991, win 64240, options [mss 1460,sackOK,TS val 2157246625 ecr 0,nop,wscale 10], length 0
+17:10:20.804547 eth0  Out IP 10.244.1.9.9090 > 10.244.2.7.46570: Flags [R.], seq 0, ack 2469574992, win 0, length 0
+17:10:20.826870 eth0  In  IP 10.244.2.7.46584 > 10.244.1.9.9090: Flags [S], seq 240654376, win 64240, options [mss 1460,sackOK,TS val 3522715579 ecr 0,nop,wscale 10], length 0
+17:10:20.826880 eth0  Out IP 10.244.1.9.9090 > 10.244.2.7.46584: Flags [R.], seq 0, ack 240654377, win 0, length 0
+17:10:20.906548 eth0  In  IP 10.244.2.7.

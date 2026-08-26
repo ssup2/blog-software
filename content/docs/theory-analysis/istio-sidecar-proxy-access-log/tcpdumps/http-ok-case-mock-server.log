@@ -1,0 +1,29 @@
+tcpdump: WARNING: any: That device doesn't support promiscuous mode
+(Promiscuous mode not supported on the "any" device)
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on any, link-type LINUX_SLL2 (Linux cooked v2), snapshot length 262144 bytes
+16:44:42.603834 eth0  In  IP 10.244.2.7.57486 > 10.244.1.9.8080: Flags [S], seq 1260047071, win 64240, options [mss 1460,sackOK,TS val 557234095 ecr 0,nop,wscale 10], length 0
+16:44:42.604002 eth0  Out IP 10.244.1.9.8080 > 10.244.2.7.57486: Flags [S.], seq 2263586190, ack 1260047072, win 65160, options [mss 1460,sackOK,TS val 2652445714 ecr 557234095,nop,wscale 10], length 0
+16:44:42.604050 eth0  In  IP 10.244.2.7.57486 > 10.244.1.9.8080: Flags [.], ack 1, win 63, options [nop,nop,TS val 557234095 ecr 2652445714], length 0
+16:44:42.604251 eth0  In  IP 10.244.2.7.57486 > 10.244.1.9.8080: Flags [P.], seq 1:518, ack 1, win 63, options [nop,nop,TS val 557234096 ecr 2652445714], length 517: HTTP
+16:44:42.604254 eth0  Out IP 10.244.1.9.8080 > 10.244.2.7.57486: Flags [.], ack 518, win 64, options [nop,nop,TS val 2652445715 ecr 557234096], length 0
+16:44:42.643662 eth0  Out IP 10.244.1.9.8080 > 10.244.2.7.57486: Flags [P.], seq 1:2165, ack 518, win 64, options [nop,nop,TS val 2652445754 ecr 557234096], length 2164: HTTP
+16:44:42.643726 eth0  In  IP 10.244.2.7.57486 > 10.244.1.9.8080: Flags [.], ack 2165, win 68, options [nop,nop,TS val 557234135 ecr 2652445754], length 0
+16:44:42.646730 eth0  In  IP 10.244.2.7.57486 > 10.244.1.9.8080: Flags [P.], seq 518:2470, ack 2165, win 68, options [nop,nop,TS val 557234138 ecr 2652445754], length 1952: HTTP
+16:44:42.646736 eth0  Out IP 10.244.1.9.8080 > 10.244.2.7.57486: Flags [.], ack 2470, win 68, options [nop,nop,TS val 2652445757 ecr 557234138], length 0
+16:44:42.649606 eth0  In  IP 10.244.2.7.57486 > 10.244.1.9.8080: Flags [P.], seq 2470:3294, ack 2165, win 68, options [nop,nop,TS val 557234141 ecr 2652445757], length 824: HTTP
+16:44:42.663536 lo    In  IP 127.0.0.6.56399 > 10.244.1.9.8080: Flags [S], seq 1191595695, win 65495, options [mss 65495,sackOK,TS val 2900104798 ecr 0,nop,wscale 10], length 0
+16:44:42.663553 lo    In  IP 10.244.1.9.8080 > 127.0.0.6.56399: Flags [S.], seq 3609823183, ack 1191595696, win 65483, options [mss 65495,sackOK,TS val 2340942862 ecr 2900104798,nop,wscale 10], length 0
+16:44:42.663558 lo    In  IP 127.0.0.6.56399 > 10.244.1.9.8080: Flags [.], ack 1, win 64, options [nop,nop,TS val 2900104798 ecr 2340942862], length 0
+16:44:42.663670 lo    In  IP 127.0.0.6.56399 > 10.244.1.9.8080: Flags [P.], seq 1:398, ack 1, win 64, options [nop,nop,TS val 2900104798 ecr 2340942862], length 397: HTTP: GET /status/200 HTTP/1.1
+16:44:42.663673 lo    In  IP 10.244.1.9.8080 > 127.0.0.6.56399: Flags [.], ack 398, win 64, options [nop,nop,TS val 2340942862 ecr 2900104798], length 0
+16:44:42.689548 lo    In  IP 10.244.1.9.8080 > 127.0.0.6.56399: Flags [P.], seq 1:168, ack 398, win 64, options [nop,nop,TS val 2340942888 ecr 2900104798], length 167: HTTP: HTTP/1.1 200 OK
+16:44:42.689558 lo    In  IP 127.0.0.6.56399 > 10.244.1.9.8080: Flags [.], ack 168, win 64, options [nop,nop,TS val 2900104824 ecr 2340942888], length 0
+16:44:42.691729 eth0  Out IP 10.244.1.9.8080 > 10.244.2.7.57486: Flags [P.], seq 2165:6665, ack 3294, win 71, options [nop,nop,TS val 2652445802 ecr 557234141], length 4500: HTTP
+16:44:42.691773 eth0  In  IP 10.244.2.7.57486 > 10.244.1.9.8080: Flags [.], ack 6665, win 77, options [nop,nop,TS val 557234183 ecr 2652445802], length 0
+16:44:45.129599 lo    In  IP 10.244.1.9.8080 > 127.0.0.6.60035: Flags [.], ack 2087848379, win 64, options [nop,nop,TS val 681422701 ecr 4240648616], length 0
+16:44:45.129634 lo    In  IP 127.0.0.6.60035 > 10.244.1.9.8080: Flags [.], ack 1, win 64, options [nop,nop,TS val 4240663976 ecr 681039050], length 0
+
+21 packets captured
+30 packets received by filter
+0 packets dropped by kernel

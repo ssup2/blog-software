@@ -1,0 +1,14 @@
+tcpdump: WARNING: any: That device doesn't support promiscuous mode
+(Promiscuous mode not supported on the "any" device)
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on any, link-type LINUX_SLL2 (Linux cooked v2), snapshot length 262144 bytes
+16:44:50.381428 eth0  In  IP 10.244.2.7.57486 > 10.244.1.9.8080: Flags [P.], seq 1260050365:1260051189, ack 2263592855, win 77, options [nop,nop,TS val 557241873 ecr 2652445802], length 824: HTTP
+16:44:50.382978 lo    In  IP 127.0.0.6.56399 > 10.244.1.9.8080: Flags [P.], seq 1191596093:1191596490, ack 3609823351, win 64, options [nop,nop,TS val 2900112517 ecr 2340942888], length 397: HTTP: GET /status/503 HTTP/1.1
+16:44:50.383690 lo    In  IP 10.244.1.9.8080 > 127.0.0.6.56399: Flags [P.], seq 1:202, ack 397, win 64, options [nop,nop,TS val 2340950582 ecr 2900112517], length 201: HTTP: HTTP/1.1 503 Service Unavailable
+16:44:50.383697 lo    In  IP 127.0.0.6.56399 > 10.244.1.9.8080: Flags [.], ack 202, win 64, options [nop,nop,TS val 2900112518 ecr 2340950582], length 0
+16:44:50.386084 eth0  Out IP 10.244.1.9.8080 > 10.244.2.7.57486: Flags [P.], seq 1:820, ack 824, win 74, options [nop,nop,TS val 2652453497 ecr 557241873], length 819: HTTP
+16:44:50.426747 eth0  In  IP 10.244.2.7.57486 > 10.244.1.9.8080: Flags [.], ack 820, win 79, options [nop,nop,TS val 557241918 ecr 2652453497], length 0
+
+6 packets captured
+9 packets received by filter
+0 packets dropped by kernel

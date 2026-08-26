@@ -1,0 +1,71 @@
+tcpdump: WARNING: any: That device doesn't support promiscuous mode
+(Promiscuous mode not supported on the "any" device)
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on any, link-type LINUX_SLL2 (Linux cooked v2), snapshot length 262144 bytes
+17:11:53.612620 lo    In  IP 10.244.2.7.46050 > 127.0.0.1.15001: Flags [S], seq 551328737, win 64240, options [mss 1460,sackOK,TS val 1683691040 ecr 0,nop,wscale 10], length 0
+17:11:53.612634 lo    In  IP 10.96.221.63.9090 > 10.244.2.7.46050: Flags [S.], seq 2254003074, ack 551328738, win 65483, options [mss 65495,sackOK,TS val 559275258 ecr 1683691040,nop,wscale 10], length 0
+17:11:53.612644 lo    In  IP 10.244.2.7.46050 > 127.0.0.1.15001: Flags [.], ack 2254003075, win 63, options [nop,nop,TS val 1683691040 ecr 559275258], length 0
+17:11:53.614409 lo    In  IP 10.244.2.7.46050 > 127.0.0.1.15001: Flags [P.], seq 0:24, ack 1, win 63, options [nop,nop,TS val 1683691042 ecr 559275258], length 24
+17:11:53.614412 lo    In  IP 10.96.221.63.9090 > 10.244.2.7.46050: Flags [.], ack 25, win 64, options [nop,nop,TS val 559275260 ecr 1683691042], length 0
+17:11:53.614560 lo    In  IP 10.244.2.7.46050 > 127.0.0.1.15001: Flags [P.], seq 24:33, ack 1, win 63, options [nop,nop,TS val 1683691042 ecr 559275260], length 9
+17:11:53.614813 lo    In  IP 10.96.221.63.9090 > 10.244.2.7.46050: Flags [.], ack 34, win 64, options [nop,nop,TS val 559275260 ecr 1683691042], length 0
+17:11:53.627757 lo    In  IP 10.96.221.63.9090 > 10.244.2.7.46050: Flags [P.], seq 1:56, ack 34, win 64, options [nop,nop,TS val 559275273 ecr 1683691042], length 55
+17:11:53.627770 lo    In  IP 10.244.2.7.46050 > 127.0.0.1.15001: Flags [.], ack 56, win 63, options [nop,nop,TS val 1683691055 ecr 559275273], length 0
+17:11:53.628098 lo    In  IP 10.244.2.7.46050 > 127.0.0.1.15001: Flags [P.], seq 33:42, ack 56, win 63, options [nop,nop,TS val 1683691056 ecr 559275273], length 9
+17:11:53.629834 lo    In  IP 10.244.2.7.46050 > 127.0.0.1.15001: Flags [P.], seq 42:168, ack 56, win 63, options [nop,nop,TS val 1683691057 ecr 559275273], length 126
+17:11:53.629888 lo    In  IP 10.96.221.63.9090 > 10.244.2.7.46050: Flags [.], ack 169, win 64, options [nop,nop,TS val 559275275 ecr 1683691056], length 0
+17:11:53.641787 eth0  Out IP 10.244.2.7.41072 > 10.244.1.9.9090: Flags [S], seq 1616571735, win 64240, options [mss 1460,sackOK,TS val 2706576501 ecr 0,nop,wscale 10], length 0
+17:11:54.698299 eth0  Out IP 10.244.2.7.41072 > 10.244.1.9.9090: Flags [S], seq 1616571735, win 64240, options [mss 1460,sackOK,TS val 2706577558 ecr 0,nop,wscale 10], length 0
+17:11:55.720067 eth0  Out IP 10.244.2.7.41072 > 10.244.1.9.9090: Flags [S], seq 1616571735, win 64240, options [mss 1460,sackOK,TS val 2706578579 ecr 0,nop,wscale 10], length 0
+17:11:56.744426 eth0  Out IP 10.244.2.7.41072 > 10.244.1.9.9090: Flags [S], seq 1616571735, win 64240, options [mss 1460,sackOK,TS val 2706579604 ecr 0,nop,wscale 10], length 0
+17:11:57.767737 eth0  Out IP 10.244.2.7.41072 > 10.244.1.9.9090: Flags [S], seq 1616571735, win 64240, options [mss 1460,sackOK,TS val 2706580627 ecr 0,nop,wscale 10], length 0
+17:11:58.791635 eth0  Out IP 10.244.2.7.41072 > 10.244.1.9.9090: Flags [S], seq 1616571735, win 64240, options [mss 1460,sackOK,TS val 2706581651 ecr 0,nop,wscale 10], length 0
+17:12:00.840231 eth0  Out IP 10.244.2.7.41072 > 10.244.1.9.9090: Flags [S], seq 1616571735, win 64240, options [mss 1460,sackOK,TS val 2706583700 ecr 0,nop,wscale 10], length 0
+17:12:03.654396 eth0  Out IP 10.244.2.7.53818 > 10.244.1.9.9090: Flags [S], seq 3671343067, win 64240, options [mss 1460,sackOK,TS val 4126372615 ecr 0,nop,wscale 10], length 0
+17:12:04.680730 eth0  Out IP 10.244.2.7.53818 > 10.244.1.9.9090: Flags [S], seq 3671343067, win 64240, options [mss 1460,sackOK,TS val 4126373641 ecr 0,nop,wscale 10], length 0
+17:12:05.703483 eth0  Out IP 10.244.2.7.53818 > 10.244.1.9.9090: Flags [S], seq 3671343067, win 64240, options [mss 1460,sackOK,TS val 4126374664 ecr 0,nop,wscale 10], length 0
+17:12:06.727174 eth0  Out IP 10.244.2.7.53818 > 10.244.1.9.9090: Flags [S], seq 3671343067, win 64240, options [mss 1460,sackOK,TS val 4126375688 ecr 0,nop,wscale 10], length 0
+17:12:07.754339 eth0  Out IP 10.244.2.7.53818 > 10.244.1.9.9090: Flags [S], seq 3671343067, win 64240, options [mss 1460,sackOK,TS val 4126376715 ecr 0,nop,wscale 10], length 0
+17:12:08.775823 eth0  Out IP 10.244.2.7.53818 > 10.244.1.9.9090: Flags [S], seq 3671343067, win 64240, options [mss 1460,sackOK,TS val 4126377736 ecr 0,nop,wscale 10], length 0
+17:12:10.824794 eth0  Out IP 10.244.2.7.53818 > 10.244.1.9.9090: Flags [S], seq 3671343067, win 64240, options [mss 1460,sackOK,TS val 4126379785 ecr 0,nop,wscale 10], length 0
+17:12:13.703807 eth0  Out IP 10.244.2.7.48424 > 10.244.1.9.9090: Flags [S], seq 2945167820, win 64240, options [mss 1460,sackOK,TS val 1139699639 ecr 0,nop,wscale 10], length 0
+17:12:14.728663 eth0  Out IP 10.244.2.7.48424 > 10.244.1.9.9090: Flags [S], seq 2945167820, win 64240, options [mss 1460,sackOK,TS val 1139700664 ecr 0,nop,wscale 10], length 0
+17:12:15.752080 eth0  Out IP 10.244.2.7.48424 > 10.244.1.9.9090: Flags [S], seq 2945167820, win 64240, options [mss 1460,sackOK,TS val 1139701687 ecr 0,nop,wscale 10], length 0
+17:12:16.778048 eth0  Out IP 10.244.2.7.48424 > 10.244.1.9.9090: Flags [S], seq 2945167820, win 64240, options [mss 1460,sackOK,TS val 1139702713 ecr 0,nop,wscale 10], length 0
+17:12:17.800321 eth0  Out IP 10.244.2.7.48424 > 10.244.1.9.9090: Flags [S], seq 2945167820, win 64240, options [mss 1460,sackOK,TS val 1139703736 ecr 0,nop,wscale 10], length 0
+17:12:18.824803 eth0  Out IP 10.244.2.7.48424 > 10.244.1.9.9090: Flags [S], seq 2945167820, win 64240, options [mss 1460,sackOK,TS val 1139704760 ecr 0,nop,wscale 10], length 0
+17:12:20.872776 eth0  Out IP 10.244.2.7.48424 > 10.244.1.9.9090: Flags [S], seq 2945167820, win 64240, options [mss 1460,sackOK,TS val 1139706808 ecr 0,nop,wscale 10], length 0
+17:12:23.715529 lo    In  IP 10.96.221.63.9090 > 10.244.2.7.46050: Flags [P.], seq 56:212, ack 169, win 64, options [nop,nop,TS val 559305361 ecr 1683691056], length 156
+17:12:23.719515 lo    In  IP 10.244.2.7.46050 > 127.0.0.1.15001: Flags [F.], seq 168, ack 212, win 63, options [nop,nop,TS val 1683721147 ecr 559305361], length 0
+17:12:23.719609 lo    In  IP 10.96.221.63.9090 > 10.244.2.7.46050: Flags [F.], seq 212, ack 170, win 64, options [nop,nop,TS val 559305365 ecr 1683721147], length 0
+17:12:23.719624 lo    In  IP 10.244.2.7.46050 > 127.0.0.1.15001: Flags [.], ack 213, win 63, options [nop,nop,TS val 1683721147 ecr 559305365], length 0
+17:12:23.908947 lo    In  IP 10.244.2.7.48764 > 127.0.0.1.15001: Flags [S], seq 3484083512, win 64240, options [mss 1460,sackOK,TS val 3536627289 ecr 0,nop,wscale 10], length 0
+17:12:23.908954 lo    In  IP 10.96.221.63.9090 > 10.244.2.7.48764: Flags [S.], seq 647339489, ack 3484083513, win 65483, options [mss 65495,sackOK,TS val 2986393669 ecr 3536627289,nop,wscale 10], length 0
+17:12:23.908964 lo    In  IP 10.244.2.7.48764 > 127.0.0.1.15001: Flags [.], ack 647339490, win 63, options [nop,nop,TS val 3536627289 ecr 2986393669], length 0
+17:12:23.911894 lo    In  IP 10.244.2.7.48764 > 127.0.0.1.15001: Flags [P.], seq 0:24, ack 1, win 63, options [nop,nop,TS val 3536627292 ecr 2986393669], length 24
+17:12:23.911901 lo    In  IP 10.96.221.63.9090 > 10.244.2.7.48764: Flags [.], ack 25, win 64, options [nop,nop,TS val 2986393672 ecr 3536627292], length 0
+17:12:23.911913 lo    In  IP 10.244.2.7.48764 > 127.0.0.1.15001: Flags [P.], seq 24:33, ack 1, win 63, options [nop,nop,TS val 3536627292 ecr 2986393672], length 9
+17:12:23.911916 lo    In  IP 10.96.221.63.9090 > 10.244.2.7.48764: Flags [.], ack 34, win 64, options [nop,nop,TS val 2986393672 ecr 3536627292], length 0
+17:12:23.912154 lo    In  IP 10.96.221.63.9090 > 10.244.2.7.48764: Flags [P.], seq 1:56, ack 34, win 64, options [nop,nop,TS val 2986393673 ecr 3536627292], length 55
+17:12:23.912161 lo    In  IP 10.244.2.7.48764 > 127.0.0.1.15001: Flags [.], ack 56, win 63, options [nop,nop,TS val 3536627293 ecr 2986393673], length 0
+17:12:23.912223 lo    In  IP 10.244.2.7.48764 > 127.0.0.1.15001: Flags [P.], seq 33:42, ack 56, win 63, options [nop,nop,TS val 3536627293 ecr 2986393673], length 9
+17:12:23.912395 lo    In  IP 10.244.2.7.48764 > 127.0.0.1.15001: Flags [P.], seq 42:168, ack 56, win 63, options [nop,nop,TS val 3536627293 ecr 2986393673], length 126
+17:12:23.912405 lo    In  IP 10.96.221.63.9090 > 10.244.2.7.48764: Flags [.], ack 169, win 64, options [nop,nop,TS val 2986393673 ecr 3536627293], length 0
+17:12:23.912929 eth0  Out IP 10.244.2.7.51680 > 10.244.1.9.9090: Flags [S], seq 3138418459, win 64240, options [mss 1460,sackOK,TS val 3278267227 ecr 0,nop,wscale 10], length 0
+17:12:24.967084 eth0  Out IP 10.244.2.7.51680 > 10.244.1.9.9090: Flags [S], seq 3138418459, win 64240, options [mss 1460,sackOK,TS val 3278268282 ecr 0,nop,wscale 10], length 0
+17:12:25.991247 eth0  Out IP 10.244.2.7.51680 > 10.244.1.9.9090: Flags [S], seq 3138418459, win 64240, options [mss 1460,sackOK,TS val 3278269306 ecr 0,nop,wscale 10], length 0
+17:12:27.016548 eth0  Out IP 10.244.2.7.51680 > 10.244.1.9.9090: Flags [S], seq 3138418459, win 64240, options [mss 1460,sackOK,TS val 3278270331 ecr 0,nop,wscale 10], length 0
+17:12:28.039733 eth0  Out IP 10.244.2.7.51680 > 10.244.1.9.9090: Flags [S], seq 3138418459, win 64240, options [mss 1460,sackOK,TS val 3278271354 ecr 0,nop,wscale 10], length 0
+17:12:29.065476 eth0  Out IP 10.244.2.7.51680 > 10.244.1.9.9090: Flags [S], seq 3138418459, win 64240, options [mss 1460,sackOK,TS val 3278272380 ecr 0,nop,wscale 10], length 0
+17:12:31.112123 eth0  Out IP 10.244.2.7.51680 > 10.244.1.9.9090: Flags [S], seq 3138418459, win 64240, options [mss 1460,sackOK,TS val 3278274427 ecr 0,nop,wscale 10], length 0
+17:12:33.940362 eth0  Out IP 10.244.2.7.39104 > 10.244.1.9.9090: Flags [S], seq 1061177468, win 64240, options [mss 1460,sackOK,TS val 1086018447 ecr 0,nop,wscale 10], length 0
+17:12:34.952107 eth0  Out IP 10.244.2.7.39104 > 10.244.1.9.9090: Flags [S], seq 1061177468, win 64240, options [mss 1460,sackOK,TS val 1086019459 ecr 0,nop,wscale 10], length 0
+17:12:35.978062 eth0  Out IP 10.244.2.7.39104 > 10.244.1.9.9090: Flags [S], seq 1061177468, win 64240, options [mss 1460,sackOK,TS val 1086020484 ecr 0,nop,wscale 10], length 0
+17:12:37.002341 eth0  Out IP 10.244.2.7.39104 > 10.244.1.9.9090: Flags [S], seq 1061177468, win 64240, options [mss 1460,sackOK,TS val 1086021509 ecr 0,nop,wscale 10], length 0
+17:12:38.025070 eth0  Out IP 10.244.2.7.39104 > 10.244.1.9.9090: Flags [S], seq 1061177468, win 64240, options [mss 1460,sackOK,TS val 1086022531 ecr 0,nop,wscale 10], length 0
+17:12:39.049109 eth0  Out IP 10.244.2.7.39104 > 10.244.1.9.9090: Flags [S], seq 1061177468, win 64240, options [mss 1460,sackOK,TS val 1086023556 ecr 0,nop,wscale 10], length 0
+17:12:41.298517 eth0  Out IP 10.244.2.7.39104 > 10.244.1.9.9090: Flags [S], seq 1061177468, win 64240, options [mss 1460,sackOK,TS val 1086025795 ecr 0,nop,wscale 10], length 0
+
+63 packets captured
+91 packets received by filter
+0 packets dropped by kernel

@@ -1,0 +1,24 @@
+tcpdump: WARNING: any: That device doesn't support promiscuous mode
+(Promiscuous mode not supported on the "any" device)
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on any, link-type LINUX_SLL2 (Linux cooked v2), snapshot length 262144 bytes
+17:06:37.361307 eth0  In  IP 10.244.2.7.59140 > 10.244.1.9.9090: Flags [P.], seq 351962122:351962240, ack 2290533874, win 78, options [nop,nop,TS val 1495624920 ecr 3048995431], length 118
+17:06:37.364610 lo    In  IP 127.0.0.6.58203 > 10.244.1.9.9090: Flags [P.], seq 302957432:302957526, ack 2814764935, win 64, options [nop,nop,TS val 1422381672 ecr 1853058806], length 94
+17:06:37.366047 lo    In  IP 10.244.1.9.9090 > 127.0.0.6.58203: Flags [P.], seq 1:31, ack 94, win 64, options [nop,nop,TS val 1853062240 ecr 1422381672], length 30
+17:06:37.366057 lo    In  IP 127.0.0.6.58203 > 10.244.1.9.9090: Flags [.], ack 31, win 64, options [nop,nop,TS val 1422381674 ecr 1853062240], length 0
+17:06:37.366277 lo    In  IP 127.0.0.6.58203 > 10.244.1.9.9090: Flags [P.], seq 94:111, ack 31, win 64, options [nop,nop,TS val 1422381674 ecr 1853062240], length 17
+17:06:37.403316 eth0  Out IP 10.244.1.9.9090 > 10.244.2.7.59140: Flags [.], ack 118, win 71, options [nop,nop,TS val 3049010985 ecr 1495624920], length 0
+17:06:37.409278 lo    In  IP 10.244.1.9.9090 > 127.0.0.6.58203: Flags [.], ack 111, win 64, options [nop,nop,TS val 1853062284 ecr 1422381674], length 0
+17:06:38.368194 lo    In  IP 10.244.1.9.9090 > 127.0.0.6.58203: Flags [P.], seq 31:68, ack 111, win 64, options [nop,nop,TS val 1853063243 ecr 1422381674], length 37
+17:06:38.369098 eth0  Out IP 10.244.1.9.9090 > 10.244.2.7.59140: Flags [P.], seq 1:93, ack 118, win 71, options [nop,nop,TS val 3049011951 ecr 1495624920], length 92
+17:06:38.369260 eth0  In  IP 10.244.2.7.59140 > 10.244.1.9.9090: Flags [.], ack 93, win 78, options [nop,nop,TS val 1495625928 ecr 3049011951], length 0
+17:06:38.411765 lo    In  IP 127.0.0.6.58203 > 10.244.1.9.9090: Flags [.], ack 68, win 64, options [nop,nop,TS val 1422382719 ecr 1853063243], length 0
+17:06:38.468256 lo    In  IP 10.244.1.9.9090 > 127.0.0.6.58203: Flags [F.], seq 68, ack 111, win 64, options [nop,nop,TS val 1853063343 ecr 1422382719], length 0
+17:06:38.468583 lo    In  IP 127.0.0.6.58203 > 10.244.1.9.9090: Flags [F.], seq 111, ack 69, win 64, options [nop,nop,TS val 1422382776 ecr 1853063343], length 0
+17:06:38.468637 lo    In  IP 10.244.1.9.9090 > 127.0.0.6.58203: Flags [.], ack 112, win 64, options [nop,nop,TS val 1853063343 ecr 1422382776], length 0
+17:06:38.469945 eth0  Out IP 10.244.1.9.9090 > 10.244.2.7.59140: Flags [P.], seq 93:128, ack 118, win 71, options [nop,nop,TS val 3049012051 ecr 1495625928], length 35
+17:06:38.470029 eth0  In  IP 10.244.2.7.59140 > 10.244.1.9.9090: Flags [.], ack 128, win 78, options [nop,nop,TS val 1495626028 ecr 3049012051], length 0
+
+16 packets captured
+26 packets received by filter
+0 packets dropped by kernel
