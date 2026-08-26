@@ -1,0 +1,375 @@
+2026-08-25T00:16:24.840085Z	info	FLAG: --concurrency="0"
+2026-08-25T00:16:24.840168Z	info	FLAG: --domain="default.svc.cluster.local"
+2026-08-25T00:16:24.840200Z	info	FLAG: --help="false"
+2026-08-25T00:16:24.840205Z	info	FLAG: --log_as_json="false"
+2026-08-25T00:16:24.840207Z	info	FLAG: --log_caller=""
+2026-08-25T00:16:24.840208Z	info	FLAG: --log_output_level="default:info"
+2026-08-25T00:16:24.840212Z	info	FLAG: --log_stacktrace_level="default:none"
+2026-08-25T00:16:24.840233Z	info	FLAG: --log_target="[stdout]"
+2026-08-25T00:16:24.840237Z	info	FLAG: --meshConfig="./etc/istio/config/mesh"
+2026-08-25T00:16:24.840238Z	info	FLAG: --outlierLogPath=""
+2026-08-25T00:16:24.840240Z	info	FLAG: --profiling="true"
+2026-08-25T00:16:24.840242Z	info	FLAG: --proxyComponentLogLevel="misc:error"
+2026-08-25T00:16:24.840243Z	info	FLAG: --proxyLogLevel="warning"
+2026-08-25T00:16:24.840243Z	info	FLAG: --serviceCluster="istio-proxy"
+2026-08-25T00:16:24.840244Z	info	FLAG: --stsPort="0"
+2026-08-25T00:16:24.840245Z	info	FLAG: --templateFile=""
+2026-08-25T00:16:24.840246Z	info	FLAG: --tokenManagerPlugin=""
+2026-08-25T00:16:24.840249Z	info	FLAG: --vklog="0"
+2026-08-25T00:16:24.840254Z	info	Version 1.24.2-7754674f65d38523e49b692cbb95a5bb1e2a93b8-Clean
+2026-08-25T00:16:24.840352Z	info	Set max file descriptors (ulimit -n) to: 1073741816
+2026-08-25T00:16:24.840860Z	info	Proxy role	ips=[10.244.1.9] type=sidecar id=mock-server.default domain=default.svc.cluster.local
+2026-08-25T00:16:24.840919Z	info	Apply proxy config from env {}
+
+2026-08-25T00:16:24.845870Z	info	cpu limit detected as 2, setting concurrency
+2026-08-25T00:16:24.846453Z	info	Effective config: binaryPath: /usr/local/bin/envoy
+concurrency: 2
+configPath: ./etc/istio/proxy
+controlPlaneAuthPolicy: MUTUAL_TLS
+discoveryAddress: istiod.istio-system.svc:15012
+drainDuration: 45s
+proxyAdminPort: 15000
+serviceCluster: istio-proxy
+statNameLength: 189
+statusPort: 15020
+terminationDrainDuration: 5s
+
+2026-08-25T00:16:24.846485Z	info	JWT policy is third-party-jwt
+2026-08-25T00:16:24.846494Z	info	using credential fetcher of JWT type in cluster.local trust domain
+2026-08-25T00:16:24.853386Z	info	platform detected is GCP
+2026-08-25T00:16:24.853920Z	info	Starting default Istio SDS Server
+2026-08-25T00:16:24.853934Z	info	CA Endpoint istiod.istio-system.svc:15012, provider Citadel
+2026-08-25T00:16:24.853965Z	info	Using CA istiod.istio-system.svc:15012 cert with certs: var/run/secrets/istio/root-cert.pem
+2026-08-25T00:16:24.854145Z	info	Opening status port 15020
+2026-08-25T00:16:24.856072Z	info	xdsproxy	Initializing with upstream address "istiod.istio-system.svc:15012" and cluster "Kubernetes"
+2026-08-25T00:16:24.857616Z	info	sds	Starting SDS grpc server
+2026-08-25T00:16:24.857655Z	info	sds	Starting SDS server for workload certificates, will listen on "var/run/secrets/workload-spiffe-uds/socket"
+2026-08-25T00:16:24.857863Z	info	starting Http service at 127.0.0.1:15004
+2026-08-25T00:16:24.927413Z	info	cache	generated new workload certificate	resourceName=default latency=69.586952ms ttl=23h59m59.072590787s
+2026-08-25T00:16:24.927448Z	info	cache	Root cert has changed, start rotating root cert
+2026-08-25T00:16:24.927479Z	info	cache	returned workload trust anchor from cache	ttl=23h59m59.072520746s
+2026-08-25T00:16:29.858306Z	warn	cannot reach the Google Instance metadata endpoint dial tcp 169.254.169.254:80: i/o timeout
+2026-08-25T00:16:29.859119Z	warn	Error fetching GCP zone: 
+2026-08-25T00:16:29.865078Z	warn	Error fetching GCP zone: 
+2026-08-25T00:16:29.865121Z	info	Pilot SAN: [istiod.istio-system.svc]
+2026-08-25T00:16:29.869769Z	info	Starting proxy agent
+2026-08-25T00:16:29.870088Z	info	Envoy command: [-c etc/istio/proxy/envoy-rev.json --drain-time-s 45 --drain-strategy immediate --local-address-ip-version v4 --file-flush-interval-msec 1000 --disable-hot-restart --allow-unknown-static-fields -l warning --component-log-level misc:error --concurrency 2]
+2026-08-25T00:16:29.967236Z	warning	envoy main external/envoy/source/server/server.cc:852	Usage of the deprecated runtime key overload.global_downstream_max_connections, consider switching to `envoy.resource_monitors.global_downstream_max_connections` instead.This runtime key will be removed in future.	thread=17
+2026-08-25T00:16:29.967652Z	warning	envoy main external/envoy/source/server/server.cc:948	There is no configured limit to the number of allowed active downstream connections. Configure a limit in `envoy.resource_monitors.global_downstream_max_connections` resource monitor.	thread=17
+2026-08-25T00:16:29.972028Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=1
+2026-08-25T00:16:29.984426Z	info	ads	ADS: new connection for node:1
+2026-08-25T00:16:29.984499Z	info	cache	returned workload certificate from cache	ttl=23h59m54.015502353s
+2026-08-25T00:16:29.985142Z	info	ads	ADS: new connection for node:2
+2026-08-25T00:16:29.985179Z	info	cache	returned workload trust anchor from cache	ttl=23h59m54.014821604s
+2026-08-25T00:16:30.925990Z	info	Readiness succeeded in 6.087171105s
+2026-08-25T00:16:30.926711Z	info	Envoy proxy is ready
+{
+  "start_time": "2026-08-25T00:19:18.761Z",
+  "method": "GET",
+  "path": "/status/502",
+  "protocol": "HTTP/1.1",
+  "response_code": "502",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "68",
+  "duration": "13",
+  "upstream_service_time": "7",
+  "x_forwarded_for": "-",
+  "user_agent": "curl/8.21.0",
+  "request_id": "c0ace0c7-fe4b-9244-81cd-72cda95dee0b",
+  "authority": "mock-server:8080",
+  "upstream_host": "10.244.1.9:8080",
+  "upstream_cluster": "inbound|8080||",
+  "upstream_local_address": "127.0.0.6:51459",
+  "downstream_local_address": "10.244.1.9:8080",
+  "downstream_remote_address": "10.244.2.7:41132",
+  "requested_server_name": "outbound_.8080_._.mock-server.default.svc.cluster.local",
+  "route_name": "default",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "13"
+}
+{
+  "start_time": "2026-08-25T00:19:18.802Z",
+  "method": "GET",
+  "path": "/status/502",
+  "protocol": "HTTP/1.1",
+  "response_code": "502",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "68",
+  "duration": "0",
+  "upstream_service_time": "0",
+  "x_forwarded_for": "-",
+  "user_agent": "curl/8.21.0",
+  "request_id": "c0ace0c7-fe4b-9244-81cd-72cda95dee0b",
+  "authority": "mock-server:8080",
+  "upstream_host": "10.244.1.9:8080",
+  "upstream_cluster": "inbound|8080||",
+  "upstream_local_address": "127.0.0.6:51459",
+  "downstream_local_address": "10.244.1.9:8080",
+  "downstream_remote_address": "10.244.2.7:41148",
+  "requested_server_name": "outbound_.8080_._.mock-server.default.svc.cluster.local",
+  "route_name": "default",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "0"
+}
+{
+  "start_time": "2026-08-25T00:19:18.819Z",
+  "method": "GET",
+  "path": "/status/502",
+  "protocol": "HTTP/1.1",
+  "response_code": "502",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "68",
+  "duration": "0",
+  "upstream_service_time": "0",
+  "x_forwarded_for": "-",
+  "user_agent": "curl/8.21.0",
+  "request_id": "c0ace0c7-fe4b-9244-81cd-72cda95dee0b",
+  "authority": "mock-server:8080",
+  "upstream_host": "10.244.1.9:8080",
+  "upstream_cluster": "inbound|8080||",
+  "upstream_local_address": "127.0.0.6:51459",
+  "downstream_local_address": "10.244.1.9:8080",
+  "downstream_remote_address": "10.244.2.7:41160",
+  "requested_server_name": "outbound_.8080_._.mock-server.default.svc.cluster.local",
+  "route_name": "default",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "0"
+}
+2026-08-25T01:13:02.141726Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=2
+2026-08-25T01:58:08.367091Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=3
+2026-08-25T02:29:38.869826Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=4
+{
+  "start_time": "2026-08-25T02:32:08.341Z",
+  "method": "POST",
+  "path": "/mock.MockService/Status",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "7",
+  "bytes_sent": "0",
+  "duration": "57",
+  "upstream_service_time": "36",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "0ea3e5b2-6c30-9f3b-8c06-bc056c442043",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.1.9:9090",
+  "upstream_cluster": "inbound|9090||",
+  "upstream_local_address": "127.0.0.6:53621",
+  "downstream_local_address": "10.244.1.9:9090",
+  "downstream_remote_address": "10.244.2.7:42196",
+  "requested_server_name": "outbound_.9090_._.mock-server.default.svc.cluster.local",
+  "route_name": "default",
+  "grpc_status": "Internal",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "20",
+  "response_duration": "57"
+}
+{
+  "start_time": "2026-08-25T02:32:08.437Z",
+  "method": "POST",
+  "path": "/mock.MockService/Status",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "7",
+  "bytes_sent": "0",
+  "duration": "1",
+  "upstream_service_time": "1",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "01f901a0-01e7-978a-aecc-a81094ae5ed6",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.1.9:9090",
+  "upstream_cluster": "inbound|9090||",
+  "upstream_local_address": "127.0.0.6:53621",
+  "downstream_local_address": "10.244.1.9:9090",
+  "downstream_remote_address": "10.244.2.7:42196",
+  "requested_server_name": "outbound_.9090_._.mock-server.default.svc.cluster.local",
+  "route_name": "default",
+  "grpc_status": "Unavailable",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "1"
+}
+{
+  "start_time": "2026-08-25T02:32:08.455Z",
+  "method": "POST",
+  "path": "/mock.MockService/Status",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "7",
+  "bytes_sent": "0",
+  "duration": "0",
+  "upstream_service_time": "0",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "01f901a0-01e7-978a-aecc-a81094ae5ed6",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.1.9:9090",
+  "upstream_cluster": "inbound|9090||",
+  "upstream_local_address": "127.0.0.6:53621",
+  "downstream_local_address": "10.244.1.9:9090",
+  "downstream_remote_address": "10.244.2.7:42196",
+  "requested_server_name": "outbound_.9090_._.mock-server.default.svc.cluster.local",
+  "route_name": "default",
+  "grpc_status": "Unavailable",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "0"
+}
+{
+  "start_time": "2026-08-25T02:32:08.493Z",
+  "method": "POST",
+  "path": "/mock.MockService/Status",
+  "protocol": "HTTP/2",
+  "response_code": "200",
+  "response_flags": "-",
+  "response_code_details": "via_upstream",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "7",
+  "bytes_sent": "0",
+  "duration": "0",
+  "upstream_service_time": "0",
+  "x_forwarded_for": "-",
+  "user_agent": "grpcurl/v1.9.3 grpc-go/1.61.0",
+  "request_id": "01f901a0-01e7-978a-aecc-a81094ae5ed6",
+  "authority": "mock-server:9090",
+  "upstream_host": "10.244.1.9:9090",
+  "upstream_cluster": "inbound|9090||",
+  "upstream_local_address": "127.0.0.6:53621",
+  "downstream_local_address": "10.244.1.9:9090",
+  "downstream_remote_address": "10.244.2.7:42196",
+  "requested_server_name": "outbound_.9090_._.mock-server.default.svc.cluster.local",
+  "route_name": "default",
+  "grpc_status": "Unavailable",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "0"
+}
+2026-08-25T03:01:32.434868Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=5
+2026-08-25T06:38:44.645606Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=6
+2026-08-25T07:08:26.366891Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=7
+2026-08-25T11:44:11.753144Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=8
+2026-08-25T12:16:41.757081Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=9
+2026-08-25T12:49:45.195026Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=10
+2026-08-25T13:19:06.482459Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=11
+2026-08-25T13:49:49.266503Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=12
+2026-08-25T14:14:04.690582Z	info	cache	generated new workload certificate	resourceName=default latency=149.191658ms ttl=23h59m59.30942523s
+2026-08-25T14:22:59.511238Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=13
+2026-08-25T14:55:18.569448Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=14
+2026-08-25T15:25:18.320715Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=15
+2026-08-25T23:35:23.616111Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=16
+2026-08-26T01:04:46.235870Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=17
+2026-08-26T01:34:01.622901Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=18
+2026-08-26T02:04:54.354909Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=19
+2026-08-26T02:42:43.499105Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=20
+2026-08-26T03:13:31.624803Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=21
+2026-08-26T03:42:54.901216Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=22
+2026-08-26T04:10:52.120907Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=23
+2026-08-26T04:32:15.951607Z	info	cache	generated new workload certificate	resourceName=default latency=114.554688ms ttl=23h59m59.048395341s
+2026-08-26T04:39:35.660517Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=24
+2026-08-26T05:06:54.475483Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=25
+2026-08-26T05:38:20.186324Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=26
+2026-08-26T06:11:27.089098Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=27
+2026-08-26T06:41:30.060481Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=28
+2026-08-26T07:12:47.470522Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=29
+2026-08-26T07:41:47.845533Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=30
+2026-08-26T08:10:21.453454Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=31
+2026-08-26T08:40:42.321149Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=32
+2026-08-26T09:14:46.989445Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=33
+2026-08-26T09:45:16.844341Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=34
+2026-08-26T10:16:57.394260Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=35
+2026-08-26T10:48:18.205037Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=36
+2026-08-26T13:34:18.645391Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=37
+2026-08-26T14:01:51.238423Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=38
+2026-08-26T14:31:40.211192Z	info	xdsproxy	connected to delta upstream XDS server: istiod.istio-system.svc:15012	id=39
+{
+  "start_time": "2026-08-26T14:43:43.624Z",
+  "method": "GET",
+  "path": "/delay/5000",
+  "protocol": "HTTP/1.1",
+  "response_code": "0",
+  "response_flags": "DC",
+  "response_code_details": "downstream_remote_disconnect",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "0",
+  "duration": "974",
+  "upstream_service_time": "-",
+  "x_forwarded_for": "-",
+  "user_agent": "python-rst-client",
+  "request_id": "4cfca057-4b86-912d-9925-5970ae4182a3",
+  "authority": "mock-server:8080",
+  "upstream_host": "10.244.1.9:8080",
+  "upstream_cluster": "inbound|8080||",
+  "upstream_local_address": "127.0.0.6:46185",
+  "downstream_local_address": "10.244.1.9:8080",
+  "downstream_remote_address": "10.244.2.7:37430",
+  "requested_server_name": "outbound_.8080_._.mock-server.default.svc.cluster.local",
+  "route_name": "default",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "-"
+}
+{
+  "start_time": "2026-08-26T14:44:50.192Z",
+  "method": "GET",
+  "path": "/delay/5000",
+  "protocol": "HTTP/1.1",
+  "response_code": "0",
+  "response_flags": "DC",
+  "response_code_details": "downstream_remote_disconnect",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "0",
+  "duration": "958",
+  "upstream_service_time": "-",
+  "x_forwarded_for": "-",
+  "user_agent": "python-rst-client",
+  "request_id": "6829f238-8938-964e-b075-5acc45deea89",
+  "authority": "mock-server:8080",
+  "upstream_host": "10.244.1.9:8080",
+  "upstream_cluster": "inbound|8080||",
+  "upstream_local_address": "127.0.0.6:55605",
+  "downstream_local_address": "10.244.1.9:8080",
+  "downstream_remote_address": "10.244.2.7:48142",
+  "requested_server_name": "outbound_.8080_._.mock-server.default.svc.cluster.local",
+  "route_name": "default",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "-"
+}
