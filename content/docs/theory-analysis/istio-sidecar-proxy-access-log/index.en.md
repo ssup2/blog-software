@@ -541,8 +541,6 @@ When the `curl` command is forcefully terminated during execution, the `curl` co
 
 **TODO: Add figure `images/http-downstream-tcp-rst-case.png`**
 
-{{< figure caption="[Figure 5] Downstream TCP RST Case" src="images/http-downstream-tcp-rst-case.png" width="1000px" >}}
-
 ```shell {caption="[Shell 6] Downstream TCP RST Case / python3 Command", linenos=table}
 $ kubectl exec -it shell -- python3 -c '
 import socket, struct, time
@@ -554,7 +552,7 @@ s.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER, struct.pack("ii", 1, 0))
 s.close()'
 ```
 
-[Figure 5] shows the Downstream TCP RST Case where a `GET` request is sent to the `mock-server`'s `/delay/5000` Endpoint from the `shell` Pod, and the request is forcefully terminated by sending a TCP RST Flag instead of a TCP FIN Flag before 5000ms passes. [Shell 6] shows an example of executing [Figure 5]. Since the `curl` command cannot control the Socket's `SO_LINGER` Option and therefore cannot send a TCP RST Flag, the `python3` command is used to set the `SO_LINGER` Option to `0` and close the Socket 1000ms after sending the request, which sends a TCP RST Flag.
+[Shell 6] shows the Downstream TCP RST Case where a `GET` request is sent to the `mock-server`'s `/delay/5000` Endpoint from the `shell` Pod, and the request is forcefully terminated by sending a TCP RST Flag instead of a TCP FIN Flag before 5000ms passes. Since the `curl` command cannot control the Socket's `SO_LINGER` Option and therefore cannot send a TCP RST Flag, the `python3` command is used to set the `SO_LINGER` Option to `0` and close the Socket 1000ms after sending the request, which sends a TCP RST Flag.
 
 The `shell` Pod's `istio-proxy` that received the TCP RST Flag does not forward the TCP RST Flag to the `mock-server` Pod as-is, but instead sends a TCP FIN Flag to terminate the Connection, identical to the Downstream TCP Close Case. Since `istio-proxy` manages the Downstream Connection and the Upstream Connection as separate TCP Connections, even if the Downstream Connection is abnormally terminated with a TCP RST Flag, the Upstream Connection is gracefully terminated with a TCP FIN Flag. The `mock-server` Pod's `istio-proxy` that received the TCP FIN Flag also sends a TCP FIN Flag to the `mock-server` Container. Afterward, the `mock-server` Container sends the response after 5000ms, but since the Connection is already terminated, it receives a TCP RST Flag from the `mock-server` Pod's `istio-proxy`.
 
@@ -630,8 +628,6 @@ The `shell` Pod's `istio-proxy` that received the TCP RST Flag does not forward 
 
 **TODO: Add figure `images/http-upstream-request-retry-case.png`**
 
-{{< figure caption="[Figure 6] Upstream Request Retry Case" src="images/http-upstream-request-retry-case.png" width="1000px" >}}
-
 Since the `retryOn` Field of the Virtual Service in [File 1] includes the `502` Status Code, up to 2 retries are performed when a `502` Status Code response is received, so up to 3 requests are sent.
 
 ```shell {caption="[Shell 7] Upstream Request Retry Case / curl Command", linenos=table}
@@ -639,7 +635,7 @@ $ kubectl exec -it shell -- curl -s mock-server:8080/status/502
 {"message":"Bad Gateway","service":"mock-server","status_code":502}
 ```
 
-[Figure 6] shows the Upstream Request Retry Case where a `GET` request is sent to the `mock-server`'s `/status/502` Endpoint using the `curl` command from the `shell` Pod. [Shell 7] shows an example of executing [Figure 6]. Since the `mock-server` returns a `502 Bad Gateway` response for every request, the `shell` Pod's `istio-proxy` delivers the last received `502 Bad Gateway` response to the `curl` command after performing both retries.
+[Shell 7] shows the Upstream Request Retry Case where a `GET` request is sent to the `mock-server`'s `/status/502` Endpoint using the `curl` command from the `shell` Pod. Since the `mock-server` returns a `502 Bad Gateway` response for every request, the `shell` Pod's `istio-proxy` delivers the last received `502 Bad Gateway` response to the `curl` command after performing both retries.
 
 ```json {caption="[Text 10] Upstream Request Retry Case / shell Pod Access Log", linenos=table}
 {
@@ -2416,8 +2412,6 @@ Also, the `shell` Pod's `istio-proxy` shows `response_flags` as `DC (DownstreamC
 
 **TODO: Add figure `images/grpc-downstream-tcp-rst-case.png`**
 
-{{< figure caption="[Figure 20] Downstream TCP RST Case" src="images/grpc-downstream-tcp-rst-case.png" width="1000px" >}}
-
 ```shell {caption="[Shell 21] Downstream TCP RST Case / python3 Command", linenos=table}
 $ kubectl exec -i shell -- python3 - <<'EOF'
 import socket, struct, time
@@ -2454,7 +2448,7 @@ s.close()
 EOF
 ```
 
-[Figure 20] shows the Downstream TCP RST Case where a `milliseconds: 5000` request is sent to the `mock-server`'s `/mock.MockService/Delay` function from the `shell` Pod, and the request is forcefully terminated by sending a TCP RST Flag instead of a TCP FIN Flag before 5000ms passes. [Shell 21] shows an example of executing [Figure 20]. Since the `grpcurl` command cannot control the Socket's `SO_LINGER` Option and therefore cannot send a TCP RST Flag, the `python3` command is used to construct the HTTP/2 Frames and the gRPC Message directly to send the request, and 1000ms after sending the request, the `SO_LINGER` Option is set to `0` and the Socket is closed, which sends a TCP RST Flag.
+[Shell 21] shows the Downstream TCP RST Case where a `milliseconds: 5000` request is sent to the `mock-server`'s `/mock.MockService/Delay` function from the `shell` Pod, and the request is forcefully terminated by sending a TCP RST Flag instead of a TCP FIN Flag before 5000ms passes. Since the `grpcurl` command cannot control the Socket's `SO_LINGER` Option and therefore cannot send a TCP RST Flag, the `python3` command is used to construct the HTTP/2 Frames and the gRPC Message directly to send the request, and 1000ms after sending the request, the `SO_LINGER` Option is set to `0` and the Socket is closed, which sends a TCP RST Flag.
 
 The `shell` Pod's `istio-proxy` that received the TCP RST Flag does not forward the TCP RST Flag to the `mock-server` Pod as-is, identical to the Downstream TCP Close Case, but sends an HTTP/2 RST_STREAM Frame to terminate only the Stream of the request. In other words, regardless of whether the Downstream Connection is gracefully terminated with a TCP FIN Flag or abnormally terminated with a TCP RST Flag, the TCP Connection between Pods is maintained and only the HTTP/2 RST_STREAM Frame is sent.
 
@@ -2530,8 +2524,6 @@ The `shell` Pod's `istio-proxy` that received the TCP RST Flag does not forward 
 
 **TODO: Add figure `images/grpc-upstream-request-retry-case.png`**
 
-{{< figure caption="[Figure 21] Upstream Request Retry Case" src="images/grpc-upstream-request-retry-case.png" width="1000px" >}}
-
 Since the `retryOn` Field of the Virtual Service in [File 1] includes the gRPC retry conditions `unavailable` and `cancelled`, up to 2 retries are performed when an `UNAVAILABLE (14)` Status Code response is received, so up to 3 requests are sent.
 
 ```shell {caption="[Shell 22] Upstream Request Retry Case / grpcurl Command", linenos=table}
@@ -2541,7 +2533,7 @@ ERROR:
   Message: Simulated error with gRPC code 14 (Unavailable)
 ```
 
-[Figure 21] shows the Upstream Request Retry Case where the `grpcurl` command is used from the `shell` Pod to send a `code: 14` (Unavailable) request to the `mock-server`'s `/mock.MockService/Status` function. [Shell 22] shows an example of executing [Figure 21].
+[Shell 22] shows the Upstream Request Retry Case where the `grpcurl` command is used from the `shell` Pod to send a `code: 14` (Unavailable) request to the `mock-server`'s `/mock.MockService/Status` function.
 
 ```json {caption="[Text 38] Upstream Request Retry Case / shell Pod Access Log", linenos=table}
 {

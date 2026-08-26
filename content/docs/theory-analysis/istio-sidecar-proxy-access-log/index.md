@@ -541,8 +541,6 @@ $ kubectl exec -it shell -- curl -s mock-server:8080/delay/5000
 
 **TODO: `images/http-downstream-tcp-rst-case.png` 그림 추가 필요**
 
-{{< figure caption="[Figure 5] Downstream TCP RST Case" src="images/http-downstream-tcp-rst-case.png" width="1000px" >}}
-
 ```shell {caption="[Shell 6] Downstream TCP RST Case / python3 Command", linenos=table}
 $ kubectl exec -it shell -- python3 -c '
 import socket, struct, time
@@ -554,7 +552,7 @@ s.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER, struct.pack("ii", 1, 0))
 s.close()'
 ```
 
-[Figure 5]는 `shell` Pod에서 `mock-server`의 `/delay/5000` Endpoint에 `GET` 요청을 전달하고, 5000ms가 지나기 전에 TCP FIN Flag가 아닌 TCP RST Flag를 전송하여 요청을 강제로 종료하는 Downstream TCP RST Case를 나타내고 있다. [Shell 6]은 [Figure 5]의 내용을 실행하는 예시를 나타내고 있다. `curl` 명령어는 Socket의 `SO_LINGER` Option을 제어할 수 없어 TCP RST Flag를 전송할 수 없기 때문에, `python3` 명령어를 이용하여 요청 전송 1000ms 이후에 `SO_LINGER` Option을 `0`으로 설정하고 Socket을 닫아 TCP RST Flag를 전송한다.
+[Shell 6]은 `shell` Pod에서 `mock-server`의 `/delay/5000` Endpoint에 `GET` 요청을 전달하고, 5000ms가 지나기 전에 TCP FIN Flag가 아닌 TCP RST Flag를 전송하여 요청을 강제로 종료하는 Downstream TCP RST Case를 나타내고 있다. `curl` 명령어는 Socket의 `SO_LINGER` Option을 제어할 수 없어 TCP RST Flag를 전송할 수 없기 때문에, `python3` 명령어를 이용하여 요청 전송 1000ms 이후에 `SO_LINGER` Option을 `0`으로 설정하고 Socket을 닫아 TCP RST Flag를 전송한다.
 
 TCP RST Flag를 수신한 `shell` Pod의 `istio-proxy`는 TCP RST Flag를 `mock-server` Pod에게 그대로 전달하지 않고, Downstream TCP Close Case와 동일하게 TCP FIN Flag를 전송하여 Connection을 종료한다. `istio-proxy`는 Downstream Connection과 Upstream Connection을 별도의 TCP Connection으로 관리하기 때문에, Downstream Connection이 TCP RST Flag를 통해서 비정상적으로 종료되어도 Upstream Connection은 TCP FIN Flag를 통해서 정상적으로 종료한다. TCP FIN Flag를 수신한 `mock-server` Pod의 `istio-proxy`도 TCP FIN Flag를 `mock-server` Container에게 전송한다. 이후에 `mock-server` Container는 5000ms 뒤에 응답을 전송하지만 Connection이 이미 종료된 상태이기 때문에 `mock-server` Pod의 `istio-proxy`로부터 TCP RST Flag를 수신한다.
 
@@ -630,8 +628,6 @@ TCP RST Flag를 수신한 `shell` Pod의 `istio-proxy`는 TCP RST Flag를 `mock-
 
 **TODO: `images/http-upstream-request-retry-case.png` 그림 추가 필요**
 
-{{< figure caption="[Figure 6] Upstream Request Retry Case" src="images/http-upstream-request-retry-case.png" width="1000px" >}}
-
 [File 1]의 Virtual Service에는 `retryOn` Field에 `502` Status Code가 포함되어 있기 때문에, `502` Status Code 응답을 받는 경우 최대 2번의 재시도를 수행하여 최대 3번의 요청이 전송된다.
 
 ```shell {caption="[Shell 7] Upstream Request Retry Case / curl Command", linenos=table}
@@ -639,7 +635,7 @@ $ kubectl exec -it shell -- curl -s mock-server:8080/status/502
 {"message":"Bad Gateway","service":"mock-server","status_code":502}
 ```
 
-[Figure 6]은 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/status/502` Endpoint에 `GET` 요청을 전달하는 Upstream Request Retry Case를 나타내고 있다. [Shell 7]은 [Figure 6]의 내용을 실행하는 예시를 나타내고 있다. `mock-server`는 모든 요청에 `502 Bad Gateway` 응답을 반환하기 때문에, `shell` Pod의 `istio-proxy`는 2번의 재시도를 모두 수행한 이후에 마지막으로 받은 `502 Bad Gateway` 응답을 `curl` 명령어에게 전달한다.
+[Shell 7]은 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/status/502` Endpoint에 `GET` 요청을 전달하는 Upstream Request Retry Case를 나타내고 있다. `mock-server`는 모든 요청에 `502 Bad Gateway` 응답을 반환하기 때문에, `shell` Pod의 `istio-proxy`는 2번의 재시도를 모두 수행한 이후에 마지막으로 받은 `502 Bad Gateway` 응답을 `curl` 명령어에게 전달한다.
 
 ```json {caption="[Text 10] Upstream Request Retry Case / shell Pod Access Log", linenos=table}
 {
@@ -2416,8 +2412,6 @@ $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseco
 
 **TODO: `images/grpc-downstream-tcp-rst-case.png` 그림 추가 필요**
 
-{{< figure caption="[Figure 20] Downstream TCP RST Case" src="images/grpc-downstream-tcp-rst-case.png" width="1000px" >}}
-
 ```shell {caption="[Shell 21] Downstream TCP RST Case / python3 Command", linenos=table}
 $ kubectl exec -i shell -- python3 - <<'EOF'
 import socket, struct, time
@@ -2454,7 +2448,7 @@ s.close()
 EOF
 ```
 
-[Figure 20]는 `shell` Pod에서 `mock-server`의 `/mock.MockService/Delay` 함수에 `milliseconds: 5000` 요청을 전달하고, 5000ms가 지나기 전에 TCP FIN Flag가 아닌 TCP RST Flag를 전송하여 요청을 강제로 종료하는 Downstream TCP RST Case를 나타내고 있다. [Shell 21]은 [Figure 20]의 내용을 실행하는 예시를 나타내고 있다. `grpcurl` 명령어는 Socket의 `SO_LINGER` Option을 제어할 수 없어 TCP RST Flag를 전송할 수 없기 때문에, `python3` 명령어를 이용하여 HTTP/2 Frame과 gRPC Message를 직접 구성하여 요청을 전송하고, 요청 전송 1000ms 이후에 `SO_LINGER` Option을 `0`으로 설정하고 Socket을 닫아 TCP RST Flag를 전송한다.
+[Shell 21]은 `shell` Pod에서 `mock-server`의 `/mock.MockService/Delay` 함수에 `milliseconds: 5000` 요청을 전달하고, 5000ms가 지나기 전에 TCP FIN Flag가 아닌 TCP RST Flag를 전송하여 요청을 강제로 종료하는 Downstream TCP RST Case를 나타내고 있다. `grpcurl` 명령어는 Socket의 `SO_LINGER` Option을 제어할 수 없어 TCP RST Flag를 전송할 수 없기 때문에, `python3` 명령어를 이용하여 HTTP/2 Frame과 gRPC Message를 직접 구성하여 요청을 전송하고, 요청 전송 1000ms 이후에 `SO_LINGER` Option을 `0`으로 설정하고 Socket을 닫아 TCP RST Flag를 전송한다.
 
 TCP RST Flag를 수신한 `shell` Pod의 `istio-proxy`는 Downstream TCP Close Case와 동일하게 TCP RST Flag를 `mock-server` Pod에게 그대로 전달하지 않고, HTTP/2 RST_STREAM Frame을 전송하여 해당 요청의 Stream만 종료한다. 즉 Downstream Connection이 TCP FIN Flag를 통해서 정상적으로 종료되거나 TCP RST Flag를 통해서 비정상적으로 종료되는 것과 무관하게, Pod 사이의 TCP Connection은 그대로 유지되며 HTTP/2 RST_STREAM Frame만 전송된다.
 
@@ -2530,8 +2524,6 @@ TCP RST Flag를 수신한 `shell` Pod의 `istio-proxy`는 Downstream TCP Close C
 
 **TODO: `images/grpc-upstream-request-retry-case.png` 그림 추가 필요**
 
-{{< figure caption="[Figure 21] Upstream Request Retry Case" src="images/grpc-upstream-request-retry-case.png" width="1000px" >}}
-
 [File 1]의 Virtual Service의 `retryOn` Field에는 gRPC의 재시도 조건인 `unavailable`, `cancelled`가 포함되어 있다. 따라서 `UNAVAILABLE (14)` Status Code 응답을 받는 경우 최대 2번의 재시도를 수행하여 최대 3번의 요청이 전송된다.
 
 ```shell {caption="[Shell 22] Upstream Request Retry Case / grpcurl Command", linenos=table}
@@ -2541,7 +2533,7 @@ ERROR:
   Message: Simulated error with gRPC code 14 (Unavailable)
 ```
 
-[Figure 21]은 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/Status` 함수에 `code: 14` (Unavailable) 요청을 전달하는 Upstream Request Retry Case를 나타내고 있다. [Shell 22]은 [Figure 21]의 내용을 실행하는 예시를 나타내고 있다.
+[Shell 22]은 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/Status` 함수에 `code: 14` (Unavailable) 요청을 전달하는 Upstream Request Retry Case를 나타내고 있다.
 
 ```json {caption="[Text 38] Upstream Request Retry Case / shell Pod Access Log", linenos=table}
 {
