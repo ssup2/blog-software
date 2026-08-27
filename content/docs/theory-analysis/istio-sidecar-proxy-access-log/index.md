@@ -87,7 +87,7 @@ metadata:
 spec:
   containers:
   - name: mock-server
-    image: ghcr.io/ssup2/mock-go-server:0.1.6
+    image: ghcr.io/ssup2/mock-go-server:0.1.7
     ports:
     - containerPort: 8080
     - containerPort: 9090
@@ -178,6 +178,7 @@ HTTP/GRPC 요청의 최대 동시 처리 개수를 제한하는 방법은 `http.
 | Endpoint | Description |
 |---|---|
 | /status/{code} | Return specific HTTP status code |
+| /bytes/{bytes} | Return specified number of bytes |
 | /delay/{ms} | Delay response by milliseconds |
 | /reset-before-response/{ms} | Server sends TCP RST before response after delay |
 | /reset-after-response/{ms} | Server sends dummy data, then TCP RST after delay |
@@ -624,20 +625,119 @@ TCP RST Flag를 수신한 `shell` Pod의 `istio-proxy`는 TCP RST Flag를 `mock-
 
 [Text 8]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 9]는 `mock-server`의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 Downstream TCP Close Case와 동일하게 `response_code`가 `0`, `response_flags`가 `DC (DownstreamConnectionTermination)`, `response_code_details`가 `downstream_remote_disconnect`로 나타나는 것을 확인할 수 있다. 즉 `istio-proxy`는 Downstream으로부터 TCP FIN Flag를 수신하는 경우와 TCP RST Flag를 수신하는 경우를 Access Log에서 구분하지 않는것을 확인할 수 있다.
 
-#### 1.2.5. Upstream Request Retry Case
+#### 1.2.5. Downstream TCP RST with Backpressure Case
+
+**TODO: `images/http-downstream-tcp-rst-with-backpressure-case.png` 그림 추가 필요**
+
+```shell {caption="[Shell 7] Downstream TCP RST with Backpressure Case / python3 Command", linenos=table}
+$ kubectl exec -i shell -- python3 - <<'EOF'
+import socket, struct, time, subprocess
+
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect(("mock-server", 8080))
+s.sendall(b"GET /bytes/50000000 HTTP/1.1\r\nHost: mock-server:8080\r\nUser-Agent: python-backpressure-rst\r\n\r\n")
+time.sleep(4)   # do not read the response so the buffers on the path fill up
+# show unread bytes stacked in istio-proxy's upstream socket
+print(subprocess.run(["ss", "-tn", "dport", "=", ":8080"], capture_output=True, text=True).stdout)
+# Close with SO_LINGER(on, 0) so the kernel sends TCP RST instead of FIN
+s.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER, struct.pack("ii", 1, 0))
+s.close()
+EOF
+State Recv-Q  Send-Q Local Address:Port  Peer Address:Port
+ESTAB 124312  0         10.244.2.7:38012 10.96.221.63:8080
+ESTAB 1868933 0         10.244.2.7:50072  10.244.1.10:8080
+```
+
+[Shell 7]은 `shell` Pod에서 `mock-server`의 `/bytes/50000000` Endpoint에 `GET` 요청을 전달하여 50MB 응답을 수신하는 도중에, 응답을 읽지 않고 4000ms 대기한 이후에 TCP RST Flag를 전송하여 요청을 강제로 종료하는 Downstream TCP RST with Backpressure Case를 나타내고 있다.
+
+Client가 응답을 읽지 않으면 `shell` Pod의 `istio-proxy`는 Client에게 전달하지 못한 데이터를 내부 Buffer에 보관하며, Buffer가 가득 차면(High Watermark) Upstream 데이터 읽기를 중단하는 Backpressure가 동작한다. 이후 `mock-server` Pod에서 전송된 데이터는 `istio-proxy`가 읽어가지 않기 때문에 Upstream Socket의 Kernel Receive Buffer에 쌓인다. [Shell 7]의 `ss` 명령어 출력에서 `istio-proxy`의 Upstream Socket(`10.244.1.10:8080`)의 Recv-Q에 약 1.8MB의 읽지 않은 데이터가 쌓여있는 것을 확인할 수 있다.
+
+이 상태에서 TCP RST Flag를 수신한 `shell` Pod의 `istio-proxy`는 Upstream Connection을 종료하는데, Downstream TCP RST Case와 다르게 Kernel Receive Buffer에 읽지 않은 데이터가 남아있는 Socket을 닫기 때문에 TCP 규칙에 따라 TCP FIN Flag가 아닌 TCP RST Flag가 `mock-server` Pod에게 전송된다. 즉 `istio-proxy`가 Upstream Connection을 종료할 때 전송하는 Flag는 종료 시점에 Kernel Receive Buffer에 읽지 않은 데이터가 존재하는지 여부에 따라서 결정된다.
+
+```json {caption="[Text 10] Downstream TCP RST with Backpressure Case / shell Pod Access Log", linenos=table}
+{
+  "start_time": "2026-08-27T02:24:12.605Z",
+  "method": "GET",
+  "path": "/bytes/50000000",
+  "protocol": "HTTP/1.1",
+  "response_code": "200",
+  "response_flags": "DC",
+  "response_code_details": "downstream_remote_disconnect",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "1818624",
+  "duration": "3982",
+  "upstream_service_time": "60",
+  "x_forwarded_for": "-",
+  "user_agent": "python-backpressure-rst",
+  "request_id": "ab01ee94-eacc-96f2-a3f1-291a830f1036",
+  "authority": "mock-server:8080",
+  "upstream_host": "10.244.1.10:8080",
+  "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
+  "upstream_local_address": "10.244.2.7:50072",
+  "downstream_local_address": "10.96.221.63:8080",
+  "downstream_remote_address": "10.244.2.7:38012",
+  "requested_server_name": "-",
+  "route_name": "-",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "72"
+}
+```
+
+```json {caption="[Text 11] Downstream TCP RST with Backpressure Case / mock-server Pod Access Log", linenos=table}
+{
+  "start_time": "2026-08-27T02:24:12.633Z",
+  "method": "GET",
+  "path": "/bytes/50000000",
+  "protocol": "HTTP/1.1",
+  "response_code": "200",
+  "response_flags": "DC",
+  "response_code_details": "downstream_remote_disconnect",
+  "connection_termination_details": "-",
+  "upstream_transport_failure_reason": "-",
+  "bytes_received": "0",
+  "bytes_sent": "8752321",
+  "duration": "3967",
+  "upstream_service_time": "23",
+  "x_forwarded_for": "-",
+  "user_agent": "python-backpressure-rst",
+  "request_id": "ab01ee94-eacc-96f2-a3f1-291a830f1036",
+  "authority": "mock-server:8080",
+  "upstream_host": "10.244.1.10:8080",
+  "upstream_cluster": "inbound|8080||",
+  "upstream_local_address": "127.0.0.6:49821",
+  "downstream_local_address": "10.244.1.10:8080",
+  "downstream_remote_address": "10.244.2.7:50072",
+  "requested_server_name": "outbound_.8080_._.mock-server.default.svc.cluster.local",
+  "route_name": "default",
+  "grpc_status": "-",
+  "upstream_request_attempt_count": "1",
+  "request_duration": "0",
+  "response_duration": "43"
+}
+```
+
+[Text 10]은 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 11]은 `mock-server`의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log 모두 Downstream TCP RST Case와 동일하게 `response_flags`가 `DC (DownstreamConnectionTermination)`, `response_code_details`가 `downstream_remote_disconnect`로 기록되며, 응답 전송 도중에 중단되었기 때문에 `response_code`는 `200`으로 기록된다. `bytes_sent`를 통해서 중단 전까지 각 `istio-proxy`가 Downstream에게 전송한 데이터의 크기도 확인할 수 있다.
+
+즉 Access Log에서는 Downstream TCP RST Case와 Downstream TCP RST with Backpressure Case가 구분되지 않으며, `istio-proxy`가 Upstream에게 TCP FIN Flag 대신 TCP RST Flag를 전송하는 차이는 Packet Dump를 통해서만 확인이 가능하다.
+
+#### 1.2.6. Upstream Request Retry Case
 
 **TODO: `images/http-upstream-request-retry-case.png` 그림 추가 필요**
 
 [File 1]의 Virtual Service에는 `retryOn` Field에 `502` Status Code가 포함되어 있기 때문에, `502` Status Code 응답을 받는 경우 최대 2번의 재시도를 수행하여 최대 3번의 요청이 전송된다.
 
-```shell {caption="[Shell 7] Upstream Request Retry Case / curl Command", linenos=table}
+```shell {caption="[Shell 8] Upstream Request Retry Case / curl Command", linenos=table}
 $ kubectl exec -it shell -- curl -s mock-server:8080/status/502
 {"message":"Bad Gateway","service":"mock-server","status_code":502}
 ```
 
-[Shell 7]은 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/status/502` Endpoint에 `GET` 요청을 전달하는 Upstream Request Retry Case를 나타내고 있다. `mock-server`는 모든 요청에 `502 Bad Gateway` 응답을 반환하기 때문에, `shell` Pod의 `istio-proxy`는 2번의 재시도를 모두 수행한 이후에 마지막으로 받은 `502 Bad Gateway` 응답을 `curl` 명령어에게 전달한다.
+[Shell 8]은 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/status/502` Endpoint에 `GET` 요청을 전달하는 Upstream Request Retry Case를 나타내고 있다. `mock-server`는 모든 요청에 `502 Bad Gateway` 응답을 반환하기 때문에, `shell` Pod의 `istio-proxy`는 2번의 재시도를 모두 수행한 이후에 마지막으로 받은 `502 Bad Gateway` 응답을 `curl` 명령어에게 전달한다.
 
-```json {caption="[Text 10] Upstream Request Retry Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 12] Upstream Request Retry Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2026-08-25T00:19:18.701Z",
   "method": "GET",
@@ -670,7 +770,7 @@ $ kubectl exec -it shell -- curl -s mock-server:8080/status/502
 }
 ```
 
-```json {caption="[Text 11] Upstream Request Retry Case / mock-server Pod Access Log", linenos=table}
+```json {caption="[Text 13] Upstream Request Retry Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2026-08-25T00:19:18.761Z",
   "method": "GET",
@@ -763,24 +863,24 @@ $ kubectl exec -it shell -- curl -s mock-server:8080/status/502
 }
 ```
 
-[Text 10]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 11]는 `mock-server`의 `istio-proxy`의 Access Log를 나타내고 있다. [Text 10]에서는 `upstream_request_attempt_count`가 첫번째 시도와 2번의 재시도를 모두 포함한 `3`으로 기록된 것을 확인할 수 있으며, `response_flags`도 재시도 한도를 모두 소진했음을 나타내는 `URX (UpstreamRetryLimitExceeded)`로 기록된 것을 확인할 수 있다.
+[Text 12]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 13]는 `mock-server`의 `istio-proxy`의 Access Log를 나타내고 있다. [Text 12]에서는 `upstream_request_attempt_count`가 첫번째 시도와 2번의 재시도를 모두 포함한 `3`으로 기록된 것을 확인할 수 있으며, `response_flags`도 재시도 한도를 모두 소진했음을 나타내는 `URX (UpstreamRetryLimitExceeded)`로 기록된 것을 확인할 수 있다.
 
-[Text 11]에서는 동일한 `request_id`를 갖는 3개의 Log가 기록된 것을 확인할 수 있다. 재시도는 Client 역할을 수행하는 `shell` Pod의 `istio-proxy`에서 수행되기 때문에, `mock-server` Pod의 `istio-proxy`는 각 재시도를 별개의 요청으로 처리하여 모든 Log에 `upstream_request_attempt_count`가 `1`로 기록된다.
+[Text 13]에서는 동일한 `request_id`를 갖는 3개의 Log가 기록된 것을 확인할 수 있다. 재시도는 Client 역할을 수행하는 `shell` Pod의 `istio-proxy`에서 수행되기 때문에, `mock-server` Pod의 `istio-proxy`는 각 재시도를 별개의 요청으로 처리하여 모든 Log에 `upstream_request_attempt_count`가 `1`로 기록된다.
 
-#### 1.2.6. Upstream TCP RST before Response Case
+#### 1.2.7. Upstream TCP RST before Response Case
 
 {{< figure caption="[Figure 7] Upstream TCP RST before Response Case" src="images/http-upstream-tcp-rst-before-response-case.png" width="1000px" >}}
 
-```shell {caption="[Shell 8] Upstream TCP RST before Response Case / curl Command", linenos=table}
+```shell {caption="[Shell 9] Upstream TCP RST before Response Case / curl Command", linenos=table}
 $ kubectl exec -it shell -- curl -s mock-server:8080/reset-before-response/1000
 upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
-[Figure 7]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/reset-before-response/1000` Endpoint에 `GET` 요청을 전달하고, `1000ms` 후에 `mock-server` Pod가 TCP RST Flag를 전송하여 Connection을 강제로 종료하는 Upstream TCP RST before Response Case를 나타내고 있다. [Shell 8]은 [Figure 7]의 내용을 실행하는 예시를 나타내고 있다.
+[Figure 7]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/reset-before-response/1000` Endpoint에 `GET` 요청을 전달하고, `1000ms` 후에 `mock-server` Pod가 TCP RST Flag를 전송하여 Connection을 강제로 종료하는 Upstream TCP RST before Response Case를 나타내고 있다. [Shell 9]은 [Figure 7]의 내용을 실행하는 예시를 나타내고 있다.
 
 `mock-server` Pod의 `istio-proxy`는 `mock-server` Container로부터 TCP RST Flag를 수신하면 TCP RST Flag를 `shell` Pod에게 전송하지 않고, `503 Service Unavailable` 응답을 전송하기 때문에 `shell` Pod의 `istio-proxy`의 Access Log에는 `response_flags`가 존재하지 않고 `503 Service Unavailable` 응답만 확인이 가능하다.
 
-```json {caption="[Text 12] Upstream TCP RST before Response Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 14] Upstream TCP RST before Response Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-01T11:58:47.152Z",
   "method": "GET",
@@ -813,7 +913,7 @@ upstream connect error or disconnect/reset before headers. reset reason: connect
 }
 ```
 
-```json {caption="[Text 13] Upstream TCP RST before Response Case / mock-server Pod Access Log", linenos=table}
+```json {caption="[Text 15] Upstream TCP RST before Response Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-01T11:58:47.167Z",
   "method": "GET",
@@ -846,23 +946,23 @@ upstream connect error or disconnect/reset before headers. reset reason: connect
 }
 ```
 
-[Text 12]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 13]는 `mock-server`의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/reset-before-response/1000` Endpoint에 접근하는 내역와 `503 Service Unavailable` 응답도 확인이 가능하다. 또한 `response_flags`가 `UC (UpstreamConnectionTermination)`로 나타나는 것을 확인할 수 있으며, `response_code_details`에 `upstream_reset_before_response_started{connection_termination}`, 즉 응답을 시작하기전에 TCP RST Flag가 Upstream에서 전송되었음을 나타내는 상세 내역도 확인할 수 있다.
+[Text 14]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 15]는 `mock-server`의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/reset-before-response/1000` Endpoint에 접근하는 내역와 `503 Service Unavailable` 응답도 확인이 가능하다. 또한 `response_flags`가 `UC (UpstreamConnectionTermination)`로 나타나는 것을 확인할 수 있으며, `response_code_details`에 `upstream_reset_before_response_started{connection_termination}`, 즉 응답을 시작하기전에 TCP RST Flag가 Upstream에서 전송되었음을 나타내는 상세 내역도 확인할 수 있다.
 
-#### 1.2.7. Upstream TCP RST after Response Case
+#### 1.2.8. Upstream TCP RST after Response Case
 
 {{< figure caption="[Figure 8] Upstream TCP RST after Response Case" src="images/http-upstream-tcp-rst-after-response-case.png" width="1000px" >}}
 
-```shell {caption="[Shell 9] Upstream TCP RST after Response Case / curl Command", linenos=table}
+```shell {caption="[Shell 10] Upstream TCP RST after Response Case / curl Command", linenos=table}
 $ kubectl exec -it shell -- curl -s mock-server:8080/reset-after-response/1000
 curl: (18) transfer closed with outstanding read data remaining
 dummy datacommand terminated with exit code 18
 ```
 
-[Figure 8]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/reset-after-response/1000` Endpoint에 `GET` 요청을 전달하고, `1000ms` 후에 `mock-server` Pod가 응답을 일부 전송한 후에 TCP RST Flag를 전송하여 Connection을 강제로 종료하는 Upstream TCP RST after Response Case를 나타내고 있다. [Shell 9]은 [Figure 8]의 내용을 실행하는 예시를 나타내고 있다.
+[Figure 8]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/reset-after-response/1000` Endpoint에 `GET` 요청을 전달하고, `1000ms` 후에 `mock-server` Pod가 응답을 일부 전송한 후에 TCP RST Flag를 전송하여 Connection을 강제로 종료하는 Upstream TCP RST after Response Case를 나타내고 있다. [Shell 10]은 [Figure 8]의 내용을 실행하는 예시를 나타내고 있다.
 
 TCP RST Flag를 받은 `mock-server` Pod의 `istio-proxy`는 TCP FIN Flag를 `shell` Pod에게 전송하여 TCP Connection을 종료한다. 또한 예상치 못한 Connection 종료였기 때문에 TCP RST Flag도 TCP RST Flag 이후에 전송한다.
 
-```json {caption="[Text 14] Upstream TCP RST after Response Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 16] Upstream TCP RST after Response Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-01T12:47:45.064Z",
   "method": "GET",
@@ -895,7 +995,7 @@ TCP RST Flag를 받은 `mock-server` Pod의 `istio-proxy`는 TCP FIN Flag를 `sh
 }
 ```
 
-```json {caption="[Text 15] Upstream TCP RST after Response Case / mock-server Pod Access Log", linenos=table}
+```json {caption="[Text 17] Upstream TCP RST after Response Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-01T12:47:45.066Z",
   "method": "GET",
@@ -928,24 +1028,24 @@ TCP RST Flag를 받은 `mock-server` Pod의 `istio-proxy`는 TCP FIN Flag를 `sh
 }
 ```
 
-[Text 14]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 15]는 `mock-server`의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/reset-after-response/1000` Endpoint에 접근하는 내역와 `200 OK` 응답도 확인이 가능하다. 또한 `response_flags`가 `UPE (UpstreamProtocolError)`로 나타나는 것을 확인할 수 있있다. 
+[Text 16]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 17]는 `mock-server`의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/reset-after-response/1000` Endpoint에 접근하는 내역와 `200 OK` 응답도 확인이 가능하다. 또한 `response_flags`가 `UPE (UpstreamProtocolError)`로 나타나는 것을 확인할 수 있있다. 
 
 `response_code_details`에 `upstream_reset_after_response_started{protocol_error}`, 즉 일부 응답 전송후에 TCP RST Flag가 Upstream에서 전송되었음을 나타내는 상세 내역도 확인할 수 있다. Protocol Error가 발생하는 이유는 완전한 HTTP 응답을 전송하기 전에 TCP RST Flag가 Upstream에서 전송되었기 때문이다.
 
-#### 1.2.8. Upstream TCP Close before Response Case
+#### 1.2.9. Upstream TCP Close before Response Case
 
 {{< figure caption="[Figure 9] Upstream TCP Close before Response Case" src="images/http-upstream-tcp-close-before-response-case.png" width="1000px" >}}
 
-```shell {caption="[Shell 10] Upstream TCP Close before Response Case / curl Command", linenos=table}
+```shell {caption="[Shell 11] Upstream TCP Close before Response Case / curl Command", linenos=table}
 $ kubectl exec -it shell -- curl -s mock-server:8080/close-before-response/1000
 upstream connect error or disconnect/reset before headers. reset reason: connection termination
 ```
 
-[Figure 9]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/close-before-response/1000` Endpoint에 `GET` 요청을 전달하고, `1000ms` 후에 `mock-server` Pod가 Connection을 강제로 종료하는 Upstream TCP Close before Response Case를 나타내고 있다. [Shell 10]은 [Figure 9]의 내용을 실행하는 예시를 나타내고 있다.
+[Figure 9]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/close-before-response/1000` Endpoint에 `GET` 요청을 전달하고, `1000ms` 후에 `mock-server` Pod가 Connection을 강제로 종료하는 Upstream TCP Close before Response Case를 나타내고 있다. [Shell 11]은 [Figure 9]의 내용을 실행하는 예시를 나타내고 있다.
 
 `mock-server` Pod의 `istio-proxy`는 `mock-server` Container로부터 TCP FIN Flag를 수신하면 503 Service Unavailable 응답을 `shell` Pod에게 전송하여 요청이 비정상적으로 종료된것을 알린다.
 
-```json {caption="[Text 16] Upstream TCP Connection Close Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 18] Upstream TCP Connection Close Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-11T08:00:51.487Z",
   "method": "GET",
@@ -978,7 +1078,7 @@ upstream connect error or disconnect/reset before headers. reset reason: connect
 }
 ```
 
-```json {caption="[Text 17] Upstream TCP Connection Close Case / mock-server Pod Access Log", linenos=table}
+```json {caption="[Text 19] Upstream TCP Connection Close Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-11T08:00:51.488Z",
   "method": "GET",
@@ -1011,24 +1111,24 @@ upstream connect error or disconnect/reset before headers. reset reason: connect
 }
 ```
 
-[Text 16]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 17]는 `mock-server`의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/disconnect/1000` Endpoint에 접근하는 내역와 `503 Service Unavailable` 응답도 확인이 가능하다. 또한 `response_flags`가 `UC (UpstreamConnectionTermination)`로 나타나는 것을 확인할 수 있다.
+[Text 18]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 19]는 `mock-server`의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/disconnect/1000` Endpoint에 접근하는 내역와 `503 Service Unavailable` 응답도 확인이 가능하다. 또한 `response_flags`가 `UC (UpstreamConnectionTermination)`로 나타나는 것을 확인할 수 있다.
 
 `response_code_details`에 `upstream_reset_before_response_started {connection_termination}`, 즉 응답을 시작하기전에 TCP FIN Flag가 Upstream에서 전송되었음을 나타내는 상세 내역도 확인할 수 있다. 이는 [Figure 7]에서 TCP RST Flag를 받을때와 동일한 상세 내역이며, `mock-server` Pod의 `istio-proxy`는 응답이 전송되기 전에 TCP FIN Flag 또는 TCP RST Flag를 수신하면 동일한 `response_code_details`를 남기는것을 확인할 수 있다.
 
-#### 1.2.9. Upstream TCP Close after Response Case
+#### 1.2.10. Upstream TCP Close after Response Case
 
 {{< figure caption="[Figure 10] Upstream TCP Close after Response Case" src="images/http-upstream-tcp-close-after-response-case.png" width="1000px" >}}
 
-```shell {caption="[Shell 11] Upstream TCP Close after Response Case / curl Command", linenos=table}
+```shell {caption="[Shell 12] Upstream TCP Close after Response Case / curl Command", linenos=table}
 $ kubectl exec -it shell -- curl -s mock-server:8080/close-after-response/1000
 dummy datacommand terminated with exit code 18
 ```
 
-[Figure 10]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/close-after-response/1000` Endpoint에 `GET` 요청을 전달하고, `1000ms` 후에 `mock-server` Pod가 응답을 전송한 후에 Connection을 강제로 종료하는 Upstream TCP Close after Response Case를 나타내고 있다. [Shell 11]은 [Figure 10]의 내용을 실행하는 예시를 나타내고 있다.
+[Figure 10]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/close-after-response/1000` Endpoint에 `GET` 요청을 전달하고, `1000ms` 후에 `mock-server` Pod가 응답을 전송한 후에 Connection을 강제로 종료하는 Upstream TCP Close after Response Case를 나타내고 있다. [Shell 12]은 [Figure 10]의 내용을 실행하는 예시를 나타내고 있다.
 
 `mock-server` Pod의 `istio-proxy`는 `mock-server` Container로부터 TCP FIN Flag를 수신하면 503 Service Unavailable 응답을 `shell` Pod에게 전송하여 요청이 비정상적으로 종료된것을 알린다.
 
-```json {caption="[Text 18] Upstream TCP Close after Response Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 20] Upstream TCP Close after Response Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-11T08:01:36.305Z",
   "method": "GET",
@@ -1061,7 +1161,7 @@ dummy datacommand terminated with exit code 18
 }
 ```
 
-```json {caption="[Text 19] Upstream TCP Close after Response Case / mock-server Pod Access Log", linenos=table}
+```json {caption="[Text 21] Upstream TCP Close after Response Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-11T08:01:36.307Z",
   "method": "GET",
@@ -1094,15 +1194,15 @@ dummy datacommand terminated with exit code 18
 }
 ```
 
-[Text 18]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 19]는 `mock-server`의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/close-after-response/1000` Endpoint에 접근하는 내역과 `200 OK` 응답도 확인이 가능하다. 또한 `response_flags`가 `UPE (UpstreamProtocolError)`로 나타나는 것을 확인할 수 있다.
+[Text 20]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 21]는 `mock-server`의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/close-after-response/1000` Endpoint에 접근하는 내역과 `200 OK` 응답도 확인이 가능하다. 또한 `response_flags`가 `UPE (UpstreamProtocolError)`로 나타나는 것을 확인할 수 있다.
 
 `response_code_details`에 `upstream_reset_after_response_started {protocol_error}`, 즉 응답을 시작한 후에 Protocol Error가 발생하여 Connection을 강제로 종료한 것을 나타내는 상세 내역도 확인할 수 있다. 이는 [Figure 8]에서 TCP RST Flag를 받을때와 동일한 상세 내역이며, `mock-server` Pod의 `istio-proxy`는 응답을 일부 전송한 상태에서 TCP FIN Flag 또는 TCP RST Flag를 수신하면 동일한 `response_code_details`를 남기는것을 확인할 수 있다.
 
-#### 1.2.10. Circuit Breaking with Upstream Connection Pool Overflow Case
+#### 1.2.11. Circuit Breaking with Upstream Connection Pool Overflow Case
 
 {{< figure caption="[Figure 11] Circuit Breaking with Upstream Connection Pool Overflow Case" src="images/http-circuit-breaking-with-upstream-connection-pool-overflow-case.png" width="1000px" >}}
 
-```shell {caption="[Shell 12] Circuit Breaking with Upstream Connection Pool Overflow Case / curl Command", linenos=table}
+```shell {caption="[Shell 13] Circuit Breaking with Upstream Connection Pool Overflow Case / curl Command", linenos=table}
 $ kubectl exec shell -- curl -s mock-server:8080/delay/5000 &
 $ kubectl exec shell -- curl -s mock-server:8080/delay/5000 &
 $ kubectl exec shell -- curl -s mock-server:8080/delay/5000 &
@@ -1111,11 +1211,11 @@ upstream connect error or disconnect/reset before headers. reset reason: overflo
 {"delayed_ms":5000,"message":"Response delayed by 5000ms","service":"mock-server"}
 ```
 
-[Figure 11]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/delay/5000` Endpoint에 `GET` 요청을 3번 연속으로 전달하여 Upstream Connection Pool Overflow를 발생시켜 Circuit Breaking을 동작시키는 Case를 나타내고 있다. [Shell 12]은 [Figure 11]의 내용을 실행하는 예시를 나타내고 있다.
+[Figure 11]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/delay/5000` Endpoint에 `GET` 요청을 3번 연속으로 전달하여 Upstream Connection Pool Overflow를 발생시켜 Circuit Breaking을 동작시키는 Case를 나타내고 있다. [Shell 13]은 [Figure 11]의 내용을 실행하는 예시를 나타내고 있다.
 
 [File 1]의 Destination Rule에 의해서 첫번째 요청은 바로 `mock-server` Pod로 전달되며, 5000ms 동안 대기 이후에 `200 OK` 응답과 함께 종료된다. 두번째 요청은 첫번째 요청이 처리중이기 때문에 Pending되어 첫번째 요청이 끝나기 전까지 대기 이후에 `mock-server` Pod에 전달된다. 따라서 두번째 요청이 처리되는데 걸리는 시간은 5000ms + 5000ms = 10000ms가 된다. 세번째 요청은 Pending도 불가능하기 때문에 `istio-proxy`는 Upstream Overflow라 간주하고 Circuit Breaking을 동작시키고, `503 Service Unavailable` 응답을 전송한다.
 
-```json {caption="[Text 20] Circuit Breaking with Upstream Connection Pool Overflow Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 22] Circuit Breaking with Upstream Connection Pool Overflow Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2025-12-22T16:08:03.507Z",
   "method": "GET",
@@ -1208,7 +1308,7 @@ upstream connect error or disconnect/reset before headers. reset reason: overflo
 }
 ```
 
-```json {caption="[Text 21] Circuit Breaking with Upstream Connection Pool Overflow Case / mock-server Pod Access Log", linenos=table}
+```json {caption="[Text 23] Circuit Breaking with Upstream Connection Pool Overflow Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2025-12-22T16:08:02.443Z",
   "method": "GET",
@@ -1271,15 +1371,15 @@ upstream connect error or disconnect/reset before headers. reset reason: overflo
 }
 ```
 
-[Text 20]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 21]는 `mock-server`의 `istio-proxy`의 Access Log를 나타내고 있다. `shell` Pod의 `istio-proxy`의 Access Log에는 가장 먼저 남는 Log는 Upstream Connection Pool Overflow로 인해서 요청과 동시에 처리에 실패한 세번째 요청에 대한 Log이다. `response_flags`가 `UO (UpstreamOverflow)`로 나타나는 것을 확인할 수 있으며, `start_time`도 나머지 Log와 비교하면 가장 나중에 시작된 것도 확인할 수 있다. 두번째로 남는 Log는 첫번째 요청에 대한 Log이며, 세번째로 남는 Log는 두번째 요청에 대한 Log이다. `response_duration`이 각각 5000ms, 10000ms인걸 확인할 수 있다.
+[Text 22]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 23]는 `mock-server`의 `istio-proxy`의 Access Log를 나타내고 있다. `shell` Pod의 `istio-proxy`의 Access Log에는 가장 먼저 남는 Log는 Upstream Connection Pool Overflow로 인해서 요청과 동시에 처리에 실패한 세번째 요청에 대한 Log이다. `response_flags`가 `UO (UpstreamOverflow)`로 나타나는 것을 확인할 수 있으며, `start_time`도 나머지 Log와 비교하면 가장 나중에 시작된 것도 확인할 수 있다. 두번째로 남는 Log는 첫번째 요청에 대한 Log이며, 세번째로 남는 Log는 두번째 요청에 대한 Log이다. `response_duration`이 각각 5000ms, 10000ms인걸 확인할 수 있다.
 
 `mock-server` Pod의 `istio-proxy`의 Access Log에는 첫번째 요청과 두번째 요청에 대한 Log만 남아 있는것을 확인할 수 있으며, `response_duration`이 모두 5000ms인걸 확인할 수 있다. 세번째 요청은 `shell` Pod의 `istio-proxy`에서 Upstream Connection Pool Overflow로 인해서 `mock-server` Pod로 전달되지 않았기 때문에 `mock-server` Pod의 `istio-proxy`에도 세번째 요청에 대한 Log가 존재하지 않는다.
 
-#### 1.2.11. Circuit Breaking with Upstream Request Limit Overflow Case
+#### 1.2.12. Circuit Breaking with Upstream Request Limit Overflow Case
 
 {{< figure caption="[Figure 12] Circuit Breaking with Upstream Request Limit Overflow Case" src="images/http-circuit-breaking-with-upstream-request-limit-overflow-case.png" width="1000px" >}}
 
-```shell {caption="[Shell 13] Circuit Breaking with Upstream Request Limit Overflow Case / curl Command", linenos=table}
+```shell {caption="[Shell 14] Circuit Breaking with Upstream Request Limit Overflow Case / curl Command", linenos=table}
 $ kubectl exec shell -- curl -s mock-server:8080/delay/5000 &
 $ kubectl exec shell -- curl -s mock-server:8080/delay/5000 &
 upstream connect error or disconnect/reset before headers. reset reason: overflow
@@ -1288,11 +1388,11 @@ upstream connect error or disconnect/reset before headers. reset reason: overflo
 {"delayed_ms":5000,"message":"Response delayed by 5000ms","service":"mock-server"}
 ```
 
-[Figure 12]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/delay/5000` Endpoint에 `GET` 요청을 3번 연속으로 전달하여 Upstream Request Limit Overflow를 발생시키는 Case를 나타내고 있다. 이 Case를 재현하기 위해서는 [File 2]에서 설정한 Destination Rule을 적용해야한다. [Shell 13]은 [Figure 12]의 내용을 실행하는 예시를 나타내고 있다.
+[Figure 12]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/delay/5000` Endpoint에 `GET` 요청을 3번 연속으로 전달하여 Upstream Request Limit Overflow를 발생시키는 Case를 나타내고 있다. 이 Case를 재현하기 위해서는 [File 2]에서 설정한 Destination Rule을 적용해야한다. [Shell 14]은 [Figure 12]의 내용을 실행하는 예시를 나타내고 있다.
 
 [File 2]의 Destination Rule의 설정에 의해서 최대 동시에 처리할 수 있는 요청이 하나이고 요청 Pending도 불가능하기 때문에, 두번째와 세번째 요청은 Upstream Overflow로 인해서 `mock-server` Pod에 전달되지 않는다.
 
-```json {caption="[Text 22] Circuit Breaking with Request Limit Upstream Overflow Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 24] Circuit Breaking with Request Limit Upstream Overflow Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-03T15:23:06.371Z",
   "method": "GET",
@@ -1385,7 +1485,7 @@ upstream connect error or disconnect/reset before headers. reset reason: overflo
 }
 ```
 
-```json {caption="[Text 23] Circuit Breaking with Request Limit Upstream Overflow Case / mock-server Pod Access Log", linenos=table}
+```json {caption="[Text 25] Circuit Breaking with Request Limit Upstream Overflow Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-03T15:23:06.121Z",
   "method": "GET",
@@ -1418,13 +1518,13 @@ upstream connect error or disconnect/reset before headers. reset reason: overflo
 }
 ```
 
-[Text 22]은 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 23]은 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. `shell` Pod의 `istio-proxy`의 Access Log에는 먼저 남는 Log는 Upstream Request Limit Overflow로 인해서 요청과 동시에 처리에 실패한 두번째, 세번째 요청에 대한 Log이다. 첫번째 Log가 두번째 요청에 대한 Log이고, 두번째 Log가 세번째 요청에 대한 Log이다. 둘다 `response_flags`가 `UO (UpstreamOverflow)`로 나타나는 것을 확인할 수 있다. 마지막 Log는 첫번째 요청에 대한 Log이며, 정상적으로 `mock-server` Pod에 전달되어 처리된 것을 확인할 수 있다.
+[Text 24]은 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 25]은 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. `shell` Pod의 `istio-proxy`의 Access Log에는 먼저 남는 Log는 Upstream Request Limit Overflow로 인해서 요청과 동시에 처리에 실패한 두번째, 세번째 요청에 대한 Log이다. 첫번째 Log가 두번째 요청에 대한 Log이고, 두번째 Log가 세번째 요청에 대한 Log이다. 둘다 `response_flags`가 `UO (UpstreamOverflow)`로 나타나는 것을 확인할 수 있다. 마지막 Log는 첫번째 요청에 대한 Log이며, 정상적으로 `mock-server` Pod에 전달되어 처리된 것을 확인할 수 있다.
 
-#### 1.2.12. Circuit Breaking with No Healthy Upstream Case
+#### 1.2.13. Circuit Breaking with No Healthy Upstream Case
 
 {{< figure caption="[Figure 13] Circuit Breaking with No Healthy Upstream Case" src="images/http-circuit-breaking-with-no-healthy-upstream-case.png" width="1000px" >}}
 
-```shell {caption="[Shell 14] Circuit Breaking with No Healthy Upstream Case / curl Command", linenos=table}
+```shell {caption="[Shell 15] Circuit Breaking with No Healthy Upstream Case / curl Command", linenos=table}
 $ kubectl exec -it shell -- curl -s mock-server:8080/status/503
 {"message":"Service Unavailable","service":"mock-server","status_code":503}
 $ kubectl exec -it shell -- curl -s mock-server:8080/status/503 
@@ -1443,11 +1543,11 @@ $ kubectl exec -it shell -- curl -s mock-server:8080/status/200
 no healthy upstream
 ```
 
-[Figure 13]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/status/503` Endpoint에 `GET` 요청을 8번 연속으로 전달하여 No Healthy Upstream을 통한 Circuit Breaking을 발생시키는 Case를 나타내고 있다. [Shell 14]는 [Figure 13]의 내용을 실행하는 예시를 나타내고 있다.
+[Figure 13]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/status/503` Endpoint에 `GET` 요청을 8번 연속으로 전달하여 No Healthy Upstream을 통한 Circuit Breaking을 발생시키는 Case를 나타내고 있다. [Shell 15]는 [Figure 13]의 내용을 실행하는 예시를 나타내고 있다.
 
 [File 1]의 Destination Rule에 의해서 5번의 연속적인 5XX Error가 발생하면 Circuit Breaking이 동작한다. 따라서 `shell` Pod의 첫 5번의 요청은 모두 `mock-server` Pod에게 전달되지만, 이후에 3번의 요청은 Circuit Breaking으로 인해서 `mock-server` Pod에 전달되지 않는다.
 
-```json {caption="[Text 24] Circuit Breaking with No Healthy Upstream Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 26] Circuit Breaking with No Healthy Upstream Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2025-12-22T12:23:20.109Z",
   "method": "GET",
@@ -1690,7 +1790,7 @@ no healthy upstream
 }
 ```
 
-```json {caption="[Text 25] Circuit Breaking with No Healthy Upstream Case / mock-server Pod Access Log", linenos=table}
+```json {caption="[Text 27] Circuit Breaking with No Healthy Upstream Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2025-12-22T12:23:20.129Z",
   "method": "GET",
@@ -1843,13 +1943,13 @@ no healthy upstream
 }
 ```
 
-[Text 24]은 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 25]은 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. `shell` Pod의 `istio-proxy`의 Access Log에는 마지막 3개의 요청에만 `response_flags`가 `UH (NoHealthyUpstream)`와 함께 요청이 `mock-server` Pod에 전달되지 않은 것을 확인할 수 있다. 또한 `mock-server` Pod의 `istio-proxy`의 Access Log에는 처음 5개의 요청에 대한 Log만 남아있는것도 확인할 수 있다.
+[Text 26]은 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 27]은 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. `shell` Pod의 `istio-proxy`의 Access Log에는 마지막 3개의 요청에만 `response_flags`가 `UH (NoHealthyUpstream)`와 함께 요청이 `mock-server` Pod에 전달되지 않은 것을 확인할 수 있다. 또한 `mock-server` Pod의 `istio-proxy`의 Access Log에는 처음 5개의 요청에 대한 Log만 남아있는것도 확인할 수 있다.
 
-#### 1.2.13. Upstream Connection Failure with Timeout Case
+#### 1.2.14. Upstream Connection Failure with Timeout Case
 
 {{< figure caption="[Figure 14] Upstream Connection Failure with Timeout Case" src="images/http-upstream-connection-failure-case-with-timeout.png" width="1000px" >}}
 
-```shell {caption="[Shell 15] Upstream Connection Failure with Timeout Case / iptables & curl Command", linenos=table}
+```shell {caption="[Shell 16] Upstream Connection Failure with Timeout Case / iptables & curl Command", linenos=table}
 $ SHELL_IP=$(kubectl get pod shell -o jsonpath='{.status.podIP}')
 $ kubectl exec mock-server -c mock-server -- iptables -A INPUT -s ${SHELL_IP} -j DROP
 # $ kubectl exec mock-server -c mock-server -- iptables -D INPUT 1 remove rule after case execution
@@ -1862,13 +1962,13 @@ $ kubectl exec -it shell -- curl -s mock-server:8080/status/200
 no healthy upstream
 ```
 
-[Figure 14]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/status/200` Endpoint에 접속시 Timeout에 의해서 연결에 실패하여 Retry되는 Upstream Connection Failure with Timeout Case를 나타내고 있다. [Shell 15]은 [Figure 14]의 내용을 실행하는 예시를 나타내고 있다. Timeout을 발생시키기 위해서 `iptables` 명령어를 이용하여 `shell` Pod의 IP Address로부터 들어오는 트래픽을 `DROP`하는 Rule을 추가한 다음, `curl` 명령어를 이용하여 요청을 전송한다.
+[Figure 14]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/status/200` Endpoint에 접속시 Timeout에 의해서 연결에 실패하여 Retry되는 Upstream Connection Failure with Timeout Case를 나타내고 있다. [Shell 16]은 [Figure 14]의 내용을 실행하는 예시를 나타내고 있다. Timeout을 발생시키기 위해서 `iptables` 명령어를 이용하여 `shell` Pod의 IP Address로부터 들어오는 트래픽을 `DROP`하는 Rule을 추가한 다음, `curl` 명령어를 이용하여 요청을 전송한다.
 
 [File 1]의 Virtual Service의 `connect-failure` 의해서 2번의 재시도가 발생하여 총 3번의 요청이 전송된다. 따라서 `shell` Pod의 첫번째 요청은 `shell` Pod의 `istio-proxy`에 의해서 3번의 재시도를 수행한 다음 `connection timeout` 오류가 출력된다. `shell` Pod의 두번째 요청은 1번의 재시도가 발생하여 총 2번의 요청이 전송되는데, 이유는 [File 1]의 Destination Rule에 의해서 5번 연속적인 5XX Error가 발생하면 Circuit Breaking이 동작하기 때문이다.
 
 첫번째 요청의 3번의 요청과 두번째 요청의 2번째 요청, 총 5번의 요청이 발생했고 모두 Timeout에 의해서 실패하였기 때문에 Healthy Upstream이 없다고 판단하고 Circuit Breaking이 동작한다. 따라서 두번째 요청의 2번째 재시도는 Circuit Breaking에 의해서 `mock-server` Pod에 전송되지 않으며, 두번째 요청의 결과로 `no healthy upstream` 오류가 출력된다. 세번째 요청은 Circuit Breaking에 의해서 즉시 `no healthy upstream` 오류 출력과 함께 종료된다.
 
-```json {caption="[Text 26] Upstream Connection Failure with Timeout Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 28] Upstream Connection Failure with Timeout Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2025-12-21T07:17:42.331Z",
   "method": "GET",
@@ -1961,15 +2061,15 @@ no healthy upstream
 }
 ```
 
-[Text 26]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. `shell` Pod의 요청이 `istio-proxy`에 의해서 `mock-server` Pod에 전달되지 않기 때문에 `mock-server` Pod의 `istio-proxy`의 Access Log에는 아무것도 남지 않는다. 첫번째 요청에는 `response_flags`에 `URX (UpstreamRetryLimitExceeded)`와 `UF (UpstreamConnectionFailure)`가 함께 나타나는 것을 확인할 수 있으며, `response_code_details`에 `upstream_reset_before_response_started {connection_timeout}`, 즉 Connection Timeout이 발생한 사실을 확인할 수 있다. `upstream_request_attempt_count`가 `3`으로 나타나는 것을 확인할 수 있다.
+[Text 28]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. `shell` Pod의 요청이 `istio-proxy`에 의해서 `mock-server` Pod에 전달되지 않기 때문에 `mock-server` Pod의 `istio-proxy`의 Access Log에는 아무것도 남지 않는다. 첫번째 요청에는 `response_flags`에 `URX (UpstreamRetryLimitExceeded)`와 `UF (UpstreamConnectionFailure)`가 함께 나타나는 것을 확인할 수 있으며, `response_code_details`에 `upstream_reset_before_response_started {connection_timeout}`, 즉 Connection Timeout이 발생한 사실을 확인할 수 있다. `upstream_request_attempt_count`가 `3`으로 나타나는 것을 확인할 수 있다.
 
 두번째, 세번째 요청에는 Circuit Breaking에 의해서 `response_flags`에 `UH (NoHealthyUpstream)`가 나타나는 것을 확인할 수 있으며, `response_code_details`에 `no_healthy_upstream`가 나타나는 것을 확인할 수 있다. 두번째 요청에는 `upstream_request_attempt_count`가 `3`으로 나타나는 것을 확인할 수 있다. 세번째 요청에는 `upstream_request_attempt_count`가 `1`으로 나타나는 것을 확인할 수 있다.
 
-#### 1.2.14. Upstream Connection Failure with TCP Reset Case
+#### 1.2.15. Upstream Connection Failure with TCP Reset Case
 
 {{< figure caption="[Figure 15] Upstream Connection Failure with TCP Reset Case" src="images/http-upstream-connection-failure-case-with-tcp-reset.png" width="1000px" >}}
 
-```shell {caption="[Shell 16] Upstream Connection Failure with TCP Reset Case / iptables & curl Command", linenos=table}
+```shell {caption="[Shell 17] Upstream Connection Failure with TCP Reset Case / iptables & curl Command", linenos=table}
 $ SHELL_IP=$(kubectl get pod shell -o jsonpath='{.status.podIP}')
 $ kubectl exec mock-server -c mock-server -- iptables-legacy -A INPUT -p tcp -s ${SHELL_IP} -j REJECT --reject-with tcp-reset
 # $ kubectl exec mock-server -c mock-server -- iptables-legacy -D INPUT 1 remove rule after case execution
@@ -1982,9 +2082,9 @@ $ kubectl exec -it shell -- curl -s mock-server:8080/status/200
 no healthy upstream
 ```
 
-[Figure 15]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/status/200` Endpoint에 접속시 TCP Reset에 의해서 연결에 실패하여 Retry되는 Upstream Connection Failure with TCP Reset Case를 나타내고 있다. [Shell 16]은 [Figure 15]의 내용을 실행하는 예시를 나타내고 있다. TCP Reset을 발생시키기 위해서 `iptables` 명령어를 이용하여 `shell` Pod의 IP Address로부터 들어오는 트래픽을 `REJECT`하는 Rule을 추가한 다음, `curl` 명령어를 이용하여 요청을 전송한다. `Connection Refused` 오류 내용을 제외하고는 Timeout에 의해서 Retry를 수행하는 Case와 동일한 결과를 보여준다.
+[Figure 15]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/status/200` Endpoint에 접속시 TCP Reset에 의해서 연결에 실패하여 Retry되는 Upstream Connection Failure with TCP Reset Case를 나타내고 있다. [Shell 17]은 [Figure 15]의 내용을 실행하는 예시를 나타내고 있다. TCP Reset을 발생시키기 위해서 `iptables` 명령어를 이용하여 `shell` Pod의 IP Address로부터 들어오는 트래픽을 `REJECT`하는 Rule을 추가한 다음, `curl` 명령어를 이용하여 요청을 전송한다. `Connection Refused` 오류 내용을 제외하고는 Timeout에 의해서 Retry를 수행하는 Case와 동일한 결과를 보여준다.
 
-```json {caption="[Text 27] Upstream Connection Failure with TCP Reset Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 29] Upstream Connection Failure with TCP Reset Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2025-12-22T17:09:54.276Z",
   "method": "GET",
@@ -2077,21 +2177,21 @@ no healthy upstream
 }
 ```
 
-[Text 27]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. `shell` Pod의 요청이 `istio-proxy`에 의해서 `mock-server` Pod에 전달되지 않기 때문에 `mock-server` Pod의 `istio-proxy`의 Access Log에는 아무것도 남지 않는다. `response_code_details`에 `upstream_reset_before_response_started{remote_connection_failure|delayed_connect_error:_Connection_refused}`, 즉 Remote Connection Failure와 Delayed Connect Error가 발생한 사실을 확인할 수 있다. 이 부분을 제외하고는 Timeout에 의해서 Retry를 수행하는 Case와 동일한 결과를 보여준다.
+[Text 29]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. `shell` Pod의 요청이 `istio-proxy`에 의해서 `mock-server` Pod에 전달되지 않기 때문에 `mock-server` Pod의 `istio-proxy`의 Access Log에는 아무것도 남지 않는다. `response_code_details`에 `upstream_reset_before_response_started{remote_connection_failure|delayed_connect_error:_Connection_refused}`, 즉 Remote Connection Failure와 Delayed Connect Error가 발생한 사실을 확인할 수 있다. 이 부분을 제외하고는 Timeout에 의해서 Retry를 수행하는 Case와 동일한 결과를 보여준다.
 
-#### 1.2.15. Upstream Request Timeout Case
+#### 1.2.16. Upstream Request Timeout Case
 
 {{< figure caption="[Figure 16] Upstream Request Timeout Case" src="images/http-upstream-request-timeout-case.png" width="1000px" >}}
 
-```shell {caption="[Shell 17] Upstream Request Timeout Case / curl Command", linenos=table}
+```shell {caption="[Shell 18] Upstream Request Timeout Case / curl Command", linenos=table}
 $ kubectl exec -it shell -- curl -s mock-server:8080/delay/70000
 ```
 
-[Figure 16]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/delay/70000` Endpoint에 `GET` 요청을 전달하였지만, `mock-server` Pod의 `istio-proxy`에서 60000ms 대기후에 응답이 오지 않아 Request를 Timeout 처리하는 Upstream Request Timeout Case를 나타내고 있다. [Shell 17]은 [Figure 16]의 내용을 실행하는 예시를 나타내고 있다.
+[Figure 16]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/delay/70000` Endpoint에 `GET` 요청을 전달하였지만, `mock-server` Pod의 `istio-proxy`에서 60000ms 대기후에 응답이 오지 않아 Request를 Timeout 처리하는 Upstream Request Timeout Case를 나타내고 있다. [Shell 18]은 [Figure 16]의 내용을 실행하는 예시를 나타내고 있다.
 
 [File 1]의 Virtual Service에 의해서 `mock-server` Pod로 전송된 요청은 최대 60000ms 대기할 수 있다. 하지만 `mock-server` Pod의 `/delay/70000` Endpoint에 전송한 요청은 70000ms가 필요하기 때문에 Timeout이 발생한다. `mock-server` Pod의 `istio-proxy`는 Timeout 발생시 TCP FIN Flag와 TCP RST Flag를 차례로 전송하여, `mock-server` Pod와의 연결을 종료한다. 또한 `504 Gateway Timeout` 응답을 `shell` Container에게 전송한다.
 
-```json {caption="[Text 28] Upstream Timeout Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 30] Upstream Timeout Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-12T16:07:19.812Z",
   "method": "GET",
@@ -2124,7 +2224,7 @@ $ kubectl exec -it shell -- curl -s mock-server:8080/delay/70000
 }
 ```
 
-```json {caption="[Text 29] Upstream Timeout Case / mock-server Pod Access Log", linenos=table}
+```json {caption="[Text 31] Upstream Timeout Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-12T16:07:19.851Z",
   "method": "GET",
@@ -2157,7 +2257,7 @@ $ kubectl exec -it shell -- curl -s mock-server:8080/delay/70000
 }
 ```
 
-[Text 28]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 29]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. `shell` Pod의 `istio-proxy`에는 `response_flags`에 `UT (UpstreamTimeout)`를 확인할 수 있다. `mock-server` Pod의 `istio-proxy`에는 `response_flags`에 `DC (DownstreamConnectionTermination)`를 확인할 수 있다.
+[Text 30]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 31]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. `shell` Pod의 `istio-proxy`에는 `response_flags`에 `UT (UpstreamTimeout)`를 확인할 수 있다. `mock-server` Pod의 `istio-proxy`에는 `response_flags`에 `DC (DownstreamConnectionTermination)`를 확인할 수 있다.
 
 ### 1.3. GRPC Cases
 
@@ -2165,7 +2265,7 @@ $ kubectl exec -it shell -- curl -s mock-server:8080/delay/70000
 
 {{< figure caption="[Figure 17] OK Case" src="images/grpc-ok-case.png" width="1000px" >}}
 
-```shell {caption="[Shell 18] OK Case / grpcurl Command", linenos=table}
+```shell {caption="[Shell 19] OK Case / grpcurl Command", linenos=table}
 $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 0}' mock-server:9090 mock.MockService/Status
 {
   "service": "mock-server",
@@ -2173,9 +2273,9 @@ $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 0}
 }
 ```
 
-[Figure 17]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/Status` 함수에 `code: 0` 요청을 전달하고, `OK` 응답을 받는 OK Case를 나타내고 있다. [Shell 18]은 [Figure 17]의 내용을 실행하는 예시를 나타내고 있다.
+[Figure 17]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/Status` 함수에 `code: 0` 요청을 전달하고, `OK` 응답을 받는 OK Case를 나타내고 있다. [Shell 19]은 [Figure 17]의 내용을 실행하는 예시를 나타내고 있다.
 
-```json {caption="[Text 30] OK Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 32] OK Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2025-12-25T11:18:51.880Z",
   "method": "POST",
@@ -2208,7 +2308,7 @@ $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 0}
 }
 ```
 
-```json {caption="[Text 31] OK Case / mock-server Pod Access Log", linenos=table}
+```json {caption="[Text 33] OK Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2025-12-25T11:18:51.881Z",
   "method": "POST",
@@ -2241,13 +2341,13 @@ $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 0}
 }
 ```
 
-[Text 30]은 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 31]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/mock.MockService/Status` 함수에 접근하는 내역과 `grpc_status`가 `OK`로 나타나는 것을 확인할 수 있다.
+[Text 32]은 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 33]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/mock.MockService/Status` 함수에 접근하는 내역과 `grpc_status`가 `OK`로 나타나는 것을 확인할 수 있다.
 
 #### 1.3.2. Internal Case
 
 {{< figure caption="[Figure 18] Internal Case" src="images/grpc-internal-case.png" width="1000px" >}}
 
-```shell {caption="[Shell 19] Internal Case / grpcurl Command", linenos=table}
+```shell {caption="[Shell 20] Internal Case / grpcurl Command", linenos=table}
 $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 13}' mock-server:9090 mock.MockService/Status
 ERROR:
   Code: Internal
@@ -2255,9 +2355,9 @@ ERROR:
 command terminated with exit code 77
 ```
 
-[Figure 18]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/Status` 함수에 `code: 13` 요청을 전달하고, `Internal` 응답을 받는 Internal Case를 나타내고 있다. [Shell 19]은 [Figure 18]의 내용을 실행하는 예시를 나타내고 있다.
+[Figure 18]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/Status` 함수에 `code: 13` 요청을 전달하고, `Internal` 응답을 받는 Internal Case를 나타내고 있다. [Shell 20]은 [Figure 18]의 내용을 실행하는 예시를 나타내고 있다.
 
-```json {caption="[Text 32] Internal Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 34] Internal Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2026-08-25T02:32:08.271Z",
   "method": "POST",
@@ -2290,7 +2390,7 @@ command terminated with exit code 77
 }
 ```
 
-```json {caption="[Text 33] Internal Case / mock-server Pod Access Log", linenos=table}
+```json {caption="[Text 35] Internal Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2026-08-25T02:32:08.341Z",
   "method": "POST",
@@ -2323,22 +2423,22 @@ command terminated with exit code 77
 }
 ```
 
-[Text 32]은 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 33]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/mock.MockService/Status` 함수에 접근하는 내역과 `grpc_status`가 `Internal`로 나타나는 것을 확인할 수 있다. 또한 `response_code`가 `200 OK`로 나타나는 것을 확인할 수 있으며, gRPC 이용시 gRPC의 결과와 상관없이 `response_code`는 항상 `200 OK`로 나타난다. `INTERNAL (13)` Status Code는 [File 1]의 Virtual Service의 `retryOn` Field에 포함되어 있지 않기 때문에 재시도가 발생하지 않으며, `upstream_request_attempt_count`도 `1`로 기록된다.
+[Text 34]은 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 35]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/mock.MockService/Status` 함수에 접근하는 내역과 `grpc_status`가 `Internal`로 나타나는 것을 확인할 수 있다. 또한 `response_code`가 `200 OK`로 나타나는 것을 확인할 수 있으며, gRPC 이용시 gRPC의 결과와 상관없이 `response_code`는 항상 `200 OK`로 나타난다. `INTERNAL (13)` Status Code는 [File 1]의 Virtual Service의 `retryOn` Field에 포함되어 있지 않기 때문에 재시도가 발생하지 않으며, `upstream_request_attempt_count`도 `1`로 기록된다.
 
 #### 1.3.3. Downstream TCP Close Case
 
 {{< figure caption="[Figure 19] Downstream TCP Close Case" src="images/grpc-downstream-tcp-close-case.png" width="1000px" >}}
 
-```shell {caption="[Shell 20] Downstream TCP Close Case / grpcurl Command", linenos=table}
+```shell {caption="[Shell 21] Downstream TCP Close Case / grpcurl Command", linenos=table}
 $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 5000}' mock-server:9090 mock.MockService/Delay
 ^C
 ```
 
-[Figure 19]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/Delay` 함수에 `milliseconds: 5000` 요청을 전달하고, 5000ms가 지나기 전에 `Ctrl+C` 명령어를 이용하여 요청을 강제로 종료하는 Downstream TCP Close Case를 나타내고 있다. [Shell 20]은 [Figure 19]의 내용을 실행하는 예시를 나타내고 있다.
+[Figure 19]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/Delay` 함수에 `milliseconds: 5000` 요청을 전달하고, 5000ms가 지나기 전에 `Ctrl+C` 명령어를 이용하여 요청을 강제로 종료하는 Downstream TCP Close Case를 나타내고 있다. [Shell 21]은 [Figure 19]의 내용을 실행하는 예시를 나타내고 있다.
 
 `grpcurl` 명령어 실행 중 강제로 종료하면 `grpcurl` 명령어는 내부적으로 Connection을 종료하면서 TCP FIN Flag를 `shell` Pod의 `istio-proxy`에게 전송하며, TCP FIN Flag를 받은 `shell` Pod의 `istio-proxy`는 HTTP/2 RST_STREAM Frame을 `mock-server` Pod에게 전송하여 최종적으로 `mock-server` Container에게 전달하여 요청을 종료한다. HTTP/1.1 Protocol과 다르게 HTTP/2 Protocol을 이용하는 Pod 사이의 TCP Connection은 Stream 다중화를 통해서 다수의 요청이 공유하기 때문에, `shell` Pod의 `istio-proxy`는 Pod 사이의 TCP Connection을 종료하지 않고 HTTP/2 RST_STREAM Frame을 통해서 해당 요청의 Stream만 종료한다.
 
-```json {caption="[Text 34] Downstream TCP Close Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 36] Downstream TCP Close Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-05T14:41:20.286Z",
   "method": "POST",
@@ -2371,7 +2471,7 @@ $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseco
 }
 ```
 
-```json {caption="[Text 35] Downstream TCP Close Case / mock-server Pod Access Log", linenos=table}
+```json {caption="[Text 37] Downstream TCP Close Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-05T14:41:20.300Z",
   "method": "POST",
@@ -2404,7 +2504,7 @@ $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseco
 }
 ```
 
-[Text 34]은 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 35]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/mock.MockService/Delay` 함수에 접근하는 내역과 `response_code`가 `0`, `grpc_status`가 `-`로 나타나는 것을 확인할 수 있다.
+[Text 36]은 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 37]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/mock.MockService/Delay` 함수에 접근하는 내역과 `response_code`가 `0`, `grpc_status`가 `-`로 나타나는 것을 확인할 수 있다.
 
 또한 `shell` Pod의 `istio-proxy`에서는 `grpcurl` 명령어로부터 TCP FIN Flag를 수신하기 때문에 `response_flags`가 `DC (DownstreamConnectionTermination)`로 나타나는 것을 확인할 수 있으며, `mock-server` Pod의 `istio-proxy`에서는 HTTP/2 RST_STREAM Frame을 수신하기 때문에 `response_flags`가 `DR (DownstreamRemoteReset)`로 나타나는 것을 확인할 수 있다.
 
@@ -2412,7 +2512,7 @@ $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseco
 
 **TODO: `images/grpc-downstream-tcp-rst-case.png` 그림 추가 필요**
 
-```shell {caption="[Shell 21] Downstream TCP RST Case / python3 Command", linenos=table}
+```shell {caption="[Shell 22] Downstream TCP RST Case / python3 Command", linenos=table}
 $ kubectl exec -i shell -- python3 - <<'EOF'
 import socket, struct, time
 
@@ -2448,11 +2548,11 @@ s.close()
 EOF
 ```
 
-[Shell 21]은 `shell` Pod에서 `mock-server`의 `/mock.MockService/Delay` 함수에 `milliseconds: 5000` 요청을 전달하고, 5000ms가 지나기 전에 TCP FIN Flag가 아닌 TCP RST Flag를 전송하여 요청을 강제로 종료하는 Downstream TCP RST Case를 나타내고 있다. `grpcurl` 명령어는 Socket의 `SO_LINGER` Option을 제어할 수 없어 TCP RST Flag를 전송할 수 없기 때문에, `python3` 명령어를 이용하여 HTTP/2 Frame과 gRPC Message를 직접 구성하여 요청을 전송하고, 요청 전송 1000ms 이후에 `SO_LINGER` Option을 `0`으로 설정하고 Socket을 닫아 TCP RST Flag를 전송한다.
+[Shell 22]은 `shell` Pod에서 `mock-server`의 `/mock.MockService/Delay` 함수에 `milliseconds: 5000` 요청을 전달하고, 5000ms가 지나기 전에 TCP FIN Flag가 아닌 TCP RST Flag를 전송하여 요청을 강제로 종료하는 Downstream TCP RST Case를 나타내고 있다. `grpcurl` 명령어는 Socket의 `SO_LINGER` Option을 제어할 수 없어 TCP RST Flag를 전송할 수 없기 때문에, `python3` 명령어를 이용하여 HTTP/2 Frame과 gRPC Message를 직접 구성하여 요청을 전송하고, 요청 전송 1000ms 이후에 `SO_LINGER` Option을 `0`으로 설정하고 Socket을 닫아 TCP RST Flag를 전송한다.
 
 TCP RST Flag를 수신한 `shell` Pod의 `istio-proxy`는 Downstream TCP Close Case와 동일하게 TCP RST Flag를 `mock-server` Pod에게 그대로 전달하지 않고, HTTP/2 RST_STREAM Frame을 전송하여 해당 요청의 Stream만 종료한다. 즉 Downstream Connection이 TCP FIN Flag를 통해서 정상적으로 종료되거나 TCP RST Flag를 통해서 비정상적으로 종료되는 것과 무관하게, Pod 사이의 TCP Connection은 그대로 유지되며 HTTP/2 RST_STREAM Frame만 전송된다.
 
-```json {caption="[Text 36] Downstream TCP RST Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 38] Downstream TCP RST Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2026-08-26T15:16:13.003Z",
   "method": "POST",
@@ -2485,7 +2585,7 @@ TCP RST Flag를 수신한 `shell` Pod의 `istio-proxy`는 Downstream TCP Close C
 }
 ```
 
-```json {caption="[Text 37] Downstream TCP RST Case / mock-server Pod Access Log", linenos=table}
+```json {caption="[Text 39] Downstream TCP RST Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2026-08-26T15:16:13.026Z",
   "method": "POST",
@@ -2518,7 +2618,7 @@ TCP RST Flag를 수신한 `shell` Pod의 `istio-proxy`는 Downstream TCP Close C
 }
 ```
 
-[Text 36]은 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 37]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 Downstream TCP Close Case와 동일하게 `shell` Pod에서는 `response_flags`가 `DC (DownstreamConnectionTermination)`, `response_code_details`가 `downstream_remote_disconnect`로 나타나며, `mock-server` Pod에서는 `response_flags`가 `DR (DownstreamRemoteReset)`, `response_code_details`가 `http2.remote_reset`으로 나타나는 것을 확인할 수 있다. 즉 HTTP/1.1 Protocol의 경우와 동일하게 gRPC Protocol의 경우에도 `istio-proxy`는 Downstream으로부터 TCP FIN Flag를 수신하는 경우와 TCP RST Flag를 수신하는 경우를 Access Log에서 구분하지 않는것을 확인할 수 있다.
+[Text 38]은 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 39]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 Downstream TCP Close Case와 동일하게 `shell` Pod에서는 `response_flags`가 `DC (DownstreamConnectionTermination)`, `response_code_details`가 `downstream_remote_disconnect`로 나타나며, `mock-server` Pod에서는 `response_flags`가 `DR (DownstreamRemoteReset)`, `response_code_details`가 `http2.remote_reset`으로 나타나는 것을 확인할 수 있다. 즉 HTTP/1.1 Protocol의 경우와 동일하게 gRPC Protocol의 경우에도 `istio-proxy`는 Downstream으로부터 TCP FIN Flag를 수신하는 경우와 TCP RST Flag를 수신하는 경우를 Access Log에서 구분하지 않는것을 확인할 수 있다.
 
 #### 1.3.5. Upstream Request Retry Case
 
@@ -2526,16 +2626,16 @@ TCP RST Flag를 수신한 `shell` Pod의 `istio-proxy`는 Downstream TCP Close C
 
 [File 1]의 Virtual Service의 `retryOn` Field에는 gRPC의 재시도 조건인 `unavailable`, `cancelled`가 포함되어 있다. 따라서 `UNAVAILABLE (14)` Status Code 응답을 받는 경우 최대 2번의 재시도를 수행하여 최대 3번의 요청이 전송된다.
 
-```shell {caption="[Shell 22] Upstream Request Retry Case / grpcurl Command", linenos=table}
+```shell {caption="[Shell 23] Upstream Request Retry Case / grpcurl Command", linenos=table}
 $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 14}' mock-server:9090 mock.MockService/Status
 ERROR:
   Code: Unavailable
   Message: Simulated error with gRPC code 14 (Unavailable)
 ```
 
-[Shell 22]은 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/Status` 함수에 `code: 14` (Unavailable) 요청을 전달하는 Upstream Request Retry Case를 나타내고 있다.
+[Shell 23]은 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/Status` 함수에 `code: 14` (Unavailable) 요청을 전달하는 Upstream Request Retry Case를 나타내고 있다.
 
-```json {caption="[Text 38] Upstream Request Retry Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 40] Upstream Request Retry Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2026-08-25T02:32:08.437Z",
   "method": "POST",
@@ -2568,7 +2668,7 @@ ERROR:
 }
 ```
 
-```json {caption="[Text 39] Upstream Request Retry Case / mock-server Pod Access Log", linenos=table}
+```json {caption="[Text 41] Upstream Request Retry Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2026-08-25T02:32:08.437Z",
   "method": "POST",
@@ -2661,15 +2761,15 @@ ERROR:
 }
 ```
 
-[Text 38]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. `upstream_request_attempt_count`가 첫번째 시도와 2번의 재시도를 모두 포함한 `3`으로 기록된 것을 확인할 수 있으며, `response_flags`도 재시도 한도를 모두 소진했음을 나타내는 `URX (UpstreamRetryLimitExceeded)`로 기록된 것을 확인할 수 있다.
+[Text 40]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. `upstream_request_attempt_count`가 첫번째 시도와 2번의 재시도를 모두 포함한 `3`으로 기록된 것을 확인할 수 있으며, `response_flags`도 재시도 한도를 모두 소진했음을 나타내는 `URX (UpstreamRetryLimitExceeded)`로 기록된 것을 확인할 수 있다.
 
-[Text 39]에서는 동일한 `request_id`를 갖는 3개의 Log가 기록된 것을 확인할 수 있다. 재시도는 Client 역할을 수행하는 `shell` Pod의 `istio-proxy`에서 수행되기 때문에, `mock-server` Pod의 `istio-proxy`는 각 재시도를 별개의 요청으로 처리하여 모든 Log에 `upstream_request_attempt_count`가 `1`로 기록된다.
+[Text 41]에서는 동일한 `request_id`를 갖는 3개의 Log가 기록된 것을 확인할 수 있다. 재시도는 Client 역할을 수행하는 `shell` Pod의 `istio-proxy`에서 수행되기 때문에, `mock-server` Pod의 `istio-proxy`는 각 재시도를 별개의 요청으로 처리하여 모든 Log에 `upstream_request_attempt_count`가 `1`로 기록된다.
 
 #### 1.3.6. Upstream TCP RST before Response Case
 
 {{< figure caption="[Figure 22] Upstream TCP RST before Response Case" src="images/grpc-upstream-tcp-rst-before-response-case.png" width="1000px" >}}
 
-```shell {caption="[Shell 23] Upstream TCP RST before Response Case / grpcurl Command", linenos=table}
+```shell {caption="[Shell 24] Upstream TCP RST before Response Case / grpcurl Command", linenos=table}
 $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 1000}' mock-server:9090 mock.MockService/ResetBeforeResponse
 ERROR:
   Code: Unavailable
@@ -2677,11 +2777,11 @@ ERROR:
 command terminated with exit code 78
 ```
 
-[Figure 22]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/ResetBeforeResponse` 함수에 `milliseconds: 1000` 요청을 전달하고, 1000ms 대기후에 TCP RST Flag를 전송하여 Connection을 강제로 종료하는 Upstream TCP RST before Response Case를 나타내고 있다. [Shell 23]은 [Figure 22]의 내용을 실행하는 예시를 나타내고 있다.
+[Figure 22]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/ResetBeforeResponse` 함수에 `milliseconds: 1000` 요청을 전달하고, 1000ms 대기후에 TCP RST Flag를 전송하여 Connection을 강제로 종료하는 Upstream TCP RST before Response Case를 나타내고 있다. [Shell 24]은 [Figure 22]의 내용을 실행하는 예시를 나타내고 있다.
 
 TCP RST Flag를 받은 `mock-server` Pod의 `istio-proxy`는 `Unavailable` 상태 코드를 반환하여 요청이 비정상적으로 종료된것을 `shell` Pod의 `istio-proxy`에게 알린다. [File 1]의 Virtual Service에 `unavailable` 설정에 의해서 `shell` Pod의 `istio-proxy`는 2번의 재시도를 수행하여 총 3번의 요청을 전송한다.
 
-```json {caption="[Text 40] Upstream TCP RST before Response Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 42] Upstream TCP RST before Response Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-10T15:25:19.861Z",
   "method": "POST",
@@ -2714,7 +2814,7 @@ TCP RST Flag를 받은 `mock-server` Pod의 `istio-proxy`는 `Unavailable` 상�
 }
 ```
 
-```json {caption="[Text 41] Upstream TCP RST before Response Case / mock-server Pod Access Log", linenos=table}
+```json {caption="[Text 43] Upstream TCP RST before Response Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-10T15:25:19.863Z",
   "method": "POST",
@@ -2807,7 +2907,7 @@ TCP RST Flag를 받은 `mock-server` Pod의 `istio-proxy`는 `Unavailable` 상�
 }
 ```
 
-[Text 40]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 41]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/mock.MockService/ResetBeforeResponse` 함수에 접근하는 내역과 `response_code`가 `200`, `grpc_status`가 `Unavailable`로 나타나는 것을 확인할 수 있다. 또한 두 Access Log에서 모두 `response_flags`가 `UC (UpstreamConnectionTermination)`로 나타나는 것을 확인할 수 있다.
+[Text 42]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 43]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/mock.MockService/ResetBeforeResponse` 함수에 접근하는 내역과 `response_code`가 `200`, `grpc_status`가 `Unavailable`로 나타나는 것을 확인할 수 있다. 또한 두 Access Log에서 모두 `response_flags`가 `UC (UpstreamConnectionTermination)`로 나타나는 것을 확인할 수 있다.
 
 `shell` Pod의 `istio-proxy`가 3번의 요청을 전송하기 때문에 `shell Pod`의 `istio-proxy`의 Access Log에서 `upstream_request_attempt_count`가 `3`으로 나타나는 것을 확인할 수 있다. 또한 `mock-server` Pod의 `istio-proxy`의 Access Log가 3번이 남아있는것을 확인할 수 있다.
 
@@ -2815,7 +2915,7 @@ TCP RST Flag를 받은 `mock-server` Pod의 `istio-proxy`는 `Unavailable` 상�
 
 {{< figure caption="[Figure 23] Upstream TCP RST after Response Case" src="images/grpc-upstream-tcp-rst-after-response-case.png" width="1000px" >}}
 
-```shell {caption="[Shell 24] Upstream TCP RST after Response Case / grpcurl Command", linenos=table}
+```shell {caption="[Shell 25] Upstream TCP RST after Response Case / grpcurl Command", linenos=table}
 $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 1000}' mock-server:9090 mock.MockService/ResetAfterResponse
 kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 1000}' mock-server:9090 mock.MockService/ResetAfterResponse
 {
@@ -2827,9 +2927,9 @@ ERROR:
 command terminated with exit code 77
 ```
 
-[Figure 23]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/ResetAfterResponse` 함수에 `milliseconds: 1000` 요청을 전달하고, `1000ms` 후에 `mock-server` Pod가 응답을 일부 전송한 후에 TCP RST Flag를 전송하여 Connection을 강제로 종료하는 Upstream TCP RST after Response Case를 나타내고 있다. [Shell 24]은 [Figure 23]의 내용을 실행하는 예시를 나타내고 있다.
+[Figure 23]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/ResetAfterResponse` 함수에 `milliseconds: 1000` 요청을 전달하고, `1000ms` 후에 `mock-server` Pod가 응답을 일부 전송한 후에 TCP RST Flag를 전송하여 Connection을 강제로 종료하는 Upstream TCP RST after Response Case를 나타내고 있다. [Shell 25]은 [Figure 23]의 내용을 실행하는 예시를 나타내고 있다.
 
-```json {caption="[Text 42] Upstream TCP RST after Response Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 44] Upstream TCP RST after Response Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-11T06:37:13.914Z",
   "method": "POST",
@@ -2862,7 +2962,7 @@ command terminated with exit code 77
 }
 ```
 
-```json {caption="[Text 43] Upstream TCP RST after Response Case / mock-server Pod Access Log", linenos=table}
+```json {caption="[Text 45] Upstream TCP RST after Response Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-11T06:37:13.949Z",
   "method": "POST",
@@ -2895,13 +2995,13 @@ command terminated with exit code 77
 }
 ```
 
-[Text 42]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 43]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/mock.MockService/ResetAfterResponse` 함수에 접근하는 내역과 `response_code`가 `200`, `grpc_status`가 `Unknown`로 나타나는 것을 확인할 수 있다. `shell` Pod의 `istio-proxy`의 Access Log에서 `response_flags`가 `UR (UpstreamRemoteReset)`로 나타나는 것을 확인할 수 있으며, `mock-server` Pod의 `istio-proxy`의 Access Log에서 `response_flags`가 `UC (UpstreamConnectionTermination)`로 나타나는 것을 확인할 수 있다.
+[Text 44]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 45]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/mock.MockService/ResetAfterResponse` 함수에 접근하는 내역과 `response_code`가 `200`, `grpc_status`가 `Unknown`로 나타나는 것을 확인할 수 있다. `shell` Pod의 `istio-proxy`의 Access Log에서 `response_flags`가 `UR (UpstreamRemoteReset)`로 나타나는 것을 확인할 수 있으며, `mock-server` Pod의 `istio-proxy`의 Access Log에서 `response_flags`가 `UC (UpstreamConnectionTermination)`로 나타나는 것을 확인할 수 있다.
 
 #### 1.3.8. Upstream TCP Close before Response Case
 
 {{< figure caption="[Figure 24] Upstream TCP Close before Response Case" src="images/grpc-upstream-tcp-close-before-response-case.png" width="1000px" >}}
 
-```shell {caption="[Shell 25] Upstream TCP Close before Response Case / grpcurl Command", linenos=table}
+```shell {caption="[Shell 26] Upstream TCP Close before Response Case / grpcurl Command", linenos=table}
 $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 1000}' mock-server:9090 mock.MockService/CloseBeforeResponse
 ERROR:
   Code: Unavailable
@@ -2909,11 +3009,11 @@ ERROR:
 command terminated with exit code 78
 ```
 
-[Figure 24]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/CloseBeforeResponse` 함수에 `milliseconds: 1000` 요청을 전달하고, `1000ms` 후에 `mock-server` Pod가 Connection을 강제로 종료하는 Upstream TCP Close before Response Case를 나타내고 있다. [Shell 25]은 [Figure 24]의 내용을 실행하는 예시를 나타내고 있다.
+[Figure 24]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/CloseBeforeResponse` 함수에 `milliseconds: 1000` 요청을 전달하고, `1000ms` 후에 `mock-server` Pod가 Connection을 강제로 종료하는 Upstream TCP Close before Response Case를 나타내고 있다. [Shell 26]은 [Figure 24]의 내용을 실행하는 예시를 나타내고 있다.
 
 `mock-server` Container에서 TCP FIN Flag를 전송한다는 부분만 제외하고 TCP RST Flag를 받는 [Figure 22]과 동일한 과정을 수행한다는 것을 알 수 있다.
 
-```json {caption="[Text 44] Upstream TCP Close before Response Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 46] Upstream TCP Close before Response Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-11T11:55:39.852Z",
   "method": "POST",
@@ -2946,7 +3046,7 @@ command terminated with exit code 78
 }
 ```
 
-```json {caption="[Text 45] Upstream TCP Close before Response Case / mock-server Pod Access Log", linenos=table}
+```json {caption="[Text 47] Upstream TCP Close before Response Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-11T11:55:39.855Z",
   "method": "POST",
@@ -3039,13 +3139,13 @@ command terminated with exit code 78
 }
 ```
 
-[Text 44]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 45]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/mock.MockService/CloseBeforeResponse` 함수에 접근하는 내역과 `response_code`가 `200`, `grpc_status`가 `Unavailable`로 나타나는 것을 확인할 수 있다. TCP RST Flag를 받는 [Figure 22]과 동일한 과정을 수행한다는 것을 알 수 있다.
+[Text 46]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 47]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/mock.MockService/CloseBeforeResponse` 함수에 접근하는 내역과 `response_code`가 `200`, `grpc_status`가 `Unavailable`로 나타나는 것을 확인할 수 있다. TCP RST Flag를 받는 [Figure 22]과 동일한 과정을 수행한다는 것을 알 수 있다.
 
 #### 1.3.9. Upstream TCP Close after Response Case
 
 {{< figure caption="[Figure 25] Upstream TCP Close after Response Case" src="images/grpc-upstream-tcp-close-after-response-case.png" width="1000px" >}}
 
-```shell {caption="[Shell 26] Upstream TCP Close after Response Case / grpcurl Command", linenos=table}
+```shell {caption="[Shell 27] Upstream TCP Close after Response Case / grpcurl Command", linenos=table}
 $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 1000}' mock-server:9090 mock.MockService/CloseAfterResponse
 ERROR:
   Code: Internal
@@ -3053,11 +3153,11 @@ ERROR:
 command terminated with exit code 77
 ```
 
-[Figure 25]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/CloseAfterResponse` 함수에 `milliseconds: 1000` 요청을 전달하고, `1000ms` 후에 `mock-server` Pod가 응답을 일부 전송한 후에 Connection을 강제로 종료하는 Upstream TCP Close after Response Case를 나타내고 있다. [Shell 26]은 [Figure 25]의 내용을 실행하는 예시를 나타내고 있다.
+[Figure 25]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/CloseAfterResponse` 함수에 `milliseconds: 1000` 요청을 전달하고, `1000ms` 후에 `mock-server` Pod가 응답을 일부 전송한 후에 Connection을 강제로 종료하는 Upstream TCP Close after Response Case를 나타내고 있다. [Shell 27]은 [Figure 25]의 내용을 실행하는 예시를 나타내고 있다.
 
 `mock-server` Container에서 TCP FIN Flag를 전송한다는 부분만 제외하고 TCP RST Flag를 받는 [Figure 23]과 동일한 과정을 수행한다는 것을 알 수 있다.
 
-```json {caption="[Text 46] Upstream TCP Close after Response Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 48] Upstream TCP Close after Response Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-11T12:12:56.184Z",
   "method": "POST",
@@ -3090,7 +3190,7 @@ command terminated with exit code 77
 }
 ```
 
-```json {caption="[Text 47] Upstream TCP Close before Response Case / mock-server Pod Access Log", linenos=table}
+```json {caption="[Text 49] Upstream TCP Close before Response Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-11T12:12:56.215Z",
   "method": "POST",
@@ -3123,13 +3223,13 @@ command terminated with exit code 77
 }
 ```
 
-[Text 46]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 47]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/mock.MockService/CloseAfterResponse` 함수에 접근하는 내역과 `response_code`가 `200`, `grpc_status`가 `Unknown`로 나타나는 것을 확인할 수 있다. TCP RST Flag를 받는 [Figure 23]과 동일한 과정을 수행한다는 것을 알 수 있다.
+[Text 48]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 49]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/mock.MockService/CloseAfterResponse` 함수에 접근하는 내역과 `response_code`가 `200`, `grpc_status`가 `Unknown`로 나타나는 것을 확인할 수 있다. TCP RST Flag를 받는 [Figure 23]과 동일한 과정을 수행한다는 것을 알 수 있다.
 
 #### 1.3.10. Circuit Breaking with Upstream Connection Pool Overflow Case
 
 {{< figure caption="[Figure 26] Circuit Breaking with Upstream Connection Pool Overflow Case" src="images/grpc-circuit-breaking-with-upstream-connection-pool-overflow-case.png" width="1000px" >}}
 
-```shell {caption="[Shell 27] Circuit Breaking with Upstream Connection Pool Overflow Case / grpcurl Command", linenos=table}
+```shell {caption="[Shell 28] Circuit Breaking with Upstream Connection Pool Overflow Case / grpcurl Command", linenos=table}
 $ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 5000}' mock-server:9090 mock.MockService/Delay &
 $ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 5000}' mock-server:9090 mock.MockService/Delay &
 $ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 5000}' mock-server:9090 mock.MockService/Delay &
@@ -3149,9 +3249,9 @@ command terminated with exit code 78
 }
 ```
 
-[Figure 26]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/Delay` 함수에 `milliseconds: 5000` 요청을 3번 연속으로 전달하여 Upstream Connection Pool Overflow를 발생시키는 Case를 나타내고 있다. [Shell 27]은 [Figure 26]의 내용을 실행하는 예시를 나타내고 있다. GRPC로 요청과 응답이 온다는 부분을 제외하고는 [Figure 11]에서 설명한 것과 동일한 과정을 수행한다.
+[Figure 26]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/Delay` 함수에 `milliseconds: 5000` 요청을 3번 연속으로 전달하여 Upstream Connection Pool Overflow를 발생시키는 Case를 나타내고 있다. [Shell 28]은 [Figure 26]의 내용을 실행하는 예시를 나타내고 있다. GRPC로 요청과 응답이 온다는 부분을 제외하고는 [Figure 11]에서 설명한 것과 동일한 과정을 수행한다.
 
-```json {caption="[Text 48] Circuit Breaking with Upstream Connection Pool Overflow Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 50] Circuit Breaking with Upstream Connection Pool Overflow Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-11T16:00:42.913Z",
   "method": "POST",
@@ -3244,7 +3344,7 @@ command terminated with exit code 78
 }
 ```
 
-```json {caption="[Text 49] Circuit Breaking with Upstream Connection Pool Overflow Case / mock-server Pod Access Log", linenos=table}
+```json {caption="[Text 51] Circuit Breaking with Upstream Connection Pool Overflow Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-11T16:00:42.395Z",
   "method": "POST",
@@ -3307,13 +3407,13 @@ command terminated with exit code 78
 }
 ```
 
-[Text 48]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 49]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. GRPC로 요청과 응답이 발생한다는 부분을 제외하고 [Text 20], [Text 21]과 동일한 과정을 수행한다는 것을 알 수 있다.
+[Text 50]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 51]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. GRPC로 요청과 응답이 발생한다는 부분을 제외하고 [Text 22], [Text 23]과 동일한 과정을 수행한다는 것을 알 수 있다.
 
 #### 1.3.11. Circuit Breaking with Upstream Request Limit Overflow Case
 
 {{< figure caption="[Figure 27] Circuit Breaking with Upstream Request Limit Overflow Case" src="images/grpc-circuit-breaking-with-upstream-request-limit-overflow-case.png" width="1000px" >}}
 
-```shell {caption="[Shell 28] Circuit Breaking with Upstream Request Limit Overflow Case / grpcurl Command", linenos=table}
+```shell {caption="[Shell 29] Circuit Breaking with Upstream Request Limit Overflow Case / grpcurl Command", linenos=table}
 $ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 5000}' mock-server:9090 mock.MockService/Delay &
 $ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 5000}' mock-server:9090 mock.MockService/Delay &
 ERROR:
@@ -3327,9 +3427,9 @@ ERROR:
 command terminated with exit code 78
 ```
 
-[Figure 27]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/Delay` 함수에 `milliseconds: 5000` 요청을 3번 연속으로 전달하여 Upstream Request Limit Overflow를 발생시키는 Case를 나타내고 있다. 이 Case를 재현하기 위해서는 [File 2]에서 설정한 Destination Rule을 적용해야한다. [Shell 28]은 [Figure 27]의 내용을 실행하는 예시를 나타내고 있다. GRPC로 요청과 응답이 발생한다는 부분을 제외하고는 [Figure 12]에서 설명한 것과 동일한 과정을 수행한다.
+[Figure 27]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/Delay` 함수에 `milliseconds: 5000` 요청을 3번 연속으로 전달하여 Upstream Request Limit Overflow를 발생시키는 Case를 나타내고 있다. 이 Case를 재현하기 위해서는 [File 2]에서 설정한 Destination Rule을 적용해야한다. [Shell 29]은 [Figure 27]의 내용을 실행하는 예시를 나타내고 있다. GRPC로 요청과 응답이 발생한다는 부분을 제외하고는 [Figure 12]에서 설명한 것과 동일한 과정을 수행한다.
 
-```json {caption="[Text 50] Circuit Breaking with Upstream Request Limit Overflow Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 52] Circuit Breaking with Upstream Request Limit Overflow Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2025-12-25T14:45:01.595Z",
   "method": "POST",
@@ -3422,7 +3522,7 @@ command terminated with exit code 78
 }
 ```
 
-```json {caption="[Text 51] Circuit Breaking with Upstream Request Limit Overflow Case / mock-server Pod Access Log", linenos=table}
+```json {caption="[Text 53] Circuit Breaking with Upstream Request Limit Overflow Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2025-12-25T14:45:01.241Z",
   "method": "POST",
@@ -3455,13 +3555,13 @@ command terminated with exit code 78
 }
 ```
 
-[Text 50]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 51]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. GRPC로 요청과 응답이 발생한다는 부분을 제외하고 [Text 22], [Text 23]과 동일한 과정을 수행한다는 것을 알 수 있다.
+[Text 52]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 53]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. GRPC로 요청과 응답이 발생한다는 부분을 제외하고 [Text 24], [Text 25]과 동일한 과정을 수행한다는 것을 알 수 있다.
 
 #### 1.3.12. Circuit Breaking with No Healthy Upstream Case
 
 {{< figure caption="[Figure 28] Circuit Breaking with No Healthy Upstream Case" src="images/grpc-circuit-breaking-with-no-healthy-upstream-case.png" width="1000px" >}}
 
-```shell {caption="[Shell 29] Circuit Breaking with No Healthy Upstream Case / grpcurl Command", linenos=table}
+```shell {caption="[Shell 30] Circuit Breaking with No Healthy Upstream Case / grpcurl Command", linenos=table}
 $ kubectl exec shell -- grpcurl -plaintext -proto mock.proto -d '{"code": 13}' mock-server:9090 mock.MockService/Status
 ERROR:
   Code: Internal
@@ -3504,11 +3604,11 @@ ERROR:
 command terminated with exit code 78
 ```
 
-[Figure 28]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/Status` 함수에 `code: 13` 요청을 8번 연속으로 전달하여 No Healthy Upstream을 통한 Circuit Breaking을 발생시키는 Case를 나타내고 있다. [Shell 29]은 [Figure 28]의 내용을 실행하는 예시를 나타내고 있다.
+[Figure 28]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/Status` 함수에 `code: 13` 요청을 8번 연속으로 전달하여 No Healthy Upstream을 통한 Circuit Breaking을 발생시키는 Case를 나타내고 있다. [Shell 30]은 [Figure 28]의 내용을 실행하는 예시를 나타내고 있다.
 
 [File 1]의 Destination Rule에 의해서 5번의 연속적인 5XX Error가 발생하면 Circuit Breaking이 동작한다. 따라서 `shell` Pod의 첫 5번의 요청은 모두 `mock-server` Pod에게 전달되지만, 이후에 3번의 요청은 Circuit Breaking으로 인해서 `mock-server` Pod에 전달되지 않는다. 따라서 첫번째 5번의 요청에 대한 응답은 `Internal`로 나타나고, 이후에 3번의 요청에 대한 응답은 `Unavailable`로 나타난다.
 
-```json {caption="[Text 52] Circuit Breaking Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 54] Circuit Breaking Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-12T15:02:58.363Z",
   "method": "POST",
@@ -3751,7 +3851,7 @@ command terminated with exit code 78
 }
 ```
 
-```json {caption="[Text 53] Circuit Breaking Case / mock-server Pod Access Log", linenos=table}
+```json {caption="[Text 55] Circuit Breaking Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-12T15:02:58.454Z",
   "method": "POST",
@@ -3904,13 +4004,13 @@ command terminated with exit code 78
 }
 ```
 
-[Text 52]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 53]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. `shell` Pod의 `istio-proxy`의 Access Log에는 마지막 3개의 요청에만 `response_flags`가 `UH (NoHealthyUpstream)`와 함께 요청이 `mock-server` Pod에 전달되지 않은 것을 확인할 수 있다. 또한 `mock-server` Pod의 `istio-proxy`의 Access Log에는 처음 5개의 요청에 대한 Log만 남아있는것도 확인할 수 있다.
+[Text 54]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 55]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. `shell` Pod의 `istio-proxy`의 Access Log에는 마지막 3개의 요청에만 `response_flags`가 `UH (NoHealthyUpstream)`와 함께 요청이 `mock-server` Pod에 전달되지 않은 것을 확인할 수 있다. 또한 `mock-server` Pod의 `istio-proxy`의 Access Log에는 처음 5개의 요청에 대한 Log만 남아있는것도 확인할 수 있다.
 
 #### 1.3.13. Upstream Connection Failure with Timeout Case
 
 {{< figure caption="[Figure 29] Upstream Connection Failure with Timeout Case" src="images/grpc-upstream-connection-failure-case-with-timeout.png" width="1000px" >}}
 
-```shell {caption="[Shell 30] Upstream Connection Failure with Timeout Case / iptables Command", linenos=table}
+```shell {caption="[Shell 31] Upstream Connection Failure with Timeout Case / iptables Command", linenos=table}
 $ SHELL_IP=$(kubectl get pod shell -o jsonpath='{.status.podIP}')
 $ kubectl exec mock-server -c mock-server -- iptables -A INPUT -s ${SHELL_IP} -j DROP
 # $ kubectl exec mock-server -c mock-server -- iptables -D INPUT 1 remove rule after case execution
@@ -3932,9 +4032,9 @@ ERROR:
 command terminated with exit code 78
 ```
 
-[Figure 29]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/Status` 함수에 `code: 0` 요청을 3번 연속으로 전달하여 Timeout에 의해서 Retry되는 Upstream Connection Failure with Timeout Case를 나타내고 있다. [Shell 30]은 [Figure 29]의 내용을 실행하는 예시를 나타내고 있다. GRPC로 요청과 응답이 발생한다는 부분을 제외하고는 [Figure 14]에서 설명한 것과 동일한 과정을 수행한다.
+[Figure 29]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/Status` 함수에 `code: 0` 요청을 3번 연속으로 전달하여 Timeout에 의해서 Retry되는 Upstream Connection Failure with Timeout Case를 나타내고 있다. [Shell 31]은 [Figure 29]의 내용을 실행하는 예시를 나타내고 있다. GRPC로 요청과 응답이 발생한다는 부분을 제외하고는 [Figure 14]에서 설명한 것과 동일한 과정을 수행한다.
 
-```json {caption="[Text 54] Upstream Connection Failure with Timeout Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 56] Upstream Connection Failure with Timeout Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-12T16:03:05.367Z",
   "method": "POST",
@@ -4027,13 +4127,13 @@ command terminated with exit code 78
 }
 ```
 
-[Text 54]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. GRPC로 요청과 응답이 발생한다는 부분을 제외하고는 [Text 26]와 동일한 과정을 수행한다.
+[Text 56]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. GRPC로 요청과 응답이 발생한다는 부분을 제외하고는 [Text 28]와 동일한 과정을 수행한다.
 
 #### 1.3.14. Upstream Connection Failure with TCP Reset Case
 
 {{< figure caption="[Figure 30] Upstream Connection Failure with TCP Reset Case" src="images/grpc-upstream-connection-failure-case-with-tcp-reset.png" width="1000px" >}}
 
-```shell {caption="[Shell 31] Upstream Connection Failure with TCP Reset Case / iptables Command", linenos=table}
+```shell {caption="[Shell 32] Upstream Connection Failure with TCP Reset Case / iptables Command", linenos=table}
 $ SHELL_IP=$(kubectl get pod shell -o jsonpath='{.status.podIP}')
 $ kubectl exec mock-server -c mock-server -- iptables-legacy -A INPUT -p tcp -s ${SHELL_IP} -j REJECT --reject-with tcp-reset
 # $ kubectl exec mock-server -c mock-server -- iptables-legacy -D INPUT 1 remove rule after case execution
@@ -4055,9 +4155,9 @@ ERROR:
 command terminated with exit code 78
 ```
 
-[Figure 30]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/Status` 함수에 `code: 0` 요청을 3번 연속으로 전달하여 TCP Reset에 의해서 Retry되는 Upstream Connection Failure with TCP Reset Case를 나타내고 있다. [Shell 31]은 [Figure 30]의 내용을 실행하는 예시를 나타내고 있다. GRPC로 요청과 응답이 발생한다는 부분을 제외하고는 [Figure 15]에서 설명한 것과 동일한 과정을 수행한다.
+[Figure 30]는 `shell` Pod에서 `grpcurl` 명령어를 이용하여 `mock-server`의 `/mock.MockService/Status` 함수에 `code: 0` 요청을 3번 연속으로 전달하여 TCP Reset에 의해서 Retry되는 Upstream Connection Failure with TCP Reset Case를 나타내고 있다. [Shell 32]은 [Figure 30]의 내용을 실행하는 예시를 나타내고 있다. GRPC로 요청과 응답이 발생한다는 부분을 제외하고는 [Figure 15]에서 설명한 것과 동일한 과정을 수행한다.
 
-```json {caption="[Text 55] Upstream Connection Failure with TCP Reset Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 57] Upstream Connection Failure with TCP Reset Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-12T15:38:06.556Z",
   "method": "POST",
@@ -4150,13 +4250,13 @@ command terminated with exit code 78
 }
 ```
 
-[Text 55]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. GRPC로 요청과 응답이 발생한다는 부분을 제외하고는 [Text 27]와 동일한 과정을 수행한다.
+[Text 57]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. GRPC로 요청과 응답이 발생한다는 부분을 제외하고는 [Text 29]와 동일한 과정을 수행한다.
 
 #### 1.3.15. Upstream Request Timeout Case
 
 {{< figure caption="[Figure 31] Upstream Request Timeout Case" src="images/grpc-upstream-request-timeout-case.png" width="1000px" >}}
 
-```shell {caption="[Shell 32] Upstream Request Timeout Case / grpcurl Command", linenos=table}
+```shell {caption="[Shell 33] Upstream Request Timeout Case / grpcurl Command", linenos=table}
 $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseconds": 70000}' mock-server:9090 mock.MockService/Delay
 ```
 
@@ -4164,7 +4264,7 @@ $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseco
 
 [File 1]의 Virtual Service에 의해서 `mock-server` Pod로 전송된 요청은 최대 60000ms 대기할 수 있다. 하지만 `mock-server` Pod의 `/mock.MockService/Delay` 함수에 `milliseconds: 70000`과 함께 전달할 요청은 70000ms가 필요하기 때문에 Timeout이 발생한다. `mock-server` Pod의 `istio-proxy`는 Timeout 발생시 HTTP/2 RST_STREAM Frame을 전송하여, `mock-server` Pod와의 연결을 종료한다. 또한 `Unavailable` 상태 코드를 반환하여 요청이 비정상적으로 종료된것을 `shell` Pod의 `istio-proxy`에게 알린다.
 
-```json {caption="[Text 56] Upstream Request Timeout Case / shell Pod Access Log", linenos=table}
+```json {caption="[Text 58] Upstream Request Timeout Case / shell Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-12T16:10:41.589Z",
   "method": "POST",
@@ -4197,7 +4297,7 @@ $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseco
 }
 ```
 
-```json {caption="[Text 57] Upstream Request Timeout Case / mock-server Pod Access Log", linenos=table}
+```json {caption="[Text 59] Upstream Request Timeout Case / mock-server Pod Access Log", linenos=table}
 {
   "start_time": "2026-01-12T16:10:41.644Z",
   "method": "POST",
@@ -4230,7 +4330,7 @@ $ kubectl exec -it shell -- grpcurl -plaintext -proto mock.proto -d '{"milliseco
 }
 ```
 
-[Text 56]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 57]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. `shell` Pod의 `istio-proxy`에는 `response_flags`에 `UT (UpstreamTimeout)`를 확인할 수 있다. `mock-server` Pod의 `istio-proxy`에는 `response_flags`에 `DR (DownstreamRemoteReset)`를 확인할 수 있다.
+[Text 58]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 59]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. `shell` Pod의 `istio-proxy`에는 `response_flags`에 `UT (UpstreamTimeout)`를 확인할 수 있다. `mock-server` Pod의 `istio-proxy`에는 `response_flags`에 `DR (DownstreamRemoteReset)`를 확인할 수 있다.
 
 ## 2. 참조
 
