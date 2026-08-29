@@ -1,6 +1,5 @@
 ---
 title: Envoy Header
-draft: true
 ---
 
 Organizes Envoy's own Headers used while Envoy processes HTTP and gRPC requests.

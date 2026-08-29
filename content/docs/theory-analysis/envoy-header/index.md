@@ -1,6 +1,5 @@
 ---
 title: Envoy Header
-draft: true
 ---
 
 Envoy가 HTTP, gRPC 요청을 처리하는 과정에서 활용하는 Envoy 고유의 Header를 정리한다.
