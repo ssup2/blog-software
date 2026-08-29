@@ -5,3 +5,10 @@
 .hextra-toc {
     width: 20rem;
 }
+
+.content table {
+    width: fit-content;
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}

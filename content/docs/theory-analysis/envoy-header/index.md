@@ -77,7 +77,14 @@ gRPC는 HTTP/2를 기반으로 동작하기 때문에 위에서 설명한 대부
   * `internal` : gRPC Status Code `INTERNAL (13)` 발생 시 재시도를 수행한다.
   * `resource-exhausted` : gRPC Status Code `RESOURCE_EXHAUSTED (8)` 발생 시 재시도를 수행한다.
   * `unavailable` : gRPC Status Code `UNAVAILABLE (14)` 발생 시 재시도를 수행한다.
-* `grpc-status`, `grpc-message` : gRPC의 처리 결과를 나타내는 Header이며, 일반적으로 gRPC Server가 응답의 Trailer에 설정한다. Envoy가 요청을 Upstream Server에게 전달하지 못하고 자체적으로 Error 응답을 생성하는 경우, 요청이 gRPC 요청이라면 Envoy는 HTTP Status Code `200`과 함께 `grpc-status`, `grpc-message` Header를 설정하여 응답한다.
+* `grpc-status`, `grpc-message` : gRPC의 처리 결과를 나타내는 Header이며, 일반적으로 gRPC Server가 응답의 Trailer에 설정한다. Envoy가 Upstream Server로부터 정상적인 응답을 받지 못하고 자체적으로 Error 응답을 생성하는 경우에도 설정되며, 상세 과정은 1.4.1에서 설명한다.
+
+#### 1.4.1. Error 응답의 gRPC Status Code 변환
+
+Envoy가 gRPC Server로부터 정상적으로 응답을 받은 경우에는 gRPC Server가 Trailer에 설정한 `grpc-status`가 그대로 Downstream Client에게 전달되며, Envoy는 별도의 변환을 수행하지 않는다. 반면 Envoy가 Upstream Server로부터 정상적인 응답을 받지 못한 경우에는 gRPC Server가 생성한 `grpc-status`가 존재하지 않기 때문에, Envoy가 자체적으로 Error 응답을 생성하여 Downstream Client에게 응답한다. Envoy가 Upstream Server로부터 정상적인 응답을 받지 못하는 경우는 다음과 같이 두 부류로 구분할 수 있다.
+
+* 요청을 Upstream Server에게 전달하지 못한 경우 : 요청에 매칭되는 Route가 존재하지 않는 경우, Upstream Cluster에 Healthy 상태의 Upstream Server가 존재하지 않는 경우, Upstream Server와 연결에 실패한 경우, Circuit Breaking으로 인해서 요청이 거절된 경우
+* 요청을 전달했지만 정상적인 응답을 받지 못한 경우 : Timeout이 발생한 경우, Upstream Server가 응답 도중에 연결을 종료하거나 Reset한 경우
 
 {{< table caption="[Table 1] Envoy HTTP Status Code, gRPC Status Code Mapping" >}}
 | HTTP Status Code | gRPC Status Code |
@@ -93,7 +100,13 @@ gRPC는 HTTP/2를 기반으로 동작하기 때문에 위에서 설명한 대부
 | 기타 | UNKNOWN (2) |
 {{</ table >}}
 
-[Table 1]은 Envoy가 자체적으로 Error 응답을 생성할 때 활용하는 HTTP Status Code와 gRPC Status Code의 Mapping을 나타내고 있다. Envoy는 Error 응답을 생성할 때 내부적으로 HTTP Status Code를 먼저 결정하며, HTTP 요청의 경우에는 결정된 HTTP Status Code가 그대로 응답에 설정된다. 반면 gRPC 요청의 경우에는 결정된 HTTP Status Code를 [Table 1]의 Mapping에 따라서 gRPC Status Code로 변환한 다음, HTTP Status Code `200`과 함께 `grpc-status` Header에 설정하여 응답한다. 즉 [Table 1]의 HTTP Status Code는 gRPC 요청의 실제 응답에 설정되는 값이 아니라 Envoy 내부적으로 결정된 HTTP Status Code를 의미하며, gRPC 요청의 실제 응답에 설정되는 HTTP Status Code는 항상 `200`이다. 예외적으로 Timeout이 발생한 경우에는 [Table 1]의 Mapping을 이용하지 않고 `DEADLINE_EXCEEDED (4)` gRPC Status Code가 직접 설정된다. (동일한 상황에서 HTTP 요청의 경우 `504` Status Code가 응답된다.)
+이와 같은 경우에는 Envoy가 [Table 1]의 Mapping을 활용하여 다음의 과정을 통해서 gRPC 형식의 Error 응답을 생성한다. 다음과 같은 순서로 진행된다.
+
+1. Envoy는 Error 상황에 따라서 내부적으로 HTTP Status Code를 먼저 결정한다. (Upstream Server 연결 실패 시 `503`, Route 부재 시 `404` 등) HTTP 요청의 경우에는 결정된 HTTP Status Code가 그대로 응답에 설정된다.
+2. gRPC 요청의 경우에는 결정된 HTTP Status Code를 [Table 1]의 Mapping에 따라서 gRPC Status Code로 변환한다.
+3. 변환된 gRPC Status Code를 `grpc-status` Header에 설정하고, HTTP Status Code `200`과 함께 Trailers-Only 형태로 응답한다. 즉 [Table 1]의 HTTP Status Code는 gRPC 요청의 실제 응답에 설정되는 값이 아니라 Envoy 내부적으로 결정된 HTTP Status Code를 의미하며, gRPC 요청의 실제 응답에 설정되는 HTTP Status Code는 항상 `200`이다.
+
+예외적으로 Timeout이 발생한 경우에는 [Table 1]의 Mapping을 이용하지 않고 `DEADLINE_EXCEEDED (4)` gRPC Status Code가 직접 설정된다. (동일한 상황에서 HTTP 요청의 경우 `504` Status Code가 응답된다.)
 
 ## 2. 참조
 
