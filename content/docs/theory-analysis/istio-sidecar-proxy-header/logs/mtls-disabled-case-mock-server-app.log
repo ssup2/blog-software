@@ -1,0 +1,7 @@
+2026/08/29 16:28:14 [mock-server] HTTP GET /status/200 127.0.0.6:60681
+2026/08/29 16:28:14 [mock-server] HTTP header Accept: */*
+2026/08/29 16:28:14 [mock-server] HTTP header User-Agent: curl/8.21.0
+2026/08/29 16:28:14 [mock-server] HTTP header X-Envoy-Attempt-Count: 1
+2026/08/29 16:28:14 [mock-server] HTTP header X-Forwarded-Proto: http
+2026/08/29 16:28:14 [mock-server] HTTP header X-Request-Id: 79dbc3bb-9fb0-9086-9396-738c845d3238
+2026/08/29 16:28:14 [mock-server] HTTP GET /status/200 completed in 2.283616ms

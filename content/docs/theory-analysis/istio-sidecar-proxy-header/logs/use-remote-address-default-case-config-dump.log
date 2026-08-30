@@ -1,0 +1,5 @@
+# Ingress Gateway HTTP Connection Manager (default)
+   1 "use_remote_address": true
+
+# Sidecar Proxy (shell) HTTP Connection Manager (default)
+  10 "use_remote_address": false

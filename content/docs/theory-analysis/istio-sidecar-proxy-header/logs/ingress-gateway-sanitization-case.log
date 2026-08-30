@@ -1,0 +1,17 @@
+# A: no XFF + x-envoy-upstream-rq-timeout-ms: 1000 -> Internal (direct address is private via port-forward) -> 504 in 1s
+504 1.046821s
+
+# B: X-Forwarded-For: 1.2.3.4 + x-envoy-upstream-rq-timeout-ms: 1000 -> External -> header sanitized -> 200 in 3s
+200 3.023438s
+
+# App received headers for case B (timeout header removed, external address set)
+2026/08/30 02:05:14 [mock-server] HTTP GET /delay/3000 127.0.0.6:42925
+2026/08/30 02:05:14 [mock-server] HTTP header Accept: */*
+2026/08/30 02:05:14 [mock-server] HTTP header User-Agent: curl/8.7.1
+2026/08/30 02:05:14 [mock-server] HTTP header X-Envoy-Attempt-Count: 1
+2026/08/30 02:05:14 [mock-server] HTTP header X-Envoy-External-Address: 127.0.0.1
+2026/08/30 02:05:14 [mock-server] HTTP header X-Forwarded-Client-Cert: By=spiffe://cluster.local/ns/default/sa/default;Hash=14f4d966e35945cd8fa134ebe6a41219ec52def845ee3909876f48987f32ad0a;Subject="";URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account
+2026/08/30 02:05:14 [mock-server] HTTP header X-Forwarded-For: 1.2.3.4,10.244.1.5
+2026/08/30 02:05:14 [mock-server] HTTP header X-Forwarded-Proto: http
+2026/08/30 02:05:14 [mock-server] HTTP header X-Request-Id: 42ed04f5-3b84-950e-bc88-b822176667a1
+2026/08/30 02:05:16 [mock-server] HTTP GET /delay/3000 completed in 3.004143654s

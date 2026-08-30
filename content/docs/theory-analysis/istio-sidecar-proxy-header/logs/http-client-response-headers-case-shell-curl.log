@@ -1,0 +1,12 @@
+> GET /status/200 HTTP/1.1
+> Host: mock-server:8080
+> User-Agent: curl/8.21.0
+> Accept: */*
+> 
+< HTTP/1.1 200 OK
+< content-type: application/json
+< date: Sat, 29 Aug 2026 16:16:15 GMT
+< content-length: 59
+< x-envoy-upstream-service-time: 53
+< server: envoy
+< 
