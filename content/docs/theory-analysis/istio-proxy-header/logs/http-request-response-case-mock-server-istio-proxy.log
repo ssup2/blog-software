@@ -30,3 +30,11 @@
 'x-envoy-peer-metadata-id', 'sidecar~10.244.1.8~mock-server.default~default.svc.cluster.local'
 'x-envoy-peer-metadata', 'ChoKCkNMVVNURVJfSUQSDBoKS3ViZXJuZXRlcwqFAQoGTEFCRUxTEnsqeQoUCgNhcHASDRoLbW9jay1zZXJ2ZXIKMAofc2VydmljZS5pc3Rpby5pby9jYW5vbmljYWwtbmFtZRINGgttb2NrLXNlcnZlcgovCiNzZXJ2aWNlLmlzdGlvLmlvL2Nhbm9uaWNhbC1yZXZpc2lvbhIIGgZsYXRlc3QKFQoETkFNRRINGgttb2NrLXNlcnZlcgoWCglOQU1FU1BBQ0USCRoHZGVmYXVsdApICgVPV05FUhI/Gj1rdWJlcm5ldGVzOi8vYXBpcy9hcHBzL3YxL25hbWVzcGFjZXMvZGVmYXVsdC9wb2RzL21vY2stc2VydmVyCh4KDVdPUktMT0FEX05BTUUSDRoLbW9jay1zZXJ2ZXI='
 'server', 'istio-envoy'
+
+# Response headers received from app container (router:trace)
+2026-08-30T10:11:37.655122Z	trace	envoy router external/envoy/source/common/router/upstream_request.cc:269	[Tags: "ConnectionId":"1385","StreamId":"9327732857740695570"] end_stream: false, upstream response headers:
+':status', '200'
+'content-type', 'application/json'
+'date', 'Sun, 30 Aug 2026 10:11:37 GMT'
+'content-length', '59'
+	thread=25

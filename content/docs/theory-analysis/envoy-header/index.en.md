@@ -112,4 +112,4 @@ Exceptionally, when a Timeout occurs, the `DEADLINE_EXCEEDED (4)` gRPC Status Co
 * Envoy HTTP Header Manipulation : [https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_conn_man/headers](https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_conn_man/headers)
 * Envoy Router Filter Header : [https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/router_filter](https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/router_filter)
 * gRPC HTTP Status Mapping : [https://github.com/grpc/grpc/blob/master/doc/http-grpc-status-mapping.md](https://github.com/grpc/grpc/blob/master/doc/http-grpc-status-mapping.md)
-* Istio Envoy Header : [https://ssup2.github.io/blog-software/docs/theory-analysis/istio-envoy-header/](https://ssup2.github.io/blog-software/docs/theory-analysis/istio-envoy-header/)
+* Istio Proxy Header : [https://ssup2.github.io/blog-software/docs/theory-analysis/istio-proxy-header/](https://ssup2.github.io/blog-software/docs/theory-analysis/istio-proxy-header/)
