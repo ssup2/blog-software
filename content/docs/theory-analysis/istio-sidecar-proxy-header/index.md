@@ -155,7 +155,7 @@ $ kubectl logs mock-server -c istio-proxy -f
 
 * Tracing Header 미생성 : Istio `1.22` Version부터 Tracing이 기본적으로 비활성화되어 있기 때문에, `x-b3-traceid`, `x-b3-spanid`와 같은 Tracing Header는 생성되지 않는다. Mesh Config를 통해서 Tracing을 활성화한 경우에만 설정된다.
 * Sidecar Proxy 간 전용 Header 제거 : `x-envoy-peer-metadata`, `x-envoy-peer-metadata-id`, `x-envoy-decorator-operation` Header는 Sidecar Proxy 사이에서만 교환되며, App Container에게 전달되기 전에 제거된다.
-* 제어 Header 기본 미동작 : App이 요청에 설정하는 `x-envoy-upstream-rq-timeout-ms`, `x-envoy-retry-on`과 같은 제어 Header는 기본적으로 동작하지 않는다. Sidecar Proxy의 `use_remote_address` 설정이 `false`이고 App이 전송하는 요청에는 XFF Header가 존재하지 않기 때문에, Sidecar Proxy는 요청을 External 요청으로 판단하여 `x-envoy-` Prefix의 제어 Header를 제거한다. 따라서 요청에 XFF Header와 하나의 Internal 주소를 함께 설정하여 Internal 요청으로 판단되도록 만들어야 제어 Header가 동작한다.
+* 제어 Header 미동작 : App이 요청에 설정하는 `x-envoy-upstream-rq-timeout-ms`, `x-envoy-retry-on`과 같은 제어 Header는 동작하지 않는다. Sidecar Proxy의 `use_remote_address` 설정이 `false`이고 App이 전송하는 요청에는 XFF Header가 존재하지 않기 때문에, Sidecar Proxy는 요청을 External 요청으로 판단하여 `x-envoy-` Prefix의 제어 Header를 제거한다. 따라서 Timeout과 재시도는 제어 Header가 아니라 Virtual Service를 통해서 설정해야 한다.
 
 ### 1.3. HTTP Cases
 
@@ -306,82 +306,17 @@ WORKLOAD_NAME / shell
 * `x-envoy-peer-metadata`, `x-envoy-peer-metadata-id` : Client Workload의 Metadata를 나타낸다. [Text 5]는 `x-envoy-peer-metadata` 값을 Decoding한 결과를 나타내고 있으며, Workload의 이름, Namespace, Label, Owner 정보가 포함되어 있다. 응답에는 반대로 `mock-server` Workload의 Metadata가 설정되며, 양쪽 Sidecar Proxy는 이러한 Metadata 교환을 통해서 `source_workload`, `destination_workload`와 같은 Istio Metric의 Label을 설정한다.
 * `x-envoy-decorator-operation` : Client 측 Sidecar Proxy가 Route 설정을 기반으로 설정한 Tracing Span의 Operation 이름을 나타낸다.
 
-#### 1.3.4. Timeout 제어 Header Case
-
-```shell {caption="[Shell 6] Timeout 제어 Header 설정 요청"}
-# Without XFF header
-$ kubectl exec -it shell -- curl -s -H "x-envoy-upstream-rq-timeout-ms: 1000" mock-server:8080/delay/1200
-
-# With single internal XFF address
-$ kubectl exec -it shell -- curl -s -H "X-Forwarded-For: 10.244.2.3" -H "x-envoy-upstream-rq-timeout-ms: 1000" mock-server:8080/delay/3000
-
-# Check headers in shell istio-proxy log
-$ kubectl logs shell -c istio-proxy
-```
-
-```text {caption="[Text 6] Timeout 제어 Header 결과 (shell istio-proxy Debug Log)"}
-# A: without XFF - request headers received from curl
-request headers complete (end_stream=true):
-':path', '/delay/1200'
-'x-envoy-upstream-rq-timeout-ms', '1000'
-
-# A: request headers sent to mock-server istio-proxy (timeout header removed)
-router decoding headers:
-':path', '/delay/1200'
-'x-request-id', '82ff3289-3d05-9ee1-bebd-ad7242faf824'
-'x-envoy-attempt-count', '1'
-
-# A: response 200 after 1.2s (timeout not applied)
-"response_code": "200"
-
-# B: with XFF - request headers sent to mock-server istio-proxy (timeout header honored)
-router decoding headers:
-':path', '/delay/3000'
-'x-forwarded-for', '10.244.2.3'
-'x-envoy-internal', 'true'
-'x-envoy-expected-rq-timeout-ms', '1000'
-
-# B: 504 local reply after 1s (timeout applied)
-Sending local reply with details response_timeout
-"response_code": "504"
-"response_flags": "UT"
-```
-
-[Shell 6]과 같이 App이 요청에 `x-envoy-upstream-rq-timeout-ms` Header를 설정하여 Virtual Service 설정 없이 요청 단위로 Timeout을 제어할 수 있는지 확인한다. [Text 6]은 Timeout 제어 Header를 설정한 요청의 `shell` istio-proxy Log를 나타내고 있다. **XFF Header 없이 요청을 전송하는 경우 Timeout이 동작하지 않는다.** Envoy는 `use_remote_address` 설정이 `false`인 경우 (Sidecar Proxy의 기본값) XFF Header에 정확히 하나의 Internal 주소가 존재해야 Internal 요청으로 판단하는데, App이 전송하는 요청에는 XFF Header가 존재하지 않기 때문에 External 요청으로 판단되어 `x-envoy-` Prefix의 제어 Header가 제거되기 때문이다. A의 경우 `curl`로부터 수신한 요청에는 Timeout Header가 존재하지만, Upstream으로 전송하는 요청에서는 제거된 것을 확인할 수 있다.
-
-반면 XFF Header에 Internal 주소 (Pod IP) 하나를 함께 설정한 B의 경우 Internal 요청으로 판단되어 `x-envoy-internal: true` Header가 설정되고, Timeout Header가 `x-envoy-expected-rq-timeout-ms` Header로 변환되어 적용된다. `mock-server`의 `/delay/3000` Endpoint가 3초 후에 응답하기 때문에 1초의 Timeout이 적용되어 `response_timeout` Local Reply와 함께 `504` Status Code, `UT` (UpstreamRequestTimeout) Response Flag가 확인된다.
-
-#### 1.3.5. Retry 제어 Header Case
-
-```shell {caption="[Shell 7] Retry 제어 Header 설정 요청"}
-$ kubectl exec -it shell -- curl -s -H "X-Forwarded-For: 10.244.2.3" -H "x-envoy-retry-on: 5xx" -H "x-envoy-max-retries: 3" mock-server:8080/status/503
-$ kubectl logs mock-server -c istio-proxy | grep -E "x-envoy-attempt-count|x-envoy-internal"
-```
-
-```text {caption="[Text 7] Retry 제어 Header 결과 (mock-server istio-proxy Debug Log)"}
-'x-envoy-attempt-count', '1'
-'x-envoy-internal', 'true'
-'x-envoy-attempt-count', '2'
-'x-envoy-internal', 'true'
-'x-envoy-attempt-count', '3'
-'x-envoy-internal', 'true'
-'x-envoy-attempt-count', '4'
-'x-envoy-internal', 'true'
-```
-
-[Shell 7]과 같이 App이 요청에 `x-envoy-retry-on`, `x-envoy-max-retries` Header를 설정하여 요청 단위로 재시도를 제어할 수 있는지 확인하며, 1.3.4와 동일한 이유로 XFF Header에 Internal 주소를 함께 설정해야 동작한다. [Text 7]은 `mock-server` istio-proxy가 수신한 요청들의 Header를 나타내고 있다. Istio의 기본 재시도 조건 (`connect-failure,refused-stream,unavailable,cancelled`)에는 `5xx`가 포함되어 있지 않기 때문에 `503` Status Code는 기본적으로 재시도되지 않지만, `x-envoy-retry-on: 5xx` Header를 설정하면 재시도가 수행된다. `x-envoy-max-retries: 3` 설정에 의해서 최대 4번의 요청이 전송되며, `mock-server` istio-proxy가 수신하는 요청의 `x-envoy-attempt-count` Header 값이 `1`부터 `4`까지 증가하는 것을 확인할 수 있다.
-
 ### 1.4. GRPC Cases
 
 #### 1.4.1. 요청, 응답 Header와 Trailer Case
 
-```shell {caption="[Shell 8] gRPC 요청 전송 및 응답 Header, Trailer 확인"}
+```shell {caption="[Shell 6] gRPC 요청 전송 및 응답 Header, Trailer 확인"}
 $ kubectl exec -it shell -- grpcurl -plaintext -d '{"code": 0}' mock-server:9090 mock.MockService/Status
 $ kubectl exec -it shell -- grpcurl -plaintext -d '{"code": 13}' mock-server:9090 mock.MockService/Status
 $ kubectl logs shell -c istio-proxy
 ```
 
-```text {caption="[Text 8] gRPC 정상 응답의 Header, Trailer (shell istio-proxy Debug Log)"}
+```text {caption="[Text 6] gRPC 정상 응답의 Header, Trailer (shell istio-proxy Debug Log)"}
 # Request headers received from grpcurl
 request headers complete (end_stream=false):
 ':method', 'POST'
@@ -406,7 +341,7 @@ encoding trailers via codec:
 'grpc-message', ''
 ```
 
-```text {caption="[Text 9] gRPC Error 응답의 Header (shell istio-proxy Debug Log, Trailers-Only)"}
+```text {caption="[Text 7] gRPC Error 응답의 Header (shell istio-proxy Debug Log, Trailers-Only)"}
 encoding headers via codec (end_stream=true):
 ':status', '200'
 'content-type', 'application/grpc'
@@ -416,18 +351,18 @@ encoding headers via codec (end_stream=true):
 'server', 'envoy'
 ```
 
-[Shell 8]과 같이 gRPC 요청을 전송하고 `shell` istio-proxy의 Log를 통해서 응답의 Header와 Trailer를 확인한다. [Text 8]은 정상 응답 (gRPC Status Code `OK (0)`)을 나타내고 있다. 요청 Header에는 gRPC의 특징인 `content-type: application/grpc`, `te: trailers` Header가 설정되어 있으며, 응답은 Header (`end_stream=false`)와 Body 전송 이후 **Trailer**에 최종 처리 결과인 `grpc-status` Header가 설정되어 전송된다.
+[Shell 6]과 같이 gRPC 요청을 전송하고 `shell` istio-proxy의 Log를 통해서 응답의 Header와 Trailer를 확인한다. [Text 6]은 정상 응답 (gRPC Status Code `OK (0)`)을 나타내고 있다. 요청 Header에는 gRPC의 특징인 `content-type: application/grpc`, `te: trailers` Header가 설정되어 있으며, 응답은 Header (`end_stream=false`)와 Body 전송 이후 **Trailer**에 최종 처리 결과인 `grpc-status` Header가 설정되어 전송된다.
 
-[Text 9]는 Error 응답 (gRPC Status Code `INTERNAL (13)`)을 나타내고 있다. 전송할 Message가 없는 Error 응답이기 때문에 **Trailers-Only** 형태로 응답되며, 별도의 Trailer 없이 하나의 HEADERS Frame (`end_stream=true`)에 `grpc-status`, `grpc-message` Header가 함께 설정된 것을 확인할 수 있다.
+[Text 7]는 Error 응답 (gRPC Status Code `INTERNAL (13)`)을 나타내고 있다. 전송할 Message가 없는 Error 응답이기 때문에 **Trailers-Only** 형태로 응답되며, 별도의 Trailer 없이 하나의 HEADERS Frame (`end_stream=true`)에 `grpc-status`, `grpc-message` Header가 함께 설정된 것을 확인할 수 있다.
 
 #### 1.4.2. grpc-timeout Header Case
 
-```shell {caption="[Shell 9] gRPC Deadline 설정 요청"}
+```shell {caption="[Shell 7] gRPC Deadline 설정 요청"}
 $ kubectl exec -it shell -- grpcurl -plaintext -max-time 1 -d '{"milliseconds": 3000}' mock-server:9090 mock.MockService/Delay
 $ kubectl logs mock-server -c istio-proxy | grep -B 10 -A 2 "grpc-timeout"
 ```
 
-```text {caption="[Text 10] grpc-timeout Header 결과 (mock-server istio-proxy Debug Log)"}
+```text {caption="[Text 8] grpc-timeout Header 결과 (mock-server istio-proxy Debug Log)"}
 request headers complete (end_stream=false):
 ':method', 'POST'
 ':scheme', 'http'
@@ -441,26 +376,10 @@ request headers complete (end_stream=false):
 'x-envoy-attempt-count', '1'
 ```
 
-[Shell 9]와 같이 `grpcurl` 명령어의 `-max-time` 옵션을 이용하여 gRPC Client의 Deadline이 `grpc-timeout` Header로 전파되는지 확인한다. [Text 10]은 `mock-server` istio-proxy가 수신한 요청 Header를 나타내고 있다.
+[Shell 7]와 같이 `grpcurl` 명령어의 `-max-time` 옵션을 이용하여 gRPC Client의 Deadline이 `grpc-timeout` Header로 전파되는지 확인한다. [Text 8]은 `mock-server` istio-proxy가 수신한 요청 Header를 나타내고 있다.
 
 * Client가 설정한 1초의 Deadline은 `grpc-timeout: 988m` Header로 전파된다. (전송 시점까지의 경과 시간을 제외한 988 Millisecond)
 * Sidecar Proxy는 `grpc-timeout` Header를 요청의 Timeout으로 활용하며, `x-envoy-expected-rq-timeout-ms: 988` Header를 추가로 설정하여 Upstream에게 Timeout 값을 전파하는 것을 확인할 수 있다.
-
-#### 1.4.3. gRPC Retry 제어 Header Case
-
-```shell {caption="[Shell 10] gRPC Retry 제어 Header 설정 요청"}
-$ kubectl exec -it shell -- grpcurl -plaintext -H 'x-forwarded-for: 10.244.2.3' -H 'x-envoy-retry-grpc-on: internal' -H 'x-envoy-max-retries: 3' -d '{"code": 13}' mock-server:9090 mock.MockService/Status
-$ kubectl logs mock-server -c istio-proxy | grep "x-envoy-attempt-count"
-```
-
-```text {caption="[Text 11] gRPC Retry 제어 Header 결과 (mock-server istio-proxy Debug Log)"}
-'x-envoy-attempt-count', '1'
-'x-envoy-attempt-count', '2'
-'x-envoy-attempt-count', '3'
-'x-envoy-attempt-count', '4'
-```
-
-[Shell 10]과 같이 App이 요청에 `x-envoy-retry-grpc-on` Header를 설정하여 gRPC 요청 단위로 재시도를 제어할 수 있는지 확인한다. HTTP Case와 동일하게 XFF Header에 Internal 주소를 함께 설정해야 동작하며, Istio의 기본 재시도 조건에 포함되어 있지 않은 `internal` 조건 (gRPC Status Code `INTERNAL (13)`)을 이용한다. [Text 11]과 같이 `INTERNAL (13)` gRPC Status Code는 기본적으로 재시도되지 않지만, `x-envoy-retry-grpc-on: internal` Header를 설정하면 최대 4번의 요청이 전송되는 것을 확인할 수 있다.
 
 ### 1.5. mTLS Cases
 
@@ -468,12 +387,12 @@ mTLS 적용 유무에 따라서 변화하는 Header를 확인한다. mTLS 관련
 
 #### 1.5.1. mTLS 적용 Case
 
-```shell {caption="[Shell 11] mTLS 적용 상태 요청 전송"}
+```shell {caption="[Shell 8] mTLS 적용 상태 요청 전송"}
 $ kubectl exec -it shell -- curl -s mock-server:8080/status/200
 $ kubectl logs mock-server -c istio-proxy | grep -A 12 "router decoding headers"
 ```
 
-```text {caption="[Text 12] mTLS 적용 상태 App Container 전송 요청 Header"}
+```text {caption="[Text 9] mTLS 적용 상태 App Container 전송 요청 Header"}
 router decoding headers:
 ':authority', 'mock-server:8080'
 ':path', '/status/200'
@@ -482,7 +401,7 @@ router decoding headers:
 'x-forwarded-client-cert', 'By=spiffe://cluster.local/ns/default/sa/default;Hash=a6410c85...;Subject="";URI=spiffe://cluster.local/ns/default/sa/default'
 ```
 
-Istio는 기본적으로 Sidecar Proxy 사이에 mTLS를 적용한다 (`PERMISSIVE` Mode + Auto mTLS). [Shell 11]과 같이 mTLS가 적용된 상태에서 `mock-server` istio-proxy가 App Container에게 전송하는 요청 Header를 확인하면, [Text 12]와 같이 `x-forwarded-client-cert` (XFCC) Header에 Client (`shell` Pod)의 SPIFFE ID가 설정되어 있는 것을 확인할 수 있다.
+Istio는 기본적으로 Sidecar Proxy 사이에 mTLS를 적용한다 (`PERMISSIVE` Mode + Auto mTLS). [Shell 8]과 같이 mTLS가 적용된 상태에서 `mock-server` istio-proxy가 App Container에게 전송하는 요청 Header를 확인하면, [Text 9]와 같이 `x-forwarded-client-cert` (XFCC) Header에 Client (`shell` Pod)의 SPIFFE ID가 설정되어 있는 것을 확인할 수 있다.
 
 #### 1.5.2. mTLS 미적용 Case
 
@@ -511,12 +430,12 @@ spec:
 
 [File 4]는 `mock-server`에 대한 mTLS를 비활성화하는 Manifest를 나타내고 있다. PeerAuthentication을 통해서 Server 측의 mTLS 수신을 비활성화하고, Destination Rule을 통해서 Client 측의 mTLS 전송을 비활성화한다.
 
-```shell {caption="[Shell 12] mTLS 미적용 상태 요청 전송"}
+```shell {caption="[Shell 9] mTLS 미적용 상태 요청 전송"}
 $ kubectl exec -it shell -- curl -s mock-server:8080/status/200
 $ kubectl logs mock-server -c istio-proxy | grep -A 12 "router decoding headers"
 ```
 
-```text {caption="[Text 13] mTLS 미적용 상태 App Container 전송 요청 Header"}
+```text {caption="[Text 10] mTLS 미적용 상태 App Container 전송 요청 Header"}
 router decoding headers:
 ':authority', 'mock-server:8080'
 ':path', '/status/200'
@@ -529,7 +448,7 @@ router decoding headers:
 'x-envoy-attempt-count', '1'
 ```
 
-[Shell 12]와 같이 mTLS를 비활성화한 상태에서 동일한 요청을 전송하면, [Text 13]과 같이 App Container에게 전송하는 요청에서 `x-forwarded-client-cert` (XFCC) Header가 사라진 것을 확인할 수 있다. XFCC Header는 mTLS 인증서 정보를 기반으로 설정되기 때문에 mTLS가 비활성화되면 설정되지 않는다.
+[Shell 9]와 같이 mTLS를 비활성화한 상태에서 동일한 요청을 전송하면, [Text 10]과 같이 App Container에게 전송하는 요청에서 `x-forwarded-client-cert` (XFCC) Header가 사라진 것을 확인할 수 있다. XFCC Header는 mTLS 인증서 정보를 기반으로 설정되기 때문에 mTLS가 비활성화되면 설정되지 않는다.
 
 ### 1.6. Ingress Gateway Cases
 
@@ -539,7 +458,7 @@ Mesh 외부에서 Ingress Gateway로의 접근은 `kubectl port-forward`를 이�
 
 #### 1.6.1. Ingress Gateway 경유 요청 Header Case
 
-```shell {caption="[Shell 13] Ingress Gateway 경유 요청 전송"}
+```shell {caption="[Shell 10] Ingress Gateway 경유 요청 전송"}
 # Port forward ingress gateway
 $ kubectl port-forward -n istio-system svc/istio-ingressgateway 8080:80
 
@@ -550,7 +469,7 @@ $ curl -s -H "Host: mock-server.example.com" localhost:8080/status/200
 $ kubectl logs mock-server -c istio-proxy | grep -A 13 "router decoding headers"
 ```
 
-```text {caption="[Text 14] Ingress Gateway 경유 App Container 전송 요청 Header"}
+```text {caption="[Text 11] Ingress Gateway 경유 App Container 전송 요청 Header"}
 router decoding headers:
 ':authority', 'mock-server.example.com'
 ':path', '/status/200'
@@ -566,7 +485,7 @@ router decoding headers:
 'x-forwarded-client-cert', 'By=spiffe://cluster.local/ns/default/sa/default;Hash=31d6f5d6...;Subject="";URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account'
 ```
 
-[Shell 13]과 같이 [File 3]의 Gateway, Virtual Service를 통해서 Mesh 외부에서 Ingress Gateway를 경유하여 `mock-server`에 접근하고, App Container에게 전송되는 요청 Header를 확인한다. [Text 14]는 Mesh 내부 요청과 비교하여 다음의 차이를 나타내고 있다.
+[Shell 10]과 같이 [File 3]의 Gateway, Virtual Service를 통해서 Mesh 외부에서 Ingress Gateway를 경유하여 `mock-server`에 접근하고, App Container에게 전송되는 요청 Header를 확인한다. [Text 11]는 Mesh 내부 요청과 비교하여 다음의 차이를 나타내고 있다.
 
 * `x-forwarded-for` : Ingress Gateway가 직접 연결된 Client의 IP 주소를 XFF Header에 추가한 것을 확인할 수 있다. Mesh 내부의 Sidecar Proxy는 XFF Header를 추가하지 않지만, Ingress Gateway는 `use_remote_address` 설정이 `true`이기 때문에 XFF Header를 추가한다.
 * `x-forwarded-client-cert` (XFCC) : Ingress Gateway와 `mock-server`의 Sidecar Proxy 사이에는 mTLS가 적용되기 때문에, `URI` Key에 Ingress Gateway의 SPIFFE ID (`spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account`)가 설정된다. 즉 App 입장에서 XFCC로 확인할 수 있는 Identity는 원본 Client가 아니라 Ingress Gateway이다.
@@ -574,7 +493,7 @@ router decoding headers:
 
 #### 1.6.2. Header Sanitization Case
 
-```shell {caption="[Shell 14] 외부 Client의 제어 Header 설정 요청"}
+```shell {caption="[Shell 11] 외부 Client의 제어 Header 설정 요청"}
 # Enable debug log for ingress gateway
 $ istioctl proxy-config log deploy/istio-ingressgateway -n istio-system --level http:debug,router:debug
 
@@ -588,7 +507,7 @@ $ curl -s -H "Host: mock-server.example.com" -H "X-Forwarded-For: 1.2.3.4" -H "x
 $ kubectl logs -n istio-system deploy/istio-ingressgateway
 ```
 
-```text {caption="[Text 15] Header Sanitization 결과 (Ingress Gateway Debug Log)"}
+```text {caption="[Text 12] Header Sanitization 결과 (Ingress Gateway Debug Log)"}
 # A: request headers received from external client
 request headers complete (end_stream=true):
 ':path', '/delay/3000'
@@ -620,7 +539,7 @@ router decoding headers:
 "response_code": "200"
 ```
 
-[Shell 14]와 같이 Mesh 외부의 Client가 `x-envoy-` Prefix의 제어 Header를 설정하여 전송하는 경우, Ingress Gateway가 해당 Header를 제거하는지 확인한다. `kubectl port-forward` 환경에서는 직접 연결된 Client의 주소가 Internal 주소로 인식되기 때문에, XFF Header에 공인 IP를 설정하여 External 요청 상황을 재현한다. [Text 15]는 Ingress Gateway의 Log를 나타내고 있다.
+[Shell 11]와 같이 Mesh 외부의 Client가 `x-envoy-` Prefix의 제어 Header를 설정하여 전송하는 경우, Ingress Gateway가 해당 Header를 제거하는지 확인한다. `kubectl port-forward` 환경에서는 직접 연결된 Client의 주소가 Internal 주소로 인식되기 때문에, XFF Header에 공인 IP를 설정하여 External 요청 상황을 재현한다. [Text 12]는 Ingress Gateway의 Log를 나타내고 있다.
 
 * A의 경우 Ingress Gateway가 직접 연결된 Client의 주소 (Internal 주소)를 기반으로 Internal 요청으로 판단하기 때문에, Timeout 제어 Header가 `x-envoy-expected-rq-timeout-ms` Header로 변환되어 동작하고 `504` Status Code가 1초 만에 응답된다.
 * B의 경우 요청에 XFF Header가 존재하기 때문에 External 요청으로 판단되며, **Timeout 제어 Header가 제거되어 동작하지 않고** 3초 후에 `200` Status Code가 응답된다. External 요청이기 때문에 `x-envoy-external-address` Header가 설정되며, 신뢰할 수 있는 Client의 IP 주소인 직접 연결된 주소 (`127.0.0.1`, port-forward의 Loopback 연결)가 설정된다. Client가 전송한 XFF Header의 `1.2.3.4` 값은 신뢰되지 않는다.
@@ -629,7 +548,7 @@ router decoding headers:
 
 #### 1.6.3. use_remote_address 기본값 Case
 
-```shell {caption="[Shell 15] use_remote_address 설정 확인"}
+```shell {caption="[Shell 12] use_remote_address 설정 확인"}
 # Ingress gateway
 $ kubectl exec -n istio-system deploy/istio-ingressgateway -- pilot-agent request GET config_dump | grep use_remote_address
 
@@ -637,7 +556,7 @@ $ kubectl exec -n istio-system deploy/istio-ingressgateway -- pilot-agent reques
 $ kubectl exec shell -c istio-proxy -- pilot-agent request GET config_dump | grep use_remote_address
 ```
 
-```text {caption="[Text 16] use_remote_address 기본값 확인 결과"}
+```text {caption="[Text 13] use_remote_address 기본값 확인 결과"}
 # Ingress Gateway
 "use_remote_address": true
 
@@ -645,9 +564,9 @@ $ kubectl exec shell -c istio-proxy -- pilot-agent request GET config_dump | gre
 "use_remote_address": false
 ```
 
-Envoy의 `use_remote_address` 설정은 신뢰할 수 있는 Client의 IP 주소와 Internal/External 요청 판단의 기준을 결정하며, Istio는 Proxy의 역할에 따라서 이 설정을 다르게 구성한다. Istio는 이 설정을 변경하는 정식 API를 제공하지 않는다. [Shell 15]와 같이 Envoy의 Config Dump를 통해서 확인하면, [Text 16]과 같이 **Ingress Gateway는 `true`, Sidecar Proxy는 `false`**로 설정되어 있다. 이 차이로 인해서 앞의 Case들에서 확인한 동작 차이가 발생한다.
+Envoy의 `use_remote_address` 설정은 신뢰할 수 있는 Client의 IP 주소와 Internal/External 요청 판단의 기준을 결정하며, Istio는 Proxy의 역할에 따라서 이 설정을 다르게 구성한다. Istio는 이 설정을 변경하는 정식 API를 제공하지 않는다. [Shell 12]와 같이 Envoy의 Config Dump를 통해서 확인하면, [Text 13]과 같이 **Ingress Gateway는 `true`, Sidecar Proxy는 `false`**로 설정되어 있다. 이 차이로 인해서 앞의 Case들에서 확인한 동작 차이가 발생한다.
 
-* Sidecar Proxy (`false`) : 직접 연결된 Client (App Container)의 주소를 신뢰하지 않고 XFF Header만을 기반으로 판단한다. App이 전송하는 요청에는 XFF Header가 없기 때문에 External 요청으로 판단되어 제어 Header가 제거되며, XFF Header에 Internal 주소를 설정해야 Internal 요청으로 판단된다. XFF Header에 주소를 추가하지도 않는다.
+* Sidecar Proxy (`false`) : 직접 연결된 Client (App Container)의 주소를 신뢰하지 않고 XFF Header만을 기반으로 판단한다. App이 전송하는 요청에는 XFF Header가 없기 때문에 External 요청으로 판단되어 제어 Header가 제거된다. XFF Header에 주소를 추가하지도 않는다.
 * Ingress Gateway (`true`) : Mesh의 Edge에 위치하기 때문에 직접 연결된 Client의 주소를 신뢰한다. 직접 연결된 주소를 XFF Header에 추가하며, 요청에 XFF Header가 존재하지 않으면 직접 연결된 주소를 기반으로 Internal/External을 판단하고, XFF Header가 존재하면 External 요청으로 판단한다.
 
 #### 1.6.4. xff_num_trusted_hops 설정 Case
@@ -669,7 +588,7 @@ spec:
 
 [File 5]는 Ingress Gateway의 `numTrustedProxies` 설정을 `1`로 변경하는 Manifest를 나타내고 있다. Istio는 `gatewayTopology.numTrustedProxies` 설정을 통해서 Envoy의 `xff_num_trusted_hops` 설정을 변경한다. Ingress Gateway 앞에 신뢰할 수 있는 Proxy (AWS ALB, Nginx 등)가 존재하는 환경을 의미한다.
 
-```shell {caption="[Shell 16] xff_num_trusted_hops 설정 요청 전송"}
+```shell {caption="[Shell 13] xff_num_trusted_hops 설정 요청 전송"}
 # Send request with pre-populated XFF header (simulating a front proxy)
 $ curl -s -H "Host: mock-server.example.com" -H "X-Forwarded-For: 1.2.3.4, 5.6.7.8" localhost:8080/status/200
 
@@ -677,7 +596,7 @@ $ curl -s -H "Host: mock-server.example.com" -H "X-Forwarded-For: 1.2.3.4, 5.6.7
 $ kubectl logs mock-server -c istio-proxy | grep -A 13 "router decoding headers"
 ```
 
-```text {caption="[Text 17] xff_num_trusted_hops 설정 App Container 전송 요청 Header"}
+```text {caption="[Text 14] xff_num_trusted_hops 설정 App Container 전송 요청 Header"}
 # Before (numTrustedProxies: 0, default)
 'x-forwarded-for', '1.2.3.4, 5.6.7.8,10.244.2.7'
 'x-envoy-external-address', '127.0.0.1'
@@ -687,7 +606,7 @@ $ kubectl logs mock-server -c istio-proxy | grep -A 13 "router decoding headers"
 'x-envoy-external-address', '5.6.7.8'
 ```
 
-[Shell 16]과 같이 XFF Header에 두 개의 주소 (`1.2.3.4, 5.6.7.8`)를 설정한 요청을 전송하고, App Container에게 전송되는 요청 Header를 설정 전/후로 비교한다. [Text 17]은 설정 전/후의 결과를 나타내고 있다.
+[Shell 13]과 같이 XFF Header에 두 개의 주소 (`1.2.3.4, 5.6.7.8`)를 설정한 요청을 전송하고, App Container에게 전송되는 요청 Header를 설정 전/후로 비교한다. [Text 14]은 설정 전/후의 결과를 나타내고 있다.
 
 * 설정 전 (`numTrustedProxies: 0`) : XFF Header의 주소를 신뢰하지 않고, 직접 연결된 Client의 주소 (`127.0.0.1`)가 신뢰할 수 있는 Client의 IP 주소로 판단되어 `x-envoy-external-address` Header에 설정된다.
 * 설정 후 (`numTrustedProxies: 1`) : Ingress Gateway 앞에 신뢰할 수 있는 Proxy가 1개 존재한다고 가정하기 때문에, XFF Header의 가장 오른쪽 주소 (`5.6.7.8`)가 신뢰할 수 있는 Proxy가 설정한 신뢰할 수 있는 Client의 IP 주소로 판단되어 `x-envoy-external-address` Header에 설정된다. Client가 임의로 설정한 `1.2.3.4` 값은 신뢰되지 않는다.
