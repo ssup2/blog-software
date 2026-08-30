@@ -1,0 +1,35 @@
+# Before (numTrustedProxies: 0, default)
+'x-envoy-expected-rq-timeout-ms', '15000'
+2026-08-30T09:10:35.544566Z	debug	envoy http external/envoy/source/common/http/conn_manager_impl.cc:1878	[Tags: "ConnectionId":"1134","StreamId":"15158889163186182270"] encoding headers via codec (end_stream=true):
+':status', '200'
+2026-08-30T09:10:41.626888Z	debug	envoy router external/envoy/source/common/router/router.cc:756	[Tags: "ConnectionId":"1135","StreamId":"8769526331938843788"] router decoding headers:
+':authority', 'mock-server.example.com'
+':path', '/status/200'
+':method', 'GET'
+':scheme', 'http'
+'user-agent', 'curl/8.7.1'
+'accept', '*/*'
+'x-forwarded-for', '1.2.3.4, 5.6.7.8,10.244.2.7'
+'x-forwarded-proto', 'http'
+'x-envoy-external-address', '127.0.0.1'
+'x-request-id', '44a65b4c-bfff-9c7f-8254-986b672f2540'
+'x-envoy-attempt-count', '1'
+'x-forwarded-client-cert', 'By=spiffe://cluster.local/ns/default/sa/default;Hash=31d6f5d6c7567079e06c826d79dec3b2772e139f087f69df465bfbcfe8558d58;Subject="";URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account'
+
+# After (numTrustedProxies: 1)
+'x-envoy-expected-rq-timeout-ms', '15000'
+2026-08-30T09:11:20.546813Z	debug	envoy http external/envoy/source/common/http/conn_manager_impl.cc:1878	[Tags: "ConnectionId":"1138","StreamId":"2121395451390948754"] encoding headers via codec (end_stream=true):
+':status', '200'
+2026-08-30T09:11:28.986848Z	debug	envoy router external/envoy/source/common/router/router.cc:756	[Tags: "ConnectionId":"1139","StreamId":"7129295314837202446"] router decoding headers:
+':authority', 'mock-server.example.com'
+':path', '/status/200'
+':method', 'GET'
+':scheme', 'http'
+'user-agent', 'curl/8.7.1'
+'accept', '*/*'
+'x-forwarded-for', '1.2.3.4, 5.6.7.8,10.244.1.10'
+'x-forwarded-proto', 'http'
+'x-envoy-external-address', '5.6.7.8'
+'x-request-id', '884f1094-2d00-945b-a562-69d2416849b1'
+'x-envoy-attempt-count', '1'
+'x-forwarded-client-cert', 'By=spiffe://cluster.local/ns/default/sa/default;Hash=596dd20517fd0799453a4c3eb47b713bbf70a2b19dc92b1bbf18601dd1fc23df;Subject="";URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account'

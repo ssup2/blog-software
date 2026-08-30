@@ -1,7 +1,0 @@
-# Before (numTrustedProxies: 0, default): trusted client = direct downstream address
-X-Envoy-External-Address: 127.0.0.1
-X-Forwarded-For: 1.2.3.4, 5.6.7.8,10.244.1.5
-
-# After (numTrustedProxies: 1): trusted client = 1st address from the right of XFF
-X-Envoy-External-Address: 5.6.7.8
-X-Forwarded-For: 1.2.3.4, 5.6.7.8,10.244.1.9

@@ -1,30 +1,46 @@
-{
-  "start_time": "2026-08-29T16:19:54.208Z",
-  "method": "GET",
-  "path": "/delay/3000",
-  "protocol": "HTTP/1.1",
-  "response_code": "504",
-  "response_flags": "UT",
-  "response_code_details": "response_timeout",
-  "connection_termination_details": "-",
-  "upstream_transport_failure_reason": "-",
-  "bytes_received": "0",
-  "bytes_sent": "24",
-  "duration": "1003",
-  "upstream_service_time": "-",
-  "x_forwarded_for": "10.244.2.3",
-  "user_agent": "curl/8.21.0",
-  "request_id": "ab8d075d-20f4-9cdf-ba59-ea434331b1b6",
-  "authority": "mock-server:8080",
-  "upstream_host": "10.244.1.8:8080",
-  "upstream_cluster": "outbound|8080||mock-server.default.svc.cluster.local",
-  "upstream_local_address": "10.244.2.3:41080",
-  "downstream_local_address": "10.96.221.63:8080",
-  "downstream_remote_address": "10.244.2.3:0",
-  "requested_server_name": "-",
-  "route_name": "default",
-  "grpc_status": "-",
-  "upstream_request_attempt_count": "1",
-  "request_duration": "0",
-  "response_duration": "-"
-}
+# A: without XFF header (timeout header sanitized, 200 after delay)
+':authority', 'mock-server:8080'
+':path', '/delay/1200'
+':method', 'GET'
+'user-agent', 'curl/8.21.0'
+'accept', '*/*'
+'x-envoy-upstream-rq-timeout-ms', '1000'
+2026-08-30T09:05:11.501034Z	debug	envoy router external/envoy/source/common/router/router.cc:756	[Tags: "ConnectionId":"1135","StreamId":"11175674071666716139"] router decoding headers:
+':authority', 'mock-server:8080'
+':path', '/delay/1200'
+':method', 'GET'
+':scheme', 'http'
+'user-agent', 'curl/8.21.0'
+'accept', '*/*'
+'x-forwarded-proto', 'http'
+'x-request-id', '82ff3289-3d05-9ee1-bebd-ad7242faf824'
+'x-envoy-decorator-operation', 'mock-server.default.svc.cluster.local:8080/*'
+'x-envoy-peer-metadata-id', 'sidecar~10.244.2.3~shell.default~default.svc.cluster.local'
+'x-envoy-peer-metadata', 'ChoKCkNMVVNURVJfSUQSDBoKS3ViZXJuZXRlcwp5CgZMQUJFTFMSbyptCg4KA2FwcBIHGgVzaGVsbAoqCh9zZXJ2aWNlLmlzdGlvLmlvL2Nhbm9uaWNhbC1uYW1lEgcaBXNoZWxsCi8KI3NlcnZpY2UuaXN0aW8uaW8vY2Fub25pY2FsLXJldmlzaW9uEggaBmxhdGVzdAoPCgROQU1FEgcaBXNoZWxsChYKCU5BTUVTUEFDRRIJGgdkZWZhdWx0CkIKBU9XTkVSEjkaN2t1YmVybmV0ZXM6Ly9hcGlzL2FwcHMvdjEvbmFtZXNwYWNlcy9kZWZhdWx0L3BvZHMvc2hlbGwKGAoNV09SS0xPQURfTkFNRRIHGgVzaGVsbA=='
+'x-envoy-attempt-count', '1'
+2026-08-30T09:05:12.713263Z	debug	envoy http external/envoy/source/common/http/conn_manager_impl.cc:1878	[Tags: "ConnectionId":"1135","StreamId":"11175674071666716139"] encoding headers via codec (end_stream=false):
+
+# B: with single internal XFF address (timeout header honored, 504 local reply)
+':authority', 'mock-server:8080'
+':path', '/delay/3000'
+':method', 'GET'
+'user-agent', 'curl/8.21.0'
+'accept', '*/*'
+'x-forwarded-for', '10.244.2.3'
+'x-envoy-upstream-rq-timeout-ms', '1000'
+2026-08-30T09:05:13.954769Z	debug	envoy router external/envoy/source/common/router/router.cc:756	[Tags: "ConnectionId":"1136","StreamId":"26081021597770949"] router decoding headers:
+':authority', 'mock-server:8080'
+':path', '/delay/3000'
+':method', 'GET'
+':scheme', 'http'
+'user-agent', 'curl/8.21.0'
+'accept', '*/*'
+'x-forwarded-for', '10.244.2.3'
+'x-forwarded-proto', 'http'
+'x-envoy-internal', 'true'
+'x-request-id', 'c3fc4b77-b99e-9822-a8a1-1bde437ec8f3'
+'x-envoy-decorator-operation', 'mock-server.default.svc.cluster.local:8080/*'
+'x-envoy-peer-metadata-id', 'sidecar~10.244.2.3~shell.default~default.svc.cluster.local'
+'x-envoy-peer-metadata', 'ChoKCkNMVVNURVJfSUQSDBoKS3ViZXJuZXRlcwp5CgZMQUJFTFMSbyptCg4KA2FwcBIHGgVzaGVsbAoqCh9zZXJ2aWNlLmlzdGlvLmlvL2Nhbm9uaWNhbC1uYW1lEgcaBXNoZWxsCi8KI3NlcnZpY2UuaXN0aW8uaW8vY2Fub25pY2FsLXJldmlzaW9uEggaBmxhdGVzdAoPCgROQU1FEgcaBXNoZWxsChYKCU5BTUVTUEFDRRIJGgdkZWZhdWx0CkIKBU9XTkVSEjkaN2t1YmVybmV0ZXM6Ly9hcGlzL2FwcHMvdjEvbmFtZXNwYWNlcy9kZWZhdWx0L3BvZHMvc2hlbGwKGAoNV09SS0xPQURfTkFNRRIHGgVzaGVsbA=='
+'x-envoy-expected-rq-timeout-ms', '1000'
+'x-envoy-attempt-count', '1'

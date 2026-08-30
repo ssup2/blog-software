@@ -1,0 +1,16 @@
+'x-envoy-expected-rq-timeout-ms', '15000'
+2026-08-30T09:09:35.544999Z	debug	envoy http external/envoy/source/common/http/conn_manager_impl.cc:1878	[Tags: "ConnectionId":"1126","StreamId":"8904190401738163172"] encoding headers via codec (end_stream=true):
+':status', '200'
+2026-08-30T09:09:46.554573Z	debug	envoy router external/envoy/source/common/router/router.cc:756	[Tags: "ConnectionId":"1127","StreamId":"7237047576563898615"] router decoding headers:
+':authority', 'mock-server.example.com'
+':path', '/status/200'
+':method', 'GET'
+':scheme', 'http'
+'user-agent', 'curl/8.7.1'
+'accept', '*/*'
+'x-forwarded-for', '10.244.2.7'
+'x-forwarded-proto', 'http'
+'x-request-id', '2b4f3b6e-f411-94ef-9a43-dde1cb79c7ea'
+'x-envoy-attempt-count', '1'
+'x-envoy-internal', 'true'
+'x-forwarded-client-cert', 'By=spiffe://cluster.local/ns/default/sa/default;Hash=31d6f5d6c7567079e06c826d79dec3b2772e139f087f69df465bfbcfe8558d58;Subject="";URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account'
