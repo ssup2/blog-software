@@ -1,0 +1,22 @@
+2026-08-29T16:16:32.339672Z	debug	envoy http external/envoy/source/common/http/conn_manager_impl.cc:1183	[Tags: "ConnectionId":"7","StreamId":"4164644102720748808"] request headers complete (end_stream=true):
+':authority', 'mock-server:8080'
+':path', '/status/200'
+':method', 'GET'
+'user-agent', 'curl/8.21.0'
+'accept', '*/*'
+'x-forwarded-proto', 'http'
+'x-request-id', '9461e9ba-ba6b-924f-8cbd-f8a1ec35be61'
+'x-envoy-decorator-operation', 'mock-server.default.svc.cluster.local:8080/*'
+'x-envoy-peer-metadata-id', 'sidecar~10.244.2.3~shell.default~default.svc.cluster.local'
+'x-envoy-peer-metadata', 'ChoKCkNMVVNURVJfSUQSDBoKS3ViZXJuZXRlcwp5CgZMQUJFTFMSbyptCg4KA2FwcBIHGgVzaGVsbAoqCh9zZXJ2aWNlLmlzdGlvLmlvL2Nhbm9uaWNhbC1uYW1lEgcaBXNoZWxsCi8KI3NlcnZpY2UuaXN0aW8uaW8vY2Fub25pY2FsLXJldmlzaW9uEggaBmxhdGVzdAoPCgROQU1FEgcaBXNoZWxsChYKCU5BTUVTUEFDRRIJGgdkZWZhdWx0CkIKBU9XTkVSEjkaN2t1YmVybmV0ZXM6Ly9hcGlzL2FwcHMvdjEvbmFtZXNwYWNlcy9kZWZhdWx0L3BvZHMvc2hlbGwKGAoNV09SS0xPQURfTkFNRRIHGgVzaGVsbA=='
+'date', 'Sat, 29 Aug 2026 16:16:32 GMT'
+'content-length', '59'
+'x-envoy-upstream-service-time', '1'
+'x-envoy-peer-metadata-id', 'sidecar~10.244.1.8~mock-server.default~default.svc.cluster.local'
+'x-envoy-peer-metadata', 'ChoKCkNMVVNURVJfSUQSDBoKS3ViZXJuZXRlcwqFAQoGTEFCRUxTEnsqeQoUCgNhcHASDRoLbW9jay1zZXJ2ZXIKMAofc2VydmljZS5pc3Rpby5pby9jYW5vbmljYWwtbmFtZRINGgttb2NrLXNlcnZlcgovCiNzZXJ2aWNlLmlzdGlvLmlvL2Nhbm9uaWNhbC1yZXZpc2lvbhIIGgZsYXRlc3QKFQoETkFNRRINGgttb2NrLXNlcnZlcgoWCglOQU1FU1BBQ0USCRoHZGVmYXVsdApICgVPV05FUhI/Gj1rdWJlcm5ldGVzOi8vYXBpcy9hcHBzL3YxL25hbWVzcGFjZXMvZGVmYXVsdC9wb2RzL21vY2stc2VydmVyCh4KDVdPUktMT0FEX05BTUUSDRoLbW9jay1zZXJ2ZXI='
+'server', 'istio-envoy'
+	thread=25
+2026-08-29T16:16:32.341646Z	debug	envoy http external/envoy/source/common/http/conn_manager_impl.cc:1993	[Tags: "ConnectionId":"7","StreamId":"4164644102720748808"] Codec completed encoding stream.	thread=25
+--
+2026-08-29T16:16:32.821354Z	debug	envoy http external/envoy/source/common/http/conn_manager_impl.cc:1878	[Tags: "ConnectionId":"28","StreamId":"7690837926540183869"] encoding headers via codec (end_stream=true):
+':status', '200'

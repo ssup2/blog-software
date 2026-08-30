@@ -1,0 +1,50 @@
+
+Resolved method descriptor:
+rpc Status ( .mock.StatusRequest ) returns ( .mock.StatusResponse );
+
+Request metadata to send:
+(empty)
+
+Response headers received:
+content-type: application/grpc
+date: Sat, 29 Aug 2026 16:21:54 GMT
+server: envoy
+x-envoy-upstream-service-time: 3
+
+Estimated response size: 17 bytes
+
+Response contents:
+{
+  "service": "mock-server",
+  "message": "OK"
+}
+
+Response trailers received:
+(empty)
+Sent 1 request and received 1 response
+Timing Data: 72.959815ms
+  Dial: 11.593591ms
+    BlockingDial: 11.58405ms
+  InvokeRPC: 60.531293ms
+
+# Error case (code: 13) - Trailers-Only response
+
+Resolved method descriptor:
+rpc Status ( .mock.StatusRequest ) returns ( .mock.StatusResponse );
+
+Request metadata to send:
+(empty)
+
+Response headers received:
+(empty)
+
+Response trailers received:
+content-type: application/grpc
+date: Sat, 29 Aug 2026 16:25:01 GMT
+server: envoy
+x-envoy-upstream-service-time: 2
+Sent 1 request and received 0 responses
+ERROR:
+  Code: Internal
+  Message: Simulated error with gRPC code 13 (Internal)
+command terminated with exit code 77

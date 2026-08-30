@@ -1,0 +1,32 @@
+16:35:34.369029 IP shell.40420 > 10-244-1-8.mock-server.default.svc.cluster.local.8080: Flags [P.], seq 1665840462:1665841225, ack 957828588, win 63, options [nop,nop,TS val 759059404 ecr 3814306086], length 763: HTTP: GET /status/200 HTTP/1.1
+E../	.@.@...
+...
+.......cJ.N9.M....?.......
+->S..Y.&GET /status/200 HTTP/1.1
+host: mock-server:8080
+user-agent: curl/8.21.0
+accept: */*
+x-forwarded-proto: http
+x-request-id: a4188fda-81aa-938d-a1e7-f846b86a9bea
+x-envoy-decorator-operation: mock-server.default.svc.cluster.local:8080/*
+x-envoy-peer-metadata-id: sidecar~10.244.2.3~shell.default~default.svc.cluster.local
+x-envoy-peer-metadata: ChoKCkNMVVNURVJfSUQSDBoKS3ViZXJuZXRlcwp5CgZMQUJFTFMSbyptCg4KA2FwcBIHGgVzaGVsbAoqCh9zZXJ2aWNlLmlzdGlvLmlvL2Nhbm9uaWNhbC1uYW1lEgcaBXNoZWxsCi8KI3NlcnZpY2UuaXN0aW8uaW8vY2Fub25pY2FsLXJldmlzaW9uEggaBmxhdGVzdAoPCgROQU1FEgcaBXNoZWxsChYKCU5BTUVTUEFDRRIJGgdkZWZhdWx0CkIKBU9XTkVSEjkaN2t1YmVybmV0ZXM6Ly9hcGlzL2FwcHMvdjEvbmFtZXNwYWNlcy9kZWZhdWx0L3BvZHMvc2hlbGwKGAoNV09SS0xPQURfTkFNRRIHGgVzaGVsbA==
+x-envoy-attempt-count: 1
+16:35:34.401079 IP 10-244-1-8.mock-server.default.svc.cluster.local.8080 > shell.40420: Flags [P.], seq 1:765, ack 763, win 63, options [nop,nop,TS val 3814397956 ecr 759059404], length 764: HTTP: HTTP/1.1 200 OK
+E..0..@.>.N.
+...
+.......9.M.cJ.I...?.......
+.[..->S.HTTP/1.1 200 OK
+content-type: application/json
+date: Sat, 29 Aug 2026 16:35:34 GMT
+content-length: 59
+x-envoy-upstream-service-time: 19
+x-envoy-peer-metadata-id: sidecar~10.244.1.8~mock-server.default~default.svc.cluster.local
+x-envoy-peer-metadata: ChoKCkNMVVNURVJfSUQSDBoKS3ViZXJuZXRlcwqFAQoGTEFCRUxTEnsqeQoUCgNhcHASDRoLbW9jay1zZXJ2ZXIKMAofc2VydmljZS5pc3Rpby5pby9jYW5vbmljYWwtbmFtZRINGgttb2NrLXNlcnZlcgovCiNzZXJ2aWNlLmlzdGlvLmlvL2Nhbm9uaWNhbC1yZXZpc2lvbhIIGgZsYXRlc3QKFQoETkFNRRINGgttb2NrLXNlcnZlcgoWCglOQU1FU1BBQ0USCRoHZGVmYXVsdApICgVPV05FUhI/Gj1rdWJlcm5ldGVzOi8vYXBpcy9hcHBzL3YxL25hbWVzcGFjZXMvZGVmYXVsdC9wb2RzL21vY2stc2VydmVyCh4KDVdPUktMT0FEX05BTUUSDRoLbW9jay1zZXJ2ZXI=
+server: istio-envoy
+{"message":"OK","service":"mock-server","status_code":200}
+16:35:34.401086 IP shell.40420 > 10-244-1-8.mock-server.default.svc.cluster.local.8080: Flags [.], ack 765, win 63, options [nop,nop,TS val 759059436 ecr 3814397956], length 0
+E..4	.@.@...
+...
+.......cJ.I9.P....?.......
+->S..[..

@@ -1,0 +1,13 @@
+# Without retry header -> single attempt (INTERNAL is not in istio default retryOn)
+2026/08/29 16:26:08 [mock-server] gRPC /mock.MockService/Status
+2026/08/29 16:26:08 [mock-server] gRPC header x-envoy-attempt-count: 1
+
+# With x-forwarded-for: 10.244.2.3 + x-envoy-retry-grpc-on: internal + x-envoy-max-retries: 3 -> 4 attempts
+2026/08/29 16:26:10 [mock-server] gRPC /mock.MockService/Status
+2026/08/29 16:26:10 [mock-server] gRPC header x-envoy-attempt-count: 1
+2026/08/29 16:26:10 [mock-server] gRPC /mock.MockService/Status
+2026/08/29 16:26:10 [mock-server] gRPC header x-envoy-attempt-count: 2
+2026/08/29 16:26:10 [mock-server] gRPC /mock.MockService/Status
+2026/08/29 16:26:10 [mock-server] gRPC header x-envoy-attempt-count: 3
+2026/08/29 16:26:10 [mock-server] gRPC /mock.MockService/Status
+2026/08/29 16:26:10 [mock-server] gRPC header x-envoy-attempt-count: 4

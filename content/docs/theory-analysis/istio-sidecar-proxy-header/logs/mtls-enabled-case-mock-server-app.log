@@ -1,0 +1,7 @@
+2026/08/29 16:28:02 [mock-server] HTTP GET /status/200 127.0.0.6:58851
+2026/08/29 16:28:02 [mock-server] HTTP header Accept: */*
+2026/08/29 16:28:02 [mock-server] HTTP header User-Agent: curl/8.21.0
+2026/08/29 16:28:02 [mock-server] HTTP header X-Envoy-Attempt-Count: 1
+2026/08/29 16:28:02 [mock-server] HTTP header X-Forwarded-Client-Cert: By=spiffe://cluster.local/ns/default/sa/default;Hash=a6410c85e2c1e69d841df524352de973a7992b4c093602673dc69aa798a3aaa1;Subject="";URI=spiffe://cluster.local/ns/default/sa/default
+2026/08/29 16:28:02 [mock-server] HTTP header X-Forwarded-Proto: http
+2026/08/29 16:28:02 [mock-server] HTTP header X-Request-Id: 0399dd5b-ba8b-9b22-b66d-924a10e6f292
