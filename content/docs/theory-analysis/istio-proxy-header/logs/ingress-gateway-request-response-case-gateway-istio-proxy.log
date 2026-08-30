@@ -1,44 +1,41 @@
-2026-08-30T14:34:01.751578Z	debug	envoy http external/envoy/source/common/http/conn_manager_impl.cc:1183	[Tags: "ConnectionId":"6974","StreamId":"3238840309654784156"] request headers complete (end_stream=true):
+2026-08-30T16:29:30.755359Z	debug	envoy http external/envoy/source/common/http/conn_manager_impl.cc:1183	[Tags: "ConnectionId":"533","StreamId":"458365115130804659"] request headers complete (end_stream=true):
 ':authority', 'mock-server.example.com'
 ':path', '/status/200'
 ':method', 'GET'
 'user-agent', 'curl/8.7.1'
 'accept', '*/*'
 	thread=29
-2026-08-30T14:34:01.758885Z	debug	envoy router external/envoy/source/common/router/router.cc:756	[Tags: "ConnectionId":"6974","StreamId":"3238840309654784156"] router decoding headers:
+2026-08-30T16:29:30.755491Z	debug	envoy router external/envoy/source/common/router/router.cc:756	[Tags: "ConnectionId":"533","StreamId":"458365115130804659"] router decoding headers:
 ':authority', 'mock-server.example.com'
 ':path', '/status/200'
 ':method', 'GET'
 ':scheme', 'http'
 'user-agent', 'curl/8.7.1'
 'accept', '*/*'
-'x-forwarded-for', '10.244.1.11'
+'x-forwarded-for', '203.0.113.9'
 'x-forwarded-proto', 'http'
-'x-envoy-internal', 'true'
-'x-request-id', 'f3552f92-c7c6-9029-a300-8905a42312f1'
+'x-envoy-external-address', '203.0.113.9'
+'x-request-id', 'b06908b8-745a-9b2b-99c1-a6f570ce6627'
 'x-envoy-decorator-operation', 'mock-server.default.svc.cluster.local:8080/*'
-'x-envoy-peer-metadata-id', 'router~10.244.1.11~istio-ingressgateway-78c97cd8c9-qf9sb.istio-system~istio-system.svc.cluster.local'
-'x-envoy-peer-metadata', 'ChoKCkNMVVNURVJfSUQSDBoKS3ViZXJuZXRlcwqZAQoGTEFCRUxTEo4BKosBCh0KA2FwcBIWGhRpc3Rpby1pbmdyZXNzZ2F0ZXdheQo5Ch9zZXJ2aWNlLmlzdGlvLmlvL2Nhbm9uaWNhbC1uYW1lEhYaFGlzdGlvLWluZ3Jlc3NnYXRld2F5Ci8KI3NlcnZpY2UuaXN0aW8uaW8vY2Fub25pY2FsLXJldmlzaW9uEggaBmxhdGVzdAovCgROQU1FEicaJWlzdGlvLWluZ3Jlc3NnYXRld2F5LTc4Yzk3Y2Q4YzktcWY5c2IKGwoJTkFNRVNQQUNFEg4aDGlzdGlvLXN5c3RlbQpdCgVPV05FUhJUGlJrdWJlcm5ldGVzOi8vYXBpcy9hcHBzL3YxL25hbWVzcGFjZXMvaXN0aW8tc3lzdGVtL2RlcGxveW1lbnRzL2lzdGlvLWluZ3Jlc3NnYXRld2F5CicKDVdPUktMT0FEX05BTUUSFhoUaXN0aW8taW5ncmVzc2dhdGV3YXk='
+'x-envoy-peer-metadata-id', 'router~10.244.1.14~istio-ingressgateway-78c97cd8c9-p6qkv.istio-system~istio-system.svc.cluster.local'
+'x-envoy-peer-metadata', 'ChoKCkNMVVNURVJfSUQSDBoKS3ViZXJuZXRlcwqZAQoGTEFCRUxTEo4BKosBCh0KA2FwcBIWGhRpc3Rpby1pbmdyZXNzZ2F0ZXdheQo5Ch9zZXJ2aWNlLmlzdGlvLmlvL2Nhbm9uaWNhbC1uYW1lEhYaFGlzdGlvLWluZ3Jlc3NnYXRld2F5Ci8KI3NlcnZpY2UuaXN0aW8uaW8vY2Fub25pY2FsLXJldmlzaW9uEggaBmxhdGVzdAovCgROQU1FEicaJWlzdGlvLWluZ3Jlc3NnYXRld2F5LTc4Yzk3Y2Q4YzktcDZxa3YKGwoJTkFNRVNQQUNFEg4aDGlzdGlvLXN5c3RlbQpdCgVPV05FUhJUGlJrdWJlcm5ldGVzOi8vYXBpcy9hcHBzL3YxL25hbWVzcGFjZXMvaXN0aW8tc3lzdGVtL2RlcGxveW1lbnRzL2lzdGlvLWluZ3Jlc3NnYXRld2F5CicKDVdPUktMT0FEX05BTUUSFhoUaXN0aW8taW5ncmVzc2dhdGV3YXk='
 'x-envoy-attempt-count', '1'
 	thread=29
-2026-08-30T14:34:01.789582Z	trace	envoy router external/envoy/source/common/router/upstream_request.cc:269	[Tags: "ConnectionId":"6974","StreamId":"3238840309654784156"] end_stream: false, upstream response headers:
+2026-08-30T16:29:30.757566Z	trace	envoy router external/envoy/source/common/router/upstream_request.cc:269	[Tags: "ConnectionId":"533","StreamId":"458365115130804659"] end_stream: false, upstream response headers:
 ':status', '200'
 'content-type', 'application/json'
-'date', 'Sun, 30 Aug 2026 14:34:01 GMT'
+'date', 'Sun, 30 Aug 2026 16:29:30 GMT'
 'content-length', '59'
-'x-envoy-upstream-service-time', '23'
-'x-envoy-peer-metadata-id', 'sidecar~10.244.1.8~mock-server.default~default.svc.cluster.local'
+'x-envoy-upstream-service-time', '0'
+'x-envoy-peer-metadata-id', 'sidecar~10.244.1.15~mock-server.default~default.svc.cluster.local'
 'x-envoy-peer-metadata', 'ChoKCkNMVVNURVJfSUQSDBoKS3ViZXJuZXRlcwqFAQoGTEFCRUxTEnsqeQoUCgNhcHASDRoLbW9jay1zZXJ2ZXIKMAofc2VydmljZS5pc3Rpby5pby9jYW5vbmljYWwtbmFtZRINGgttb2NrLXNlcnZlcgovCiNzZXJ2aWNlLmlzdGlvLmlvL2Nhbm9uaWNhbC1yZXZpc2lvbhIIGgZsYXRlc3QKFQoETkFNRRINGgttb2NrLXNlcnZlcgoWCglOQU1FU1BBQ0USCRoHZGVmYXVsdApICgVPV05FUhI/Gj1rdWJlcm5ldGVzOi8vYXBpcy9hcHBzL3YxL25hbWVzcGFjZXMvZGVmYXVsdC9wb2RzL21vY2stc2VydmVyCh4KDVdPUktMT0FEX05BTUUSDRoLbW9jay1zZXJ2ZXI='
 'server', 'istio-envoy'
 	thread=29
-2026-08-30T14:34:01.789742Z	trace	envoy http external/envoy/source/common/http/filter_manager.cc:1254	[Tags: "ConnectionId":"6974","StreamId":"3238840309654784156"] encode headers called: filter=istio.metadata_exchange status=0	thread=29
-2026-08-30T14:34:01.789764Z	debug	envoy http external/envoy/source/common/http/conn_manager_impl.cc:1878	[Tags: "ConnectionId":"6974","StreamId":"3238840309654784156"] encoding headers via codec (end_stream=false):
+2026-08-30T16:29:30.757752Z	debug	envoy http external/envoy/source/common/http/conn_manager_impl.cc:1878	[Tags: "ConnectionId":"533","StreamId":"458365115130804659"] encoding headers via codec (end_stream=false):
 ':status', '200'
 'content-type', 'application/json'
-'date', 'Sun, 30 Aug 2026 14:34:01 GMT'
+'date', 'Sun, 30 Aug 2026 16:29:30 GMT'
 'content-length', '59'
-'x-envoy-upstream-service-time', '29'
+'x-envoy-upstream-service-time', '2'
 'server', 'istio-envoy'
 	thread=29
-2026-08-30T14:34:01.789782Z	trace	envoy http external/envoy/source/common/http/http1/codec_impl.cc:942	[Tags: "ConnectionId":"6975"] message complete	thread=29
-2026-08-30T14:34:01.789794Z	trace	envoy http external/envoy/source/common/http/filter_manager.cc:904	[Tags: "ConnectionId":"6974","StreamId":"3238840309654784156"] commonEncodePrefix end_stream: false, isHalfCloseEnabled: false	thread=29
