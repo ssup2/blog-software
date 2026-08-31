@@ -652,7 +652,7 @@ ESTAB 1868933 0         10.244.2.7:50072  10.244.1.10:8080
 
 Client가 응답을 읽지 않으면 `shell` Pod의 `istio-proxy`는 Client에게 전달하지 못한 데이터를 내부 Buffer에 보관하며, Buffer가 가득 차면(High Watermark) Upstream 데이터 읽기를 중단하는 Backpressure가 동작한다. 이후 `mock-server` Pod에서 전송된 데이터는 `istio-proxy`가 읽어가지 않기 때문에 Upstream Socket의 Kernel Receive Buffer에 쌓인다. [Shell 7]의 `ss` 명령어 출력에서 `istio-proxy`의 Upstream Socket(`10.244.1.10:8080`)의 Recv-Q에 약 1.8MB의 읽지 않은 데이터가 쌓여있는 것을 확인할 수 있다.
 
-이 상태에서 TCP RST Flag를 수신한 `shell` Pod의 `istio-proxy`는 Upstream Connection을 종료하는데, Downstream TCP RST Case와 다르게 Kernel Receive Buffer에 읽지 않은 데이터가 남아있는 Socket을 닫기 때문에 TCP 규칙에 따라 TCP FIN Flag가 아닌 TCP RST Flag가 `mock-server` Pod에게 전송된다. 즉 `istio-proxy`가 Upstream Connection을 종료할 때 전송하는 Flag는 종료 시점에 Kernel Receive Buffer에 읽지 않은 데이터가 존재하는지 여부에 따라서 결정된다.
+이 상태에서 TCP RST Flag를 수신한 `shell` Pod의 `istio-proxy`는 Upstream Connection을 종료하는데, Downstream TCP RST Case와 다르게 Kernel Receive Buffer에 읽지 않은 데이터가 남아있는 Socket을 닫기 때문에 TCP 규칙에 따라 TCP FIN Flag가 아닌 TCP RST Flag가 `mock-server` Pod에게 전송된다. 즉 `istio-proxy`가 Upstream Connection을 종료할 때 전송하는 Flag는 종료 시점에 Kernel Receive Buffer에 읽지 않은 데이터가 존재하는지 여부에 따라서 결정된다. TCP RST Flag를 수신한 `mock-server` Pod의 `istio-proxy`도 동일한 이유로 `mock-server` Container에게 TCP RST Flag를 전송한다. Backpressure로 인해서 `mock-server` Pod의 `istio-proxy`도 `mock-server` Container가 전송한 데이터를 읽지 않고 있었기 때문에, `mock-server` Container와 연결된 Socket의 Kernel Receive Buffer에도 읽지 않은 데이터가 남아있기 때문이다.
 
 ```json {caption="[Text 10] Downstream TCP RST with Backpressure Case / shell Pod Access Log", linenos=table}
 {
