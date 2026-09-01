@@ -1,6 +1,5 @@
 ---
 title: Istio Proxy Header
-draft: true
 ---
 
 ## 1. Istio Proxy Header
