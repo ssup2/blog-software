@@ -197,7 +197,8 @@ $ kubectl logs -n istio-system deploy/istio-ingressgateway -f
 * Tracing Header 미생성 : Istio `1.22` Version부터 Tracing이 기본적으로 비활성화되어 있기 때문에, `x-b3-traceid`, `x-b3-spanid`와 같은 Tracing Header는 생성되지 않는다. Mesh Config를 통해서 Tracing을 활성화한 경우에만 설정된다.
 * Istio Proxy 간 전용 Header 제거 : `x-envoy-peer-metadata`, `x-envoy-peer-metadata-id`, `x-envoy-decorator-operation` Header는 Istio Proxy 사이에서만 교환되며, Client와 Server의 Container에게 전달되기 전에 제거된다.
 * gRPC 요청의 동일 처리 : gRPC는 HTTP/2를 기반으로 동작하기 때문에 gRPC 요청에도 HTTP 요청과 동일한 Header 처리가 적용된다. gRPC Client가 Deadline을 설정한 경우 전파되는 `grpc-timeout` Header는 Istio Proxy가 요청의 Timeout으로 활용하며, `x-envoy-expected-rq-timeout-ms` Header로 변환되어 Upstream에게 전파된다.
-* 제어 Header 미동작 : Client가 요청에 설정하는 `x-envoy-upstream-rq-timeout-ms`, `x-envoy-retry-on`과 같은 제어 Header는 동작하지 않는다. Sidecar Proxy의 Envoy 설정인 `use_remote_address`가 `false`이고 Client가 전송하는 요청에는 XFF Header가 존재하지 않기 때문에, Sidecar Proxy는 요청을 External 요청으로 판단하여 `x-envoy-` Prefix의 제어 Header를 제거한다. Ingress Gateway도 동일하게 Mesh 외부에서 유입되는 External 요청의 `x-envoy-` Prefix 제어 Header를 제거한다. 따라서 Timeout과 재시도는 제어 Header가 아니라 Virtual Service를 통해서 설정해야 한다.
+* External 요청 판단 (`x-envoy-internal: false`) : Istio Proxy는 기본적으로 요청을 External 요청으로 판단하며, `x-envoy-internal` Header가 `false`인 상태로 동작한다. Sidecar Proxy는 Envoy의 `use_remote_address` 설정이 `false`이고 Client가 전송하는 요청에 XFF Header가 존재하지 않기 때문에 요청을 External 요청으로 판단하며, Ingress Gateway는 직접 연결된 Client의 주소가 공인 대역이기 때문에 요청을 External 요청으로 판단한다.
+* 제어 Header 미동작 : 요청이 External 요청으로 판단되기 때문에, Client가 요청에 설정하는 `x-envoy-upstream-rq-timeout-ms`, `x-envoy-retry-on`과 같은 `x-envoy-` Prefix의 제어 Header는 Istio Proxy가 제거하여 동작하지 않는다. 따라서 Timeout과 재시도는 제어 Header가 아니라 Virtual Service를 통해서 설정해야 한다.
 
 ### 1.3. Sidecar Proxy Cases
 
