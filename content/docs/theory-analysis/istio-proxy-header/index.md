@@ -9,7 +9,9 @@ Istio 환경에서 Sidecar Proxy와 Ingress Gateway가 설정하고 활용하는
 
 ### 1.1. Test 환경 구성
 
-Test 환경은 Istio `1.24` Version을 기준으로 구성한다. 2개의 Worker Node로 구성되어 있고 각각의 Node에 Client 역할을 수행하는 `shell` Pod와 Server 역할을 수행하는 `mock-server` Pod가 위치한다. `shell` Pod 내부에서 `curl` 명령어를 이용하여 `mock-server`에 접근한다. Ingress Gateway Case (1.4)에서는 Mesh 외부에서 Ingress Gateway를 경유하여 `mock-server`에 접근한다.
+{{< figure caption="[Figure 1] Test Environment" src="images/test-environment.png" width="1000px" >}}
+
+[Figure 1]은 Istio Proxy Header Test 환경을 나타내고 있다. Test 환경은 Istio `1.24` Version을 기준으로 구성한다. 2개의 Worker Node로 구성되어 있고 각각의 Node에 Client 역할을 수행하는 `shell` Pod와 Server 역할을 수행하는 `mock-server` Pod가 위치한다. `shell` Pod 내부에서 `curl` 명령어를 이용하여 `mock-server`에 접근한다. Ingress Gateway Case (1.4)에서는 Mesh 외부에서 Ingress Gateway를 경유하여 `mock-server`에 접근한다.
 
 #### 1.1.1. Kubernetes, Istio 환경 구성
 
@@ -200,11 +202,13 @@ $ kubectl logs -n istio-system deploy/istio-ingressgateway -f
 
 ### 1.3. Sidecar Proxy Cases
 
+{{< figure caption="[Figure 2] Sidecar Proxy Case" src="images/sidecar-proxy-case.png" width="1000px" >}}
+
 ```shell {caption="[Shell 4] HTTP 요청 전송"}
 $ kubectl exec -it shell -- curl -s mock-server:8080/status/200
 ```
 
-[Shell 4]과 같이 `shell` Pod에서 `mock-server`로 하나의 HTTP 요청을 전송하고, 요청과 응답이 흐르는 순서대로 각 구간의 Header를 istio-proxy의 Log를 통해서 확인한다. 요청은 `shell` Container → `shell` istio-proxy → `mock-server` istio-proxy → `mock-server` Container 순서로 3개의 구간을 거치며, 응답은 반대 순서로 전달된다. 각 구간의 Header 처리는 Protocol과 무관하게 동작하기 때문에 HTTP 요청으로만 확인하며, gRPC 요청의 경우에도 동일하게 동작한다.
+[Figure 2]는 Sidecar Proxy Case에서 요청과 응답이 각 구간을 거치면서 추가되는 Header를 나타내고 있으며, 각 번호는 이후 살펴보는 Case의 순서를 나타낸다. [Shell 4]과 같이 `shell` Pod에서 `mock-server`로 하나의 HTTP 요청을 전송하고, 요청과 응답이 흐르는 순서대로 각 구간의 Header를 istio-proxy의 Log를 통해서 확인한다. 요청은 `shell` Container → `shell` istio-proxy → `mock-server` istio-proxy → `mock-server` Container 순서로 3개의 구간을 거치며, 응답은 반대 순서로 전달된다. 각 구간의 Header 처리는 Protocol과 무관하게 동작하기 때문에 HTTP 요청으로만 확인하며, gRPC 요청의 경우에도 동일하게 동작한다.
 
 #### 1.3.1. Client 전송 요청 Header Case (shell → shell istio-proxy)
 
@@ -352,11 +356,13 @@ encoding headers via codec (end_stream=false):
 
 ### 1.4. Ingress Gateway Cases
 
+{{< figure caption="[Figure 3] Ingress Gateway Case" src="images/ingressgateway-case.png" width="1000px" >}}
+
 ```shell {caption="[Shell 11] Ingress Gateway 경유 HTTP 요청 전송"}
 $ curl -s -H "Host: mock-server.example.com" http://192.168.97.200/status/200
 ```
 
-[Shell 11]과 같이 [File 4]의 Gateway, Virtual Service를 통해서 Mesh 외부에서 Ingress Gateway를 경유하는 하나의 HTTP 요청을 전송하고, 요청과 응답이 흐르는 순서대로 각 구간의 Header를 istio-proxy의 Log를 통해서 확인한다. 요청은 External Client → istio-ingressgateway → `mock-server` istio-proxy → `mock-server` Container 순서로 3개의 구간을 거치며, 응답은 반대 순서로 전달된다. 각 구간의 Header 처리는 Protocol과 무관하게 동작하기 때문에 HTTP 요청으로만 확인하며, gRPC 요청의 경우에도 동일하게 동작한다.
+[Figure 3]는 Ingress Gateway Case에서 요청과 응답이 각 구간을 거치면서 추가되는 Header를 나타내고 있으며, 각 번호는 이후 살펴보는 Case의 순서를 나타낸다. [Shell 11]과 같이 [File 4]의 Gateway, Virtual Service를 통해서 Mesh 외부에서 Ingress Gateway를 경유하는 하나의 HTTP 요청을 전송하고, 요청과 응답이 흐르는 순서대로 각 구간의 Header를 istio-proxy의 Log를 통해서 확인한다. 요청은 External Client → istio-ingressgateway → `mock-server` istio-proxy → `mock-server` Container 순서로 3개의 구간을 거치며, 응답은 반대 순서로 전달된다. 각 구간의 Header 처리는 Protocol과 무관하게 동작하기 때문에 HTTP 요청으로만 확인하며, gRPC 요청의 경우에도 동일하게 동작한다.
 
 #### 1.4.1. Client 전송 요청 Header Case (External Client → istio-ingressgateway)
 
