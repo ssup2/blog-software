@@ -565,10 +565,10 @@ $ kubectl logs mock-server -c istio-proxy | sed -n '/router decoding headers/,/t
 'x-envoy-external-address', '5.6.7.8'
 ```
 
-As shown in [Shell 19], a request with two addresses (`1.2.3.4, 5.6.7.8`) set in the XFF Header is sent, and the request Headers sent to the `mock-server` Container are compared before and after the configuration. [Text 15] shows the results before and after the configuration.
+As shown in [Shell 19], a request with two addresses (`1.2.3.4, 5.6.7.8`) set in the XFF Header is sent, and the request Headers sent to the `mock-server` Container are compared before and after the configuration. [Text 15] shows the results before and after the configuration. The trusted Client IP address judgment is performed based on the XFF Header at the time the Ingress Gateway receives it (`1.2.3.4, 5.6.7.8`), and since the Ingress Gateway appends the address of the directly connected External Client (`203.0.113.9`) to the XFF Header after the judgment, `203.0.113.9` is located at the rightmost position of the XFF Header in [Text 15] in both cases.
 
 * Before configuration (`numTrustedProxies: 0`) : The addresses in the XFF Header are not trusted, and the address of the directly connected External Client (`203.0.113.9`) is judged as the trusted Client IP address and set in the `x-envoy-external-address` Header.
-* After configuration (`numTrustedProxies: 1`) : Since it is assumed that one trusted Proxy exists in front of the Ingress Gateway, the rightmost address in the XFF Header (`5.6.7.8`) is judged as the trusted Client IP address set by the trusted Proxy and set in the `x-envoy-external-address` Header. The `1.2.3.4` value arbitrarily set by the Client is not trusted.
+* After configuration (`numTrustedProxies: 1`) : Since it is assumed that one trusted Proxy exists in front of the Ingress Gateway, the rightmost address in the XFF Header received by the Ingress Gateway (`5.6.7.8`) is judged as the trusted Client IP address set by the trusted Proxy and set in the `x-envoy-external-address` Header. The `1.2.3.4` value arbitrarily set by the Client is not trusted.
 
 ## 2. References
 

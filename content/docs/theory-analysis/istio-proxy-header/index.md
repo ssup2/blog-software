@@ -565,10 +565,10 @@ $ kubectl logs mock-server -c istio-proxy | sed -n '/router decoding headers/,/t
 'x-envoy-external-address', '5.6.7.8'
 ```
 
-[Shell 19]과 같이 XFF Header에 두 개의 주소 (`1.2.3.4, 5.6.7.8`)를 설정한 요청을 전송하고, `mock-server` Container에게 전송되는 요청 Header를 설정 전/후로 비교한다. [Text 15]은 설정 전/후의 결과를 나타내고 있다.
+[Shell 19]과 같이 XFF Header에 두 개의 주소 (`1.2.3.4, 5.6.7.8`)를 설정한 요청을 전송하고, `mock-server` Container에게 전송되는 요청 Header를 설정 전/후로 비교한다. [Text 15]은 설정 전/후의 결과를 나타내고 있다. 신뢰할 수 있는 Client의 IP 주소 판단은 Ingress Gateway가 수신한 시점의 XFF Header (`1.2.3.4, 5.6.7.8`)를 기준으로 수행되며, 판단 이후에 Ingress Gateway가 직접 연결된 External Client의 주소 (`203.0.113.9`)를 XFF Header에 추가하기 때문에 [Text 15]의 XFF Header 가장 오른쪽에는 두 경우 모두 `203.0.113.9`가 위치한다.
 
 * 설정 전 (`numTrustedProxies: 0`) : XFF Header의 주소를 신뢰하지 않고, 직접 연결된 External Client의 주소 (`203.0.113.9`)가 신뢰할 수 있는 Client의 IP 주소로 판단되어 `x-envoy-external-address` Header에 설정된다.
-* 설정 후 (`numTrustedProxies: 1`) : Ingress Gateway 앞에 신뢰할 수 있는 Proxy가 1개 존재한다고 가정하기 때문에, XFF Header의 가장 오른쪽 주소 (`5.6.7.8`)가 신뢰할 수 있는 Proxy가 설정한 신뢰할 수 있는 Client의 IP 주소로 판단되어 `x-envoy-external-address` Header에 설정된다. Client가 임의로 설정한 `1.2.3.4` 값은 신뢰되지 않는다.
+* 설정 후 (`numTrustedProxies: 1`) : Ingress Gateway 앞에 신뢰할 수 있는 Proxy가 1개 존재한다고 가정하기 때문에, Ingress Gateway가 수신한 XFF Header의 가장 오른쪽 주소 (`5.6.7.8`)가 신뢰할 수 있는 Proxy가 설정한 신뢰할 수 있는 Client의 IP 주소로 판단되어 `x-envoy-external-address` Header에 설정된다. Client가 임의로 설정한 `1.2.3.4` 값은 신뢰되지 않는다.
 
 ## 2. 참조
 
