@@ -354,23 +354,65 @@ encoding headers via codec (end_stream=false):
 * `x-envoy-upstream-service-time` : `shell` istio-proxy가 측정한 값으로 덮어써진다. Client 측 Sidecar Proxy가 `mock-server` Pod로 요청을 전송한 이후 응답을 받을 때까지의 시간 (Millisecond)을 나타내며, 두 Pod 사이의 Network Latency와 Server 측 Sidecar Proxy, `mock-server` Container의 처리 시간이 모두 포함된다.
 * `server` : Server 측 Sidecar Proxy가 설정한 `istio-envoy` 값이 `envoy` 값으로 변경되어 Client에게 전달된다.
 
+#### 1.3.7. Circuit Breaking 응답 Header Case (shell istio-proxy → shell)
+
+```yaml {caption="[File 5] mock-server Destination Rule Manifest", linenos=table}
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: mock-server
+spec:
+  host: mock-server
+  trafficPolicy:
+    connectionPool:
+      http:
+        http2MaxRequests: 1
+```
+
+```shell {caption="[Shell 11] Circuit Breaking 응답 Header 확인"}
+# Send two requests concurrently
+$ kubectl exec shell -- curl -s mock-server:8080/delay/5000 &
+$ kubectl exec shell -- curl -s mock-server:8080/delay/5000 &
+upstream connect error or disconnect/reset before headers. reset reason: overflow
+{"delayed_ms":5000,"message":"Response delayed by 5000ms","service":"mock-server"}
+
+# Check headers in shell istio-proxy logs
+$ kubectl logs shell -c istio-proxy | sed -n '/encoding headers via codec/,/thread=/p'
+```
+
+```text {caption="[Text 8] shell istio-proxy의 shell 전송 503 응답 Header"}
+encoding headers via codec (end_stream=false):
+':status', '503'
+'x-envoy-overloaded', 'true'
+'content-length', '81'
+'content-type', 'text/plain'
+'date', 'Tue, 01 Sep 2026 07:05:26 GMT'
+'server', 'envoy'
+```
+
+[File 5]는 `mock-server`로의 동시 요청 개수를 1개로 제한하는 Destination Rule Manifest를 나타내고 있다. [Shell 11]과 같이 두 개의 요청을 동시에 전송하면 두번째 요청은 동시 요청 제한을 초과하기 때문에, `shell` istio-proxy는 Upstream Overflow로 판단하여 Circuit Breaking을 동작시키고 요청을 `mock-server` Pod에게 전달하지 않고 직접 `503 Service Unavailable` 응답을 생성한다.
+
+[Text 8]과 같이 생성된 응답에는 `x-envoy-overloaded: true` Header가 설정된 것을 확인할 수 있으며, Client는 이 Header를 통해서 응답이 Server가 아니라 Circuit Breaking에 의해서 생성된 것을 구분할 수 있다.
+
+유사하게 Rate Limit에 의해서 제한된 요청의 응답에 설정되는 `x-envoy-ratelimited` Header도 존재하지만, Envoy의 Global Rate Limit Filter만 설정하는 Header이기 때문에 EnvoyFilter를 통해서 별도의 Rate Limit Service를 연동하지 않는 기본 Istio 환경에서는 설정되지 않는다. EnvoyFilter를 통해서 설정하는 Local Rate Limit Filter의 경우에도 Istio `1.24`가 이용하는 Envoy `1.32` Version 기준으로 `x-envoy-ratelimited` Header를 설정하지 않는다.
+
 ### 1.4. Ingress Gateway Cases
 
 {{< figure caption="[Figure 3] Ingress Gateway Case" src="images/ingressgateway-case.png" width="1000px" >}}
 
-```shell {caption="[Shell 11] Ingress Gateway 경유 HTTP 요청 전송"}
+```shell {caption="[Shell 12] Ingress Gateway 경유 HTTP 요청 전송"}
 $ curl -s -H "Host: mock-server.example.com" http://192.168.97.200/status/200
 ```
 
-[Figure 3]는 Ingress Gateway Case에서 요청과 응답이 각 구간을 거치면서 추가되는 Header를 나타내고 있으며, 각 번호는 이후 살펴보는 Case의 순서를 나타낸다. [Shell 11]과 같이 [File 4]의 Gateway, Virtual Service를 통해서 Mesh 외부에서 Ingress Gateway를 경유하는 하나의 HTTP 요청을 전송하고, 요청과 응답이 흐르는 순서대로 각 구간의 Header를 istio-proxy의 Log를 통해서 확인한다. 요청은 External Client → istio-ingressgateway → `mock-server` istio-proxy → `mock-server` Container 순서로 3개의 구간을 거치며, 응답은 반대 순서로 전달된다. 각 구간의 Header 처리는 Protocol과 무관하게 동작하기 때문에 HTTP 요청으로만 확인하며, gRPC 요청의 경우에도 동일하게 동작한다.
+[Figure 3]는 Ingress Gateway Case에서 요청과 응답이 각 구간을 거치면서 추가되는 Header를 나타내고 있으며, 각 번호는 이후 살펴보는 Case의 순서를 나타낸다. [Shell 12]과 같이 [File 4]의 Gateway, Virtual Service를 통해서 Mesh 외부에서 Ingress Gateway를 경유하는 하나의 HTTP 요청을 전송하고, 요청과 응답이 흐르는 순서대로 각 구간의 Header를 istio-proxy의 Log를 통해서 확인한다. 요청은 External Client → istio-ingressgateway → `mock-server` istio-proxy → `mock-server` Container 순서로 3개의 구간을 거치며, 응답은 반대 순서로 전달된다. 각 구간의 Header 처리는 Protocol과 무관하게 동작하기 때문에 HTTP 요청으로만 확인하며, gRPC 요청의 경우에도 동일하게 동작한다.
 
 #### 1.4.1. Client 전송 요청 Header Case (External Client → istio-ingressgateway)
 
-```shell {caption="[Shell 12] Client 전송 요청 Header 확인"}
+```shell {caption="[Shell 13] Client 전송 요청 Header 확인"}
 $ kubectl logs -n istio-system deploy/istio-ingressgateway | sed -n '/request headers complete/,/thread=/p'
 ```
 
-```text {caption="[Text 8] istio-ingressgateway 수신 요청 Header"}
+```text {caption="[Text 9] istio-ingressgateway 수신 요청 Header"}
 request headers complete (end_stream=true):
 ':authority', 'mock-server.example.com'
 ':path', '/status/200'
@@ -379,15 +421,15 @@ request headers complete (end_stream=true):
 'accept', '*/*'
 ```
 
-[Shell 12]과 같이 istio-ingressgateway가 External Client로부터 수신한 요청 Header를 확인한다. [Text 8]과 같이 `curl`이 전송한 `Host`, `User-Agent`, `Accept` Header만 존재하며, 아직 Istio 관련 Header는 존재하지 않는다.
+[Shell 13]과 같이 istio-ingressgateway가 External Client로부터 수신한 요청 Header를 확인한다. [Text 9]과 같이 `curl`이 전송한 `Host`, `User-Agent`, `Accept` Header만 존재하며, 아직 Istio 관련 Header는 존재하지 않는다.
 
 #### 1.4.2. Istio Proxy 간 요청 Header Case (istio-ingressgateway → mock-server istio-proxy)
 
-```shell {caption="[Shell 13] Istio Proxy 간 요청 Header 확인"}
+```shell {caption="[Shell 14] Istio Proxy 간 요청 Header 확인"}
 $ kubectl logs -n istio-system deploy/istio-ingressgateway | sed -n '/router decoding headers/,/thread=/p'
 ```
 
-```text {caption="[Text 9] istio-ingressgateway의 mock-server istio-proxy 전송 요청 Header"}
+```text {caption="[Text 10] istio-ingressgateway의 mock-server istio-proxy 전송 요청 Header"}
 router decoding headers:
 ':authority', 'mock-server.example.com'
 ':path', '/status/200'
@@ -405,7 +447,7 @@ router decoding headers:
 'x-envoy-attempt-count', '1'
 ```
 
-[Shell 13]와 같이 istio-ingressgateway가 `mock-server` istio-proxy에게 전송하는 요청 Header를 확인한다. [Text 9]와 같이 Sidecar Proxy Case (1.3.2)와 동일하게 `x-request-id`, `x-envoy-decorator-operation`, `x-envoy-peer-metadata` Header가 추가되며, 다음의 차이가 존재한다.
+[Shell 14]와 같이 istio-ingressgateway가 `mock-server` istio-proxy에게 전송하는 요청 Header를 확인한다. [Text 10]와 같이 Sidecar Proxy Case (1.3.2)와 동일하게 `x-request-id`, `x-envoy-decorator-operation`, `x-envoy-peer-metadata` Header가 추가되며, 다음의 차이가 존재한다.
 
 * `x-forwarded-for` : istio-ingressgateway가 직접 연결된 External Client의 주소 (`203.0.113.9`)를 XFF Header에 추가한다. Sidecar Proxy는 XFF Header를 추가하지 않지만, istio-ingressgateway는 Envoy의 `use_remote_address` 설정이 `true`이기 때문에 XFF Header를 추가한다.
 * `x-envoy-external-address` : 직접 연결된 External Client의 주소가 공인 대역이기 때문에 istio-ingressgateway는 요청을 External 요청으로 판단하며, 신뢰할 수 있는 Client의 IP 주소인 직접 연결된 주소 (`203.0.113.9`)를 설정한다. 반대로 Internal 요청으로 판단한 경우에는 `x-envoy-internal: true` Header가 설정된다.
@@ -413,11 +455,11 @@ router decoding headers:
 
 #### 1.4.3. Server 수신 요청 Header Case (mock-server istio-proxy → mock-server)
 
-```shell {caption="[Shell 14] Server 수신 요청 Header 확인"}
+```shell {caption="[Shell 15] Server 수신 요청 Header 확인"}
 $ kubectl logs mock-server -c istio-proxy | sed -n '/router decoding headers/,/thread=/p'
 ```
 
-```text {caption="[Text 10] mock-server istio-proxy의 mock-server 전송 요청 Header"}
+```text {caption="[Text 11] mock-server istio-proxy의 mock-server 전송 요청 Header"}
 router decoding headers:
 ':authority', 'mock-server.example.com'
 ':path', '/status/200'
@@ -433,30 +475,30 @@ router decoding headers:
 'x-forwarded-client-cert', 'By=spiffe://cluster.local/ns/default/sa/default;Hash=de4a0539...;Subject="";URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account'
 ```
 
-[Shell 14]과 같이 `mock-server` istio-proxy가 `mock-server` Container에게 전송하는 요청 Header를 확인한다. [Text 10]과 같이 Istio Proxy 간 전용 Header는 제거되고 XFCC Header가 추가되며, `x-forwarded-for`, `x-envoy-external-address` Header는 그대로 유지되어 전달된다. XFCC Header의 `URI` Key에는 istio-ingressgateway의 SPIFFE ID (`spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account`)가 설정된다. 즉 `mock-server` Container 입장에서 XFCC로 확인할 수 있는 Identity는 원본 Client가 아니라 istio-ingressgateway이다.
+[Shell 15]과 같이 `mock-server` istio-proxy가 `mock-server` Container에게 전송하는 요청 Header를 확인한다. [Text 11]과 같이 Istio Proxy 간 전용 Header는 제거되고 XFCC Header가 추가되며, `x-forwarded-for`, `x-envoy-external-address` Header는 그대로 유지되어 전달된다. XFCC Header의 `URI` Key에는 istio-ingressgateway의 SPIFFE ID (`spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account`)가 설정된다. 즉 `mock-server` Container 입장에서 XFCC로 확인할 수 있는 Identity는 원본 Client가 아니라 istio-ingressgateway이다.
 
 #### 1.4.4. Server 전송 응답 Header Case (mock-server → mock-server istio-proxy)
 
-```shell {caption="[Shell 15] Server 전송 응답 Header 확인"}
+```shell {caption="[Shell 16] Server 전송 응답 Header 확인"}
 $ kubectl logs mock-server -c istio-proxy | sed -n '/upstream response headers/,/thread=/p'
 ```
 
-```text {caption="[Text 11] mock-server istio-proxy 수신 응답 Header"}
+```text {caption="[Text 12] mock-server istio-proxy 수신 응답 Header"}
 end_stream: false, upstream response headers:
 ':status', '200'
 'content-type', 'application/json'
 'content-length', '59'
 ```
 
-[Shell 15]와 같이 `mock-server` istio-proxy가 `mock-server` Container로부터 수신한 응답 Header를 확인한다. Sidecar Proxy Case (1.3.4)와 동일하게 `mock-server` Container가 전송한 응답에는 기본 Header만 존재한다.
+[Shell 16]와 같이 `mock-server` istio-proxy가 `mock-server` Container로부터 수신한 응답 Header를 확인한다. Sidecar Proxy Case (1.3.4)와 동일하게 `mock-server` Container가 전송한 응답에는 기본 Header만 존재한다.
 
 #### 1.4.5. Istio Proxy 간 응답 Header Case (mock-server istio-proxy → istio-ingressgateway)
 
-```shell {caption="[Shell 16] Istio Proxy 간 응답 Header 확인"}
+```shell {caption="[Shell 17] Istio Proxy 간 응답 Header 확인"}
 $ kubectl logs mock-server -c istio-proxy | sed -n '/encoding headers via codec/,/thread=/p'
 ```
 
-```text {caption="[Text 12] mock-server istio-proxy의 istio-ingressgateway 전송 응답 Header"}
+```text {caption="[Text 13] mock-server istio-proxy의 istio-ingressgateway 전송 응답 Header"}
 encoding headers via codec (end_stream=false):
 ':status', '200'
 'content-type', 'application/json'
@@ -466,15 +508,15 @@ encoding headers via codec (end_stream=false):
 'server', 'istio-envoy'
 ```
 
-[Shell 16]와 같이 `mock-server` istio-proxy가 istio-ingressgateway에게 전송하는 응답 Header를 확인한다. Sidecar Proxy Case (1.3.5)와 동일하게 `mock-server` Workload의 Metadata Header와 `x-envoy-upstream-service-time`, `server` Header가 추가된다.
+[Shell 17]와 같이 `mock-server` istio-proxy가 istio-ingressgateway에게 전송하는 응답 Header를 확인한다. Sidecar Proxy Case (1.3.5)와 동일하게 `mock-server` Workload의 Metadata Header와 `x-envoy-upstream-service-time`, `server` Header가 추가된다.
 
 #### 1.4.6. Client 수신 응답 Header Case (istio-ingressgateway → External Client)
 
-```shell {caption="[Shell 17] Client 수신 응답 Header 확인"}
+```shell {caption="[Shell 18] Client 수신 응답 Header 확인"}
 $ kubectl logs -n istio-system deploy/istio-ingressgateway | sed -n '/encoding headers via codec/,/thread=/p'
 ```
 
-```text {caption="[Text 13] istio-ingressgateway의 External Client 전송 응답 Header"}
+```text {caption="[Text 14] istio-ingressgateway의 External Client 전송 응답 Header"}
 encoding headers via codec (end_stream=false):
 ':status', '200'
 'content-type', 'application/json'
@@ -484,11 +526,11 @@ encoding headers via codec (end_stream=false):
 'server', 'istio-envoy'
 ```
 
-[Shell 17]과 같이 istio-ingressgateway가 External Client에게 전달하는 응답 Header를 확인한다. [Text 13]과 같이 Istio Proxy 간 전용 Header는 제거되고, `x-envoy-upstream-service-time` Header는 istio-ingressgateway가 측정한 값 (`2`)으로 덮어써진다. Sidecar Proxy와 다르게 `server` Header는 `envoy` 값으로 변경되지 않고 `istio-envoy` 값이 그대로 전달된다.
+[Shell 18]과 같이 istio-ingressgateway가 External Client에게 전달하는 응답 Header를 확인한다. [Text 14]과 같이 Istio Proxy 간 전용 Header는 제거되고, `x-envoy-upstream-service-time` Header는 istio-ingressgateway가 측정한 값 (`2`)으로 덮어써진다. Sidecar Proxy와 다르게 `server` Header는 `envoy` 값으로 변경되지 않고 `istio-envoy` 값이 그대로 전달된다.
 
 #### 1.4.7. xff_num_trusted_hops 설정 Case
 
-```yaml {caption="[File 5] Ingress Gateway numTrustedProxies Manifest", linenos=table}
+```yaml {caption="[File 6] Ingress Gateway numTrustedProxies Manifest", linenos=table}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -503,9 +545,9 @@ spec:
             numTrustedProxies: 1
 ```
 
-[File 5]는 Ingress Gateway의 `numTrustedProxies` 설정을 `1`로 변경하는 Manifest를 나타내고 있다. Istio는 `gatewayTopology.numTrustedProxies` 설정을 통해서 Envoy의 `xff_num_trusted_hops` 설정을 변경한다. Ingress Gateway 앞에 신뢰할 수 있는 Proxy (AWS ALB, Nginx 등)가 존재하는 환경을 의미한다.
+[File 6]는 Ingress Gateway의 `numTrustedProxies` 설정을 `1`로 변경하는 Manifest를 나타내고 있다. Istio는 `gatewayTopology.numTrustedProxies` 설정을 통해서 Envoy의 `xff_num_trusted_hops` 설정을 변경한다. Ingress Gateway 앞에 신뢰할 수 있는 Proxy (AWS ALB, Nginx 등)가 존재하는 환경을 의미한다.
 
-```shell {caption="[Shell 18] xff_num_trusted_hops 설정 요청 전송"}
+```shell {caption="[Shell 19] xff_num_trusted_hops 설정 요청 전송"}
 # Send request with pre-populated XFF header (simulating a front proxy)
 $ curl -s -H "Host: mock-server.example.com" -H "X-Forwarded-For: 1.2.3.4, 5.6.7.8" http://192.168.97.200/status/200
 
@@ -513,7 +555,7 @@ $ curl -s -H "Host: mock-server.example.com" -H "X-Forwarded-For: 1.2.3.4, 5.6.7
 $ kubectl logs mock-server -c istio-proxy | sed -n '/router decoding headers/,/thread=/p'
 ```
 
-```text {caption="[Text 14] xff_num_trusted_hops 설정 mock-server 전송 요청 Header"}
+```text {caption="[Text 15] xff_num_trusted_hops 설정 mock-server 전송 요청 Header"}
 # Before (numTrustedProxies: 0, default)
 'x-forwarded-for', '1.2.3.4, 5.6.7.8,203.0.113.9'
 'x-envoy-external-address', '203.0.113.9'
@@ -523,7 +565,7 @@ $ kubectl logs mock-server -c istio-proxy | sed -n '/router decoding headers/,/t
 'x-envoy-external-address', '5.6.7.8'
 ```
 
-[Shell 18]과 같이 XFF Header에 두 개의 주소 (`1.2.3.4, 5.6.7.8`)를 설정한 요청을 전송하고, `mock-server` Container에게 전송되는 요청 Header를 설정 전/후로 비교한다. [Text 14]은 설정 전/후의 결과를 나타내고 있다.
+[Shell 19]과 같이 XFF Header에 두 개의 주소 (`1.2.3.4, 5.6.7.8`)를 설정한 요청을 전송하고, `mock-server` Container에게 전송되는 요청 Header를 설정 전/후로 비교한다. [Text 15]은 설정 전/후의 결과를 나타내고 있다.
 
 * 설정 전 (`numTrustedProxies: 0`) : XFF Header의 주소를 신뢰하지 않고, 직접 연결된 External Client의 주소 (`203.0.113.9`)가 신뢰할 수 있는 Client의 IP 주소로 판단되어 `x-envoy-external-address` Header에 설정된다.
 * 설정 후 (`numTrustedProxies: 1`) : Ingress Gateway 앞에 신뢰할 수 있는 Proxy가 1개 존재한다고 가정하기 때문에, XFF Header의 가장 오른쪽 주소 (`5.6.7.8`)가 신뢰할 수 있는 Proxy가 설정한 신뢰할 수 있는 Client의 IP 주소로 판단되어 `x-envoy-external-address` Header에 설정된다. Client가 임의로 설정한 `1.2.3.4` 값은 신뢰되지 않는다.
