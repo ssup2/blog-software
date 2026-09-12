@@ -1,5 +1,6 @@
 ---
 title: Kubernetes Gateway API
+draft: true
 ---
 
 Kubernetes에서 Ingress의 한계를 극복하기 위해서 등장한 Gateway API를 분석한다. 분석한 Gateway API의 Version은 v1.6이다.
