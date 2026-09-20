@@ -36,9 +36,9 @@ spec:
     failureMode: FailOpen
 ```
 
-**InferencePool**은 동일한 Model을 서비스하는 Model Server Pod의 집합을 정의하는 Resource이다. [File 1]은 vLLM 기반의 Model Server Pod를 묶는 InferencePool의 예제를 나타내고 있다. selector에는 InferencePool에 포함될 Model Server Pod의 Label을 명시하고, targetPorts에는 Model Server가 요청을 수신하는 Port를 명시한다. InferencePool은 Kubernetes Service와 유사하게 Pod의 집합을 정의하지만, Load Balancing 대상 선택을 endpointPickerRef에 명시된 EPP에게 위임한다는 차이점이 존재한다.
+**InferencePool**은 동일한 Model을 서비스하는 Model Server Pod의 집합을 정의하는 Resource이다. [File 1]은 vLLM 기반의 Model Server Pod를 묶는 InferencePool의 예제를 나타내고 있다. `selector`에는 InferencePool에 포함될 Model Server Pod의 Label을 명시하고, `targetPorts`에는 Model Server가 요청을 수신하는 Port를 명시한다. InferencePool은 Kubernetes Service와 유사하게 Pod의 집합을 정의하지만, Load Balancing 대상 선택을 `endpointPickerRef`에 명시된 EPP에게 위임한다는 차이점이 존재한다.
 
-endpointPickerRef의 failureMode는 EPP에 장애가 발생한 경우의 동작을 정의한다. `FailOpen`으로 설정되어 있으면 EPP 장애시 Traffic은 일반적인 Load Balancing 방식으로 전달되며, `FailClose`로 설정되어 있으면 EPP 장애시 Traffic은 전달되지 않고 실패한다. InferencePool은 Gateway API의 역할 지향 설계와 동일하게 GPU Node와 Model Server를 관리하는 Inference Platform Owner가 관리하며, App 개발자는 HTTPRoute를 통해서 InferencePool을 참조만 하여 이용한다.
+`endpointPickerRef`의 `failureMode`는 EPP에 장애가 발생한 경우의 동작을 정의한다. `FailOpen`으로 설정되어 있으면 EPP 장애시 Traffic은 일반적인 Load Balancing 방식으로 전달되며, `FailClose`로 설정되어 있으면 EPP 장애시 Traffic은 전달되지 않고 실패한다. InferencePool은 Gateway API의 역할 지향 설계와 동일하게 GPU Node와 Model Server를 관리하는 Inference Platform Owner가 관리하며, App 개발자는 HTTPRoute를 통해서 InferencePool을 참조만 하여 이용한다.
 
 ### 1.2. HTTPRoute 연동
 
@@ -65,7 +65,7 @@ spec:
       name: vllm-llama3-8b
 ```
 
-Gateway API Inference Extension은 별도의 Route Resource를 정의하지 않고 기존 Gateway API의 Gateway와 HTTPRoute를 그대로 이용한다. [File 2]는 InferencePool을 참조하는 HTTPRoute의 예제를 나타내고 있다. HTTPRoute의 backendRefs에 Service 대신 group과 kind를 통해서 InferencePool을 명시하면, HTTPRoute의 matches 조건에 부합하는 Traffic은 InferencePool로 전달되고 EPP가 선택한 Model Server Pod로 Routing된다. 따라서 기존 Gateway API의 Hostname, Path 기반 Routing과 Traffic 비율 제어 기능도 InferencePool과 같이 이용할 수 있다.
+Gateway API Inference Extension은 별도의 Route Resource를 정의하지 않고 기존 Gateway API의 Gateway와 HTTPRoute를 그대로 이용한다. [File 2]는 InferencePool을 참조하는 HTTPRoute의 예제를 나타내고 있다. HTTPRoute의 `backendRefs`에 Service 대신 `group`과 `kind`를 통해서 InferencePool을 명시하면, HTTPRoute의 `matches` 조건에 부합하는 Traffic은 InferencePool로 전달되고 EPP가 선택한 Model Server Pod로 Routing된다. 따라서 기존 Gateway API의 Hostname, Path 기반 Routing과 Traffic 비율 제어 기능도 InferencePool과 같이 이용할 수 있다.
 
 ### 1.3. Endpoint Picker
 
@@ -91,7 +91,7 @@ spec:
     name: vllm-llama3-8b
 ```
 
-**InferenceObjective**는 요청의 우선순위를 정의하는 Resource이다. [File 3]은 `vllm-llama3-8b` InferencePool에 우선순위를 설정하는 InferenceObjective의 예제를 나타내고 있다. priority에는 요청의 우선순위를 명시하며, InferencePool의 Model Server가 포화 상태인 경우 EPP는 우선순위가 낮은 요청을 거절하여 우선순위가 높은 요청의 처리를 보장한다. InferenceObjective는 아직 Alpha 단계의 Resource이기 때문에 향후 변경될 수 있으며, v1.6 Version부터는 별도의 Repository로 이관되어 개발되고 있다.
+**InferenceObjective**는 요청의 우선순위를 정의하는 Resource이다. [File 3]은 `vllm-llama3-8b` InferencePool에 우선순위를 설정하는 InferenceObjective의 예제를 나타내고 있다. `priority`에는 요청의 우선순위를 명시하며, InferencePool의 Model Server가 포화 상태인 경우 EPP는 우선순위가 낮은 요청을 거절하여 우선순위가 높은 요청의 처리를 보장한다. InferenceObjective는 아직 Alpha 단계의 Resource이기 때문에 향후 변경될 수 있으며, v1.6 Version부터는 별도의 Repository로 이관되어 개발되고 있다.
 
 ## 2. 참조
 

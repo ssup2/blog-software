@@ -24,9 +24,9 @@ Gateway API Inference Extension은 아직 Istio의 기본 기능으로 활성화
 
 ### 1.1. InferencePool 변환
 
-istiod는 InferencePool을 Istio의 기존 Service Model로 변환하여 처리한다. InferencePool이 생성되면 istiod는 InferencePool마다 `[InferencePool 이름]-ip-[Hash].[Namespace].svc.cluster.local` 형태의 이름을 갖는 내부 **Shadow Service**를 생성하고, InferencePool의 selector에 부합하는 Model Server Pod들을 Shadow Service의 Endpoint로 등록한다. 따라서 Model Server Pod의 생성과 제거는 기존 Istio의 Service Discovery와 동일하게 EDS (Endpoint Discovery Service)를 통해서 Envoy에 반영된다.
+istiod는 InferencePool을 Istio의 기존 Service Model로 변환하여 처리한다. InferencePool이 생성되면 istiod는 InferencePool마다 `[InferencePool 이름]-ip-[Hash].[Namespace].svc.cluster.local` 형태의 이름을 갖는 내부 **Shadow Service**를 생성하고, InferencePool의 `selector`에 부합하는 Model Server Pod들을 Shadow Service의 Endpoint로 등록한다. 따라서 Model Server Pod의 생성과 제거는 기존 Istio의 Service Discovery와 동일하게 EDS (Endpoint Discovery Service)를 통해서 Envoy에 반영된다.
 
-Envoy에는 Shadow Service에 대응하는 `outbound|[Target Port]||[Shadow Service 이름]` 형태의 `EDS` Type Cluster가 생성된다. HTTPRoute의 backendRefs에 InferencePool이 명시되어 있으면, 해당 Route의 Cluster는 InferencePool의 Shadow Service Cluster로 설정된다. 이처럼 Istio는 InferencePool을 별도의 개념으로 처리하지 않고 기존 Service Model로 변환하기 때문에, Istio가 제공하는 mTLS와 Telemetry 기능도 InferencePool의 Model Server에 동일하게 적용할 수 있다.
+Envoy에는 Shadow Service에 대응하는 `outbound|[Target Port]||[Shadow Service 이름]` 형태의 `EDS` Type Cluster가 생성된다. HTTPRoute의 `backendRefs`에 InferencePool이 명시되어 있으면, 해당 Route의 Cluster는 InferencePool의 Shadow Service Cluster로 설정된다. 이처럼 Istio는 InferencePool을 별도의 개념으로 처리하지 않고 기존 Service Model로 변환하기 때문에, Istio가 제공하는 mTLS와 Telemetry 기능도 InferencePool의 Model Server에 동일하게 적용할 수 있다.
 
 ### 1.2. 요청 처리 과정
 
@@ -49,11 +49,11 @@ Envoy에는 Shadow Service에 대응하는 `outbound|[Target Port]||[Shadow Serv
 }
 ```
 
-[Figure 2]는 Istio Inference Gateway의 요청 처리 과정을 나타내고 있고, [File 1]은 InferencePool을 참조하는 Route에 설정되는 ext-proc Filter의 설정 예시를 나타내고 있다. Gateway의 Envoy가 요청을 수신하면 HTTPRoute의 matches 조건에 따라서 InferencePool의 Route가 선택되고, Route에 설정된 ext-proc Filter는 요청의 Header와 Body를 EPP에게 gRPC로 전달한다. ext-proc Filter는 InferencePool을 참조하는 Route에만 설정되기 때문에, 동일한 Gateway에서 일반 Service로 전달되는 요청은 EPP를 경유하지 않는다.
+[Figure 2]는 Istio Inference Gateway의 요청 처리 과정을 나타내고 있고, [File 1]은 InferencePool을 참조하는 Route에 설정되는 ext-proc Filter의 설정 예시를 나타내고 있다. Gateway의 Envoy가 요청을 수신하면 HTTPRoute의 `matches` 조건에 따라서 InferencePool의 Route가 선택되고, Route에 설정된 ext-proc Filter는 요청의 Header와 Body를 EPP에게 gRPC로 전달한다. ext-proc Filter는 InferencePool을 참조하는 Route에만 설정되기 때문에, 동일한 Gateway에서 일반 Service로 전달되는 요청은 EPP를 경유하지 않는다.
 
 EPP는 Model Server의 Queue 길이, KV Cache 사용률, LoRA Adapter 적재 여부 Metric을 기반으로 최적의 Model Server Pod를 선택하고, 선택한 Pod의 주소를 `x-gateway-destination-endpoint` Header에 설정하여 Envoy에게 반환한다. Envoy의 Cluster에는 Override Host Load Balancing Policy가 설정되어 있기 때문에, Envoy는 일반적인 Load Balancing 알고리즘 대신 `x-gateway-destination-endpoint` Header에 명시된 Pod로 요청을 전달한다. Header가 존재하지 않는 경우에는 Fallback으로 설정된 Load Balancing 알고리즘을 이용한다.
 
-InferencePool의 failureMode는 ext-proc Filter의 `failure_mode_allow` 설정으로 변환된다. `FailOpen`으로 설정되어 있으면 `failure_mode_allow`는 `true`로 설정되어 EPP 장애시에도 요청은 Fallback Load Balancing을 통해서 전달되며, `FailClose`로 설정되어 있으면 EPP 장애시 요청은 실패한다.
+InferencePool의 `failureMode`는 ext-proc Filter의 `failure_mode_allow` 설정으로 변환된다. `FailOpen`으로 설정되어 있으면 `failure_mode_allow`는 `true`로 설정되어 EPP 장애시에도 요청은 Fallback Load Balancing을 통해서 전달되며, `FailClose`로 설정되어 있으면 EPP 장애시 요청은 실패한다.
 
 ### 1.3. Envoy Gateway 구현과 비교
 

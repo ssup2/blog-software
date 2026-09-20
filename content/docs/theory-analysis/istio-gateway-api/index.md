@@ -88,7 +88,7 @@ data:
       type: ClusterIP
 ```
 
-자동 배포되는 Deployment와 Service는 Gateway의 infrastructure 설정을 통해서 Customize할 수 있다. infrastructure의 labels, annotations에 명시된 값은 생성되는 Resource에 그대로 전파되며, parametersRef에는 [File 2]와 같은 ConfigMap을 명시할 수 있다. ConfigMap에는 `deployment`, `service`, `serviceAccount`, `horizontalPodAutoscaler`, `podDisruptionBudget` Key를 정의할 수 있으며, 각 Key의 내용은 Strategic Merge Patch 방식으로 생성되는 Resource에 반영된다. Cluster 전체에 적용되는 기본값은 `istio-system` Namespace에 `gateway.istio.io/defaults-for-class` Label을 갖는 ConfigMap을 통해서 GatewayClass 단위로 설정할 수 있다.
+자동 배포되는 Deployment와 Service는 Gateway의 `infrastructure` 설정을 통해서 Customize할 수 있다. `infrastructure`의 `labels`, `annotations`에 명시된 값은 생성되는 Resource에 그대로 전파되며, `parametersRef`에는 [File 2]와 같은 ConfigMap을 명시할 수 있다. ConfigMap에는 `deployment`, `service`, `serviceAccount`, `horizontalPodAutoscaler`, `podDisruptionBudget` Key를 정의할 수 있으며, 각 Key의 내용은 Strategic Merge Patch 방식으로 생성되는 Resource에 반영된다. Cluster 전체에 적용되는 기본값은 `istio-system` Namespace에 `gateway.istio.io/defaults-for-class` Label을 갖는 ConfigMap을 통해서 GatewayClass 단위로 설정할 수 있다.
 
 #### 1.1.2. 수동 배포
 
@@ -113,7 +113,7 @@ spec:
         from: All
 ```
 
-자동 배포를 이용하지 않고 기존에 배포되어 있는 Ingress Gateway에 Gateway API의 설정만 적용할 수도 있다. [File 3]과 같이 Gateway의 addresses에 Ingress Gateway Service의 이름을 `Hostname` Type으로 명시하면, istiod는 Deployment와 Service를 생성하지 않고 명시된 Service의 Ingress Gateway에 Listener 설정만 전달한다. 이 경우 Ingress Gateway의 Pod에는 `gateway.networking.k8s.io/gateway-name` Label이 설정되어야 Gateway에 연결된 Route와 Policy가 정상적으로 적용된다. 수동 배포는 Ingress Gateway의 배포를 직접 제어해야 하는 경우에 이용되며, 일반적으로는 자동 배포 방식이 권장된다.
+자동 배포를 이용하지 않고 기존에 배포되어 있는 Ingress Gateway에 Gateway API의 설정만 적용할 수도 있다. [File 3]과 같이 Gateway의 `addresses`에 Ingress Gateway Service의 이름을 `Hostname` Type으로 명시하면, istiod는 Deployment와 Service를 생성하지 않고 명시된 Service의 Ingress Gateway에 Listener 설정만 전달한다. 이 경우 Ingress Gateway의 Pod에는 `gateway.networking.k8s.io/gateway-name` Label이 설정되어야 Gateway에 연결된 Route와 Policy가 정상적으로 적용된다. 수동 배포는 Ingress Gateway의 배포를 직접 제어해야 하는 경우에 이용되며, 일반적으로는 자동 배포 방식이 권장된다.
 
 ### 1.2. Istio 설정 변환
 
@@ -158,7 +158,7 @@ spec:
       weight: 10
 ```
 
-Gateway API는 **GAMMA** (Gateway API for Mesh Management and Administration)를 통해서 Cluster 외부에서 유입되는 North-South Traffic뿐만 아니라 Mesh 내부의 East-West Traffic 제어에도 이용할 수 있다. [File 4]는 parentRefs에 Gateway 대신 Service를 명시하여 Mesh 내부에서 `version` Service로 전달되는 Traffic을 `version-v1`, `version-v2` Service로 분배하는 HTTPRoute의 예제를 나타내고 있다. Sidecar Mode에서는 요청을 전송하는 Client의 Sidecar에서 Routing 규칙이 적용되며, 이는 VirtualService를 mesh Gateway에 적용하는 방식과 동일한 역할을 수행한다.
+Gateway API는 **GAMMA** (Gateway API for Mesh Management and Administration)를 통해서 Cluster 외부에서 유입되는 North-South Traffic뿐만 아니라 Mesh 내부의 East-West Traffic 제어에도 이용할 수 있다. [File 4]는 `parentRefs`에 Gateway 대신 Service를 명시하여 Mesh 내부에서 `version` Service로 전달되는 Traffic을 `version-v1`, `version-v2` Service로 분배하는 HTTPRoute의 예제를 나타내고 있다. Sidecar Mode에서는 요청을 전송하는 Client의 Sidecar에서 Routing 규칙이 적용되며, 이는 VirtualService를 mesh Gateway에 적용하는 방식과 동일한 역할을 수행한다.
 
 ### 1.5. Ambient Mode Waypoint
 
