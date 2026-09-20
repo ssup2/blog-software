@@ -12,6 +12,9 @@ hugo.linux
 # Temporary lock file while building
 /.hugo_build.lock
 
+# Claude Code local (machine-specific) instructions
+CLAUDE.local.md
+
 # MacOS
 .DS_Store
 ._.DS_Store
