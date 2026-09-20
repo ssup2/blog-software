@@ -129,6 +129,24 @@ spec:
       insecureSkipVerify: true
 ```
 
+```shell {caption="[Shell 2] Test Workload 확인"}
+$ kubectl -n llm-namespace get pods -o wide
+NAME                                   READY   STATUS    RESTARTS   AGE    IP
+vllm-llama3-8b-56d558cb78-hnfzl        1/1     Running   0          21m    10.244.0.13
+vllm-llama3-8b-56d558cb78-nw2p4        1/1     Running   0          21m    10.244.0.14
+vllm-llama3-8b-56d558cb78-vw58t        1/1     Running   0          21m    10.244.0.15
+vllm-llama3-8b-epp-5dc6dcfddc-bjcq7    1/1     Running   0          21m    10.244.0.16
+
+$ kubectl -n llm-namespace get services
+NAME                         TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)     AGE
+vllm-llama3-8b-epp           ClusterIP   10.96.249.74   <none>        9002/TCP    21m
+vllm-llama3-8b-ip-22dc7de1   ClusterIP   None           <none>        54321/TCP   21m
+```
+
+Test 환경의 Model Server는 [File 1]과 같이 GPU 없이 동작하는 vLLM Simulator 3개의 Pod로 구성하며, Lightweight EPP 기반의 `vllm-llama3-8b-epp` Deployment와 Service를 함께 생성한다. EPP는 TLS로 요청을 수신하기 때문에 Gateway와 EPP 사이의 TLS 연결을 위한 DestinationRule도 설정하며, EPP가 InferencePool과 Pod를 조회하기 위한 RBAC 구성은 [File 1]에서 생략하였다.
+
+[File 1]을 적용하면 [Shell 2]와 같이 3개의 Model Server Pod와 EPP Pod, EPP Service가 생성된 것을 확인할 수 있다. Service 목록의 `vllm-llama3-8b-ip-22dc7de1` Service는 이후 [File 2]의 InferencePool을 적용하면 istiod가 생성하는 Shadow Service이다.
+
 ```yaml {caption="[File 2] InferencePool, HTTPRoute 구성", linenos=table}
 apiVersion: inference.networking.k8s.io/v1
 kind: InferencePool
@@ -169,24 +187,6 @@ spec:
       name: vllm-llama3-8b
 ```
 
-```shell {caption="[Shell 2] Test Workload 확인"}
-$ kubectl -n llm-namespace get pods -o wide
-NAME                                   READY   STATUS    RESTARTS   AGE    IP
-vllm-llama3-8b-56d558cb78-hnfzl        1/1     Running   0          21m    10.244.0.13
-vllm-llama3-8b-56d558cb78-nw2p4        1/1     Running   0          21m    10.244.0.14
-vllm-llama3-8b-56d558cb78-vw58t        1/1     Running   0          21m    10.244.0.15
-vllm-llama3-8b-epp-5dc6dcfddc-bjcq7    1/1     Running   0          21m    10.244.0.16
-
-$ kubectl -n llm-namespace get services
-NAME                         TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)     AGE
-vllm-llama3-8b-epp           ClusterIP   10.96.249.74   <none>        9002/TCP    21m
-vllm-llama3-8b-ip-22dc7de1   ClusterIP   None           <none>        54321/TCP   21m
-```
-
-Test 환경의 Model Server는 [File 1]과 같이 GPU 없이 동작하는 vLLM Simulator 3개의 Pod로 구성하며, Lightweight EPP 기반의 `vllm-llama3-8b-epp` Deployment와 Service를 함께 생성한다. EPP는 TLS로 요청을 수신하기 때문에 Gateway와 EPP 사이의 TLS 연결을 위한 DestinationRule도 설정하며, EPP가 InferencePool과 Pod를 조회하기 위한 RBAC 구성은 [File 1]에서 생략하였다. [File 2]는 Model Server Pod를 묶는 `vllm-llama3-8b` InferencePool과 InferencePool을 참조하는 HTTPRoute를 나타내고 있다.
-
-Gateway는 `gateway-namespace` Namespace의 `istio` GatewayClass Gateway를 이용하며, [File 2]의 HTTPRoute는 `llm.ssup2.com` Hostname의 Traffic을 InferencePool로 전달한다. [File 1]과 [File 2]를 적용하면 [Shell 2]와 같이 `llm-namespace` Namespace에 Test Workload가 구성된 것을 확인할 수 있다.
-
 ```shell {caption="[Shell 3] InferencePool 상태 확인"}
 $ kubectl -n llm-namespace get inferencepool
 NAME             AGE
@@ -197,7 +197,7 @@ Accepted=True (Accepted)
 ResolvedRefs=True (ResolvedRefs)
 ```
 
-[Shell 3]은 생성된 InferencePool과 status를 나타내고 있다. status의 `Accepted` Condition을 통해서 InferencePool이 HTTPRoute를 통해서 Gateway에 정상적으로 연결된 것을 확인할 수 있고, `ResolvedRefs` Condition을 통해서 `endpointPickerRef`에 명시된 EPP 참조가 정상적으로 해석된 것을 확인할 수 있다. 이후 본문의 동작 확인은 이 상태의 Test 환경에서 수행한다.
+Gateway는 `gateway-namespace` Namespace의 `istio` GatewayClass Gateway를 이용하며, [File 2]는 Model Server Pod를 묶는 `vllm-llama3-8b` InferencePool과 `llm.ssup2.com` Hostname의 Traffic을 InferencePool로 전달하는 HTTPRoute를 나타내고 있다. [Shell 3]은 [File 2] 적용 이후 생성된 InferencePool과 status를 나타내고 있다. status의 `Accepted` Condition을 통해서 InferencePool이 HTTPRoute를 통해서 Gateway에 정상적으로 연결된 것을 확인할 수 있고, `ResolvedRefs` Condition을 통해서 `endpointPickerRef`에 명시된 EPP 참조가 정상적으로 해석된 것을 확인할 수 있다. 이후 본문의 동작 확인은 이 상태의 Test 환경에서 수행한다.
 
 ### 1.2. InferencePool 변환
 
