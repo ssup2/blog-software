@@ -19,6 +19,13 @@ ssup2의 개인 기술 블로그 (Hugo 기반). 글은 `content/docs/` 아래 Ma
 - 본문 내부 링크 최소화: 자기 블로그 글 링크는 본문에 넣지 않고 하단 "참조" 섹션에만 둔다. "상세 내용은 X.X에서 설명한다" 같은 상호참조 문장도 지양한다.
 - 실험 환경 버전 명시는 도입부가 아니라 "Test 환경 구성" 섹션에 쓴다.
 
+### 서술
+
+- 동어반복 지양: 필드를 같은 이름의 단어로 설명하지 않는다 ("`listeners`에는 Listener를 정의한다" 대신 "`listeners`에는 Traffic을 수신하는 진입점을 정의한다"처럼 역할로 풀어서 설명한다).
+- 관계 방향 명확화: Resource 간 참조를 설명할 때 담당 주체와 방향이 드러나게 쓴다 (예: "Gateway가 이용할 GatewayClass" 대신 "Gateway의 생성과 관리를 담당할 GatewayClass").
+- 개념 관계 명시: 타입:인스턴스 같은 Resource 간 관계는 정의 문장에서 명시한다 (예: "Gateway는 GatewayClass의 인스턴스에 해당한다").
+- 중의적 용어 한정: 문맥상 여러 의미로 읽힐 수 있는 용어는 한정어를 붙인다 (Envoy Cluster와 혼동될 수 있는 "Cluster"는 "Kubernetes Cluster"로 명시).
+
 ### 표기
 
 - 키워드 강조: 정의 시점의 핵심 용어·Resource·Component 이름은 `**bold**`로, 설정값·필드 이름(`controllerName`, `parentRefs` 등)·Resource 인스턴스 이름·Label·명령어는 `` `code` ``로 강조한다. 같은 용어의 이후 언급은 일반 텍스트로 둔다. 본문 첫 정의 문장에서 글 제목과 연관된 키워드도 bold 처리한다.
