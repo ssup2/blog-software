@@ -284,7 +284,7 @@ $ kubectl -n version-namespace exec client -c curl -- sh -c 'for i in $(seq 1 10
   10 version-v2
 ```
 
-[File 5]와 동일한 형태의 HTTPRoute를 `version` Service에 연결하고 `client` Pod에서 요청을 전송하면 [Shell 6]과 같은 결과를 확인할 수 있다. HTTPRoute 적용 전에는 version-v1, version-v2 Pod가 각각 1개씩 존재하기 때문에 약 50:50 비율로 분배되지만, 적용 후에는 weight 설정에 따라서 90:10 비율로 분배된다.
+[Shell 6]은 [File 5]의 HTTPRoute 적용 전후에 `client` Pod에서 `version` Service로 100번의 요청을 전송한 결과를 나타내고 있다. 적용 전에는 Routing 규칙이 없기 때문에 요청은 `version` Service의 Endpoint인 version-v1, version-v2 Pod로 약 50:50 비율로 분배되지만, 적용 후에는 HTTPRoute의 weight 설정에 따라서 `version-v1`, `version-v2` Service로 90:10 비율로 분배되는 것을 확인할 수 있다.
 
 ```shell {caption="[Shell 7] Client Sidecar의 Route 설정 확인"}
 $ istioctl proxy-config routes client -n version-namespace --name 8080 -o json
