@@ -37,6 +37,13 @@ $ kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/downl
 $ istioctl install --set profile=minimal -y
 ```
 
+```shell {caption="[Shell 2] GatewayClass 확인"}
+$ kubectl get gatewayclass
+NAME           CONTROLLER                    ACCEPTED   AGE
+istio          istio.io/gateway-controller   True       5s
+istio-remote   istio.io/unmanaged-gateway    True       5s
+```
+
 ```yaml {caption="[File 1] Test Workload 구성", linenos=table}
 apiVersion: v1
 kind: Namespace
@@ -116,13 +123,6 @@ spec:
   - name: curl
     image: curlimages/curl:8.10.1
     command: ["sleep", "infinity"]
-```
-
-```shell {caption="[Shell 2] GatewayClass 확인"}
-$ kubectl get gatewayclass
-NAME           CONTROLLER                    ACCEPTED   AGE
-istio          istio.io/gateway-controller   True       5s
-istio-remote   istio.io/unmanaged-gateway    True       5s
 ```
 
 ```shell {caption="[Shell 3] Test Workload 확인"}
