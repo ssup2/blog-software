@@ -30,7 +30,7 @@ spec:
   controllerName: istio.io/gateway-controller
 ```
 
-**GatewayClass**는 Gateway의 구현체를 정의하는 Cluster Scope의 Resource이다. [File 1]은 Istio 구현체를 이용하는 GatewayClass의 예제를 나타내고 있다. `controllerName`에는 GatewayClass를 처리하는 Gateway Controller의 이름을 명시하며, 해당 Gateway Controller가 GatewayClass를 참조하는 Gateway의 생성과 관리를 담당한다. GatewayClass는 Kubernetes의 StorageClass와 유사한 개념이며, 일반적으로 구현체를 설치하면 GatewayClass도 같이 생성된다. 하나의 Cluster에는 다수의 GatewayClass가 존재할 수 있기 때문에 하나의 Cluster에서 다수의 구현체를 같이 이용할 수 있다.
+**GatewayClass**는 Gateway의 구현체를 정의하는 Cluster Scope의 Resource이다. [File 1]은 Istio 구현체를 이용하는 GatewayClass의 예제를 나타내고 있다. `controllerName`에는 GatewayClass를 처리하는 Gateway Controller의 이름을 명시하며, 해당 Gateway Controller가 GatewayClass를 참조하는 Gateway의 생성과 관리를 담당한다. GatewayClass는 Kubernetes의 StorageClass와 유사한 개념이며, 일반적으로 구현체를 설치하면 GatewayClass도 같이 생성된다. 하나의 Kubernetes Cluster에는 다수의 GatewayClass가 존재할 수 있기 때문에 하나의 Cluster에서 다수의 구현체를 같이 이용할 수 있다.
 
 ### 1.2. Gateway
 
