@@ -40,8 +40,6 @@ spec:
 
 `endpointPickerRef`의 `failureMode`는 EPP에 장애가 발생한 경우의 동작을 정의한다. `FailOpen`으로 설정되어 있으면 EPP 장애시 Traffic은 일반적인 Load Balancing 방식으로 전달되며, `FailClose`로 설정되어 있으면 EPP 장애시 Traffic은 전달되지 않고 실패한다. InferencePool은 Gateway API의 역할 지향 설계와 동일하게 GPU Node와 Model Server를 관리하는 Inference Platform Owner가 관리하며, App 개발자는 HTTPRoute를 통해서 InferencePool을 참조만 하여 이용한다.
 
-### 1.2. HTTPRoute 연동
-
 ```yaml {caption="[File 2] InferencePool을 참조하는 HTTPRoute 예제", linenos=table}
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -67,7 +65,7 @@ spec:
 
 Gateway API Inference Extension은 별도의 Route Resource를 정의하지 않고 기존 Gateway API의 Gateway와 HTTPRoute를 그대로 이용한다. [File 2]는 InferencePool을 참조하는 HTTPRoute의 예제를 나타내고 있다. HTTPRoute의 `backendRefs`에 Service 대신 `group`과 `kind`를 통해서 InferencePool을 명시하면, HTTPRoute의 `matches` 조건에 부합하는 Traffic은 InferencePool로 전달되고 EPP가 선택한 Model Server Pod로 Routing된다. 따라서 기존 Gateway API의 Hostname, Path 기반 Routing과 Traffic 비율 제어 기능도 InferencePool과 같이 이용할 수 있다.
 
-### 1.3. Endpoint Picker
+### 1.2. Endpoint Picker
 
 {{< figure caption="[Figure 2] Endpoint Picker의 요청 처리 과정" src="images/endpoint-picker.png" width="900px" >}}
 
@@ -77,7 +75,7 @@ EPP는 Model Server가 노출하는 Metric을 주기적으로 수집하며, Mode
 
 EPP의 선택 기법은 Plugin 형태로 구현되어 있기 때문에 필요에 따라서 Custom Plugin을 추가하여 선택 기법을 확장할 수 있다. v1.6 Version부터는 경량화된 **Lightweight EPP**가 기본 EPP로 제공되며, 기존의 EPP와 요청 Body의 Model 이름 기반으로 Routing을 수행하는 **Body-based Router**는 llm-d Project로 이관되어 개발되고 있다.
 
-### 1.4. InferenceObjective
+### 1.3. InferenceObjective
 
 ```yaml {caption="[File 3] InferenceObjective 예제", linenos=table}
 apiVersion: inference.networking.x-k8s.io/v1alpha2
