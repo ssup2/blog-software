@@ -36,7 +36,7 @@ spec:
     failureMode: FailOpen
 ```
 
-**InferencePool**은 동일한 Model을 서비스하는 Model Server Pod의 집합을 정의하는 Resource이다. [File 1]은 vLLM 기반의 Model Server Pod를 묶는 InferencePool의 예제를 나타내고 있다. `selector`에는 InferencePool에 포함될 Model Server Pod의 Label을 명시하고, `targetPorts`에는 Model Server가 요청을 수신하는 Port를 명시한다. InferencePool은 Kubernetes Service와 유사하게 Pod의 집합을 정의하지만, Load Balancing 대상 선택을 `endpointPickerRef`에 명시된 EPP에게 위임한다는 차이점이 존재한다.
+**InferencePool**은 동일한 Model을 서비스하는 Model Server Pod의 집합을 정의하는 Resource이다. InferencePool은 Kubernetes Service와 유사하게 Pod의 집합을 정의하지만, Load Balancing 대상 선택을 `endpointPickerRef`에 명시된 EPP에게 위임한다는 차이점이 존재한다. [File 1]은 vLLM 기반의 Model Server Pod를 묶는 InferencePool의 예제를 나타내고 있다. `selector`에는 InferencePool에 포함될 Model Server Pod의 Label을 명시하고, `targetPorts`에는 Model Server가 요청을 수신하는 Port를 명시한다.
 
 `endpointPickerRef`의 `failureMode`는 EPP에 장애가 발생한 경우의 동작을 정의한다. `FailOpen`으로 설정되어 있으면 EPP 장애시 Traffic은 일반적인 Load Balancing 방식으로 전달되며, `FailClose`로 설정되어 있으면 EPP 장애시 Traffic은 전달되지 않고 실패한다. InferencePool은 Gateway API의 역할 지향 설계와 동일하게 GPU Node와 Model Server를 관리하는 Inference Platform Owner가 관리하며, App 개발자는 HTTPRoute를 통해서 InferencePool을 참조만 하여 이용한다.
 
