@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gateway-namespace
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: version-namespace
+  labels:
+    istio-injection: enabled

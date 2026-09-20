@@ -1,0 +1,13 @@
+# Parent Service for GAMMA mesh routing test (frontend for producer HTTPRoute)
+apiVersion: v1
+kind: Service
+metadata:
+  name: version
+  namespace: version-namespace
+spec:
+  selector:
+    app: version
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080

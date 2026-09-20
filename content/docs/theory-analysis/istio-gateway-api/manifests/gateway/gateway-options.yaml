@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gateway-options
+  namespace: gateway-namespace
+data:
+  deployment: |
+    spec:
+      replicas: 3
+      template:
+        spec:
+          containers:
+          - name: istio-proxy
+            resources:
+              requests:
+                cpu: 500m
+                memory: 512Mi
+  service: |
+    spec:
+      type: ClusterIP

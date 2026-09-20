@@ -1,0 +1,19 @@
+# GAMMA producer route: applies to in-mesh traffic sent to the version Service
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: version-mesh
+  namespace: version-namespace
+spec:
+  parentRefs:
+  - group: ""
+    kind: Service
+    name: version
+  rules:
+  - backendRefs:
+    - name: version-v1
+      port: 8080
+      weight: 90
+    - name: version-v2
+      port: 8080
+      weight: 10

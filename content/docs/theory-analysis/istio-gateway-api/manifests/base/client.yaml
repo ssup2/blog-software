@@ -1,0 +1,13 @@
+# Client pod with sidecar for GAMMA mesh routing test
+apiVersion: v1
+kind: Pod
+metadata:
+  name: client
+  namespace: version-namespace
+  labels:
+    app: client
+spec:
+  containers:
+  - name: curl
+    image: curlimages/curl:8.10.1
+    command: ["sleep", "infinity"]
