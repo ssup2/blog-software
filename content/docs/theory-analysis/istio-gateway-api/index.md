@@ -42,9 +42,22 @@ istio          istio.io/gateway-controller   True       5s
 istio-remote   istio.io/unmanaged-gateway    True       5s
 ```
 
+```shell {caption="[Shell 3] Test Workload 확인"}
+$ kubectl -n version-namespace get pods,services
+NAME                              READY   STATUS    RESTARTS   AGE
+pod/client                        2/2     Running   0          3h20m
+pod/version-v1-7cf5688dfc-rcw7t   2/2     Running   0          3h20m
+pod/version-v2-69bf76f867-htddz   2/2     Running   0          3h20m
+
+NAME                 TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
+service/version      ClusterIP   10.96.4.246     <none>        8080/TCP   3h20m
+service/version-v1   ClusterIP   10.96.255.26    <none>        8080/TCP   3h20m
+service/version-v2   ClusterIP   10.96.153.106   <none>        8080/TCP   3h20m
+```
+
 이후 본문의 동작 확인은 [Shell 1]과 같이 kind Cluster에 Gateway API v1.6.0 Standard Channel CRD와 Istio 1.31.0을 minimal Profile의 Sidecar Mode로 설치하여 수행한다. 설치 이후에는 [Shell 2]와 같이 `istio`, `istio-remote` GatewayClass가 생성된 것을 확인할 수 있으며, Ambient Mode를 설치하지 않았기 때문에 `istio-waypoint` GatewayClass는 존재하지 않는다.
 
-Test Workload는 자신의 이름을 응답하는 `version-v1`, `version-v2` Deployment와 Service, 두 Deployment의 Pod를 모두 선택하는 `version` Service, 요청을 전송하는 `client` Pod로 구성한다. Workload는 모두 `version-namespace` Namespace에 생성하며, `istio-injection` Label이 설정되어 있기 때문에 Pod에는 Sidecar가 주입된다. Gateway는 `gateway-namespace` Namespace에 생성한다.
+Test Workload는 자신의 이름을 응답하는 `version-v1`, `version-v2` Deployment와 Service, 두 Deployment의 Pod를 모두 선택하는 `version` Service, 요청을 전송하는 `client` Pod로 구성하며, [Shell 3]은 `version-namespace` Namespace에 생성된 Test Workload를 나타내고 있다. `version-namespace` Namespace에는 `istio-injection` Label이 설정되어 있기 때문에, 모든 Pod의 READY가 2/2로 Sidecar가 주입된 것을 확인할 수 있다. Gateway는 `gateway-namespace` Namespace에 생성한다.
 
 ### 1.1. Gateway 배포
 
@@ -100,7 +113,7 @@ data:
 
 자동 배포되는 Deployment와 Service는 Gateway의 `infrastructure` 설정을 통해서 Customize할 수 있다. `infrastructure`의 `labels`, `annotations`에 명시된 값은 생성되는 Resource에 그대로 전파되며, `parametersRef`에는 [File 2]와 같은 ConfigMap을 명시할 수 있다. ConfigMap에는 `deployment`, `service`, `serviceAccount`, `horizontalPodAutoscaler`, `podDisruptionBudget` Key를 정의할 수 있으며, 각 Key의 내용은 Strategic Merge Patch 방식으로 생성되는 Resource에 반영된다. Cluster 전체에 적용되는 기본값은 `istio-system` Namespace에 `gateway.istio.io/defaults-for-class` Label을 갖는 ConfigMap을 통해서 GatewayClass 단위로 설정할 수 있다.
 
-```shell {caption="[Shell 3] Gateway 자동 배포 확인"}
+```shell {caption="[Shell 4] Gateway 자동 배포 확인"}
 $ kubectl -n gateway-namespace get gateway,deployment,service
 NAME                                        CLASS   ADDRESS                                             PROGRAMMED   AGE
 gateway.gateway.networking.k8s.io/gateway   istio   gateway-istio.gateway-namespace.svc.cluster.local   True         25s
@@ -115,7 +128,7 @@ $ kubectl -n gateway-namespace get deployment gateway-istio -o jsonpath='{.spec.
 {"cpu":"500m","memory":"512Mi"}
 ```
 
-[File 1]의 Gateway와 [File 2]의 ConfigMap을 실제로 적용하면 [Shell 3]과 같이 `gateway-istio` Deployment와 Service가 자동으로 생성된 것을 확인할 수 있다. ConfigMap의 내용에 따라서 Deployment의 Replica는 3개로, istio-proxy Container의 resources는 명시된 값으로, Service의 Type은 `ClusterIP`로 생성되어 `parametersRef`를 통한 Customize가 반영된 것도 확인할 수 있다. kind Cluster에는 LoadBalancer가 존재하지 않기 때문에 Service의 Type을 `ClusterIP`로 변경하였으며, Gateway의 ADDRESS에는 생성된 Service의 Domain 주소가 설정된다.
+[File 1]의 Gateway와 [File 2]의 ConfigMap을 실제로 적용하면 [Shell 4]와 같이 `gateway-istio` Deployment와 Service가 자동으로 생성된 것을 확인할 수 있다. ConfigMap의 내용에 따라서 Deployment의 Replica는 3개로, istio-proxy Container의 resources는 명시된 값으로, Service의 Type은 `ClusterIP`로 생성되어 `parametersRef`를 통한 Customize가 반영된 것도 확인할 수 있다. kind Cluster에는 LoadBalancer가 존재하지 않기 때문에 Service의 Type을 `ClusterIP`로 변경하였으며, Gateway의 ADDRESS에는 생성된 Service의 Domain 주소가 설정된다.
 
 #### 1.1.2. 수동 배포
 
@@ -199,7 +212,7 @@ spec:
       weight: 10
 ```
 
-```shell {caption="[Shell 4] Gateway를 통한 Traffic 분배 확인"}
+```shell {caption="[Shell 5] Gateway를 통한 Traffic 분배 확인"}
 # Port-forward to the gateway service
 $ kubectl -n gateway-namespace port-forward svc/gateway-istio 8080:80 &
 
@@ -209,9 +222,9 @@ $ for i in $(seq 1 100); do curl -s -H "Host: version.ssup2.com" http://127.0.0.
    7 version-v2
 ```
 
-[File 5]는 Gateway가 수신한 Traffic을 `version-v1` Service에 90%, `version-v2` Service에 10% 비율로 분배하는 HTTPRoute의 예제를 나타내고 있다. HTTPRoute 적용 후 [Shell 4]와 같이 100번의 요청을 전송하면 93번은 version-v1이, 7번은 version-v2가 응답하여 weight 설정에 근접한 비율로 분배되는 것을 확인할 수 있다. kind Cluster에는 LoadBalancer가 존재하지 않기 때문에 port-forward를 통해서 요청을 전송하였다.
+[File 5]는 Gateway가 수신한 Traffic을 `version-v1` Service에 90%, `version-v2` Service에 10% 비율로 분배하는 HTTPRoute의 예제를 나타내고 있다. HTTPRoute 적용 후 [Shell 5]와 같이 100번의 요청을 전송하면 93번은 version-v1이, 7번은 version-v2가 응답하여 weight 설정에 근접한 비율로 분배되는 것을 확인할 수 있다. kind Cluster에는 LoadBalancer가 존재하지 않기 때문에 port-forward를 통해서 요청을 전송하였다.
 
-```shell {caption="[Shell 5] HTTPRoute의 내부 설정 변환 확인"}
+```shell {caption="[Shell 6] HTTPRoute의 내부 설정 변환 확인"}
 # No VirtualService is stored in kubernetes
 $ kubectl get virtualservice -A
 No resources found
@@ -256,7 +269,7 @@ $ istioctl proxy-config routes gateway-istio-6cf9dd97dd-8lrn4 -n gateway-namespa
                         ...
 ```
 
-[Shell 5]와 같이 HTTPRoute를 적용해도 Kubernetes에는 VirtualService가 저장되지 않지만, Gateway Envoy의 Route 설정에는 HTTPRoute의 내용이 weightedClusters로 변환되어 반영된 것을 확인할 수 있다. Route의 metadata에는 `istio-autogenerated-k8s-gateway` 이름이 포함된 VirtualService 경로가 명시되어 있으며, 이를 통해서 istiod가 HTTPRoute를 Memory 상의 VirtualService로 변환하여 처리하는 것을 확인할 수 있다.
+[Shell 6]과 같이 HTTPRoute를 적용해도 Kubernetes에는 VirtualService가 저장되지 않지만, Gateway Envoy의 Route 설정에는 HTTPRoute의 내용이 weightedClusters로 변환되어 반영된 것을 확인할 수 있다. Route의 metadata에는 `istio-autogenerated-k8s-gateway` 이름이 포함된 VirtualService 경로가 명시되어 있으며, 이를 통해서 istiod가 HTTPRoute를 Memory 상의 VirtualService로 변환하여 처리하는 것을 확인할 수 있다.
 
 Istio는 Gateway API의 Route 중에서 HTTPRoute, GRPCRoute, TLSRoute, TCPRoute를 지원하며, Envoy 기반의 Istio가 UDP Proxy 기능을 제공하지 않기 때문에 UDPRoute는 지원하지 않는다. 또한 Gateway API는 아직 Istio의 모든 기능을 표준으로 제공하지 않기 때문에, Fault Injection이나 Circuit Breaking 같은 기능이 필요한 경우에는 Istio API를 함께 이용해야 한다. DestinationRule은 Host를 기준으로 적용되기 때문에 Gateway API의 Route와 함께 이용할 수 있다.
 
@@ -299,19 +312,7 @@ spec:
 
 Gateway API는 **GAMMA** (Gateway API for Mesh Management and Administration)를 통해서 Cluster 외부에서 유입되는 North-South Traffic뿐만 아니라 Mesh 내부의 East-West Traffic 제어에도 이용할 수 있다. [File 6]은 `parentRefs`에 Gateway 대신 Service를 명시하여 Mesh 내부에서 `version` Service로 전달되는 Traffic을 `version-v1`, `version-v2` Service로 분배하는 HTTPRoute의 예제를 나타내고 있다. Sidecar Mode에서는 요청을 전송하는 Client의 Sidecar에서 Routing 규칙이 적용되며, 이는 VirtualService를 mesh Gateway에 적용하는 방식과 동일한 역할을 수행한다.
 
-```shell {caption="[Shell 6] Mesh Traffic 분배 확인"}
-# Check the pods and services in version-namespace
-$ kubectl -n version-namespace get pods,services
-NAME                              READY   STATUS    RESTARTS   AGE
-pod/client                        2/2     Running   0          3h20m
-pod/version-v1-7cf5688dfc-rcw7t   2/2     Running   0          3h20m
-pod/version-v2-69bf76f867-htddz   2/2     Running   0          3h20m
-
-NAME                 TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
-service/version      ClusterIP   10.96.4.246     <none>        8080/TCP   3h20m
-service/version-v1   ClusterIP   10.96.255.26    <none>        8080/TCP   3h20m
-service/version-v2   ClusterIP   10.96.153.106   <none>        8080/TCP   3h20m
-
+```shell {caption="[Shell 7] Mesh Traffic 분배 확인"}
 # Before applying the mesh httproute
 $ kubectl -n version-namespace exec client -c curl -- sh -c 'for i in $(seq 1 100); do curl -s http://version:8080/; done' | sort | uniq -c
   55 version-v1
@@ -323,9 +324,9 @@ $ kubectl -n version-namespace exec client -c curl -- sh -c 'for i in $(seq 1 10
   10 version-v2
 ```
 
-[Shell 6]은 `version-namespace` Namespace의 Test Workload와 [File 6]의 HTTPRoute 적용 전후에 `client` Pod에서 `version` Service로 100번의 요청을 전송한 결과를 나타내고 있다. 모든 Pod의 READY가 2/2인 것을 통해서 Sidecar가 주입된 것을 확인할 수 있다. 적용 전에는 Routing 규칙이 없기 때문에 요청은 `version` Service의 Endpoint인 version-v1, version-v2 Pod로 약 50:50 비율로 분배되지만, 적용 후에는 HTTPRoute의 weight 설정에 따라서 `version-v1`, `version-v2` Service로 90:10 비율로 분배되는 것을 확인할 수 있다.
+[Shell 7]은 [File 6]의 HTTPRoute 적용 전후에 `client` Pod에서 `version` Service로 100번의 요청을 전송한 결과를 나타내고 있다. 적용 전에는 Routing 규칙이 없기 때문에 요청은 `version` Service의 Endpoint인 version-v1, version-v2 Pod로 약 50:50 비율로 분배되지만, 적용 후에는 HTTPRoute의 weight 설정에 따라서 `version-v1`, `version-v2` Service로 90:10 비율로 분배되는 것을 확인할 수 있다.
 
-```shell {caption="[Shell 7] Client Sidecar의 Route 설정 확인"}
+```shell {caption="[Shell 8] Client Sidecar의 Route 설정 확인"}
 $ istioctl proxy-config routes client -n version-namespace --name 8080 -o json
 ...
             {
@@ -354,7 +355,7 @@ $ istioctl proxy-config routes client -n version-namespace --name 8080 -o json
                             ...
 ```
 
-[Shell 7]과 같이 Routing 규칙은 요청을 전송하는 `client` Pod의 Sidecar Route 설정에 반영된 것을 확인할 수 있으며, Mesh Traffic의 규칙이 Gateway가 아니라 Client의 Sidecar에서 적용되는 것을 알 수 있다.
+[Shell 8]과 같이 Routing 규칙은 요청을 전송하는 `client` Pod의 Sidecar Route 설정에 반영된 것을 확인할 수 있으며, Mesh Traffic의 규칙이 Gateway가 아니라 Client의 Sidecar에서 적용되는 것을 알 수 있다.
 
 ### 1.5. Ambient Mode Waypoint
 
