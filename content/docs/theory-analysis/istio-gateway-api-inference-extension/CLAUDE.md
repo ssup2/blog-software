@@ -5,9 +5,11 @@ Istio의 Gateway API Inference Extension 구현을 분석하는 문서. 본문 �
 
 ## 문서 구성 및 상태
 
-- 1장 도입부: Shell 1(환경 구성) + Test Workload 설명. 1.1 InferencePool 변환: Shell 2(Shadow Cluster/Endpoint).
-  1.2 요청 처리 과정: Shell 3(ext-proc per-route 설정), Shell 4(curl 요청), Shell 5(Override Host Policy).
+- 1장 도입부: Shell 1(환경 구성), Shell 2(Test Workload 목록 — Pod IP·Headless Shadow Service 포함) + Test Workload 설명.
+  1.1 InferencePool 변환: Shell 3(Shadow Cluster/Endpoint, 설명은 Shell 2의 Service 목록을 교차 참조).
+  1.2 요청 처리 과정: Shell 4(ext-proc per-route 설정), Shell 5(curl 요청), Shell 6(Override Host Policy).
   1.3 Envoy Gateway 구현과 비교: 이론만.
+  Shell 2의 AGE 21m은 캡처 시점 값 (환경 구성 21분 후 캡처됨).
 - 본문 Shell 출력은 전부 실측 발췌. 초기 초안의 [File 1](ext-proc 설정 예시)은 창작이어서 Shell 3 실측으로 교체됨.
 - 실측으로 확인·수정된 사실:
   - Shadow Service Cluster의 Port는 Target Port가 아니라 **고정 가상 Port 54321** (초안의 `outbound|[Target Port]||` 서술을 수정함). Target Port는 Endpoint에 반영.
