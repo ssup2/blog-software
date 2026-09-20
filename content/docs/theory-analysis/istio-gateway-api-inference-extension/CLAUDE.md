@@ -5,8 +5,11 @@ Istio의 Gateway API Inference Extension 구현을 분석하는 문서. 본문 �
 
 ## 문서 구성 및 상태
 
-- 1.1 Test 환경 구축: Shell 1(환경 구성), Shell 2(Test Workload 목록 — Pod IP·Headless Shadow Service 포함),
+- 1.1 Test 환경 구축: Shell 1(환경 구성), File 1(Test Workload — sim/EPP/Service/DestinationRule),
+  File 2(InferencePool/HTTPRoute), Shell 2(Test Workload 목록 — Pod IP·Headless Shadow Service 포함),
   Shell 3(InferencePool 상태 — Accepted/ResolvedRefs Condition).
+  본문 [File 1]은 manifests/ 원본에서 sim의 env(POD_NAME 등)·resources, EPP의 probe·9003/9090 Port, RBAC을 축약한 버전.
+  재현은 manifests/ 원본 기준 (sim의 POD_NAME env가 없으면 응답의 x-inference-pod Header 값이 달라질 수 있음).
   1.2 InferencePool 변환: Shell 4(Shadow Cluster/Endpoint, 설명은 Shell 2의 Service 목록을 교차 참조).
   1.3 요청 처리 과정: Shell 5(ext-proc per-route 설정), Shell 6(curl 요청), Shell 7(Override Host Policy).
   1.4 Envoy Gateway 구현과 비교: 이론만.
