@@ -188,5 +188,5 @@ Ambient Mode에서 L7 Traffic을 처리하는 **Waypoint**도 Gateway API를 기
 * Istio Gateway 배포 : [https://istio.io/latest/docs/setup/additional-setup/gateway/](https://istio.io/latest/docs/setup/additional-setup/gateway/)
 * Istio Waypoint : [https://istio.io/latest/docs/ambient/usage/waypoint/](https://istio.io/latest/docs/ambient/usage/waypoint/)
 * Gateway API : [https://gateway-api.sigs.k8s.io/](https://gateway-api.sigs.k8s.io/)
-* Gateway API GAMMA : [https://gateway-api.sigs.k8s.io/mesh/](https://gateway-api.sigs.k8s.io/mesh/)
+* Gateway API GAMMA : [https://gateway-api.sigs.k8s.io/docs/mesh/mesh-overview/](https://gateway-api.sigs.k8s.io/docs/mesh/mesh-overview/)
 * Istio Gateway API 변환 : [https://deepwiki.com/istio/istio/3.5.1-gateway-api-integration-and-conversion](https://deepwiki.com/istio/istio/3.5.1-gateway-api-integration-and-conversion)
