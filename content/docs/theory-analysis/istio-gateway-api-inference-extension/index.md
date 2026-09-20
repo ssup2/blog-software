@@ -37,11 +37,24 @@ Test 환경의 Model Server는 GPU 없이 동작하는 vLLM Simulator 3개의 Po
 
 ### 1.1. InferencePool 변환
 
-istiod는 InferencePool을 Istio의 기존 Service Model로 변환하여 처리한다. InferencePool이 생성되면 istiod는 InferencePool마다 `[InferencePool 이름]-ip-[Hash].[Namespace].svc.cluster.local` 형태의 이름을 갖는 내부 **Shadow Service**를 생성하고, InferencePool의 `selector`에 부합하는 Model Server Pod들을 Shadow Service의 Endpoint로 등록한다. 따라서 Model Server Pod의 생성과 제거는 기존 Istio의 Service Discovery와 동일하게 EDS (Endpoint Discovery Service)를 통해서 Envoy에 반영된다.
+istiod는 InferencePool을 Istio의 기존 Service Model로 변환하여 처리한다. InferencePool이 생성되면 istiod는 InferencePool마다 `[InferencePool 이름]-ip-[Hash].[Namespace].svc.cluster.local` 형태의 이름을 갖는 **Shadow Service**를 Headless Service로 생성하고, InferencePool의 `selector`에 부합하는 Model Server Pod들을 Shadow Service의 Endpoint로 등록한다. 따라서 Model Server Pod의 생성과 제거는 기존 Istio의 Service Discovery와 동일하게 EDS (Endpoint Discovery Service)를 통해서 Envoy에 반영된다.
 
 Envoy에는 Shadow Service에 대응하는 `outbound|54321||[Shadow Service 이름]` 형태의 `EDS` Type Cluster가 생성된다. Cluster 이름의 `54321`은 Shadow Service에 이용되는 고정된 가상 Port이며, Traffic이 실제로 전달되는 Port는 Cluster의 Endpoint에 설정된 InferencePool의 Target Port이다. HTTPRoute의 `backendRefs`에 InferencePool이 명시되어 있으면, 해당 Route의 Cluster는 InferencePool의 Shadow Service Cluster로 설정된다. 이처럼 Istio는 InferencePool을 별도의 개념으로 처리하지 않고 기존 Service Model로 변환하기 때문에, Istio가 제공하는 mTLS와 Telemetry 기능도 InferencePool의 Model Server에 동일하게 적용할 수 있다.
 
 ```shell {caption="[Shell 2] Shadow Service의 Cluster, Endpoint 확인"}
+# Check the pods and services in llm-namespace
+$ kubectl -n llm-namespace get pods -o wide
+NAME                                   READY   STATUS    RESTARTS   AGE    IP
+vllm-llama3-8b-56d558cb78-hnfzl        1/1     Running   0          21m    10.244.0.13
+vllm-llama3-8b-56d558cb78-nw2p4        1/1     Running   0          21m    10.244.0.14
+vllm-llama3-8b-56d558cb78-vw58t        1/1     Running   0          21m    10.244.0.15
+vllm-llama3-8b-epp-5dc6dcfddc-bjcq7    1/1     Running   0          21m    10.244.0.16
+
+$ kubectl -n llm-namespace get services
+NAME                         TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)     AGE
+vllm-llama3-8b-epp           ClusterIP   10.96.249.74   <none>        9002/TCP    21m
+vllm-llama3-8b-ip-22dc7de1   ClusterIP   None           <none>        54321/TCP   21m
+
 $ istioctl proxy-config clusters gateway-istio-6cf9dd97dd-8lrn4 -n gateway-namespace | grep vllm
 vllm-llama3-8b-epp.llm-namespace.svc.cluster.local             9002      -          outbound      EDS        vllm-llama3-8b-epp-tls.llm-namespace
 vllm-llama3-8b-ip-22dc7de1.llm-namespace.svc.cluster.local     54321     -          outbound      EDS
@@ -52,7 +65,7 @@ $ istioctl proxy-config endpoints gateway-istio-6cf9dd97dd-8lrn4 -n gateway-name
 10.244.0.15:8000        HEALTHY     OK     outbound|54321||vllm-llama3-8b-ip-22dc7de1.llm-namespace.svc.cluster.local
 ```
 
-[Shell 2]는 `vllm-llama3-8b` InferencePool 생성 이후 Gateway Envoy의 Cluster와 Endpoint를 나타내고 있다. `vllm-llama3-8b-ip-22dc7de1` 이름의 Shadow Service Cluster가 생성되어 있고, Cluster의 Endpoint에는 InferencePool의 `selector`로 선택된 3개의 Model Server Pod가 Target Port인 8000 Port와 함께 등록된 것을 확인할 수 있다.
+[Shell 2]는 `vllm-llama3-8b` InferencePool 생성 이후 `llm-namespace` Namespace의 Workload와 Gateway Envoy의 Cluster, Endpoint를 나타내고 있다. Model Server를 위한 Service는 별도로 생성하지 않았지만, Service 목록에는 istiod가 생성한 `vllm-llama3-8b-ip-22dc7de1` 이름의 Shadow Service가 Headless Service로 존재하는 것을 확인할 수 있다. Envoy에는 Shadow Service에 대응하는 Cluster가 생성되어 있고, Cluster의 Endpoint에는 InferencePool의 `selector`로 선택된 3개의 Model Server Pod IP가 Target Port인 8000 Port와 함께 등록된 것을 확인할 수 있다.
 
 ### 1.2. 요청 처리 과정
 
