@@ -148,7 +148,9 @@ spec:
 
 **HTTPRoute**는 Gateway가 수신한 HTTP Traffic을 Service로 Routing하는 규칙을 정의하는 Resource이다. [Figure 2]와 [File 3]은 `version.ssup2.com` Hostname으로 수신한 Traffic을 `version-v1`, `version-v2` Service로 Routing하는 HTTPRoute의 예제를 나타내고 있다. `parentRefs`에는 HTTPRoute가 연결될 Gateway를 명시하며, `hostnames`에는 Routing 대상이 되는 Hostname을 명시한다.
 
-HTTPRoute의 `hostnames`는 연결된 Gateway Listener의 `hostname`과 겹치는 경우에만 유효하며, [File 3]의 `version.ssup2.com`은 [File 2]의 `*.ssup2.com`에 포함되기 때문에 HTTPRoute는 정상적으로 Gateway에 연결된다. 동일한 Hostname을 명시한 다수의 HTTPRoute도 하나의 Gateway에 연결될 수 있으며, 이 경우 모든 HTTPRoute의 규칙이 병합되어 하나의 Routing 규칙처럼 동작한다.
+[File 3]처럼 `parentRefs`에 `sectionName` 없이 Gateway만 명시하면 HTTPRoute는 Protocol이 호환되는 모든 Listener에 연결된다. 따라서 [File 3]의 HTTPRoute는 [File 2]의 http Listener가 수신한 HTTP Traffic뿐만 아니라, https Listener가 TLS Termination을 수행한 HTTPS Traffic도 같이 Routing한다. 다만 https Listener의 `allowedRoutes`에는 `Selector`가 설정되어 있기 때문에, `version-namespace` Namespace에 `gateway-access: "true"` Label이 설정되어 있어야 https Listener에 연결될 수 있다.
+
+HTTPRoute의 `hostnames`는 연결된 Gateway Listener의 `hostname`과 겹치는 경우에만 유효하며, [File 3]의 `version.ssup2.com`은 [File 2]의 `*.ssup2.com`에 포함되기 때문에 HTTPRoute는 정상적으로 Gateway에 연결된다. 동일한 Hostname을 명시한 다수의 HTTPRoute도 하나의 Gateway에 연결될 수 있으며, 이 경우 모든 HTTPRoute의 규칙이 **병합되어 하나의 Routing 규칙**처럼 동작한다.
 
 다수의 HTTPRoute 규칙이 동일한 Traffic에 부합하는 경우에는 더 구체적인 조건을 정의한 규칙이 우선 적용된다. 정확한 Path 일치, 긴 PathPrefix, Method 조건, 많은 Header 조건, 많은 Query Parameter 조건 순서로 우선순위가 결정되며, 조건의 구체성이 동일하면 먼저 생성된 HTTPRoute의 규칙이 우선 적용되고, 생성 시점도 동일하면 Namespace와 이름의 알파벳 순서로 결정된다. 먼저 생성된 HTTPRoute가 우선권을 갖기 때문에, 나중에 생성된 HTTPRoute가 동일한 조건을 정의하여 기존 HTTPRoute의 Traffic을 가로채는 것은 불가능하다.
 
