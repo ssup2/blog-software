@@ -24,6 +24,8 @@ Istio는 자체 Traffic 관리 API인 Gateway, VirtualService Resource를 제공
 
 [Table 1]은 Istio가 제공하는 GatewayClass의 종류를 나타내고 있다. 일반적인 Ingress Gateway 용도로는 `istio` GatewayClass를 이용하며, 나머지 GatewayClass는 Multi-Cluster 구성이나 Ambient Mode에서 이용된다. Sidecar Mode로 설치하는 경우에는 `istio`, `istio-remote` GatewayClass만 생성되며, `istio-waypoint`와 `istio-east-west` GatewayClass는 Ambient Mode로 설치하는 경우에 생성된다. `istio-east-west` GatewayClass는 아직 실험 단계의 기능이다.
 
+### 1.1. Test 환경 구축
+
 ```shell {caption="[Shell 1] Test 환경 구성"}
 # Create kind cluster
 $ kind create cluster --name istio-gateway-api
@@ -55,13 +57,13 @@ service/version-v1   ClusterIP   10.96.255.26    <none>        8080/TCP   3h20m
 service/version-v2   ClusterIP   10.96.153.106   <none>        8080/TCP   3h20m
 ```
 
-이후 본문의 동작 확인은 [Shell 1]과 같이 kind Cluster에 Gateway API v1.6.0 Standard Channel CRD와 Istio 1.31.0을 minimal Profile의 Sidecar Mode로 설치하여 수행한다. 설치 이후에는 [Shell 2]와 같이 `istio`, `istio-remote` GatewayClass가 생성된 것을 확인할 수 있으며, Ambient Mode를 설치하지 않았기 때문에 `istio-waypoint` GatewayClass는 존재하지 않는다.
+이후 본문의 동작 확인은 [Shell 1]과 같이 kind Cluster에 Gateway API v1.6.0 Standard Channel CRD와 Istio 1.31.0을 minimal Profile의 Sidecar Mode로 설치하여 수행한다. istiod가 설치되면 GatewayClass도 함께 생성되기 때문에, [Shell 2]의 GatewayClass 목록을 통해서 Istio가 Gateway API 구현체로 정상 설치된 것을 확인할 수 있다. `istio`, `istio-remote` GatewayClass가 생성되어 있으며, Ambient Mode를 설치하지 않았기 때문에 `istio-waypoint` GatewayClass는 존재하지 않는다.
 
 Test Workload는 자신의 이름을 응답하는 `version-v1`, `version-v2` Deployment와 Service, 두 Deployment의 Pod를 모두 선택하는 `version` Service, 요청을 전송하는 `client` Pod로 구성하며, [Shell 3]은 `version-namespace` Namespace에 생성된 Test Workload를 나타내고 있다. `version-namespace` Namespace에는 `istio-injection` Label이 설정되어 있기 때문에, 모든 Pod의 READY가 2/2로 Sidecar가 주입된 것을 확인할 수 있다. Gateway는 `gateway-namespace` Namespace에 생성한다.
 
-### 1.1. Gateway 배포
+### 1.2. Gateway 배포
 
-#### 1.1.1. 자동 배포
+#### 1.2.1. 자동 배포
 
 ```yaml {caption="[File 1] Gateway 예제", linenos=table}
 apiVersion: gateway.networking.k8s.io/v1
@@ -130,7 +132,7 @@ $ kubectl -n gateway-namespace get deployment gateway-istio -o jsonpath='{.spec.
 
 [File 1]의 Gateway와 [File 2]의 ConfigMap을 실제로 적용하면 [Shell 4]와 같이 `gateway-istio` Deployment와 Service가 자동으로 생성된 것을 확인할 수 있다. ConfigMap의 내용에 따라서 Deployment의 Replica는 3개로, istio-proxy Container의 resources는 명시된 값으로, Service의 Type은 `ClusterIP`로 생성되어 `parametersRef`를 통한 Customize가 반영된 것도 확인할 수 있다. kind Cluster에는 LoadBalancer가 존재하지 않기 때문에 Service의 Type을 `ClusterIP`로 변경하였으며, Gateway의 ADDRESS에는 생성된 Service의 Domain 주소가 설정된다.
 
-#### 1.1.2. 수동 배포
+#### 1.2.2. 수동 배포
 
 ```yaml {caption="[File 3] 수동 배포된 Ingress Gateway를 이용하는 Gateway 예제", linenos=table}
 apiVersion: gateway.networking.k8s.io/v1
@@ -155,7 +157,7 @@ spec:
 
 자동 배포를 이용하지 않고 기존에 배포되어 있는 Ingress Gateway에 Gateway API의 설정만 적용할 수도 있다. [File 3]과 같이 Gateway의 `addresses`에 Ingress Gateway Service의 이름을 `Hostname` Type으로 명시하면, istiod는 Deployment와 Service를 생성하지 않고 명시된 Service의 Ingress Gateway에 Listener 설정만 전달한다. 이 경우 Ingress Gateway의 Pod에는 `gateway.networking.k8s.io/gateway-name` Label이 설정되어야 Gateway에 연결된 Route와 Policy가 정상적으로 적용된다. 수동 배포는 Ingress Gateway의 배포를 직접 제어해야 하는 경우에 이용되며, 일반적으로는 자동 배포 방식이 권장된다.
 
-#### 1.1.3. 원격 Gateway 등록
+#### 1.2.3. 원격 Gateway 등록
 
 ```yaml {caption="[File 4] 원격 Cluster의 East-West Gateway를 등록하는 Gateway 예제", linenos=table}
 apiVersion: gateway.networking.k8s.io/v1
@@ -182,7 +184,7 @@ spec:
 
 `topology.istio.io/network` Label에는 원격 Gateway가 속한 Network를 명시하며, 등록 이후 해당 Network의 Workload로 전달되는 Traffic은 `addresses`에 명시된 East-West Gateway 주소로 전송된다. 기존에는 Network 간 Gateway 주소를 meshConfig의 `meshNetworks` 설정으로 관리해야 했지만, `istio-remote` GatewayClass를 이용하면 Gateway API Resource로 선언적으로 관리할 수 있다.
 
-### 1.2. Istio 설정 변환
+### 1.3. Istio 설정 변환
 
 istiod의 Gateway API Controller는 Gateway API Resource를 Istio API와 동일한 형태의 내부 설정으로 변환한다. Gateway Resource는 Istio의 Gateway 설정으로 변환되며, HTTPRoute, GRPCRoute, TLSRoute, TCPRoute Resource는 VirtualService 설정으로 변환된다. 변환된 설정은 istiod의 Memory에만 존재하고 Kubernetes에 저장되지 않기 때문에 kubectl을 통해서는 조회할 수 없으며, Envoy에 전달된 최종 설정은 `istioctl proxy-config` 명령어를 통해서 확인할 수 있다.
 
@@ -273,7 +275,7 @@ $ istioctl proxy-config routes gateway-istio-6cf9dd97dd-8lrn4 -n gateway-namespa
 
 Istio는 Gateway API의 Route 중에서 HTTPRoute, GRPCRoute, TLSRoute, TCPRoute를 지원하며, Envoy 기반의 Istio가 UDP Proxy 기능을 제공하지 않기 때문에 UDPRoute는 지원하지 않는다. 또한 Gateway API는 아직 Istio의 모든 기능을 표준으로 제공하지 않기 때문에, Fault Injection이나 Circuit Breaking 같은 기능이 필요한 경우에는 Istio API를 함께 이용해야 한다. DestinationRule은 Host를 기준으로 적용되기 때문에 Gateway API의 Route와 함께 이용할 수 있다.
 
-### 1.3. Istio API 비교
+### 1.4. Istio API 비교
 
 {{< table caption="[Table 2] Istio API, Gateway API 비교" >}}
 | 구분 | Istio API | Gateway API |
@@ -287,7 +289,7 @@ Istio는 Gateway API의 Route 중에서 HTTPRoute, GRPCRoute, TLSRoute, TCPRoute
 
 [Table 2]는 Istio API와 Gateway API의 주요 차이점을 나타내고 있다. Istio API는 Istio의 모든 기능을 이용할 수 있지만 Istio 전용 API이기 때문에 다른 구현체로 이식할 수 없으며, Gateway API는 표준 API이기 때문에 이식성이 높지만 Istio의 모든 기능을 이용할 수는 없다. Istio는 두 API를 같이 지원하기 때문에 하나의 Cluster에서 혼용할 수 있지만, 하나의 Ingress Gateway에는 하나의 API만 이용하는 것이 관리 측면에서 권장된다.
 
-### 1.4. Mesh Traffic 제어
+### 1.5. Mesh Traffic 제어
 
 ```yaml {caption="[File 6] Service에 연결된 HTTPRoute 예제", linenos=table}
 apiVersion: gateway.networking.k8s.io/v1
@@ -357,7 +359,7 @@ $ istioctl proxy-config routes client -n version-namespace --name 8080 -o json
 
 [Shell 8]과 같이 Routing 규칙은 요청을 전송하는 `client` Pod의 Sidecar Route 설정에 반영된 것을 확인할 수 있으며, Mesh Traffic의 규칙이 Gateway가 아니라 Client의 Sidecar에서 적용되는 것을 알 수 있다.
 
-### 1.5. Ambient Mode Waypoint
+### 1.6. Ambient Mode Waypoint
 
 ```yaml {caption="[File 7] Waypoint Gateway 예제", linenos=table}
 apiVersion: gateway.networking.k8s.io/v1

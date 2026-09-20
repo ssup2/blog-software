@@ -5,10 +5,10 @@ Istio의 Kubernetes Gateway API 구현을 분석하는 문서. 본문 기준 Ver
 
 ## 문서 구성 및 상태
 
-- **1장**: 이론 완료 (1.1 Gateway 배포(자동/수동), 1.2 Istio 설정 변환, 1.3 Istio API 비교, 1.4 Mesh Traffic 제어, 1.5 Ambient Mode Waypoint).
-- **Test**: 2026-09-20 실측 완료. 별도 Test 섹션 없이 본문 각 섹션에 녹임 (사용자 지시):
-  환경 구성·Workload(Shell 1~3)는 1장 도입부, 자동 배포 확인(Shell 4)은 1.1.1,
-  HTTPRoute 분배·변환 확인(File 5, Shell 5~6)은 1.2, Mesh 확인(Shell 7~8)은 1.4.
+- **1장 구성**: 1.1 Test 환경 구축, 1.2 Gateway 배포(1.2.1 자동/1.2.2 수동/1.2.3 원격), 1.3 Istio 설정 변환,
+  1.4 Istio API 비교, 1.5 Mesh Traffic 제어, 1.6 Ambient Mode Waypoint.
+- **Test**: 2026-09-20 실측 완료. 환경 구축·검증(Shell 1 구성, Shell 2 GatewayClass, Shell 3 Workload)은 1.1 섹션,
+  자동 배포 확인(Shell 4)은 1.2.1, HTTPRoute 분배·변환 확인(File 5, Shell 5~6)은 1.3, Mesh 확인(Shell 7~8)은 1.5.
   본문의 Shell 1~8 출력은 전부 실측 발췌 (초기 초안의 창작 Shell은 제거됨).
   2026-09-20 전체 재검증 완료: GatewayClass 목록, CLUSTER-IP, resources, route/weight, VirtualService 부재가
   클러스터 재실행 결과와 일치. inference-extension 실측을 위한 istiod 재설치(inference 플래그 추가) 이후에도 영향 없음.
