@@ -9,7 +9,7 @@ Kubernetes에서 LLM Inference Traffic을 위한 Routing 기능을 제공하는 
 
 {{< figure caption="[Figure 1] Inference Gateway 구성" src="images/inference-gateway.png" width="900px" >}}
 
-Gateway API Inference Extension은 Gateway API를 확장하여 LLM Inference Traffic에 최적화된 Routing 기능을 제공하는 확장 API이다. LLM Inference Traffic은 일반적인 Web Traffic과 다른 특성을 갖는다. 요청마다 처리해야 하는 Token의 개수가 다르기 때문에 요청별 처리 비용의 편차가 크고, 하나의 요청을 처리하는데 수 초에서 수 분까지 소요된다. 또한 Model Server는 고가의 GPU를 이용하기 때문에 일반적인 Web Server와 다르게 적은 수의 Replica로 운영된다.
+**Gateway API Inference Extension**은 Gateway API를 확장하여 LLM Inference Traffic에 최적화된 Routing 기능을 제공하는 확장 API이다. LLM Inference Traffic은 일반적인 Web Traffic과 다른 특성을 갖는다. 요청마다 처리해야 하는 Token의 개수가 다르기 때문에 요청별 처리 비용의 편차가 크고, 하나의 요청을 처리하는데 수 초에서 수 분까지 소요된다. 또한 Model Server는 고가의 GPU를 이용하기 때문에 일반적인 Web Server와 다르게 적은 수의 Replica로 운영된다.
 
 이러한 특성 때문에 Kubernetes Service의 Round Robin, Random 방식의 Load Balancing을 LLM Inference Traffic에 이용하는 경우, 처리 비용이 큰 요청이 특정 Model Server에 몰리면 해당 Model Server의 Queue에 요청이 쌓여 Tail Latency가 증가하고 GPU 활용률도 불균형해지는 문제가 발생한다. Gateway API Inference Extension은 Model Server의 상태를 기반으로 최적의 Model Server를 선택하는 Load Balancing을 통해서 이러한 문제를 해결하며, Gateway API Inference Extension이 적용된 Gateway를 **Inference Gateway**라고 부른다.
 

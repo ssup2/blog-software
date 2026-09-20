@@ -9,7 +9,7 @@ Istio가 Kubernetes Gateway API를 어떻게 구현하여 동작하는지 분석
 
 {{< figure caption="[Figure 1] Istio Gateway API 구성" src="images/istio-gateway-api.png" width="900px" >}}
 
-Istio는 자체 Traffic 관리 API인 Gateway, VirtualService Resource를 제공하지만, Kubernetes 표준 API인 Gateway API의 구현체 역할도 수행한다. Istio는 향후 Gateway API를 기본 Traffic 관리 API로 전환할 계획이며, 신규 기능인 Ambient Mode의 Waypoint도 Gateway API를 기반으로 동작한다. Gateway API의 CRD는 Istio에 포함되어 있지 않기 때문에 별도로 설치되어야 하며, CRD가 설치되어 있으면 istiod가 Gateway API Resource를 Watch하여 처리하기 때문에 별도의 Controller 설치는 필요하지 않다.
+Istio는 자체 Traffic 관리 API인 Gateway, VirtualService Resource를 제공하지만, Kubernetes 표준 API인 **Gateway API**의 구현체 역할도 수행한다. Istio는 향후 Gateway API를 기본 Traffic 관리 API로 전환할 계획이며, 신규 기능인 Ambient Mode의 Waypoint도 Gateway API를 기반으로 동작한다. Gateway API의 CRD는 Istio에 포함되어 있지 않기 때문에 별도로 설치되어야 하며, CRD가 설치되어 있으면 istiod가 Gateway API Resource를 Watch하여 처리하기 때문에 별도의 Controller 설치는 필요하지 않다.
 
 [Figure 1]은 Istio Gateway API의 구성을 나타내고 있다. istiod는 Gateway API의 Gateway, Route Resource를 내부의 Istio Gateway, VirtualService 설정으로 변환하고, 변환된 설정은 기존 Istio 설정과 동일한 과정을 거쳐서 xDS를 통해 Envoy에 전달된다. 따라서 Gateway API를 이용해도 실제 Traffic 처리 방식은 Istio API를 이용하는 경우와 동일하다.
 

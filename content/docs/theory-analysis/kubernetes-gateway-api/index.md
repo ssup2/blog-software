@@ -9,7 +9,7 @@ Kubernetes에서 Ingress의 한계를 극복하기 위해서 등장한 Gateway A
 
 {{< figure caption="[Figure 1] Gateway API Resource 관계" src="images/gateway-api-resource.png" width="900px" >}}
 
-Gateway API는 Kubernetes Cluster 외부의 Traffic을 Cluster 내부의 Service로 Routing하는 방법을 정의하는 표준 API이다. 기존의 Ingress는 HTTP/HTTPS Protocol 중심으로 설계되어 있고, 표준으로 정의된 기능이 부족하기 때문에 대부분의 Ingress Controller는 Annotation을 통해서 기능을 확장한다.
+**Gateway API**는 Kubernetes Cluster 외부의 Traffic을 Cluster 내부의 Service로 Routing하는 방법을 정의하는 표준 API이다. 기존의 Ingress는 HTTP/HTTPS Protocol 중심으로 설계되어 있고, 표준으로 정의된 기능이 부족하기 때문에 대부분의 Ingress Controller는 Annotation을 통해서 기능을 확장한다.
 
 Annotation은 Ingress Controller마다 다르게 정의되어 있기 때문에 Ingress Controller를 변경하는 경우 Ingress도 같이 수정되어야 하는 이식성 문제가 존재한다. 또한 Ingress는 하나의 Resource에 Load Balancer 설정과 Routing 규칙이 모두 정의되기 때문에 Cluster 관리자와 App 개발자의 역할을 분리하기 어려운 문제도 존재한다. Gateway API는 이러한 Ingress의 한계를 극복하기 위해서 등장하였다.
 

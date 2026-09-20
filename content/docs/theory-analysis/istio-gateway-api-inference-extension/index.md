@@ -9,7 +9,7 @@ Istio에서 Gateway API Inference Extension이 어떻게 구현되어 동작하�
 
 {{< figure caption="[Figure 1] Istio Inference Gateway 구성" src="images/istio-inference-gateway.png" width="900px" >}}
 
-Envoy에는 Inference를 위한 전용 기능이 존재하지 않는다. 따라서 Istio는 Envoy의 범용 기능인 **External Processing (ext-proc) Filter**와 **Override Host Load Balancing Policy**를 조합하여 Gateway API Inference Extension을 구현한다. istiod는 InferencePool Resource를 Watch하고 있다가 InferencePool을 참조하는 HTTPRoute가 존재하면, Gateway 역할을 수행하는 Envoy에 ext-proc Filter와 Override Host Load Balancing Policy 설정을 전달한다.
+Envoy에는 Inference를 위한 전용 기능이 존재하지 않는다. 따라서 Istio는 Envoy의 범용 기능인 **External Processing (ext-proc) Filter**와 **Override Host Load Balancing Policy**를 조합하여 **Gateway API Inference Extension**을 구현한다. istiod는 InferencePool Resource를 Watch하고 있다가 InferencePool을 참조하는 HTTPRoute가 존재하면, Gateway 역할을 수행하는 Envoy에 ext-proc Filter와 Override Host Load Balancing Policy 설정을 전달한다.
 
 [Figure 1]은 Istio Inference Gateway의 구성을 나타내고 있다. Gateway가 수신한 요청은 ext-proc Filter를 통해서 **EPP** (Endpoint Picker)에게 전달되고, EPP가 선택한 Model Server Pod의 주소는 Header를 통해서 Envoy에게 반환된다. Envoy는 Override Host Load Balancing Policy를 통해서 Header에 명시된 Model Server Pod로 요청을 전달한다.
 
