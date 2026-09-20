@@ -253,7 +253,7 @@ Istio는 Gateway API의 Route 중에서 HTTPRoute, GRPCRoute, TLSRoute, TCPRoute
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: version
+  name: version-mesh
   namespace: version-namespace
 spec:
   parentRefs:
