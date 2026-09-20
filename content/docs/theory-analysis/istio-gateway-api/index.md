@@ -44,6 +44,8 @@ istio          istio.io/gateway-controller   True       5s
 istio-remote   istio.io/unmanaged-gateway    True       5s
 ```
 
+이후 본문의 동작 확인은 [Shell 1]과 같이 kind Cluster에 Gateway API v1.6.0 Standard Channel CRD와 Istio 1.31.0을 minimal Profile의 Sidecar Mode로 설치하여 수행한다. istiod가 설치되면 GatewayClass도 함께 생성되기 때문에, [Shell 2]의 GatewayClass 목록을 통해서 Istio가 Gateway API 구현체로 정상 설치된 것을 확인할 수 있다. `istio`, `istio-remote` GatewayClass가 생성되어 있으며, Ambient Mode를 설치하지 않았기 때문에 `istio-waypoint` GatewayClass는 존재하지 않는다.
+
 ```yaml {caption="[File 1] Test Workload 구성", linenos=table}
 apiVersion: v1
 kind: Namespace
@@ -137,8 +139,6 @@ service/version      ClusterIP   10.96.4.246     <none>        8080/TCP   3h20m
 service/version-v1   ClusterIP   10.96.255.26    <none>        8080/TCP   3h20m
 service/version-v2   ClusterIP   10.96.153.106   <none>        8080/TCP   3h20m
 ```
-
-이후 본문의 동작 확인은 [Shell 1]과 같이 kind Cluster에 Gateway API v1.6.0 Standard Channel CRD와 Istio 1.31.0을 minimal Profile의 Sidecar Mode로 설치하여 수행한다. istiod가 설치되면 GatewayClass도 함께 생성되기 때문에, [Shell 2]의 GatewayClass 목록을 통해서 Istio가 Gateway API 구현체로 정상 설치된 것을 확인할 수 있다. `istio`, `istio-remote` GatewayClass가 생성되어 있으며, Ambient Mode를 설치하지 않았기 때문에 `istio-waypoint` GatewayClass는 존재하지 않는다.
 
 Test Workload는 [File 1]과 같이 자신의 이름을 응답하는 `version-v1`, `version-v2` Deployment와 Service, 두 Deployment의 Pod를 모두 선택하는 `version` Service, 요청을 전송하는 `client` Pod로 구성하며, [File 1]을 적용하면 [Shell 3]과 같이 `version-namespace` Namespace에 Test Workload가 생성된 것을 확인할 수 있다. `version-namespace` Namespace에는 `istio-injection` Label이 설정되어 있기 때문에, 모든 Pod의 READY가 2/2로 Sidecar가 주입된 것을 확인할 수 있다. Gateway는 `gateway-namespace` Namespace에 생성한다.
 
