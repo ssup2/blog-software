@@ -6,9 +6,12 @@ Istio의 Kubernetes Gateway API 구현을 분석하는 문서. 본문 기준 Ver
 ## 문서 구성 및 상태
 
 - **1장**: 이론 완료 (1.1 Gateway 배포(자동/수동), 1.2 Istio 설정 변환, 1.3 Istio API 비교, 1.4 Mesh Traffic 제어, 1.5 Ambient Mode Waypoint).
-- **Test 섹션**: 미작성. 실측 완료 후 본문에 추가한다.
-- **주의**: 본문 [Shell 1](Gateway 자동 배포 확인)은 현재 실측이 아닌 창작된 예시 출력이다.
-  실측 후 실제 출력으로 교체해야 한다 (본문 출력 창작 금지 원칙).
+- **Test 섹션**: 2026-09-20 실측 완료 후 본문 반영 완료 (1.6 Test 환경 구성, 1.7 자동 배포, 1.8 HTTPRoute Routing, 1.9 설정 변환, 1.10 Mesh Routing).
+  본문의 Shell 1~7 출력은 전부 실측 발췌 (초기 초안의 창작 Shell은 제거됨).
+  - Shell 4 분배 결과: 93:7/100회. Shell 6: 적용 전 55:45, 적용 후 90:10.
+  - minimal Profile 설치 시 GatewayClass는 istio, istio-remote만 생성됨을 실측으로 확인 (본문 [Table 1] 문단에 반영).
+- 실측 환경의 kind Cluster(`istio-gateway-api` 이름, context `kind-istio-gateway-api`)는 재확인용으로 유지 중.
+  삭제: `kind delete cluster --name istio-gateway-api`. istioctl 1.31.0은 `/tmp/istio-1.31.0/bin/istioctl`에 있었음 (재부팅 시 소실 가능).
 - Figure 1 이미지 미제작.
 
 ## Test 환경 (재현 방법)
