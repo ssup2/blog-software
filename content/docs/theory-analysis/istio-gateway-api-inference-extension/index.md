@@ -35,7 +35,101 @@ $ istioctl install --set profile=minimal \
 
 Gateway API Inference Extension은 아직 Istio의 기본 기능으로 활성화되어 있지 않기 때문에, [Shell 1]과 같이 istiod의 환경 변수를 통해서 활성화해야 한다. 활성화 이후에는 별도의 Istio 전용 설정 없이 Gateway API Inference Extension의 InferencePool과 Gateway API의 Gateway, HTTPRoute Resource만으로 Inference Gateway를 구성할 수 있다. 이후 본문의 동작 확인은 [Shell 1]과 같이 kind Cluster에 Gateway API v1.6.0 CRD, Gateway API Inference Extension v1.6.2 CRD, Istio 1.31.0을 설치하여 수행한다.
 
-```yaml {caption="[File 1] InferencePool, HTTPRoute 구성", linenos=table}
+```yaml {caption="[File 1] Test Workload 구성", linenos=table}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: llm-namespace
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm-llama3-8b
+  namespace: llm-namespace
+  labels:
+    app: vllm-llama3-8b
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: vllm-llama3-8b
+  template:
+    metadata:
+      labels:
+        app: vllm-llama3-8b
+    spec:
+      containers:
+      - name: vllm-sim
+        image: ghcr.io/llm-d/llm-d-inference-sim:v0.7.1
+        args:
+        - --model
+        - meta-llama/Llama-3.1-8B-Instruct
+        - --port
+        - "8000"
+        - --max-loras
+        - "2"
+        - --lora-modules
+        - '{"name": "reviews-1"}'
+        ports:
+        - containerPort: 8000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm-llama3-8b-epp
+  namespace: llm-namespace
+  labels:
+    app: vllm-llama3-8b-epp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vllm-llama3-8b-epp
+  template:
+    metadata:
+      labels:
+        app: vllm-llama3-8b-epp
+    spec:
+      containers:
+      - name: lwepp
+        image: registry.k8s.io/gateway-api-inference-extension/lwepp:v1.6.2
+        args:
+        - --pool-name
+        - vllm-llama3-8b
+        - --pool-namespace
+        - llm-namespace
+        ports:
+        - containerPort: 9002
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vllm-llama3-8b-epp
+  namespace: llm-namespace
+spec:
+  selector:
+    app: vllm-llama3-8b-epp
+  ports:
+  - protocol: TCP
+    port: 9002
+    targetPort: 9002
+    appProtocol: http2
+---
+# A DestinationRule is required to enable TLS between the gateway and the EPP
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: vllm-llama3-8b-epp-tls
+  namespace: llm-namespace
+spec:
+  host: vllm-llama3-8b-epp
+  trafficPolicy:
+    tls:
+      mode: SIMPLE
+      insecureSkipVerify: true
+```
+
+```yaml {caption="[File 2] InferencePool, HTTPRoute 구성", linenos=table}
 apiVersion: inference.networking.k8s.io/v1
 kind: InferencePool
 metadata:
@@ -89,9 +183,9 @@ vllm-llama3-8b-epp           ClusterIP   10.96.249.74   <none>        9002/TCP  
 vllm-llama3-8b-ip-22dc7de1   ClusterIP   None           <none>        54321/TCP   21m
 ```
 
-Test 환경의 Model Server는 GPU 없이 동작하는 vLLM Simulator 3개의 Pod로 구성하며, `llm-namespace` Namespace에 Model Server Pod를 묶는 `vllm-llama3-8b` InferencePool과 Lightweight EPP 기반의 `vllm-llama3-8b-epp` Deployment를 생성한다. [File 1]은 Test 환경의 InferencePool과 HTTPRoute 구성을 나타내고 있으며, vLLM Simulator와 EPP의 Deployment, Service 구성은 생략하였다. [File 1]을 적용하면 [Shell 2]와 같이 `llm-namespace` Namespace에 Test Workload가 구성된 것을 확인할 수 있다.
+Test 환경의 Model Server는 [File 1]과 같이 GPU 없이 동작하는 vLLM Simulator 3개의 Pod로 구성하며, Lightweight EPP 기반의 `vllm-llama3-8b-epp` Deployment와 Service를 함께 생성한다. EPP는 TLS로 요청을 수신하기 때문에 Gateway와 EPP 사이의 TLS 연결을 위한 DestinationRule도 설정하며, EPP가 InferencePool과 Pod를 조회하기 위한 RBAC 구성은 [File 1]에서 생략하였다. [File 2]는 Model Server Pod를 묶는 `vllm-llama3-8b` InferencePool과 InferencePool을 참조하는 HTTPRoute를 나타내고 있다.
 
-Gateway는 `gateway-namespace` Namespace의 `istio` GatewayClass Gateway를 이용하며, [File 1]의 HTTPRoute는 `llm.ssup2.com` Hostname의 Traffic을 InferencePool로 전달한다. EPP는 TLS로 요청을 수신하기 때문에 Gateway와 EPP 사이에는 TLS 연결을 위한 DestinationRule 설정이 필요하다.
+Gateway는 `gateway-namespace` Namespace의 `istio` GatewayClass Gateway를 이용하며, [File 2]의 HTTPRoute는 `llm.ssup2.com` Hostname의 Traffic을 InferencePool로 전달한다. [File 1]과 [File 2]를 적용하면 [Shell 2]와 같이 `llm-namespace` Namespace에 Test Workload가 구성된 것을 확인할 수 있다.
 
 ```shell {caption="[Shell 3] InferencePool 상태 확인"}
 $ kubectl -n llm-namespace get inferencepool
