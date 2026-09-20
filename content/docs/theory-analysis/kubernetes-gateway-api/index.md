@@ -86,7 +86,7 @@ spec:
         from: All
 ```
 
-**Gateway**는 Traffic을 수신하는 Load Balancer를 정의하는 Resource이다. Gateway가 생성되면 Gateway Controller는 Gateway의 내용에 따라서 실제 Traffic을 수신하는 Proxy (Envoy, Nginx)와 LoadBalancer Type의 Service를 생성한다. [File 2]는 HTTP, HTTPS, TLS, TCP, UDP Traffic을 수신하는 Gateway의 예제를 나타내고 있다. gatewayClassName에는 Gateway의 구현체를 결정하는 GatewayClass의 이름을 명시하며, listeners에는 Traffic을 수신하는 Listener를 정의한다. 하나의 Gateway에는 다수의 Listener를 정의할 수 있으며, 각 Listener에는 Protocol, Port, Hostname을 설정할 수 있다. Listener의 Protocol에는 HTTP, HTTPS, TLS, TCP, UDP를 설정할 수 있다.
+**Gateway**는 Traffic을 수신하는 Load Balancer를 정의하는 Resource이다. Gateway가 생성되면 Gateway Controller는 Gateway의 내용에 따라서 실제 Traffic을 수신하는 Proxy (Envoy, Nginx)와 `LoadBalancer` Type의 Service를 생성한다. [File 2]는 HTTP, HTTPS, TLS, TCP, UDP Traffic을 수신하는 Gateway의 예제를 나타내고 있다. gatewayClassName에는 Gateway의 구현체를 결정하는 GatewayClass의 이름을 명시하며, listeners에는 Traffic을 수신하는 Listener를 정의한다. 하나의 Gateway에는 다수의 Listener를 정의할 수 있으며, 각 Listener에는 Protocol, Port, Hostname을 설정할 수 있다. Listener의 Protocol에는 `HTTP`, `HTTPS`, `TLS`, `TCP`, `UDP`를 설정할 수 있다.
 
 [File 2]의 https Listener처럼 tls의 certificateRefs에 인증서가 저장된 Secret을 명시하면 Listener는 TLS Termination을 수행한다. 반면 tls Listener처럼 TLS Mode가 `Passthrough`로 설정되어 있으면 Listener는 TLS Termination을 수행하지 않고 Traffic을 그대로 전달한다.
 
@@ -146,7 +146,7 @@ spec:
 
 **HTTPRoute**는 Gateway가 수신한 HTTP Traffic을 Service로 Routing하는 규칙을 정의하는 Resource이다. [Figure 2]와 [File 3]은 `version.ssup2.com` Hostname으로 수신한 Traffic을 `version-v1`, `version-v2` Service로 Routing하는 HTTPRoute의 예제를 나타내고 있다. parentRefs에는 HTTPRoute가 연결될 Gateway를 명시하며, hostnames에는 Routing 대상이 되는 Hostname을 명시한다. HTTPRoute의 hostnames는 연결된 Gateway Listener의 hostname과 겹치는 경우에만 유효하며, [File 3]의 `version.ssup2.com`은 [File 2]의 `*.ssup2.com`에 포함되기 때문에 HTTPRoute는 정상적으로 Gateway에 연결된다.
 
-rules에는 Traffic의 Routing 규칙을 정의한다. matches는 Routing 대상이 되는 Traffic의 조건을 정의하며 Path뿐만 아니라 Header, Method, Query Parameter 기반의 조건도 정의할 수 있다. filters는 Routing 과정에서 Traffic을 조작하는 역할을 수행하며, Request/Response Header 수정 (RequestHeaderModifier, ResponseHeaderModifier), Redirect (RequestRedirect), URL 재작성 (URLRewrite), Traffic 복제 (RequestMirror) 기능을 표준으로 제공한다. Ingress에서는 이러한 기능들을 Annotation을 통해서 이용해야 하지만, Gateway API에서는 표준 API로 제공되기 때문에 구현체와 관계없이 동일하게 이용할 수 있다.
+rules에는 Traffic의 Routing 규칙을 정의한다. matches는 Routing 대상이 되는 Traffic의 조건을 정의하며 Path뿐만 아니라 Header, Method, Query Parameter 기반의 조건도 정의할 수 있다. filters는 Routing 과정에서 Traffic을 조작하는 역할을 수행하며, Request/Response Header 수정 (`RequestHeaderModifier`, `ResponseHeaderModifier`), Redirect (`RequestRedirect`), URL 재작성 (`URLRewrite`), Traffic 복제 (`RequestMirror`) 기능을 표준으로 제공한다. Ingress에서는 이러한 기능들을 Annotation을 통해서 이용해야 하지만, Gateway API에서는 표준 API로 제공되기 때문에 구현체와 관계없이 동일하게 이용할 수 있다.
 
 backendRefs에는 Traffic이 전달될 Service를 명시하며, 다수의 Service를 명시하는 경우 weight를 통해서 Traffic의 비율을 설정할 수 있다. [File 3]에서는 `version-v1` Service에 90%, `version-v2` Service에 10%의 Traffic이 전달되도록 설정되어 있는 것을 확인할 수 있다. 따라서 Gateway API는 Ingress와 다르게 별도의 구현체 확장 기능 없이 Canary 배포를 수행할 수 있다.
 
@@ -197,7 +197,7 @@ spec:
       port: 8443
 ```
 
-**TLSRoute**는 Gateway가 수신한 TLS Traffic을 복호화하지 않고 SNI (Server Name Indication) 기반으로 Routing하는 규칙을 정의하는 Resource이다. [File 5]는 SNI가 `version.ssup2.com`인 TLS Traffic을 `version` Service로 Routing하는 TLSRoute의 예제를 나타내고 있다. TLSRoute를 이용하기 위해서는 연결된 Gateway Listener의 Protocol이 `TLS`로 설정되어 있고 TLS Mode가 `Passthrough`로 설정되어 있어야 한다. Gateway는 TLS Handshake 과정의 SNI만 확인하고 Traffic을 복호화하지 않고 전달하기 때문에, TLS Termination은 Traffic을 전달받는 Backend에서 수행된다.
+**TLSRoute**는 Gateway가 수신한 TLS Traffic을 복호화하지 않고 **SNI** (Server Name Indication) 기반으로 Routing하는 규칙을 정의하는 Resource이다. [File 5]는 SNI가 `version.ssup2.com`인 TLS Traffic을 `version` Service로 Routing하는 TLSRoute의 예제를 나타내고 있다. TLSRoute를 이용하기 위해서는 연결된 Gateway Listener의 Protocol이 `TLS`로 설정되어 있고 TLS Mode가 `Passthrough`로 설정되어 있어야 한다. Gateway는 TLS Handshake 과정의 SNI만 확인하고 Traffic을 복호화하지 않고 전달하기 때문에, TLS Termination은 Traffic을 전달받는 Backend에서 수행된다.
 
 #### 1.3.4. TCPRoute
 
@@ -277,7 +277,7 @@ spec:
 | Traffic 비율 제어 | 미지원 (구현체 확장 필요) | backendRefs weight 지원 |
 {{< /table >}}
 
-[Table 2]는 Ingress와 Gateway API의 주요 차이점을 나타내고 있다. Gateway API는 Ingress의 후속 표준으로 자리잡고 있으며, Kubernetes 공식 문서에서도 신규 환경에서는 Gateway API 이용을 권장하고 있다. Ingress는 더 이상 신규 기능이 추가되지 않는 Frozen 상태이며, 대부분의 Ingress Controller 구현체도 Gateway API 지원을 제공하고 있다. 또한 Gateway API는 GAMMA (Gateway API for Mesh Management and Administration)를 통해서 Cluster 외부 Traffic뿐만 아니라 Service Mesh의 East-West Traffic 제어에도 이용 범위를 확장하고 있다.
+[Table 2]는 Ingress와 Gateway API의 주요 차이점을 나타내고 있다. Gateway API는 Ingress의 후속 표준으로 자리잡고 있으며, Kubernetes 공식 문서에서도 신규 환경에서는 Gateway API 이용을 권장하고 있다. Ingress는 더 이상 신규 기능이 추가되지 않는 **Frozen** 상태이며, 대부분의 Ingress Controller 구현체도 Gateway API 지원을 제공하고 있다. 또한 Gateway API는 **GAMMA** (Gateway API for Mesh Management and Administration)를 통해서 Cluster 외부 Traffic뿐만 아니라 Service Mesh의 East-West Traffic 제어에도 이용 범위를 확장하고 있다.
 
 ## 2. 참조
 
