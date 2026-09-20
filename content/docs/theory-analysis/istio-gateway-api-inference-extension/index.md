@@ -13,7 +13,7 @@ Envoy에는 Inference를 위한 전용 기능이 존재하지 않는다. 따라�
 
 istiod는 InferencePool Resource를 Watch하고 있다가 InferencePool을 참조하는 HTTPRoute가 존재하면, Gateway 역할을 수행하는 Envoy에 ext-proc Filter와 Override Host Load Balancing Policy 설정을 전달한다.
 
-[Figure 1]은 Istio Inference Gateway의 구성을 나타내고 있다. Gateway가 수신한 요청은 ext-proc Filter를 통해서 **EPP** (Endpoint Picker)에게 전달되고, EPP가 선택한 Model Server Pod의 주소는 Header를 통해서 Envoy에게 반환된다. Envoy는 Override Host Load Balancing Policy를 통해서 Header에 명시된 Model Server Pod로 요청을 전달한다.
+[Figure 1]은 Istio Inference Gateway의 구성을 나타내고 있다. Gateway가 수신한 요청은 ext-proc Filter를 통해서 **EPP** (Endpoint Picker)에게 전달되고, EPP가 선택한 Model Server Pod의 주소는 ext-proc 응답의 Metadata를 통해서 Envoy에게 반환된다. Envoy는 Override Host Load Balancing Policy를 통해서 Metadata에 명시된 Model Server Pod로 요청을 전달한다.
 
 ```shell {caption="[Shell 1] Test 환경 구성"}
 # Create kind cluster
@@ -37,7 +37,7 @@ Test 환경의 Model Server는 GPU 없이 동작하는 vLLM Simulator 3개의 Po
 
 ### 1.1. InferencePool 변환
 
-istiod는 InferencePool을 Istio의 기존 Service Model로 변환하여 처리한다. InferencePool이 생성되면 istiod는 InferencePool마다 `[InferencePool 이름]-ip-[Hash].[Namespace].svc.cluster.local` 형태의 이름을 갖는 **Shadow Service**를 Headless Service로 생성하고, InferencePool의 `selector`에 부합하는 Model Server Pod들을 Shadow Service의 Endpoint로 등록한다. 따라서 Model Server Pod의 생성과 제거는 기존 Istio의 Service Discovery와 동일하게 EDS (Endpoint Discovery Service)를 통해서 Envoy에 반영된다.
+istiod는 InferencePool을 Istio의 기존 Service Model로 변환하여 처리한다. InferencePool이 생성되면 istiod는 InferencePool마다 `[InferencePool 이름]-ip-[Hash].[Namespace].svc.cluster.local` 형태의 이름을 갖는 **Shadow Service**를 Headless Service로 생성한다. Shadow Service의 selector와 Target Port는 InferencePool의 `selector`와 Target Port로 설정되기 때문에, `selector`에 부합하는 Model Server Pod들이 Shadow Service의 Endpoint로 등록된다. 따라서 Model Server Pod의 생성과 제거는 기존 Istio의 Service Discovery와 동일하게 EDS (Endpoint Discovery Service)를 통해서 Envoy에 반영된다.
 
 Envoy에는 Shadow Service에 대응하는 `outbound|54321||[Shadow Service 이름]` 형태의 `EDS` Type Cluster가 생성된다. Cluster 이름의 `54321`은 Shadow Service에 이용되는 고정된 가상 Port이며, Traffic이 실제로 전달되는 Port는 Cluster의 Endpoint에 설정된 InferencePool의 Target Port이다. HTTPRoute의 `backendRefs`에 InferencePool이 명시되어 있으면, 해당 Route의 Cluster는 InferencePool의 Shadow Service Cluster로 설정된다. 이처럼 Istio는 InferencePool을 별도의 개념으로 처리하지 않고 기존 Service Model로 변환하기 때문에, Istio가 제공하는 mTLS와 Telemetry 기능도 InferencePool의 Model Server에 동일하게 적용할 수 있다.
 
@@ -113,6 +113,7 @@ $ istioctl proxy-config routes gateway-istio-6cf9dd97dd-8lrn4 -n gateway-namespa
 $ curl -s -i -H "Host: llm.ssup2.com" http://127.0.0.1:8080/v1/completions \
     -d '{"model": "reviews-1", "prompt": "What do reviewers think about The Comedy of Errors?", "max_tokens": 100, "temperature": 0}'
 HTTP/1.1 200 OK
+...
 server: istio-envoy
 x-inference-pod: vllm-llama3-8b-56d558cb78-hnfzl
 x-inference-port: 8000
@@ -122,7 +123,7 @@ x-inference-port: 8000
 
 [Shell 4]는 port-forward를 통해서 Gateway로 Inference 요청을 전송한 결과를 나타내고 있다. 요청은 vLLM Simulator에 의해서 정상적으로 처리되며, 응답의 `x-inference-pod` Header를 통해서 요청을 처리한 Model Server Pod를 확인할 수 있다.
 
-EPP는 Model Server의 Queue 길이, KV Cache 사용률, LoRA Adapter 적재 여부 Metric을 기반으로 최적의 Model Server Pod를 선택하고, 선택한 Pod의 주소를 `x-gateway-destination-endpoint` Header에 설정하여 Envoy에게 반환한다. Envoy의 Cluster에는 Override Host Load Balancing Policy가 설정되어 있기 때문에, Envoy는 일반적인 Load Balancing 알고리즘 대신 `x-gateway-destination-endpoint` Header에 명시된 Pod로 요청을 전달한다. Header가 존재하지 않는 경우에는 Fallback으로 설정된 Load Balancing 알고리즘을 이용한다.
+EPP는 Model Server의 Queue 길이, KV Cache 사용률, LoRA Adapter 적재 여부 Metric을 기반으로 최적의 Model Server Pod를 선택하고, 선택한 Pod의 주소를 ext-proc 응답의 `envoy.lb` Metadata에 `x-gateway-destination-endpoint` Key로 설정하여 Envoy에게 반환한다. Envoy의 Cluster에는 Override Host Load Balancing Policy가 설정되어 있기 때문에, Envoy는 일반적인 Load Balancing 알고리즘 대신 Metadata에 명시된 Pod로 요청을 전달한다. Metadata가 존재하지 않는 경우에는 Fallback으로 설정된 Load Balancing 알고리즘을 이용한다.
 
 ```shell {caption="[Shell 5] Shadow Service Cluster의 Override Host Load Balancing Policy 확인"}
 $ istioctl proxy-config clusters gateway-istio-6cf9dd97dd-8lrn4 -n gateway-namespace \
