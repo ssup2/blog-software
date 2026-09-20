@@ -146,7 +146,11 @@ spec:
       weight: 10
 ```
 
-**HTTPRoute**는 Gateway가 수신한 HTTP Traffic을 Service로 Routing하는 규칙을 정의하는 Resource이다. [Figure 2]와 [File 3]은 `version.ssup2.com` Hostname으로 수신한 Traffic을 `version-v1`, `version-v2` Service로 Routing하는 HTTPRoute의 예제를 나타내고 있다. `parentRefs`에는 HTTPRoute가 연결될 Gateway를 명시하며, `hostnames`에는 Routing 대상이 되는 Hostname을 명시한다. HTTPRoute의 `hostnames`는 연결된 Gateway Listener의 `hostname`과 겹치는 경우에만 유효하며, [File 3]의 `version.ssup2.com`은 [File 2]의 `*.ssup2.com`에 포함되기 때문에 HTTPRoute는 정상적으로 Gateway에 연결된다.
+**HTTPRoute**는 Gateway가 수신한 HTTP Traffic을 Service로 Routing하는 규칙을 정의하는 Resource이다. [Figure 2]와 [File 3]은 `version.ssup2.com` Hostname으로 수신한 Traffic을 `version-v1`, `version-v2` Service로 Routing하는 HTTPRoute의 예제를 나타내고 있다. `parentRefs`에는 HTTPRoute가 연결될 Gateway를 명시하며, `hostnames`에는 Routing 대상이 되는 Hostname을 명시한다.
+
+HTTPRoute의 `hostnames`는 연결된 Gateway Listener의 `hostname`과 겹치는 경우에만 유효하며, [File 3]의 `version.ssup2.com`은 [File 2]의 `*.ssup2.com`에 포함되기 때문에 HTTPRoute는 정상적으로 Gateway에 연결된다. 동일한 Hostname을 명시한 다수의 HTTPRoute도 하나의 Gateway에 연결될 수 있으며, 이 경우 모든 HTTPRoute의 규칙이 병합되어 하나의 Routing 규칙처럼 동작한다.
+
+다수의 HTTPRoute 규칙이 동일한 Traffic에 부합하는 경우에는 더 구체적인 조건을 정의한 규칙이 우선 적용된다. 정확한 Path 일치, 긴 PathPrefix, Method 조건, 많은 Header 조건, 많은 Query Parameter 조건 순서로 우선순위가 결정되며, 조건의 구체성이 동일하면 먼저 생성된 HTTPRoute의 규칙이 우선 적용되고, 생성 시점도 동일하면 Namespace와 이름의 알파벳 순서로 결정된다. 먼저 생성된 HTTPRoute가 우선권을 갖기 때문에, 나중에 생성된 HTTPRoute가 동일한 조건을 정의하여 기존 HTTPRoute의 Traffic을 가로채는 것은 불가능하다.
 
 `rules`에는 Traffic의 Routing 규칙을 정의한다. `matches`는 Routing 대상이 되는 Traffic의 조건을 정의하며 Path뿐만 아니라 Header, Method, Query Parameter 기반의 조건도 정의할 수 있다. `filters`는 Routing 과정에서 Traffic을 조작하는 역할을 수행하며, Request/Response Header 수정 (`RequestHeaderModifier`, `ResponseHeaderModifier`), Redirect (`RequestRedirect`), URL 재작성 (`URLRewrite`), Traffic 복제 (`RequestMirror`) 기능을 표준으로 제공한다. Ingress에서는 이러한 기능들을 Annotation을 통해서 이용해야 하지만, Gateway API에서는 표준 API로 제공되기 때문에 구현체와 관계없이 동일하게 이용할 수 있다.
 
