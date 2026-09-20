@@ -21,5 +21,6 @@ ssup2의 개인 기술 블로그 (Hugo 기반). 글은 `content/docs/` 아래 Ma
 
 ### 표기
 
+- 키워드 강조: 정의 시점의 핵심 용어·Resource·Component 이름은 `**bold**`로, 설정값·Resource 인스턴스 이름·필드값·Label·명령어는 `` `code` ``로 강조한다. 같은 용어의 이후 언급은 일반 텍스트로 둔다.
 - 명칭 대칭: "Client가 수신하는" ↔ "Server가 수신하는"처럼 역할 명칭의 형태를 맞춘다 ("Server App" 대신 "Server").
 - Bold 문법 주의: 닫는 `**` 바로 앞이 구두점(`)` 등)이고 뒤에 한글 조사가 바로 붙으면 CommonMark flanking 규칙 때문에 렌더링이 깨진다 (`**A (B)**는` 실패). 괄호를 강조 밖으로 빼서 `**A** (B)는` 형태로 작성한다.
