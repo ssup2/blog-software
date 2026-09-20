@@ -33,6 +33,8 @@ $ istioctl install --set profile=minimal \
     --set values.pilot.env.ENABLE_GATEWAY_API_INFERENCE_EXTENSION=true -y
 ```
 
+Gateway API Inference Extension은 아직 Istio의 기본 기능으로 활성화되어 있지 않기 때문에, [Shell 1]과 같이 istiod의 환경 변수를 통해서 활성화해야 한다. 활성화 이후에는 별도의 Istio 전용 설정 없이 Gateway API Inference Extension의 InferencePool과 Gateway API의 Gateway, HTTPRoute Resource만으로 Inference Gateway를 구성할 수 있다. 이후 본문의 동작 확인은 [Shell 1]과 같이 kind Cluster에 Gateway API v1.6.0 CRD, Gateway API Inference Extension v1.6.2 CRD, Istio 1.31.0을 설치하여 수행한다.
+
 ```yaml {caption="[File 1] InferencePool, HTTPRoute 구성", linenos=table}
 apiVersion: inference.networking.k8s.io/v1
 kind: InferencePool
@@ -87,6 +89,10 @@ vllm-llama3-8b-epp           ClusterIP   10.96.249.74   <none>        9002/TCP  
 vllm-llama3-8b-ip-22dc7de1   ClusterIP   None           <none>        54321/TCP   21m
 ```
 
+Test 환경의 Model Server는 GPU 없이 동작하는 vLLM Simulator 3개의 Pod로 구성하며, `llm-namespace` Namespace에 Model Server Pod를 묶는 `vllm-llama3-8b` InferencePool과 Lightweight EPP 기반의 `vllm-llama3-8b-epp` Deployment를 생성한다. [File 1]은 Test 환경의 InferencePool과 HTTPRoute 구성을 나타내고 있으며, vLLM Simulator와 EPP의 Deployment, Service 구성은 생략하였다. [File 1]을 적용하면 [Shell 2]와 같이 `llm-namespace` Namespace에 Test Workload가 구성된 것을 확인할 수 있다.
+
+Gateway는 `gateway-namespace` Namespace의 `istio` GatewayClass Gateway를 이용하며, [File 1]의 HTTPRoute는 `llm.ssup2.com` Hostname의 Traffic을 InferencePool로 전달한다. EPP는 TLS로 요청을 수신하기 때문에 Gateway와 EPP 사이에는 TLS 연결을 위한 DestinationRule 설정이 필요하다.
+
 ```shell {caption="[Shell 3] InferencePool 상태 확인"}
 $ kubectl -n llm-namespace get inferencepool
 NAME             AGE
@@ -96,12 +102,6 @@ $ kubectl -n llm-namespace get inferencepool vllm-llama3-8b -o jsonpath='{range 
 Accepted=True (Accepted)
 ResolvedRefs=True (ResolvedRefs)
 ```
-
-Gateway API Inference Extension은 아직 Istio의 기본 기능으로 활성화되어 있지 않기 때문에, [Shell 1]과 같이 istiod의 환경 변수를 통해서 활성화해야 한다. 활성화 이후에는 별도의 Istio 전용 설정 없이 Gateway API Inference Extension의 InferencePool과 Gateway API의 Gateway, HTTPRoute Resource만으로 Inference Gateway를 구성할 수 있다. 이후 본문의 동작 확인은 [Shell 1]과 같이 kind Cluster에 Gateway API v1.6.0 CRD, Gateway API Inference Extension v1.6.2 CRD, Istio 1.31.0을 설치하여 수행한다.
-
-Test 환경의 Model Server는 GPU 없이 동작하는 vLLM Simulator 3개의 Pod로 구성하며, `llm-namespace` Namespace에 Model Server Pod를 묶는 `vllm-llama3-8b` InferencePool과 Lightweight EPP 기반의 `vllm-llama3-8b-epp` Deployment를 생성한다. [File 1]은 Test 환경의 InferencePool과 HTTPRoute 구성을 나타내고 있으며, vLLM Simulator와 EPP의 Deployment, Service 구성은 생략하였다. [File 1]을 적용하면 [Shell 2]와 같이 `llm-namespace` Namespace에 Test Workload가 구성된 것을 확인할 수 있다.
-
-Gateway는 `gateway-namespace` Namespace의 `istio` GatewayClass Gateway를 이용하며, [File 1]의 HTTPRoute는 `llm.ssup2.com` Hostname의 Traffic을 InferencePool로 전달한다. EPP는 TLS로 요청을 수신하기 때문에 Gateway와 EPP 사이에는 TLS 연결을 위한 DestinationRule 설정이 필요하다.
 
 [Shell 3]은 생성된 InferencePool과 status를 나타내고 있다. status의 `Accepted` Condition을 통해서 InferencePool이 HTTPRoute를 통해서 Gateway에 정상적으로 연결된 것을 확인할 수 있고, `ResolvedRefs` Condition을 통해서 `endpointPickerRef`에 명시된 EPP 참조가 정상적으로 해석된 것을 확인할 수 있다. 이후 본문의 동작 확인은 이 상태의 Test 환경에서 수행한다.
 
