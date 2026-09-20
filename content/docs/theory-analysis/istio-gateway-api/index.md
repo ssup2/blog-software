@@ -300,6 +300,18 @@ spec:
 Gateway API는 **GAMMA** (Gateway API for Mesh Management and Administration)를 통해서 Cluster 외부에서 유입되는 North-South Traffic뿐만 아니라 Mesh 내부의 East-West Traffic 제어에도 이용할 수 있다. [File 6]은 `parentRefs`에 Gateway 대신 Service를 명시하여 Mesh 내부에서 `version` Service로 전달되는 Traffic을 `version-v1`, `version-v2` Service로 분배하는 HTTPRoute의 예제를 나타내고 있다. Sidecar Mode에서는 요청을 전송하는 Client의 Sidecar에서 Routing 규칙이 적용되며, 이는 VirtualService를 mesh Gateway에 적용하는 방식과 동일한 역할을 수행한다.
 
 ```shell {caption="[Shell 6] Mesh Traffic 분배 확인"}
+# Check the pods and services in version-namespace
+$ kubectl -n version-namespace get pods,services
+NAME                              READY   STATUS    RESTARTS   AGE
+pod/client                        2/2     Running   0          3h20m
+pod/version-v1-7cf5688dfc-rcw7t   2/2     Running   0          3h20m
+pod/version-v2-69bf76f867-htddz   2/2     Running   0          3h20m
+
+NAME                 TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
+service/version      ClusterIP   10.96.4.246     <none>        8080/TCP   3h20m
+service/version-v1   ClusterIP   10.96.255.26    <none>        8080/TCP   3h20m
+service/version-v2   ClusterIP   10.96.153.106   <none>        8080/TCP   3h20m
+
 # Before applying the mesh httproute
 $ kubectl -n version-namespace exec client -c curl -- sh -c 'for i in $(seq 1 100); do curl -s http://version:8080/; done' | sort | uniq -c
   55 version-v1
@@ -311,7 +323,7 @@ $ kubectl -n version-namespace exec client -c curl -- sh -c 'for i in $(seq 1 10
   10 version-v2
 ```
 
-[Shell 6]은 [File 6]의 HTTPRoute 적용 전후에 `client` Pod에서 `version` Service로 100번의 요청을 전송한 결과를 나타내고 있다. 적용 전에는 Routing 규칙이 없기 때문에 요청은 `version` Service의 Endpoint인 version-v1, version-v2 Pod로 약 50:50 비율로 분배되지만, 적용 후에는 HTTPRoute의 weight 설정에 따라서 `version-v1`, `version-v2` Service로 90:10 비율로 분배되는 것을 확인할 수 있다.
+[Shell 6]은 `version-namespace` Namespace의 Test Workload와 [File 6]의 HTTPRoute 적용 전후에 `client` Pod에서 `version` Service로 100번의 요청을 전송한 결과를 나타내고 있다. 모든 Pod의 READY가 2/2인 것을 통해서 Sidecar가 주입된 것을 확인할 수 있다. 적용 전에는 Routing 규칙이 없기 때문에 요청은 `version` Service의 Endpoint인 version-v1, version-v2 Pod로 약 50:50 비율로 분배되지만, 적용 후에는 HTTPRoute의 weight 설정에 따라서 `version-v1`, `version-v2` Service로 90:10 비율로 분배되는 것을 확인할 수 있다.
 
 ```shell {caption="[Shell 7] Client Sidecar의 Route 설정 확인"}
 $ istioctl proxy-config routes client -n version-namespace --name 8080 -o json
