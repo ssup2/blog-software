@@ -37,6 +37,87 @@ $ kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/downl
 $ istioctl install --set profile=minimal -y
 ```
 
+```yaml {caption="[File 1] Test Workload 구성", linenos=table}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gateway-namespace
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: version-namespace
+  labels:
+    istio-injection: enabled
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: version-v1
+  namespace: version-namespace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: version
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: version
+        version: v1
+    spec:
+      containers:
+      - name: http-echo
+        image: hashicorp/http-echo:1.0
+        args:
+        - -text=version-v1
+        - -listen=:8080
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: version-v1
+  namespace: version-namespace
+spec:
+  selector:
+    app: version
+    version: v1
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+---
+# version-v2 Deployment and Service are identical to version-v1 except the version label and text
+apiVersion: v1
+kind: Service
+metadata:
+  name: version
+  namespace: version-namespace
+spec:
+  selector:
+    app: version
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: client
+  namespace: version-namespace
+  labels:
+    app: client
+spec:
+  containers:
+  - name: curl
+    image: curlimages/curl:8.10.1
+    command: ["sleep", "infinity"]
+```
+
 ```shell {caption="[Shell 2] GatewayClass 확인"}
 $ kubectl get gatewayclass
 NAME           CONTROLLER                    ACCEPTED   AGE
@@ -59,13 +140,13 @@ service/version-v2   ClusterIP   10.96.153.106   <none>        8080/TCP   3h20m
 
 이후 본문의 동작 확인은 [Shell 1]과 같이 kind Cluster에 Gateway API v1.6.0 Standard Channel CRD와 Istio 1.31.0을 minimal Profile의 Sidecar Mode로 설치하여 수행한다. istiod가 설치되면 GatewayClass도 함께 생성되기 때문에, [Shell 2]의 GatewayClass 목록을 통해서 Istio가 Gateway API 구현체로 정상 설치된 것을 확인할 수 있다. `istio`, `istio-remote` GatewayClass가 생성되어 있으며, Ambient Mode를 설치하지 않았기 때문에 `istio-waypoint` GatewayClass는 존재하지 않는다.
 
-Test Workload는 자신의 이름을 응답하는 `version-v1`, `version-v2` Deployment와 Service, 두 Deployment의 Pod를 모두 선택하는 `version` Service, 요청을 전송하는 `client` Pod로 구성하며, [Shell 3]은 `version-namespace` Namespace에 생성된 Test Workload를 나타내고 있다. `version-namespace` Namespace에는 `istio-injection` Label이 설정되어 있기 때문에, 모든 Pod의 READY가 2/2로 Sidecar가 주입된 것을 확인할 수 있다. Gateway는 `gateway-namespace` Namespace에 생성한다.
+Test Workload는 [File 1]과 같이 자신의 이름을 응답하는 `version-v1`, `version-v2` Deployment와 Service, 두 Deployment의 Pod를 모두 선택하는 `version` Service, 요청을 전송하는 `client` Pod로 구성하며, [File 1]을 적용하면 [Shell 3]과 같이 `version-namespace` Namespace에 Test Workload가 생성된 것을 확인할 수 있다. `version-namespace` Namespace에는 `istio-injection` Label이 설정되어 있기 때문에, 모든 Pod의 READY가 2/2로 Sidecar가 주입된 것을 확인할 수 있다. Gateway는 `gateway-namespace` Namespace에 생성한다.
 
 ### 1.2. Gateway 배포
 
 #### 1.2.1. 자동 배포
 
-```yaml {caption="[File 1] Gateway 예제", linenos=table}
+```yaml {caption="[File 2] Gateway 예제", linenos=table}
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
@@ -88,9 +169,9 @@ spec:
       name: gateway-options
 ```
 
-Istio API의 Gateway Resource는 이미 배포되어 있는 Ingress Gateway의 설정만 정의하기 때문에 Ingress Gateway를 Helm Chart나 IstioOperator를 통해서 별도로 배포해야 하지만, Gateway API의 Gateway Resource는 설정뿐만 아니라 배포까지 담당한다. [File 1]과 같이 `istio` GatewayClass를 이용하는 Gateway를 생성하면 istiod는 `[Gateway 이름]-[GatewayClass 이름]` 형태의 이름을 갖는 Deployment와 Service를 자동으로 생성한다. 생성된 Deployment의 Pod에서는 Envoy가 동작하며, istiod로부터 xDS를 통해서 설정을 전달받는다. Service의 Type은 기본적으로 `LoadBalancer`로 설정되며, `networking.istio.io/service-type` Annotation을 통해서 변경할 수 있다.
+Istio API의 Gateway Resource는 이미 배포되어 있는 Ingress Gateway의 설정만 정의하기 때문에 Ingress Gateway를 Helm Chart나 IstioOperator를 통해서 별도로 배포해야 하지만, Gateway API의 Gateway Resource는 설정뿐만 아니라 배포까지 담당한다. [File 2]와 같이 `istio` GatewayClass를 이용하는 Gateway를 생성하면 istiod는 `[Gateway 이름]-[GatewayClass 이름]` 형태의 이름을 갖는 Deployment와 Service를 자동으로 생성한다. 생성된 Deployment의 Pod에서는 Envoy가 동작하며, istiod로부터 xDS를 통해서 설정을 전달받는다. Service의 Type은 기본적으로 `LoadBalancer`로 설정되며, `networking.istio.io/service-type` Annotation을 통해서 변경할 수 있다.
 
-```yaml {caption="[File 2] Gateway 배포 Customize를 위한 ConfigMap 예제", linenos=table}
+```yaml {caption="[File 3] Gateway 배포 Customize를 위한 ConfigMap 예제", linenos=table}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -113,7 +194,7 @@ data:
       type: ClusterIP
 ```
 
-자동 배포되는 Deployment와 Service는 Gateway의 `infrastructure` 설정을 통해서 Customize할 수 있다. `infrastructure`의 `labels`, `annotations`에 명시된 값은 생성되는 Resource에 그대로 전파되며, `parametersRef`에는 [File 2]와 같은 ConfigMap을 명시할 수 있다. ConfigMap에는 `deployment`, `service`, `serviceAccount`, `horizontalPodAutoscaler`, `podDisruptionBudget` Key를 정의할 수 있으며, 각 Key의 내용은 Strategic Merge Patch 방식으로 생성되는 Resource에 반영된다. Cluster 전체에 적용되는 기본값은 `istio-system` Namespace에 `gateway.istio.io/defaults-for-class` Label을 갖는 ConfigMap을 통해서 GatewayClass 단위로 설정할 수 있다.
+자동 배포되는 Deployment와 Service는 Gateway의 `infrastructure` 설정을 통해서 Customize할 수 있다. `infrastructure`의 `labels`, `annotations`에 명시된 값은 생성되는 Resource에 그대로 전파되며, `parametersRef`에는 [File 3]과 같은 ConfigMap을 명시할 수 있다. ConfigMap에는 `deployment`, `service`, `serviceAccount`, `horizontalPodAutoscaler`, `podDisruptionBudget` Key를 정의할 수 있으며, 각 Key의 내용은 Strategic Merge Patch 방식으로 생성되는 Resource에 반영된다. Cluster 전체에 적용되는 기본값은 `istio-system` Namespace에 `gateway.istio.io/defaults-for-class` Label을 갖는 ConfigMap을 통해서 GatewayClass 단위로 설정할 수 있다.
 
 ```shell {caption="[Shell 4] Gateway 자동 배포 확인"}
 $ kubectl -n gateway-namespace get gateway,deployment,service
@@ -130,11 +211,11 @@ $ kubectl -n gateway-namespace get deployment gateway-istio -o jsonpath='{.spec.
 {"cpu":"500m","memory":"512Mi"}
 ```
 
-[File 1]의 Gateway와 [File 2]의 ConfigMap을 실제로 적용하면 [Shell 4]와 같이 `gateway-istio` Deployment와 Service가 자동으로 생성된 것을 확인할 수 있다. ConfigMap의 내용에 따라서 Deployment의 Replica는 3개로, istio-proxy Container의 resources는 명시된 값으로, Service의 Type은 `ClusterIP`로 생성되어 `parametersRef`를 통한 Customize가 반영된 것도 확인할 수 있다. kind Cluster에는 LoadBalancer가 존재하지 않기 때문에 Service의 Type을 `ClusterIP`로 변경하였으며, Gateway의 ADDRESS에는 생성된 Service의 Domain 주소가 설정된다.
+[File 2]의 Gateway와 [File 3]의 ConfigMap을 실제로 적용하면 [Shell 4]와 같이 `gateway-istio` Deployment와 Service가 자동으로 생성된 것을 확인할 수 있다. ConfigMap의 내용에 따라서 Deployment의 Replica는 3개로, istio-proxy Container의 resources는 명시된 값으로, Service의 Type은 `ClusterIP`로 생성되어 `parametersRef`를 통한 Customize가 반영된 것도 확인할 수 있다. kind Cluster에는 LoadBalancer가 존재하지 않기 때문에 Service의 Type을 `ClusterIP`로 변경하였으며, Gateway의 ADDRESS에는 생성된 Service의 Domain 주소가 설정된다.
 
 #### 1.2.2. 수동 배포
 
-```yaml {caption="[File 3] 수동 배포된 Ingress Gateway를 이용하는 Gateway 예제", linenos=table}
+```yaml {caption="[File 4] 수동 배포된 Ingress Gateway를 이용하는 Gateway 예제", linenos=table}
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
@@ -155,11 +236,11 @@ spec:
         from: All
 ```
 
-자동 배포를 이용하지 않고 기존에 배포되어 있는 Ingress Gateway에 Gateway API의 설정만 적용할 수도 있다. [File 3]과 같이 Gateway의 `addresses`에 Ingress Gateway Service의 이름을 `Hostname` Type으로 명시하면, istiod는 Deployment와 Service를 생성하지 않고 명시된 Service의 Ingress Gateway에 Listener 설정만 전달한다. 이 경우 Ingress Gateway의 Pod에는 `gateway.networking.k8s.io/gateway-name` Label이 설정되어야 Gateway에 연결된 Route와 Policy가 정상적으로 적용된다. 수동 배포는 Ingress Gateway의 배포를 직접 제어해야 하는 경우에 이용되며, 일반적으로는 자동 배포 방식이 권장된다.
+자동 배포를 이용하지 않고 기존에 배포되어 있는 Ingress Gateway에 Gateway API의 설정만 적용할 수도 있다. [File 4]와 같이 Gateway의 `addresses`에 Ingress Gateway Service의 이름을 `Hostname` Type으로 명시하면, istiod는 Deployment와 Service를 생성하지 않고 명시된 Service의 Ingress Gateway에 Listener 설정만 전달한다. 이 경우 Ingress Gateway의 Pod에는 `gateway.networking.k8s.io/gateway-name` Label이 설정되어야 Gateway에 연결된 Route와 Policy가 정상적으로 적용된다. 수동 배포는 Ingress Gateway의 배포를 직접 제어해야 하는 경우에 이용되며, 일반적으로는 자동 배포 방식이 권장된다.
 
 #### 1.2.3. 원격 Gateway 등록
 
-```yaml {caption="[File 4] 원격 Cluster의 East-West Gateway를 등록하는 Gateway 예제", linenos=table}
+```yaml {caption="[File 5] 원격 Cluster의 East-West Gateway를 등록하는 Gateway 예제", linenos=table}
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
@@ -180,7 +261,7 @@ spec:
       mode: Passthrough
 ```
 
-`istio-remote` GatewayClass는 istiod가 배포하거나 관리하지 않는 Gateway를 등록할 때 이용하며, [Shell 2]에서 확인할 수 있는 것처럼 별도의 `istio.io/unmanaged-gateway` Controller 이름으로 처리된다. `istio-remote` GatewayClass를 이용하는 Gateway가 생성되어도 istiod는 Deployment와 Service를 생성하지 않으며, `addresses`에 명시된 주소 정보만 이용한다. [File 4]는 Multi-Network Mesh 구성에서 다른 Network의 원격 Cluster에 존재하는 East-West Gateway를 등록하는 Gateway의 예제를 나타내고 있다.
+`istio-remote` GatewayClass는 istiod가 배포하거나 관리하지 않는 Gateway를 등록할 때 이용하며, [Shell 2]에서 확인할 수 있는 것처럼 별도의 `istio.io/unmanaged-gateway` Controller 이름으로 처리된다. `istio-remote` GatewayClass를 이용하는 Gateway가 생성되어도 istiod는 Deployment와 Service를 생성하지 않으며, `addresses`에 명시된 주소 정보만 이용한다. [File 5]는 Multi-Network Mesh 구성에서 다른 Network의 원격 Cluster에 존재하는 East-West Gateway를 등록하는 Gateway의 예제를 나타내고 있다.
 
 `topology.istio.io/network` Label에는 원격 Gateway가 속한 Network를 명시하며, 등록 이후 해당 Network의 Workload로 전달되는 Traffic은 `addresses`에 명시된 East-West Gateway 주소로 전송된다. 기존에는 Network 간 Gateway 주소를 meshConfig의 `meshNetworks` 설정으로 관리해야 했지만, `istio-remote` GatewayClass를 이용하면 Gateway API Resource로 선언적으로 관리할 수 있다.
 
@@ -188,7 +269,7 @@ spec:
 
 istiod의 Gateway API Controller는 Gateway API Resource를 Istio API와 동일한 형태의 내부 설정으로 변환한다. Gateway Resource는 Istio의 Gateway 설정으로 변환되며, HTTPRoute, GRPCRoute, TLSRoute, TCPRoute Resource는 VirtualService 설정으로 변환된다. 변환된 설정은 istiod의 Memory에만 존재하고 Kubernetes에 저장되지 않기 때문에 kubectl을 통해서는 조회할 수 없으며, Envoy에 전달된 최종 설정은 `istioctl proxy-config` 명령어를 통해서 확인할 수 있다.
 
-```yaml {caption="[File 5] Gateway에 연결된 HTTPRoute 예제", linenos=table}
+```yaml {caption="[File 6] Gateway에 연결된 HTTPRoute 예제", linenos=table}
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -224,7 +305,7 @@ $ for i in $(seq 1 100); do curl -s -H "Host: version.ssup2.com" http://127.0.0.
    7 version-v2
 ```
 
-[File 5]는 Gateway가 수신한 Traffic을 `version-v1` Service에 90%, `version-v2` Service에 10% 비율로 분배하는 HTTPRoute의 예제를 나타내고 있다. HTTPRoute 적용 후 [Shell 5]와 같이 100번의 요청을 전송하면 93번은 version-v1이, 7번은 version-v2가 응답하여 weight 설정에 근접한 비율로 분배되는 것을 확인할 수 있다. kind Cluster에는 LoadBalancer가 존재하지 않기 때문에 port-forward를 통해서 요청을 전송하였다.
+[File 6]은 Gateway가 수신한 Traffic을 `version-v1` Service에 90%, `version-v2` Service에 10% 비율로 분배하는 HTTPRoute의 예제를 나타내고 있다. HTTPRoute 적용 후 [Shell 5]와 같이 100번의 요청을 전송하면 93번은 version-v1이, 7번은 version-v2가 응답하여 weight 설정에 근접한 비율로 분배되는 것을 확인할 수 있다. kind Cluster에는 LoadBalancer가 존재하지 않기 때문에 port-forward를 통해서 요청을 전송하였다.
 
 ```shell {caption="[Shell 6] HTTPRoute의 내부 설정 변환 확인"}
 # No VirtualService is stored in kubernetes
@@ -291,7 +372,7 @@ Istio는 Gateway API의 Route 중에서 HTTPRoute, GRPCRoute, TLSRoute, TCPRoute
 
 ### 1.5. Mesh Traffic 제어
 
-```yaml {caption="[File 6] Service에 연결된 HTTPRoute 예제", linenos=table}
+```yaml {caption="[File 7] Service에 연결된 HTTPRoute 예제", linenos=table}
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -312,7 +393,7 @@ spec:
       weight: 10
 ```
 
-Gateway API는 **GAMMA** (Gateway API for Mesh Management and Administration)를 통해서 Cluster 외부에서 유입되는 North-South Traffic뿐만 아니라 Mesh 내부의 East-West Traffic 제어에도 이용할 수 있다. [File 6]은 `parentRefs`에 Gateway 대신 Service를 명시하여 Mesh 내부에서 `version` Service로 전달되는 Traffic을 `version-v1`, `version-v2` Service로 분배하는 HTTPRoute의 예제를 나타내고 있다. Sidecar Mode에서는 요청을 전송하는 Client의 Sidecar에서 Routing 규칙이 적용되며, 이는 VirtualService를 mesh Gateway에 적용하는 방식과 동일한 역할을 수행한다.
+Gateway API는 **GAMMA** (Gateway API for Mesh Management and Administration)를 통해서 Cluster 외부에서 유입되는 North-South Traffic뿐만 아니라 Mesh 내부의 East-West Traffic 제어에도 이용할 수 있다. [File 7]은 `parentRefs`에 Gateway 대신 Service를 명시하여 Mesh 내부에서 `version` Service로 전달되는 Traffic을 `version-v1`, `version-v2` Service로 분배하는 HTTPRoute의 예제를 나타내고 있다. Sidecar Mode에서는 요청을 전송하는 Client의 Sidecar에서 Routing 규칙이 적용되며, 이는 VirtualService를 mesh Gateway에 적용하는 방식과 동일한 역할을 수행한다.
 
 ```shell {caption="[Shell 7] Mesh Traffic 분배 확인"}
 # Before applying the mesh httproute
@@ -326,7 +407,7 @@ $ kubectl -n version-namespace exec client -c curl -- sh -c 'for i in $(seq 1 10
   10 version-v2
 ```
 
-[Shell 7]은 [File 6]의 HTTPRoute 적용 전후에 `client` Pod에서 `version` Service로 100번의 요청을 전송한 결과를 나타내고 있다. 적용 전에는 Routing 규칙이 없기 때문에 요청은 `version` Service의 Endpoint인 version-v1, version-v2 Pod로 약 50:50 비율로 분배되지만, 적용 후에는 HTTPRoute의 weight 설정에 따라서 `version-v1`, `version-v2` Service로 90:10 비율로 분배되는 것을 확인할 수 있다.
+[Shell 7]은 [File 7]의 HTTPRoute 적용 전후에 `client` Pod에서 `version` Service로 100번의 요청을 전송한 결과를 나타내고 있다. 적용 전에는 Routing 규칙이 없기 때문에 요청은 `version` Service의 Endpoint인 version-v1, version-v2 Pod로 약 50:50 비율로 분배되지만, 적용 후에는 HTTPRoute의 weight 설정에 따라서 `version-v1`, `version-v2` Service로 90:10 비율로 분배되는 것을 확인할 수 있다.
 
 ```shell {caption="[Shell 8] Client Sidecar의 Route 설정 확인"}
 $ istioctl proxy-config routes client -n version-namespace --name 8080 -o json
@@ -361,7 +442,7 @@ $ istioctl proxy-config routes client -n version-namespace --name 8080 -o json
 
 ### 1.6. Ambient Mode Waypoint
 
-```yaml {caption="[File 7] Waypoint Gateway 예제", linenos=table}
+```yaml {caption="[File 8] Waypoint Gateway 예제", linenos=table}
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
@@ -377,9 +458,9 @@ spec:
     protocol: HBONE
 ```
 
-Ambient Mode에서 L7 Traffic을 처리하는 **Waypoint**도 Gateway API를 기반으로 배포된다. [File 7]은 istioctl의 `istioctl waypoint apply` 명령어가 생성하는 Waypoint Gateway를 나타내고 있다. `istio-waypoint` GatewayClass와 HBONE Protocol의 Listener가 설정되어 있으며, Gateway가 생성되면 istiod는 일반 Gateway와 동일하게 Waypoint의 Deployment와 Service를 자동으로 배포한다. 다만 Waypoint의 경우에는 생성되는 Resource의 이름에 GatewayClass 이름이 붙지 않는다.
+Ambient Mode에서 L7 Traffic을 처리하는 **Waypoint**도 Gateway API를 기반으로 배포된다. [File 8]은 istioctl의 `istioctl waypoint apply` 명령어가 생성하는 Waypoint Gateway를 나타내고 있다. `istio-waypoint` GatewayClass와 HBONE Protocol의 Listener가 설정되어 있으며, Gateway가 생성되면 istiod는 일반 Gateway와 동일하게 Waypoint의 Deployment와 Service를 자동으로 배포한다. 다만 Waypoint의 경우에는 생성되는 Resource의 이름에 GatewayClass 이름이 붙지 않는다.
 
-배포된 Waypoint는 Namespace, Service, Pod에 `istio.io/use-waypoint` Label을 설정하여 이용하며, Label이 설정된 Resource로 전달되는 Traffic은 Waypoint를 경유한다. Waypoint를 경유하는 Traffic에도 [File 6]과 같은 Service에 연결된 HTTPRoute를 통해서 L7 Routing 규칙을 적용할 수 있다. 이처럼 Ambient Mode는 Istio API가 아닌 Gateway API를 중심으로 설계되어 있다.
+배포된 Waypoint는 Namespace, Service, Pod에 `istio.io/use-waypoint` Label을 설정하여 이용하며, Label이 설정된 Resource로 전달되는 Traffic은 Waypoint를 경유한다. Waypoint를 경유하는 Traffic에도 [File 7]과 같은 Service에 연결된 HTTPRoute를 통해서 L7 Routing 규칙을 적용할 수 있다. 이처럼 Ambient Mode는 Istio API가 아닌 Gateway API를 중심으로 설계되어 있다.
 
 ## 2. 참조
 
