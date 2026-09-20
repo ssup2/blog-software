@@ -13,7 +13,7 @@ Gateway API Inference Extension은 Gateway API를 확장하여 LLM Inference Tra
 
 이러한 특성 때문에 Kubernetes Service의 Round Robin, Random 방식의 Load Balancing을 LLM Inference Traffic에 이용하는 경우, 처리 비용이 큰 요청이 특정 Model Server에 몰리면 해당 Model Server의 Queue에 요청이 쌓여 Tail Latency가 증가하고 GPU 활용률도 불균형해지는 문제가 발생한다. Gateway API Inference Extension은 Model Server의 상태를 기반으로 최적의 Model Server를 선택하는 Load Balancing을 통해서 이러한 문제를 해결하며, Gateway API Inference Extension이 적용된 Gateway를 **Inference Gateway**라고 부른다.
 
-[Figure 1]은 Inference Gateway의 구성을 나타내고 있다. Gateway API Inference Extension은 Model Server의 집합을 정의하는 **InferencePool** Resource와 최적의 Model Server를 선택하는 **Endpoint Picker (EPP)** Component로 구성된다. Inference Gateway는 Envoy의 External Processing (ext-proc) Filter를 기반으로 동작하기 때문에 ext-proc을 지원하는 Gateway API 구현체에서 이용할 수 있으며, 대표적인 구현체로는 Envoy Gateway, Istio, kgateway, NGINX Gateway Fabric, GKE Inference Gateway가 존재한다.
+[Figure 1]은 Inference Gateway의 구성을 나타내고 있다. Gateway API Inference Extension은 Model Server의 집합을 정의하는 **InferencePool** Resource와 최적의 Model Server를 선택하는 **Endpoint Picker (EPP)** Component로 구성된다. Inference Gateway는 Envoy의 **External Processing (ext-proc) Filter**를 기반으로 동작하기 때문에 ext-proc을 지원하는 Gateway API 구현체에서 이용할 수 있으며, 대표적인 구현체로는 Envoy Gateway, Istio, kgateway, NGINX Gateway Fabric, GKE Inference Gateway가 존재한다.
 
 ### 1.1. InferencePool
 
@@ -73,9 +73,9 @@ Gateway API Inference Extension은 별도의 Route Resource를 정의하지 않�
 
 **Endpoint Picker** (EPP)는 InferencePool에 포함된 Model Server 중에서 요청을 처리할 최적의 Model Server를 선택하는 Component이며, 별도의 Pod로 배포되어 Envoy의 ext-proc Protocol을 통해서 Gateway와 통신한다. [Figure 2]는 EPP의 요청 처리 과정을 나타내고 있다. Gateway는 HTTPRoute를 통해서 Traffic이 전달될 InferencePool을 결정한 다음, 요청 정보를 EPP에게 전달한다. EPP는 InferencePool에 포함된 Model Server의 Metric을 기반으로 최적의 Model Server를 선택하여 Gateway에게 반환하고, Gateway는 선택된 Model Server Pod로 요청을 전달한다.
 
-EPP는 Model Server가 노출하는 Metric을 주기적으로 수집하며, Model Server의 Queue에 대기중인 요청의 개수, KV Cache 사용률, 적재된 LoRA Adapter 목록, Prefix Cache 상태를 기반으로 Model Server를 선택한다. 예를 들어 Queue가 짧고 KV Cache에 여유가 있는 Model Server를 우선 선택하고, LoRA Adapter를 이용하는 요청은 해당 Adapter가 이미 적재된 Model Server로 전달하여 Adapter 적재 비용을 제거한다. Model Server가 노출해야 하는 Metric의 규격은 Model Server Protocol로 표준화되어 있으며, vLLM과 같은 Model Serving Platform이 지원하고 있다.
+EPP는 Model Server가 노출하는 Metric을 주기적으로 수집하며, Model Server의 Queue에 대기중인 요청의 개수, KV Cache 사용률, 적재된 LoRA Adapter 목록, Prefix Cache 상태를 기반으로 Model Server를 선택한다. 예를 들어 Queue가 짧고 KV Cache에 여유가 있는 Model Server를 우선 선택하고, LoRA Adapter를 이용하는 요청은 해당 Adapter가 이미 적재된 Model Server로 전달하여 Adapter 적재 비용을 제거한다. Model Server가 노출해야 하는 Metric의 규격은 **Model Server Protocol**로 표준화되어 있으며, vLLM과 같은 Model Serving Platform이 지원하고 있다.
 
-EPP의 선택 기법은 Plugin 형태로 구현되어 있기 때문에 필요에 따라서 Custom Plugin을 추가하여 선택 기법을 확장할 수 있다. v1.6 Version부터는 경량화된 Lightweight EPP가 기본 EPP로 제공되며, 기존의 EPP와 요청 Body의 Model 이름 기반으로 Routing을 수행하는 Body-based Router는 llm-d Project로 이관되어 개발되고 있다.
+EPP의 선택 기법은 Plugin 형태로 구현되어 있기 때문에 필요에 따라서 Custom Plugin을 추가하여 선택 기법을 확장할 수 있다. v1.6 Version부터는 경량화된 **Lightweight EPP**가 기본 EPP로 제공되며, 기존의 EPP와 요청 Body의 Model 이름 기반으로 Routing을 수행하는 **Body-based Router**는 llm-d Project로 이관되어 개발되고 있다.
 
 ### 1.4. InferenceObjective
 
