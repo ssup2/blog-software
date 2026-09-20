@@ -1,0 +1,98 @@
+# Lightweight EPP (default EPP since inference extension v1.6)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm-llama3-8b-epp
+  namespace: llm-namespace
+  labels:
+    app: vllm-llama3-8b-epp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vllm-llama3-8b-epp
+  template:
+    metadata:
+      labels:
+        app: vllm-llama3-8b-epp
+    spec:
+      containers:
+      - name: lwepp
+        image: registry.k8s.io/gateway-api-inference-extension/lwepp:v1.6.2
+        args:
+        - --pool-name
+        - vllm-llama3-8b
+        - --pool-namespace
+        - llm-namespace
+        ports:
+        - containerPort: 9002
+        - containerPort: 9003
+        - name: metrics
+          containerPort: 9090
+        livenessProbe:
+          grpc:
+            port: 9003
+            service: inference-extension
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        readinessProbe:
+          grpc:
+            port: 9003
+            service: inference-extension
+          initialDelaySeconds: 5
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vllm-llama3-8b-epp
+  namespace: llm-namespace
+spec:
+  selector:
+    app: vllm-llama3-8b-epp
+  ports:
+  - protocol: TCP
+    port: 9002
+    targetPort: 9002
+    appProtocol: http2
+  type: ClusterIP
+---
+# TLS is required between the gateway and the EPP (EPP serves with self-signed cert)
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: vllm-llama3-8b-epp-tls
+  namespace: llm-namespace
+spec:
+  host: vllm-llama3-8b-epp
+  trafficPolicy:
+    tls:
+      mode: SIMPLE
+      insecureSkipVerify: true
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: inference-model-reader
+  namespace: llm-namespace
+rules:
+- apiGroups: ["inference.networking.k8s.io"]
+  resources: ["inferencepools"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: epp-to-inference-model-reader
+  namespace: llm-namespace
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: llm-namespace
+roleRef:
+  kind: Role
+  name: inference-model-reader
+  apiGroup: rbac.authorization.k8s.io
