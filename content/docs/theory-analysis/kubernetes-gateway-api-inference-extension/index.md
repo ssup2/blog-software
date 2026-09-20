@@ -89,7 +89,9 @@ spec:
     name: vllm-llama3-8b
 ```
 
-**InferenceObjective**는 요청의 우선순위를 정의하는 Resource이다. [File 3]은 `vllm-llama3-8b` InferencePool에 우선순위를 설정하는 InferenceObjective의 예제를 나타내고 있다. `priority`에는 요청의 우선순위를 명시하며, InferencePool의 Model Server가 포화 상태인 경우 EPP는 우선순위가 낮은 요청을 거절하여 우선순위가 높은 요청의 처리를 보장한다. InferenceObjective가 정의되지 않은 요청은 기본 우선순위인 `0`으로 처리되며, 포화 상태에서 거절되는 대상은 우선순위가 `0`보다 낮은 요청이기 때문에 InferenceObjective 없이도 요청은 정상적으로 처리된다. InferenceObjective는 아직 Alpha 단계의 Resource이기 때문에 향후 변경될 수 있으며, v1.6 Version부터는 별도의 Repository로 이관되어 개발되고 있다.
+**InferenceObjective**는 요청의 우선순위를 정의하는 Resource이다. [File 3]은 `vllm-llama3-8b` InferencePool에 우선순위를 설정하는 InferenceObjective의 예제를 나타내고 있다. `priority`에는 요청의 우선순위를 명시하며, InferencePool의 Model Server가 포화 상태인 경우 EPP는 우선순위가 낮은 요청을 거절하여 우선순위가 높은 요청의 처리를 보장한다. InferenceObjective가 정의되지 않은 요청은 기본 우선순위인 `0`으로 처리되며, 포화 상태에서 거절되는 대상은 우선순위가 `0`보다 낮은 요청이기 때문에 InferenceObjective 없이도 요청은 정상적으로 처리된다.
+
+InferenceObjective는 아직 Alpha 단계의 Resource이기 때문에 향후 변경될 수 있으며, v1.6 Version부터는 별도의 Repository로 이관되어 개발되고 있다.
 
 ## 2. 참조
 
