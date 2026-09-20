@@ -86,7 +86,9 @@ spec:
         from: All
 ```
 
-**Gateway**는 Traffic을 수신하는 Load Balancer를 정의하는 Resource이며, GatewayClass의 인스턴스에 해당한다. Gateway가 생성되면 Gateway Controller는 Gateway의 내용에 따라서 실제 Traffic을 수신하는 Proxy (Envoy, Nginx)와 `LoadBalancer` Type의 Service를 생성한다. [File 2]는 HTTP, HTTPS, TLS, TCP, UDP Traffic을 수신하는 Gateway의 예제를 나타내고 있다. `gatewayClassName`에는 Gateway의 생성과 관리를 담당할 GatewayClass의 이름을 명시하며, `listeners`에는 Gateway가 Traffic을 수신하는 진입점을 정의한다. 하나의 Gateway에는 다수의 Listener를 정의할 수 있으며, 각 Listener에는 Protocol, Port, Hostname을 설정할 수 있다. Listener의 Protocol에는 `HTTP`, `HTTPS`, `TLS`, `TCP`, `UDP`를 설정할 수 있다.
+**Gateway**는 Traffic을 수신하는 Load Balancer를 정의하는 Resource이며, GatewayClass의 인스턴스에 해당한다. Gateway가 생성되면 Gateway Controller는 Gateway의 내용에 따라서 실제 Traffic을 수신하는 Proxy (Envoy, Nginx)와 `LoadBalancer` Type의 Service를 생성한다.
+
+[File 2]는 HTTP, HTTPS, TLS, TCP, UDP Traffic을 수신하는 Gateway의 예제를 나타내고 있다. `gatewayClassName`에는 Gateway의 생성과 관리를 담당할 GatewayClass의 이름을 명시하며, `listeners`에는 Gateway가 Traffic을 수신하는 진입점을 정의한다. 하나의 Gateway에는 다수의 Listener를 정의할 수 있으며, 각 Listener에는 Protocol, Port, Hostname을 설정할 수 있다. Listener의 Protocol에는 `HTTP`, `HTTPS`, `TLS`, `TCP`, `UDP`를 설정할 수 있다.
 
 [File 2]의 https Listener처럼 `tls`의 `certificateRefs`에 인증서가 저장된 Secret을 명시하면 Listener는 TLS Termination을 수행한다. 반면 tls Listener처럼 TLS Mode가 `Passthrough`로 설정되어 있으면 Listener는 TLS Termination을 수행하지 않고 Traffic을 그대로 전달한다.
 
