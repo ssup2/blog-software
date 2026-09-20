@@ -11,6 +11,7 @@ Istio의 Gateway API Inference Extension 구현을 분석하는 문서. 본문 �
 - 본문 Shell 출력은 전부 실측 발췌. 초기 초안의 [File 1](ext-proc 설정 예시)은 창작이어서 Shell 3 실측으로 교체됨.
 - 실측으로 확인·수정된 사실:
   - Shadow Service Cluster의 Port는 Target Port가 아니라 **고정 가상 Port 54321** (초안의 `outbound|[Target Port]||` 서술을 수정함). Target Port는 Endpoint에 반영.
+  - Shadow Service는 istiod 내부 개념이 아니라 **실제 Headless Service(ClusterIP: None, Port 54321)로 Kubernetes에 생성됨** (`kubectl get svc -n llm-namespace`로 확인 가능).
   - EPP가 반환한 Endpoint는 Header가 아니라 `envoy.lb` Dynamic Metadata의 `x-gateway-destination-endpoint` Key로 Override Host Policy가 참조. Fallback은 Round Robin.
   - `FailOpen` → `failureModeAllow: true` 변환 확인.
   - v1.6부터 release image는 `epp`가 없고 `lwepp`(Lightweight EPP)만 존재 (registry.k8s.io/gateway-api-inference-extension/lwepp:v1.6.2, amd64 전용 — OrbStack Rosetta로 kind에서 실행됨).
