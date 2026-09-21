@@ -253,8 +253,6 @@ spec:
 
 ### 1.4. ReferenceGrant
 
-{{< figure caption="[Figure 3] ReferenceGrant를 통한 Namespace 간 참조 허용" src="images/reference-grant.png" width="700px" >}}
-
 ```yaml {caption="[File 8] ReferenceGrant 예제", linenos=table}
 apiVersion: gateway.networking.k8s.io/v1
 kind: ReferenceGrant
@@ -273,7 +271,7 @@ spec:
 
 **ReferenceGrant**는 서로 다른 Namespace의 Resource 참조를 허용하는 Resource이다. Gateway API에서 Route의 `backendRefs`에 다른 Namespace의 Service를 명시하는 경우, 대상 Service의 Namespace에 ReferenceGrant가 존재하지 않으면 참조가 거부된다. 임의의 Namespace의 Route가 다른 Namespace의 Service를 참조하여 Traffic을 가로챌 수 있는 보안 문제를 방지하기 위함이다.
 
-[Figure 3]과 [File 8]은 `version-namespace` Namespace의 HTTPRoute가 `backend-namespace` Namespace의 Service를 참조할 수 있도록 허용하는 ReferenceGrant의 예제를 나타내고 있다. ReferenceGrant는 참조 대상 Resource가 존재하는 Namespace에 생성되어야 하며, `from`에는 참조를 수행하는 Resource를, `to`에는 참조를 허용할 Resource를 명시한다.
+[File 8]은 `version-namespace` Namespace의 HTTPRoute가 `backend-namespace` Namespace의 Service를 참조할 수 있도록 허용하는 ReferenceGrant의 예제를 나타내고 있다. ReferenceGrant는 참조 대상 Resource가 존재하는 Namespace에 생성되어야 하며, `from`에는 참조를 수행하는 Resource를, `to`에는 참조를 허용할 Resource를 명시한다.
 
 ### 1.5. Ingress 비교
 
