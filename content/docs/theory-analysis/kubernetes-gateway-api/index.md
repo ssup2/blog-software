@@ -15,7 +15,7 @@ Annotation은 Ingress Controller마다 다르게 정의되어 있기 때문에 I
 
 [Figure 1]은 Gateway API의 주요 Resource와 각 Resource를 관리하는 역할의 관계를 나타내고 있다. Gateway API는 **역할 지향 (Role-oriented)** 설계를 기반으로 GatewayClass, Gateway, Route 3가지 계층의 Resource를 제공한다. GatewayClass는 Gateway의 구현체를 정의하는 Resource이며 Infrastructure Provider가 관리한다. Gateway는 Traffic을 수신하는 Load Balancer (Proxy)를 정의하는 Resource이며 Cluster Operator가 관리한다. HTTPRoute를 포함한 Route는 수신한 Traffic을 Service로 Routing하는 규칙을 정의하는 Resource이며 App 개발자가 관리한다.
 
-이처럼 Gateway API는 역할별로 Resource가 분리되어 있기 때문에, App 개발자는 Cluster Operator가 관리하는 Gateway를 수정하지 않고 자신의 Namespace에서 Route만 정의하여 App을 외부에 노출할 수 있다.
+**Infrastructure Provider**는 Cloud Provider처럼 Gateway API의 구현체와 구현체가 동작하는 기반 환경을 제공하는 역할이고, **Cluster Operator**는 Kubernetes Cluster의 운영과 Traffic 정책 관리를 담당하는 관리자이며, **App 개발자**는 Cluster에서 동작하는 App의 개발과 배포를 담당한다. 이처럼 Gateway API는 역할별로 Resource가 분리되어 있기 때문에, App 개발자는 Cluster Operator가 관리하는 Gateway를 수정하지 않고 자신의 Namespace에서 Route만 정의하여 App을 외부에 노출할 수 있다.
 
 Gateway API는 Kubernetes에 내장되어 있지 않으며 CRD (Custom Resource Definition) 형태로 별도로 설치된다. 또한 Gateway API는 API 표준만 정의하고 실제 동작은 Gateway Controller 구현체가 담당한다. 대표적인 구현체로는 Istio, Envoy Gateway, NGINX Gateway Fabric, Cilium, Kong이 존재하며, AWS/GCP/Azure와 같은 Cloud Provider도 자신의 Load Balancer와 연동되는 구현체를 제공한다.
 
