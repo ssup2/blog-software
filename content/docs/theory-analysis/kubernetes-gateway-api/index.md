@@ -15,11 +15,11 @@ Annotation은 Ingress Controller마다 다르게 정의되어 있기 때문에 I
 
 [Figure 1]은 Gateway API의 주요 Resource와 각 Resource를 관리하는 역할의 관계를 나타내고 있다. Gateway API는 **역할 지향 (Role-oriented)** 설계를 기반으로 GatewayClass, Gateway, Route 3가지 계층의 Resource를 제공한다. GatewayClass는 Gateway의 구현체를 정의하는 Resource이며 Infrastructure Provider가 관리한다. Gateway는 Traffic을 수신하는 Load Balancer (Proxy)를 정의하는 Resource이며 Cluster Operator가 관리한다. HTTPRoute를 포함한 Route는 수신한 Traffic을 Service로 Routing하는 규칙을 정의하는 Resource이며 App 개발자가 관리한다.
 
-[Figure 1]에서 Cluster Operator는 외부에 공개되는 External Gateway와 내부망에만 공개되는 Internal Gateway 2개의 Gateway를 운영하고 있으며, App 개발자는 External Gateway에 HTTPRoute와 TLSRoute를, Internal Gateway에 GRPCRoute, TCPRoute, UDPRoute를 연결하여 이용하고 있다. Gateway Controller는 GatewayClass를 참조하는 Gateway가 생성되면 Gateway마다 실제 Traffic을 수신하는 Proxy의 Deployment와 Load Balancer 역할의 Service를 생성하며, Client가 전송한 Traffic은 Load Balancer와 Proxy를 거쳐서 Route의 규칙에 따라 App의 Service와 Pod로 전달된다.
-
 **Infrastructure Provider**는 Cloud Provider처럼 Gateway API의 구현체와 구현체가 동작하는 기반 환경을 제공하는 역할이고, **Cluster Operator**는 Kubernetes Cluster의 운영과 Traffic 정책 관리를 담당하는 관리자이며, **App 개발자**는 Cluster에서 동작하는 App의 개발과 배포를 담당한다. AWS EKS 환경을 예로 들면 Gateway Controller와 Load Balancer를 제공하는 AWS가 Infrastructure Provider에 해당하고, Gateway를 생성하여 Domain과 인증서를 관리하는 Platform 팀이 Cluster Operator에 해당하며, Route를 정의하여 자신의 App을 노출하는 각 서비스의 개발 팀이 App 개발자에 해당한다.
 
 이처럼 Gateway API는 역할별로 Resource가 분리되어 있기 때문에, App 개발자는 Cluster Operator가 관리하는 Gateway를 수정하지 않고 자신의 Namespace에서 Route만 정의하여 App을 외부에 노출할 수 있다. 다만 역할이 반드시 서로 다른 주체에게 분리되어야 하는 것은 아니며, On-Premise 환경에서 Istio와 같은 구현체를 직접 설치하여 이용하는 경우에는 하나의 팀이 Infrastructure Provider와 Cluster Operator 역할을 겸할 수도 있다.
+
+[Figure 1]에서 Cluster Operator는 외부에 공개되는 External Gateway와 내부망에만 공개되는 Internal Gateway 2개의 Gateway를 운영하고 있으며, App 개발자는 External Gateway에 HTTPRoute와 TLSRoute를, Internal Gateway에 GRPCRoute, TCPRoute, UDPRoute를 연결하여 이용하고 있다. Gateway Controller는 GatewayClass를 참조하는 Gateway가 생성되면 Gateway마다 실제 Traffic을 수신하는 Proxy의 Deployment와 Load Balancer 역할의 Service를 생성하며, Client가 전송한 Traffic은 Load Balancer와 Proxy를 거쳐서 Route의 규칙에 따라 App의 Service와 Pod로 전달된다.
 
 Gateway API는 Kubernetes에 내장되어 있지 않으며 CRD (Custom Resource Definition) 형태로 별도로 설치된다. 또한 Gateway API는 API 표준만 정의하고 실제 동작은 Gateway Controller 구현체가 담당한다. 대표적인 구현체로는 Istio, Envoy Gateway, NGINX Gateway Fabric, Cilium, Kong이 존재하며, AWS/GCP/Azure와 같은 Cloud Provider도 자신의 Load Balancer와 연동되는 구현체를 제공한다.
 
