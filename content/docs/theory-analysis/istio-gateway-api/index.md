@@ -1,6 +1,5 @@
 ---
 title: Istio Gateway API
-draft: true
 ---
 
 Istio가 Kubernetes Gateway API를 어떻게 구현하여 동작하는지 분석한다. 분석한 Istio의 Version은 1.31이고, Gateway API의 Version은 v1.6이다.

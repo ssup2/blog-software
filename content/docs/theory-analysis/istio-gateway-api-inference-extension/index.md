@@ -1,6 +1,5 @@
 ---
 title: Istio Gateway API Inference Extension
-draft: true
 ---
 
 Istio에서 Gateway API Inference Extension이 어떻게 구현되어 동작하는지 분석한다. Istio는 1.27 Version부터 Gateway API Inference Extension을 지원하며, 분석한 Istio의 Version은 1.31이고 Gateway API Inference Extension의 Version은 v1.6이다.
