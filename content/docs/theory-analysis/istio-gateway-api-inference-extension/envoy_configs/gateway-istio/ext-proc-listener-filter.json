@@ -1,0 +1,30 @@
+{
+  "name": "envoy.filters.http.ext_proc",
+  "typed_config": {
+    "@type": "type.googleapis.com/envoy.extensions.filters.http.ext_proc.v3.ExternalProcessor",
+    "grpc_service": {
+      "envoy_grpc": {
+        "cluster_name": "dummy"
+      },
+      "timeout": "10s"
+    },
+    "failure_mode_allow": true,
+    "processing_mode": {
+      "request_header_mode": "SKIP",
+      "response_header_mode": "SKIP"
+    },
+    "message_timeout": "1000s",
+    "metadata_options": {
+      "forwarding_namespaces": {
+        "untyped": [
+          "envoy.lb"
+        ]
+      },
+      "receiving_namespaces": {
+        "untyped": [
+          "envoy.lb"
+        ]
+      }
+    }
+  }
+}

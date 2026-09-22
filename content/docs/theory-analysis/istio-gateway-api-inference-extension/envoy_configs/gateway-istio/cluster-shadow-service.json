@@ -1,0 +1,99 @@
+{
+  "@type": "type.googleapis.com/envoy.config.cluster.v3.Cluster",
+  "name": "outbound|54321||vllm-llama3-8b-ip-22dc7de1.llm-namespace.svc.cluster.local",
+  "type": "EDS",
+  "eds_cluster_config": {
+    "eds_config": {
+      "ads": {},
+      "initial_fetch_timeout": "0s",
+      "resource_api_version": "V3"
+    },
+    "service_name": "outbound|54321||vllm-llama3-8b-ip-22dc7de1.llm-namespace.svc.cluster.local"
+  },
+  "connect_timeout": "10s",
+  "lb_policy": "CLUSTER_PROVIDED",
+  "circuit_breakers": {
+    "thresholds": [
+      {
+        "max_connections": 4294967295,
+        "max_pending_requests": 4294967295,
+        "max_requests": 4294967295,
+        "max_retries": 4294967295
+      }
+    ]
+  },
+  "metadata": {
+    "filter_metadata": {
+      "istio": {
+        "services": [
+          {
+            "name": "vllm-llama3-8b-ip-22dc7de1",
+            "namespace": "llm-namespace",
+            "host": "vllm-llama3-8b-ip-22dc7de1.llm-namespace.svc.cluster.local"
+          }
+        ]
+      }
+    }
+  },
+  "common_lb_config": {
+    "healthy_panic_threshold": {}
+  },
+  "alt_stat_name": "outbound|54321||vllm-llama3-8b-ip-22dc7de1.llm-namespace.svc.cluster.local;",
+  "filters": [
+    {
+      "name": "istio.metadata_exchange",
+      "typed_config": {
+        "@type": "type.googleapis.com/udpa.type.v1.TypedStruct",
+        "type_url": "type.googleapis.com/envoy.tcp.metadataexchange.config.MetadataExchange",
+        "value": {
+          "protocol": "istio-peer-exchange",
+          "enable_discovery": true
+        }
+      }
+    }
+  ],
+  "load_balancing_policy": {
+    "policies": [
+      {
+        "typed_extension_config": {
+          "name": "envoy.load_balancing_policies.override_host",
+          "typed_config": {
+            "@type": "type.googleapis.com/envoy.extensions.load_balancing_policies.override_host.v3.OverrideHost",
+            "override_host_sources": [
+              {
+                "metadata": {
+                  "key": "envoy.lb",
+                  "path": [
+                    {
+                      "key": "x-gateway-destination-endpoint"
+                    }
+                  ]
+                }
+              }
+            ],
+            "selected_host_key": {
+              "key": "envoy.lb",
+              "path": [
+                {
+                  "key": "x-gateway-destination-endpoint-served"
+                }
+              ]
+            },
+            "fallback_policy": {
+              "policies": [
+                {
+                  "typed_extension_config": {
+                    "name": "envoy.load_balancing_policies.round_robin",
+                    "typed_config": {
+                      "@type": "type.googleapis.com/envoy.extensions.load_balancing_policies.round_robin.v3.RoundRobin"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    ]
+  }
+}

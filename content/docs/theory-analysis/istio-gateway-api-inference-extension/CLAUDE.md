@@ -45,3 +45,14 @@ Istio의 Gateway API Inference Extension 구현을 분석하는 문서. 본문 �
 - `manifests/epp/epp.yaml` — Lightweight EPP Deployment/Service(9002 http2)/DestinationRule(TLS)/RBAC.
 - `manifests/inferencepool.yaml` — InferencePool vllm-llama3-8b (targetPorts 8000, endpointPickerRef 9002, FailOpen).
 - `manifests/httproute.yaml` — llm-route (hostname llm.ssup2.com → InferencePool backendRef).
+- `envoy_configs/` — Gateway Envoy 설정과 Metric의 실측 dump 저장소 (2026-09-22 캡처, `capture.sh`로 재캡처).
+  질문/확인 요청 시 클러스터를 다시 띄우지 말고 여기 저장된 dump를 우선 활용할 것.
+  - `gateway-istio/config_dump.json` — Gateway Envoy 전체 config_dump (admin :15000, pretty-print).
+  - `gateway-istio/ext-proc-listener-filter.json` — Listener의 ext_proc Filter. `metadata_options`의
+    forwarding/receiving_namespaces에 `envoy.lb`가 설정되어 EPP 응답 Metadata가 수신됨.
+    Listener Level에서는 dummy cluster + SKIP 모드로 비활성이고 Route별 override([Shell 5])로 활성화된다.
+  - `gateway-istio/route-llm-route.json` — llm-route의 Route 항목 (본문 [Shell 5] 원본).
+  - `gateway-istio/cluster-shadow-service.json` — Shadow Service Cluster (본문 [Shell 8] 원본,
+    override_host + `selected_host_key` + Round Robin fallback).
+  - `gateway-istio/cluster-epp.json` — EPP Cluster (DestinationRule의 TLS 설정 반영).
+  - `model-server/metrics.txt` — vLLM Simulator /metrics 출력 (본문 [Shell 7] 원본).

@@ -1,0 +1,84 @@
+{
+  "@type": "type.googleapis.com/envoy.config.cluster.v3.Cluster",
+  "name": "outbound|9002||vllm-llama3-8b-epp.llm-namespace.svc.cluster.local",
+  "type": "EDS",
+  "eds_cluster_config": {
+    "eds_config": {
+      "ads": {},
+      "initial_fetch_timeout": "0s",
+      "resource_api_version": "V3"
+    },
+    "service_name": "outbound|9002||vllm-llama3-8b-epp.llm-namespace.svc.cluster.local"
+  },
+  "connect_timeout": "10s",
+  "lb_policy": "LEAST_REQUEST",
+  "circuit_breakers": {
+    "thresholds": [
+      {
+        "max_connections": 4294967295,
+        "max_pending_requests": 4294967295,
+        "max_requests": 4294967295,
+        "max_retries": 4294967295
+      }
+    ]
+  },
+  "transport_socket": {
+    "name": "envoy.transport_sockets.tls",
+    "typed_config": {
+      "@type": "type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext",
+      "common_tls_context": {
+        "tls_params": {
+          "tls_minimum_protocol_version": "TLSv1_2",
+          "tls_maximum_protocol_version": "TLSv1_3"
+        },
+        "validation_context": {},
+        "alpn_protocols": [
+          "h2"
+        ]
+      }
+    }
+  },
+  "metadata": {
+    "filter_metadata": {
+      "istio": {
+        "config": "/apis/networking.istio.io/v1/namespaces/llm-namespace/destination-rule/vllm-llama3-8b-epp-tls",
+        "alpn_override": "false",
+        "services": [
+          {
+            "host": "vllm-llama3-8b-epp.llm-namespace.svc.cluster.local",
+            "name": "vllm-llama3-8b-epp",
+            "namespace": "llm-namespace"
+          }
+        ]
+      }
+    }
+  },
+  "common_lb_config": {
+    "healthy_panic_threshold": {}
+  },
+  "alt_stat_name": "outbound|9002||vllm-llama3-8b-epp.llm-namespace.svc.cluster.local;",
+  "typed_extension_protocol_options": {
+    "envoy.extensions.upstreams.http.v3.HttpProtocolOptions": {
+      "@type": "type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions",
+      "upstream_http_protocol_options": {
+        "auto_sni": true
+      },
+      "explicit_http_config": {
+        "http2_protocol_options": {}
+      }
+    }
+  },
+  "filters": [
+    {
+      "name": "istio.metadata_exchange",
+      "typed_config": {
+        "@type": "type.googleapis.com/udpa.type.v1.TypedStruct",
+        "type_url": "type.googleapis.com/envoy.tcp.metadataexchange.config.MetadataExchange",
+        "value": {
+          "protocol": "istio-peer-exchange",
+          "enable_discovery": true
+        }
+      }
+    }
+  ]
+}
