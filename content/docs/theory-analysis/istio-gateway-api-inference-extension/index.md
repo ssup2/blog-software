@@ -12,7 +12,9 @@ Envoy에는 Inference를 위한 전용 기능이 존재하지 않는다. 따라�
 
 istiod는 InferencePool Resource를 Watch하고 있다가 InferencePool을 참조하는 HTTPRoute가 존재하면, Gateway 역할을 수행하는 Envoy에 ext-proc Filter와 Override Host Load Balancing Policy 설정을 전달한다.
 
-[Figure 1]은 Istio Inference Gateway의 구성을 나타내고 있다. Gateway가 수신한 요청은 ext-proc Filter를 통해서 **EPP** (Endpoint Picker)에게 전달되고, EPP가 선택한 Model Server Pod의 주소는 ext-proc 응답의 Metadata를 통해서 Envoy에게 반환된다. Envoy는 Override Host Load Balancing Policy를 통해서 Metadata에 명시된 Model Server Pod로 요청을 전달한다.
+[Figure 1]은 2개의 Model을 서비스하는 Istio Inference Gateway의 구성을 나타내고 있다. 각 Model은 Model Server의 Deployment, Model Server의 집합을 정의하는 InferencePool, Traffic을 InferencePool로 전달하는 HTTPRoute, 최적의 Model Server를 선택하는 전용 **EPP** (Endpoint Picker)의 조합으로 구성되며, EPP는 자신이 담당하는 Model Server의 Metric만 수집한다. istiod는 Gateway의 Envoy Deployment와 Service뿐만 아니라 InferencePool에 대응하는 Headless Service도 함께 생성한다.
+
+Client의 요청을 수신한 Gateway의 Envoy는 ext-proc Filter를 통해서 요청 정보를 EPP에게 전달하고, EPP가 선택한 Model Server Pod의 주소는 ext-proc 응답의 Metadata를 통해서 Envoy에게 반환된다. Envoy는 Override Host Load Balancing Policy를 통해서 Metadata에 명시된 Model Server Pod로 요청을 전달한다.
 
 ### 1.1. Test 환경 구축
 
@@ -219,8 +221,6 @@ $ istioctl proxy-config endpoints gateway-istio-6cf9dd97dd-8lrn4 -n gateway-name
 
 ### 1.3. 요청 처리 과정
 
-{{< figure caption="[Figure 2] Istio Inference Gateway의 요청 처리 과정" src="images/istio-inference-request-flow.png" width="900px" >}}
-
 ```shell {caption="[Shell 5] InferencePool Route의 ext-proc Filter 설정 확인"}
 $ istioctl proxy-config routes gateway-istio-6cf9dd97dd-8lrn4 -n gateway-namespace --name http.80 -o json
 ...
@@ -257,7 +257,7 @@ $ istioctl proxy-config routes gateway-istio-6cf9dd97dd-8lrn4 -n gateway-namespa
 ...
 ```
 
-[Figure 2]는 Istio Inference Gateway의 요청 처리 과정을 나타내고 있고, [Shell 5]는 InferencePool을 참조하는 Route에 설정된 ext-proc Filter의 실제 설정을 나타내고 있다. Route의 Cluster는 InferencePool의 Shadow Service Cluster로 설정되어 있으며, ext-proc Filter의 `grpcService`에는 EPP의 Cluster가 명시되어 있다. Gateway의 Envoy가 요청을 수신하면 HTTPRoute의 `matches` 조건에 따라서 InferencePool의 Route가 선택되고, Route에 설정된 ext-proc Filter는 요청의 Header와 Body를 EPP에게 gRPC로 전달한다. ext-proc Filter는 InferencePool을 참조하는 Route에만 설정되기 때문에, 동일한 Gateway에서 일반 Service로 전달되는 요청은 EPP를 경유하지 않는다.
+[Shell 5]는 InferencePool을 참조하는 Route에 설정된 ext-proc Filter의 실제 설정을 나타내고 있다. Route의 Cluster는 InferencePool의 Shadow Service Cluster로 설정되어 있으며, ext-proc Filter의 `grpcService`에는 EPP의 Cluster가 명시되어 있다. Gateway의 Envoy가 요청을 수신하면 HTTPRoute의 `matches` 조건에 따라서 InferencePool의 Route가 선택되고, Route에 설정된 ext-proc Filter는 요청의 Header와 Body를 EPP에게 gRPC로 전달한다. ext-proc Filter는 InferencePool을 참조하는 Route에만 설정되기 때문에, 동일한 Gateway에서 일반 Service로 전달되는 요청은 EPP를 경유하지 않는다.
 
 ```shell {caption="[Shell 6] Inference 요청 확인"}
 $ curl -s -i -H "Host: llm.ssup2.com" http://127.0.0.1:8080/v1/completions \

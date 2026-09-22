@@ -23,7 +23,7 @@ Istio의 Gateway API Inference Extension 구현을 분석하는 문서. 본문 �
   - Shadow Service는 selector/Target Port가 InferencePool의 것으로 설정된 채 생성되며 ownerReference가 InferencePool로 걸려 있음. Endpoint 등록은 Service selector에 의한 표준 동작.
   - `FailOpen` → `failureModeAllow: true` 변환 확인.
   - v1.6부터 release image는 `epp`가 없고 `lwepp`(Lightweight EPP)만 존재 (registry.k8s.io/gateway-api-inference-extension/lwepp:v1.6.2, amd64 전용 — OrbStack Rosetta로 kind에서 실행됨).
-- Figure 1, 2 이미지 미제작.
+- Figure 1(istio-inference-gateway.png, 2개 Model 구성) 제작 완료. Figure 2(요청 처리 과정)는 본문에서 제거됨.
 
 ## Test 환경 (재현 방법)
 
