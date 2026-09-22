@@ -299,7 +299,7 @@ vllm:num_requests_waiting{model_name="meta-llama/Llama-3.1-8B-Instruct"} 0
 
 [Shell 7]은 Model Server Pod의 `/metrics` Endpoint를 조회한 결과를 나타내고 있다. EPP는 각 Model Server의 Metric을 주기적으로 수집하며, Queue에 대기 중인 요청의 개수를 나타내는 `vllm:num_requests_waiting`, KV Cache 사용률을 나타내는 `vllm:kv_cache_usage_perc`, 적재된 LoRA Adapter 목록을 나타내는 `vllm:lora_requests_info`를 기반으로 최적의 Model Server Pod를 선택한다. Model Server가 노출해야 하는 Metric의 규격은 Model Server Protocol로 표준화되어 있기 때문에, vLLM이 아닌 다른 Model Serving Platform도 동일한 방식으로 이용할 수 있다.
 
-EPP는 선택한 Pod의 주소를 ext-proc 응답의 `envoy.lb` Metadata에 `x-gateway-destination-endpoint` Key로 설정하여 Envoy에게 반환한다. Envoy의 Cluster에는 Override Host Load Balancing Policy가 설정되어 있기 때문에, Envoy는 일반적인 Load Balancing 알고리즘 대신 Metadata에 명시된 Pod로 요청을 전달한다. Metadata가 존재하지 않는 경우에는 Fallback으로 설정된 Load Balancing 알고리즘을 이용한다.
+EPP는 선택한 Pod의 주소를 ext-proc 응답의 `envoy.lb` Metadata에 `x-gateway-destination-endpoint` Key로 설정하여 Envoy에게 반환한다. `x-gateway-destination-endpoint`는 EPP Protocol이 표준으로 정의한 Header의 이름이며, EPP는 Metadata뿐만 아니라 같은 이름의 Header에도 동일한 주소를 직접 설정한다. Envoy의 Cluster에는 Override Host Load Balancing Policy가 설정되어 있기 때문에, Envoy는 일반적인 Load Balancing 알고리즘 대신 Metadata에 명시된 Pod로 요청을 전달한다. Metadata가 존재하지 않는 경우에는 Fallback으로 설정된 Load Balancing 알고리즘을 이용한다.
 
 ```shell {caption="[Shell 8] Shadow Service Cluster의 Override Host Load Balancing Policy 확인"}
 $ istioctl proxy-config clusters gateway-istio-6cf9dd97dd-8lrn4 -n gateway-namespace \
@@ -339,7 +339,7 @@ InferencePool의 `failureMode`는 ext-proc Filter의 `failure_mode_allow` 설정
 
 ### 1.4. Envoy Gateway 구현과 비교
 
-Gateway API Inference Extension은 EPP와의 통신 방식만 ext-proc Protocol로 표준화하고 있기 때문에, EPP가 선택한 Model Server Pod로 요청을 전달하는 방식은 구현체마다 다르다. EPP Protocol은 EPP가 선택한 Endpoint 주소를 `x-gateway-destination-endpoint` Header와 `envoy.lb` Metadata 양쪽에 동일한 값으로 설정하도록 정의하고 있는데, 이는 Proxy가 두 전달 경로를 모두 지원한다는 보장이 없기 때문이며 구현체는 이 중에서 자신이 이용하는 채널을 읽는다.
+Gateway API Inference Extension은 EPP와의 통신 방식만 ext-proc Protocol로 표준화하고 있기 때문에, EPP가 선택한 Model Server Pod로 요청을 전달하는 방식은 구현체마다 다르다. EPP Protocol이 Header와 Metadata 두 채널에 동일한 값을 설정하도록 정의한 것은 Proxy가 두 전달 경로를 모두 지원한다는 보장이 없기 때문이며, 구현체는 이 중에서 자신이 이용하는 채널을 읽는다.
 
 Envoy Gateway는 Header 채널을 이용하며, Cluster를 `ORIGINAL_DST` Type으로 설정하고 `use_http_header` 옵션을 통해서 Header에 명시된 주소로 요청을 전달한다. `ORIGINAL_DST` Type Cluster는 Endpoint 정보를 관리하지 않기 때문에 구현이 단순하지만, Envoy의 Endpoint 기반 기능들을 이용할 수 없다.
 
