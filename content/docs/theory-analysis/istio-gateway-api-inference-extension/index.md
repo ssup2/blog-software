@@ -273,9 +273,33 @@ x-inference-port: 8000
 
 [Shell 6]은 port-forward를 통해서 Gateway로 Inference 요청을 전송한 결과를 나타내고 있다. 요청은 vLLM Simulator에 의해서 정상적으로 처리되며, 응답의 `x-inference-pod` Header를 통해서 요청을 처리한 Model Server Pod를 확인할 수 있다.
 
-EPP는 Model Server의 Queue 길이, KV Cache 사용률, LoRA Adapter 적재 여부 Metric을 기반으로 최적의 Model Server Pod를 선택하고, 선택한 Pod의 주소를 ext-proc 응답의 `envoy.lb` Metadata에 `x-gateway-destination-endpoint` Key로 설정하여 Envoy에게 반환한다. Envoy의 Cluster에는 Override Host Load Balancing Policy가 설정되어 있기 때문에, Envoy는 일반적인 Load Balancing 알고리즘 대신 Metadata에 명시된 Pod로 요청을 전달한다. Metadata가 존재하지 않는 경우에는 Fallback으로 설정된 Load Balancing 알고리즘을 이용한다.
+```shell {caption="[Shell 7] Model Server의 Metric 확인"}
+# Port-forward to a model server pod
+$ kubectl -n llm-namespace port-forward pod/vllm-llama3-8b-56d558cb78-hnfzl 8000:8000 &
 
-```shell {caption="[Shell 7] Shadow Service Cluster의 Override Host Load Balancing Policy 확인"}
+$ curl -s http://127.0.0.1:8000/metrics
+# HELP vllm:cache_config_info Information of the LLMEngine CacheConfig.
+# TYPE vllm:cache_config_info gauge
+vllm:cache_config_info{block_size="16",num_gpu_blocks="1024"} 1
+# HELP vllm:kv_cache_usage_perc Prometheus metric for the fraction of KV-cache blocks currently in use (from 0 to 1).
+# TYPE vllm:kv_cache_usage_perc gauge
+vllm:kv_cache_usage_perc{model_name="meta-llama/Llama-3.1-8B-Instruct"} 0
+# HELP vllm:lora_requests_info Running stats on lora requests.
+# TYPE vllm:lora_requests_info gauge
+vllm:lora_requests_info{max_lora="2",running_lora_adapters="",waiting_lora_adapters=""} 1.790053209e+09
+# HELP vllm:num_requests_running Number of requests currently running on GPU.
+# TYPE vllm:num_requests_running gauge
+vllm:num_requests_running{model_name="meta-llama/Llama-3.1-8B-Instruct"} 0
+# HELP vllm:num_requests_waiting Prometheus metric for the number of queued requests.
+# TYPE vllm:num_requests_waiting gauge
+vllm:num_requests_waiting{model_name="meta-llama/Llama-3.1-8B-Instruct"} 0
+```
+
+[Shell 7]은 Model Server Pod의 `/metrics` Endpoint를 조회한 결과를 나타내고 있다. EPP는 각 Model Server의 Metric을 주기적으로 수집하며, Queue에 대기 중인 요청의 개수를 나타내는 `vllm:num_requests_waiting`, KV Cache 사용률을 나타내는 `vllm:kv_cache_usage_perc`, 적재된 LoRA Adapter 목록을 나타내는 `vllm:lora_requests_info`를 기반으로 최적의 Model Server Pod를 선택한다. Model Server가 노출해야 하는 Metric의 규격은 Model Server Protocol로 표준화되어 있기 때문에, vLLM이 아닌 다른 Model Serving Platform도 동일한 방식으로 이용할 수 있다.
+
+EPP는 선택한 Pod의 주소를 ext-proc 응답의 `envoy.lb` Metadata에 `x-gateway-destination-endpoint` Key로 설정하여 Envoy에게 반환한다. Envoy의 Cluster에는 Override Host Load Balancing Policy가 설정되어 있기 때문에, Envoy는 일반적인 Load Balancing 알고리즘 대신 Metadata에 명시된 Pod로 요청을 전달한다. Metadata가 존재하지 않는 경우에는 Fallback으로 설정된 Load Balancing 알고리즘을 이용한다.
+
+```shell {caption="[Shell 8] Shadow Service Cluster의 Override Host Load Balancing Policy 확인"}
 $ istioctl proxy-config clusters gateway-istio-6cf9dd97dd-8lrn4 -n gateway-namespace \
     --fqdn "vllm-llama3-8b-ip-22dc7de1.llm-namespace.svc.cluster.local" -o json
 ...
@@ -307,7 +331,7 @@ $ istioctl proxy-config clusters gateway-istio-6cf9dd97dd-8lrn4 -n gateway-names
                                             ...
 ```
 
-[Shell 7]은 Shadow Service Cluster에 설정된 Override Host Load Balancing Policy를 나타내고 있다. EPP가 반환한 Endpoint 주소는 Envoy의 `envoy.lb` Metadata에 `x-gateway-destination-endpoint` Key로 저장되어 참조되며, Fallback Load Balancing 알고리즘은 Round Robin으로 설정되어 있는 것을 확인할 수 있다.
+[Shell 8]은 Shadow Service Cluster에 설정된 Override Host Load Balancing Policy를 나타내고 있다. EPP가 반환한 Endpoint 주소는 Envoy의 `envoy.lb` Metadata에 `x-gateway-destination-endpoint` Key로 저장되어 참조되며, Fallback Load Balancing 알고리즘은 Round Robin으로 설정되어 있는 것을 확인할 수 있다.
 
 InferencePool의 `failureMode`는 ext-proc Filter의 `failure_mode_allow` 설정으로 변환된다. `FailOpen`으로 설정되어 있으면 `failure_mode_allow`는 `true`로 설정되어 EPP 장애시에도 요청은 Fallback Load Balancing을 통해서 전달되며, `FailClose`로 설정되어 있으면 EPP 장애시 요청은 실패한다. Test 환경의 InferencePool은 `FailOpen`으로 설정되어 있기 때문에, [Shell 5]에서 `failureModeAllow`가 `true`로 변환된 것을 확인할 수 있다.
 

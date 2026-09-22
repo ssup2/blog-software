@@ -11,7 +11,7 @@ Istio의 Gateway API Inference Extension 구현을 분석하는 문서. 본문 �
   본문 [File 1]은 manifests/ 원본에서 sim의 env(POD_NAME 등)·resources, EPP의 probe·9003/9090 Port, RBAC을 축약한 버전.
   재현은 manifests/ 원본 기준 (sim의 POD_NAME env가 없으면 응답의 x-inference-pod Header 값이 달라질 수 있음).
   1.2 InferencePool 변환: Shell 4(Shadow Cluster/Endpoint, 설명은 Shell 2의 Service 목록을 교차 참조).
-  1.3 요청 처리 과정: Shell 5(ext-proc per-route 설정), Shell 6(curl 요청), Shell 7(Override Host Policy).
+  1.3 요청 처리 과정: Shell 5(ext-proc per-route 설정), Shell 6(curl 요청), Shell 7(Model Server /metrics — 2026-09-22 실측, vLLM Simulator는 cache_config_info/kv_cache_usage_perc/lora_requests_info/num_requests_running/num_requests_waiting 5종 노출), Shell 8(Override Host Policy).
   1.4 Envoy Gateway 구현과 비교: 이론만.
   Shell 2의 AGE 21m, Shell 3의 AGE 40m은 각각의 캡처 시점 값.
 - 본문 Shell 출력은 전부 실측 발췌. 초기 초안의 [File 1](ext-proc 설정 예시)은 창작이어서 Shell 3 실측으로 교체됨.
