@@ -339,9 +339,11 @@ InferencePool의 `failureMode`는 ext-proc Filter의 `failure_mode_allow` 설정
 
 ### 1.4. Envoy Gateway 구현과 비교
 
-Gateway API Inference Extension은 EPP와의 통신 방식만 ext-proc Protocol로 표준화하고 있기 때문에, EPP가 선택한 Model Server Pod로 요청을 전달하는 방식은 구현체마다 다르다. Envoy Gateway는 Cluster를 `ORIGINAL_DST` Type으로 설정하고 `use_http_header` 옵션을 통해서 `x-gateway-destination-endpoint` Header에 명시된 주소로 요청을 전달한다. `ORIGINAL_DST` Type Cluster는 Endpoint 정보를 관리하지 않기 때문에 구현이 단순하지만, Envoy의 Endpoint 기반 기능들을 이용할 수 없다.
+Gateway API Inference Extension은 EPP와의 통신 방식만 ext-proc Protocol로 표준화하고 있기 때문에, EPP가 선택한 Model Server Pod로 요청을 전달하는 방식은 구현체마다 다르다. EPP Protocol은 EPP가 선택한 Endpoint 주소를 `x-gateway-destination-endpoint` Header와 `envoy.lb` Metadata 양쪽에 동일한 값으로 설정하도록 정의하고 있는데, 이는 Proxy가 두 전달 경로를 모두 지원한다는 보장이 없기 때문이며 구현체는 이 중에서 자신이 이용하는 채널을 읽는다.
 
-반면 Istio는 `EDS` Type Cluster를 유지하면서 Override Host Load Balancing Policy를 통해서 Header에 명시된 Endpoint를 선택한다. 따라서 Istio는 InferencePool의 Model Server도 기존 Service와 동일하게 Endpoint 기반으로 관리하며, Istio의 Service Model과 자연스럽게 통합된다는 장점을 갖는다. 초기 Version의 Istio Gateway API Inference Extension은 Gateway를 통한 North-South Traffic만 지원하며, Ambient Mesh의 Waypoint를 통한 East-West Traffic 지원은 이후 Version에서 개발되고 있다.
+Envoy Gateway는 Header 채널을 이용하며, Cluster를 `ORIGINAL_DST` Type으로 설정하고 `use_http_header` 옵션을 통해서 Header에 명시된 주소로 요청을 전달한다. `ORIGINAL_DST` Type Cluster는 Endpoint 정보를 관리하지 않기 때문에 구현이 단순하지만, Envoy의 Endpoint 기반 기능들을 이용할 수 없다.
+
+반면 Istio는 Metadata 채널을 이용하며, `EDS` Type Cluster를 유지하면서 Override Host Load Balancing Policy를 통해서 Metadata에 명시된 Endpoint를 선택한다. 따라서 Istio는 InferencePool의 Model Server도 기존 Service와 동일하게 Endpoint 기반으로 관리하며, Istio의 Service Model과 자연스럽게 통합된다는 장점을 갖는다. 초기 Version의 Istio Gateway API Inference Extension은 Gateway를 통한 North-South Traffic만 지원하며, Ambient Mesh의 Waypoint를 통한 East-West Traffic 지원은 이후 Version에서 개발되고 있다.
 
 ## 2. 참조
 
@@ -349,5 +351,6 @@ Gateway API Inference Extension은 EPP와의 통신 방식만 ext-proc Protocol�
 * Istio Gateway API Inference Extension Task : [https://istio.io/latest/docs/tasks/traffic-management/ingress/gateway-api-inference-extension/](https://istio.io/latest/docs/tasks/traffic-management/ingress/gateway-api-inference-extension/)
 * Gateway API Inference Extension : [https://gateway-api-inference-extension.sigs.k8s.io/](https://gateway-api-inference-extension.sigs.k8s.io/)
 * Gateway API Inference Extension Deep Dive : [https://www.cncf.io/blog/2025/04/21/deep-dive-into-the-gateway-api-inference-extension/](https://www.cncf.io/blog/2025/04/21/deep-dive-into-the-gateway-api-inference-extension/)
+* Endpoint Picker Protocol : [https://github.com/kubernetes-sigs/gateway-api-inference-extension/tree/main/docs/proposals/004-endpoint-picker-protocol](https://github.com/kubernetes-sigs/gateway-api-inference-extension/tree/main/docs/proposals/004-endpoint-picker-protocol)
 * Envoy Override Host Load Balancing Policy : [https://github.com/istio/istio/issues/56230](https://github.com/istio/istio/issues/56230)
 * Istio InferencePool 변환 : [https://github.com/istio/istio/issues/57638](https://github.com/istio/istio/issues/57638)
