@@ -299,7 +299,9 @@ vllm:num_requests_waiting{model_name="meta-llama/Llama-3.1-8B-Instruct"} 0
 
 [Shell 7]은 Model Server Pod의 `/metrics` Endpoint를 조회한 결과를 나타내고 있다. EPP는 각 Model Server의 Metric을 주기적으로 수집하며, Queue에 대기 중인 요청의 개수를 나타내는 `vllm:num_requests_waiting`, KV Cache 사용률을 나타내는 `vllm:kv_cache_usage_perc`, 적재된 LoRA Adapter 목록을 나타내는 `vllm:lora_requests_info`를 기반으로 최적의 Model Server Pod를 선택한다. Model Server가 노출해야 하는 Metric의 규격은 Model Server Protocol로 표준화되어 있기 때문에, vLLM이 아닌 다른 Model Serving Platform도 동일한 방식으로 이용할 수 있다.
 
-EPP는 선택한 Pod의 주소를 ext-proc 응답에 실어서 Envoy에게 반환하며, 주소는 EPP Protocol이 표준으로 정의한 `x-gateway-destination-endpoint` 이름으로 요청에 추가되는 Header와 응답의 `dynamic_metadata` 필드 두 곳에 동일하게 설정된다. Envoy의 ext-proc Filter는 응답의 `dynamic_metadata` 필드에서 `envoy.lb` Namespace의 값을 꺼내서 처리 중인 요청의 Metadata로 저장한다. Metadata는 Header와 다르게 요청 메시지에 포함되어 전송되는 값이 아니라, Envoy가 요청 하나를 처리하는 동안만 내부적으로 유지하는 요청별 상태이다.
+EPP는 선택한 Pod의 주소를 ext-proc 응답에 실어서 Envoy에게 반환하며, 주소는 EPP Protocol이 표준으로 정의한 `x-gateway-destination-endpoint` 이름으로 요청에 추가되는 Header와 응답의 `dynamic_metadata` 필드 두 곳에 동일하게 설정된다. `dynamic_metadata`는 외부 Server가 Envoy 내부에 저장할 값을 전달할 수 있도록 ext-proc 응답 Message에 정의되어 있는 필드이다.
+
+Envoy의 ext-proc Filter는 응답의 `dynamic_metadata` 필드에서 `envoy.lb` Namespace의 값을 꺼내서 처리 중인 요청의 Metadata로 저장한다. Metadata는 Header와 다르게 요청 메시지에 포함되어 전송되는 값이 아니라, Envoy가 요청 하나를 처리하는 동안만 내부적으로 유지하는 요청별 상태이다.
 
 Envoy의 Cluster에는 Override Host Load Balancing Policy가 설정되어 있기 때문에, Envoy는 일반적인 Load Balancing 알고리즘 대신 Metadata에 명시된 Pod로 요청을 전달한다. Metadata가 존재하지 않는 경우에는 Fallback으로 설정된 Load Balancing 알고리즘을 이용한다.
 
