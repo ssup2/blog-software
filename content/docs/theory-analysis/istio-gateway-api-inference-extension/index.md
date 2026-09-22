@@ -257,7 +257,7 @@ $ istioctl proxy-config routes gateway-istio-6cf9dd97dd-8lrn4 -n gateway-namespa
 ...
 ```
 
-[Shell 5]는 InferencePool을 참조하는 Route에 설정된 ext-proc Filter의 실제 설정을 나타내고 있다. Route의 Cluster는 InferencePool의 Shadow Service Cluster로 설정되어 있으며, ext-proc Filter의 `grpcService`에는 EPP의 Cluster가 명시되어 있다. Gateway의 Envoy가 요청을 수신하면 HTTPRoute의 `matches` 조건에 따라서 InferencePool의 Route가 선택되고, Route에 설정된 ext-proc Filter는 요청의 Header와 Body를 EPP에게 gRPC로 전달한다. ext-proc Filter는 InferencePool을 참조하는 Route에만 설정되기 때문에, 동일한 Gateway에서 일반 Service로 전달되는 요청은 EPP를 경유하지 않는다.
+[Shell 5]는 InferencePool을 참조하는 Route에 설정된 ext-proc Filter의 실제 설정을 나타내고 있다. Route의 Cluster는 InferencePool의 Shadow Service Cluster로 설정되어 있으며, ext-proc Filter의 `grpcService`에는 EPP의 Cluster가 명시되어 있다. Gateway의 Envoy가 요청을 수신하면 HTTPRoute의 `matches` 조건에 따라서 InferencePool의 Route가 선택되고, Route에 설정된 ext-proc Filter는 요청의 Header와 Body를 EPP에게 gRPC로 전달한다. ext-proc Filter는 InferencePool을 참조하는 Route에만 설정되기 때문에, 동일한 Gateway에서 일반 Service로 전달되는 요청은 EPP를 경유하지 않는다. Route 설정에는 특정 Pod를 지정하는 부분이 존재하지 않으며, Route는 요청을 EPP에게 전달하는 것까지만 담당하고 EPP가 선택한 Pod로 요청을 전달하는 동작은 Shadow Service Cluster의 Load Balancing 설정이 담당한다.
 
 ```shell {caption="[Shell 6] Inference 요청 확인"}
 $ curl -s -i -H "Host: llm.ssup2.com" http://127.0.0.1:8080/v1/completions \
@@ -331,7 +331,7 @@ $ istioctl proxy-config clusters gateway-istio-6cf9dd97dd-8lrn4 -n gateway-names
                                             ...
 ```
 
-[Shell 8]은 Shadow Service Cluster에 설정된 Override Host Load Balancing Policy를 나타내고 있다. EPP가 반환한 Endpoint 주소는 Envoy의 `envoy.lb` Metadata에 `x-gateway-destination-endpoint` Key로 저장되어 참조되며, Fallback Load Balancing 알고리즘은 Round Robin으로 설정되어 있는 것을 확인할 수 있다.
+[Shell 8]은 Shadow Service Cluster에 설정된 Override Host Load Balancing Policy를 나타내고 있다. EPP가 반환한 Endpoint 주소는 Envoy의 `envoy.lb` Metadata에 `x-gateway-destination-endpoint` Key로 저장되어 참조되며, Fallback Load Balancing 알고리즘은 Round Robin으로 설정되어 있는 것을 확인할 수 있다. Listener의 ext-proc Filter에는 `metadata_options`의 `receiving_namespaces`에 `envoy.lb` Namespace가 설정되어 있기 때문에, EPP가 ext-proc 응답에 설정한 Metadata는 Envoy에 수신되어 Override Host Load Balancing Policy가 참조할 수 있는 상태로 저장된다.
 
 InferencePool의 `failureMode`는 ext-proc Filter의 `failure_mode_allow` 설정으로 변환된다. `FailOpen`으로 설정되어 있으면 `failure_mode_allow`는 `true`로 설정되어 EPP 장애시에도 요청은 Fallback Load Balancing을 통해서 전달되며, `FailClose`로 설정되어 있으면 EPP 장애시 요청은 실패한다. Test 환경의 InferencePool은 `FailOpen`으로 설정되어 있기 때문에, [Shell 5]에서 `failureModeAllow`가 `true`로 변환된 것을 확인할 수 있다.
 
