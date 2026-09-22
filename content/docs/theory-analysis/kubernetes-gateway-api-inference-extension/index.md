@@ -1,6 +1,5 @@
 ---
 title: Kubernetes Gateway API Inference Extension
-draft: true
 ---
 
 Kubernetes에서 LLM Inference Traffic을 위한 Routing 기능을 제공하는 Gateway API Inference Extension을 분석한다. 분석한 Gateway API Inference Extension의 Version은 v1.6이다.

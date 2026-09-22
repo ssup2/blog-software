@@ -1,6 +1,5 @@
 ---
 title: Kubernetes Gateway API GAMMA
-draft: true
 ---
 
 Kubernetes Gateway API를 Service Mesh의 East-West Traffic 제어로 확장하는 GAMMA를 분석한다. 분석한 Gateway API의 Version은 v1.6이다.
