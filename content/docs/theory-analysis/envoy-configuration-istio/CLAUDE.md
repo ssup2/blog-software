@@ -12,7 +12,7 @@ Istio가 Envoy 설정을 어떻게 만드는지 실측으로 기록하는 문서
     발췌는 envoy_configs/base/의 실측 dump 기반.
   - **1.2 (Envoy Configuration with Kubernetes Resources)**: 2026-09-24 신설.
     1.2.1 = Service 신규 Port(LDS/RDS/CDS 생성 + EDS의 targetPort 매핑), 1.2.2 = Service 기존 Port 공유(VH/Cluster만 추가),
-    1.2.3 = Pod 증감(EDS만 변화, 무변화는 전체 dump diff 0으로 검증), 1.2.4 = Port 이름 http→tcp(ClusterIP bind TCP Listener로 교체),
+    1.2.3 = TCP Service(Port 이름 http→tcp, ClusterIP bind TCP Listener로 교체), 1.2.4 = Pod 증감(EDS만 변화, 무변화는 전체 dump diff 0으로 검증),
     1.2.5 = Headless Service(ORIGINAL_DST Cluster + Pod DNS wildcard domains),
     1.2.6 = ExternalName Service(대상 VH domains에 별칭 4형태 추가, 외부 Host 대상은 diff 0),
     1.2.7 = Selector 없는 Service + 수동 EndpointSlice(임의 IP가 Endpoint로, tlsMode 표식 없음 → Plaintext),
@@ -127,8 +127,8 @@ Istio가 Envoy 설정을 어떻게 만드는지 실측으로 기록하는 문서
   번호는 등장 순서 기준 — [Config 1] = 1장 도입부 실험 환경,
   [Config 2] = 1.1.1 Outbound 기본 설정 발췌, [Config 3] = 1.1.2 Inbound 기본 설정 발췌,
   [Config/Diff 4] = 1.2.1 Service 신규 Port, [Config 5] = 1.2.1의 EDS Endpoint 발췌,
-  [Config/Diff 6] = 1.2.2 Service 기존 Port 공유, [Config/Diff 7] = 1.2.3 Pod,
-  [Config/Diff 8] = 1.2.4 Port Protocol, [Config/Diff 9] = 1.2.5 Headless Service,
+  [Config/Diff 6] = 1.2.2 Service 기존 Port 공유, [Config/Diff 7] = 1.2.3 TCP Service,
+  [Config/Diff 8] = 1.2.4 Pod, [Config/Diff 9] = 1.2.5 Headless Service,
   [Config/Diff 10] = 1.2.6 ExternalName, [Config 11/12] = 1.2.7 Selector 없는 Service의 Manifest/EDS 발췌,
   [Config/Diff 13] = 1.2.8 ServiceAccount, [Config/Diff 14] = 1.2.9 Node,
   [Config 15] = 1.3.1의 istio-ingressgateway Service Port 매핑 발췌(Gateway 예시보다 앞에 배치),
