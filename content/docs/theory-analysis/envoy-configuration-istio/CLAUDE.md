@@ -92,6 +92,8 @@ Istio가 Envoy 설정을 어떻게 만드는지 실측으로 기록하는 문서
 ## 폴더 구조
 
 - `index.md` — 문서 본문.
+- `index.en.md` — 영어 버전 (2026-09-25 작성, index.md 전체 번역. 코드 블록은 동일, 캡션·prose만 번역.
+  이후 본문 수정 시 함께 갱신 필요).
 - `manifests/istio/<cr이름>/<cr이름>.yaml` — 1.3 예제 CR (전부 클러스터에 적용해 검증된 상태, 2026-09-24에 istio/ 하위로 이동).
   workloadentry는 ServiceEntry+WorkloadEntry 2개 리소스가 한 파일에 있음.
   virtualservice에는 mesh용(virtualservice.yaml)과 Gateway-bound용(virtualservice-gateway.yaml) 2개 파일.
