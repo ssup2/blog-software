@@ -80,7 +80,7 @@ spec:
     command: ["sleep", "infinity"]
 ```
 
-[Figure 1]은 Envoy Configuration Test에 이용할 Workload를 나타내고 있으며, [Config 1]은 이를 구성하성 Workload Manifest를 나타내고 있다. Test 환경은 kind Cluster + Istio 1.24이며, `istio-system` Namespace에는 istiod와 istio-ingressgateway Pod가 설치되어 있다. `default` Namespace에 `istio-injection=enabled` Label이 설정되어 있어 모든 Pod에 istio-proxy Sidecar가 주입된 상태로 동작한다. 각 Workload의 역할은 다음과 같다.
+[Figure 1]은 Envoy Configuration Test에 이용할 Workload를 나타내고 있으며, [Config 1]은 이를 구성하는 Workload Manifest를 나타내고 있다. Test 환경은 kind Cluster + Istio 1.24이며, `istio-system` Namespace에는 istiod와 istio-ingressgateway Pod가 설치되어 있다. `default` Namespace에 `istio-injection=enabled` Label이 설정되어 있어 모든 Pod에 istio-proxy Sidecar가 주입된 상태로 동작한다. 각 Workload의 역할은 다음과 같다.
 
 * **`server-a`, `server-b` Pod/Service** : 요청을 받는 서버이며, 각각 `8080` Port를 노출한다. 같은 Port를 노출하는 Service가 여러 개일 때의 설정을 확인하기 위해 두 개를 배치했다.
 * **`server-c` Pod/Service** : 요청을 받는 서버이며, `9090` Port를 노출한다. 다른 Port를 노출하는 Service가 있을 때의 설정을 확인하기 위해 배치했다.
@@ -594,10 +594,10 @@ HTTP Connection Manager도 목적지를 지정하는 `route_config`(Catch-all Ch
 {{< table caption="[Table 1] Kubernetes 리소스가 Envoy 설정에 반영되는 리소스 타입" >}}
 | 리소스 | Listener | Route | Cluster | Endpoint | 비고 |
 |---|:---:|:---:|:---:|:---:|---|
+| Pod | - | - | - | O | Label로 선택하는 Service Cluster의 Endpoint 증감 |
 | Service (신규 Port) | O | O | O | O | Port 단위 Listener/Route Table과 Service 단위 Cluster 생성 |
 | Service (기존 Port 공유) | - | O | O | O | Route Table의 Virtual Host와 Cluster만 추가 |
 | TCP Service | O | O | - | - | Port Protocol을 TCP로 선언 시 ClusterIP에 Bind되는 TCP Listener로 교체 |
-| Pod | - | - | - | O | Label로 선택하는 Service Cluster의 Endpoint 증감 |
 | Headless Service | - | O | O | - | EDS 대신 ORIGINAL_DST Type Cluster 생성 |
 | Service (ExternalName) | - | O | - | - | 대상 Virtual Host의 domains에 별칭 추가 |
 | Service (Selector 없음) | O | O | O | O | EndpointSlice의 수동 IP가 Endpoint로 등록 |
@@ -605,9 +605,69 @@ HTTP Connection Manager도 목적지를 지정하는 `route_config`(Catch-all Ch
 | Node | - | - | - | O | Topology Label이 Endpoint의 locality로 반영 |
 {{< /table >}}
 
-#### 1.2.1. Service
+#### 1.2.1. Pod
 
-```yaml {caption="[Config 4] server-d Pod/Service Manifest (7070 Port)", linenos=table}
+```yaml {caption="[Config 4] server-a-2 Pod Manifest", linenos=table}
+# Second Pod with the same app=server-a Label as the existing server-a Pod
+apiVersion: v1
+kind: Pod
+metadata:
+  name: server-a-2
+  namespace: default
+  labels:
+    app: server-a
+spec:
+  containers:
+  - name: server-a-2
+    image: ghcr.io/ssup2/mock-go-server:commit-f8ad4477
+    ports:
+    - containerPort: 8080
+```
+
+```diff {caption="[Diff 4] server-a-2 Pod 추가 전후 client Pod의 proxy-config (server-a Cluster의 EDS)"}
+ - endpoint_config:
+     '@type': type.googleapis.com/envoy.config.endpoint.v3.ClusterLoadAssignment
+     cluster_name: outbound|8080||server-a.default.svc.cluster.local
+     endpoints:
+     - lb_endpoints:
+       - endpoint:
+           address:
+             socket_address:
+               address: 10.244.2.6    # existing server-a Pod IP
+               port_value: 8080
+         health_status: HEALTHY
+         load_balancing_weight: 1
+         metadata:
+           filter_metadata:
+             envoy.transport_socket_match:
+               tlsMode: istio
+             istio:
+               workload: server-a;default;server-a;;Kubernetes
++      - endpoint:
++          address:
++            socket_address:
++              address: 10.244.1.10   # added server-a-2 Pod IP
++              port_value: 8080
++        health_status: HEALTHY
++        load_balancing_weight: 1
++        metadata:
++          filter_metadata:
++            envoy.transport_socket_match:
++              tlsMode: istio
++            istio:
++              workload: server-a-2;default;server-a;;Kubernetes
+-      load_balancing_weight: 1
++      load_balancing_weight: 2
+       locality: {}
+```
+
+[Config 4]는 기존 server-a Pod와 같은 `app: server-a` Label을 가진 두 번째 Pod의 Manifest를 나타내고 있다. 적용하면 `server-a` Service의 Endpoint에 새 Pod IP가 등록되고, istiod가 이를 감지하여 [Diff 4]와 같이 server-a Cluster의 EDS에 **Endpoint 하나가 추가될 뿐** Listener, Route Table, Cluster는 전혀 변하지 않는다 (EDS를 제외한 전체 Config Dump의 diff가 0줄임을 실측으로 확인했다). Endpoint의 `workload` 표식으로 어느 Pod에 해당하는지 구분할 수 있으며, Locality 수준의 `load_balancing_weight`도 Endpoint 수를 따라 `1`에서 `2`로 증가한다.
+
+Deployment의 Replica 증감이나 Rolling Update로 Pod가 교체되는 일상적인 변화는 모두 이 EDS 갱신만으로 처리된다. Listener나 Cluster의 재생성 없이 LB 대상 목록만 바뀌므로, Mesh에서 가장 빈번하게 일어나는 변화가 가장 저렴한 설정 갱신으로 흡수되는 구조이다.
+
+#### 1.2.2. Service
+
+```yaml {caption="[Config 5] server-d Pod/Service Manifest (7070 Port)", linenos=table}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -636,7 +696,7 @@ spec:
     targetPort: 8080
 ```
 
-```diff {caption="[Diff 4] server-d Service (7070 Port) 생성 전후 client Pod의 proxy-config"}
+```diff {caption="[Diff 5] server-d Service (7070 Port) 생성 전후 client Pod의 proxy-config"}
  - '@type': type.googleapis.com/envoy.admin.v3.ClustersConfigDump
    dynamic_active_clusters:
    ...
@@ -731,9 +791,9 @@ spec:
 +            ...
 ```
 
-[Config 4]는 Mesh에 없던 `7070` Port를 노출하는 `server-d` Service와 대상 Pod의 Manifest를 나타내고 있으며, [Diff 4]는 적용 전후 `client` Pod의 proxy-config 변화를 나타내고 있다. Mesh에 새로운 Service Port가 등장했으므로 **Cluster, Listener, Route Table이 한꺼번에 생성**된다. Cluster는 Service 단위인 `outbound|7070||server-d...` 이름의 `EDS` Type으로 생성되고, Listener는 Port 단위인 `0.0.0.0_7070`에 생성되며 그 구조는 [Config 2]의 Port별 Outbound Listener와 동일하다. Route Table `"7070"`에는 server-d의 Virtual Host와 Catch-all인 `allow_any` Virtual Host가 들어 있다.
+[Config 5]는 Mesh에 없던 `7070` Port를 노출하는 `server-d` Service와 대상 Pod의 Manifest를 나타내고 있으며, [Diff 5]는 적용 전후 `client` Pod의 proxy-config 변화를 나타내고 있다. Mesh에 새로운 Service Port가 등장했으므로 **Cluster, Listener, Route Table이 한꺼번에 생성**된다. Cluster는 Service 단위인 `outbound|7070||server-d...` 이름의 `EDS` Type으로 생성되고, Listener는 Port 단위인 `0.0.0.0_7070`에 생성되며 그 구조는 [Config 2]의 Port별 Outbound Listener와 동일하다. Route Table `"7070"`에는 server-d의 Virtual Host와 Catch-all인 `allow_any` Virtual Host가 들어 있다.
 
-```yaml {caption="[Config 5] server-d Cluster의 EDS Endpoint Dump", linenos=table}
+```yaml {caption="[Config 6] server-d Cluster의 EDS Endpoint Dump", linenos=table}
 # EDS: Endpoints of the server-d Cluster - Pod IP with targetPort
 - endpoint_config:
     '@type': type.googleapis.com/envoy.config.endpoint.v3.ClusterLoadAssignment
@@ -754,12 +814,12 @@ spec:
             ...
 ```
 
-[Config 5]는 server-d Cluster가 EDS로 전달받은 Endpoint를 나타내고 있다. Listener 주소, Route Table 이름, Cluster 이름이 모두 Service의 `port` 값인 `7070` 기준인 반면, Endpoint는 Pod IP와 `targetPort` 값인 `8080`의 조합이다. 즉 Service의 `port`에서 `targetPort`로의 변환은 Envoy 설정에서 **Cluster와 Endpoint의 경계**에서 일어나며, Envoy가 kube-proxy의 도움 없이 직접 Pod IP와 targetPort로 연결한다.
+[Config 6]은 server-d Cluster가 EDS로 전달받은 Endpoint를 나타내고 있다. Listener 주소, Route Table 이름, Cluster 이름이 모두 Service의 `port` 값인 `7070` 기준인 반면, Endpoint는 Pod IP와 `targetPort` 값인 `8080`의 조합이다. 즉 Service의 `port`에서 `targetPort`로의 변환은 Envoy 설정에서 **Cluster와 Endpoint의 경계**에서 일어나며, Envoy가 kube-proxy의 도움 없이 직접 Pod IP와 targetPort로 연결한다.
 
-#### 1.2.2. Service Port Sharing
+#### 1.2.3. Service Port Sharing
 
-```yaml {caption="[Config 6] server-d Pod/Service Manifest (8080 Port 공유)", linenos=table}
-# server-d Pod: same as the Pod in [Config 4]
+```yaml {caption="[Config 7] server-d Pod/Service Manifest (8080 Port 공유)", linenos=table}
+# server-d Pod: same as the Pod in [Config 5]
 apiVersion: v1
 kind: Service
 metadata:
@@ -774,7 +834,7 @@ spec:
     targetPort: 8080
 ```
 
-```diff {caption="[Diff 6] server-d Service (8080 Port) 생성 전후 client Pod의 proxy-config"}
+```diff {caption="[Diff 7] server-d Service (8080 Port) 생성 전후 client Pod의 proxy-config"}
  - '@type': type.googleapis.com/envoy.admin.v3.ClustersConfigDump
    dynamic_active_clusters:
    ...
@@ -821,12 +881,12 @@ spec:
          name: allow_any
 ```
 
-[Config 6]과 같이 같은 server-d Pod를 이번에는 기존 `server-a`, `server-b`와 동일한 `8080` Port를 노출하는 Service로 등록하면 (Pod Manifest는 [Config 4]와 같아 생략), [Diff 6]과 같이 **Listener는 전혀 변하지 않는다**. `0.0.0.0_8080` Listener가 이미 존재하고 Port당 Listener는 하나이기 때문이다. 추가되는 것은 server-d의 Cluster와 `"8080"` Route Table의 server-d Virtual Host뿐이며, 같은 Listener로 들어온 요청이 Route Table의 Domain 매칭으로 Service별로 갈라진다는 1.1.1의 구조가 실측으로 확인된다.
+[Config 7]과 같이 같은 server-d Pod를 이번에는 기존 `server-a`, `server-b`와 동일한 `8080` Port를 노출하는 Service로 등록하면 (Pod Manifest는 [Config 5]와 같아 생략), [Diff 7]과 같이 **Listener는 전혀 변하지 않는다**. `0.0.0.0_8080` Listener가 이미 존재하고 Port당 Listener는 하나이기 때문이다. 추가되는 것은 server-d의 Cluster와 `"8080"` Route Table의 server-d Virtual Host뿐이며, 같은 Listener로 들어온 요청이 Route Table의 Domain 매칭으로 Service별로 갈라진다는 1.1.1의 구조가 실측으로 확인된다.
 
-#### 1.2.3. TCP Service
+#### 1.2.4. TCP Service
 
-```yaml {caption="[Config 7] server-d Service Manifest (Port 이름 tcp)", linenos=table}
-# Applied on top of [Config 4] (same Service, only the port name changes)
+```yaml {caption="[Config 8] server-d Service Manifest (Port 이름 tcp)", linenos=table}
+# Applied on top of [Config 5] (same Service, only the port name changes)
 apiVersion: v1
 kind: Service
 metadata:
@@ -841,7 +901,7 @@ spec:
     targetPort: 8080
 ```
 
-```diff {caption="[Diff 7] server-d Service의 Port 이름 http에서 tcp로 변경 전후 client Pod의 proxy-config"}
+```diff {caption="[Diff 8] server-d Service의 Port 이름 http에서 tcp로 변경 전후 client Pod의 proxy-config"}
  - '@type': type.googleapis.com/envoy.admin.v3.ListenersConfigDump
    dynamic_listeners:
    ...
@@ -907,69 +967,9 @@ spec:
 -        ...
 ```
 
-Istio는 Service Port의 `name` Prefix(`http`, `grpc`, `tcp` 등)나 `appProtocol` 필드로 해당 Port의 Protocol을 판단하며, 이에 따라 생성하는 Listener의 구조가 달라진다. [Config 7]과 같이 [Config 4]의 Service에서 Port 이름만 `http`에서 `tcp`로 바꾸면, [Diff 7]과 같이 `0.0.0.0_7070` Listener가 **ClusterIP에 Bind되는 `10.96.121.134_7070` Listener로 교체**된다. TCP Traffic에는 Host Header가 없어 Route Table로 목적지 Service를 구분할 수 없으므로, 목적지 IP 자체로 Traffic을 구분해야 하기 때문이다.
+Istio는 Service Port의 `name` Prefix(`http`, `grpc`, `tcp` 등)나 `appProtocol` 필드로 해당 Port의 Protocol을 판단하며, 이에 따라 생성하는 Listener의 구조가 달라진다. [Config 8]과 같이 [Config 5]의 Service에서 Port 이름만 `http`에서 `tcp`로 바꾸면, [Diff 8]과 같이 `0.0.0.0_7070` Listener가 **ClusterIP에 Bind되는 `10.96.121.134_7070` Listener로 교체**된다. TCP Traffic에는 Host Header가 없어 Route Table로 목적지 Service를 구분할 수 없으므로, 목적지 IP 자체로 Traffic을 구분해야 하기 때문이다.
 
 Listener 내부도 함께 단순해진다. HTTP Connection Manager 대신 tcp_proxy가 server-d Cluster로 직결되고, Route Table `"7070"`은 참조하는 곳이 없어져 통째로 제거되며, Protocol을 판별할 필요가 없으므로 Listener Filter도 사라진다. 반면 Cluster와 EDS Endpoint는 변하지 않는데, Protocol 선언은 요청을 Cluster까지 보내는 방법에만 영향을 주고 Cluster 단위의 Endpoint 관리와는 무관하기 때문이다.
-
-#### 1.2.4. Pod
-
-```yaml {caption="[Config 8] server-a-2 Pod Manifest", linenos=table}
-# Second Pod with the same app=server-a Label as the existing server-a Pod
-apiVersion: v1
-kind: Pod
-metadata:
-  name: server-a-2
-  namespace: default
-  labels:
-    app: server-a
-spec:
-  containers:
-  - name: server-a-2
-    image: ghcr.io/ssup2/mock-go-server:commit-f8ad4477
-    ports:
-    - containerPort: 8080
-```
-
-```diff {caption="[Diff 8] server-a-2 Pod 추가 전후 client Pod의 proxy-config (server-a Cluster의 EDS)"}
- - endpoint_config:
-     '@type': type.googleapis.com/envoy.config.endpoint.v3.ClusterLoadAssignment
-     cluster_name: outbound|8080||server-a.default.svc.cluster.local
-     endpoints:
-     - lb_endpoints:
-       - endpoint:
-           address:
-             socket_address:
-               address: 10.244.2.6    # existing server-a Pod IP
-               port_value: 8080
-         health_status: HEALTHY
-         load_balancing_weight: 1
-         metadata:
-           filter_metadata:
-             envoy.transport_socket_match:
-               tlsMode: istio
-             istio:
-               workload: server-a;default;server-a;;Kubernetes
-+      - endpoint:
-+          address:
-+            socket_address:
-+              address: 10.244.1.10   # added server-a-2 Pod IP
-+              port_value: 8080
-+        health_status: HEALTHY
-+        load_balancing_weight: 1
-+        metadata:
-+          filter_metadata:
-+            envoy.transport_socket_match:
-+              tlsMode: istio
-+            istio:
-+              workload: server-a-2;default;server-a;;Kubernetes
--      load_balancing_weight: 1
-+      load_balancing_weight: 2
-       locality: {}
-```
-
-[Config 8]은 기존 server-a Pod와 같은 `app: server-a` Label을 가진 두 번째 Pod의 Manifest를 나타내고 있다. 적용하면 `server-a` Service의 Endpoint에 새 Pod IP가 등록되고, istiod가 이를 감지하여 [Diff 8]과 같이 server-a Cluster의 EDS에 **Endpoint 하나가 추가될 뿐** Listener, Route Table, Cluster는 전혀 변하지 않는다 (EDS를 제외한 전체 Config Dump의 diff가 0줄임을 실측으로 확인했다). Endpoint의 `workload` 표식으로 어느 Pod에 해당하는지 구분할 수 있으며, Locality 수준의 `load_balancing_weight`도 Endpoint 수를 따라 `1`에서 `2`로 증가한다.
-
-Deployment의 Replica 증감이나 Rolling Update로 Pod가 교체되는 일상적인 변화는 모두 이 EDS 갱신만으로 처리된다. Listener나 Cluster의 재생성 없이 LB 대상 목록만 바뀌므로, Mesh에서 가장 빈번하게 일어나는 변화가 가장 저렴한 설정 갱신으로 흡수되는 구조이다.
 
 #### 1.2.5. Headless Service
 
@@ -1034,7 +1034,7 @@ spec:
          name: allow_any
 ```
 
-[Config 9]는 `clusterIP: None`으로 선언한 Headless Service의 Manifest를 나타내고 있다 (Pod Manifest는 [Config 4]와 같아 생략). 적용하면 [Diff 9]와 같이 Cluster가 `EDS` Type이 아니라 **`ORIGINAL_DST` Type으로 생성**된다. Headless Service는 ClusterIP가 없고 DNS 질의가 Pod IP를 직접 반환하므로, LB의 주체가 Envoy가 아니라 DNS를 조회한 App이다. 그래서 Envoy는 EDS로 Endpoint 목록을 받아 LB를 수행하는 대신, App이 이미 선택한 원래 목적지 Pod IP로 그대로 연결한다. Upstream mTLS 설정도 Endpoint의 `tlsMode` 표식과 매칭하는 `transport_socket_matches` 대신 고정된 `transport_socket`으로 들어가는데, EDS Endpoint의 metadata가 없어 대상 Pod의 Sidecar 유무를 표식으로 선별할 수 없기 때문이다.
+[Config 9]는 `clusterIP: None`으로 선언한 Headless Service의 Manifest를 나타내고 있다 (Pod Manifest는 [Config 5]와 같아 생략). 적용하면 [Diff 9]와 같이 Cluster가 `EDS` Type이 아니라 **`ORIGINAL_DST` Type으로 생성**된다. Headless Service는 ClusterIP가 없고 DNS 질의가 Pod IP를 직접 반환하므로, LB의 주체가 Envoy가 아니라 DNS를 조회한 App이다. 그래서 Envoy는 EDS로 Endpoint 목록을 받아 LB를 수행하는 대신, App이 이미 선택한 원래 목적지 Pod IP로 그대로 연결한다. Upstream mTLS 설정도 Endpoint의 `tlsMode` 표식과 매칭하는 `transport_socket_matches` 대신 고정된 `transport_socket`으로 들어가는데, EDS Endpoint의 metadata가 없어 대상 Pod의 Sidecar 유무를 표식으로 선별할 수 없기 때문이다.
 
 Virtual Host의 `domains`에는 ClusterIP 대신 `*.server-d...` 형태의 Wildcard가 들어가며, StatefulSet처럼 `<pod>.<service>` 형태의 Pod 개별 DNS 이름으로 호출하는 경우를 매칭하기 위한 것이다. `8080` Port를 노출하는 Service가 이미 존재하므로 Listener는 변하지 않고, Virtual Host도 기존 `"8080"` Route Table에 추가된다.
 
@@ -1127,14 +1127,14 @@ endpoints:
               workload: ;;;;Kubernetes   # no Pod behind - workload identity is empty
 ```
 
-[Config 11]은 `selector`가 없는 Service와, 그 Service에 `kubernetes.io/service-name` Label로 연결한 수동 EndpointSlice의 Manifest를 나타내고 있다. selector가 없으면 Kubernetes가 Endpoint를 자동으로 관리하지 않으므로, EndpointSlice에 직접 등록한 임의 IP가 그대로 Endpoint가 된다. 적용하면 `client` Pod에는 [Diff 4]와 동일한 구조로 `0.0.0.0_7071` Listener, `"7071"` Route Table, server-manual의 `EDS` Type Cluster가 생성된다. istiod 입장에서 Service의 형태는 selector 유무와 무관하게 같기 때문이다.
+[Config 11]은 `selector`가 없는 Service와, 그 Service에 `kubernetes.io/service-name` Label로 연결한 수동 EndpointSlice의 Manifest를 나타내고 있다. selector가 없으면 Kubernetes가 Endpoint를 자동으로 관리하지 않으므로, EndpointSlice에 직접 등록한 임의 IP가 그대로 Endpoint가 된다. 적용하면 `client` Pod에는 [Diff 5]와 동일한 구조로 `0.0.0.0_7071` Listener, `"7071"` Route Table, server-manual의 `EDS` Type Cluster가 생성된다. istiod 입장에서 Service의 형태는 selector 유무와 무관하게 같기 때문이다.
 
-[Config 12]는 server-manual Cluster가 EDS로 전달받은 Endpoint를 나타내고 있다. EndpointSlice에 등록한 `10.10.10.10`이 Pod 없이 그대로 Endpoint로 등록되었고, 뒤에 Pod가 없으므로 `workload` 표식이 비어 있으며 Sidecar의 존재를 나타내는 `tlsMode: istio` metadata도 없다. 따라서 이 Endpoint로의 연결에는 mTLS가 아닌 Plaintext transport socket이 선택된다. 결국 **istiod가 EDS를 만드는 직접적인 근거는 Pod가 아니라 EndpointSlice**이며, 1.2.4에서 Pod 추가가 EDS를 갱신한 것도 Kubernetes가 Pod를 EndpointSlice에 반영했기 때문이다. Kubernetes Cluster 외부의 Workload를 IP로 직접 등록한다는 점에서, Istio의 ServiceEntry와 WorkloadEntry 조합이 하는 역할을 순수 Kubernetes 리소스로 수행하는 셈이다.
+[Config 12]는 server-manual Cluster가 EDS로 전달받은 Endpoint를 나타내고 있다. EndpointSlice에 등록한 `10.10.10.10`이 Pod 없이 그대로 Endpoint로 등록되었고, 뒤에 Pod가 없으므로 `workload` 표식이 비어 있으며 Sidecar의 존재를 나타내는 `tlsMode: istio` metadata도 없다. 따라서 이 Endpoint로의 연결에는 mTLS가 아닌 Plaintext transport socket이 선택된다. 결국 **istiod가 EDS를 만드는 직접적인 근거는 Pod가 아니라 EndpointSlice**이며, 1.2.1에서 Pod 추가가 EDS를 갱신한 것도 Kubernetes가 Pod를 EndpointSlice에 반영했기 때문이다. Kubernetes Cluster 외부의 Workload를 IP로 직접 등록한다는 점에서, Istio의 ServiceEntry와 WorkloadEntry 조합이 하는 역할을 순수 Kubernetes 리소스로 수행하는 셈이다.
 
 #### 1.2.8. ServiceAccount
 
 ```yaml {caption="[Config 13] server-d-sa ServiceAccount와 server-d-2 Pod Manifest", linenos=table}
-# Applied on top of [Config 4] (adds a second server-d Pod with a dedicated ServiceAccount)
+# Applied on top of [Config 5] (adds a second server-d Pod with a dedicated ServiceAccount)
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -1180,9 +1180,9 @@ spec:
                  ...
 ```
 
-[Config 13]은 [Config 4]의 상태 위에, 전용 ServiceAccount `server-d-sa`를 사용하는 두 번째 server-d Pod를 추가하는 Manifest를 나타내고 있다. 적용하면 [Diff 13]과 같이 server-d Cluster의 mTLS 검증 설정에 **`match_subject_alt_names` 항목 하나가 추가**되는 것이 유일한 변화이다. Istio에서 Workload의 Identity는 `spiffe://<trust-domain>/ns/<namespace>/sa/<serviceaccount>` 형태로 ServiceAccount로부터 만들어지며, 보내는 쪽 Envoy는 mTLS Handshake에서 상대 인증서의 SAN이 이 목록에 포함되는지 검증한다.
+[Config 13]은 [Config 5]의 상태 위에, 전용 ServiceAccount `server-d-sa`를 사용하는 두 번째 server-d Pod를 추가하는 Manifest를 나타내고 있다. 적용하면 [Diff 13]과 같이 server-d Cluster의 mTLS 검증 설정에 **`match_subject_alt_names` 항목 하나가 추가**되는 것이 유일한 변화이다. Istio에서 Workload의 Identity는 `spiffe://<trust-domain>/ns/<namespace>/sa/<serviceaccount>` 형태로 ServiceAccount로부터 만들어지며, 보내는 쪽 Envoy는 mTLS Handshake에서 상대 인증서의 SAN이 이 목록에 포함되는지 검증한다.
 
-그래서 istiod는 Service의 Endpoint들이 사용하는 ServiceAccount의 집합을 해당 Cluster의 SAN 목록으로 유지하며, 새로운 ServiceAccount를 사용하는 Pod가 Service에 추가되면 EDS뿐만 아니라 CDS 갱신도 함께 일어난다. 같은 ServiceAccount의 Pod 추가가 EDS만 갱신했던 1.2.4와 대비되는 지점이다.
+그래서 istiod는 Service의 Endpoint들이 사용하는 ServiceAccount의 집합을 해당 Cluster의 SAN 목록으로 유지하며, 새로운 ServiceAccount를 사용하는 Pod가 Service에 추가되면 EDS뿐만 아니라 CDS 갱신도 함께 일어난다. 같은 ServiceAccount의 Pod 추가가 EDS만 갱신했던 1.2.1과 대비되는 지점이다.
 
 #### 1.2.9. Node
 
