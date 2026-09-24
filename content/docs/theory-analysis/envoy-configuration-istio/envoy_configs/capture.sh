@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # envoy_configs 캡처 스크립트.
-# manifests/의 각 CR을 순서대로 적용/캡처/삭제하며, 정규화된 proxy-config dump를
+# manifests/istio/의 각 CR을 순서대로 적용/캡처/삭제하며, 정규화된 proxy-config dump를
 # envoy_configs/<cr이름>/<pod>.yaml 로 저장한다.
 # 실험 환경: manifests/base/의 server-a, server-b, server-c, client Pod가
 # default Namespace(istio-injection=enabled)에 상주해야 한다.
@@ -8,7 +8,7 @@ set -euo pipefail
 
 CTX=kind-kind
 DOC_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-MAN="$DOC_DIR/manifests"
+MAN="$DOC_DIR/manifests/istio"
 OUT="$DOC_DIR/envoy_configs"
 K="kubectl --context $CTX"
 DRAIN_WAIT=45   # CR 삭제 후 구 Listener drain 대기 (CLAUDE.md 방법론 5번)

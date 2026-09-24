@@ -85,7 +85,7 @@ Istio가 Envoy 설정을 어떻게 만드는지 실측으로 기록하는 문서
 ## 폴더 구조
 
 - `index.md` — 문서 본문.
-- `manifests/<cr이름>/<cr이름>.yaml` — 1.3 예제 CR (전부 클러스터에 적용해 검증된 상태).
+- `manifests/istio/<cr이름>/<cr이름>.yaml` — 1.3 예제 CR (전부 클러스터에 적용해 검증된 상태, 2026-09-24에 istio/ 하위로 이동).
   workloadentry는 ServiceEntry+WorkloadEntry 2개 리소스가 한 파일에 있음.
   virtualservice에는 mesh용(virtualservice.yaml)과 Gateway-bound용(virtualservice-gateway.yaml) 2개 파일.
 - `manifests/kubernetes/<실험이름>/<실험이름>.yaml` — 1.2 실험 리소스 (service-new-port, service-protocol-tcp,
@@ -94,7 +94,8 @@ Istio가 Envoy 설정을 어떻게 만드는지 실측으로 기록하는 문서
   service-externalname에는 외부 Host 변형(service-externalname-external.yaml)이 함께 있다.
   1.2.9 Node 실험은 Manifest 없이 capture-kubernetes.sh의 kubectl label로 수행한다.
 - `manifests/base/` — 실험 환경 Workload (server-a/b/c.yaml = Pod+Service, client.yaml = Pod).
-- `envoy_configs/` — CR별 적용 상태의 proxy-config dump 저장소 (manifests와 같은 하위폴더 구조).
+- `envoy_configs/` — CR별 적용 상태의 proxy-config dump 저장소 (CR 폴더는 최상위에 그대로,
+  manifests만 istio/ 하위로 이동한 상태라 계층이 1단계 다름).
   질문/diff 요청 시 클러스터에 다시 실험하지 말고 여기 저장된 dump를 우선 활용할 것.
   - `base/{client,server-a,server-b,server-c,istio-ingressgateway}.yaml` — CR 미적용 baseline.
     1.1의 [Config 2], [Config 3] 발췌 원본이기도 하다.
