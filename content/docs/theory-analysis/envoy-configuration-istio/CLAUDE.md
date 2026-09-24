@@ -99,7 +99,7 @@ Istio가 Envoy 설정을 어떻게 만드는지 실측으로 기록하는 문서
   service-shared-port, pod-endpoint, service-headless, service-externalname, serviceaccount).
   service-protocol-tcp와 serviceaccount는 service-new-port 상태 위에 덮어 적용하는 파일이고,
   service-externalname에는 Mesh 내부 alias 변형(service-externalname-alias.yaml, 별칭 동작 실측 근거)이 함께 있다.
-  1.2.8 Node 실험은 Manifest 없이 capture-kubernetes.sh의 kubectl label로 수행한다.
+  1.2.8 Node Topology 실험은 Manifest 없이 capture-kubernetes.sh의 kubectl label로 수행한다.
 - `manifests/base/` — 실험 환경 Workload (server-a/b/c.yaml = Pod+Service, client.yaml = Pod).
 - `envoy_configs/` — CR별 적용 상태의 proxy-config dump 저장소 (CR 폴더는 최상위에 그대로,
   manifests만 istio/ 하위로 이동한 상태라 계층이 1단계 다름).
@@ -137,7 +137,7 @@ Istio가 Envoy 설정을 어떻게 만드는지 실측으로 기록하는 문서
   [Config 6] = 1.2.2의 EDS Endpoint 발췌, [Config/Diff 7] = 1.2.3 Service Port 공유,
   [Config/Diff 8] = 1.2.4 TCP Service, [Config/Diff 9] = 1.2.5 Headless Service,
   [Config 10] = 1.2.6 ExternalName(변화 없음이라 diff 블록 없음),
-  [Config/Diff 11] = 1.2.7 ServiceAccount, [Config/Diff 12] = 1.2.8 Node,
+  [Config/Diff 11] = 1.2.7 ServiceAccount, [Config/Diff 12] = 1.2.8 Node Topology,
   [Config 13] = 1.3.1의 istio-ingressgateway Service Port 매핑 발췌(Gateway 예시보다 앞에 배치),
   [Config/Diff 14] = 1.3.1 Gateway, [Config/Diff 15~28] = 1.3.2~1.3.14 CR.
   Diff 2, 3, 6, 10, 13은 없음(발췌 블록 또는 무변화, Config/Diff 번호는 쌍 기준).

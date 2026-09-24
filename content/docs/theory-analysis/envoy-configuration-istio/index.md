@@ -601,7 +601,7 @@ HTTP Connection Manager도 목적지를 지정하는 `route_config`(Catch-all Ch
 | Headless Service | - | O | O | - | EDS 대신 ORIGINAL_DST Type Cluster 생성 |
 | ExternalName Service | - | - | - | - | 변화 없음 (Mesh 내부 Host를 가리키는 경우에만 대상 Virtual Host에 별칭 추가) |
 | ServiceAccount | - | - | O | - | Cluster mTLS 검증의 SAN 목록 갱신 |
-| Node | - | - | - | O | Topology Label이 Endpoint의 locality로 반영 |
+| Node Topology | - | - | - | O | Node의 Topology Label이 Endpoint의 locality로 반영 |
 {{< /table >}}
 
 #### 1.2.1. Pod
@@ -1107,7 +1107,7 @@ spec:
 
 그래서 istiod는 Service의 Endpoint들이 사용하는 ServiceAccount의 집합을 해당 Cluster의 SAN 목록으로 유지하며, 새로운 ServiceAccount를 사용하는 Pod가 Service에 추가되면 EDS뿐만 아니라 CDS 갱신도 함께 일어난다. 같은 ServiceAccount의 Pod 추가가 EDS만 갱신했던 1.2.1과 대비되는 지점이다.
 
-#### 1.2.8. Node
+#### 1.2.8. Node Topology
 
 ```yaml {caption="[Config 12] Worker Node Topology Label (발췌)", linenos=table}
 apiVersion: v1
