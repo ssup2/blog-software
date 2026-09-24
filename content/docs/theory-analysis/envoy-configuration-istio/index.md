@@ -595,12 +595,12 @@ HTTP Connection Manager도 목적지를 지정하는 `route_config`(Catch-all Ch
 | 리소스 | Listener | Route | Cluster | Endpoint | 비고 |
 |---|:---:|:---:|:---:|:---:|---|
 | Pod | - | - | - | O | Label로 선택하는 Service Cluster의 Endpoint 증감 |
-| Service (신규 Port) | O | O | O | O | Port 단위 Listener/Route Table과 Service 단위 Cluster 생성 |
-| Service (기존 Port 공유) | - | O | O | O | Route Table의 Virtual Host와 Cluster만 추가 |
+| Service | O | O | O | O | Port 단위 Listener/Route Table과 Service 단위 Cluster 생성 |
+| Service Port Sharing | - | O | O | O | Route Table의 Virtual Host와 Cluster만 추가 |
 | TCP Service | O | O | - | - | Port Protocol을 TCP로 선언 시 ClusterIP에 Bind되는 TCP Listener로 교체 |
 | Headless Service | - | O | O | - | EDS 대신 ORIGINAL_DST Type Cluster 생성 |
-| Service (ExternalName) | - | O | - | - | 대상 Virtual Host의 domains에 별칭 추가 |
-| Service (Selector 없음) | O | O | O | O | EndpointSlice의 수동 IP가 Endpoint로 등록 |
+| ExternalName Service | - | O | - | - | 대상 Virtual Host의 domains에 별칭 추가 |
+| Service without Selector | O | O | O | O | EndpointSlice의 수동 IP가 Endpoint로 등록 |
 | ServiceAccount | - | - | O | - | Cluster mTLS 검증의 SAN 목록 갱신 |
 | Node | - | - | - | O | Topology Label이 Endpoint의 locality로 반영 |
 {{< /table >}}
