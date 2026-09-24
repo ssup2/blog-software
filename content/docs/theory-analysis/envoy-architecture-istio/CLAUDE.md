@@ -21,6 +21,7 @@ CR별 Envoy 설정 변화(실측 diff)는 2026-08-09에 **envoy-configuration-is
 ## 폴더 구조
 
 - `index.md` — 문서 본문.
+- `index.en.md` — 영어 버전 (2026-09-24 작성, index.md 전체 번역. 이후 본문 수정 시 함께 갱신 필요).
 - `images/` — Figure 이미지 (envoy-istio-sidecar.png, envoy-istio-ingress-gateway.png, envoy-istio-egress-gateway.png). gateway-figure-draft.md는 Figure 2/3 작도용 초안으로 이제 삭제 가능.
 
 ## 문서 컨벤션

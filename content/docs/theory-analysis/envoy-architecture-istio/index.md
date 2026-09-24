@@ -6,7 +6,7 @@ title: "Envoy Architecture with Istio"
 
 {{< figure caption="[Figure 1] Sidecar Proxy with Istio" src="images/envoy-istio-sidecar.png" width="700px" >}}
 
-[Figure 1]은 Istio 환경에서 Envoy가 Sidecar Proxy로 동작할 때 App Pod 내부의 구성 요소와 Traffic 흐름을 나타내고 있다. App Pod에는 App Container와 함께 istio-proxy Container가 배치되며, istio-proxy Container 안에서는 pilot-agent와 Envoy 두 Process가 동작한다. Pod 시작 시 istio-init Container가 설정한 iptables Rule에 의해 App Container의 **모든 Traffic은 Envoy를 경유**한다. 다음과 같은 동작으로 분류 할 수 있다.
+[Figure 1]은 Istio 환경에서 Envoy가 Sidecar Proxy로 동작할 때 App Pod 내부의 구성 요소와 Traffic 흐름을 나타내고 있다. App Pod에는 App Container와 함께 istio-proxy Container가 배치되며, istio-proxy Container 안에서는 pilot-agent와 Envoy 두 Process가 동작한다. Pod 시작 시 istio-init Container가 설정한 iptables Rule에 의해 App Container의 **모든 Traffic은 Envoy를 경유**한다. Traffic 흐름은 다음과 같은 동작으로 분류할 수 있다.
 
 ### 1.1. xDS
 
@@ -24,7 +24,7 @@ App Container가 **외부로 보내는 요청**은 iptables에 의해 Envoy의 `
 
 ### 1.3. DNS Lookup
 
-DNS Capture 활성화 여부에 따라 App Container의 DNS 질의 경로가 달라진다. **DNS Capture가 비활성화된 경우** App Container의 DNS 질의는 iptables를 거쳐 CoreDNS로 그대로 전달된다 (연두색). 반면 **DNS Capture가 활성화된 경우** DNS 질의는 iptables에 의해 pilot-agent의 `15053` Port DNS Proxy로 Redirect되어 처리된다 (초록색). 이때 DNS Proxy가 사용하는 Hostname 정보는 istiod로부터 NDS를 통해 전달되며, NDS가 Envoy로 중계되지 않고 pilot-agent에서 소비되는 이유이다.
+DNS Capture 활성화 여부에 따라 App Container의 DNS 질의 경로가 달라진다. **DNS Capture가 비활성화된 경우** App Container의 DNS 질의는 iptables를 거쳐 CoreDNS로 그대로 전달된다 (연두색). 반면 **DNS Capture가 활성화된 경우** DNS 질의는 iptables에 의해 pilot-agent의 `15053` Port DNS Proxy로 Redirect되어 처리된다 (초록색). 이때 DNS Proxy가 사용하는 Hostname 정보는 istiod로부터 NDS를 통해 전달되므로, NDS는 Envoy로 중계되지 않고 pilot-agent에서 소비된다.
 
 ### 1.4. Metrics 수집
 
@@ -50,7 +50,7 @@ istioctl은 Envoy의 `15000` Port Admin Interface에 접근하여 **Envoy에 적
 
 [Figure 2]는 Istio 환경에서 Envoy가 Ingress Gateway로 동작할 때 istio-ingressgateway Pod 내부의 구성 요소와 Traffic 흐름을 나타내고 있다. istio-ingressgateway는 외부에서 Mesh로 들어오는 **Traffic의 진입점** 역할을 수행한다.
 
-Pod 내부 구조는 [Figure 1]의 Sidecar와 거의 동일하다. istio-proxy Container 안에서 pilot-agent와 Envoy가 함께 동작하고, pilot-agent가 xDS Proxy와 인증서 공급을 담당하는 구조, kubelet의 Envoy Probe와 istioctl의 Envoy Admin 접근 경로도 그대로 유지된다. 차이는 두 가지다. 첫째, App Container가 없으므로 **Envoy가 Pod의 유일한 Process** 역할을 하며, `proxy router` 모드로 실행된다. 둘째, 가로챌 App Traffic이 없으므로 **istio-init Container와 iptables Redirect도 없다**. Traffic은 Redirect가 아니라 Kubernetes Service를 통해 Envoy의 Listener Port로 직접 도착한다. 또한 App Container가 없으므로 Metrics 수집도 pilot-agent를 경유하여 Envoy의 Metrics만 수집하는 경로 하나만 존재한다 (남색).
+Pod 내부 구조는 [Figure 1]의 Sidecar와 거의 동일하다. istio-proxy Container 안에서 pilot-agent와 Envoy가 함께 동작하고, pilot-agent가 xDS Proxy와 인증서 공급을 담당하는 구조, kubelet의 Envoy Probe와 istioctl의 Envoy Admin 접근 경로도 그대로 유지된다. 차이는 두 가지다. 첫째, App Container가 없으므로 **Envoy가 Traffic을 처리하는 유일한 Process**가 되며, `proxy router` 모드로 실행된다. 둘째, 가로챌 App Traffic이 없으므로 **istio-init Container와 iptables Redirect도 없다**. Traffic은 Redirect가 아니라 Kubernetes Service를 통해 Envoy의 Listener Port로 직접 도착한다. 또한 App Container가 없으므로 Metrics 수집도 pilot-agent를 경유하여 Envoy의 Metrics만 수집하는 경로 하나만 존재한다 (남색).
 
 **Inbound Traffic (노란색)** 은 외부 Client의 요청이 Mesh 내부로 들어오는 흐름이다. istio-ingressgateway Service는 `LoadBalancer` Type으로 외부에 노출되므로, 요청은 외부 Load Balancer를 거쳐 Service의 Port로 들어오고, `targetPort` 매핑에 따라 Envoy의 Listener에 도착한다. Envoy는 Gateway에 연결된 VirtualService의 Route에 따라 요청을 Mesh 내부 서비스의 Cluster로 전달하며, Upstream Sidecar와는 mTLS로 통신한다. istio-ingressgateway Service가 노출하는 각 Port의 역할은 다음과 같다.
 
@@ -71,5 +71,5 @@ istio-egressgateway는 [Figure 2]의 istio-ingressgateway와 **내부 구조를 
 
 istio-egressgateway Service는 `ClusterIP` Type으로 Mesh 내부에서만 접근할 수 있다. 외부 Load Balancer가 없으므로 `status-port`를 노출하지 않으며, 외부에서 들어오는 Traffic을 받을 일이 없으므로 `31400`, `15443` Port도 존재하지 않는다. Service에는 `80` → `8080`, `443` → `8443` 두 개의 매핑만 남는다.
 
-**Outbound Traffic (주황색)** 은 App이 외부로 보내는 요청을 Sidecar가 VirtualService Route에 따라 Egress Gateway로 먼저 전달하고, Egress Gateway가 이를 받아 외부 서비스로 내보내는 흐름이다. Egress Gateway를 통해서 모든 Outbound Traffic이 하나의 지점을 거치므로서 고정된 출구 IP 확보, TLS Origination, 외부 접근 정책 설정을 한 곳에서 수행할 수 있다.
+**Outbound Traffic (주황색)** 은 App이 외부로 보내는 요청을 Sidecar가 VirtualService Route에 따라 Egress Gateway로 먼저 전달하고, Egress Gateway가 이를 받아 외부 서비스로 내보내는 흐름이다. 모든 Outbound Traffic이 Egress Gateway라는 하나의 지점을 거치므로 고정된 출구 IP 확보, TLS Origination, 외부 접근 정책 설정을 한 곳에서 수행할 수 있다.
 
