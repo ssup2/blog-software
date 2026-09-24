@@ -1,0 +1,9 @@
+# Variant: ExternalName pointing to an in-mesh Service (alias evidence for the doc)
+apiVersion: v1
+kind: Service
+metadata:
+  name: server-external
+  namespace: default
+spec:
+  type: ExternalName
+  externalName: server-a.default.svc.cluster.local

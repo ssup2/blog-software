@@ -5,4 +5,4 @@ metadata:
   namespace: default
 spec:
   type: ExternalName
-  externalName: server-a.default.svc.cluster.local
+  externalName: external.example.com

@@ -7547,6 +7547,10 @@ configs:
         - server-a
         - server-a.default.svc
         - server-a.default
+        - server-external.default.svc.cluster.local
+        - server-external
+        - server-external.default.svc
+        - server-external.default
         - 10.96.202.153
         include_request_attempt_count: true
         name: server-a.default.svc.cluster.local:8080

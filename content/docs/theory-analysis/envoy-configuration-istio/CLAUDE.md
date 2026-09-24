@@ -14,10 +14,12 @@ Istio가 Envoy 설정을 어떻게 만드는지 실측으로 기록하는 문서
     1.2.1 = Pod 증감(EDS만 변화, 무변화는 전체 dump diff 0으로 검증), 1.2.2 = Service 신규 Port(LDS/RDS/CDS 생성 + EDS의 targetPort 매핑),
     1.2.3 = Service 기존 Port 공유(VH/Cluster만 추가), 1.2.4 = TCP Service(Port 이름 http→tcp, ClusterIP bind TCP Listener로 교체),
     1.2.5 = Headless Service(ORIGINAL_DST Cluster + Pod DNS wildcard domains),
-    1.2.6 = ExternalName Service(대상 VH domains에 별칭 4형태 추가, 외부 Host 대상은 diff 0),
-    1.2.7 = Selector 없는 Service + 수동 EndpointSlice(임의 IP가 Endpoint로, tlsMode 표식 없음 → Plaintext),
-    1.2.8 = ServiceAccount(Cluster SAN 목록 +1줄, service-new-port 상태 위 diff),
-    1.2.9 = Node Topology Label(EDS locality 반영, Pod 재등록 필요). 도입부에 [Table 1] 매핑 표.
+    1.2.6 = ExternalName Service(일반 패턴인 외부 Host 대상 예제로 "변화 없음(diff 0)"을 명시. Mesh 내부 alias 시
+    대상 VH domains에 별칭이 추가되는 실측은 본문 한 줄 + client-alias.yaml dump로만 유지),
+    1.2.7 = ServiceAccount(Cluster SAN 목록 +1줄, service-new-port 상태 위 diff),
+    1.2.8 = Node Topology Label(EDS locality 반영, Pod 재등록 필요). 도입부에 [Table 1] 매핑 표.
+    "Selector 없는 Service + 수동 EndpointSlice" 실험은 일반적인 사용 패턴이 아니라서 2026-09-25에 제거
+    (manifests/dump도 함께 삭제).
   - **1.3 (Envoy Configuration with Istio Custom Resources)** (구 1.2, 2026-09-24 개명):
     1.3.1~1.3.14 = Gateway, VirtualService, DestinationRule, ServiceEntry, Sidecar, EnvoyFilter, WorkloadEntry,
     WorkloadGroup, ProxyConfig, PeerAuthentication, RequestAuthentication, AuthorizationPolicy, Telemetry, WasmPlugin.
@@ -94,10 +96,10 @@ Istio가 Envoy 설정을 어떻게 만드는지 실측으로 기록하는 문서
   workloadentry는 ServiceEntry+WorkloadEntry 2개 리소스가 한 파일에 있음.
   virtualservice에는 mesh용(virtualservice.yaml)과 Gateway-bound용(virtualservice-gateway.yaml) 2개 파일.
 - `manifests/kubernetes/<실험이름>/<실험이름>.yaml` — 1.2 실험 리소스 (service-new-port, service-protocol-tcp,
-  service-shared-port, pod-endpoint, service-headless, service-externalname, service-endpointslice,
-  serviceaccount). service-protocol-tcp와 serviceaccount는 service-new-port 상태 위에 덮어 적용하는 파일이고,
-  service-externalname에는 외부 Host 변형(service-externalname-external.yaml)이 함께 있다.
-  1.2.9 Node 실험은 Manifest 없이 capture-kubernetes.sh의 kubectl label로 수행한다.
+  service-shared-port, pod-endpoint, service-headless, service-externalname, serviceaccount).
+  service-protocol-tcp와 serviceaccount는 service-new-port 상태 위에 덮어 적용하는 파일이고,
+  service-externalname에는 Mesh 내부 alias 변형(service-externalname-alias.yaml, 별칭 동작 실측 근거)이 함께 있다.
+  1.2.8 Node 실험은 Manifest 없이 capture-kubernetes.sh의 kubectl label로 수행한다.
 - `manifests/base/` — 실험 환경 Workload (server-a/b/c.yaml = Pod+Service, client.yaml = Pod).
 - `envoy_configs/` — CR별 적용 상태의 proxy-config dump 저장소 (CR 폴더는 최상위에 그대로,
   manifests만 istio/ 하위로 이동한 상태라 계층이 1단계 다름).
@@ -134,12 +136,12 @@ Istio가 Envoy 설정을 어떻게 만드는지 실측으로 기록하는 문서
   [Config/Diff 4] = 1.2.1 Pod, [Config/Diff 5] = 1.2.2 Service 신규 Port,
   [Config 6] = 1.2.2의 EDS Endpoint 발췌, [Config/Diff 7] = 1.2.3 Service Port 공유,
   [Config/Diff 8] = 1.2.4 TCP Service, [Config/Diff 9] = 1.2.5 Headless Service,
-  [Config/Diff 10] = 1.2.6 ExternalName, [Config 11/12] = 1.2.7 Selector 없는 Service의 Manifest/EDS 발췌,
-  [Config/Diff 13] = 1.2.8 ServiceAccount, [Config/Diff 14] = 1.2.9 Node,
-  [Config 15] = 1.3.1의 istio-ingressgateway Service Port 매핑 발췌(Gateway 예시보다 앞에 배치),
-  [Config/Diff 16] = 1.3.1 Gateway, [Config/Diff 17~30] = 1.3.2~1.3.14 CR.
-  Diff 2, 3, 6, 11, 12, 15는 없음(발췌 블록, Config/Diff 번호는 쌍 기준).
-  1.3.2 VirtualService에는 mesh용([Config/Diff 17])과 Gateway-bound용([Config/Diff 18]) 두 쌍이 있고,
+  [Config 10] = 1.2.6 ExternalName(변화 없음이라 diff 블록 없음),
+  [Config/Diff 11] = 1.2.7 ServiceAccount, [Config/Diff 12] = 1.2.8 Node,
+  [Config 13] = 1.3.1의 istio-ingressgateway Service Port 매핑 발췌(Gateway 예시보다 앞에 배치),
+  [Config/Diff 14] = 1.3.1 Gateway, [Config/Diff 15~28] = 1.3.2~1.3.14 CR.
+  Diff 2, 3, 6, 10, 13은 없음(발췌 블록 또는 무변화, Config/Diff 번호는 쌍 기준).
+  1.3.2 VirtualService에는 mesh용([Config/Diff 15])과 Gateway-bound용([Config/Diff 16]) 두 쌍이 있고,
   1.3.8 WorkloadGroup, 1.3.9 ProxyConfig는 diff 블록 없음.
   [Table 1] = 1.2 Kubernetes 리소스 매핑 표, [Table 2] = 1.3 Istio CR 매핑 표.
 - diff 블록은 unified diff 스타일: 변경 라인(+/-) 앞뒤로 context 라인을 남기고,

@@ -1,9 +1,0 @@
-# Variant: ExternalName pointing to a Host not registered in the Mesh
-apiVersion: v1
-kind: Service
-metadata:
-  name: server-external
-  namespace: default
-spec:
-  type: ExternalName
-  externalName: external.example.com

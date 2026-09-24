@@ -127,7 +127,8 @@ $K delete -f "$MAN/service-headless/service-headless.yaml"
 sleep $DRAIN_WAIT
 verify_clean
 
-# 7. service-externalname: Mesh 내부 server-a를 가리키는 별칭 + 외부 Host 변형
+# 7. service-externalname: 외부 Host를 가리키는 일반 패턴 (base와 diff 0이어야 정상)
+#    + Mesh 내부 server-a를 가리키는 alias 변형 (별칭 동작의 실측 근거)
 log "=== service-externalname (client) ==="
 $K apply -f "$MAN/service-externalname/service-externalname.yaml"
 sleep $PUSH_WAIT
@@ -135,29 +136,14 @@ cap "$OUT/service-externalname/client.yaml"
 $K delete -f "$MAN/service-externalname/service-externalname.yaml"
 sleep 20
 verify_clean
-$K apply -f "$MAN/service-externalname/service-externalname-external.yaml"
+$K apply -f "$MAN/service-externalname/service-externalname-alias.yaml"
 sleep $PUSH_WAIT
-cap "$OUT/service-externalname/client-external.yaml"   # base와 diff 0이어야 정상
-$K delete -f "$MAN/service-externalname/service-externalname-external.yaml"
+cap "$OUT/service-externalname/client-alias.yaml"
+$K delete -f "$MAN/service-externalname/service-externalname-alias.yaml"
 sleep 20
 verify_clean
 
-# 8. service-endpointslice: selector 없는 Service + 수동 EndpointSlice (dump + EDS)
-log "=== service-endpointslice (client) ==="
-$K apply -f "$MAN/service-endpointslice/service-endpointslice.yaml"
-sleep $PUSH_WAIT
-mkdir -p "$OUT/service-endpointslice"
-RAW=$(mktemp)
-istioctl --context "$CTX" proxy-config all client -n default -o yaml > "$RAW"
-normalize < "$RAW" > "$OUT/service-endpointslice/client.yaml"
-eds_section < "$RAW" > "$OUT/service-endpointslice/client-eds.yaml"
-rm -f "$RAW"
-log "captured service-endpointslice dump + eds"
-$K delete -f "$MAN/service-endpointslice/service-endpointslice.yaml"
-sleep $DRAIN_WAIT
-verify_clean
-
-# 9. serviceaccount: service-new-port 상태 위에 전용 SA의 server-d-2 Pod 추가
+# 8. serviceaccount: service-new-port 상태 위에 전용 SA의 server-d-2 Pod 추가
 log "=== serviceaccount (client) ==="
 $K apply -f "$MAN/service-new-port/service-new-port.yaml"
 $K wait --for=condition=Ready pod/server-d --timeout=120s
@@ -172,7 +158,7 @@ $K delete -f "$MAN/service-new-port/service-new-port.yaml"
 sleep $DRAIN_WAIT
 verify_clean
 
-# 10. node-locality: 두 Worker Node에 Topology Label 부여 (Manifest 없음, kubectl label 사용).
+# 9. node-locality: 두 Worker Node에 Topology Label 부여 (Manifest 없음, kubectl label 사용).
 #     Label만으로는 기존 Endpoint에 소급 반영되지 않으므로(실측) server-a Pod를 재생성해 재등록한다.
 #     server-a Pod가 어느 Node로 스케줄되든 locality가 채워지도록 두 Worker에 모두 Label을 붙인다.
 log "=== node-locality (client) ==="
