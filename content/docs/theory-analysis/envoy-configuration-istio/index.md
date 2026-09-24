@@ -1234,7 +1234,7 @@ metadata:
 
 ### 1.3. Envoy Configuration with Istio Custom Resources
 
-1.1의 기본 설정을 기준으로, Istio의 각 CR (Custom Resource)이 Envoy 설정에 어떻게 반영되는지 1.2와 같은 방식의 diff로 기록한다. 각 Istio CR이 Envoy 설정의 어느 리소스 타입에 반영되는지 정리하면 다음과 같다.
+이 절에서는 VirtualService, PeerAuthentication을 비롯한 **Istio CR** (Custom Resource)을 적용하면서 그 변화를 살펴본다. Outbound 설정을 변경하는 CR은 `client` Pod에서, Inbound 설정을 변경하는 CR은 `server-a` Pod에서 관찰한다. 각 Istio CR이 Envoy 설정의 어느 리소스 타입에 반영되는지 정리하면 다음과 같다.
 
 {{< table caption="[Table 2] Istio CR이 Envoy 설정에 반영되는 리소스 타입" >}}
 | CR | Listener | Route | Cluster | Endpoint | 비고 |
