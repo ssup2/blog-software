@@ -1,0 +1,14 @@
+# Second Pod with the same app=server-a Label as the existing server-a Pod
+apiVersion: v1
+kind: Pod
+metadata:
+  name: server-a-2
+  namespace: default
+  labels:
+    app: server-a
+spec:
+  containers:
+  - name: server-a-2
+    image: ghcr.io/ssup2/mock-go-server:commit-f8ad4477
+    ports:
+    - containerPort: 8080

@@ -1,0 +1,13 @@
+# Applied on top of service-new-port (same Service, only the port name changes)
+apiVersion: v1
+kind: Service
+metadata:
+  name: server-d
+  namespace: default
+spec:
+  selector:
+    app: server-d
+  ports:
+  - name: tcp
+    port: 7070
+    targetPort: 8080

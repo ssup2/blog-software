@@ -1,21 +1,25 @@
 # envoy-configuration-istio 문서 작업 컨텍스트
 
 Istio가 Envoy 설정을 어떻게 만드는지 실측으로 기록하는 문서 (envoy-architecture-istio 문서에서 2026-08-09에 분리됨).
-1.1은 CR 없는 기본 Envoy 설정(baseline), 1.2는 Istio CR별 Envoy 설정 변화를 실측 diff로 기록한다.
+1.1은 CR 없는 기본 Envoy 설정(baseline), 1.2는 Kubernetes 리소스별, 1.3은 Istio CR별 Envoy 설정 변화를 실측 diff로 기록한다.
 
 ## 문서 구성 및 상태
 
 - **1장 (Envoy Configuration with Istio)**: 완료. 장 도입부에 실험 환경 yaml([Config 1])과 Workload 설명
-  (1.1과 1.2가 공유하는 환경이라 장 바로 아래에 배치).
+  (1.1~1.3이 공유하는 환경이라 장 바로 아래에 배치).
   - **1.1 (Default Configuration)**: 1.1.1 = Outbound 기본 설정(client Pod 발췌, 기본 HTTP Filter 목록 포함),
     1.1.2 = Inbound 기본 설정(server-a Pod 발췌, listener_filters·Filter Chain·기본 HTTP Filter 목록 포함).
     발췌는 envoy_configs/base/의 실측 dump 기반.
-  - **1.2 (Envoy Configuration with Istio and Kubernetes Resources)**:
-    1.2.1~1.2.14 = Gateway, VirtualService, DestinationRule, ServiceEntry, Sidecar, EnvoyFilter, WorkloadEntry,
+  - **1.2 (Envoy Configuration with Kubernetes Resources)**: 2026-09-24 신설.
+    1.2.1 = Service 신규 Port(LDS/RDS/CDS 생성 + EDS의 targetPort 매핑), 1.2.2 = Service 기존 Port 공유(VH/Cluster만 추가),
+    1.2.3 = Pod 증감(EDS만 변화, 무변화는 전체 dump diff 0으로 검증), 1.2.4 = Port 이름 http→tcp(ClusterIP bind TCP Listener로 교체),
+    1.2.5 = Headless Service(ORIGINAL_DST Cluster + Pod DNS wildcard domains). 도입부에 [Table 1] 매핑 표.
+  - **1.3 (Envoy Configuration with Istio Custom Resources)** (구 1.2, 2026-09-24 개명):
+    1.3.1~1.3.14 = Gateway, VirtualService, DestinationRule, ServiceEntry, Sidecar, EnvoyFilter, WorkloadEntry,
     WorkloadGroup, ProxyConfig, PeerAuthentication, RequestAuthentication, AuthorizationPolicy, Telemetry, WasmPlugin.
 - **2장 (참조)**: 링크 미채움.
 
-## 실험 환경 (1.2 diff 재현 방법)
+## 실험 환경 (1.2/1.3 diff 재현 방법)
 
 - kind Cluster (`kind-kind` context) + Istio **1.24.2** (istiod, ingress/egress gateway 설치됨).
 - `default` Namespace: `istio-injection=enabled`. Pod 4개 상주 (2026-08-17에 mock-server/shell 환경에서 교체,
@@ -24,9 +28,14 @@ Istio가 Envoy 설정을 어떻게 만드는지 실측으로 기록하는 문서
   - `server-c` (Service `9090` grpc Port) — 다른 Port를 노출하는 Service가 있을 때의 설정 확인용.
     (mock-go-server 이미지는 8080 HTTP·9090 gRPC를 모두 수신한다.)
   - `client` (app=client) — 보내는 쪽(outbound) 실험 대상. 자신은 아무 Port도 열지 않는다.
-- 1.2의 CR은 서버 중 **server-a만을 대상으로 적용**한다. Inbound CR은 `server-a` Pod에서,
+- 1.3의 CR은 서버 중 **server-a만을 대상으로 적용**한다. Inbound CR은 `server-a` Pod에서,
   Outbound CR은 `client` Pod에서 diff를 관찰한다. server-b/server-c는 CR을 적용하지 않는 대조군이다.
 - Gateway 실험은 `istio-system`의 istio-ingressgateway Pod 대상 (Pod 이름은 `kubectl get pods -n istio-system`으로 확인).
+- 1.2의 Kubernetes 리소스 실험은 모두 `client` Pod에서 관찰하며, 일시적 리소스(`server-d` Pod/Service,
+  `server-a-2` Pod)를 적용→캡처→삭제한다. **2026-09-24 캡처 시점에는 클러스터에 문서 환경 외 잉여
+  Workload(httpbin, mock-server 8080/9090/8081, my-shell, shell)가 상주**했기 때문에 1.2의 diff는 구
+  envoy_configs/base/가 아니라 같은 시점에 뜬 envoy_configs/kubernetes/base/와 비교해야 한다.
+  잉여 Service가 상수로 유지되므로 diff의 +/- 라인에는 나타나지 않고, 본문 발췌에서는 `...`으로 걸렀다.
 
 ## diff 캡처 방법론
 
@@ -61,14 +70,17 @@ Istio가 Envoy 설정을 어떻게 만드는지 실측으로 기록하는 문서
   (subFilter 미지정 시 배열 맨 앞에 삽입됨은 본문에 설명).
 - Sidecar CR(egress를 server-a로 제한)의 제거 단위: Cluster는 Service 단위로 전부 제거,
   `9090`처럼 남는 Service가 없는 Port는 Listener 자체가 제거, `8080`처럼 server-a가 남는 Port는
-  Listener는 유지되고 Route Table의 server-b Virtual Host만 제거된다 (1.2.5에 서술).
+  Listener는 유지되고 Route Table의 server-b Virtual Host만 제거된다 (1.3.5에 서술).
 
 ## 폴더 구조
 
 - `index.md` — 문서 본문.
-- `manifests/<cr이름>/<cr이름>.yaml` — 1.2 예제 CR (전부 클러스터에 적용해 검증된 상태).
+- `manifests/<cr이름>/<cr이름>.yaml` — 1.3 예제 CR (전부 클러스터에 적용해 검증된 상태).
   workloadentry는 ServiceEntry+WorkloadEntry 2개 리소스가 한 파일에 있음.
   virtualservice에는 mesh용(virtualservice.yaml)과 Gateway-bound용(virtualservice-gateway.yaml) 2개 파일.
+- `manifests/kubernetes/<실험이름>/<실험이름>.yaml` — 1.2 실험 리소스 (service-new-port, service-protocol-tcp,
+  service-shared-port, pod-endpoint, service-headless). service-protocol-tcp는 service-new-port 상태 위에
+  덮어 적용하는 Service 단독 파일이다.
 - `manifests/base/` — 실험 환경 Workload (server-a/b/c.yaml = Pod+Service, client.yaml = Pod).
 - `envoy_configs/` — CR별 적용 상태의 proxy-config dump 저장소 (manifests와 같은 하위폴더 구조).
   질문/diff 요청 시 클러스터에 다시 실험하지 말고 여기 저장된 dump를 우선 활용할 것.
@@ -82,20 +94,32 @@ Istio가 Envoy 설정을 어떻게 만드는지 실측으로 기록하는 문서
   - 모든 dump는 정규화됨 (EndpointsConfigDump 섹션·last_updated·version_info 라인 제거).
   - **주의**: 캡처 간 Listener/Cluster 순서가 뒤바뀔 수 있어 파일 전체 diff에는 재배열 노이즈가 섞인다.
     특정 리소스 이름으로 해당 부분만 발췌해서 비교할 것 (무변화 검증은 `diff <(sort a) <(sort b)`로 가능).
-  - `capture.sh` — 재캡처 스크립트 (약 15분 소요). `_backup/old-env/`는 2026-08-17 이전의
+  - `capture.sh` — 1.3(CR) 재캡처 스크립트 (약 15분 소요). `_backup/old-env/`는 2026-08-17 이전의
     mock-server/shell 환경 백업(복원용이 아니라 기록용).
-- 전체 dump는 2026-08-17에 server-a/b/c + client 환경에서 재실측함.
+  - `kubernetes/` — 1.2 실험 dump (2026-09-24 실측). `base/client.yaml`이 1.2 전용 baseline이고,
+    `<실험이름>/client.yaml`은 정규화 dump, `client-eds*.yaml`은 raw dump의 EndpointsConfigDump 섹션
+    (정규화가 EDS를 제거하므로 EDS 관찰 실험만 별도 저장). diff 상대는 `kubernetes/base/client.yaml`,
+    단 service-protocol-tcp는 service-new-port/client.yaml과 diff.
+  - `capture-kubernetes.sh` — 1.2 재캡처 스크립트 (약 10분 소요). service-new-port ↔ service-protocol-tcp는
+    같은 Service 인스턴스에서 연속 캡처해야 ClusterIP/Pod IP가 일치한다 (본문 [Diff 4]/[Config 5]/[Diff 8]의
+    IP 10.96.121.134, 10.244.2.11이 서로 맞물려 있음). Listener 교체/삭제 후에는 75s drain 대기.
+- 1.3 전체 dump는 2026-08-17에 server-a/b/c + client 환경에서 재실측함. 1.2 dump는 2026-09-24 실측
+  (잉여 Workload 상주 환경, 위 실험 환경 절 참고).
 
 ## 문서 컨벤션
 
-- Code Block caption: yaml은 `[Config N] <CR> Example`, diff는 `[Diff N] <CR> 적용 전후 <pod>의 proxy-config`.
+- Code Block caption: yaml은 `[Config N] <이름> Example/Manifest`, diff는 `[Diff N] <변경> 전후 <pod>의 proxy-config`.
   번호는 등장 순서 기준 — [Config 1] = 1장 도입부 실험 환경,
   [Config 2] = 1.1.1 Outbound 기본 설정 발췌, [Config 3] = 1.1.2 Inbound 기본 설정 발췌,
-  [Config 4] = 1.2.1의 istio-ingressgateway Service Port 매핑 발췌(Gateway 예시보다 앞에 배치),
-  [Config/Diff 5] = 1.2.1 Gateway, [Config/Diff 6~19] = 1.2.2~1.2.14 CR.
-  Diff 2~4는 없음(발췌 블록, Config/Diff 번호는 쌍 기준).
-  1.2.2 VirtualService에는 mesh용([Config/Diff 6])과 Gateway-bound용([Config/Diff 7]) 두 쌍이 있고,
-  1.2.8 WorkloadGroup, 1.2.9 ProxyConfig는 diff 블록 없음.
+  [Config/Diff 4] = 1.2.1 Service 신규 Port, [Config 5] = 1.2.1의 EDS Endpoint 발췌,
+  [Config/Diff 6] = 1.2.2 Service 기존 Port 공유, [Config/Diff 7] = 1.2.3 Pod,
+  [Config/Diff 8] = 1.2.4 Port Protocol, [Config/Diff 9] = 1.2.5 Headless Service,
+  [Config 10] = 1.3.1의 istio-ingressgateway Service Port 매핑 발췌(Gateway 예시보다 앞에 배치),
+  [Config/Diff 11] = 1.3.1 Gateway, [Config/Diff 12~25] = 1.3.2~1.3.14 CR.
+  Diff 2, 3, 5, 10은 없음(발췌 블록, Config/Diff 번호는 쌍 기준).
+  1.3.2 VirtualService에는 mesh용([Config/Diff 12])과 Gateway-bound용([Config/Diff 13]) 두 쌍이 있고,
+  1.3.8 WorkloadGroup, 1.3.9 ProxyConfig는 diff 블록 없음.
+  [Table 1] = 1.2 Kubernetes 리소스 매핑 표, [Table 2] = 1.3 Istio CR 매핑 표.
 - diff 블록은 unified diff 스타일: 변경 라인(+/-) 앞뒤로 context 라인을 남기고,
   무관한 부분은 `...`으로 표기. 내용은 실측 dump에서 발췌 (창작 금지).
 - 리소스 이름/설정값은 백틱(`server-a`, `lb_policy` 등), 일반 기술 용어는 영어 표기(Listener, Cluster 등).
