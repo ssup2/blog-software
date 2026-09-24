@@ -60,6 +60,11 @@ Istio가 Envoy 설정을 어떻게 만드는지 실측으로 기록하는 문서
 
 ## 실험에서 확인된 특이사항
 
+- 호스트(laptop) 절전 등으로 kind가 오래 멈췄다 깨어나면 pilot-agent의 워크로드 인증서 갱신이
+  멈춘 채 만료될 수 있다 (`istioctl proxy-config secret <pod>`의 VALID CERT가 false). 이 상태면
+  Mesh 내 모든 요청이 503(UC, connection_termination)으로 실패하므로, 기능 실험 전에 인증서
+  유효성을 확인하고 만료됐으면 해당 Pod를 재생성한다 (2026-09-25에 client/server-b/server-c 재생성으로 해결.
+  Pod 재생성 시 Bootstrap의 Pod IP·인증서 필드가 바뀌므로 저장된 base dump와 그 부분만 달라진다).
 - ExternalName Service는 alias 모드(1.24 기본)라 대상이 Mesh 내부 Service면 그 VH의 domains에만
   별칭이 추가되고, 대상이 Mesh에 없는 외부 Host면 설정 변화가 아예 없다 (diff 0 실측).
 - Node Topology Label은 이미 등록된 Endpoint에 소급 반영되지 않는다 (Label 후 EDS diff 0 실측).
