@@ -605,7 +605,7 @@ HTTP Connection Manager도 목적지를 지정하는 `route_config`(Catch-all Ch
 | Node | - | - | - | O | Topology Label이 Endpoint의 locality로 반영 |
 {{< /table >}}
 
-#### 1.2.1. Service (New Port)
+#### 1.2.1. Service
 
 ```yaml {caption="[Config 4] server-d Pod/Service Manifest (7070 Port)", linenos=table}
 apiVersion: v1
@@ -756,7 +756,7 @@ spec:
 
 [Config 5]는 server-d Cluster가 EDS로 전달받은 Endpoint를 나타내고 있다. Listener 주소, Route Table 이름, Cluster 이름이 모두 Service의 `port` 값인 `7070` 기준인 반면, Endpoint는 Pod IP와 `targetPort` 값인 `8080`의 조합이다. 즉 Service의 `port`에서 `targetPort`로의 변환은 Envoy 설정에서 **Cluster와 Endpoint의 경계**에서 일어나며, Envoy가 kube-proxy의 도움 없이 직접 Pod IP와 targetPort로 연결한다.
 
-#### 1.2.2. Service (Shared Port)
+#### 1.2.2. Service Port Sharing
 
 ```yaml {caption="[Config 6] server-d Pod/Service Manifest (8080 Port 공유)", linenos=table}
 # server-d Pod: same as the Pod in [Config 4]
