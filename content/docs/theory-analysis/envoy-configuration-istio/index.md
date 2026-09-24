@@ -589,7 +589,7 @@ HTTP Connection Manager도 목적지를 지정하는 `route_config`(Catch-all Ch
 
 ### 1.2. Envoy Configuration with Kubernetes Resources
 
-1.1의 기본 설정은 Istio CR 없이 istiod가 **Kubernetes의 Service와 Endpoint 정보만으로 만든 것**이므로, Kubernetes 리소스의 변화는 그 자체로 Envoy 설정을 변경시킨다. 이 절에서는 Service, Pod를 비롯한 Kubernetes 리소스를 추가하거나 변경하면서 그 변화를 살펴본다. 각 리소스를 적용하기 전후의 `istioctl proxy-config all <pod> -o yaml` 출력을 비교하여 Envoy Config Dump의 어느 부분이 변경되는지 앞뒤 Context와 함께 diff로 기록하며, 변경과 무관한 부분은 `...`으로 표기한다. 이 변화들은 Mesh 전체 Sidecar의 Outbound 설정에 반영되므로 `client` Pod에서 관찰한다. 각 Kubernetes 리소스가 Envoy 설정의 어느 리소스 타입에 반영되는지 정리하면 다음과 같다.
+이 절에서는 Service, Pod를 비롯한 **Kubernetes 리소스**를 추가하거나 변경하면서 그 변화를 살펴본다. 이 변화들은 Mesh 전체 Sidecar의 Outbound 설정에 반영되므로 `client` Pod에서 관찰한다. 각 Kubernetes 리소스가 Envoy 설정의 어느 리소스 타입에 반영되는지 정리하면 다음과 같다.
 
 {{< table caption="[Table 1] Kubernetes 리소스가 Envoy 설정에 반영되는 리소스 타입" >}}
 | 리소스 | Listener | Route | Cluster | Endpoint | 비고 |
