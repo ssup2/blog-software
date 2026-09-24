@@ -13,7 +13,11 @@ Istio가 Envoy 설정을 어떻게 만드는지 실측으로 기록하는 문서
   - **1.2 (Envoy Configuration with Kubernetes Resources)**: 2026-09-24 신설.
     1.2.1 = Service 신규 Port(LDS/RDS/CDS 생성 + EDS의 targetPort 매핑), 1.2.2 = Service 기존 Port 공유(VH/Cluster만 추가),
     1.2.3 = Pod 증감(EDS만 변화, 무변화는 전체 dump diff 0으로 검증), 1.2.4 = Port 이름 http→tcp(ClusterIP bind TCP Listener로 교체),
-    1.2.5 = Headless Service(ORIGINAL_DST Cluster + Pod DNS wildcard domains). 도입부에 [Table 1] 매핑 표.
+    1.2.5 = Headless Service(ORIGINAL_DST Cluster + Pod DNS wildcard domains),
+    1.2.6 = ExternalName Service(대상 VH domains에 별칭 4형태 추가, 외부 Host 대상은 diff 0),
+    1.2.7 = Selector 없는 Service + 수동 EndpointSlice(임의 IP가 Endpoint로, tlsMode 표식 없음 → Plaintext),
+    1.2.8 = ServiceAccount(Cluster SAN 목록 +1줄, service-new-port 상태 위 diff),
+    1.2.9 = Node Topology Label(EDS locality 반영, Pod 재등록 필요). 도입부에 [Table 1] 매핑 표.
   - **1.3 (Envoy Configuration with Istio Custom Resources)** (구 1.2, 2026-09-24 개명):
     1.3.1~1.3.14 = Gateway, VirtualService, DestinationRule, ServiceEntry, Sidecar, EnvoyFilter, WorkloadEntry,
     WorkloadGroup, ProxyConfig, PeerAuthentication, RequestAuthentication, AuthorizationPolicy, Telemetry, WasmPlugin.
@@ -56,6 +60,12 @@ Istio가 Envoy 설정을 어떻게 만드는지 실측으로 기록하는 문서
 
 ## 실험에서 확인된 특이사항
 
+- ExternalName Service는 alias 모드(1.24 기본)라 대상이 Mesh 내부 Service면 그 VH의 domains에만
+  별칭이 추가되고, 대상이 Mesh에 없는 외부 Host면 설정 변화가 아예 없다 (diff 0 실측).
+- Node Topology Label은 이미 등록된 Endpoint에 소급 반영되지 않는다 (Label 후 EDS diff 0 실측).
+  Pod를 재생성해 Endpoint를 재등록해야 반영된다. 이때 한쪽 Node에만 Label을 붙이면 재생성된 Pod가
+  Label 없는 다른 Node로 스케줄될 수 있으므로 (실제로 겪음), 두 Worker Node 모두에 Label을 붙인다
+  (zone은 kind-worker=zone-a, kind-worker2=zone-b로 상이하게).
 - 이 클러스터의 meshConfig에는 `accessLogFile: /dev/stdout`이 전역 설정되어 있어, Telemetry의
   `envoy` provider는 diff가 안 나온다. `otel` provider(extensionProviders에 정의됨)를 쓰되,
   provider가 가리키는 `opentelemetry-collector.observability.svc.cluster.local` Service가 실제로
@@ -79,8 +89,10 @@ Istio가 Envoy 설정을 어떻게 만드는지 실측으로 기록하는 문서
   workloadentry는 ServiceEntry+WorkloadEntry 2개 리소스가 한 파일에 있음.
   virtualservice에는 mesh용(virtualservice.yaml)과 Gateway-bound용(virtualservice-gateway.yaml) 2개 파일.
 - `manifests/kubernetes/<실험이름>/<실험이름>.yaml` — 1.2 실험 리소스 (service-new-port, service-protocol-tcp,
-  service-shared-port, pod-endpoint, service-headless). service-protocol-tcp는 service-new-port 상태 위에
-  덮어 적용하는 Service 단독 파일이다.
+  service-shared-port, pod-endpoint, service-headless, service-externalname, service-endpointslice,
+  serviceaccount). service-protocol-tcp와 serviceaccount는 service-new-port 상태 위에 덮어 적용하는 파일이고,
+  service-externalname에는 외부 Host 변형(service-externalname-external.yaml)이 함께 있다.
+  1.2.9 Node 실험은 Manifest 없이 capture-kubernetes.sh의 kubectl label로 수행한다.
 - `manifests/base/` — 실험 환경 Workload (server-a/b/c.yaml = Pod+Service, client.yaml = Pod).
 - `envoy_configs/` — CR별 적용 상태의 proxy-config dump 저장소 (manifests와 같은 하위폴더 구조).
   질문/diff 요청 시 클러스터에 다시 실험하지 말고 여기 저장된 dump를 우선 활용할 것.
@@ -100,9 +112,11 @@ Istio가 Envoy 설정을 어떻게 만드는지 실측으로 기록하는 문서
     `<실험이름>/client.yaml`은 정규화 dump, `client-eds*.yaml`은 raw dump의 EndpointsConfigDump 섹션
     (정규화가 EDS를 제거하므로 EDS 관찰 실험만 별도 저장). diff 상대는 `kubernetes/base/client.yaml`,
     단 service-protocol-tcp는 service-new-port/client.yaml과 diff.
-  - `capture-kubernetes.sh` — 1.2 재캡처 스크립트 (약 10분 소요). service-new-port ↔ service-protocol-tcp는
+  - `capture-kubernetes.sh` — 1.2 재캡처 스크립트 (약 20분 소요). service-new-port ↔ service-protocol-tcp는
     같은 Service 인스턴스에서 연속 캡처해야 ClusterIP/Pod IP가 일치한다 (본문 [Diff 4]/[Config 5]/[Diff 8]의
     IP 10.96.121.134, 10.244.2.11이 서로 맞물려 있음). Listener 교체/삭제 후에는 75s drain 대기.
+    diff 상대: service-protocol-tcp와 serviceaccount는 각자의 직전 상태(service-new-port 캡처/client-before)와,
+    node-locality는 client-eds-before ↔ client-eds-after끼리, 나머지는 kubernetes/base/client.yaml과 diff.
 - 1.3 전체 dump는 2026-08-17에 server-a/b/c + client 환경에서 재실측함. 1.2 dump는 2026-09-24 실측
   (잉여 Workload 상주 환경, 위 실험 환경 절 참고).
 
@@ -114,10 +128,12 @@ Istio가 Envoy 설정을 어떻게 만드는지 실측으로 기록하는 문서
   [Config/Diff 4] = 1.2.1 Service 신규 Port, [Config 5] = 1.2.1의 EDS Endpoint 발췌,
   [Config/Diff 6] = 1.2.2 Service 기존 Port 공유, [Config/Diff 7] = 1.2.3 Pod,
   [Config/Diff 8] = 1.2.4 Port Protocol, [Config/Diff 9] = 1.2.5 Headless Service,
-  [Config 10] = 1.3.1의 istio-ingressgateway Service Port 매핑 발췌(Gateway 예시보다 앞에 배치),
-  [Config/Diff 11] = 1.3.1 Gateway, [Config/Diff 12~25] = 1.3.2~1.3.14 CR.
-  Diff 2, 3, 5, 10은 없음(발췌 블록, Config/Diff 번호는 쌍 기준).
-  1.3.2 VirtualService에는 mesh용([Config/Diff 12])과 Gateway-bound용([Config/Diff 13]) 두 쌍이 있고,
+  [Config/Diff 10] = 1.2.6 ExternalName, [Config 11/12] = 1.2.7 Selector 없는 Service의 Manifest/EDS 발췌,
+  [Config/Diff 13] = 1.2.8 ServiceAccount, [Config/Diff 14] = 1.2.9 Node,
+  [Config 15] = 1.3.1의 istio-ingressgateway Service Port 매핑 발췌(Gateway 예시보다 앞에 배치),
+  [Config/Diff 16] = 1.3.1 Gateway, [Config/Diff 17~30] = 1.3.2~1.3.14 CR.
+  Diff 2, 3, 5, 11, 12, 15는 없음(발췌 블록, Config/Diff 번호는 쌍 기준).
+  1.3.2 VirtualService에는 mesh용([Config/Diff 17])과 Gateway-bound용([Config/Diff 18]) 두 쌍이 있고,
   1.3.8 WorkloadGroup, 1.3.9 ProxyConfig는 diff 블록 없음.
   [Table 1] = 1.2 Kubernetes 리소스 매핑 표, [Table 2] = 1.3 Istio CR 매핑 표.
 - diff 블록은 unified diff 스타일: 변경 라인(+/-) 앞뒤로 context 라인을 남기고,

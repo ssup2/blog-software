@@ -127,4 +127,71 @@ $K delete -f "$MAN/service-headless/service-headless.yaml"
 sleep $DRAIN_WAIT
 verify_clean
 
+# 7. service-externalname: Mesh 내부 server-a를 가리키는 별칭 + 외부 Host 변형
+log "=== service-externalname (client) ==="
+$K apply -f "$MAN/service-externalname/service-externalname.yaml"
+sleep $PUSH_WAIT
+cap "$OUT/service-externalname/client.yaml"
+$K delete -f "$MAN/service-externalname/service-externalname.yaml"
+sleep 20
+verify_clean
+$K apply -f "$MAN/service-externalname/service-externalname-external.yaml"
+sleep $PUSH_WAIT
+cap "$OUT/service-externalname/client-external.yaml"   # base와 diff 0이어야 정상
+$K delete -f "$MAN/service-externalname/service-externalname-external.yaml"
+sleep 20
+verify_clean
+
+# 8. service-endpointslice: selector 없는 Service + 수동 EndpointSlice (dump + EDS)
+log "=== service-endpointslice (client) ==="
+$K apply -f "$MAN/service-endpointslice/service-endpointslice.yaml"
+sleep $PUSH_WAIT
+mkdir -p "$OUT/service-endpointslice"
+RAW=$(mktemp)
+istioctl --context "$CTX" proxy-config all client -n default -o yaml > "$RAW"
+normalize < "$RAW" > "$OUT/service-endpointslice/client.yaml"
+eds_section < "$RAW" > "$OUT/service-endpointslice/client-eds.yaml"
+rm -f "$RAW"
+log "captured service-endpointslice dump + eds"
+$K delete -f "$MAN/service-endpointslice/service-endpointslice.yaml"
+sleep $DRAIN_WAIT
+verify_clean
+
+# 9. serviceaccount: service-new-port 상태 위에 전용 SA의 server-d-2 Pod 추가
+log "=== serviceaccount (client) ==="
+$K apply -f "$MAN/service-new-port/service-new-port.yaml"
+$K wait --for=condition=Ready pod/server-d --timeout=120s
+sleep $PUSH_WAIT
+cap "$OUT/serviceaccount/client-before.yaml"
+$K apply -f "$MAN/serviceaccount/serviceaccount.yaml"
+$K wait --for=condition=Ready pod/server-d-2 --timeout=120s
+sleep $PUSH_WAIT
+cap "$OUT/serviceaccount/client.yaml"
+$K delete -f "$MAN/serviceaccount/serviceaccount.yaml"
+$K delete -f "$MAN/service-new-port/service-new-port.yaml"
+sleep $DRAIN_WAIT
+verify_clean
+
+# 10. node-locality: 두 Worker Node에 Topology Label 부여 (Manifest 없음, kubectl label 사용).
+#     Label만으로는 기존 Endpoint에 소급 반영되지 않으므로(실측) server-a Pod를 재생성해 재등록한다.
+#     server-a Pod가 어느 Node로 스케줄되든 locality가 채워지도록 두 Worker에 모두 Label을 붙인다.
+log "=== node-locality (client) ==="
+cap_eds "$OUT/node-locality/client-eds-before.yaml"
+$K label node kind-worker  topology.kubernetes.io/region=region-a topology.kubernetes.io/zone=zone-a --overwrite
+$K label node kind-worker2 topology.kubernetes.io/region=region-a topology.kubernetes.io/zone=zone-b --overwrite
+sleep 10
+$K delete pod server-a
+$K apply -f "$DOC_DIR/manifests/base/server-a.yaml"
+$K wait --for=condition=Ready pod/server-a --timeout=120s
+sleep 8
+cap_eds "$OUT/node-locality/client-eds-after.yaml"
+grep -q 'region-a' "$OUT/node-locality/client-eds-after.yaml" && log "locality reflected" || log "WARNING: locality missing"
+$K label node kind-worker  topology.kubernetes.io/region- topology.kubernetes.io/zone-
+$K label node kind-worker2 topology.kubernetes.io/region- topology.kubernetes.io/zone-
+$K delete pod server-a
+$K apply -f "$DOC_DIR/manifests/base/server-a.yaml"
+$K wait --for=condition=Ready pod/server-a --timeout=120s
+sleep 8
+verify_clean
+
 log "done"
