@@ -1072,7 +1072,7 @@ spec:
 
 [Config 10]은 Mesh 내부의 `server-a`를 가리키는 `ExternalName` Type Service의 Manifest를 나타내고 있다. 적용하면 [Diff 10]과 같이 새로운 Listener, Cluster, Virtual Host가 생기는 것이 아니라, **대상인 server-a Virtual Host의 `domains`에 server-external의 이름 축약형들이 추가**될 뿐이다. 즉 ExternalName Service는 별도의 설정 실체 없이 대상 Host의 별칭으로 동작하며, App이 `server-external`로 호출해도 Host Header가 server-a의 Virtual Host에 매칭되어 server-a의 Cluster로 라우팅된다. ClusterIP가 없으므로 `domains`에 IP는 추가되지 않는다.
 
-반면 Mesh에 등록되지 않은 외부 Host(`external.example.com`)를 가리키는 ExternalName Service는 **Envoy 설정에 아무 변화도 만들지 않는다** (전체 Config Dump의 diff가 0줄임을 실측으로 확인했다). 별칭을 걸 대상 Virtual Host가 Mesh에 없기 때문이며, 해당 Host로의 요청은 DNS 해석을 거쳐 Catch-all 경로(PassthroughCluster)로 처리된다. 외부 Host를 Envoy 설정에 등록하려면 ServiceEntry를 사용해야 한다.
+정작 ExternalName Service의 일반적인 용도는 `external.example.com` 같은 외부 Host를 Kubernetes Service 이름으로 호출할 수 있게 하는 것인데, 예제가 Mesh 내부를 가리키는 이유는 외부 Host를 가리키는 경우 **Envoy 설정에 아무 변화도 만들지 않기 때문이다** (전체 Config Dump의 diff가 0줄임을 실측으로 확인했다). 별칭을 걸 대상 Virtual Host가 Mesh에 없으므로 반영할 것이 없고, 해당 Host로의 요청은 DNS 해석을 거쳐 Catch-all 경로(PassthroughCluster)로 처리된다. 외부 Host를 Envoy 설정에 등록하려면 ServiceEntry를 사용해야 한다.
 
 #### 1.2.7. Service without Selector
 
