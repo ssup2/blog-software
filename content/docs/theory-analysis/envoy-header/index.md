@@ -56,7 +56,7 @@ x-envoy-external-address: 203.0.113.10
 x-envoy-original-path: /api/v1/users
 ```
 
-[Text 4]와 같이 Envoy의 Route 설정에 의해서 요청의 Path가 Rewrite된 경우, Rewrite 되기 전의 원본 Path를 나타낸다.
+[Text 4]와 같이 Envoy의 Route 설정에 의해서 요청의 Path가 Rewrite된 경우, Rewrite 되기 전의 원본 Path를 나타낸다. [Text 4]의 `:path`는 HTTP/2에서 요청 경로를 나타내는 Pseudo-header로 Rewrite가 적용된 실제 요청 경로를 담고 있으며, HTTP/1.1의 Request Line에 있던 Method, 경로 정보는 HTTP/2부터 `:method`, `:path`와 같은 `:` Prefix의 Pseudo-header로 분해되어 전달된다.
 
 #### 1.1.5. x-envoy-attempt-count
 

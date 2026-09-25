@@ -56,7 +56,7 @@ As in [Text 3], it represents the trusted Client IP address (Trusted Client Addr
 x-envoy-original-path: /api/v1/users
 ```
 
-As in [Text 4], it represents the original Path before Rewrite when the request Path has been rewritten by Envoy's Route configuration.
+As in [Text 4], it represents the original Path before Rewrite when the request Path has been rewritten by Envoy's Route configuration. The `:path` in [Text 4] is the Pseudo-header that represents the request path in HTTP/2, holding the actual request path with the Rewrite applied; the Method and path information that used to be in the HTTP/1.1 Request Line is decomposed into Pseudo-headers with the `:` Prefix, such as `:method` and `:path`, starting from HTTP/2.
 
 #### 1.1.5. x-envoy-attempt-count
 
