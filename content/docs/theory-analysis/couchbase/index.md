@@ -17,9 +17,7 @@ Couchbase는 Memcached를 기반으로하는 **Built-in Cache**를 갖고 있다
 Bucket은 Couchbase에서 관리하는 Document Group이다. 하나의 CouchBase Cluster에 여러개의 Bucket이 존재할 수 있으며, 각 Bucket마다 Resource 사용량을 제한할 수 있다. Bucket에는 Couchbase, Ephemeral, Memcached 3가지 Type이 존재한다.
 
 * **Couchbase** : memory + disk를 이용하는 Bucket Type이다. Data는 Memory와 Disk에 저장되며, Memory가 가득찬 경우 Memory에 Data는 덮어씌워 진다. 하지만 Data는 Disk에 남아있기 때문에 Data의 손실로 이어지지는 않는다. Replication, Rebalancing을 지원한다.
-
 * **Ephemeral** : memory만 이용하는 Bucket Type이다. Data는 Memory에만 저장되며, Memory가 가득찬 경우 기존의 Data는 덮어씌워진다. 이는 곧 Data의 손실로 이어진다. Replication, Rebalancing을 지원한다.
-
 * **Memcached** : memory만 이용하는 방식이다. memcached처럼 Ketama consistent hashing을 이용하여 Data를 저장한다. Replication, Rebalancing을 지원하지 않는다.
 
 ### 1.2. Replication

@@ -32,9 +32,7 @@ Library performs the role of helping process various types of workloads based on
 [Figure 2] shows the Spark Runtime Architecture. It consists of Driver, Cluster Manager, and Executor.
 
 * **Driver** : Driver is a program that initializes and manages Spark Context. SparkContext is an object that contains overall information about tasks. It separates tasks into Tasks, and the separated Tasks are sent to Executors through the Scheduler inside SparkContext and executed. RDDs are also created through SparkContext.
-
 * **Cluster Manager** : Performs the role of running and managing Spark Executors with the Resources (CPU, Memory) required by SparkContext. Cluster Manager can integrate with various platforms, and currently supports Hadoop YARN, Apache Mesos, and Kubernetes.
-
 * **Executor** : Executor is a program that performs the role of receiving Tasks from SparkContext, executing them, and returning results. Executor is created by Cluster Manager at the request of SparkContext, and after creation is complete, Executor connects to SparkContext and waits for Tasks to execute from SparkContext. Executor belongs to one SparkContext and is not shared with multiple SparkContexts. Therefore, even if multiple Spark Applications use the same Cluster Manager, they run independently. When SparkContext terminates, Executor also terminates.
 
 {{< figure caption="[Figure 3] Client Mode Spark Runtime Architecture" src="images/spark-runtime-architecture-client-mode.png" width="650px" >}}
@@ -44,7 +42,6 @@ Library performs the role of helping process various types of workloads based on
 Spark Runtime Architecture can be divided into 2 modes: **Client Mode** and **Cluster Mode**. [Figure 3] shows Client Mode, and [Figure 4] shows Cluster Mode.
 
 * **Client Mode** : In Client Mode, the Client directly runs the Driver. Mainly used when using Spark interactively for Spark Application development, such as Spark Shell or Jupyter Notebook.
-
 * **Cluster Mode** : In Cluster Mode, the Client delegates Driver operation to Cluster Manager. Therefore, Driver also runs inside the Cluster, same as Executor. Mainly used in Production environments.
 
 ## 3. References

@@ -13,9 +13,7 @@ Couchbase provides Memcached compatibility so that existing Memcached deployment
 [Figure 1] shows how to replace existing Memcached with Couchbase and Moxi. Three approaches are provided: Couchbase Library, Server Side Moxi, and Client Side Moxi. **Moxi** is a proxy server that converts the Memcached protocol to the Couchbase protocol between a Memcached client and a Couchbase server.
 
 * **Couchbase Library** : A method that replaces the existing Memcached library with the Couchbase library. It can minimize performance degradation, but has the disadvantage of requiring modifications to existing applications.
-
 * **Server Side Moxi** : A method that runs Moxi on a server node to convert the Memcached protocol to the Couchbase protocol. This approach is not recommended today due to SPOF (single point of failure) issues.
-
 * **Client Side Moxi** : A method that runs Moxi on a client node to convert the Memcached protocol to the Couchbase protocol. The application must be modified so that the Memcached library connects to Moxi on the client node rather than to Memcached on the server node.
 
 ## 2. References

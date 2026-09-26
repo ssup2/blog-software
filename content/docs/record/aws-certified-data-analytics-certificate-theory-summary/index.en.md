@@ -14,11 +14,9 @@ Organize missing content based on the following organized content
   * Kinesis Data Streams (KDS)
   * Simple Queue Service (SQS)
   * Internet of Things (IoT)
-
 * **Near-real Time** : Near-real-time data collection
   * Kinesis Data Firehose (KDF)
   * Database Migration Service (DMS)
-
 * **Batch** : Batch data collection
   * Snowball
   * Data Pipeline

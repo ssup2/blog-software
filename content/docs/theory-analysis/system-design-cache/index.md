@@ -8,12 +8,10 @@ System Design 관점에서 Cache의 고려 사항을 정리한다.
 ## 1. System Design Cache
 
 * Cache Timeout
-
 * Cache Invalidation
   * Write-through
   * Write-around
   * Write-back
-
 * Cache Eviction Policy
   * LRU (Least Recently Used)
   * LFU (Least Frequently Used)

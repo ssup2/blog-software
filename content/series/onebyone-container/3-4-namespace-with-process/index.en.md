@@ -9,9 +9,7 @@ Namespace and Process have a close relationship. First, let's look at the charac
 Below is an explanation of system calls related to Namespace. You can see that clone() and unshare() system calls, which create new Namespaces, not only create Namespaces but also perform the action of assigning processes to the created Namespace.
 
 * `clone()` : This is an extended version of the fork() system call that creates processes. When you proceed with Namespace-related settings with CLONE-NEW* options and call the clone() system call, not only the (Child) process but also a new Namespace to which the process belongs is created. Container runtimes like Docker use the clone() system call to simultaneously create the Namespace used by the container and the container's Init Process when creating a new container.
-
 * `unshare()` : When the unshare() system call is called, a new Namespace is created, and the process that called the unshare() system call belongs to the newly created Namespace. You can use the unshare() system call through the unshare command.
-
 * `setns()` : The process that calls the setns() system call belongs to another Namespace specified through the setns() system call parameter. The docker exec command used when executing commands inside Docker containers from the Host uses the setns() system call to run processes in the Docker container's Namespace. You can also use the setns() system call through the nsenter command.
 
 ## Characteristics of Process Related to Namespace

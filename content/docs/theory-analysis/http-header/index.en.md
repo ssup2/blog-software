@@ -63,7 +63,6 @@ The `Cache-Control` header is a header for directing cache policies. Here, Cache
   * `no-store` : Shared Cache does not store data received from the Origin Server. The client always receives new data from the Origin Server.
   * `no-transform` : Shared Cache does not transform data.
   * `only-if-cached` : Shared Cache checks if there is cached data and responds with that data if available, otherwise does not respond.
-
 * Server's `<cache-directive>` : Indicates policy direction for Local Cache or Shared Cache. Multiple Cache Directives can be used.
   * `max-age=<seconds>` : If Local Cache has cached data less than seconds, it responds with cached data, and if it has cached data more than seconds, it re-caches new data from the Origin Server and then responds.
   * `s-maxage=<seconds>` : If Shared Cache has cached data less than seconds, it responds with cached data, and if it has cached data more than seconds, it re-caches new data from the Origin Server and then responds.

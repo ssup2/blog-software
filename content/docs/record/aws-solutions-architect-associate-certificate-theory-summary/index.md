@@ -335,17 +335,14 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
     * ASG Group의 평균 Inbound Traffic (All EC2 Network Interface)
     * ASG Group의 평균 Outbound Traffic (All EC2 Network Interface)
     * ASG Group의 평균 초당 Request
-
 * Simple Scailing
   * CloudWatch Alarm 기반 정책
   * Metric이 특정 값을 도달하면 EC2 Instance 추가, 삭제 수행
   * Ex) ASG Group 평균 CPU 사용률이 70% 이상이면 EC2 Instnace 5개 추가, 40% 미만이면 5개 감소
-
 * Step Scailing
   * CloudWatch Alarm 기반 정책
   * Metric이 구간에 따라서 EC2 Instance 추가, 삭제 수행
   * Ex) ASG Group 평균 CPU 사용률이 70% 이상일 경우 EC2 Instance 10개 추가, 60% 이상일 경우 5개 추가, 40% 미만이면 5개 감소, 30% 미만일 경우 10개 감소
-
 * Predictive Scailing
   * 다음의 과거의 Metric을 기반으료 예측하여 Scaling 수행
     * ASG Group에 평균 CPU 사용량
@@ -353,7 +350,6 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
     * SG Group의 평균 Outbound Traffic
     * ASG Group의 평균 초당 Request
     * Custom Metric 기반으로 예측
-
 * Scheduled Action
   * 시간대에 따른 Scaleing 수행
 
@@ -1144,7 +1140,6 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
   * RCU (Read Capacity Units), WCU (Write Capacility Unit)만큼 비용 청구
   * RCU & WCU를 대상으로 Auto-scaliing을 수행 가능
   * 예측 가능한 Workload에 적합
-
 * On-Demand Mode
   * Read/Write 자동으로 Scale Up/Down 수행
   * 용량 예측 불필요
@@ -1427,7 +1422,6 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
     * 주기는 변경되지 않음
   * Key Rotate를 수행한 이후에도 동일한 CMK ID를 갖음
   * Rotate 이후에도 Rotate 이전의 Key는 하위 호완성을 위해서 지원
-
 * Manual Key Rotate
   * 새로운 Key를 생성하여 사용자가 원할때 Key Rotate를 수행
   * 새로운 Key를 생성하였기 때문에 다른 CMK ID를 갖음

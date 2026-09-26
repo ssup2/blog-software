@@ -34,7 +34,6 @@ CSI defines Interface between CO and Plugin based on defined Plugin and Volume L
   * GetPluginInfo
   * GetPluginCapabilities
   * Probe
-
 * Controller Service
   * CreateVolume
   * DeleteVolume
@@ -48,7 +47,6 @@ CSI defines Interface between CO and Plugin based on defined Plugin and Volume L
   * DeleteSnapshot 
   * ListSnapshots 
   * ControllerExpandVolume 
-
 * Node Service
   * NodeStageVolume
   * NodeUnstageVolume

@@ -34,7 +34,6 @@ CSI는 정의한 Plugin과 Volume Lifecycle을 바탕으로 CO와 Plugin 사이�
   * GetPluginInfo
   * GetPluginCapabilities
   * Probe
-
 * Controller Service
   * CreateVolume
   * DeleteVolume
@@ -48,7 +47,6 @@ CSI는 정의한 Plugin과 Volume Lifecycle을 바탕으로 CO와 Plugin 사이�
   * DeleteSnapshot 
   * ListSnapshots 
   * ControllerExpandVolume 
-
 * Node Service
   * NodeStageVolume
   * NodeUnstageVolume

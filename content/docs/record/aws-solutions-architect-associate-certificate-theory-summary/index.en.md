@@ -335,17 +335,14 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
     * Average inbound traffic of ASG group (all EC2 network interfaces)
     * Average outbound traffic of ASG group (all EC2 network interfaces)
     * Average requests per second of ASG group
-
 * Simple Scaling
   * Policy based on CloudWatch alarm
   * Adds or removes EC2 instances when metric reaches specific value
   * Ex) Add 5 EC2 instances when ASG group average CPU usage is 70% or higher, decrease 5 when below 40%
-
 * Step Scaling
   * Policy based on CloudWatch alarm
   * Adds or removes EC2 instances based on metric ranges
   * Ex) Add 10 EC2 instances when ASG group average CPU usage is 70% or higher, add 5 when 60% or higher, decrease 5 when below 40%, decrease 10 when below 30%
-
 * Predictive Scaling
   * Performs scaling by predicting based on the following past metrics
     * Average CPU usage of ASG group
@@ -353,7 +350,6 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
     * Average outbound traffic of ASG group
     * Average requests per second of ASG group
     * Prediction based on custom metrics
-
 * Scheduled Action
   * Performs scaling based on time periods
 
@@ -1144,7 +1140,6 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
   * Charges based on RCU (Read Capacity Units) and WCU (Write Capacity Units)
   * Can perform auto-scaling on RCU & WCU
   * Suitable for predictable workloads
-
 * On-Demand Mode
   * Automatically performs scale up/down for read/write
   * No need to predict capacity
@@ -1427,7 +1422,6 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
     * Cycle does not change
   * Has same CMK ID even after performing key rotate
   * Supports keys before rotate even after rotate for backward compatibility
-
 * Manual Key Rotate
   * Creates new key and performs key rotate when user wants
   * Has different CMK ID because new key is created

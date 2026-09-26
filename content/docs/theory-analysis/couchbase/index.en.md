@@ -17,9 +17,7 @@ Couchbase has **Built-in Cache** based on Memcached. Since most Data-related ope
 Bucket is a Document Group managed by Couchbase. Multiple Buckets can exist in one Couchbase Cluster, and Resource usage can be limited for each Bucket. There are three types of Buckets: Couchbase, Ephemeral, and Memcached.
 
 * **Couchbase** : Bucket Type that uses memory + disk. Data is stored in Memory and Disk, and when Memory is full, Data in Memory is overwritten. However, since Data remains on Disk, it does not lead to Data loss. Supports Replication and Rebalancing.
-
 * **Ephemeral** : Bucket Type that uses only memory. Data is stored only in Memory, and when Memory is full, existing Data is overwritten. This leads to Data loss. Supports Replication and Rebalancing.
-
 * **Memcached** : Method that uses only memory. Stores Data using Ketama consistent hashing like memcached. Does not support Replication and Rebalancing.
 
 ### 1.2. Replication

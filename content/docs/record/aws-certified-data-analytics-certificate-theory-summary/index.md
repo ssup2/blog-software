@@ -14,11 +14,9 @@ title: AWS Certified Data Analytics 자격증 이론 정리
   * Kinesis data Streams (KDS)
   * Simple Queue Service (SQS)
   * Internet of Things (IoT)
-
 * **Near-real Time** : 준실시간 Data 수집
   * Kinesis Data Firehose (KDF)
   * Database Migration Service (DMS)
-
 * **Batch** : 일괄 Data 수집
   * Snowball
   * Data Pipeline

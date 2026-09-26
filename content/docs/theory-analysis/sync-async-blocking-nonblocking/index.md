@@ -27,17 +27,14 @@ Linux I/O 관련 함수들은 Sync/Async, Blocking/Non-blocking 인지에 따라
 * Sync + Blocking
   * I/O 함수 - read(), write() without O-NONBLOCK
   * I/O 처리 결과를 I/O 함수 호출이 완료되면 얻을 수 있으며, I/O 처리가 완료될때까지 I/O 함수를 호출한 Thread는 다른일을 수행하지 못한다.
-
 * Sync + Non-blocking
   * I/O 함수 - read(), write() with O-NONBLOCK
   * I/O 처리 결과를 I/O 함수 호출이 완료되면 얻을 수 있으며, I/O 처리가 완료되지 않더라도 I/O 함수를 호출한 Thread는 다른일을 수행할 수 있다.
   * I/O 함수를 호출한 Thread는 I/O 처리가 완료될 때까지 계속 I/O 함수를 다시 호출해야 한다.
-
 * Async + Blocking
   * I/O 함수 - select(), epoll() (Multiplexing) with read(), write() and O-NONBLOCK
   * I/O 처리 결과를 I/O 함수 호출이 완료되어도 얻을 수 없으며, I/O 처리가 완료될때까지 I/O 함수를 호출한 Thread는 다른일을 수행하지 못한다.
   * I/O 함수를 호출하고 Mutiplexing 함수를 호출하여 I/O 처리 완료 Event가 발생할 때까지 Blocking 한다.
-
 * Async + Non-blocking
   * I/O 함수 - aio()
   * I/O 처리 결과를 I/O 함수 호출이 완료되어도 얻을 수 없으며, I/O 처리가 완료되지 않더라도 I/O 함수를 호출한 Thread는 다른일을 수행할 수 있다.

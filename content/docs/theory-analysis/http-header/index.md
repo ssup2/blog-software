@@ -63,7 +63,6 @@ Cache-Control: <cache-directive>
   * `no-store` : Shared Cache는 Origin Server로 부터 받은 데이터를 저장하지 않는다. Client는 항상 Orgin Server로부터 새로운 Data를 받는다.
   * `no-transform` : Shared Cache는 데이터를 변환하지 않는다.
   * `only-if-cached` : Shared Cache는 Caching된 데이터가 있는지 확인하고 있으면 해당 데이터를 응답하고, 없으면 응답하지 않는다.
-
 * Server의 `<cache-directive>` : Local Cache 또는 Shared Cache에 대한 정책 지시를 의미한다. 여러개의 Cache Directive를 사용될 수 있다.
   * `max-age=<seconds>` : Local Cache는 seconds 미만의 Caching된 데이터가 있을 경우에는 Caching된 데이터를 응답하고, seconds 이상의 Caching된 데이터가 있을 경우에는 Orgin Server로부터 새로운 Data를 다시 Caching후에 응답한다.
   * `s-maxage=<seconds>` : Shared Cache는 seconds 미만의 Caching된 데이터가 있을 경우에는 Caching된 데이터를 응답하고, seconds 이상의 Caching된 데이터가 있을 경우에는 Orgin Server로부터 새로운 Data를 다시 Caching후에 응답한다.
