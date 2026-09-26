@@ -37,5 +37,6 @@ ssup2의 개인 기술 블로그 (Hugo 기반). 글은 `content/docs/` 아래 Ma
 ### 표기
 
 - 키워드 강조: 정의 시점의 핵심 용어·Resource·Component 이름은 `**bold**`로, 설정값·필드 이름(`controllerName`, `parentRefs` 등)·Resource 인스턴스 이름·Label·명령어는 `` `code` ``로 강조한다. 같은 용어의 이후 언급은 일반 텍스트로 둔다. 본문 첫 정의 문장에서 글 제목과 연관된 키워드도 bold 처리한다.
+- 개조식 선두 용어 강조: `용어 : 설명` 형태의 개조식 목록에서 콜론 앞의 선두 용어는 평문으로 두지 않고 위의 키워드 강조 기준에 따라 강조한다. 개념·Component 이름은 `**bold**`로 (예: "**kubelet** : kube-apiserver로부터 명령을 받아..."), 설정값·필드·Filter 이름 같은 리터럴 값은 `` `code` ``로 (예: "`envoy.filters.listener.tls_inspector` : ClientHello를 엿보아...") 강조한다.
 - 명칭 대칭: "Client가 수신하는" ↔ "Server가 수신하는"처럼 역할 명칭의 형태를 맞춘다 ("Server App" 대신 "Server").
 - Bold 문법 주의: 닫는 `**` 바로 앞이 구두점(`)` 등)이고 뒤에 한글 조사가 바로 붙으면 CommonMark flanking 규칙 때문에 렌더링이 깨진다 (`**A (B)**는` 실패). 괄호를 강조 밖으로 빼서 `**A** (B)는` 형태로 작성한다.
