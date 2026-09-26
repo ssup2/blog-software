@@ -62,9 +62,9 @@ Istio 설치를 위해서 Master Node의 `/etc/kubernetes/manifests/kube-apiserv
 ```shell
 (User)# mkdir ~/kubeflow
 (User)# cd ~/kubeflow
-(User)# curl -L -O -J https://github.com/kubeflow/kfctl/releases/download/v1.2.0/kfctl-v1.2.0-0-gbc038f9-linux.tar.gz
-(User)# tar -xvf kfctl-v1.2.0-0-gbc038f9-linux.tar.gz
-(User)# rm kfctl-v1.2.0-0-gbc038f9-linux.tar.gz
+(User)# curl -L -O -J https://github.com/kubeflow/kfctl/releases/download/v1.2.0/kfctl_v1.2.0-0-gbc038f9_linux.tar.gz
+(User)# tar -xvf kfctl_v1.2.0-0-gbc038f9_linux.tar.gz
+(User)# rm kfctl_v1.2.0-0-gbc038f9_linux.tar.gz
 ```
 
 kubeflow 관리 도구인 `kfctl`을 설치한다.
@@ -73,19 +73,19 @@ kubeflow 관리 도구인 `kfctl`을 설치한다.
 
 ```text {caption="[File 2] ~/kubeflow/kfctl-env", linenos=table}
 export PATH=$PATH:~/kubeflow
-export KF-NAME=ssup2-kubeflow
-export BASE-DIR=~/kubeflow/cluster
-export KF-DIR=${BASE-DIR}/${KF-NAME}
-export CONFIG-URI="https://raw.githubusercontent.com/kubeflow/manifests/v1.2-branch/kfdef/kfctl-k8s-istio.v1.2.0.yaml"
+export KF_NAME=ssup2-kubeflow
+export BASE_DIR=~/kubeflow/cluster
+export KF_DIR=${BASE_DIR}/${KF_NAME}
+export CONFIG_URI="https://raw.githubusercontent.com/kubeflow/manifests/v1.2-branch/kfdef/kfctl_k8s_istio.v1.2.0.yaml"
 ```
 
 [File 1]의 내용으로 `kfctl`을 위한 env 파일을 생성한다.
 
 ```shell
 (User)# . ~/kubeflow/kfctl-env
-(User)# mkdir -p ${KF-DIR}
-(User)# cd ${KF-DIR}
-(User)# kfctl apply -V -f ${CONFIG-URI}
+(User)# mkdir -p ${KF_DIR}
+(User)# cd ${KF_DIR}
+(User)# kfctl apply -V -f ${CONFIG_URI}
 ```
 
 Kubeflow를 설치한다. 설치가 완료된 이후에 `istio-system` Namespace의 `istio-ingressgateway` Service의 NodePort를 이용하여 Kubeflow Dashboard에 접근한다.
@@ -94,5 +94,5 @@ Kubeflow를 설치한다. 설치가 완료된 이후에 `istio-system` Namespace
 ## 7. 참조
 
 * kustomize Install : [https://kubectl.docs.kubernetes.io/installation/kustomize/binaries/](https://kubectl.docs.kubernetes.io/installation/kustomize/binaries/)
-* Kubeflow Install : [https://www.kubeflow.org/docs/started/k8s/kfctl-k8s-istio/](https://www.kubeflow.org/docs/started/k8s/kfctl-k8s-istio/)
+* Kubeflow Install : [https://www.kubeflow.org/docs/started/k8s/kfctl_k8s_istio/](https://www.kubeflow.org/docs/started/k8s/kfctl_k8s_istio/)
 * Kubeflow kustomize : [https://www.kubeflow.org/docs/other-guides/kustomize/](https://www.kubeflow.org/docs/other-guides/kustomize/)

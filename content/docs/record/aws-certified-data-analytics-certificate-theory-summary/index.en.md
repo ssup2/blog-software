@@ -80,7 +80,7 @@ Organize missing content based on the following organized content
 * Ex) Application, AWS Lambda, Kinesis Data Firehose, Kinesis Data Analytics
 * Performance
   * **Default** : 2 MB/sec for all consumers
-  * With Enhanced Fan Out : 2 MB/sec per consumer
+  * **With Enhanced Fan Out** : 2 MB/sec per consumer
 * API
   * `GetRecords`
     * Retrieves multiple records

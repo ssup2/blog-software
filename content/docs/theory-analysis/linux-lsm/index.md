@@ -34,7 +34,7 @@ LSM 위에 다양한 Security Module들을 동시에 올릴 수 있다. 이러�
 
 LSM에 올라온 Security Module의 순서대로 Security Module의 Hook Function들이 Hook Head에 연결된다. Capability Module, Yama Module, AppArmor Module 순으로 LSM에 올라갔기 때문에 `ptrace-access-check` Hook Head에 Capabilty, Yama, AppArmor의 `ptrace-access-check` Hook Function이 순서대로 연결된다. `task-ptr` Hook Head에는 Capability와 Yama의 Hook Function만 연결되어 있는데 AppArmor는 `task-ptr` Hook Function을 구현하지 않았기 때문이다.
 
-먼저 LSM에 올라온 Security Module의 Hook Function이 먼져 수행되고 중간 Hook Function의 결과가 No라면 그 즉시 다음 Hook Function을 수행하지 않고 중단한다. [Figure 5]처럼 Security Module이 설정되어 있는 상태에서 `ptrace-access-check` hook이 발생하면 가장 먼져 Capability의 `ptrace-access-check` Hook Function이 실행된다. Capability의 `ptrace-access-check` Hook Function의 결과가 Yes라면 Yama의 `ptrace-access-check` Hook Function이 수행된다. 만약 결과가 No라면 다음 Yama의 Hook Function을 수행하지 않고 바로 LSM을 빠져 나온다.
+먼저 LSM에 올라온 Security Module의 Hook Function이 먼저 수행되고 중간 Hook Function의 결과가 No라면 그 즉시 다음 Hook Function을 수행하지 않고 중단한다. [Figure 5]처럼 Security Module이 설정되어 있는 상태에서 `ptrace-access-check` hook이 발생하면 가장 먼저 Capability의 `ptrace-access-check` Hook Function이 실행된다. Capability의 `ptrace-access-check` Hook Function의 결과가 Yes라면 Yama의 `ptrace-access-check` Hook Function이 수행된다. 만약 결과가 No라면 다음 Yama의 Hook Function을 수행하지 않고 바로 LSM을 빠져 나온다.
 
 ```c linenos {caption="[Code 1] security-init() 함수", linenos=table}
 /**

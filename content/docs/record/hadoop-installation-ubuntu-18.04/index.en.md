@@ -7,7 +7,7 @@ title: Hadoop Installation / Ubuntu 18.04 Environment
 The installation and execution environment is as follows.
 
 * Ubuntu 18.04 LTS 64bit, root user
-* Java openjdk version "1.8.0-171"
+* Java openjdk version "1.8.0_171"
 * Hadoop 3.0.3
 
 ## 2. sshd Installation, Configuration
@@ -20,7 +20,7 @@ $ apt install -y pdsh
 
 Install `sshd`.
 
-```text {caption="[File 1] /etc/ssh/sshd-config", linenos=table}
+```text {caption="[File 1] /etc/ssh/sshd_config", linenos=table}
 ...
 #LoginGraceTime 2m
 PermitRootLogin yes
@@ -28,14 +28,14 @@ PermitRootLogin yes
 ...
 ```
 
-Modify the `/etc/ssh/sshd-config` file with the contents of [File 1].
+Modify the `/etc/ssh/sshd_config` file with the contents of [File 1].
 
 ```shell
 $ service sshd restart
-$ ssh-keygen -t rsa -P '' -f ~/.ssh/id-rsa
-$ cat ~/.ssh/id-rsa.pub >> ~/.ssh/authorized-keys
-$ chmod 0600 ~/.ssh/authorized-keys
-$ echo "ssh" > /etc/pdsh/rcmd-default
+$ ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa
+$ cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+$ chmod 0600 ~/.ssh/authorized_keys
+$ echo "ssh" > /etc/pdsh/rcmd_default
 $ ssh localhost
 
 ...
@@ -66,7 +66,7 @@ Download the Hadoop Binary.
 ```text {caption="[File 2] ~/hadoop-3.0.3/etc/hadoop/hadoop-env.sh", linenos=table}
 # The java implementation to use. By default, this environment
 # variable is REQUIRED on ALL platforms except OS X!
-export JAVA-HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64
+export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64
 ```
 
 Modify the `~/hadoop-3.0.3/etc/hadoop/hadoop-env.sh` file as shown in [File 2].
@@ -82,7 +82,7 @@ Modify the `~/hadoop-3.0.3/etc/hadoop/hadoop-env.sh` file as shown in [File 2].
 
 Modify the `~/hadoop-3.0.3/etc/hadoop/core-site.xml` file as shown in [File 3].
 
-```xml {caption="[File 4] ~/hadoop-3.0.3/etc/hadoop/core-site.xml", linenos=table}
+```xml {caption="[File 4] ~/hadoop-3.0.3/etc/hadoop/hdfs-site.xml", linenos=table}
 <configuration>
 	<property>
         <name>dfs.replication</name>
@@ -91,23 +91,23 @@ Modify the `~/hadoop-3.0.3/etc/hadoop/core-site.xml` file as shown in [File 3].
 </configuration>
 ```
 
-Modify the `~/hadoop-3.0.3/etc/hadoop/core-site.xml` file as shown in [File 4].
+Modify the `~/hadoop-3.0.3/etc/hadoop/hdfs-site.xml` file as shown in [File 4].
 
 ```text {caption="[File 5] ~/.bashrc", linenos=table}
 ...
-export HADOOP-HOME="/root/hadoop-3.0.3"
-export PATH=$PATH:$HADOOP-HOME/bin
-export PATH=$PATH:$HADOOP-HOME/sbin
-export HADOOP-MAPRED-HOME=$HADOOP-HOME
-export HADOOP-COMMON-HOME=$HADOOP-HOME
-export HADOOP-HDFS-HOME=$HADOOP-HOME
-export YARN-HOME=$HADOOP-HOME
+export HADOOP_HOME="/root/hadoop-3.0.3"
+export PATH=$PATH:$HADOOP_HOME/bin
+export PATH=$PATH:$HADOOP_HOME/sbin
+export HADOOP_MAPRED_HOME=$HADOOP_HOME
+export HADOOP_COMMON_HOME=$HADOOP_HOME
+export HADOOP_HDFS_HOME=$HADOOP_HOME
+export YARN_HOME=$HADOOP_HOME
 
-export HDFS-NAMENODE-USER="root"
-export HDFS-DATANODE-USER="root"
-export HDFS-SECONDARYNAMENODE-USER="root"
-export YARN-RESOURCEMANAGER-USER="root"
-export YARN-NODEMANAGER-USER="root"
+export HDFS_NAMENODE_USER="root"
+export HDFS_DATANODE_USER="root"
+export HDFS_SECONDARYNAMENODE_USER="root"
+export YARN_RESOURCEMANAGER_USER="root"
+export YARN_NODEMANAGER_USER="root"
 ```
 
 Add the contents of [File 5] to the `~/.bashrc` file.
@@ -139,15 +139,15 @@ Create a root user folder.
 	</property>
 	<property>
 		<name>yarn.app.mapreduce.am.env</name>
-		<value>HADOOP-MAPRED-HOME=/root/hadoop-3.0.3</value>
+		<value>HADOOP_MAPRED_HOME=/root/hadoop-3.0.3</value>
 	</property>
 	<property>
 		<name>mapreduce.map.env</name>
-		<value>HADOOP-MAPRED-HOME=/root/hadoop-3.0.3</value>
+		<value>HADOOP_MAPRED_HOME=/root/hadoop-3.0.3</value>
 	</property>
 	<property>
 		<name>mapreduce.reduce.env</name>
-		<value>HADOOP-MAPRED-HOME=/root/hadoop-3.0.3</value>
+		<value>HADOOP_MAPRED_HOME=/root/hadoop-3.0.3</value>
 	</property>
 </configuration>
 ```
@@ -158,7 +158,7 @@ Modify the `~/hadoop-3.0.3/etc/hadoop/mapred-site.xml` file as shown in [File 6]
 <configuration>
 	<property>
 		<name>yarn.nodemanager.aux-services</name>
-		<value>mapreduce-shuffle</value>
+		<value>mapreduce_shuffle</value>
 	</property>
 	<property>
 		<name>yarn.nodemanager.vmem-check-enabled</name>

@@ -48,7 +48,7 @@ int main()
 
 Event Drivent Architecture는 Main Loop라는 Single Thread를 이용하기 때문에 Race Condtion이 발생하지 않는다. Lock을 이용한 자원 동기화가 불필요 하기 때문에 프로그래밍이 간단하다는 큰 장점이 있다. 하지만 몇가지 단점도 가지고 있다.
 
-먼져 Main Loop는 Event Handler안에서 Blocking상태가 되면 안된다. 오직 Event를 대기하는 곳에서만 Blocking 상태가 되어야 한다. Event Handler안에서 Blocking 상태가 되면 그 사이에 발생한 Event는 처리되지 못하기 때문에 프로그램의 반응성이 크게 떨어진다. Event Handler안에서 발생하는 Blocking 동작 대부분은 I/O 동작을 위한 `read()`, `write()` 같은 System Call에서 발생한다. 이러한 Blocking 현상을 막기 위해서는 Non-blocking Option을 통해서 System Call을 호출하거나 AIO(Async I/O)를 이용해야 한다.
+먼저 Main Loop는 Event Handler안에서 Blocking상태가 되면 안된다. 오직 Event를 대기하는 곳에서만 Blocking 상태가 되어야 한다. Event Handler안에서 Blocking 상태가 되면 그 사이에 발생한 Event는 처리되지 못하기 때문에 프로그램의 반응성이 크게 떨어진다. Event Handler안에서 발생하는 Blocking 동작 대부분은 I/O 동작을 위한 `read()`, `write()` 같은 System Call에서 발생한다. 이러한 Blocking 현상을 막기 위해서는 Non-blocking Option을 통해서 System Call을 호출하거나 AIO(Async I/O)를 이용해야 한다.
 
 또 하나의 단점은 Single Thread로 동작하기 때문에 Mult-Core 환경에서 CPU를 100% 이용할 수 없다는 점이다. 따라서 Event Driven Architecture만을 이용해서는 CPU Bound 일을 제대로 대응 할 수 없다.
 

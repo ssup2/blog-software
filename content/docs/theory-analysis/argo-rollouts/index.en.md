@@ -181,7 +181,7 @@ spec:
 
 [Manifest 4] shows an AnalysisTemplate Object that performs Analysis using Prometheus. The `metrics` section specifies the Metric to perform Analysis on, and specifies the execution interval, execution count, success condition, and failure limit. In the case of [Manifest 4], it performs 3 Queries at 30-second intervals, and since 2 failures are allowed, Analysis is considered successful if 1 out of 3 Queries succeeds. Query results are considered successful if they are 0.95 or higher. The `provider` section specifies which external system to integrate with to perform Analysis. The `prometheus` section specifies the Prometheus Endpoint and Query to integrate with. 
 
-```yaml {caption="[File 5] Rollouts Canary with AnalysisTemplate Prometheus Example", linenos=table}
+```yaml {caption="[Manifest 5] Rollouts Canary with AnalysisTemplate Prometheus Example", linenos=table}
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:

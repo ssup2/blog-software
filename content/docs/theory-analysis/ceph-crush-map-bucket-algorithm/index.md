@@ -87,7 +87,7 @@ cbucket list(bucket, pg_id, replica) {
 
 {{< figure caption="[Figure 4] List에 하위 Bucket이 추가되는 경우" src="images/crush-list-bucket-add.png" width="750px" >}}
 
-[Figure 4]는 Linked List에 하위 Bucket이 추가되는 경우를 나타내고 있다. 추가된 Bucket은 Linked List의 마지막에 붙어 Link 알고리즘 수행시 가장 먼져 배치여부를 조사하는 Bucket이 된다. 하위 Bucket이 추가되면 **PG는 추가된 Bucket에 배치되거나 기존의 Bucket에 그대로 배치된다.** 하위 Bucket이 추가되어도 기존의 `sum_weights` 값은 변하지 않기 때문이다. 따라서 적은 수의 Object들만 Rebalancing된다.
+[Figure 4]는 Linked List에 하위 Bucket이 추가되는 경우를 나타내고 있다. 추가된 Bucket은 Linked List의 마지막에 붙어 Link 알고리즘 수행시 가장 먼저 배치여부를 조사하는 Bucket이 된다. 하위 Bucket이 추가되면 **PG는 추가된 Bucket에 배치되거나 기존의 Bucket에 그대로 배치된다.** 하위 Bucket이 추가되어도 기존의 `sum_weights` 값은 변하지 않기 때문이다. 따라서 적은 수의 Object들만 Rebalancing된다.
 
 {{< figure caption="[Figure 5] List에 하위 Bucket이 제거되는 경우" src="images/crush-list-bucket-remove.png" width="650px" >}}
 

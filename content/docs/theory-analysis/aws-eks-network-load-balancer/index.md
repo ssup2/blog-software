@@ -106,8 +106,8 @@ my-nginx   <none>   *       k8s-default-mynginx-290ac4e9b9-1853125440.ap-northea
 
 [Shell 5]는 Ingress는 ALB를 이용하는 Ingress의 상태를 나타내고 있다. Ingress가 ALB를 이용하도록 설정하기 위해서는 Ingress에 다음과 같은 Annotation을 설정해야 한다.
 
-* ALB Class 설정 (필수) : `kubernetes.io/ingress.class: alb`
-* ALB Public Network 연결 : `alb.ingress.kubernetes.io/scheme: internet-facing`
+* **ALB Class 설정** (필수) : `kubernetes.io/ingress.class: alb`
+* **ALB Public Network 연결** : `alb.ingress.kubernetes.io/scheme: internet-facing`
 * **ALB Instance Target Type** : `alb.ingress.kubernetes.io/target-type: instance`
 * **ALB IP Target Type** : `alb.ingress.kubernetes.io/target-type: ip`
 
@@ -119,7 +119,7 @@ my-nginx   <none>   *       k8s-mygroup-9758714285-724452701.ap-northeast-2.elb.
 
 ALB는 여러 Ingress를 하나의 VIP로 이용할 수 있는 Group 기능을 제공한다. [Shell 6]는 Group 기능을 이용한 Ingress의 상태를 나타내고 있다. Group 기능을 이용하기 위해서는 아래의 Annotation을 설정해야 한다.
 
-* ALB Group 이름 : `alb.ingress.kubernetes.io/group.name: <group-name>`
+* **ALB Group 이름** : `alb.ingress.kubernetes.io/group.name: <group-name>`
 
 ## 2. 참조
 

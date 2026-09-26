@@ -35,7 +35,7 @@ Add Routing Rules so that Container IPs can be directly accessed from Windows. A
 $ apt update
 $ apt install docker.io
 $ apt install docker-compose
-$ echo "export DOCKER-HOST=tcp://localhost:2375" >> ~/.bashrc && source ~/.bashrc
+$ echo "export DOCKER_HOST=tcp://localhost:2375" >> ~/.bashrc && source ~/.bashrc
 ```
 
 Install and set up Docker and Docker Compose. Run WSL Ubuntu and install Docker Package for Docker Client. Specify Docker Host in Bash to connect with Docker from Docker for Windows. Enter the above command in WSL Ubuntu.

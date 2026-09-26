@@ -31,7 +31,7 @@ title: CKAD 자격증 시험 정리/후기
 * `tmux` 동작 확인
   * https://linuxize.com/post/getting-started-with-tmux/
 
-## 4. 시험중 알아야할 명렁어
+## 4. 시험중 알아야할 명령어
 
 * Windows Copy
   * ctrl + insert

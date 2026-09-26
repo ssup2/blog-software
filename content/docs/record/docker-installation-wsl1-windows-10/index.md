@@ -35,7 +35,7 @@ Windows에서 Container의 IP에 바로 접근할 수 있도록 Routing Rule을 
 $ apt update
 $ apt install docker.io
 $ apt install docker-compose
-$ echo "export DOCKER-HOST=tcp://localhost:2375" >> ~/.bashrc && source ~/.bashrc
+$ echo "export DOCKER_HOST=tcp://localhost:2375" >> ~/.bashrc && source ~/.bashrc
 ```
 
 Docker, Docker Compose 설치 및 설정한다. WSL Ubuntu를 실행하여 Docker Client를 위해서 Docker Package를 설치한다. Docker for Windows의 Docker와 연결하기 위해서 Bash에 Docker Host를 지정한다. WSL Ubuntu에서 위의 명령어를 입력한다.

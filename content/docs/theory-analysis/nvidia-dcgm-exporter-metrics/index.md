@@ -87,8 +87,8 @@ GPU Memory에서 수행하는 Remapping Row Metric. Remapping Row는 GPU Memory�
 {{< table caption="[Table 7] NVIDIA DCGM Exporter Remapping Rows Metrics" >}}
 | Metric | Description | Metric Type | Value Unit |
 |---|---|---|---|
-| `DCGM_FI_DEV_CORRECTABLE_REMAPPED_ROWS` | GPU Memory에서 Row Remapping을 통해서 수정이 가능한 Error의 갯수 | Counter | |
-| `DCGM_FI_DEV_UNCORRECTABLE_REMAPPED_ROWS` | GPU Memory에서 Row Remapping을 통해서 수정이 불가능한 Error의 갯수 | Counter | |
+| `DCGM_FI_DEV_CORRECTABLE_REMAPPED_ROWS` | GPU Memory에서 Row Remapping을 통해서 수정이 가능한 Error의 개수 | Counter | |
+| `DCGM_FI_DEV_UNCORRECTABLE_REMAPPED_ROWS` | GPU Memory에서 Row Remapping을 통해서 수정이 불가능한 Error의 개수 | Counter | |
 | `DCGM_FI_DEV_ROW_REMAP_FAILURE` | GPU Memory에서 Row Remapping 수행 시도 실패 횟수 | Counter | |
 {{</ table >}}
 
@@ -99,10 +99,10 @@ GPU Memroy의 ECC (Error-Correcting Code) Metric
 {{< table caption="[Table 8] NVIDIA DCGM Exporter ECC Metrics" >}}
 | Metric | Description | Metric Type | Value Unit |
 |---|---|---|---|
-| `DCGM_FI_DEV_ECC_SBE_VOL_TOTAL` | 휘발성 Single-Bit Error의 갯수 | Counter | |
-| `DCGM_FI_DEV_ECC_DBE_VOL_TOTAL` | 휘발성 Double-Bit Error의 갯수 | Counter | |
-| `DCGM_FI_DEV_ECC_SBE_AGG_TOTAL` | 영구적인 Single-Bit Error의 갯수 | Counter | |
-| `DCGM_FI_DEV_ECC_DBE_AGG_TOTAL` | 영구적인 Double-Bit Error의 갯수 | Counter | |
+| `DCGM_FI_DEV_ECC_SBE_VOL_TOTAL` | 휘발성 Single-Bit Error의 개수 | Counter | |
+| `DCGM_FI_DEV_ECC_DBE_VOL_TOTAL` | 휘발성 Double-Bit Error의 개수 | Counter | |
+| `DCGM_FI_DEV_ECC_SBE_AGG_TOTAL` | 영구적인 Single-Bit Error의 개수 | Counter | |
+| `DCGM_FI_DEV_ECC_DBE_AGG_TOTAL` | 영구적인 Double-Bit Error의 개수 | Counter | |
 {{</ table >}}
 
 ### 1.9. Retired Pages Metrics
@@ -112,9 +112,9 @@ GPU Memroy의 Retired Pages Metric. Retired Page는 비정상 상태의 Page를 
 {{< table caption="[Table 9] NVIDIA DCGM Exporter Retired Pages Metrics" >}}
 | Metric | Description | Metric Type | Value Unit |
 |---|---|---|---|
-| `DCGM_FI_DEV_RETIRED_SBE` | 휘발성 Single-Bit Error로 인해서 삭제된 Page의 갯수 | Counter | |
-| `DCGM_FI_DEV_RETIRED_DBE` | 휘발성 Double-Bit Error로 인해서 삭제된 Page의 갯수 | Counter | |
-| `DCGM_FI_DEV_RETIRED_PENDING` | 삭제 대기중인 Page의 갯수 | Counter | |
+| `DCGM_FI_DEV_RETIRED_SBE` | 휘발성 Single-Bit Error로 인해서 삭제된 Page의 개수 | Counter | |
+| `DCGM_FI_DEV_RETIRED_DBE` | 휘발성 Double-Bit Error로 인해서 삭제된 Page의 개수 | Counter | |
+| `DCGM_FI_DEV_RETIRED_PENDING` | 삭제 대기중인 Page의 개수 | Counter | |
 {{</ table >}}
 
 ### 1.10. Error and Violation Metrics

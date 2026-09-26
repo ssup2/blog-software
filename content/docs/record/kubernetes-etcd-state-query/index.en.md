@@ -13,7 +13,7 @@ The execution environment is as follows.
 
 ```shell
 (Node)$ kubectl -n kube-system exec -it etcd-vm01 sh
-(Container)$ ETCDCTL-API=3 etcdctl --endpoints 127.0.0.1:2379 --cacert /etc/kubernetes/pki/etcd/ca.crt --cert /etc/kubernetes/pki/etcd/server.crt --key /etc/kubernetes/pki/etcd/server.key get / --prefix --keys-only
+(Container)$ ETCDCTL_API=3 etcdctl --endpoints 127.0.0.1:2379 --cacert /etc/kubernetes/pki/etcd/ca.crt --cert /etc/kubernetes/pki/etcd/server.crt --key /etc/kubernetes/pki/etcd/server.key get / --prefix --keys-only
 /registry/apiextensions.k8s.io/customresourcedefinitions/adapters.config.istio.io
 
 /registry/apiextensions.k8s.io/customresourcedefinitions/apikeys.config.istio.io
@@ -28,7 +28,7 @@ The execution environment is as follows.
 ...
 ```
 
-After entering the etcd container using `kubectl`, execute the `etcdctl` key query command. The API version must be explicitly specified using the `ETCDCTL-API` environment variable, and certificate-related files must also be specified via options. Since the query was performed on the `/` (root) path, all keys held by etcd are queried.
+After entering the etcd container using `kubectl`, execute the `etcdctl` key query command. The API version must be explicitly specified using the `ETCDCTL_API` environment variable, and certificate-related files must also be specified via options. Since the query was performed on the `/` (root) path, all keys held by etcd are queried.
 
 ## 3. References
 

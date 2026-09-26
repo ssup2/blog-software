@@ -26,7 +26,7 @@ title: Linux Kernel Compile
 ### 1.4. Install
 
 * `make install` : initrd 이미지를 생성해주고, `vmlinuz`, `System.map` 파일을 `/boot`에 복사하고 심볼릭 링크를 생성한다. 그리고 `grub.conf`를 알맞게 수정하여 새로운 Kernel 이미지로 부팅할 수 있게 한다.
-* `make modules-install` : Compile한 Module들을 `$INSTALL-MOD-PATH/lib/modules/[kernel version]` 폴더에 저장한다. Shell에서 `$INSTALL-MOD-PATH`를 변수를 설정하여 복사 위치를 변경 할 수 있다. `$INSTALL-MOD-PATH`를 설정하지 않으면 /(root)의 `lib` 폴더 아래에 복사된다.
+* `make modules_install` : Compile한 Module들을 `$INSTALL_MOD_PATH/lib/modules/[kernel version]` 폴더에 저장한다. Shell에서 `$INSTALL_MOD_PATH`를 변수를 설정하여 복사 위치를 변경 할 수 있다. `$INSTALL_MOD_PATH`를 설정하지 않으면 /(root)의 `lib` 폴더 아래에 복사된다.
 
 ### 1.5. E.T.C
 
@@ -39,9 +39,9 @@ title: Linux Kernel Compile
 ### 2.1. ARM
 
 ```shell
-$ ARCH=arm CROSS-COMPILE=arm-linux-gnueabi- make menuconfig
-$ ARCH=arm CROSS-COMPILE=arm-linux-gnueabi- make zImage
-$ ARCH=arm CROSS-COMPILE=arm-linux-gnueabi- make uImage
-$ ARCH=arm CROSS-COMPILE=arm-linux-gnueabi- make modules
-$ ARCH=arm CROSS-COMPILE=arm-linux-gnueabi- INSTALL-MOD-PATH=tmp make modules-install
+$ ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- make menuconfig
+$ ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- make zImage
+$ ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- make uImage
+$ ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- make modules
+$ ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- INSTALL_MOD_PATH=tmp make modules_install
 ```

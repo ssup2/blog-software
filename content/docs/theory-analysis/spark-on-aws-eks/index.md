@@ -11,8 +11,8 @@ AWS EKS에서도 일반적인 Kubernetes Cluster처럼 `spark-submit` CLI 및 Sp
 다만 AWS EKS에서는 Driver, Executor Pod의 Container Image를 **EMR on EKS Spark Container Image**로 이용하는 것을 권장한다. EMR on EKS Spark Container Image에는 EKS 환경에 최적화된 Optimized Spark가 내장되어 있어 Open Source Spark 대비 더 빠른 성능을 보이며, 아래에 명시된 AWS와 연관된 Library 및 Spark Connector가 포함되어 있기 때문이다.
 
 * EMRFS S3-optimized comitter
-* AWS Redshift용 Spark Connector : Spark Application에서 AWS Redshift 접근시 이용
-* AWS SageMaker용 Spark Library : Spark Application의 DataFrame에 저장되어 있는 Data를 바로 AWS SageMaker를 통해서 Training 수행 가능
+* **AWS Redshift용 Spark Connector** : Spark Application에서 AWS Redshift 접근시 이용
+* **AWS SageMaker용 Spark Library** : Spark Application의 DataFrame에 저장되어 있는 Data를 바로 AWS SageMaker를 통해서 Training 수행 가능
 
 EMR on EKS Spark Container Image는 [Public AWS ECR](https://gallery.ecr.aws/emr-on-eks)에 공개되어 있다. Spark Application에서 고유한 Library 및 Spark Connector를 이용하는 경우 Custom Container Image를 구축해야 하는데, 이 경우에도 EMR on EKS Spark Container Image를 Base Image로 이용하는 것을 권장한다.
 

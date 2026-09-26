@@ -38,11 +38,11 @@ Install Python and Pip on all nodes.
 ```shell
 (Deploy)$ ssh-keygen -t rsa
 Generating public/private rsa key pair.
-Enter file in which to save the key (/root/.ssh/id-rsa):
+Enter file in which to save the key (/root/.ssh/id_rsa):
 Enter passphrase (empty for no passphrase):
 Enter same passphrase again:
-Your identification has been saved in /root/.ssh/id-rsa.
-Your public key has been saved in /root/.ssh/id-rsa.pub.
+Your identification has been saved in /root/.ssh/id_rsa.
+Your public key has been saved in /root/.ssh/id_rsa.pub.
 The key fingerprint is:
 SHA256:Sp0SUDPNKxTIYVObstB0QQPoG/csF9qe/v5+S5e8hf4 root@kube02
 The key's randomart image is:
@@ -67,7 +67,7 @@ Generate an SSH key on the Deploy Node. Enter a blank for passphrase (Password) 
 (Deploy)$ ssh-copy-id root@30.0.0.13
 ```
 
-Use the `ssh-copy-id` command from the Deploy Node to copy the generated SSH public key to the `~/.ssh/authorized-keys` file of the remaining nodes.
+Use the `ssh-copy-id` command from the Deploy Node to copy the generated SSH public key to the `~/.ssh/authorized_keys` file of the remaining nodes.
 
 ## 4. kubespray Configuration and Execution
 
@@ -83,9 +83,9 @@ Install kubespray and copy the sample inventory.
 
 ```text {caption="[File 1] Deploy Node - ~/kubespray/inventory/mycluster/inventory.ini", linenos=table}
 [all]
-vm01 ansible-host=30.0.0.11 ip=30.0.0.11 etcd-member-name=etcd1
-vm02 ansible-host=30.0.0.12 ip=30.0.0.12 etcd-member-name=etcd2
-vm03 ansible-host=30.0.0.13 ip=30.0.0.13 etcd-member-name=etcd3
+vm01 ansible_host=30.0.0.11 ip=30.0.0.11 etcd_member_name=etcd1
+vm02 ansible_host=30.0.0.12 ip=30.0.0.12 etcd_member_name=etcd2
+vm03 ansible_host=30.0.0.13 ip=30.0.0.13 etcd_member_name=etcd3
 
 [kube-master]
 vm01
@@ -108,7 +108,7 @@ kube-node
 
 Store information and roles for each VM in the `inventory/mycluster/inventory.ini` file on the Deploy Node.
 
-```text {caption="[File 2] Deploy Node - ~/kubespray/inventory/mycluster/group-vars/all/all.yml", linenos=table}
+```text {caption="[File 2] Deploy Node - ~/kubespray/inventory/mycluster/group_vars/all/all.yml", linenos=table}
 ...
 ## There are some changes specific to the cloud providers
 ## for instance we need to encapsulate packets with some network plugins
@@ -117,59 +117,59 @@ Store information and roles for each VM in the `inventory/mycluster/inventory.in
 ## like you would do when using openstack-client before starting the playbook.
 ## Note: The 'external' cloud provider is not supported.
 ## TODO(riverzhang): https://kubernetes.io/docs/tasks/administer-cluster/running-cloud-controller/#running-cloud-controller-manager
-cloud-provider: openstack
+cloud_provider: openstack
 ...
 ```
 
-Set the Cloud Provider to OpenStack in the `inventory/mycluster/group-vars/all/all.yml` file on the Deploy Node.
+Set the Cloud Provider to OpenStack in the `inventory/mycluster/group_vars/all/all.yml` file on the Deploy Node.
 
-```text {caption="[File 3] Deploy Node - ~/kubespray/inventory/mycluster/group-vars/all/openstack.yml", linenos=table}
+```text {caption="[File 3] Deploy Node - ~/kubespray/inventory/mycluster/group_vars/all/openstack.yml", linenos=table}
 # # When OpenStack is used, if LBaaSv2 is available you can enable it with the following 2 variables.
-openstack-lbaas-enabled: True
-openstack-lbaas-subnet-id: [Tenant Network Subnet ID]
+openstack_lbaas_enabled: True
+openstack_lbaas_subnet_id: [Tenant Network Subnet ID]
 # To enable automatic floating ip provisioning, specify a subnet.
-openstack-lbaas-floating-network-id: [NAT (External) Network ID]
+openstack_lbaas_floating_network_id: [NAT (External) Network ID]
 # # Override default LBaaS behavior
-openstack-lbaas-use-octavia: True
-openstack-lbaas-method: "ROUND-ROBIN"
-#openstack-lbaas-provider: "haproxy"
-openstack-lbaas-create-monitor: "yes"
-openstack-lbaas-monitor-delay: "1m"
-openstack-lbaas-monitor-timeout: "30s"
-openstack-lbaas-monitor-max-retries: "3"     
+openstack_lbaas_use_octavia: True
+openstack_lbaas_method: "ROUND_ROBIN"
+#openstack_lbaas_provider: "haproxy"
+openstack_lbaas_create_monitor: "yes"
+openstack_lbaas_monitor_delay: "1m"
+openstack_lbaas_monitor_timeout: "30s"
+openstack_lbaas_monitor_max_retries: "3"     
 ```
 
-Configure the Octavia Load Balancer for Kubernetes LoadBalancer Service in the `inventory/mycluster/group-vars/all/openstack.yml` file on the Deploy Node. Check and set the External Network ID and External Network Subnet ID.
+Configure the Octavia Load Balancer for Kubernetes LoadBalancer Service in the `inventory/mycluster/group_vars/all/openstack.yml` file on the Deploy Node. Check and set the External Network ID and External Network Subnet ID.
 
-```text {caption="[File 4] Deploy Node - ~/kubespray/inventory/mycluster/group-vars/k8s-cluster/k8s-cluster.yml", linenos=table}
+```text {caption="[File 4] Deploy Node - ~/kubespray/inventory/mycluster/group_vars/k8s-cluster/k8s-cluster.yml", linenos=table}
 ...
-kube-network-plugin: cilium
+kube_network_plugin: cilium
 ...
-persistent-volumes-enabled: true
+persistent_volumes_enabled: true
 ...
 ```
 
-Configure the CNI plugin to use `cilium` and enable Persistent Volume in the `inventory/mycluster/group-vars/k8s-cluster/k8s-cluster.yml` file on the Deploy Node to configure Kubernetes to use OpenStack's Cinder.
+Configure the CNI plugin to use `cilium` and enable Persistent Volume in the `inventory/mycluster/group_vars/k8s-cluster/k8s-cluster.yml` file on the Deploy Node to configure Kubernetes to use OpenStack's Cinder.
 
 ```text {caption="[File 5] Deploy Node - ~/kubespray/roles/bootstrap-os/defaults/main.yml", linenos=table}
 ...
 ## General
-# Set the hostname to inventory-hostname
-override-system-hostname: false
+# Set the hostname to inventory_hostname
+override_system_hostname: false
 ```
 
 Configure the `roles/bootstrap-os/defaults/main.yml` file on the Deploy Node to not override the hostname where Kubernetes is installed.
 
 ```text {caption="[File 6] Deploy Node - ~/kubespray/openstack-rc", linenos=table}
-export OS-AUTH-URL=http://192.168.0.40:5000/v3
-export OS-PROJECT-ID=[Project ID]
-export OS-PROJECT-NAME="admin"
-export OS-USER-DOMAIN-NAME="Default"
-export OS-USERNAME="admin"
-export OS-PASSWORD="admin"
-export OS-REGION-NAME="RegionOne"
-export OS-INTERFACE=public
-export OS-IDENTITY-API-VERSION=3
+export OS_AUTH_URL=http://192.168.0.40:5000/v3
+export OS_PROJECT_ID=[Project ID]
+export OS_PROJECT_NAME="admin"
+export OS_USER_DOMAIN_NAME="Default"
+export OS_USERNAME="admin"
+export OS_PASSWORD="admin"
+export OS_REGION_NAME="RegionOne"
+export OS_INTERFACE=public
+export OS_IDENTITY_API_VERSION=3
 ```
 
 Create the `openstack-rc` file based on the OpenStack RC file information.

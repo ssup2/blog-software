@@ -169,12 +169,12 @@ $ aws sts assume-role --role-arn arn:aws:iam::278805249149:role/assume-role-role
 }
 ```
 
-Perform an Assume Role operation to obtain temporary `AccessKeyID`, `SecretAccessKey`, and `SessionToken`.
+Perform an Assume Role operation to obtain temporary `AccessKeyId`, `SecretAccessKey`, and `SessionToken`.
 
 ```shell
-$ export AWS-ACCESS-KEY-ID=<Access Key>
-$ export AWS-SECRET-ACCESS-KEY=<Secret Access Key>
-$ export AWS-SESSION-TOKEN=<SessionToken>
+$ export AWS_ACCESS_KEY_ID=<Access Key>
+$ export AWS_SECRET_ACCESS_KEY=<Secret Access Key>
+$ export AWS_SESSION_TOKEN=<SessionToken>
 
 $ aws ec2 describe-instances
 {
@@ -192,7 +192,7 @@ $ aws ec2 describe-instances
 ...
 ```
 
-Configure aws CLI using the obtained `AccessKeyID`, `SecretAccessKey`, and `SessionToken`. Afterward, when performing an EC2 Describe operation, you can see that it works.
+Configure aws CLI using the obtained `AccessKeyId`, `SecretAccessKey`, and `SessionToken`. Afterward, when performing an EC2 Describe operation, you can see that it works.
 
 ## 6. References
 

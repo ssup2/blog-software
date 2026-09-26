@@ -23,7 +23,7 @@ Idempotence 기능이 활성화되면 Producer의 Request에는 **PID (Producer 
 
 Kafka Broker는 Idempotence 기능이 활성화 됬을때, **각 PID, Epoch 마다** Topic/Partition별 처리가 완료된 Record Batch의 Sequence Number를 **5개까지 Caching**하며 다음과 같은 동작을 통해서 **중복 Record 저장을 방지**할 뿐만 아니라 **잘못된 순서로 Record가 저장되는 것도 방지**한다.
 
-* Broker는 Record Batch를 수신하면 먼져 Record Batch의 Sequence Number가 이미 Caching된 상태인지 확인한다.
+* Broker는 Record Batch를 수신하면 먼저 Record Batch의 Sequence Number가 이미 Caching된 상태인지 확인한다.
 * 만약 Record Batch의 Sequence Number가 Caching 된 상태라면, Kafka Broker는라이미 수신한 Record Batch라고 간주하여 Topic/Partition에 저장하지 않는다. 그리고 ACK만 Producer에 전송한다.
 * 만약 Record Batch의 Sequence Number가 Caching 되지 않는 상태라면, Kafka Broker는 가장 먼저 Caching된 Record Batch의 Sequence Number를 제거하고 수신한 Record Batch의 Sequence Number를 Caching한다. 그리고 수신한 Record Batch를 Topic/Partition에 저장하고 ACK를 Producer에 전송한다.
 * 만약 Record Batch의 Sequence Number가 Caching 되지 않는 상태라도, 수신한 Record Batch의 Sequence Number가 이전에 받은 Batch의 Sequence Number의 다음 숫자가 아니라면 Kafka Broker는 수신한 Record Batch를 Topic/Partition에 저장하지 않고, Broker가 `OutOfOrderSequenceException` Exception을 발생시키도록 만든다.

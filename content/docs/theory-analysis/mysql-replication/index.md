@@ -50,7 +50,7 @@ MySQL Router는 Read/Write 요청을 받는 Read/Write Port, Read 요청을 받�
 
 {{< figure caption="[Figure 5] MySQL Group Multi-primary Replication" src="images/group-replication-multi-primary.png" width="600px" >}}
 
-[Figure 5]는 Multi-primary Mode를 나타내고 있다. Multi-primary Mode는 모든 DB가 Primary Node로 동작한다. 따라서 App의 Read/Write 요청은 모든 DB에게 전달이 가능하다. MySQL Router는 DB의 부하에 따라서 적절한 DB에게 요청을 전달한다. 만약 서로다른 Primary DB에서 같은 Row을 동시에 변경하여 Commit 충돌이 발생하였다면, **먼져 Commit**한 Primary DB는 변경 내용이 반영되고 나중에 Commit한 Primary DB는 Abort된다. Single-primary Mode와 동일하게 DB 장애가 발생해도 Primary DB 및 MySQL Router를 **자동**으로 Failover하여 DB 관리자의 개입없이 계속 DB 사용이 가능하다.
+[Figure 5]는 Multi-primary Mode를 나타내고 있다. Multi-primary Mode는 모든 DB가 Primary Node로 동작한다. 따라서 App의 Read/Write 요청은 모든 DB에게 전달이 가능하다. MySQL Router는 DB의 부하에 따라서 적절한 DB에게 요청을 전달한다. 만약 서로다른 Primary DB에서 같은 Row을 동시에 변경하여 Commit 충돌이 발생하였다면, **먼저 Commit**한 Primary DB는 변경 내용이 반영되고 나중에 Commit한 Primary DB는 Abort된다. Single-primary Mode와 동일하게 DB 장애가 발생해도 Primary DB 및 MySQL Router를 **자동**으로 Failover하여 DB 관리자의 개입없이 계속 DB 사용이 가능하다.
 
 {{< figure caption="[Figure 6] MySQL Group Multi-primary Replication, Certify 과정" src="images/group-replication-multi-primary-certify-replication.png" width="550px" >}}
 

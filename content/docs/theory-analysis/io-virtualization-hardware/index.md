@@ -30,7 +30,7 @@ IOMMU는 MMU와 다른 역할을 수행한다. MMU는 CPU에서 보는 Memory �
 
 I/O Device의 DMA Conroller가 IOMMU를 통해서 가상 머신의 Physical Address를 보게 되면, I/O Device Data는 DMA를 통해 바로 가상 머신에게 전달되기 때문에 Hypervisor는 I/O Device Data 전달을 간섭하지 못한다. 다시 말해 이러한 IOMMU 설정 과정은 I/O Device를 특정 가상 머신만 이용할 수 있도록 **할당** 하는 과정이라고 할 수 있다. IOMMU는 PCI Device Function마다 다른 Memory 주소를 볼 수 있도록 설정 가능하기 때문에, Hypervisor가 인식할 수 있는 PCI Device Function들은 각기 다른 가상 머신에게 할당 할 수 있다.
 
-IOMMU릍 이용하여 가상 머신과 I/O Device간의 I/O Data 전달을 Hypervisor의 간섭 없이 수행 할 수 있게는 할 수는 있지만, I/O Interrupt 경우 Hyperivsor가 먼져 받은 후 다시 해당 가상 머신의 vCPU에게 전달 해야 한다. I/O Interrupt를 바로 해당 가상 머신에게 전달하는 기법이 있지만 제약 사항이 많아, 대부분의 Hyervisor에서 이용하지 않고 있다.
+IOMMU릍 이용하여 가상 머신과 I/O Device간의 I/O Data 전달을 Hypervisor의 간섭 없이 수행 할 수 있게는 할 수는 있지만, I/O Interrupt 경우 Hyperivsor가 먼저 받은 후 다시 해당 가상 머신의 vCPU에게 전달 해야 한다. I/O Interrupt를 바로 해당 가상 머신에게 전달하는 기법이 있지만 제약 사항이 많아, 대부분의 Hyervisor에서 이용하지 않고 있다.
 
 ## 3. SR-IOV (Single Root IO Virtualization)
 

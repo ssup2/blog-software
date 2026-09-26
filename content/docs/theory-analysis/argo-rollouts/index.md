@@ -181,7 +181,7 @@ spec:
 
 [Manifest 4]는 Prometheus를 활용하여 Analysis를 수행하는 AnalysisTemplate Object를 나타내고 있다. `metrics` 부분을 통해서 Analysis를 수행할 Metric을 명시하며, 수행 간격과 수행 횟수를 명시하고 성공 조건과 실패 제한을 명시하는 것을 확인할 수 있다. [Manifest 4]의 경우에는 30초 간격으로 3번 Query를 수행하고, 2번의 실패를 허용하기 때문에 3번의 Query 중에 1번의 Query가 성공하면 Analysis가 성공한 것으로 간주한다. Query의 결과는 0.95 이상이면 성공한 것으로 간주한다. `provider` 부분을 통해서 어떤 외부 시스템과 연동하여 Analysis를 수행할지 명시한다. `prometheus` 부분을 통해서 연동할 Prometheus Endpoint와 Query를 명시하는 것을 확인할 수 있다. 
 
-```yaml {caption="[File 5] Rollouts Canary with AnalysisTemplate Prometheus Example", linenos=table}
+```yaml {caption="[Manifest 5] Rollouts Canary with AnalysisTemplate Prometheus Example", linenos=table}
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
@@ -375,7 +375,7 @@ spec:
     command: ["sleep", "infinity"]
 ```
 
-[File 1]은 `shell` Pod의 Manifest를 나타내고 있다. `netshoot` Container Image를 이용하여 `shell` Pod을 생성하며, Argo Rollout으로 구성한 Service에 접근하여 Istio Metric을 발생시키기 위해서 사용한다.
+[Manifest 9]는 `shell` Pod의 Manifest를 나타내고 있다. `netshoot` Container Image를 이용하여 `shell` Pod을 생성하며, Argo Rollout으로 구성한 Service에 접근하여 Istio Metric을 발생시키기 위해서 사용한다.
 
 ### 2.2. Test Cases
 

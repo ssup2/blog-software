@@ -169,12 +169,12 @@ $ aws sts assume-role --role-arn arn:aws:iam::278805249149:role/assume-role-role
 }
 ```
 
-Assume Role 동작을 수행하여 임시 `AccessKeyID`, `SecretAccessKey`, `SessionToken`을 얻는다.
+Assume Role 동작을 수행하여 임시 `AccessKeyId`, `SecretAccessKey`, `SessionToken`을 얻는다.
 
 ```shell
-$ export AWS-ACCESS-KEY-ID=<Access Key>
-$ export AWS-SECRET-ACCESS-KEY=<Secret Access Key>
-$ export AWS-SESSION-TOKEN=<SessionToken>
+$ export AWS_ACCESS_KEY_ID=<Access Key>
+$ export AWS_SECRET_ACCESS_KEY=<Secret Access Key>
+$ export AWS_SESSION_TOKEN=<SessionToken>
 
 $ aws ec2 describe-instances
 {
@@ -192,7 +192,7 @@ $ aws ec2 describe-instances
 ...
 ```
 
-획득한 `AccessKeyID`, `SecretAccessKey`, `SessionToken`을 이용하여 aws CLI를 설정한다. 이후에 EC2 Describe 동작을 수행하면, 동작하는 것을 확인 할 수 있다.
+획득한 `AccessKeyId`, `SecretAccessKey`, `SessionToken`을 이용하여 aws CLI를 설정한다. 이후에 EC2 Describe 동작을 수행하면, 동작하는 것을 확인 할 수 있다.
 
 ## 6. 참조
 

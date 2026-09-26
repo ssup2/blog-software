@@ -33,15 +33,15 @@ title: CKA 자격증 시험 정리/후기
 * `tmux` 동작 확인
   * https://linuxize.com/post/getting-started-with-tmux/
 
-## 4. 시험중 알아야할 명렁어
+## 4. 시험중 알아야할 명령어
 
 * Windows Copy
   * ctrl + insert
 * Windows Paste
   * shift + insert
 * `kubectl`
-  * Resoruce API Version 확인 : `kubectl api-resources`
-  * Resource Spec/Status 확인 : `kubectl explain --recursive <resource>`
+  * **Resoruce API Version 확인** : `kubectl api-resources`
+  * **Resource Spec/Status 확인** : `kubectl explain --recursive <resource>`
 
 ## 5. 시험 후기
 

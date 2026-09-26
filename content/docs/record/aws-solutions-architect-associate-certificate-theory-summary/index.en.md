@@ -875,10 +875,10 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 ### 11.4. Transfer Family
 
 * Can use S3 and EFS through FTP protocol
-* Supported protocols : FTP, FTPS, SFTP
+* **Supported protocols** : FTP, FTPS, SFTP
 * Managed service
 * Charges based on number of endpoints + data transfer amount
-* Supported authentication methods : Microsoft Active Directory, LDAP, Okta, Cognito
+* **Supported authentication methods** : Microsoft Active Directory, LDAP, Okta, Cognito
 * Configured as User -> Route 53 -> Transfer Family --(IAM Role)--> S3, EFS
 
 ## 12. Messaging
@@ -917,7 +917,7 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
   * Client can perform encryption/decryption itself
 * Access Control
   * IAM policy control
-  * Provides SQS access policy : Useful when utilizing cross-account access
+  * **Provides SQS access policy** : Useful when utilizing cross-account access
 
 #### 12.1.3. Message Visibility Timeout
 
@@ -1056,7 +1056,7 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 ### 14.1. Lambda
 
 * **Virtual function** : No need to manage servers
-* Execution time limit : Can only perform short executions
+* **Execution time limit** : Can only perform short executions
 * Can execute only when needed and charges based on execution time
 * Supports autoscaling
 * Supports integration with various AWS services

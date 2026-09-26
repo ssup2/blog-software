@@ -4,7 +4,7 @@ title: 3.4. Namespace와 Process의 상관관계
 
 ## Process와 관련된 Namespace의 특징
 
-Namespace와 Process는 밀접한 관계를 가지고 있다. 먼져 Process와 관련된 Namespace의 특징을 알아본다. Namespace는 Namespace에 소속되어 있는 Process가 존재하지 않는 경우 Linux Kernel에 의해서 자동으로 제거된다는 특징을 갖고 있다. 즉 Namespace가 생성되기 위해서는 Namespace에 소속되어 있는 Process가 반드시 존재해야 한다는 의미이기도 하다. 이러한 이유 때문에 Namespace와 관련된 System Call들은 모두 Process와 연관되어 있다. 
+Namespace와 Process는 밀접한 관계를 가지고 있다. 먼저 Process와 관련된 Namespace의 특징을 알아본다. Namespace는 Namespace에 소속되어 있는 Process가 존재하지 않는 경우 Linux Kernel에 의해서 자동으로 제거된다는 특징을 갖고 있다. 즉 Namespace가 생성되기 위해서는 Namespace에 소속되어 있는 Process가 반드시 존재해야 한다는 의미이기도 하다. 이러한 이유 때문에 Namespace와 관련된 System Call들은 모두 Process와 연관되어 있다. 
 
 아래는 Namespace과 관련된 System Call들 관련 설명이다. 새로운 Namespace를 생성하는 `clone()`, `unshare()` System Call은 Namespace를 생성할 뿐만 아니라, Process를 생성된 Namespace에 소속시키는 동작도 같이 수행하는것을 확인할 수 있다.
 

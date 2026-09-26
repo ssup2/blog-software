@@ -60,7 +60,7 @@ ARP Packet 처리 과정을 통해 VXLAN이 얼마나 효율적으로 Broadcast�
 
 ## 3. vs VLAN
 
-VLAN을 통해서도 가상 Network를 만들 수 있다. 하지만 VLAN은 Cloud 환경에서 이용하기에는 몇몇가지 제한 사항이 있다. 먼져 VLAN의 VLAN ID는 12bit로 이루어져 있기 때문에 약 4000개의 VLAN ID밖에 이용하지 못한다. VLAN만을 이용하여 가상 Network를 구성하면 최대 4000 Tenant들만 수용 할 수 있다는 의미이다.
+VLAN을 통해서도 가상 Network를 만들 수 있다. 하지만 VLAN은 Cloud 환경에서 이용하기에는 몇몇가지 제한 사항이 있다. 먼저 VLAN의 VLAN ID는 12bit로 이루어져 있기 때문에 약 4000개의 VLAN ID밖에 이용하지 못한다. VLAN만을 이용하여 가상 Network를 구성하면 최대 4000 Tenant들만 수용 할 수 있다는 의미이다.
 
 VLAN은 L2 Layer 기술이다. VLAN을 이용하여 가상 Network를 구축하여도, 물리 스위치는 Host의 Mac Address 뿐만 아니라 VM의 MAC Address를 Learning하고 MAC Address Table을 유지해야 한다. 문제는 하나의 Host에서 다수의 VM이 동작하는 Cloud 환경에서 VM의 개수는 Host의 개수보다 훨씬 많다는 점이다. 따라서 물리 스위치가 VM의 MAC Address도 관리해야 한다는 점은 큰 부담이 될 수 있다.
 

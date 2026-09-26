@@ -96,7 +96,7 @@ Bytes               Filename
 497B                /etc/nsswitch.conf
 ```
 
-Displays files sorted by disk bandwidth usage in descending order. [Shell 4] shows the output of `sysdig -c topfiles_bytes` displaying files sorted by disk bandwidth usage.
+Displays files sorted by disk bandwidth usage in descending order. [Shell 5] shows the output of `sysdig -c topfiles_bytes` displaying files sorted by disk bandwidth usage.
 
 ## 2. References
 

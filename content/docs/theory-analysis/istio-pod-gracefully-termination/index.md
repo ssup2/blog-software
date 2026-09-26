@@ -22,7 +22,7 @@ title: Istio Pod Gracefully Termination
 
 ### 1.2. Envoy Proxy Container Gracefully Termination
 
-Envoy Proxy Container 내부에는 **pilot-agent**와 Envoy Proxy가 동작한다. pilot-agent가 Envoy Proxy Container의 Init Process로 동작하여 가장 먼져 실행되고 이후에 pilot-agent는 Envoy Proxy를 실행한다. 따라서 Pod 종료시 `SIGTERM` Signal은 pilot-agent만 수신하며, Envoy Proxy는 수신하지 않는다. `SIGTERM` Signal을 받은 pilot-agent는 Envoy Proxy를 종료시키는 역할도 수행하며, 아래서 소개되는 Envoy Proxy Container의 Gracefully Termination을 위해 설정되는 값들은 모두 `SIGTERM` Signal을 수신하는 pilot-agent의 설정값이다.
+Envoy Proxy Container 내부에는 **pilot-agent**와 Envoy Proxy가 동작한다. pilot-agent가 Envoy Proxy Container의 Init Process로 동작하여 가장 먼저 실행되고 이후에 pilot-agent는 Envoy Proxy를 실행한다. 따라서 Pod 종료시 `SIGTERM` Signal은 pilot-agent만 수신하며, Envoy Proxy는 수신하지 않는다. `SIGTERM` Signal을 받은 pilot-agent는 Envoy Proxy를 종료시키는 역할도 수행하며, 아래서 소개되는 Envoy Proxy Container의 Gracefully Termination을 위해 설정되는 값들은 모두 `SIGTERM` Signal을 수신하는 pilot-agent의 설정값이다.
 
 Envoy Proxy Container의 Termination 수행 과정은 `EXIT_ON_ZERO_ACTIVE_CONNECTIONS`의 설정 유무에 따라서 달라지며, `EXIT_ON_ZERO_ACTIVE_CONNECTIONS`가 설정되어 있지 않다면 `terminationDrainDuration` 설정값에 따라서 Envoy Proxy Container가 종료된다.
 

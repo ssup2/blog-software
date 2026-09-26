@@ -96,7 +96,7 @@ Bytes               Filename
 497B                /etc/nsswitch.conf
 ```
 
-Disk Bandwidth 사용률 높은 File들을 순서대로 출력한다. [Shell 4]는 `sysdig -c topfiles_bytes`를 이용하여 Disk Bandwidth 사용률이 높은 File들을 출력하는 Shell의 모습을 나타내고 있다.
+Disk Bandwidth 사용률 높은 File들을 순서대로 출력한다. [Shell 5]는 `sysdig -c topfiles_bytes`를 이용하여 Disk Bandwidth 사용률이 높은 File들을 출력하는 Shell의 모습을 나타내고 있다.
 
 ## 2. 참조
 

@@ -18,21 +18,21 @@ Connect the Arndale Board to PC through USB OTG port and verify Hardware ID.
 
 * Computer -> Properties -> Device Manager -> Full -> Properties > Details >Hardware ID
 
-```text {caption="[File 1] adt-bundle-windows-x86-64-20xxxxxx\sdk\extras\google\usb-driver\android-winusb.inf", linenos=table}
+```text {caption="[File 1] adt-bundle-windows-x86_64-20xxxxxx\sdk\extras\google\usb_driver\android_winusb.inf", linenos=table}
 ...
 [Google.NTx86]
 ;Insignal ARNDALE
-%CompositeAdbInterface%     = USB-Install, USB\VID-18D1&PID-0002&REV-0100
-%CompositeAdbInterface%     = USB-Install, USB\VID-18D1&PID-0002
+%CompositeAdbInterface%     = USB_Install, USB\VID_18D1&PID_0002&REV_0100
+%CompositeAdbInterface%     = USB_Install, USB\VID_18D1&PID_0002
 
 ...
 [Google.NTamd64]
 ;Insignal ARNDALE
-%CompositeAdbInterface%     = USB-Install, USB\VID-18D1&PID-0002&REV-0100
-%CompositeAdbInterface%     = USB-Install, USB\VID-18D1&PID-0002
+%CompositeAdbInterface%     = USB_Install, USB\VID_18D1&PID_0002&REV_0100
+%CompositeAdbInterface%     = USB_Install, USB\VID_18D1&PID_0002
 ```
 
-Add the content of [File 1] below the `android-winusb.inf` file and install ADB USB Driver through Windows Device Manager.
+Add the content of [File 1] below the `android_winusb.inf` file and install ADB USB Driver through Windows Device Manager.
 
 ## 3. Ubuntu Package Installation
 
@@ -129,8 +129,8 @@ Download and install Proprietary for booting.
 
 ```shell
 $ cd [root of source tree]
-$ export USE-CCACHE=1
-$ export CCACHE-DIR=/[path of your choice]/.ccache
+$ export USE_CCACHE=1
+$ export CCACHE_DIR=/[path of your choice]/.ccache
 $ prebuilts/misc/linux-x86/ccache/ccache -M 20G
 $ watch -n1 -d prebuilts/misc/linux-x86/ccache/ccache -s
 ```
@@ -142,17 +142,17 @@ Configure `ccache` for build performance improvement.
 ```shell
 $ cd [root of source tree]/u-boot/
 $ make clobber
-$ make ARCH=arm CROSS-COMPILE=arm-none-linux-gnueabi- arndale-config
-$ make ARCH=arm CROSS-COMPILE=arm-none-linux-gnueabi-
+$ make ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabi- arndale_config
+$ make ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabi-
 ```
 
 Build u-boot.
 
 ```shell
 $ cd [root of source tree]/u-boot/
-$ kernel-make distclean
-$ kernel-make arndale-android-defconfig
-$ kernel-make -j16
+$ kernel_make distclean
+$ kernel_make arndale_android_defconfig
+$ kernel_make -j16
 ```
 
 Build Kernel.
@@ -161,7 +161,7 @@ Build Kernel.
 $ cd [root of source tree]/u-boot/
 $ choosevariant
 $ choosetype
-$ make kernel-binaries
+$ make kernel_binaries
 $ make -j4
 ```
 
@@ -170,7 +170,7 @@ Build Android.
 ## 11. Create Bootable uSD Card
 
 ```shell
-$ source ./arndale-envsetup.sh
+$ source ./arndale_envsetup.sh
 $ mksdboot /dev/sdb
 ```
 

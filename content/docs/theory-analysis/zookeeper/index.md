@@ -30,7 +30,7 @@ ZNode는 **Persistent Node**와 **Ephemeral Node**로 구분된다. Persistent N
 
 {{< figure caption="[Figure 3] Zookeeper Watcher" src="images/zookeeper-watcher.png" width="900px" >}}
 
-Watcher는 ZNode의 변경을 Client에게 먼져 알려주는 역할을 수행한다. Client는 먼져 특정 ZNode에 대해 Watcher를 등록한다. 그 후 해당 ZNode의 Data가 변경되거나, Child Node가 생성/삭제 될 경우 Client에게 변경되었다는 Event를 Client에게 전달한다.
+Watcher는 ZNode의 변경을 Client에게 먼저 알려주는 역할을 수행한다. Client는 먼저 특정 ZNode에 대해 Watcher를 등록한다. 그 후 해당 ZNode의 Data가 변경되거나, Child Node가 생성/삭제 될 경우 Client에게 변경되었다는 Event를 Client에게 전달한다.
 
 ### 1.4. Usage Example
 

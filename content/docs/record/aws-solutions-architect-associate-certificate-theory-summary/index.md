@@ -847,7 +847,7 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
   * **Snowball** : Data Migration, Edge Computing 지원 
   * **Snowmobile** : Data Migration 지원
 * OpsHub를 Labtop에 설치하여 장비를 손쉽게 관리 가능
-* Glacier로 Data Migration을 진행하기 위해서는 Data를 S3에 먼져 저장한 이후 Glacier로 전환
+* Glacier로 Data Migration을 진행하기 위해서는 Data를 S3에 먼저 저장한 이후 Glacier로 전환
 
 ### 11.2. FSx
 
@@ -860,8 +860,8 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 * On-premise 환경에서 S3를 접근을 도와주는 징검다리 역할
 * On-Premise의 File, Volume, Tapes와 AWS의 EBS, S3, Glacier를 연결하는 징검다리 역할 수행
 * Storage Gateway Type
-  * VM 기반 : VMware, Hyper-V, Linux KVM, EC2
-  * Hardware 기반 : 전용 Hardware 임대 가능
+  * **VM 기반** : VMware, Hyper-V, Linux KVM, EC2
+  * **Hardware 기반** : 전용 Hardware 임대 가능
 * File Gateway 
   * S3 Standard, S3 Standard-IA, Glacier을 On-Premise 환경에서 NFS, SMB Protocol로 접근 가능
 * Volume Gateway 
@@ -875,10 +875,10 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 ### 11.4. Transfer Family
 
 * S3, EFS을 FTP Protocol을 통해서 이용가능
-* 지원하는 Protocol : FTP, FTPS, SFTP
+* **지원하는 Protocol** : FTP, FTPS, SFTP
 * Managed Service
 * Endpoint 개수 + 전송 Data양에 따라서 비용 부과
-* 지원하는 인증 방법 : Microsoft Active Directory, LDAP, Okta, Cognito
+* **지원하는 인증 방법** : Microsoft Active Directory, LDAP, Okta, Cognito
 * User -> Route 53 -> Transfer Family --(IAM Role)--> S3, EFS 형태로 구성
 
 ## 12. Messaging
@@ -917,7 +917,7 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
   * Client가 자체적으로 Encryption/Decryption 수행 가능
 * Access Control
   * IAM Policy 제어
-  * SQS Access Policy 제공 : Cross-Account Access 활용시 유용
+  * **SQS Access Policy 제공** : Cross-Account Access 활용시 유용
 
 #### 12.1.3. Message Visibility Timeout
 
@@ -1036,8 +1036,8 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
   * 부하에 따라서 ECS Task를 자동으로 Scaling 하는 기능
 * EC2 Auto Scailing
   * ECS Task 부하에 따른 EC2 Instance를 자동으로 Scaling 하는 기능
-  * ASG 방식 : Auto Scailing Group을 활용하여 Scailing 수행
-  * Cluster Capacity Provider 방식 : EC2 Instance에 ECS Task를 생성할 가용 Resource가 없는 경우 새로운 EC2 Instance Scailing Out 수행
+  * **ASG 방식** : Auto Scailing Group을 활용하여 Scailing 수행
+  * **Cluster Capacity Provider 방식** : EC2 Instance에 ECS Task를 생성할 가용 Resource가 없는 경우 새로운 EC2 Instance Scailing Out 수행
 
 #### 13.1.5. Rolling Update
 
@@ -1056,7 +1056,7 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 ### 14.1. Lambda
 
 * **Virtual Function** : Server 관리 불필요
-* 실행시간 제한 : 짧은 실행만 수행 가능
+* **실행시간 제한** : 짧은 실행만 수행 가능
 * 필요할때만 실행 가능하며, 실행한 시간만큼 비용 청구
 * Autoscaling 지원
 * 다양한 AWS Service와의 연계 지원
@@ -1464,7 +1464,7 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
   * 무료
 * Shield Advanced 
   * 추가 비용을 좀더 다양한 Resource를 대상으로 정교한 DDoS 공격 보호
-  * 보호 Target : Amazone EC2, ELB, CloudFront, Global Accelerator, Route 53
+  * **보호 Target** : Amazone EC2, ELB, CloudFront, Global Accelerator, Route 53
   * DRP (DDoS Response Team) 접근 가능
   * DDoS 공격으로 인해서 더 많은 비용 요금이 청구되었다면, 더 청구된 비용만금 캄면 가능
 

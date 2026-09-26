@@ -35,8 +35,8 @@ Compile the OpenStack External Cloud Provider to generate binaries and run tests
 
 ```shell
 $ export REGISTRY=ssup2
-$ export DOCKER-USERNAME=ssup2
-$ export DOCKER-PASSWORD=ssup2
+$ export DOCKER_USERNAME=ssup2
+$ export DOCKER_PASSWORD=ssup2
 $ make images
 $ make upload-images 
 ```

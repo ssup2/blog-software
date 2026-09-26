@@ -64,10 +64,10 @@ title: AWS Certified Developer Associate 자격증 이론 정리
 * 국가 단위로 Blacklist, Whitelist 설정 가능
 * Client -> Edge Location
   * HTTPS 기반 암호화 가능
-  * 정책 : HTTPS Only, HTTP to HTTPS Redirect를 통해서 HTTP 사용 억제 가능
+  * **정책** : HTTPS Only, HTTP to HTTPS Redirect를 통해서 HTTP 사용 억제 가능
 * Edge Location -> Origin
   * HTTPS 기반 암호화 가능
-  * 정책 : HTTPS Only, Match Viwer (Client -> Edge Location 사이가 HTTP일 경우 HTTP, HTTPS일 경우 HTTPS)
+  * **정책** : HTTPS Only, Match Viwer (Client -> Edge Location 사이가 HTTP일 경우 HTTP, HTTPS일 경우 HTTPS)
 
 ### 3.4. Signed URL, Signed Cookie
 
@@ -256,7 +256,7 @@ title: AWS Certified Developer Associate 자격증 이론 정리
 
 ### 6.3. CodeBuild
 
-* Code 위치 : CodeCommit, S3, Bitbucket, Github
+* **Code 위치** : CodeCommit, S3, Bitbucket, Github
 * Code에 존재하는 `buildspec.yml` 파일을 통해서 Build 수행
 * Output Log는 S3 또는 CloudWatch Logs에 저장되어 확인 가능
 * CloudWatch Metric을 이용하여 Build 관련 통계 확인 가능
@@ -352,7 +352,7 @@ title: AWS Certified Developer Associate 자격증 이론 정리
 ## 8. X-Ray
 
 * Tracing Service
-* 지원 Service : AWS Lambda, Elastic Beanstalk, ECS, ELB, API Gateway, EC2 Instances
+* **지원 Service** : AWS Lambda, Elastic Beanstalk, ECS, ELB, API Gateway, EC2 Instances
 * 적용 방법
   * X-Ray SDK를 App 내부에서 이용
   * EC2 Instance에 X-Ray Daemon 설치
@@ -449,8 +449,8 @@ title: AWS Certified Developer Associate 자격증 이론 정리
 
 ### 10.4. with S3
 
-* Sync 기반 : S3 -> SQS -> Lambda
-* Async 기반 : S3 -> Lambda
+* **Sync 기반** : S3 -> SQS -> Lambda
+* **Async 기반** : S3 -> Lambda
 * S3 모든 Event를 받고 싶다면 S3 Versioning 기능 활성화 필요
 
 ### 10.5. Event Source Mapping
@@ -509,9 +509,9 @@ title: AWS Certified Developer Associate 자격증 이론 정리
   * Support Ticket을 열어 1000개 이상 Quota 증설 가능
 * 함수마다 최대 몇개까지 동시에 실행할 수 있는지 설정 가능
 * 최대 실행개수를 넘어가면 Throttling 발생
-  * Sync 호출시 : 429 Error
-  * Async 호출시 : Dead-letter Queue로 전송
-* Provisioned Concurreny 방지 : 미리 Lambda 함수들을 초기화하여 Cold Start 방지
+  * **Sync 호출시** : 429 Error
+  * **Async 호출시** : Dead-letter Queue로 전송
+* **Provisioned Concurreny 방지** : 미리 Lambda 함수들을 초기화하여 Cold Start 방지
 
 ### 10.11. Code Dependency
 
@@ -561,7 +561,7 @@ title: AWS Certified Developer Associate 자격증 이론 정리
 * **Env** : 4KB
 * **Disk Capacity (/tmp)** : 512MB
 * **Concurreny Exeuction** : 1000
-* Lambda 함수 Deployment Size : 50MB
+* **Lambda 함수 Deployment Size** : 50MB
 * **Uncompressed Deployment** : 250MB
 
 ## 11. DynamoDB
@@ -693,8 +693,8 @@ title: AWS Certified Developer Associate 자격증 이론 정리
 
 ### 11.10. With S3
 
-* 400KB 이상의 Item 저장시 : Item을 S3에 저장하고, DynamoDB에는 S3 URL 저장
-* S3 Object Meta 정보 저장 : S3 -> Lambda -> DynamoDB 형태로 구성하여 S3에 저장되는 Object의 Meta 정보를 DynamoDB에 저장
+* **400KB 이상의 Item 저장시** : Item을 S3에 저장하고, DynamoDB에는 S3 URL 저장
+* **S3 Object Meta 정보 저장** : S3 -> Lambda -> DynamoDB 형태로 구성하여 S3에 저장되는 Object의 Meta 정보를 DynamoDB에 저장
 
 ## 12. API Gateway
 

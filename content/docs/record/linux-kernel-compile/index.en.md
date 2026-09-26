@@ -26,7 +26,7 @@ title: Linux Kernel Compile
 ### 1.4. Install
 
 * `make install` : Creates an initrd image, copies `vmlinuz` and `System.map` files to `/boot`, creates symbolic links, and modifies `grub.conf` appropriately so that it can boot with the new kernel image.
-* `make modules-install` : Stores compiled modules in the `$INSTALL-MOD-PATH/lib/modules/[kernel version]` folder. You can change the copy location by setting the `$INSTALL-MOD-PATH` variable in the shell. If `$INSTALL-MOD-PATH` is not set, they are copied under the `lib` folder of /(root).
+* `make modules_install` : Stores compiled modules in the `$INSTALL_MOD_PATH/lib/modules/[kernel version]` folder. You can change the copy location by setting the `$INSTALL_MOD_PATH` variable in the shell. If `$INSTALL_MOD_PATH` is not set, they are copied under the `lib` folder of /(root).
 
 ### 1.5. E.T.C
 
@@ -39,10 +39,10 @@ title: Linux Kernel Compile
 ### 2.1. ARM
 
 ```shell
-$ ARCH=arm CROSS-COMPILE=arm-linux-gnueabi- make menuconfig
-$ ARCH=arm CROSS-COMPILE=arm-linux-gnueabi- make zImage
-$ ARCH=arm CROSS-COMPILE=arm-linux-gnueabi- make uImage
-$ ARCH=arm CROSS-COMPILE=arm-linux-gnueabi- make modules
-$ ARCH=arm CROSS-COMPILE=arm-linux-gnueabi- INSTALL-MOD-PATH=tmp make modules-install
+$ ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- make menuconfig
+$ ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- make zImage
+$ ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- make uImage
+$ ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- make modules
+$ ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- INSTALL_MOD_PATH=tmp make modules_install
 ```
 

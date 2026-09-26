@@ -21,7 +21,7 @@ title: Kubernetes Kubeflow 설치 (Not Working) / Ubuntu 18.04, Jetson Nano Clus
 
 ```shell
 $ curl -s "https://raw.githubusercontent.com/\
-kubernetes-sigs/kustomize/master/hack/install-kustomize.sh"  | bash
+kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"  | bash
 ```
 
 kubectl 명령어에 포함된 kustomize는 `resources` 문법을 지원하지 않기 때문에, 최신 kustomize를 설치하여 이용한다.
@@ -31,9 +31,9 @@ kubectl 명령어에 포함된 kustomize는 `resources` 문법을 지원하지 �
 ```shell
 $ mkdir ~/kubeflow
 $ cd ~/kubeflow
-$ curl -L -O -J https://github.com/kubeflow/kfctl/releases/download/v1.2.0/kfctl-v1.2.0-0-gbc038f9-linux.tar.gz
-$ tar -xvf kfctl-v1.2.0-0-gbc038f9-linux.tar.gz
-$ rm kfctl-v1.2.0-0-gbc038f9-linux.tar.gz
+$ curl -L -O -J https://github.com/kubeflow/kfctl/releases/download/v1.2.0/kfctl_v1.2.0-0-gbc038f9_linux.tar.gz
+$ tar -xvf kfctl_v1.2.0-0-gbc038f9_linux.tar.gz
+$ rm kfctl_v1.2.0-0-gbc038f9_linux.tar.gz
 ```
 
 kubeflow 관리 도구인 kfctl을 설치한다.
@@ -63,19 +63,19 @@ $ kubectl patch storageclass nfs-client -p '{"metadata": {"annotations":{"storag
 
 ```text {caption="[File 1] ~/kubeflow/kfctl-env", linenos=table}
 export PATH=$PATH:~/kubeflow
-export KF-NAME=ssup2-kubeflow
-export BASE-DIR=~/kubeflow
-export KF-DIR=${BASE-DIR}/${KF-NAME}
-export CONFIG-URI="https://raw.githubusercontent.com/kubeflow/manifests/v1.2-branch/kfdef/kfctl-k8s-istio.v1.2.0.yaml"
+export KF_NAME=ssup2-kubeflow
+export BASE_DIR=~/kubeflow
+export KF_DIR=${BASE_DIR}/${KF_NAME}
+export CONFIG_URI="https://raw.githubusercontent.com/kubeflow/manifests/v1.2-branch/kfdef/kfctl_k8s_istio.v1.2.0.yaml"
 ```
 
 [File 1]의 내용으로 kfctl을 위한 env 파일을 생성한다.
 
 ```shell
 $ . ~/kubeflow/kfctl-env
-$ mkdir -p ${KF-DIR}
-$ cd ${KF-DIR}
-$ kfctl build -V -f ${CONFIG-URI}
+$ mkdir -p ${KF_DIR}
+$ cd ${KF_DIR}
+$ kfctl build -V -f ${CONFIG_URI}
 ```
 
 Kubeflow를 kustomize 파일을 생성한다.
@@ -97,6 +97,6 @@ Kubeflow를 kustomize 파일을 생성한다.
 ## 6. 참조
 
 * kustomize Install : [https://kubectl.docs.kubernetes.io/installation/kustomize/binaries/](https://kubectl.docs.kubernetes.io/installation/kustomize/binaries/)
-* Kubeflow Install : [https://www.kubeflow.org/docs/started/k8s/kfctl-k8s-istio/](https://www.kubeflow.org/docs/started/k8s/kfctl-k8s-istio/)
+* Kubeflow Install : [https://www.kubeflow.org/docs/started/k8s/kfctl_k8s_istio/](https://www.kubeflow.org/docs/started/k8s/kfctl_k8s_istio/)
 * Kubeflow kustomize : [https://www.kubeflow.org/docs/other-guides/kustomize/](https://www.kubeflow.org/docs/other-guides/kustomize/)
 * Kubeflow ARM Support : [https://github.com/kubeflow/kfctl/pull/318](https://github.com/kubeflow/kfctl/pull/318)

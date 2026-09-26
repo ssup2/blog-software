@@ -38,7 +38,7 @@ title: AWS Certified Data Analytics 자격증 이론 정리
     * Shard 개수당 비용 발생
   * On-demand Mode
     * Traffic 양에 따라서 자동으로 Scaling 수행
-    * 기본 성능 : 4 MB/sec, 4000 msg/sec
+    * **기본 성능** : 4 MB/sec, 4000 msg/sec
     * Shard 개수 및 Traffic 양에 따라서 비용 발생
 * Security
   * IAM 기반 인증/인가
@@ -56,8 +56,8 @@ title: AWS Certified Data Analytics 자격증 이론 정리
     * 더 많은 Data를 보내고 있는건지, Hot Shard가 발생하고 있는건지 확인 필요
     * Backoff 기반 재시도, Shard 증가, Partition Key 점검을 통해서 문제 해결
 * API
-  * 단일 : `PutRecord`
-  * 복수 : `PutRecords`
+  * **단일** : `PutRecord`
+  * **복수** : `PutRecords`
 * Kinesis Producer Library (KPL)
   * C++/Java 지원
   * Retry 로직 지원
@@ -80,7 +80,7 @@ title: AWS Certified Data Analytics 자격증 이론 정리
 * Ex) Application, AWS Lambda, Kinesis Data Firehose, Kinesis Data Analytics
 * 성능
   * **Default** : 2 MB/sec all Consumer
-  * Enhanced Fan Out 이용시 : 2 MB/sec per Consumear
+  * **Enhanced Fan Out 이용시** : 2 MB/sec per Consumear
 * API
   * `GetRecords`
     * 다수의 Record를 가져옴
@@ -124,7 +124,7 @@ title: AWS Certified Data Analytics 자격증 이론 정리
 * AWS Service, 3rd Party Application에 Data 적재
 * **Fully Managed Service** : Auto-scaling 지원
 * **Near Real Time** : 최소 60초 지연 발생
-* 압축 지원 : GZIP, ZIP, SNAPPY
+* **압축 지원** : GZIP, ZIP, SNAPPY
 * Producer
   * SDK KPL, Kinesis Agent, Kinesis Data Streams, Amazon CloudWatch, AWS IoT
   * 하나의 Record 당 최대 1MB
