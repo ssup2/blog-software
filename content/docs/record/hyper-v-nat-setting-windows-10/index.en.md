@@ -9,8 +9,8 @@ The configuration environment is as follows.
 * NAT Network
   * **Network** : 172.35.0.0/24
   * **Gateway** : 172.35.0.1
-  * **Switch Name** : NAT-Switch
-  * **Network Name** : NAT-Network
+  * **Switch Name** : `NAT-Switch`
+  * **Network Name** : `NAT-Network`
 * VM
   * **Address** : 172.35.0.100
 
@@ -47,7 +47,7 @@ network:
     version: 2
 ```
 
-Configure the /etc/netplan/50-cloud-init.yaml file as shown in [File 1]. Since there is no DHCP Server in the Network configured with NAT, manual IP configuration is required.
+Configure the `/etc/netplan/50-cloud-init.yaml` file as shown in [File 1]. Since there is no DHCP Server in the Network configured with NAT, manual IP configuration is required.
 
 ```shell
 $ netplan apply

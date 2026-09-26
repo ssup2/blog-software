@@ -52,12 +52,12 @@ title: AWS Certified Data Analytics 자격증 이론 정리
 * Ex) Application, SDK KPL, Kinesis Agent, CloudWatch Logs, AWS IoT, Kinesis Data Analytics
 * 성능
   * Shard당 1 MB/sec, 1000 msg/sec 제한
-  * 초과시 ProvisionedThroughputExceeded Exception 발생
+  * 초과시 `ProvisionedThroughputExceeded` Exception 발생
     * 더 많은 Data를 보내고 있는건지, Hot Shard가 발생하고 있는건지 확인 필요
     * Backoff 기반 재시도, Shard 증가, Partition Key 점검을 통해서 문제 해결
 * API
-  * 단일 : PutRecord
-  * 복수 : PutRecords
+  * 단일 : `PutRecord`
+  * 복수 : `PutRecords`
 * Kinesis Producer Library (KPL)
   * C++/Java 지원
   * Retry 로직 지원
@@ -66,7 +66,7 @@ title: AWS Certified Data Analytics 자격증 이론 정리
   * CloudWatch로 Metric 전송
   * Batching 수행
     * Throuput 증가, 비용 감소
-    * RecordMaxBufferedTime의 시간 만큼 대기후 한번에 전송 (Default 100ms)
+    * `RecordMaxBufferedTime`의 시간 만큼 대기후 한번에 전송 (Default 100ms)
     * Write API를 직접 이용하는것 대비 Latency가 발생하기 때문에, Latency가 중요한 Application이라면 KPL 이용을 권장하지 않음
   * 압축은 제공하지 않으며 App에서 직접 구현 필요
   * KPL로 Encoding된 Record는 반드시 KPL 또는 Helper Library를 통해서 Decoding 필요
@@ -82,7 +82,7 @@ title: AWS Certified Data Analytics 자격증 이론 정리
   * **Default** : 2 MB/sec all Consumer
   * Enhanced Fan Out 이용시 : 2 MB/sec per Consumear
 * API
-  * GetRecords
+  * `GetRecords`
     * 다수의 Record를 가져옴
     * Client의 Polling 필요
     * 한번의 호출로 각 Shard당 최대 2 MB Data 수신 가능
@@ -347,7 +347,7 @@ title: AWS Certified Data Analytics 자격증 이론 정리
     * **Flink Source** : MSK, Kinesis Data Streams
     * Flink Datastream API
     * **Flink Sink** : S3, Kinesis Datastream, Kinesis Datafirehorse
-  * RANDOM_CUT_FOREST
+  * `RANDOM_CUT_FOREST`
     * Abnormal Detection 수행 SQL 함수
 
 ### 4.2. OpenSearch
@@ -439,7 +439,7 @@ title: AWS Certified Data Analytics 자격증 이론 정리
 * Memory Pressure 발생 시
   * Shard의 불균형 분배 되었을 경우
   * Shard가 너무 많을 경우
-* JVMMemoryPressure 발생시 오래되고 이용되지 않는 Index 삭제 수행
+* `JVMMemoryPressure` 발생시 오래되고 이용되지 않는 Index 삭제 수행
 
 ### 4.3. Athena
 
@@ -472,7 +472,7 @@ title: AWS Certified Data Analytics 자격증 이론 정리
   * Partition 기능 활용
 * Transaction
   * Iceberg를 통해서 이용 가능
-    * Table Type에 ICEBERG 지정
+    * Table Type에 `ICEBERG` 지정
   * Lake Formation의 Governed Table을 통해서도 Transaction 기능 이용 가능
 
 ### 4.4. Redshift
@@ -519,7 +519,7 @@ title: AWS Certified Data Analytics 자격증 이론 정리
   * `Compound` : 다수의 Column을 조합하여 Sort Key로 이용
   * `Interleaved` : ??
 * Data 복제
-  * COPY
+  * `COPY`
     * S3, EMR, DynamoDB 원격 Host에서 Data 복제 수행
     * 병렬로 데이터 복제 수행
   * `UNLOAD` : 처리된 결과를 S3에 복제 수행
@@ -541,9 +541,9 @@ title: AWS Certified Data Analytics 자격증 이론 정리
   * WLM에 쌓여 있는 Query를 추가된 Cluster에게 전송 및 처리
 * SQA (Short Query Acceleration)
   * WLM의 Short Query를 위한 Queue를 이용
-  * Read-only Query, CREATE TALBE AS Query에 적용
+  * Read-only Query, `CREATE TABLE AS` Query에 적용
   * Short 기준 시간 설정 가능
-* VACUUM
+* `VACUUM`
   * `VACUUM FULL` : 
   * `VACUUM DELETE ONLY` :
   * `VACUUM SORT ONLY` :

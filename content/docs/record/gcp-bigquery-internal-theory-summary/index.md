@@ -104,7 +104,7 @@ title: GCP BigQuery 내부 이론 정리
 * Not cached when destination table is specified to store the results in query
 * Not cached if tables/views being used in the query have changed since the last cache.
 * Not cached for tables having streaming ingestion.
-* Not cached if query uses non-deterministic functions. (NOW(), CURRENT_USER())
+* Not cached if query uses non-deterministic functions. (`NOW()`, `CURRENT_USER()`)
 * Not cached if query runs against external data sources like BigTable or CloudStorage.
 * Result set must be smaller than maximum response size (10GB Default)
 
@@ -113,7 +113,7 @@ title: GCP BigQuery 내부 이론 정리
 * 다수의 Table에서 한번에 데이터를 조회하고 싶을때 이용
   * **Example** : SELECT * FROM `project_id.dataset_id.table_id_*`
 * `_TABLE_SUFFIX` : Wildcard Table 쿼리 이용시 Pseudo Column이며, 이를 활용하여 특정 Table만 조회 가능
-  * **Example** : SELECT * FROM `project_id.dataset_id.table_id_*` WHERE _TABLE_SUFFIX = '100' OR _TABLE_SUFFIX = '200'
+  * **Example** : SELECT * FROM `project_id.dataset_id.table_id_*` WHERE `_TABLE_SUFFIX` = '100' OR `_TABLE_SUFFIX` = '200'
 * Limitations
   * Support BigQuery storage only
   * Caching is not supported
@@ -197,7 +197,7 @@ title: GCP BigQuery 내부 이론 정리
 * 스트리밍 버퍼(Buffer) 메커니즘
   * 레코드가 올 때마다 바로 디스크에 쓰면 극도로 비효율적이라 버퍼를 사용
   * 버퍼에 있는 동안에도 쿼리 시 테이블 + 버퍼를 동시에 조회하므로 사용자 입장에서는 데이터 일관성이 보장
-  * 디스크에 완전히 쓰이기 전까지는 어느 파티션에 속할지 확정되지 않으므로 임시로 __UNPARTITIONED__에 위치
+  * 디스크에 완전히 쓰이기 전까지는 어느 파티션에 속할지 확정되지 않으므로 임시로 `__UNPARTITIONED__`에 위치
 
 ### 7.3. Integer Range Partitioning
 
@@ -214,12 +214,12 @@ title: GCP BigQuery 내부 이론 정리
 
 ### 7.4 Partition Expiration
 
-* 만료 시간은 ALTER 문으로 설정 (Web UI 미지원)
+* 만료 시간은 `ALTER` 문으로 설정 (Web UI 미지원)
 * 개별 파티션마다 다른 만료 시간 설정 불가 → 테이블 전체에 일괄 적용
 * 테이블 만료 > 파티션 만료 (테이블이 삭제되면 파티션도 같이 삭제)
   * 테이블 만료 5일, 파티션 만료 7일 → 5일 후 모두 삭제
 * 파티션 만료 설정 우선 순위
-  * 1순위: ALTER 문으로 명시적 설정
+  * 1순위: `ALTER` 문으로 명시적 설정
   * 2순위: 테이블 생성 시 설정
   * 3순위: 데이터셋 기본 설정
   * 만료 없음 → 수동 삭제 필요
@@ -365,7 +365,7 @@ WHERE cluster_column = other_column
 * SQL 쿼리로 정의된 가상 테이블. 실제 데이터를 저장하지 않고, 쿼리 결과를 테이블처럼 보여줌
 * 특성
   * 데이터 저장 : 물리적 데이터 없음
-  * 읽기/쓰기 : 읽기 전용 (INSERT/UPDATE/DELETE 불가)
+  * 읽기/쓰기 : 읽기 전용 (`INSERT`/`UPDATE`/`DELETE` 불가)
   * 스키마 독립성 : 생성 후 기본 테이블 스키마 변경해도 뷰 스키마는 그대로 유지
   * 기본 테이블 삭제 시 : 뷰가 무효화되어 쿼리 실패
   * 저장 비용 : 무료 (조회 비용은 테이블과 동일)
@@ -433,7 +433,7 @@ WHERE cluster_column = other_column
 ### 11.3. Materialized View 갱신
 
 * 변경 유형
-  * INSERT만 (append) : 변경된 델타 데이터만 읽어서 추가
+  * `INSERT`만 (append) : 변경된 델타 데이터만 읽어서 추가
   * `UPDATE`/`DELETE`/`MERGE` : 영향받은 부분 무효화 후 재읽기
 * 파티션 여부에 따른 차이
   * 파티션 MV : 영향받은 파티션만 무효화 + 재읽기
@@ -446,7 +446,7 @@ WHERE cluster_column = other_column
   * 5분 이내 자동 갱신 (변경 발생 후)
   * 단, 최소 갱신 간격 준수 (기본 30분) : 기본 테이블이 계속 바뀌어도 30분마다 최대 1회 갱신
 * 갱신 사이 시간대의 데이터 처리
-  * INSERT만 : MV 데이터 + 마지막 갱신 이후 델타 데이터 합산
+  * `INSERT`만 : MV 데이터 + 마지막 갱신 이후 델타 데이터 합산
   * `UPDATE`/`DELETE` : MV 스캔 안 하고 기본 테이블 직접 조회
 * BigQuery는 MV 갱신 여부와 관계없이 항상 최신 데이터를 보장합니다. 갱신 전이면 델타를 합산하거나 기본 테이블을 직접 조회하는 방식으로 일관성을 유지합니다.
 
@@ -457,7 +457,7 @@ WHERE cluster_column = other_column
 | 데이터 저장 | ❌ | ✅ |
 | 저장 비용 | 무료 | 발생 |
 | 쿼리 성능 | 느림 | 빠름 |
-| JOIN 지원 | ✅ | ❌ |
+| `JOIN` 지원 | ✅ | ❌ |
 | 중첩 | 16단계 | ❌ |
 | 참조 테이블 | 다중 | 단일 |
 | DML | ❌ | ❌ |
@@ -470,7 +470,7 @@ WHERE cluster_column = other_column
   * `EXPORT` : 데이터 내보내기 불가
   * `LOAD` : 직접 데이터 적재 불가
   * `INSERT` : 쿼리 결과 직접 쓰기 불가
-  * **DML** : UPDATE/DELETE/MERGE 불가
+  * **DML** : `UPDATE`/`DELETE`/`MERGE` 불가
   * `UNNEST` : 배열 펼치기 불가
   * `JOIN` : 여러 테이블 조인 불가
   * MV 중첩 : MV 기반 MV 생성 불가
@@ -502,10 +502,10 @@ GROUP BY customer_id, product_category
   * 기본 테이블 변경이 많음 : 갱신 주기 짧게 설정
   * ETL/야간 배치로 데이터 적재 : Auto Refresh 끄고 수동 갱신 또는 스케줄링
 * DML 작업은 배치로 묶고 수동 갱신
-  * UPDATE/DELETE/MERGE는 MV를 무효화시키므로 개별 실행보다 한 번에 묶어서 실행 후 수동 갱신합니다.
-* JOIN이 필요한 경우 집계를 먼저 MV로 만들기
-  * Materialized View 생성시에 JOIN을 지원하지 않음
-  * 집계용 Materialized View를 먼저 생성하고, 이를 원래 Base Table과 JOIN 쿼리로 묶어서 사용
+  * `UPDATE`/`DELETE`/`MERGE`는 MV를 무효화시키므로 개별 실행보다 한 번에 묶어서 실행 후 수동 갱신합니다.
+* `JOIN`이 필요한 경우 집계를 먼저 MV로 만들기
+  * Materialized View 생성시에 `JOIN`을 지원하지 않음
+  * 집계용 Materialized View를 먼저 생성하고, 이를 원래 Base Table과 `JOIN` 쿼리로 묶어서 사용
 
 ## 12. Pricing
 
@@ -576,7 +576,7 @@ GROUP BY customer_id, product_category
   * `INSERT` : 소스 테이블에서 SELECT로 참조된 모든 컬럼의 바이트 합계
   * `UPDATE` : 참조된 컬럼의 바이트 합계 + 수정 대상 행의 모든 컬럼 바이트 합계
   * `DELETE` : 참조된 컬럼의 바이트 합계 + 삭제 대상 행의 모든 컬럼 바이트 합계
-  * `MERGE` : 포함된 INSERT/UPDATE/DELETE 각각의 위 공식 적용
+  * `MERGE` : 포함된 `INSERT`/`UPDATE`/`DELETE` 각각의 위 공식 적용
 * BigQuery Storage API 요금
   * RPC 기반 프로토콜로 BigQuery 스토리지에 빠르게 접근하는 API.
   * 정액제 고객 : 월 3TB까지 무료 읽기 제공, 초과 시 온디맨드 요금 적용
@@ -642,8 +642,8 @@ GROUP BY customer_id, product_category
   * Cloud Storage, BigTable 등 외부 소스는 BigQuery 내부 스토리지보다 느리고 비쌈
   * 외부 소스가 적합한 경우: ETL 작업, 자주 변경되는 데이터, 주기적 로드
 * 셔플링 줄이기
-  * JOIN 전에 데이터를 최대한 줄이기
-  * JOIN 쿼리 테이블 순서 : 큰 테이블부터 작은 테이블 순으로
+  * `JOIN` 전에 데이터를 최대한 줄이기
+  * `JOIN` 쿼리 테이블 순서 : 큰 테이블부터 작은 테이블 순으로
   * 비정규화 스키마 활용
 
 ### 13.2. CPU Time 감소
@@ -653,7 +653,7 @@ GROUP BY customer_id, product_category
   * 근사 집계 함수 활용 (가능한 경우)
   * ORDER BY 사용 주의
     * 반드시 가장 바깥쪽 쿼리에서만 사용
-  * JOIN 테이블 순서 — 큰 테이블부터 작은 테이블 순
+  * `JOIN` 테이블 순서 — 큰 테이블부터 작은 테이블 순
 * 출력 데이터 관리
   * LIMIT으로 출력 데이터 제한
   * 중복 저장 방지

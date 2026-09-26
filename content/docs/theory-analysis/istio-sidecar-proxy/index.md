@@ -301,7 +301,7 @@ Init Container는 `iptables` Rule을 설정해야하기 때문에 [File 2]에서
 
 ### 1.3. Traffic Load Balancing
 
-Sidecar Proxy는 Service에게 Traffic 전송시 kube-proxy가 설정하는 iptables/IPVS Rule을 이용하여 Load Balancing을 수행하지 않는다. Sidecar Proxy는 Istiod를 통해서 받는 Service 및 Service와 연결되어 있는 Pod(Endpoint)의 정보를 받아서 직접 L7 Level의 Load Balancing을 수행한다. 따라서 L3/L4 Level의 Load Balancing을 수행하는 kube-proxy에서는 이용할 수 없는 다양한 Load Balancing 기법을 Istio의 Sidecar Proxy를 통해서 적용할 수 있다. Round Robin, Least Connection, Random과 같은 기본적인 Load Balancing 기법부터 시작하여, L7 기반의 Consistent Hash, Locality Base 기법들도 이용할 수 있다.
+Sidecar Proxy는 Service에게 Traffic 전송시 kube-proxy가 설정하는 `iptables`/IPVS Rule을 이용하여 Load Balancing을 수행하지 않는다. Sidecar Proxy는 Istiod를 통해서 받는 Service 및 Service와 연결되어 있는 Pod(Endpoint)의 정보를 받아서 직접 L7 Level의 Load Balancing을 수행한다. 따라서 L3/L4 Level의 Load Balancing을 수행하는 kube-proxy에서는 이용할 수 없는 다양한 Load Balancing 기법을 Istio의 Sidecar Proxy를 통해서 적용할 수 있다. Round Robin, Least Connection, Random과 같은 기본적인 Load Balancing 기법부터 시작하여, L7 기반의 Consistent Hash, Locality Base 기법들도 이용할 수 있다.
 
 다만 Istio 환경에서도 여전히 kube-proxy는 필수적인 요소이다. Sidecar Proxy가 존재하지 않는 Pod는 여전히 Service에게 Traffic 전송시에 kube-proxy를 이용하며, Sidecar Proxy가 Istiod와 통신시에도 kube-proxy를 통해서 Istiod에 접근하기 때문이다.
 

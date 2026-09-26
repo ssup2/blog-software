@@ -16,18 +16,18 @@ SysVinit은 순차적으로 Service를 수행하는 방식이었지만 systemd�
 
 journald는 Linux의 주요 Log를 저장하고 관리하는 Daemon이다. journald는 `/var/log/journal` 폴더 아래 다음과 같은 내용을 Log로 남긴다.
 
-* /proc/kmsg를 통해 전달되는 Kernel Log를 기록한다.
-* App이 syslog(3) 함수를 통해서 남기는 Log를 기록한다. Log는 /dev/log (/run/systemd/journal/dev-log) Domain Socket을 통해서 journald에게 전달된다.
-* sd-journal-sendv() 함수같은 journald가 제공하는 API를 통해 전달된 Log를 기록한다. Log는 /run/systemd/journal/socket Domain Socket을 통해서 journald에게 전달된다.
-* systemd Service들의 stdout, stderr를 Log로 기록한다. Log는 /run/systemd/journal/stdout을 통해서 journald에게 전달된다.
+* `/proc/kmsg`를 통해 전달되는 Kernel Log를 기록한다.
+* App이 `syslog(3)` 함수를 통해서 남기는 Log를 기록한다. Log는 `/dev/log` (`/run/systemd/journal/dev-log`) Domain Socket을 통해서 journald에게 전달된다.
+* `sd-journal-sendv()` 함수같은 journald가 제공하는 API를 통해 전달된 Log를 기록한다. Log는 `/run/systemd/journal/socket` Domain Socket을 통해서 journald에게 전달된다.
+* systemd Service들의 stdout, stderr를 Log로 기록한다. Log는 `/run/systemd/journal/stdout`을 통해서 journald에게 전달된다.
 * Audit Log를 기록한다.
 
-/dev/log Domain Socket은 journald가 나오기전 rsyslogd가 log를 받아 /var/log 폴더 아래 Log를 남길때 이용되던 Domain Socket이다. 따라서 rsyslogd는 journald와 같이 동작하는 경우 아래와 같은 2가지 방법으로 Log를 받을 수 있다
+`/dev/log` Domain Socket은 journald가 나오기전 rsyslogd가 log를 받아 `/var/log` 폴더 아래 Log를 남길때 이용되던 Domain Socket이다. 따라서 rsyslogd는 journald와 같이 동작하는 경우 아래와 같은 2가지 방법으로 Log를 받을 수 있다
 
-* /run/systemd/journal/syslog Domain Socket을 통해서 rsyslogd에게 Log를 전달 할 수 있다.
-* imjournal Module은 journald가 기록한 Log를 rsyslogd에게 전달한다.
+* `/run/systemd/journal/syslog` Domain Socket을 통해서 rsyslogd에게 Log를 전달 할 수 있다.
+* `imjournal` Module은 journald가 기록한 Log를 rsyslogd에게 전달한다.
 
-journald는 Log 기록시 rsyslogd처럼 Plain Text를 이용하지 않고 Structure를 이용하여 Log뿐만 아니라 Log의 Meta 정보를 같이 저장하는 방식이다. Structure를 통해서 journald는 Log를 빠르게 검색하거나 필터링 할 수 있다. journald는 Structure 구조이기 때문에 cat같은 Standard UNIX Tool로 Log 확인이 힘들다. journald에서 제공하는 **journalctl** 명령어로 Log를 확인 할 수 있다.
+journald는 Log 기록시 rsyslogd처럼 Plain Text를 이용하지 않고 Structure를 이용하여 Log뿐만 아니라 Log의 Meta 정보를 같이 저장하는 방식이다. Structure를 통해서 journald는 Log를 빠르게 검색하거나 필터링 할 수 있다. journald는 Structure 구조이기 때문에 `cat`같은 Standard UNIX Tool로 Log 확인이 힘들다. journald에서 제공하는 `journalctl` 명령어로 Log를 확인 할 수 있다.
 
 ## 2. 참조
 

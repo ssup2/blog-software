@@ -15,7 +15,7 @@ title: Kubernetes 설치 / kubeadm 이용 / Ubuntu 18.04
 * kubeadm 1.12.3
   * VM을 이용하여 Cluster 환경을 구축하는 경우 kubeadm을 이용하여 쉽게 Kubernetes를 설치 할 수 있다.
 * Password
-  * Kubernetes 설치에 필요한 Password는 간편한 설치를 위해 **root**로 통일한다.
+  * Kubernetes 설치에 필요한 Password는 간편한 설치를 위해 `root`로 통일한다.
 * 모든 Node에서 root User로 설치를 진행한다.
 
 ## 2. Node 설정
@@ -24,7 +24,7 @@ title: Kubernetes 설치 / kubeadm 이용 / Ubuntu 18.04
 
 VirtualBox를 이용하여 [Figure 1]과 같이 가상의 Master, Worker Node (VM)을 생성한다.
 
-* **Hostname** : Master Node - node1, Worker Node1 - node2, Worker Node2 - node3
+* **Hostname** : Master Node - `node1`, Worker Node1 - `node2`, Worker Node2 - `node3`
 * **NAT** : Virtual Box에서 제공하는 "NAT 네트워크" 이용하여 10.0.0.0/24 Network를 구축한다.
 * **Router** : 공유기를 이용하여 192.168.0.0/24 Network를 구축한다. (NAT)
 
@@ -47,7 +47,7 @@ network:
                 addresses: [8.8.8.8]
 ```
 
-Master Node의 /etc/netplan/50-cloud-init.yaml 파일을 [File 1]과 같이 설정한다.
+Master Node의 `/etc/netplan/50-cloud-init.yaml` 파일을 [File 1]과 같이 설정한다.
 
 ### 2.2. Worker Node
 
@@ -63,7 +63,7 @@ network:
                 addresses: [8.8.8.8]
 ```
 
-Worker Node 01의 /etc/netplan/50-cloud-init.yaml 파일을 [File 2]와 같이 설정한다.
+Worker Node 01의 `/etc/netplan/50-cloud-init.yaml` 파일을 [File 2]와 같이 설정한다.
 
 ```yaml {caption="[File 3] Worker Node 02 - /etc/netplan/50-cloud-init.yaml", linenos=table}
 network:
@@ -77,7 +77,7 @@ network:
                 addresses: [8.8.8.8]
 ```
 
-Worker Node 02의 /etc/netplan/50-cloud-init.yaml 파일을 [File 3]과 같이 설정한다.
+Worker Node 02의 `/etc/netplan/50-cloud-init.yaml` 파일을 [File 3]과 같이 설정한다.
 
 ## 3. Package 설치
 
@@ -115,7 +115,7 @@ Cluster 구축을 위한 kubeadm 명령어의 옵션은 이용할 Network Plugin
 kubeadm join 10.0.0.10:6443 --token x7tk20.4hp9x2x43g46ara5 --discovery-token-ca-cert-hash sha256:cab2cc0a4912164f45f502ad31f5d038974cf98ed10a6064d6632a07097fad79
 ```
 
-kubeadm를 초기화 한다. --pod-network-cidr는 반드시 **192.168.0.0/16**으로 설정해야 한다. Docker Version으로 인한 Error가 발생하면 kubeadm init 마지막에 '--ignore-preflight-errors=SystemVerification'를 붙인다.
+kubeadm를 초기화 한다. `--pod-network-cidr`는 반드시 **192.168.0.0/16**으로 설정해야 한다. Docker Version으로 인한 Error가 발생하면 `kubeadm init` 마지막에 `--ignore-preflight-errors=SystemVerification`를 붙인다.
 
 #### 4.1.1. Flannel 기반 구축
 
@@ -127,7 +127,7 @@ kubeadm를 초기화 한다. --pod-network-cidr는 반드시 **192.168.0.0/16**�
 kubeadm join 10.0.0.10:6443 --token x7tk20.4hp9x2x43g46ara5 --discovery-token-ca-cert-hash sha256:cab2cc0a4912164f45f502ad31f5d038974cf98ed10a6064d6632a07097fad79
 ```
 
-kubeadm를 초기화 한다. --pod-network-cidr는 반드시 **10.244.0.0/16**으로 설정해야 한다. Docker Version으로 인한 Error가 발생하면 kubeadm init 마지막에 '--ignore-preflight-errors=SystemVerification'를 붙인다.
+kubeadm를 초기화 한다. `--pod-network-cidr`는 반드시 **10.244.0.0/16**으로 설정해야 한다. Docker Version으로 인한 Error가 발생하면 `kubeadm init` 마지막에 `--ignore-preflight-errors=SystemVerification`를 붙인다.
 
 #### 4.1.3. Cilium 기반 구축
 
@@ -139,7 +139,7 @@ kubeadm를 초기화 한다. --pod-network-cidr는 반드시 **10.244.0.0/16**�
 kubeadm join 10.0.0.10:6443 --token x7tk20.4hp9x2x43g46ara5 --discovery-token-ca-cert-hash sha256:cab2cc0a4912164f45f502ad31f5d038974cf98ed10a6064d6632a07097fad79
 ```
 
-kubeadm를 초기화 한다. --pod-network-cidr는 --pod-network-cidr와 중복만 되지 않으면 된다. 위에서는 --pod-network-cidr를 192.167.0.0/16으로 설정하였다. Docker Version으로 인한 Error가 발생하면 kubeadm init 마지막에 '--ignore-preflight-errors=SystemVerification'를 붙인다.
+kubeadm를 초기화 한다. `--pod-network-cidr`는 `--pod-network-cidr`와 중복만 되지 않으면 된다. 위에서는 `--pod-network-cidr`를 `192.167.0.0/16`으로 설정하였다. Docker Version으로 인한 Error가 발생하면 `kubeadm init` 마지막에 `--ignore-preflight-errors=SystemVerification`를 붙인다.
 
 #### 4.1.4. 공통
 
@@ -165,7 +165,7 @@ fi
 source <(kubectl completion bash)
 ```
 
-kubectl autocomplete를 설정한다. ~/.bashrc에 [File 4]의 내용을 추가한다.
+kubectl autocomplete를 설정한다. `~/.bashrc`에 [File 4]의 내용을 추가한다.
 
 ### 4.2. Worker Node
 
@@ -175,7 +175,7 @@ kubectl autocomplete를 설정한다. ~/.bashrc에 [File 4]의 내용을 추가�
 (Worker)$ kubeadm join 10.0.0.10:6443 --token 46i2fg.yoidccf4k485z74u --discovery-token-ca-cert-hash sha256:cab2cc0a4912164f45f502ad31f5d038974cf98ed10a6064d6632a07097fad79
 ```
 
-Cluster를 구성한다. kubeadm init 결과로 나온 **kubeadm join ~~** 명령어를 모든 Worker Node에서 수행한다. Docker Version으로 인한 Error가 발생하면 kubeadm join 마지막에 '--ignore-preflight-errors=SystemVerification'를 붙인다.
+Cluster를 구성한다. `kubeadm init` 결과로 나온 **kubeadm join ~~** 명령어를 모든 Worker Node에서 수행한다. Docker Version으로 인한 Error가 발생하면 `kubeadm join` 마지막에 `--ignore-preflight-errors=SystemVerification`를 붙인다.
 
 ### 4.3. 검증
 
@@ -187,7 +187,7 @@ node2   NotReady   <none>   31s   v1.12.3
 node3   NotReady   <none>   27s   v1.12.3
 ```
 
-Master Node에서 Cluster를 확인한다. 모든 Node가 List에서 보여야 한다. Network 설정이 안되어 있기 때문에 NotReady 상태로 유지된다. Network Plugin 설치후 Ready 상태를 확인 가능하다.
+Master Node에서 Cluster를 확인한다. 모든 Node가 List에서 보여야 한다. Network 설정이 안되어 있기 때문에 `NotReady` 상태로 유지된다. Network Plugin 설치후 `Ready` 상태를 확인 가능하다.
 
 ## 5. Network Plugin 설치
 
@@ -219,7 +219,7 @@ Flannel를 설치한다.
 (Master)$ echo "bpffs                      /sys/fs/bpf             bpf     defaults 0 0" >> /etc/fstab
 ```
 
-bpffs mount 및 설정을 진행한다.
+`bpffs` mount 및 설정을 진행한다.
 
 ```shell
 (Master)$ wget https://github.com/cilium/cilium/archive/v1.3.0.zip
@@ -246,7 +246,7 @@ Cilium Download 및 Cilium 구동을 위한 etcd를 설치한다.
 ...
 ```
 
-Cilium 설정을 변경하여 Prefilter 기능을 활성화 한다. prefilter Interface는 Kubernets Cluster Network를 구성하는 NIC의 Interface를 지정해야한다. Kubernets Cluster Network를 구성하는 NIC의 Device Driver가 XDP를 지원하지 않으면 --prefilter-mode에 generic 설정을 추가해야 한다. cilium-1.3.0/examples/kubernetes/1.12/cilium.yaml 파일을 [File 5]와 같이 변경한다.
+Cilium 설정을 변경하여 Prefilter 기능을 활성화 한다. prefilter Interface는 Kubernets Cluster Network를 구성하는 NIC의 Interface를 지정해야한다. Kubernets Cluster Network를 구성하는 NIC의 Device Driver가 XDP를 지원하지 않으면 `--prefilter-mode`에 `generic` 설정을 추가해야 한다. `cilium-1.3.0/examples/kubernetes/1.12/cilium.yaml` 파일을 [File 5]와 같이 변경한다.
 
 ```shell
 (Master)$ kubectl apply -f cilium-1.3.0/examples/kubernetes/1.12/cilium.yaml
@@ -267,7 +267,7 @@ Worker Node에서는 작업이 필요없다.
 (Worker)$ echo "bpffs                      /sys/fs/bpf             bpf     defaults 0 0" >> /etc/fstab
 ```
 
-bpffs mount 및 설정을 진행한다.
+`bpffs` mount 및 설정을 진행한다.
 
 ## 6. Web UI (Dashboard) 설치
 
@@ -290,7 +290,7 @@ spec:
 ...
 ```
 
-kube-apiserver에 Insecure Option을 설정한다. /etc/kubernetes/manifests/kube-apiserver.yaml 파일의 command에 [File 6]의 내용으로 수정한다.
+kube-apiserver에 Insecure Option을 설정한다. `/etc/kubernetes/manifests/kube-apiserver.yaml` 파일의 `command`에 [File 6]의 내용으로 수정한다.
 
 ```shell
 (Master)$ service kubelet restart
@@ -315,7 +315,7 @@ subjects:
   namespace: kube-system
 ```
 
-Web UI Privilege 권한을 위한 config 파일을 생성한다. [File 7]의 내용으로 ~/dashboard-admin.yaml 파일을 생성한다.
+Web UI Privilege 권한을 위한 config 파일을 생성한다. [File 7]의 내용으로 `~/dashboard-admin.yaml` 파일을 생성한다.
 
 ```shell
 (Master)$ kubectl create -f ~/dashboard-admin.yaml

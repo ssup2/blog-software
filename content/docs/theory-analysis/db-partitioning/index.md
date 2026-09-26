@@ -8,17 +8,17 @@ DB의 Partitioning, Sharding을 분석한다.
 
 {{< figure caption="[Figure 1] DB Partitioning" src="images/db-partitioning.png" width="900px" >}}
 
-**Partitioning**은 성능, 가용성, 유지 보수의 용이성을 위해서 하나의 Table을 여러개의 Table로 분리하는 기법이다. Table이 분리 되는 만큼 Table의 Data도 별도의 Disk 공간으로 분리가 된다. Partitioning은 **Vertical Partitioning**과 **Horizontal Paritioning**이 존재한다. [Figure 1]은 Vertical Partitioning과 Horizontal Paritioning을 나타내고 있다.
+**Partitioning**은 성능, 가용성, 유지 보수의 용이성을 위해서 하나의 Table을 여러개의 Table로 분리하는 기법이다. Table이 분리 되는 만큼 Table의 Data도 별도의 Disk 공간으로 분리가 된다. Partitioning은 **Vertical Partitioning**과 **Horizontal Partitioning**이 존재한다. [Figure 1]은 Vertical Partitioning과 Horizontal Partitioning을 나타내고 있다.
 
 ### 1.1. Vertical Partitioning
 
 Vertical Partitioning은 Table을 수직으로 분리하는 기법이다. Data Read가 일부 Column에서만 자주 발생한다면, 자주 Read가 발생하는 Column만 별도의 Table로 분류하여 Read 성능을 높일 수 있다. DB를 다수의 Instance로 구성하여도 Vertical Partitioning을 통해서는 다수의 DB Instance를 제대로 활용하지 못한다.
 
-### 1.2. Horizontal Paritioning
+### 1.2. Horizontal Partitioning
 
-Horizontal Paritioning은 Table을 수평으로 분리하는 기법이다. 단일 DB Instance에서 수행하는 Horizontal Paritioning은 적용하여도 큰 성능적 이점을 얻기 힘들다. 하지만 다수의 DB Instance에게 수평으로 분리한 Table을 분산하면 다수의 DB Instance의 성능을 많이 활용할 수 있는 장점을 갖고 있다. Query를 다수의 DB Instance로 분리하여 처리할 수 있기 때문이다.
+Horizontal Partitioning은 Table을 수평으로 분리하는 기법이다. 단일 DB Instance에서 수행하는 Horizontal Partitioning은 적용하여도 큰 성능적 이점을 얻기 힘들다. 하지만 다수의 DB Instance에게 수평으로 분리한 Table을 분산하면 다수의 DB Instance의 성능을 많이 활용할 수 있는 장점을 갖고 있다. Query를 다수의 DB Instance로 분리하여 처리할 수 있기 때문이다.
 
-일반적으로 **DB Sharding**은 Horizontal Paritioning을 통해서 Table을 수평으로 분리하고, 분리한 Table을 다수의 DB Instance에 분리하여 저장하는 기법을 의미한다. Horizontal Paritioning은 Table을 수평으로 분리하는 Algorithm에 따라서 **Hash**, **Range**, **List** 방법이 존재한다.
+일반적으로 **DB Sharding**은 Horizontal Partitioning을 통해서 Table을 수평으로 분리하고, 분리한 Table을 다수의 DB Instance에 분리하여 저장하는 기법을 의미한다. Horizontal Partitioning은 Table을 수평으로 분리하는 Algorithm에 따라서 **Hash**, **Range**, **List** 방법이 존재한다.
 
 #### 1.2.1. Hash
 

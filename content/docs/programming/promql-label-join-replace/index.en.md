@@ -37,7 +37,7 @@ node-memory-MemAvailable-bytes{container="node-exporter", dest="node-exporter+me
 node-memory-MemAvailable-bytes{container="node-exporter", dest="node-exporter+metrics+monitoring", endpoint="metrics", instance="192.168.0.33:9100", job="node-exporter", namespace="monitoring", pod="prometheus-prometheus-node-exporter-9lzmv", service="prometheus-prometheus-node-exporter"} 9297317888
 ```
 
-[Query 2] shows an example of Label Join using node-memory-MemAvailable-bytes. You can see that the `dest` Label has been added, and you can see that the value of `dest` is composed of the `job`, `endpoint`, `namespace` Label values and the Seperator `+`.
+[Query 2] shows an example of Label Join using `node-memory-MemAvailable-bytes`. You can see that the `dest` Label has been added, and you can see that the value of `dest` is composed of the `job`, `endpoint`, `namespace` Label values and the `Seperator` `+`.
 
 ## 2. PromQL Label Replace
 
@@ -60,7 +60,7 @@ node-memory-MemAvailable-bytes{container="node-exporter", dest="node-exporter-re
 node-memory-MemAvailable-bytes{container="node-exporter", dest="node-exporter-replace", endpoint="metrics", instance="192.168.0.33:9100", job="node-exporter", namespace="monitoring", pod="prometheus-prometheus-node-exporter-9lzmv", service="prometheus-prometheus-node-exporter"} 9297317888
 ```
 
-[Query 3] shows an example of Label Replace using `node-memory-MemAvailable-bytes`. You can see that the `dest` Label has been added, and you can see that the value of `dest` is set to the value of the `node-exporter` label with the string `-replace` added according to Regex and Replacement syntax.
+[Query 3] shows an example of Label Replace using `node-memory-MemAvailable-bytes`. You can see that the `dest` Label has been added, and you can see that the value of `dest` is set to the value of the `node-exporter` label with the string `-replace` added according to `Regex` and `Replacement` syntax.
 
 ## 3. References
 

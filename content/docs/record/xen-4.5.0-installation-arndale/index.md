@@ -26,12 +26,12 @@ Cross Compiler를 설치한다.
 PATH=$PATH:/usr/local/gcc-linaro-arm-linux-gnueabihf-4.8/bin
 ```
 
-/usr/local Directory에 압축을 풀고 ~/.bashrc 파일에 [File 1]의 내용을 추가하여 어떤 Directory에서라도 Compiler를 실행 할 수 있도록 만든다.
+`/usr/local` Directory에 압축을 풀고 `~/.bashrc` 파일에 [File 1]의 내용을 추가하여 어떤 Directory에서라도 Compiler를 실행 할 수 있도록 만든다.
 
 ## 3. uSD Card Partiton 구성
 
-* `0 ~ 2M`, `2M`, **No Filesystem** : Bootloader (bl1, spl, U-boot)
-* `2M ~ 18M`, `16M`, `ext2`, `boot` : xen-uImage, linux-zImage, exynos5250-arndale.dtb, load-xen-uSD.img
+* `0 ~ 2M`, `2M`, **No Filesystem** : Bootloader (`bl1`, `spl`, U-boot)
+* `2M ~ 18M`, `16M`, `ext2`, `boot` : `xen-uImage`, `linux-zImage`, `exynos5250-arndale.dtb`, `load-xen-uSD.img`
 * `18M ~ rest`, `ext3`, `root` : Dom0 Root-Filesystem
 
 ## 4. U-boot Fusing
@@ -45,7 +45,7 @@ $ export ARCH=arm
 $ make arndale5250
 ```
 
-spl, u-boot Download 및 Build 한다.
+`spl`, `u-boot` Download 및 Build 한다.
 
 * Download `bl1` : http://releases.linaro.org/12.12/components/kernel/arndale-bl1/arndale-bl1.bin
 
@@ -55,7 +55,7 @@ $ dd if=spl/smdk5250-spl.bin of=/dev/sdb bs=512 seek=17
 $ dd if=u-boot.bin of=/dev/sdb bs=512 seek=49
 ```
 
-bl1, spl, u-boot를 Fusing 한다.
+`bl1`, `spl`, `u-boot`를 Fusing 한다.
 
 ## 5. Xen Build
 
@@ -141,7 +141,7 @@ PXE Boot 또는 uSD Card Boot 둘중에 하나를 선택하여 수행한다.
 $ apt-get install xinetd tftp tftpd
 ```
 
-tftp Ubuntu Package 설치한다.
+`tftp` Ubuntu Package 설치한다.
 
 ``` {caption="[File 2] /etc/xinetd.d/tftp", linenos=table}
 service tftp
@@ -159,7 +159,7 @@ service tftp
 }
 ```
 
-/etc/xinetd.d/tftp 파일을 [File 2]의 내용으로 생성한다.
+`/etc/xinetd.d/tftp` 파일을 [File 2]의 내용으로 생성한다.
 
 ```shell
 $ mkdir /tftpboot
@@ -179,7 +179,7 @@ $ cd xen-4.5.0
 $ cp xen-uImage /tftpboot
 ```
 
-생성한 Binary들을 tfpt Server에 복사한다.
+생성한 Binary들을 tftp Server에 복사한다.
 
 #### 8.1.3 tftp Image 파일 생성
 
@@ -189,11 +189,11 @@ $ wget http://xenbits.xen.org/people/julieng/load-xen-tftp.scr.txt
 $ mkimage -T script -C none -d load-xen-tftp.scr.txt /tftpboot/load-xen-tftp.img
 ```
 
-Booting을 위한 tfpt Image 파일을 생성한다.
+Booting을 위한 tftp Image 파일을 생성한다.
 
-#### 8.1.4. tfpt Image 파일 복사 
+#### 8.1.4. tftp Image 파일 복사 
 
-load-xen-tftp.img 파일을 uSD Card의 ext2 Partition에 복사한다.
+`load-xen-tftp.img` 파일을 uSD Card의 `ext2` Partition에 복사한다.
 
 #### 8.1.5. U-boot 설정
 
@@ -215,8 +215,8 @@ load-xen-tftp.img 파일을 uSD Card의 ext2 Partition에 복사한다.
 
 U-boot를 설정한다.
 
-* **board IP** : 192.168.0.200
-* **tftp Server (Host PC)** : 192.168.0.100
+* **board IP** : `192.168.0.200`
+* **tftp Server (Host PC)** : `192.168.0.100`
 
 ### 8.2. uSD Card Boot
 
@@ -238,7 +238,7 @@ ext2load mmc 0:1 $dtb_addr_r /exynos5250-arndale.dtb
 ...
 ```
 
-load-xen-tftp.scr.txt 파일을 통해서 load-xen-uSD.scr.txt 파일을 생성한다.
+`load-xen-tftp.scr.txt` 파일을 통해서 `load-xen-uSD.scr.txt` 파일을 생성한다.
 
 ```shell
 # mkimage -T script -C none -d load-xen-uSD.scr.txt /tftpboot/load-xen-uSD.img
@@ -248,7 +248,7 @@ Image 파일을 생성한다.
 
 #### 8.2.2. Kernel Images, dtb, uSD Card Image 파일 복사
 
-linux-zImage, exynos5250-arndale.dtb, load-xen-uSD.img 파일을 uSD Card의 ext2 Partition에 복사한다.
+`linux-zImage`, `exynos5250-arndale.dtb`, `load-xen-uSD.img` 파일을 uSD Card의 `ext2` Partition에 복사한다.
 
 #### 8.2.3. U-boot 설정
 
@@ -275,7 +275,7 @@ $ apt-get install sbuild
 $ sbuild-adduser $USER
 ```
 
-sbuild와 schroot를 설치한다.
+`sbuild`와 `schroot`를 설치한다.
 
 ```shell
 $ sbuild-createchroot --components=main,universe trusty /srv/chroots/trusty-armhf-cross http://archive.ubuntu.com/ubuntu/
@@ -292,7 +292,7 @@ description=Debian trusty/armhf crossbuilder
 ...
 ```
 
-/etc/schroot/chroot.d/trusty-armhf-cross 파일을 [File 4]와 같이 수정한다.
+`/etc/schroot/chroot.d/trusty-armhf-cross` 파일을 [File 4]와 같이 수정한다.
 
 ```shell
 $ schroot -c trusty-armhf-cross
@@ -351,7 +351,7 @@ auto eth0
 iface eth0 inet dhcp
 ```
 
-/etc/network/interfaces를 [File 5]의 내용으로 설정한다.
+`/etc/network/interfaces`를 [File 5]의 내용으로 설정한다.
 
 ```shell
 (chroot)$ echo deb http://ports.ubuntu.com/ trusty main >> /etc/apt/sources.list
@@ -369,7 +369,7 @@ respawn
 exec exec /sbin/getty -8 115200 hvc0
 ```
 
-/etc/init/xvc0.conf 파일을 [File 6]의 내용으로 생성하여 getty를 설정한다.
+`/etc/init/xvc0.conf` 파일을 [File 6]의 내용으로 생성하여 `getty`를 설정한다.
 
 ```shell
 (chroot) $ echo 'xenfs   /proc/xen    xenfs    defaults   0   0' >> /etc/fstab
@@ -377,7 +377,7 @@ exec exec /sbin/getty -8 115200 hvc0
 $ umount /mnt
 ```
 
-fstab을 설정한다.
+`fstab`을 설정한다.
 
 ## 11. Dom0 Root Filesystem 설정
 
@@ -441,7 +441,7 @@ $ mknod xvdg b 202 96
 $ mknod xvdh b 202 112
 ```
 
-xvdX Device Node를 생성한다.
+`xvdX` Device Node를 생성한다.
 
 ```shell
 $ echo DomU01 > /mnt/etc/hostname
@@ -504,7 +504,7 @@ $ cp DomU_zImage /media/root/root/root (ext3 partition in uSD)
 $ umount /mnt
 ```
 
-zImage, Root Filesystem들을 uSD에 복사한다.
+`zImage`, Root Filesystem들을 uSD에 복사한다.
 
 ## 15. Dom0에서 Ubuntu Package 설치
 
@@ -532,7 +532,7 @@ vif = ['bridge=xenbr0']
 extra = "earlyprintk=xenboot console=hvc0 rw rootwait root=/dev/xvda"
 ```
 
-[File 7]의 내용으로 DomU_01.cfg 파일을 생성한다.
+[File 7]의 내용으로 `DomU_01.cfg` 파일을 생성한다.
 
 ```text {caption="[File 8] 기본 Root Filesystem Image의 DomU_02.cfg", linenos=table}
 kernel = "/root/Xen_Guest/DomU_zImage"
@@ -544,7 +544,7 @@ vif = ['bridge=xenbr0']
 extra = "earlyprintk=xenboot console=hvc0 rw rootwait root=/dev/xvda"
 ```
 
-[File 8]의 내용으로 DomU_02.cfg 파일을 생성한다.
+[File 8]의 내용으로 `DomU_02.cfg` 파일을 생성한다.
 
 ## 17. DomU 구동
 

@@ -49,5 +49,5 @@ Aug 16 14:21:33 node09 sshd[23397]: Server listening on :: port 22.
 Aug 16 14:21:33 node09 systemd[1]: Started OpenBSD Secure Shell server.
 ```
 
-Displays the status of the service. [Shell 1] shows the output of the sshd service status.
+Displays the status of the service. [Shell 1] shows the output of the `sshd` service status.
 

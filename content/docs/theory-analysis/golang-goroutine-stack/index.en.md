@@ -24,7 +24,7 @@ morestack:           // call runtime to allocate more stack
 callq <runtime.morestack>
 ```
 
-[Code 1] shows this Logic in Assembly Code. At the beginning of the function, it compares the size (Limit) of the Stack available to the Goroutine stored in TLS (Thread Local Storage) with RSP that stores the Stack Pointer. If RSP exceeds the size of the Stack, it dynamically allocates Stack through the morestack function.
+[Code 1] shows this Logic in Assembly Code. At the beginning of the function, it compares the size (Limit) of the Stack available to the Goroutine stored in TLS (Thread Local Storage) with RSP that stores the Stack Pointer. If RSP exceeds the size of the Stack, it dynamically allocates Stack through the `morestack` function.
 
 {{< figure caption="[Figure 1] Goroutine Split Stack" src="images/split-stack.png" width="600px" >}}
 

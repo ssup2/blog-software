@@ -19,7 +19,7 @@ tcp        0      0 10.0.0.19:9091          0.0.0.0:*               LISTEN      
 tcp        0      0 10.0.0.19:9093          0.0.0.0:*               LISTEN      3361/alertmanager
 ```
 
-netstat은 Linux Kernel이 갖고있는 대부분의 Network 정보를 출력하는 Tool이다. [Shell 1]은 `netstat -plnt`을 이용하여 현재 Listen 상태의 Server Process와 Port를 출력하는 Shell의 모습을 나타내고 있다. netstat은 Network Interface의 성능을 측정 할때도 이용가능한 Tool이다.
+`netstat`은 Linux Kernel이 갖고있는 대부분의 Network 정보를 출력하는 Tool이다. [Shell 1]은 `netstat -plnt`을 이용하여 현재 Listen 상태의 Server Process와 Port를 출력하는 Shell의 모습을 나타내고 있다. `netstat`은 Network Interface의 성능을 측정 할때도 이용가능한 Tool이다.
 
 ### 1.2. nmap
 
@@ -37,7 +37,7 @@ PORT      STATE SERVICE
 18080/tcp open  unknown
 ```
 
-nmap은 외부 Host를 대상으로 Network Exploration을 수행하여 외부 Host의 Network 상태 정보를 출력하는 Tool이다. [Shell 2]는 `nmap -p 1-65535 localhost`을 이용하여 localhost를 대상으로 1번 Port부터 65536번 Port까지 TCP Port Scanning을 수행하는 Shell의 모습을 나타내고 있다. 22, 5000, 9094, 18080 Port를 이용하여 TCP Listening 상태인 것을 확인할 수 있다.
+`nmap`은 외부 Host를 대상으로 Network Exploration을 수행하여 외부 Host의 Network 상태 정보를 출력하는 Tool이다. [Shell 2]는 `nmap -p 1-65535 localhost`을 이용하여 `localhost`를 대상으로 1번 Port부터 65536번 Port까지 TCP Port Scanning을 수행하는 Shell의 모습을 나타내고 있다. 22, 5000, 9094, 18080 Port를 이용하여 TCP Listening 상태인 것을 확인할 수 있다.
 
 ### 1.3. nc (netcat)
 
@@ -71,7 +71,7 @@ Commercial support is available at
 </html>
 ```
 
-nc (netcat)은 Network Connection으로부터 Data를 송수신하는 Tool이다. TCP, UDP를 지원한다. [shell 3]은 `nc 10.0.0.10 80`을 이용하여 nginx에 접속하고, nginx로부터 / (root) Page를 수신하는 모습을 나타내고 있다.
+`nc` (netcat)은 Network Connection으로부터 Data를 송수신하는 Tool이다. TCP, UDP를 지원한다. [shell 3]은 `nc 10.0.0.10 80`을 이용하여 nginx에 접속하고, nginx로부터 `/` (root) Page를 수신하는 모습을 나타내고 있다.
 
 ### 1.4. tcpdump
 
@@ -88,7 +88,7 @@ listening on eth0, link-type EN10MB (Ethernet), capture size 262144 bytes
 13:30:19.355673 IP node09.55226 > a184-28-153-161.deploy.static.akamaitechnologies.com.http: Flags [.], ack 301, win 237, options [nop,nop,TS val 2368590461 ecr 2709703644], length 0
 ```
 
-tcpdump은 특정 Network Interface의 Inbound/Outbound Packet 정보를 출력하는 Tool이다. [Shell 3]은 `tcpdump -i eth0 tcp port 80`를 이용하여 eth0 Interface의 Src/Dest Port가 80인 Inbound/Outbound Packet 정보를 출력하는 Shell의 모습을 나타내고 있다.
+`tcpdump`은 특정 Network Interface의 Inbound/Outbound Packet 정보를 출력하는 Tool이다. [Shell 3]은 `tcpdump -i eth0 tcp port 80`를 이용하여 `eth0` Interface의 Src/Dest Port가 80인 Inbound/Outbound Packet 정보를 출력하는 Shell의 모습을 나타내고 있다.
 
 ### 1.5. lsof
 
@@ -106,7 +106,7 @@ systemd       1 root  mem       REG                8,2    34872    2103003 /usr/
 systemd       1 root  mem       REG                8,2   432640   11534609 /lib/x86_64-linux-gnu/libdevmapper.so.1.02.1
 ```
 
-lsof는 Open 상태의 File List를 출력하는 Tool이다. [Shell 4]는 `lsof -u root`를 이용하여 root User가 Open한 File List를 출력하는 Shell을 나타내고 있다. User 단위의 Filter뿐만 아니라 Directory, Binary 단위의 Filter도 가능하다. 또한 lsof를 이용하여 TCP, UDP의 특정 Port를 이용하는 Process를 찾는것도 가능하다.
+`lsof`는 Open 상태의 File List를 출력하는 Tool이다. [Shell 4]는 `lsof -u root`를 이용하여 `root` User가 Open한 File List를 출력하는 Shell을 나타내고 있다. User 단위의 Filter뿐만 아니라 Directory, Binary 단위의 Filter도 가능하다. 또한 `lsof`를 이용하여 TCP, UDP의 특정 Port를 이용하는 Process를 찾는것도 가능하다.
 
 ### 1.6. sysdig
 
@@ -134,7 +134,7 @@ lsof는 Open 상태의 File List를 출력하는 Tool이다. [Shell 4]는 `lsof 
 8484 01:23:53.859665937 1 sshd (30637) > switch next=3591(sysdig) pgft_maj=3 pgft_min=452 vm_size=72356 vm_rss=6396 vm_swap=0
 ```
 
-sysdig는 Process, CPU, Disk, Network등과 연관된 다양한 Kernel의 동작 상태를 보여주는 Tool이다. [Shell 5]는 `sysdig`를 이용하여 Kernel의 동작을 출력하는 Shell을 나타내고 있다. Container 단위로 Kernel의 동작 상태를 볼수도 있다. 또한 동작 상태 정보를 바탕으로 CPU, Memory, Network, Disk의 성능 측정도 가능하다.
+`sysdig`는 Process, CPU, Disk, Network등과 연관된 다양한 Kernel의 동작 상태를 보여주는 Tool이다. [Shell 5]는 `sysdig`를 이용하여 Kernel의 동작을 출력하는 Shell을 나타내고 있다. Container 단위로 Kernel의 동작 상태를 볼수도 있다. 또한 동작 상태 정보를 바탕으로 CPU, Memory, Network, Disk의 성능 측정도 가능하다.
 
 ## 2. 참조
 

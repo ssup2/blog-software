@@ -16,15 +16,15 @@ Linux의 BPF (Berkeley Packet Filter)를 분석한다.
 
 cBPF에서는 2개의 32bit Register와 메모리 역할을 수행하는 16개의 32bit Scratch Pad만을 이용 할 수 있었다. 하지만 eBPF에서는 11개의 64bit Register, 512개의 8bit Stack, Key-Value를 저장할 수 있는 무제한의 Map을 이용 할 수 있다. 또한 실행할 수 있는 Bytecode도 추가되어 eBPF에서는 Kernel이 eBPF 지원을 위해 제공하는 **Kernel Helper Function**을 호출하거나 다른 eBPF Program을 호촐할 수 있다. 이처럼 eBPF는 cBPF보다 많은 리소스 및 기능을 이용 할 수 있기 때문에 cBPF보다 다양한 기능의 Program을 구동 할 수 있다.
 
-현재 Linux에서는 cBPF, eBPF 둘다 이용하고 있으며, BPF가 실행되는 지점인 **Hook**과 Kernel Version에 따라서 어떤 BPF가 이용될지 결정된다. `bpf()` System Call이 추가된 Kernel Version은 3.18인데, 3.18 이전 Version의 BPF는 모두 cBPF이다. 예를들어 Socket() System Call의 SO-ATTACH-FILTER Option이나 Seccomp() System Call의 SECCOMP-SET-MODE-FILTER Option을 통해 이용하던 BPF는 모두 cBPF였다. 3.18 이후 Version에 추가된 BPF는 모두 eBPF이다. eBPF가 도입되면서 cBPF는 현재 일부에서만 이용되고 있고 추후 eBPF가 cBPF를 완전히 대체하게될 예정이다.
+현재 Linux에서는 cBPF, eBPF 둘다 이용하고 있으며, BPF가 실행되는 지점인 **Hook**과 Kernel Version에 따라서 어떤 BPF가 이용될지 결정된다. `bpf()` System Call이 추가된 Kernel Version은 3.18인데, 3.18 이전 Version의 BPF는 모두 cBPF이다. 예를들어 `socket()` System Call의 `SO_ATTACH_FILTER` Option이나 `seccomp()` System Call의 `SECCOMP_SET_MODE_FILTER` Option을 통해 이용하던 BPF는 모두 cBPF였다. 3.18 이후 Version에 추가된 BPF는 모두 eBPF이다. eBPF가 도입되면서 cBPF는 현재 일부에서만 이용되고 있고 추후 eBPF가 cBPF를 완전히 대체하게될 예정이다.
 
-현재 Linux에서 Socket() System Call의 경우 eBPF를 이용하는 SO-ATTACH-BPF Option이 추가되었다. 물론 하위 호환성을 위해서 SO-ATTACH-FILTER Option도 여전히 제공한다. 하지만 SO-ATTACH-FILTER Option을 이용하더라도 내부적으로는 `bpf()` System Call을 이용하여 cBPF Bytecode를 eBPF Bytecode를 변경한뒤 eBPF에 적재한다. Seccomp() System Call의 경우에는 아직도 cBPF만을 지원하지만, 현재 eBPF 지원을 위한 개발이 진행중이다.
+현재 Linux에서 `socket()` System Call의 경우 eBPF를 이용하는 `SO_ATTACH_BPF` Option이 추가되었다. 물론 하위 호환성을 위해서 `SO_ATTACH_FILTER` Option도 여전히 제공한다. 하지만 `SO_ATTACH_FILTER` Option을 이용하더라도 내부적으로는 `bpf()` System Call을 이용하여 cBPF Bytecode를 eBPF Bytecode를 변경한뒤 eBPF에 적재한다. `seccomp()` System Call의 경우에는 아직도 cBPF만을 지원하지만, 현재 eBPF 지원을 위한 개발이 진행중이다.
 
 ### 1.2. eBPF Program Compile, bpf() System Call
 
 {{< figure caption="[Figure 2] eBPF Program Compile, `bpf()` System Call" src="images/compile-bpf-syscall.png" width="650px" >}}
 
-[Figure 2]는 eBPF Program의 Compile 과정과 `bpf()` System Call의 동작을 나타내고 있다. LLVM/clang은 Backend로 eBPF를 지원한다. 개발자가 작성한 eBPF Source Code는 LLVM/clang을 통해서 eBPF Bytecode로 Compile된다. 그 후 eBPF Bytecode는 tc나 iproute2같은 eBPF 관리 App(Tool)을 이용해 Kernel의 eBPF에 적재된다. eBPF 관리 App은 내부적으로 `bpf()` System Call을 이용하여 eBPF에 eBPF Bytecode를 적재한다.
+[Figure 2]는 eBPF Program의 Compile 과정과 `bpf()` System Call의 동작을 나타내고 있다. LLVM/clang은 Backend로 eBPF를 지원한다. 개발자가 작성한 eBPF Source Code는 LLVM/clang을 통해서 eBPF Bytecode로 Compile된다. 그 후 eBPF Bytecode는 `tc`나 `iproute2`같은 eBPF 관리 App(Tool)을 이용해 Kernel의 eBPF에 적재된다. eBPF 관리 App은 내부적으로 `bpf()` System Call을 이용하여 eBPF에 eBPF Bytecode를 적재한다.
 
 eBPF Bytecode는 Kernel Level에서 동작하기 때문에 잘못 작성된 eBPF Bytecode은 System 전체에 큰영향을 줄 수 있다. 따라서 Kernel은 eBPF Bytecode를 적재전에 Verifier로 eBPF Bytecode에 이상이 없는지 검사한다. Verifier는 eBPF Bytecode가 허용되지 않은 Memory 영역을 참조하는지 검사하고, 무한 Loop가 발생하는지도 검사한다. 또한 허용되지 않은 Kernel Helper Function을 호출했는지도 검사한다. 검사를 통과못한 eBPF Bytecode는 적재에 실패한다. 검사를 통과한 eBPF Bytecode는 eBPF에 적재되어 동작한다. 필요에 따라 eBPF Bytecode의 일부는 JIT (Just-in-time) Compiler를 통해서 Native Code로 변환되어 Kernel에서 동작한다.
 

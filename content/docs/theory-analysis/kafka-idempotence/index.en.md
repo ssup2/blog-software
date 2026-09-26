@@ -40,7 +40,7 @@ Kafka Idempotence functionality does not prevent duplicate Records in all cases,
 
 * When Producer sends a Record Batch and then Producer restarts, changing PID, and then sends the same Record Batch again, duplicate Records can occur. This is because Kafka Broker manages Sequence Number Cache based on PID, so when PID changes, it is considered as a new Producer.
 * When Producer sends a Record Batch to a different Partition instead of the same Partition, duplicate Records can occur. This is because Kafka Broker manages Sequence Number Cache by each Partition.
-* When Producer sets the `inflight.requests.per.connection` setting value to **6 or more**, and Producer sends 6 or more Requests simultaneously, duplicate Records can occur. This is because Kafka Broker can only Cache Sequence Numbers of up to 5 Record Batches per Partition. This 5 is a Hard-coded value and cannot be changed. Therefore, to properly utilize Kafka Idempotence functionality, the `inflight.requests.per.connection` setting value must be set to **5 or less**.
+* When Producer sets the `max.in.flight.requests.per.connection` setting value to **6 or more**, and Producer sends 6 or more Requests simultaneously, duplicate Records can occur. This is because Kafka Broker can only Cache Sequence Numbers of up to 5 Record Batches per Partition. This 5 is a Hard-coded value and cannot be changed. Therefore, to properly utilize Kafka Idempotence functionality, the `max.in.flight.requests.per.connection` setting value must be set to **5 or less**.
 
 ## 2. Sequence Flow with Kafka Idempotence
 
@@ -72,7 +72,7 @@ Producer that received `OutOfOrderSequenceException` Exception increases Epoch v
 
 {{< figure caption="[Figure 5] Sequence Flow with Sequence Cache Missed" src="images/kafka-idempotence-sequence-flow-cache-missed.png" width="900px" >}}
 
-[Figure 5] shows the Sequence Flow where duplicate Records occur when the `inflight.requests.per.connection` setting value is set to 6. It shows a case where 6 Batch Records `A/120~114`, `B/124~121`, `C/132~125`, `D/142~133`, `E/150~143`, `F/155~151` sent by Producer were processed well, but ACK for the first Batch Record `A/120~114` was lost.
+[Figure 5] shows the Sequence Flow where duplicate Records occur when the `max.in.flight.requests.per.connection` setting value is set to 6. It shows a case where 6 Batch Records `A/120~114`, `B/124~121`, `C/132~125`, `D/142~133`, `E/150~143`, `F/155~151` sent by Producer were processed well, but ACK for the first Batch Record `A/120~114` was lost.
 
 Producer that did not receive ACK for the `A/120~114` Batch Record waits for `request.timeout.ms` time and then sends the same Record Batch again. At this time, Kafka Broker has only the last 5 Batch Records Cached, and the first `A/120~114` Batch Record is not Cached. Therefore, Kafka Broker does not recognize that the `A/120~114` Batch Record is an already stored Batch Record and raises `OutOfOrderSequenceException` Exception.
 

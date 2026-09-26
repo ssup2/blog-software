@@ -2,11 +2,11 @@
 title: Spark on AWS EKS
 ---
 
-This document analyzes Spark Application operation in AWS EKS Cluster. There are two ways to run Spark Applications in AWS EKS Cluster: using spark-submit CLI and Spark Operator provided by Spark, and using StartJobRun API provided by EMR on EKS.
+This document analyzes Spark Application operation in AWS EKS Cluster. There are two ways to run Spark Applications in AWS EKS Cluster: using `spark-submit` CLI and Spark Operator provided by Spark, and using StartJobRun API provided by EMR on EKS.
 
 ## 1. spark-submit CLI & Spark Operator
 
-In AWS EKS, Spark Applications can be run using spark-submit CLI and Spark Operator, just like in general Kubernetes Clusters. In this case, the Architecture and operation method are the same as using spark-submit CLI and Spark Operator in general Kubernetes Clusters.
+In AWS EKS, Spark Applications can be run using `spark-submit` CLI and Spark Operator, just like in general Kubernetes Clusters. In this case, the Architecture and operation method are the same as using `spark-submit` CLI and Spark Operator in general Kubernetes Clusters.
 
 However, in AWS EKS, it is recommended to use **EMR on EKS Spark Container Image** as the Container Image for Driver and Executor Pods. EMR on EKS Spark Container Image contains Optimized Spark optimized for EKS environments, showing better performance compared to Open Source Spark, and includes AWS-related Libraries and Spark Connectors listed below.
 
@@ -22,7 +22,7 @@ StartJobRun API is an API for submitting Spark Jobs in EMR on EKS environments. 
 
 {{< figure caption="[Figure 1] Spark on AWS EKS Architecture with StartJobRun API" src="images/spark-aws-eks-architecture-startjobrun-api.png" width="1000px" >}}
 
-[Figure 1] shows the Architecture when submitting Spark Jobs through StartJobRun API to an EKS Cluster with one Virtual Cluster. When StartJobRun API is called, a job-runner Pod is created in the Namespace mapped to Virtual Cluster, and spark-submit CLI runs inside job-runner Pod. That is, **StartJobRun API method also uses spark-submit CLI internally** to submit Spark Jobs.
+[Figure 1] shows the Architecture when submitting Spark Jobs through StartJobRun API to an EKS Cluster with one Virtual Cluster. When StartJobRun API is called, a `job-runner` Pod is created in the Namespace mapped to Virtual Cluster, and `spark-submit` CLI runs inside `job-runner` Pod. That is, **StartJobRun API method also uses `spark-submit` CLI internally** to submit Spark Jobs.
 
 ```shell {caption="[Shell 1] aws CLI StartJobRun API Example"}
 $ aws emr-containers start-job-run \
@@ -39,7 +39,7 @@ $ aws emr-containers start-job-run \
    }'
 ```
 
-[Shell 1] shows an example of submitting Spark Jobs through StartJobRun API using aws CLI. You can see that Virtual Cluster, the name of submitted Spark Job, AWS Region, Role for Spark Job execution, and Spark-related settings are specified. You can also see that `--conf` Parameters passed through spark-submit CLI are set in the `sparkSubmitParameters` item.
+[Shell 1] shows an example of submitting Spark Jobs through StartJobRun API using `aws` CLI. You can see that Virtual Cluster, the name of submitted Spark Job, AWS Region, Role for Spark Job execution, and Spark-related settings are specified. You can also see that `--conf` Parameters passed through `spark-submit` CLI are set in the `sparkSubmitParameters` item.
 
 ```yaml {caption="[File 1] spark-default ConfigMap", linenos=table}
 apiVersion: v1
@@ -117,11 +117,11 @@ metadata:
   uid: 14325ad5-cd76-4b32-98f4-599ee07be86f
 ```
 
-The spark-submit CLI inside job-runner Pod obtains various configuration information needed for Spark Job creation through ConfigMap-based Files attached to job-runner Pod. ConfigMaps are created by AWS EMR before job-runner Pod is created, according to StartJobRun API settings. Configuration information includes settings related to Driver Pod and Executor Pod. When [Shell 1] command is executed, 3 ConfigMaps [File 1], [File 2], [File 3] are created.
+The `spark-submit` CLI inside `job-runner` Pod obtains various configuration information needed for Spark Job creation through ConfigMap-based Files attached to `job-runner` Pod. ConfigMaps are created by AWS EMR before `job-runner` Pod is created, according to StartJobRun API settings. Configuration information includes settings related to Driver Pod and Executor Pod. When [Shell 1] command is executed, 3 ConfigMaps [File 1], [File 2], [File 3] are created.
 
-[File 1] is the spark-defaults.conf ConfigMap for passing Spark Job settings to spark-submit CLI, [File 2] is the ConfigMap for Pod Template to be passed to spark-submit CLI, and [File 3] is the ConfigMap for fluentd to be set in Driver Pod. When Spark Jobs are submitted through StartJobRun API, fluentd Sidecar Container is always created in Driver Pod. The reason is that spark-submit CLI creates fluentd Container as Driver's Sidecar Container through spark-submit CLI's Pod Template functionality using [File 1], [File 2], [File 3] ConfigMaps.
+[File 1] is the `spark-defaults.conf` ConfigMap for passing Spark Job settings to `spark-submit` CLI, [File 2] is the ConfigMap for Pod Template to be passed to `spark-submit` CLI, and [File 3] is the ConfigMap for fluentd to be set in Driver Pod. When Spark Jobs are submitted through StartJobRun API, fluentd Sidecar Container is always created in Driver Pod. The reason is that `spark-submit` CLI creates fluentd Container as Driver's Sidecar Container through `spark-submit` CLI's Pod Template functionality using [File 1], [File 2], [File 3] ConfigMaps.
 
-Looking at [File 3] fluentd ConfigMap settings, you can see that Event Logs generated from Driver Pod are stored in `prod.ap-northeast-2.appinfo.src` Bucket. `appinfo.src` Bucket is a Bucket managed by AWS EMR, and is integrated with Spark History Server managed by EMR, allowing users to check History of Spark Jobs submitted through SparkJobRun API. Of course, it is also possible to set Event Logs to be stored at a path desired by users by specifying `--conf spark.eventLog.dir=s3a://[s3-bucket]` setting.
+Looking at [File 3] fluentd ConfigMap settings, you can see that Event Logs generated from Driver Pod are stored in `prod.ap-northeast-2.appinfo.src` Bucket. `appinfo.src` Bucket is a Bucket managed by AWS EMR, and is integrated with Spark History Server managed by EMR, allowing users to check History of Spark Jobs submitted through StartJobRun API. Of course, it is also possible to set Event Logs to be stored at a path desired by users by specifying `--conf spark.eventLog.dir=s3a://[s3-bucket]` setting.
 
 ```yaml {caption="[File 2] Pod Template ConfigMap", linenos=table}
 apiVersion: v1
@@ -544,11 +544,11 @@ metadata:
   uid: 683034ea-45a8-4e96-99ed-20ae01be2a2d
 ```
 
-The spark-submit CLI inside job-runner Pod obtains various configuration information needed for Spark Job creation through ConfigMap-based Files attached to job-runner Pod. ConfigMaps are created by AWS EMR before job-runner Pod is created, according to StartJobRun API settings. Configuration information includes settings related to Driver Pod and Executor Pod. When [Shell 1] command is executed, 3 ConfigMaps [File 1], [File 2], [File 3] are created.
+The `spark-submit` CLI inside `job-runner` Pod obtains various configuration information needed for Spark Job creation through ConfigMap-based Files attached to `job-runner` Pod. ConfigMaps are created by AWS EMR before `job-runner` Pod is created, according to StartJobRun API settings. Configuration information includes settings related to Driver Pod and Executor Pod. When [Shell 1] command is executed, 3 ConfigMaps [File 1], [File 2], [File 3] are created.
 
-[File 1] is the spark-defaults.conf ConfigMap for passing Spark Job settings to spark-submit CLI, [File 2] is the ConfigMap for Pod Template to be passed to spark-submit CLI, and [File 3] is the ConfigMap for fluentd to be set in Driver Pod. When Spark Jobs are submitted through StartJobRun API, fluentd Sidecar Container is always created in Driver Pod. The reason is that spark-submit CLI creates fluentd Container as Driver's Sidecar Container through spark-submit CLI's Pod Template functionality using [File 1], [File 2], [File 3] ConfigMaps.
+[File 1] is the `spark-defaults.conf` ConfigMap for passing Spark Job settings to `spark-submit` CLI, [File 2] is the ConfigMap for Pod Template to be passed to `spark-submit` CLI, and [File 3] is the ConfigMap for fluentd to be set in Driver Pod. When Spark Jobs are submitted through StartJobRun API, fluentd Sidecar Container is always created in Driver Pod. The reason is that `spark-submit` CLI creates fluentd Container as Driver's Sidecar Container through `spark-submit` CLI's Pod Template functionality using [File 1], [File 2], [File 3] ConfigMaps.
 
-Looking at [File 3] fluentd ConfigMap settings, you can see that Event Logs generated from Driver Pod are stored in `prod.ap-northeast-2.appinfo.src` Bucket. `appinfo.src` Bucket is a Bucket managed by AWS EMR, and is integrated with Spark History Server managed by EMR, allowing users to check History of Spark Jobs submitted through SparkJobRun API. Of course, it is also possible to set Event Logs to be stored at a path desired by users by specifying `--conf spark.eventLog.dir=s3a://[s3-bucket]` setting.
+Looking at [File 3] fluentd ConfigMap settings, you can see that Event Logs generated from Driver Pod are stored in `prod.ap-northeast-2.appinfo.src` Bucket. `appinfo.src` Bucket is a Bucket managed by AWS EMR, and is integrated with Spark History Server managed by EMR, allowing users to check History of Spark Jobs submitted through StartJobRun API. Of course, it is also possible to set Event Logs to be stored at a path desired by users by specifying `--conf spark.eventLog.dir=s3a://[s3-bucket]` setting.
 
 ```shell {caption="[Shell 2] aws CLI StartJobRun API with Logging Example"}
 $ aws emr-containers start-job-run \
@@ -577,7 +577,7 @@ $ aws emr-containers start-job-run \
    }'
 ```
 
-StartJobRun API also provides functionality to easily send stdout/stderr of job-runner, driver, executor Pods to CloudWatch or S3. [Shell 2] shows an example of submitting Spark Jobs through StartJobRun API using aws CLI with Logging settings. Compared to [Shell 1], you can see that `monitoringConfiguration` setting is added, and CloudWatch and S3 settings exist under it respectively.
+StartJobRun API also provides functionality to easily send stdout/stderr of `job-runner`, driver, executor Pods to CloudWatch or S3. [Shell 2] shows an example of submitting Spark Jobs through StartJobRun API using `aws` CLI with Logging settings. Compared to [Shell 1], you can see that `monitoringConfiguration` setting is added, and CloudWatch and S3 settings exist under it respectively.
 
 ```yaml {caption="[File 4] spark-default ConfigMap with Logging", linenos=table}
 apiVersion: v1
@@ -655,7 +655,7 @@ metadata:
   uid: 1f139a71-51bf-4be3-a269-5971ee1aff66
 ```
 
-When [Shell 2] command is executed, 3 ConfigMaps [File 4], [File 5], [File 6] are created. You can see that fluentd is configured to run not only in job-runner Pod but also in Driver Pod and Executor Pod, and fluentd running in Driver Pod and Executor Pod is configured to send stdout/stderr to CloudWatch or S3.
+When [Shell 2] command is executed, 3 ConfigMaps [File 4], [File 5], [File 6] are created. You can see that fluentd is configured to run not only in `job-runner` Pod but also in Driver Pod and Executor Pod, and fluentd running in Driver Pod and Executor Pod is configured to send stdout/stderr to CloudWatch or S3.
 
 ```shell {caption="[Shell 3] aws CLI StartJobRun API with Prometheus Monitoring"}
 $ aws emr-containers start-job-run \
@@ -687,7 +687,7 @@ $ aws emr-containers start-job-run \
    }'
 ```
 
-Through StartJobRun API, various settings that can be configured in spark-submit CLI can be set identically. [Shell 3] shows an example for performing Monitoring with Prometheus.
+Through StartJobRun API, various settings that can be configured in `spark-submit` CLI can be set identically. [Shell 3] shows an example for performing Monitoring with Prometheus.
 
 ### 2.1. with ACK EMR Container Controller
 
@@ -695,7 +695,7 @@ Through StartJobRun API, various settings that can be configured in spark-submit
 
 AWS provides ACK EMR Container Controller to enable submitting Spark Jobs based on StartJobRun API using Kubernetes Objects. [Figure 2] shows the process of submitting Spark Jobs through StartJobRun API based on ACK EMR Container Controller.
 
-When ACK EMR Container Controller is installed in AWS EKS Cluster, two Custom Resources `Virtual Cluster` and `Job Run` become available. `Virtual Cluster` is a Custom Resource used to configure Virtual Cluster of EMR on EKS for a specific Namespace of AWS EKS Cluster where ACK EMR Container Controller is installed, and `Job Run` is a Custom Resource used when submitting Spark Jobs through StartJobRun API.
+When ACK EMR Container Controller is installed in AWS EKS Cluster, two Custom Resources **Virtual Cluster** and **Job Run** become available. Virtual Cluster is a Custom Resource used to configure Virtual Cluster of EMR on EKS for a specific Namespace of AWS EKS Cluster where ACK EMR Container Controller is installed, and Job Run is a Custom Resource used when submitting Spark Jobs through StartJobRun API.
 
 ```yaml {caption="[File 7] JobRun Example", linenos=table}
 apiVersion: emrcontainers.services.k8s.aws/v1alpha1
@@ -744,7 +744,7 @@ spec:
         LogUri: "s3://ssup2-spark/startjobrun/"
 ```
 
-[File 7] shows an example of a simple Job Run, and [File 8] shows an example of a Job Run with Logging settings applied. Looking at the configuration values, you can see that options set through aws CLI can be set identically in Job Run.
+[File 7] shows an example of a simple Job Run, and [File 8] shows an example of a Job Run with Logging settings applied. Looking at the configuration values, you can see that options set through `aws` CLI can be set identically in Job Run.
 
 ## 3. References
 

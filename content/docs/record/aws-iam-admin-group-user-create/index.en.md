@@ -24,13 +24,13 @@ $ aws iam create-group --group-name admins
 }
 ```
 
-Create an Admin Group with the name admins.
+Create an Admin Group with the name `admins`.
 
 ```shell
 $ aws iam attach-group-policy --group-name Admins --policy-arn arn:aws:iam::aws:policy/AdministratorAccess
 ```
 
-Attach the AdministratorAccess Policy to the admins Group to configure users belonging to the admins Group to have Admin permissions.
+Attach the `AdministratorAccess` Policy to the `admins` Group to configure users belonging to the `admins` Group to have Admin permissions.
 
 ## 3. Admin User Creation, Configuration
 
@@ -47,13 +47,13 @@ $ aws iam create-user --user-name admin
 }
 ```
 
-Create an admin User.
+Create an `admin` User.
 
 ```shell
 $ aws iam add-user-to-group --group-name admins --user-name admin
 ```
 
-Add the created admin User to the admin Group.
+Add the created `admin` User to the `admins` Group.
 
 ```shell
 $ aws iam create-access-key --user-name admin
@@ -68,7 +68,7 @@ $ aws iam create-access-key --user-name admin
 }
 ```
 
-Create an Access Key for the created admin User.
+Create an Access Key for the created `admin` User.
 
 ## 4. References
 

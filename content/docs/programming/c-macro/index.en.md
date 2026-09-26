@@ -21,7 +21,7 @@ int main()
 THIS IS TEST CODE
 ```
 
-The stringification operator (#) converts macro parameters to strings. It has the same effect as adding `" "`. [Code 1] shows an example where the `THIS IS TEST CODE` macro parameter is passed as a string to the `printf()` function.
+The stringification operator (`#`) converts macro parameters to strings. It has the same effect as adding `" "`. [Code 1] shows an example where the `THIS IS TEST CODE` macro parameter is passed as a string to the `printf()` function.
 
 ## 2. Token Pasting Operator (##)
 

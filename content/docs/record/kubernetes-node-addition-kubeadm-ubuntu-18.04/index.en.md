@@ -16,8 +16,8 @@ The installation environment is as follows.
 * kubeadm 1.15.3
   * When building a Cluster environment using VMs, Kubernetes can be easily installed using kubeadm.
 * Password
-  * For convenient installation, all Passwords required for Kubernetes installation are unified to **root**.
-* Installation is performed as root User on all Nodes.
+  * For convenient installation, all Passwords required for Kubernetes installation are unified to `root`.
+* Installation is performed as `root` User on all Nodes.
 
 ## 2. Package Installation
 
@@ -66,7 +66,7 @@ Obtain the Hash value of the CA certificate.
 (Added Node)$ kubeadm join 30.0.0.34:6443 --token 4n1agp.j97evoelu2k35dre --discovery-token-ca-cert-hash sha256:060896fc4bfe949304b8c1af7b23bb5c4e60e6d242722ce5bd02fe4cbc94aabe
 ```
 
-Join the Cluster using the Token created with kubeadm and the Hash value of the CA certificate. 30.0.0.34 is the IP of the Master Node.
+Join the Cluster using the Token created with kubeadm and the Hash value of the CA certificate. `30.0.0.34` is the IP of the Master Node.
 
 ## 4. Node Addition Verification
 
@@ -79,7 +79,7 @@ vm03   Ready    <none>   236d   v1.15.3
 vm04   Ready    <none>   101s   v1.15.3
 ```
 
-Verify the added Node from the Master Node. Node04 is the added Node.
+Verify the added Node from the Master Node. `vm04` is the added Node.
 
 ## 5. References
 

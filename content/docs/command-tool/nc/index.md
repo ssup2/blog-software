@@ -2,7 +2,7 @@
 title: nc (netcat)
 ---
 
-Network Connection으로부터 Data를 송수신하는 nc (netcat)의 사용법을 정리한다.
+Network Connection으로부터 Data를 송수신하는 `nc` (netcat)의 사용법을 정리한다.
 
 ## 1. nc
 
@@ -40,7 +40,7 @@ Commercial support is available at
 </html>
 ```
 
-입력 받은 IP, Port와 Connection을 맺고, 맺은 Connection을 통해 Data를 송수신한다. [shell 1]은 `netcat [IP] [Port]`를 이용하여 nginx에 접속하고, nginx로부터 / (root) Page를 수신하는 모습을 나타내고 있다.
+입력 받은 IP, Port와 Connection을 맺고, 맺은 Connection을 통해 Data를 송수신한다. [shell 1]은 `netcat [IP] [Port]`를 이용하여 nginx에 접속하고, nginx로부터 `/` (root) Page를 수신하는 모습을 나타내고 있다.
 
 ### 1.2. nc -zv [IP] [Port]
 

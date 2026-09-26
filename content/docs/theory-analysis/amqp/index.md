@@ -44,7 +44,7 @@ Topic Exchange는 다수의 Queue 또는 Exchange에게 Message를 Multicast하�
 
 Headers Exchange는 다수의 Queue 또는 Exchange에게 Message를 Multicast하는 Exchange이다. Mulicast의 기준은 Message Header에 포함되어 있는 Key, Value 값이다. Headers Exchange와 Binding하기 위해서는 Message Header에 포함될 Key, Value 값을 넘겨주어야 한다. [Figure 5]에서 Binding시 Headers Exchange에게 넘겨주는 Message Header를 **Binding Header**라고 표현하고 있다. Headers Exchange는 Message Header의 Key, Value 값과 동일한 Binding Header가 있는 모든 Queue 또는 Exchange에게 Message를 전달한다.
 
-Headers Exchange는 **x-match**라는 Option을 제공하는데 x-match는 'all'과 'any' 2가지 값이 존재한다. 'all'은 Message Header에 있는 모든 Key, Value 값이 Binding시에 전달 받은 Key, Value 값과 일치하는 경우에만 해당 Queue 또는 Exchange에게 Messsage를 전달한다. 'any'는 Message Header에 있는 Key, Value값의 일부만 Binding시에 전달 받은 Key, Value과 일치하더라도 해당 Queue 또는 Exchange에게 Message를 전달한다.
+Headers Exchange는 `x-match`라는 Option을 제공하는데 `x-match`는 `all`과 `any` 2가지 값이 존재한다. `all`은 Message Header에 있는 모든 Key, Value 값이 Binding시에 전달 받은 Key, Value 값과 일치하는 경우에만 해당 Queue 또는 Exchange에게 Messsage를 전달한다. `any`는 Message Header에 있는 Key, Value값의 일부만 Binding시에 전달 받은 Key, Value과 일치하더라도 해당 Queue 또는 Exchange에게 Message를 전달한다.
 
 ## 2. 참조
 

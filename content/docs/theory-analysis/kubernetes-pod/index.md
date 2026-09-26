@@ -20,7 +20,7 @@ Multi-container Pod의 각 Container안에서 동작하는 App들은 일반적�
 
 위에서 언급한 것 처럼 Multi-container Pod의 Container들은 같은 Network Namespace와 IPC Namespace를 공유하는 특징을 갖는다. 이때 공유되는 Namespace는 App Container의 Namespace가 아니라, Kubernetes가 각 Pod마다 하나씩 생성하는 Pause Container의 Namespace이다. App Container의 Namespace를 이용하지 않는 이유는, App Container의 불안전성 때문이다. App Container의 App이 죽으면 App Container가 제거되고, App Container의 Namespace도 같이 제거된다. Kubernetes는 App Container의 App이 언제 죽을지 알 수 없기 때문에, 언제 App Container의 Namespace가 제거 될지도 알 수 없다. 따라서 Kubernetes는 App Container의 Namespace를 Pod의 공유 Namespace로 이용하지 않는다.
 
-Pause Container는 pause라고 불리는 Binary를 구동한다. pause Binary은 **pause()** System Call을 호출하고 Signal을 받을때까지 Blocking 상태가 된다. 즉 pause Binary은 Signal을 받기전 까지는 죽지 않기 때문에, Pause Container는 안정적으로 존재할 수 있게 된다. 따라서 Kubernetes는 안정적인 Pause Container의 Namespace를 Pod의 공유 Namespace로 이용한다.
+Pause Container는 `pause`라고 불리는 Binary를 구동한다. `pause` Binary은 `pause()` System Call을 호출하고 Signal을 받을때까지 Blocking 상태가 된다. 즉 `pause` Binary은 Signal을 받기전 까지는 죽지 않기 때문에, Pause Container는 안정적으로 존재할 수 있게 된다. 따라서 Kubernetes는 안정적인 Pause Container의 Namespace를 Pod의 공유 Namespace로 이용한다.
 
 ### 1.2. Resource Manage (Cgroup)
 
@@ -28,7 +28,7 @@ Pause Container는 pause라고 불리는 Binary를 구동한다. pause Binary은
 
 Pod의 Resource에는 **CPU**와 **Memory**가 있다. CPU와 Memory 둘다 Linux Kernel의 Cgroup을 이용하여 제어한다. [Figure 3]은 Kubernetes가 Cgroup을 어떻게 구성하는지를 나타내고 있다. Pod A, Pod B, Pod C 처럼 Pod 단위의 Cgroup이 존재한다. 그리고 Pod Cgroup 아래에는 Pod에 속한 App Container의 Cgroup과 Pause Container의 Cgroup이 각각 존재한다.
 
-Kubernetes는 Guaranteed, Burstable, BestEffort라는 3개의 QoS Class를 제공한다. Pod의 Resource 설정에 따라서 Pod의 QoS는 3개의 Class중 하나의 Class에 속하게 된다. Burstable, BestEffort Class에 속한 Pod은 해당 Cgroup 아래 속하게 된다. 그리고 Guaranteed Cgroup에 속한 Pod은 Kubernetes가 생성한 최상위 Cgroup인 kubepods Cgroup아래 속하게 된다. kubepods Cgroup은 cpu, memory, freezer 같은 모든 Cgroup 아래 각각 생성된다.
+Kubernetes는 Guaranteed, Burstable, BestEffort라는 3개의 QoS Class를 제공한다. Pod의 Resource 설정에 따라서 Pod의 QoS는 3개의 Class중 하나의 Class에 속하게 된다. Burstable, BestEffort Class에 속한 Pod은 해당 Cgroup 아래 속하게 된다. 그리고 Guaranteed Cgroup에 속한 Pod은 Kubernetes가 생성한 최상위 Cgroup인 `kubepods` Cgroup아래 속하게 된다. `kubepods` Cgroup은 `cpu`, `memory`, `freezer` 같은 모든 Cgroup 아래 각각 생성된다.
 
 ```yaml {caption="[File 1] Kubernetes Pod 예제", linenos=table}
 apiVersion: v1
@@ -64,7 +64,7 @@ spec:
 
 #### 1.2.1. CPU
 
-CPU Resource 값은 **milicpu**라는 독특한 단위를 이용한다. 1000milicpu는 1cpu와 동일하다. 여기서 1cpu는 Container가 보는 CPU Core 1개의 Bandwidth를 의미한다. Container가 물리 머신에서 동작하면 1cpu는 물리 CPU Core 1개의 Bandwith를 의미하고, container가 VM에 올라가 동작하면 1cpu는 가상 CPU인 vCPU Core 1개의 Bandwidth를 의미한다
+CPU Resource 값은 **milicpu**라는 독특한 단위를 이용한다. 1000milicpu는 1cpu와 동일하다. 여기서 1cpu는 Container가 보는 CPU Core 1개의 Bandwidth를 의미한다. Container가 물리 머신에서 동작하면 1cpu는 물리 CPU Core 1개의 Bandwidth를 의미하고, container가 VM에 올라가 동작하면 1cpu는 가상 CPU인 vCPU Core 1개의 Bandwidth를 의미한다
 
 ```text {caption="[Formula 1] CPU Quota 계산 01", linenos=table}
 (cfs-quota-us / cfs-period-us) * 1000 = Limit milicpu
@@ -76,22 +76,22 @@ CPU Resource 값은 **milicpu**라는 독특한 단위를 이용한다. 1000mili
 0.5 * 100000 = 50000
 ```
 
-**CPU Limit** 값은 Linux에서 Process의 CPU Bandwidth를 제한하는데 이용되는 Cgroup의 CPU Quota를 설정하는데 이용된다. CPU Quota는 cfs-period-us와 cfs-quota-us라는 두개의 값으로 조작된다. cfs-period-us은 Quota 주기를 의미하고 Default 값은 100000이다. cfs-quota-us은 Quota 주기동간 최대 얼마만큼 CPU를 이용할지 설정하는 값이다. cfs-quota-us값을 150000으로 설정하면 [Formula 1]에 의해서 Container는 최대 1500milicpu만 이용 할 수 있다.
+**CPU Limit** 값은 Linux에서 Process의 CPU Bandwidth를 제한하는데 이용되는 Cgroup의 CPU Quota를 설정하는데 이용된다. CPU Quota는 `cfs-period-us`와 `cfs-quota-us`라는 두개의 값으로 조작된다. `cfs-period-us`은 Quota 주기를 의미하고 Default 값은 100000이다. `cfs-quota-us`은 Quota 주기동간 최대 얼마만큼 CPU를 이용할지 설정하는 값이다. `cfs-quota-us`값을 150000으로 설정하면 [Formula 1]에 의해서 Container는 최대 1500milicpu만 이용 할 수 있다.
 
-설정할 수 있는 최대 CPU Limit 값은 Container가 동작하는 (v)CPU의 개수에 의해 제한된다. Container가 동작하는 Node에 4 (v)CPU만 있다면 Container에게는 최대 4000milicpu까지만 할당할 수 있다. [Formula 1]을 이용하여 [Formula 2]를 만들 수 있다. [Formula 2]는 Kubernetes에서 CPU limit에 따라서 cfs-quota-us 값을 계산하는 방법을 나타낸다. cfs-period-us 값은 무조건 Default 값인 100000을 이용한다. 만약 CPU limit를 500milicpu를 설정하였다면 [Formula 2]에 의해서 cfs-quota-us값은 50000이 된다.
+설정할 수 있는 최대 CPU Limit 값은 Container가 동작하는 (v)CPU의 개수에 의해 제한된다. Container가 동작하는 Node에 4 (v)CPU만 있다면 Container에게는 최대 4000milicpu까지만 할당할 수 있다. [Formula 1]을 이용하여 [Formula 2]를 만들 수 있다. [Formula 2]는 Kubernetes에서 CPU limit에 따라서 `cfs-quota-us` 값을 계산하는 방법을 나타낸다. `cfs-period-us` 값은 무조건 Default 값인 100000을 이용한다. 만약 CPU limit를 500milicpu를 설정하였다면 [Formula 2]에 의해서 `cfs-quota-us`값은 50000이 된다.
 
 ```text {caption="[Formula 3] CPU Weight 계산", linenos=table}
 Contaier A : (1500 / 2000) * 1024 = 768
 Contaier B : (500 / 2000) * 1024 = 256
 ```
 
-**CPU Request** 값은 Linux에서 Process의 Scheduling 가중치를 주는데 이용되는 Cgroup의 CPU Weight를 설정하는데 이용된다. Cgroup에서 CPU Weigth는 shares라는 값으로 조작된다. Process A는 1024 shares를 갖고 있고, Process B는 512 shares를 갖고 있다면 Process A는 Process B보다 2배 많은 CPU Bandwith를 이용할 수 있게 된다. CPU Weight와 Kubernets의 Pod Scheduling을 이용하면 Container가 요구하는 CPU Request 값을 Container에게 제공할 수 있다.
+**CPU Request** 값은 Linux에서 Process의 Scheduling 가중치를 주는데 이용되는 Cgroup의 CPU Weight를 설정하는데 이용된다. Cgroup에서 CPU Weight는 `shares`라는 값으로 조작된다. Process A는 1024 `shares`를 갖고 있고, Process B는 512 `shares`를 갖고 있다면 Process A는 Process B보다 2배 많은 CPU Bandwidth를 이용할 수 있게 된다. CPU Weight와 Kubernetes의 Pod Scheduling을 이용하면 Container가 요구하는 CPU Request 값을 Container에게 제공할 수 있다.
 
-2000 milicpu (2 CPU)를 갖고 있는 Node에 Container A는 1500 milicpu를 Request로 요청하고 Container B는 500 milicpu를 Request로 요청한다고 가정한다면, Container A와 Container B의 Weight의 비율은 3:1만 충족시키면된다. 비율을 적용하는 기준값은 shares의 기본 값인 1024를 이용한다. 따라서 Container A의 shares 값은 768이 되고 Container B의 shares 값은 256이 된다. shares 값은 [Formula 3]을 통해서 계산할 수 있다.
+2000 milicpu (2 CPU)를 갖고 있는 Node에 Container A는 1500 milicpu를 Request로 요청하고 Container B는 500 milicpu를 Request로 요청한다고 가정한다면, Container A와 Container B의 Weight의 비율은 3:1만 충족시키면된다. 비율을 적용하는 기준값은 `shares`의 기본 값인 1024를 이용한다. 따라서 Container A의 `shares` 값은 768이 되고 Container B의 `shares` 값은 256이 된다. `shares` 값은 [Formula 3]을 통해서 계산할 수 있다.
 
 #### 1.2.2. Memory
 
-Memory Resource 값은 일반적인 용량단위(Byte, MB, GB)를 이용한다. **Memory Limit** 값은 Linux에서 Process의 Memory 사용량을 제한하는데 이용되는 Cgroup의 Memory Limit 값을 설정하는데 이용된다. Container에 설정한 용량값 그대로 Memory Limit 값으로 이용된다. Memory Limit 값은 Container가 동작하는 Node의 Memory 값보다 클 수 없다. Memory Limit 값은 Cgroup의 limit-in-bytes라는 값으로 조작된다. **Memory Request** 값은 Cgroup 설정에 이용되지 않고 오직 Kubernetes의 Pod Scheduling시 이용된다.
+Memory Resource 값은 일반적인 용량단위(Byte, MB, GB)를 이용한다. **Memory Limit** 값은 Linux에서 Process의 Memory 사용량을 제한하는데 이용되는 Cgroup의 Memory Limit 값을 설정하는데 이용된다. Container에 설정한 용량값 그대로 Memory Limit 값으로 이용된다. Memory Limit 값은 Container가 동작하는 Node의 Memory 값보다 클 수 없다. Memory Limit 값은 Cgroup의 `limit-in-bytes`라는 값으로 조작된다. **Memory Request** 값은 Cgroup 설정에 이용되지 않고 오직 Kubernetes의 Pod Scheduling시 이용된다.
 
 #### 1.2.3. QoS
 
@@ -111,12 +111,12 @@ Probe는 Kubernetes에서 Container의 정상 동작을 감시하기 위한 기�
 
 * **Exec** : Container안에서 특정 명령어를 실행한다. 실행한 명령어의 Exit Code가 0이면 Container가 정상 상태라고 간주하고, 0이 아니면 정상 상태가 아니라고 간주한다.
 * **TCP Socket** : Container가 특정 Port 번호를 열고 있으면 Container가 정상 상태라고 간주한다.
-* **HTTP Get** : Container에게 HTTP Get Request를 날려 정상응답이 오면 Containe가 정상 상태라고 간주한다.
+* **HTTP Get** : Container에게 HTTP Get Request를 날려 정상응답이 오면 Container가 정상 상태라고 간주한다.
 
-Probe에는 livenessProbe, readinessProbe 2가지 종류의 Probe가 존재한다. 각 Container마다 livenessProbe와 readinessProbe를 정의 할 수 있다.
+Probe에는 `livenessProbe`, `readinessProbe` 2가지 종류의 Probe가 존재한다. 각 Container마다 `livenessProbe`와 `readinessProbe`를 정의 할 수 있다.
 
-* `livenessProbe` : Container가 Running 상태라는걸 감지하기 위한 Probe이다. livenessProbe의 결과가 실패라면 Kubernetes는 해당 Container를 삭제하고 Container의 Restart Policy에 따라서 해당 Container를 재시작하거나 그대로 놔둔다.
-* `readinessProbe` : Container가 Service 요청을 받을 수 있는 상태인지를 감지하기 위한 Probe이다. readinessProbe의 결과가 실패라면 Kubernetes는 해당 Container를 갖고 있는 Pod의 IP 설정을 제거하여, 해당 Pod가 Service를 제공하지 못하도록 한다.
+* `livenessProbe` : Container가 Running 상태라는걸 감지하기 위한 Probe이다. `livenessProbe`의 결과가 실패라면 Kubernetes는 해당 Container를 삭제하고 Container의 Restart Policy에 따라서 해당 Container를 재시작하거나 그대로 놔둔다.
+* `readinessProbe` : Container가 Service 요청을 받을 수 있는 상태인지를 감지하기 위한 Probe이다. `readinessProbe`의 결과가 실패라면 Kubernetes는 해당 Container를 갖고 있는 Pod의 IP 설정을 제거하여, 해당 Pod가 Service를 제공하지 못하도록 한다.
 
 ```yaml {caption="[File 2] Kubernetes Pod의 livenessProbe 예제", linenos=table}
 apiVersion: v1
@@ -142,7 +142,7 @@ spec:
       periodSeconds: 5
 ```
 
-[File 2]는 Exec Type의 livenessProbe를 이용한 Pod의 예제를 나타내고 있다. [File 2]는 /tmp/healthy 파일을 생성하고 30초 동안 대기하고 있다가 /tmp/healty 파일을 삭제하고 600초 동안 대기후 사라지는 Pod을 나타낸다. livenessProbe는 cat 명령어를 통해 /tmp/healty 파일을 읽는 명령을 5초 주기로 수행한다. 30초동안은 /tmp/healty 파일이 존재하기 때문에 Probe 결과는 성공으로 나오겠지만, 30초 이후에는 /tmp/healty 파일이 사라지기 때문에 Probe 결과는 실패가 된다.
+[File 2]는 Exec Type의 `livenessProbe`를 이용한 Pod의 예제를 나타내고 있다. [File 2]는 `/tmp/healthy` 파일을 생성하고 30초 동안 대기하고 있다가 `/tmp/healthy` 파일을 삭제하고 600초 동안 대기후 사라지는 Pod을 나타낸다. `livenessProbe`는 `cat` 명령어를 통해 `/tmp/healthy` 파일을 읽는 명령을 5초 주기로 수행한다. 30초동안은 `/tmp/healthy` 파일이 존재하기 때문에 Probe 결과는 성공으로 나오겠지만, 30초 이후에는 `/tmp/healthy` 파일이 사라지기 때문에 Probe 결과는 실패가 된다.
 
 #### 1.3.2. Init Container
 
@@ -192,15 +192,15 @@ spec:
           port: 8080
 ```
 
-Container Life Cycle Hook은 각 Container의 생명주기 Event에 따라서 특정 동작을 수행할 수 있게 만든다. [File 4]는 Container Life Cycle Hook을 나타내고 있다. 현재 Kubernetes는 postStart Hook과 preStop Hook을 제공하고 있다. postStart Hook, preStop Hook 둘다 Parameter로 특정 Data를 전달하는 기능은 제공하지 않는다.
+Container Life Cycle Hook은 각 Container의 생명주기 Event에 따라서 특정 동작을 수행할 수 있게 만든다. [File 4]는 Container Life Cycle Hook을 나타내고 있다. 현재 Kubernetes는 `postStart` Hook과 `preStop` Hook을 제공하고 있다. `postStart` Hook, `preStop` Hook 둘다 Parameter로 특정 Data를 전달하는 기능은 제공하지 않는다.
 
-* `postStart` Hook : Container의 Init Process (Command) 및 Namespace를 생성한 뒤 수행하는 Hook이다. Container의 Init Process가 정상동작을 하더라도 Container의 postStart Hook이 제대로 실행 완료되지 않으면, 해당 Container는 Running 상태로 바뀌지 않는다. Container의 postStart Hook이 실패하면 Kubernetes는 해당 Container를 강제로 죽인다.
-* `preStop` Hook : Container를 정지하기전에 수행하는 Hook이다. preStop Hook이 정상적으로 수행완료 된 이후에야 Container 삭제를 시도한다. 따라서 Container의 preStop Script가 종료되지 않으면 해당 Container는 삭제할 수 없다. 이러한 문제를 해결하기 위해서 Kubernetes는 terminationGracePeriodSeconds 옵션을 통해서 preStop Hook의 Timeout 시간을 지정할 수 있다. Container의 preStop Hook이 실패하거나, Timeout으로 인해 강제로 종료되면 Kubernetes는 해당 Container를 강제로 죽인다.
+* `postStart` Hook : Container의 Init Process (Command) 및 Namespace를 생성한 뒤 수행하는 Hook이다. Container의 Init Process가 정상동작을 하더라도 Container의 `postStart` Hook이 제대로 실행 완료되지 않으면, 해당 Container는 Running 상태로 바뀌지 않는다. Container의 `postStart` Hook이 실패하면 Kubernetes는 해당 Container를 강제로 죽인다.
+* `preStop` Hook : Container를 정지하기전에 수행하는 Hook이다. `preStop` Hook이 정상적으로 수행완료 된 이후에야 Container 삭제를 시도한다. 따라서 Container의 `preStop` Script가 종료되지 않으면 해당 Container는 삭제할 수 없다. 이러한 문제를 해결하기 위해서 Kubernetes는 `terminationGracePeriodSeconds` 옵션을 통해서 `preStop` Hook의 Timeout 시간을 지정할 수 있다. Container의 `preStop` Hook이 실패하거나, Timeout으로 인해 강제로 종료되면 Kubernetes는 해당 Container를 강제로 죽인다.
 
 Hook Handler Type에는 Exec, HTTP를 제공한다.
 
-* **Exec** : Container의 Namespace 안에서 명령어를 수행한다. 명령어의 Exit Code 값이 0인 경우 성공으로 간주하고 0이 아닌경우에는 실패로 간주한다. [File 4]의 postStart Hook이 Exec Type의 Hook Handler이다.
-* **HTTP** : Container에게 HTTP Request를 전달한다. HTTP의 결과가 200번대라면 성공으로 간주하고 아닌 경우에는 실패로 간주한다. [File 4]의 preStop Hook이 HTTP Type의 Hook Handler이다.
+* **Exec** : Container의 Namespace 안에서 명령어를 수행한다. 명령어의 Exit Code 값이 0인 경우 성공으로 간주하고 0이 아닌경우에는 실패로 간주한다. [File 4]의 `postStart` Hook이 Exec Type의 Hook Handler이다.
+* **HTTP** : Container에게 HTTP Request를 전달한다. HTTP의 결과가 200번대라면 성공으로 간주하고 아닌 경우에는 실패로 간주한다. [File 4]의 `preStop` Hook이 HTTP Type의 Hook Handler이다.
 
 ## 2. 참조
 

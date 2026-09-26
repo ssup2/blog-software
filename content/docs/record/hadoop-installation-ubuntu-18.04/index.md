@@ -18,7 +18,7 @@ $ apt install -y openssh-server
 $ apt install -y pdsh
 ```
 
-sshd를 설치한다.
+`sshd`를 설치한다.
 
 ```text {caption="[File 1] /etc/ssh/sshd-config", linenos=table}
 ...
@@ -28,7 +28,7 @@ PermitRootLogin yes
 ...
 ```
 
-/etc/ssh/sshd-config 파일을 [File 1]의 내용으로 수정한다.
+`/etc/ssh/sshd-config` 파일을 [File 1]의 내용으로 수정한다.
 
 ```shell
 $ service sshd restart
@@ -42,7 +42,7 @@ $ ssh localhost
 Are you sure you want to continue connecting (yes/no)? yes
 ```
 
-sshd 재시작 및 ssh 접속시 password가 불필요하도록 설정한다.
+`sshd` 재시작 및 `ssh` 접속시 password가 불필요하도록 설정한다.
 
 ## 3. Java 설치 
 
@@ -69,7 +69,7 @@ Hadoop Binary를 Download 한다.
 export JAVA-HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64
 ```
 
-~/hadoop-3.0.3/etc/hadoop/hadoop-env.sh 파일을 [File 2]와 같이 수정한다.
+`~/hadoop-3.0.3/etc/hadoop/hadoop-env.sh` 파일을 [File 2]와 같이 수정한다.
 
 ```xml {caption="[File 3] ~/hadoop-3.0.3/etc/hadoop/core-site.xml", linenos=table}
 <configuration>
@@ -80,7 +80,7 @@ export JAVA-HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64
 </configuration>
 ```
 
-~/hadoop-3.0.3/etc/hadoop/core-site.xml 파일을 [File 3]과 같이 수정한다.
+`~/hadoop-3.0.3/etc/hadoop/core-site.xml` 파일을 [File 3]과 같이 수정한다.
 
 ```xml {caption="[File 4] ~/hadoop-3.0.3/etc/hadoop/core-site.xml", linenos=table}
 <configuration>
@@ -91,7 +91,7 @@ export JAVA-HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64
 </configuration>
 ```
 
-~/hadoop-3.0.3/etc/hadoop/core-site.xml 파일을 [File 4]와 같이 수정한다.
+`~/hadoop-3.0.3/etc/hadoop/core-site.xml` 파일을 [File 4]와 같이 수정한다.
 
 ```text {caption="[File 5] ~/.bashrc", linenos=table}
 ...
@@ -110,7 +110,7 @@ export YARN-RESOURCEMANAGER-USER="root"
 export YARN-NODEMANAGER-USER="root"
 ```
 
-~/.bashrc 파일에 [File 5]의 내용을 추가한다.
+`~/.bashrc` 파일에 [File 5]의 내용을 추가한다.
 
 ```shell
 $ hdfs namenode -format
@@ -119,7 +119,7 @@ $ start-dfs.sh
 
 HDFS Format 및 HDFS을 시작하고 HDFS 동작을 확인한다.
 
-* Web Browser에서 http://localhost:9870 접속한다.
+* Web Browser에서 `http://localhost:9870` 접속한다.
 
 ## 5. YARN 설치, 설정
 
@@ -152,7 +152,7 @@ root user 폴더를 생성한다.
 </configuration>
 ```
 
-~/hadoop-3.0.3/etc/hadoop/mapred-site.xml 파일을 [File 6]과 같이 수정한다.
+`~/hadoop-3.0.3/etc/hadoop/mapred-site.xml` 파일을 [File 6]과 같이 수정한다.
 
 ```xml {caption="[File 7] ~/hadoop-3.0.3/etc/hadoop/yarn-site.xml", linenos=table}
 <configuration>
@@ -167,7 +167,7 @@ root user 폴더를 생성한다.
 </configuration>
 ```
 
-~/hadoop-3.0.3/etc/hadoop/yarn-site.xml 파일을 [File 7]과 같이 수정한다.
+`~/hadoop-3.0.3/etc/hadoop/yarn-site.xml` 파일을 [File 7]과 같이 수정한다.
 
 ```shell
 $ start-yarn.sh
@@ -175,7 +175,7 @@ $ start-yarn.sh
 
 YARN을 시작하고 YARN의 동작을 확인한다.
 
-* http://localhost:8088
+* `http://localhost:8088`
 
 ## 6. 동작 확인
 
@@ -210,7 +210,7 @@ $ start-dfs.sh
 $ start-yarn.sh
 ```
 
-There are 0 datanode(s) Error 발생시 위와 같이 수행한다.
+`There are 0 datanode(s)` Error 발생시 위와 같이 수행한다.
 
 ## 8. 참조
 

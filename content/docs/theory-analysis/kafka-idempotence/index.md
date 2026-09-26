@@ -40,7 +40,7 @@ Kafka Idempotence 기능은 모든 경우에 대해서 중복 Record를 방지�
 
 * Producer가 Record Batch를 전송한 다음에, Producer가 재시작되어 PID가 변경된 이후에 다시 동일한 Record Batch를 전송하는 경우에는 중복 Record가 발생할 수 있다. Kafka Broker는 PID를 기준으로 Sequence Number Cache를 관리하기 때문에 PID가 변경되면 새로운 Producer라 간주하기 때문이다.
 * Producer가 전송한 Record Batch를 동일한 Paritition이 아닌 다른 Paritition에 전송하는 경우에는 중복 Record가 발생할 수 있다. Kafka Broker는 각 Partition별로 Sequence Number Cache를 관리하기 때문이다.
-* Producer가 `inflight.requests.per.connection` 설정 값을 **6개** 이상으로 설정하여, Producer가 동시에 6개 이상의 Request를 전송하는 경우에는 중복 Record가 발생할 수 있다. 이는 Kafka Broker가 각 Partition별로 최대 5개의 Record Batch의 Sequence Number만 Caching할 수 있기 때문이다. 이 5개는 Hard-code로 설정된 값이며, 변경할 수 없다. 따라서 Kafka Idempotence 기능을 제대로 활용하기 위해서는 `inflight.requests.per.connection` 설정 값을 반드시 **5개** 이하로 설정해야 한다.
+* Producer가 `max.in.flight.requests.per.connection` 설정 값을 **6개** 이상으로 설정하여, Producer가 동시에 6개 이상의 Request를 전송하는 경우에는 중복 Record가 발생할 수 있다. 이는 Kafka Broker가 각 Partition별로 최대 5개의 Record Batch의 Sequence Number만 Caching할 수 있기 때문이다. 이 5개는 Hard-code로 설정된 값이며, 변경할 수 없다. 따라서 Kafka Idempotence 기능을 제대로 활용하기 위해서는 `max.in.flight.requests.per.connection` 설정 값을 반드시 **5개** 이하로 설정해야 한다.
 
 ## 2. Sequence Flow with Kafka Idempotence
 
@@ -72,7 +72,7 @@ Kafka Idempotence 기능을 활성화 했을때 발생할 수 있는 다양한 S
 
 {{< figure caption="[Figure 5] Sequence Flow with Sequence Cache Missed" src="images/kafka-idempotence-sequence-flow-cache-missed.png" width="900px" >}}
 
-[Figure 5]는 `inflight.requests.per.connection` 설정값을 6개로 설정할 경우 중복 Record가 발생하는 Sequence Flow를 나타내고 있다. Producer가 전송한 `A/120~114`, `B/124~121`, `C/132~125`, `D/142~133`, `E/150~143`, `F/155~151` 6개의 Batch Record가 잘 처리되었지만, 가장 첫번째 Batch Record인 `A/120~114`의 ACK가 유실되는 경우를 나타내고 있다.
+[Figure 5]는 `max.in.flight.requests.per.connection` 설정값을 6개로 설정할 경우 중복 Record가 발생하는 Sequence Flow를 나타내고 있다. Producer가 전송한 `A/120~114`, `B/124~121`, `C/132~125`, `D/142~133`, `E/150~143`, `F/155~151` 6개의 Batch Record가 잘 처리되었지만, 가장 첫번째 Batch Record인 `A/120~114`의 ACK가 유실되는 경우를 나타내고 있다.
 
 `A/120~114` Batch Record에 대한 ACK를 받지못한 Producer는 `request.timeout.ms` 시간만큼 대기한 이후에 다시 동일한 Record Batch를 전송하게 된다. 이때 Kafka Broker에는 마지막으로 받은 5개의 Batch Record만 Caching 되어있고, 가장 첫번째 `A/120~114` Batch Record는 Caching 되어있지 않다. 따라서 Kafka Broker는 `A/120~114` Batch Record가 이미 저장된 Batch Record라고 인식하지 못하고 `OutOfOrderSequenceException` Exception을 발생시킨다.
 

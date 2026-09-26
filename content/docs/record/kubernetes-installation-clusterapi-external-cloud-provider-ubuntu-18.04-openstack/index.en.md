@@ -11,9 +11,9 @@ title: Kubernetes Installation / Using ClusterAPI and External Cloud Provider / 
 * Local Node: Ubuntu 18.04, KVM Enabled, 4 CPU, 4GB Memory
 * Master, Worker Node: Ubuntu 18.04, 4 vCPU, 4GB Memory
 * Network
-  * External Network: 192.168.0.0/24
-  * Octavia Network: 20.0.0.0/24
-  * Tenant Network: 10.6.0.0/24
+  * External Network: `192.168.0.0/24`
+  * Octavia Network: `20.0.0.0/24`
+  * Tenant Network: `10.6.0.0/24`
 * Kubernetes: 1.17.11
   * CNI: Cilium 1.7.11 Plugin
 * External Cloud Provider
@@ -34,7 +34,7 @@ export OS_IDENTITY_API_VERSION=3
 export OS_IMAGE_API_VERSION=2
 ```
 
-Create an admin-openrc.sh file with the content from [Text 1].
+Create an `admin-openrc.sh` file with the content from [Text 1].
 
 ## 3. Local Kubernetes Cluster Installation
 
@@ -55,7 +55,7 @@ Install and verify the Local Kubernetes Cluster for running Cluster API.
 (Local)$ snap install yq
 ```
 
-Install yq used by clusterctl.
+Install `yq` used by `clusterctl`.
 
 ```shell
 (Local)$ curl -L https://github.com/kubernetes-sigs/cluster-api/releases/download/v0.3.11/clusterctl-linux-amd64 -o clusterctl
@@ -65,7 +65,7 @@ Install yq used by clusterctl.
 clusterctl version: &version.Info{Major:"0", Minor:"3", GitVersion:"v0.3.11", GitCommit:"e9cf6846b6d93dedadfcf44c00357d15f5ccba64", GitTreeState:"clean", BuildDate:"2020-11-19T18:49:17Z", GoVersion:"go1.13.15", Compiler:"gc", Platform:"linux/amd64"}
 ```
 
-Install clusterctl to help install and use Cluster API in the Local Kubernetes Cluster.
+Install `clusterctl` to help install and use Cluster API in the Local Kubernetes Cluster.
 
 ## 5. Cluster API Installation
 
@@ -86,7 +86,7 @@ cert-manager                        cert-manager-webhook-845d9df8bf-9m4l8       
 ...
 ```
 
-Install Cluster API in the Local Kubernetes Cluster using clusterctl.
+Install Cluster API in the Local Kubernetes Cluster using `clusterctl`.
 
 ```shell
 (Local)$ kubectl -n capo-system set env deployment/capo-controller-manager CLUSTER_API_OPENSTACK_INSTANCE_CREATE_TIMEOUT=60
@@ -119,7 +119,7 @@ Install Ansible.
 (Local)$ sudo mv packer /usr/local/bin 
 ```
 
-Install packer.
+Install `packer`.
 
 ```shell
 (Local)$ curl -L https://github.com/kubernetes-sigs/image-builder/tarball/master -o image-builder.tgz
@@ -187,7 +187,7 @@ clouds:
     region: RegionOne
 ```
 
-Create a clouds.yaml file with the content from [Text 2] for use by clusterctl.
+Create a `clouds.yaml` file with the content from [Text 2] for use by `clusterctl`.
 
 ```yaml {caption="[Text 3] template.yaml", linenos=table}
 ---
@@ -340,7 +340,7 @@ data:
   cacert: ${OPENSTACK_CLOUD_CACERT_B64}
 ```
 
-Create a template.yaml file with the content from [Text 3] that serves as a Cluster Manifest Template. From the https://raw.githubusercontent.com/kubernetes-sigs/cluster-api-provider-openstack/v0.3.3/templates/cluster-template-external-cloud-provider.yaml file, removed "disableServerTags: true", changed cidrBlocks to "192.167.0.0/16", and added Bastion VM configuration.
+Create a `template.yaml` file with the content from [Text 3] that serves as a Cluster Manifest Template. From the https://raw.githubusercontent.com/kubernetes-sigs/cluster-api-provider-openstack/v0.3.3/templates/cluster-template-external-cloud-provider.yaml file, removed `disableServerTags: true`, changed `cidrBlocks` to `192.167.0.0/16`, and added Bastion VM configuration.
 
 ClusterAPI by default configures Security Groups to prevent SSH access to nodes of the created Kubernetes Cluster. The Bastion VM serves as a gateway to enable SSH access to nodes of the Kubernetes Cluster created via ClusterAPI.
 
@@ -348,7 +348,7 @@ ClusterAPI by default configures Security Groups to prevent SSH access to nodes 
 (Local)$ wget https://raw.githubusercontent.com/kubernetes-sigs/cluster-api-provider-openstack/master/templates/env.rc -O env.rc
 ```
 
-Download the env.rc script file that sets environment variables for use by clusterctl.
+Download the `env.rc` script file that sets environment variables for use by `clusterctl`.
 
 ```shell
 (Local)$ source env.rc clouds.yaml openstack
@@ -360,7 +360,7 @@ export OPENSTACK_CONTROL_PLANE_MACHINE_FLAVOR=m1.medium \
 export OPENSTACK_NODE_MACHINE_FLAVOR=m1.medium
 ```
 
-Set environment variables for use by clusterctl. Set VM Image, VM Flavor, DNS, etc. as environment variables.
+Set environment variables for use by `clusterctl`. Set VM Image, VM Flavor, DNS, etc. as environment variables.
 
 ```shell
 (Local)$ clusterctl config cluster ssup2 --from template.yaml --kubernetes-version v1.17.11 --control-plane-machine-count=3 --worker-machine-count=1 > ssup2_cluster.yaml
@@ -371,13 +371,13 @@ Create the Cluster Manifest file and create the Kubernetes Cluster using the cre
 
 ## 9. Cilium CNI & OpenStack External Cloud Provider Installation
 
-When creating a Kubernetes Cluster, only one Control Plane (Master Node) VM is created, and no more Control Planes are created. This is because the "spec.providerID" value of the Node Object of the Control Plane Node VM is not set. The "spec.providerID" value is set only after the OpenStack External Cloud Provider is installed.
+When creating a Kubernetes Cluster, only one Control Plane (Master Node) VM is created, and no more Control Planes are created. This is because the `spec.providerID` value of the Node Object of the Control Plane Node VM is not set. The `spec.providerID` value is set only after the OpenStack External Cloud Provider is installed.
 
 ```shell
 (Local)$ clusterctl get kubeconfig ssup2 > /root/.kube/ssup2.kubeconfig
 ```
 
-Create the kubeconfig file for the Kubernetes Cluster created using clusterctl.
+Create the kubeconfig file for the Kubernetes Cluster created using `clusterctl`.
 
 ```shell
 (Local)$ kubectl --kubeconfig='/root/.kube/ssup2.kubeconfig' create -f https://raw.githubusercontent.com/cilium/cilium/1.7.11/install/kubernetes/quick-install.yaml
@@ -401,7 +401,7 @@ floating-network-id=00a8e738-c81e-45f6-9788-3e58186076b6
 lb-method=ROUND_ROBIN
 ```
 
-Create a cloud.conf file with the content from [Text 4] for use by the OpenStack External Cloud Controller Manager.
+Create a `cloud.conf` file with the content from [Text 4] for use by the OpenStack External Cloud Controller Manager.
 
 ```shell
 (Local)$ kubectl --kubeconfig='/root/.kube/ssup2.kubeconfig' create secret -n kube-system generic cloud-config --from-file=cloud.conf
@@ -410,7 +410,7 @@ Create a cloud.conf file with the content from [Text 4] for use by the OpenStack
 (Local)$ kubectl --kubeconfig='/root/.kube/ssup2.kubeconfig' apply -f https://raw.githubusercontent.com/kubernetes/cloud-provider-openstack/v1.17.0/manifests/controller-manager/openstack-cloud-controller-manager-ds.yaml
 ```
 
-Create the cloud-config Secret and deploy the OpenStack External Cloud Provider.
+Create the `cloud-config` Secret and deploy the OpenStack External Cloud Provider.
 
 ```shell
 ```
@@ -470,7 +470,7 @@ Verify Kubernetes Cluster operation.
 
 ## 11. SSH Access to Kubernetes Cluster VM Nodes
 
-SSH into the Bastion VM using the ssup2 keypair, then use the ssup2 keypair again from inside the Bastion VM to access the Kubernetes Cluster VM nodes.
+SSH into the Bastion VM using the `ssup2` keypair, then use the `ssup2` keypair again from inside the Bastion VM to access the Kubernetes Cluster VM nodes.
 
 ## 12. References
 

@@ -8,13 +8,13 @@ DB의 Indexing 기법을 분석한다.
 
 {{< figure caption="[Figure 1] DB Indexing" src="images/db-indexing.png" width="600px" >}}
 
-**DB Indexing** 기법은 단어 그대로 Index(색인)를 생성하여 DB의 성능을 높이는 기법이다. [Figure 1]은 DB Indexing 기법을 간략하게 나타내고 있다. 오른쪽 표는 DB Table을 나타내고 있고, 왼쪽 표는 State Column을 기반으로 하는 Index를 나타내고 있다. Index는 State Column의 Record 값을 **정렬**한 후 해당 Record 값의 **ID**를 저장하고 있다.
+**DB Indexing** 기법은 단어 그대로 Index(색인)를 생성하여 DB의 성능을 높이는 기법이다. [Figure 1]은 DB Indexing 기법을 간략하게 나타내고 있다. 오른쪽 표는 DB Table을 나타내고 있고, 왼쪽 표는 `State` Column을 기반으로 하는 Index를 나타내고 있다. Index는 `State` Column의 Record 값을 **정렬**한 후 해당 Record 값의 **ID**를 저장하고 있다.
 
 ```sql {caption="[Query 1] Select, Where 단일 조건문"}
 SELECT * FROM Fruit_Info WHERE State = 'NC'
 ```
 
-DB는 생성한 Index를 이용하여 특정 SQL Query의 성능을 높일 수 있다. [Query 1]을 수행한다고 할 경우 Index가 없으면 DB는 Fruit_Info Table의 모든 Record 값을 읽으면서 State Field 값이 'NC'인지 확인해야 한다. 즉 Table Full Scan이 발생한다. 하지만 Index가 있으면 Binary Search 같은 **탐색** 알고리즘을 이용할 수 있기 때문에 모든 Record 값을 읽을 필요없이 'NC' 값을 가지고 있는 Record를 빠르게 찾을 수 있다.
+DB는 생성한 Index를 이용하여 특정 SQL Query의 성능을 높일 수 있다. [Query 1]을 수행한다고 할 경우 Index가 없으면 DB는 `Fruit_Info` Table의 모든 Record 값을 읽으면서 `State` Field 값이 `NC`인지 확인해야 한다. 즉 Table Full Scan이 발생한다. 하지만 Index가 있으면 Binary Search 같은 **탐색** 알고리즘을 이용할 수 있기 때문에 모든 Record 값을 읽을 필요없이 `NC` 값을 가지고 있는 Record를 빠르게 찾을 수 있다.
 
 반대로 Index가 있으면 Record 생성, 삭제시 Index도 변경되야 하기 때문에 **Overhead**가 발생한다. 따라서 Index를 무조건 많이 생성하는거시 아니라, Schema와 SQL Query에 따라 적절하게 적용해야 한다. 참고로 DB는 기본적으로 Primary Key Field에 대해서 Index를 생성하고 관리한다. 나머지 User가 정의한 Field의 Index는 DDL(Data Definition Language)를 통해서 생성, 삭제가 가능하다.
 
@@ -30,7 +30,7 @@ Index는 성격과 특징에 따라서 Clustered Index와 Non-clustered Index로
 
 **Non-clustered Index**는 Disk에 저장되는 실제 Record를 가리키는 **참조**를 기반으로 작성된 Index이다. 따라서 Non-clustered Index를 이용하면 Record에 참조에만 접근할 수 있기 때문에, Record를 얻기 위해서는 참조를 통해서 한번더 접근하는 과정이 필요하다. 따라서 Clustered Index와 비교하여 느린 Record 접근이 단점이다. 반면에 Record가 변경되더라도 Non-clustered Index는 변경될 필요가 없다는 장점을 가지고 있다. 또한 하나의 Table에 대해서도 다수의 Non-Clustered Index를 생성할 수 있다는 장점을 가지고 있다.
 
-[Figure 2]의 파란 화살표는 Non-clustered Index를 통해서 NC State를 갖는 Record에 접근하는 과정을 나타내고 있다. Non-clustered Index를 통해서 NC State를 갖는 Fruit ID를 찾은 다음, 다시 Clustered Index를 통해서 실제 Record에 접근하는 것을 확인할 수 있다. [Figure 1]의 Index도 Non-clustered Index인걸 알 수 있다. 일반적으로 Primary key를 제외한 나머지 Column에 대해서 생성하는 Index는 Non-clustered Index를 이용한다.
+[Figure 2]의 파란 화살표는 Non-clustered Index를 통해서 `NC` State를 갖는 Record에 접근하는 과정을 나타내고 있다. Non-clustered Index를 통해서 `NC` State를 갖는 Fruit ID를 찾은 다음, 다시 Clustered Index를 통해서 실제 Record에 접근하는 것을 확인할 수 있다. [Figure 1]의 Index도 Non-clustered Index인걸 알 수 있다. 일반적으로 Primary key를 제외한 나머지 Column에 대해서 생성하는 Index는 Non-clustered Index를 이용한다.
 
 ### 1.2. Index Column 선택
 

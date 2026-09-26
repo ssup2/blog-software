@@ -40,7 +40,7 @@ public class MyConfig {
 }
 ```
 
-`@Configuration` is an Annotation to inform Spring that it is a Class containing **Bean Methods**. Also, `@Configuration` informs Spring's Component Scanner of the Package of Components so that the Component Scanner can discover Components. In [Code 2], [Code 3], a Bean Method named `myBeanA` is defined using `@Bean`. Also, `@ComponentScan` is used to inform the Component Scanner of the Package where `MyBeanB` exists. Configuration inherits `@Component`. Therefore, Instances of Classes with `@Configuration` attached are also managed as Spring Beans.
+`@Configuration` is an Annotation to inform Spring that it is a Class containing **Bean Methods**. Also, `@Configuration` informs Spring's Component Scanner of the Package of Components so that the Component Scanner can discover Components. In [Code 2], [Code 3], a Bean Method named `myBeanA` is defined using `@Bean`. Also, `@ComponentScan` is used to inform the Component Scanner of the Package where `MyBeanB` exists. `@Configuration` inherits `@Component`. Therefore, Instances of Classes with `@Configuration` attached are also managed as Spring Beans.
 
 ### 2.1. @Bean
 

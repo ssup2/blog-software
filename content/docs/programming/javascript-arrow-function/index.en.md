@@ -53,9 +53,9 @@ arrowObject.callFunction()
 // Print arrow ojbect
 ```
 
-`this` inside regular functions and `this` inside Arrow functions mean different values. [Code 2] is Code that outputs `this` in regular functions and `this` in Arrow functions to see what value `this` represents. Inside the `callFunction()` function of regularObject, it outputs `this` information using a regular function. Inside the `callFunction()` function of arrowObject, it outputs `this` information using an Arrow function.
+`this` inside regular functions and `this` inside Arrow functions mean different values. [Code 2] is Code that outputs `this` in regular functions and `this` in Arrow functions to see what value `this` represents. Inside the `callFunction()` function of `regularObject`, it outputs `this` information using a regular function. Inside the `callFunction()` function of `arrowObject`, it outputs `this` information using an Arrow function.
 
-`this` in regular functions stores information about the Object that called the function. Therefore, `this` output through the `callFuncton()` function of regularObject outputs information about the Window Object that calls the `callFuncton()` function. On the other hand, `this` in Arrow functions stores information about the Object that owns the function. Therefore, `this` output through the `callFuncton()` function of arrowObject outputs information about arrowObject that owns the `callFuncton()` function.
+`this` in regular functions stores information about the Object that called the function. Therefore, `this` output through the `callFunction()` function of `regularObject` outputs information about the Window Object that calls the `callFunction()` function. On the other hand, `this` in Arrow functions stores information about the Object that owns the function. Therefore, `this` output through the `callFunction()` function of `arrowObject` outputs information about `arrowObject` that owns the `callFunction()` function.
 
 ## 2. References
 

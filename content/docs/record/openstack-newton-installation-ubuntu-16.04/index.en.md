@@ -13,7 +13,7 @@ The installation environment is as follows:
 * OpenStack Newton Version
   * **Network** : Self-service
 * Password
-  * All passwords required for OpenStack installation are unified to **root** for simplified installation.
+  * All passwords required for OpenStack installation are unified to `root` for simplified installation.
 * Installation is performed as root user on all nodes.
 
 ## 2. Node Configuration
@@ -41,7 +41,7 @@ Create virtual Controller, Compute, and Storage Nodes (VMs) using VirtualBox as 
 10.0.0.41       block1
 ```
 
-Create the /etc/hosts file with the contents of [Text 1].
+Create the `/etc/hosts` file with the contents of [Text 1].
 
 #### 2.1.1. OpenStack Package Installation
 
@@ -86,7 +86,7 @@ gateway 192.168.77.1
 dns-nameservers 8.8.8.8
 ```
 
-Modify /etc/network/interfaces as shown in [Text 2].
+Modify `/etc/network/interfaces` as shown in [Text 2].
 
 #### 2.2.2. NTP (Network Time Protocol) Configuration
 
@@ -94,7 +94,7 @@ Modify /etc/network/interfaces as shown in [Text 2].
 (Controller)$ apt install chrony
 ```
 
-Install the chrony package.
+Install the `chrony` package.
 
 ```text {caption="[Text 3] Controller Node - /etc/chrony/chrony.conf", linenos=table}
 ...
@@ -106,13 +106,13 @@ server 3.asia.pool.ntp.org
 allow 10.0.0.0/24
 ```
 
-Add the contents of [Text 3] to /etc/chrony/chrony.conf.
+Add the contents of [Text 3] to `/etc/chrony/chrony.conf`.
 
 ```shell
 (Controller)$ service chrony restart
 ```
 
-Restart chrony.
+Restart `chrony`.
 
 #### 2.2.3. SQL Database Installation
 
@@ -134,7 +134,7 @@ collation-server = utf8_general_ci
 character-set-server = utf8
 ```
 
-Create /etc/mysql/mariadb.conf.d/99-openstack.cnf and modify it as shown in [Text 4].
+Create `/etc/mysql/mariadb.conf.d/99-openstack.cnf` and modify it as shown in [Text 4].
 
 ```shell
 (Controller)$ service mysql restart
@@ -170,7 +170,7 @@ Install the Memcached package.
 -l 10.0.0.11
 ```
 
-Add the contents of [Text 5] to /etc/memcached.conf.
+Add the contents of [Text 5] to `/etc/memcached.conf`.
 
 #### 2.2.6. Environment Variable File Creation
 
@@ -185,7 +185,7 @@ export OS_IDENTITY_API_VERSION=3
 export OS_IMAGE_API_VERSION=2
 ```
 
-Create /root/admin-openrc and modify it as shown in [Text 6].
+Create `/root/admin-openrc` and modify it as shown in [Text 6].
 
 ```text {caption="[Text 7] Controller Node - /root/demo-openrc", linenos=table}
 export OS_PROJECT_DOMAIN_NAME=Default
@@ -198,7 +198,7 @@ export OS_IDENTITY_API_VERSION=3
 export OS_IMAGE_API_VERSION=2
 ```
 
-Create /root/demo-openrc and modify it as shown in [Text 7].
+Create `/root/demo-openrc` and modify it as shown in [Text 7].
 
 ### 2.3. Compute Node
 
@@ -227,7 +227,7 @@ gateway 192.168.77.1
 dns-nameservers 8.8.8.8
 ```
 
-Modify /etc/network/interfaces as shown in [Text 8].
+Modify `/etc/network/interfaces` as shown in [Text 8].
 
 #### 2.3.2. NTP (Network Time Protocol) Configuration
 
@@ -235,20 +235,20 @@ Modify /etc/network/interfaces as shown in [Text 8].
 (Compute)$ apt install chrony
 ```
 
-Install the chrony package.
+Install the `chrony` package.
 
 ```text {caption="[Text 9] Compute Node - /etc/chrony/chrony.conf", linenos=table}
 ...
 server controller iburst
 ```
 
-Add the contents of [Text 9] to /etc/chrony/chrony.conf.
+Add the contents of [Text 9] to `/etc/chrony/chrony.conf`.
 
 ```shell
 (Compute)$ service chrony restart
 ```
 
-Restart chrony.
+Restart `chrony`.
 
 ### 2.4. Storage Node
 
@@ -270,7 +270,7 @@ gateway 10.0.0.1
 dns-nameservers 8.8.8.8
 ```
 
-Modify /etc/network/interfaces as shown in [Text 10].
+Modify `/etc/network/interfaces` as shown in [Text 10].
 
 #### 2.4.2. NTP (Network Time Protocol) Configuration
 
@@ -278,20 +278,20 @@ Modify /etc/network/interfaces as shown in [Text 10].
 (Storage)$ apt install chrony
 ```
 
-Install the chrony package.
+Install the `chrony` package.
 
 ```text {caption="[Text 11] Storage Node - /etc/chrony/chrony.conf", linenos=table}
 ...
 server controller iburst
 ```
 
-Add the contents of [Text 11] to /etc/chrony/chrony.conf.
+Add the contents of [Text 11] to `/etc/chrony/chrony.conf`.
 
 ```shell
 (Storage)$ service chrony restart
 ```
 
-Restart chrony.
+Restart `chrony`.
 
 ## 3. Keystone Installation
 
@@ -322,7 +322,7 @@ connection = mysql+pymysql://keystone:root@controller/keystone
 provider = fernet
 ```
 
-Add the contents of [Text 12] to /etc/keystone/keystone.conf.
+Add the contents of [Text 12] to `/etc/keystone/keystone.conf`.
 
 ```shell
 (Controller)$ su -s /bin/sh -c "keystone-manage db_sync" keystone
@@ -338,7 +338,7 @@ Configure Keystone.
 ServerName controller
 ```
 
-Add the contents of [Text 13] to /etc/apache2/apache2.conf.
+Add the contents of [Text 13] to `/etc/apache2/apache2.conf`.
 
 ```shell
 (Controller)$ service apache2 restart
@@ -463,7 +463,7 @@ default_store = file
 filesystem_store_datadir = /var/lib/glance/images/
 ```
 
-Add the contents of [Text 14] to /etc/glance/glance-api.conf.
+Add the contents of [Text 14] to `/etc/glance/glance-api.conf`.
 
 ```text {caption="[Text 15] Controller Node - /etc/glance/glance-api.conf", linenos=table}
 ...
@@ -485,7 +485,7 @@ password = root
 flavor = keystone
 ```
 
-Add the contents of [Text 15] to /etc/glance/glance-registry.conf.
+Add the contents of [Text 15] to `/etc/glance/glance-registry.conf`.
 
 ```shell
 (Controller)$ su -s /bin/sh -c "glance-manage db_sync" glance
@@ -589,7 +589,7 @@ api_servers = http://controller:9292
 lock_path = /var/lib/nova/tmp
 ```
 
-Add the contents of [Text 16] to /etc/nova/nova.conf.
+Add the contents of [Text 16] to `/etc/nova/nova.conf`.
 
 ```shell
 (Controller)$ su -s /bin/sh -c "nova-manage api_db sync" nova
@@ -645,7 +645,7 @@ api_servers = http://controller:9292
 lock_path = /var/lib/nova/tmp
 ```
 
-Add the contents of [Text 17] to /etc/nova/nova.conf.
+Add the contents of [Text 17] to `/etc/nova/nova.conf`.
 
 ```text {caption="[Text 18] Compute Node - /etc/nova/nova-compute.conf", linenos=table}
 ...
@@ -655,7 +655,7 @@ compute_driver=libvirt.LibvirtDriver
 virt_type=qemu
 ```
 
-Since the current VirtualBox VM cannot use CPU virtualization extensions like Intel VT-X, the Compute Node cannot use KVM+QEMU combination for virtual machines and must use QEMU only. Modify /etc/nova/nova-compute.conf as shown in [Text 18].
+Since the current VirtualBox VM cannot use CPU virtualization extensions like Intel VT-X, the Compute Node cannot use KVM+QEMU combination for virtual machines and must use QEMU only. Modify `/etc/nova/nova-compute.conf` as shown in [Text 18].
 
 ```shell
 (Compute)$ service nova-compute restart
@@ -753,7 +753,7 @@ username = nova
 password = root
 ```
 
-Add the contents of [Text 19] to /etc/neutron/neutron.conf.
+Add the contents of [Text 19] to `/etc/neutron/neutron.conf`.
 
 ```text {caption="[Text 20] Controller Node - /etc/neutron/plugins/ml2/ml2_conf.ini", linenos=table}
 ...
@@ -773,7 +773,7 @@ vni_ranges = 1:1000
 enable_ipset = True
 ```
 
-Add the contents of [Text 20] to /etc/neutron/plugins/ml2/ml2_conf.ini.
+Add the contents of [Text 20] to `/etc/neutron/plugins/ml2/ml2_conf.ini`.
 
 ```text {caption="[Text 21] Controller Node - /etc/neutron/plugins/ml2/linuxbridge_agent.ini", linenos=table}
 ...
@@ -790,7 +790,7 @@ enable_security_group = True
 firewall_driver = neutron.agent.linux.iptables_firewall.IptablesFirewallDriver
 ```
 
-Add the contents of [Text 21] to /etc/neutron/plugins/ml2/linuxbridge_agent.ini.
+Add the contents of [Text 21] to `/etc/neutron/plugins/ml2/linuxbridge_agent.ini`.
 
 ```text {caption="[Text 22] Controller Node - /etc/neutron/l3_agent.ini", linenos=table}
 ...
@@ -798,7 +798,7 @@ Add the contents of [Text 21] to /etc/neutron/plugins/ml2/linuxbridge_agent.ini.
 interface_driver = neutron.agent.linux.interface.BridgeInterfaceDriver
 ```
 
-Add the contents of [Text 22] to /etc/neutron/l3_agent.ini.
+Add the contents of [Text 22] to `/etc/neutron/l3_agent.ini`.
 
 ```text {caption="[Text 23] Controller Node - /etc/neutron/dhcp_agent.ini", linenos=table}
 ...
@@ -808,7 +808,7 @@ dhcp_driver = neutron.agent.linux.dhcp.Dnsmasq
 enable_isolated_metadata = True
 ```
 
-Add the contents of [Text 23] to /etc/neutron/dhcp_agent.ini.
+Add the contents of [Text 23] to `/etc/neutron/dhcp_agent.ini`.
 
 ```text {caption="[Text 24] Controller Node - /etc/neutron/metadata_agent.ini", linenos=table}
 ...
@@ -817,7 +817,7 @@ nova_metadata_ip = controller
 metadata_proxy_shared_secret = root
 ```
 
-Add the contents of [Text 24] to /etc/neutron/metadata_agent.ini.
+Add the contents of [Text 24] to `/etc/neutron/metadata_agent.ini`.
 
 ```text {caption="[Text 25] Controller Node - /etc/nova/nova.conf", linenos=table}
 ...
@@ -835,7 +835,7 @@ service_metadata_proxy = True
 metadata_proxy_shared_secret = root
 ```
 
-Add the contents of [Text 25] to /etc/nova/nova.conf.
+Add the contents of [Text 25] to `/etc/nova/nova.conf`.
 
 ```shell
 (Contorller)$ su -s /bin/sh -c "neutron-db-manage --config-file /etc/neutron/neutron.conf --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade head" neutron
@@ -875,7 +875,7 @@ username = neutron
 password = root
 ```
 
-Add the contents of [Text 26] to /etc/neutron/neutron.conf.
+Add the contents of [Text 26] to `/etc/neutron/neutron.conf`.
 
 ```text {caption="[Text 27] Compute Node - /etc/neutron/plugins/ml2/linuxbridge_agent.ini", linenos=table}
 ...
@@ -892,7 +892,7 @@ enable_security_group = True
 firewall_driver = neutron.agent.linux.iptables_firewall.IptablesFirewallDriver
 ```
 
-Add the contents of [Text 27] to /etc/neutron/plugins/ml2/linuxbridge_agent.ini.
+Add the contents of [Text 27] to `/etc/neutron/plugins/ml2/linuxbridge_agent.ini`.
 
 ```text {caption="[Text 28] Compute Node - /etc/nova/nova.conf", linenos=table}
 ...
@@ -908,7 +908,7 @@ username = neutron
 password = root
 ```
 
-Add the contents of [Text 28] to /etc/nova/nova.conf.
+Add the contents of [Text 28] to `/etc/nova/nova.conf`.
 
 ```shell
 (Compute)$ service nova-compute restart
@@ -1000,7 +1000,7 @@ OPENSTACK_API_VERSIONS = {
 }
 ```
 
-Modify /etc/openstack-dashboard/local_settings.py as shown in [Code 1].
+Modify `/etc/openstack-dashboard/local_settings.py` as shown in [Code 1].
 
 ```shell
 (Controller)$ service apache2 reload
@@ -1013,7 +1013,7 @@ Start Horizon.
 Access Horizon through a web browser.
 
 * http://192.168.77.170/horizon
-* **Login** : Domain - default, Username - admin, Password - root
+* **Login** : Domain - `default`, Username - `admin`, Password - `root`
 
 ## 8. Cinder Installation
 
@@ -1025,7 +1025,7 @@ Access Horizon through a web browser.
 os_region_name = RegionOne
 ```
 
-Add the contents of [Text 29] to /etc/nova.nova.conf.
+Add the contents of [Text 29] to `/etc/nova.nova.conf`.
 
 ### 8.2. Controller Node
 
@@ -1092,7 +1092,7 @@ password = root
 lock_path = /var/lib/cinder/tmp
 ```
 
-Add the contents of [Text 30] to /etc/cinder/cinder.conf.
+Add the contents of [Text 30] to `/etc/cinder/cinder.conf`.
 
 ```shell
 (Controller)$ service nova-api restart
@@ -1120,7 +1120,7 @@ filter = [ "a/sdb/", "r/.*/"]
 }
 ```
 
-Add the contents of [Text 31] to /etc/lvm/lvm.conf.
+Add the contents of [Text 31] to `/etc/lvm/lvm.conf`.
 
 ```shell
 (Storage)$ apt install cinder-volume
@@ -1161,7 +1161,7 @@ iscsi_helper = tgtadm
 lock_path = /var/lib/cinder/tmp
 ```
 
-Add the contents of [Text 32] to /etc/cinder/cinder.conf.
+Add the contents of [Text 32] to `/etc/cinder/cinder.conf`.
 
 ```shell
 (Storage)$ service tgt restart

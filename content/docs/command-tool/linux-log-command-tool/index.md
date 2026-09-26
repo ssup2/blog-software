@@ -23,7 +23,7 @@ $ dmesg -H
 [  +0.000000] x86/fpu: Supporting XSAVE feature 0x010: 'MPX CSR'
 ```
 
-dmesg는 Linux Kernel의 Log Ring Buffer에 저장되어 있는 Kernel Log의 내용을 보여주는 Tool이다. [Shell 1]은 `dmesg -H`를 이용하여 Kernel Log를 출력하는 Shell의 모습을 나타내고 있다. Linux Kernel에서 printk() 함수로 출력한 내용은 Log Ring Buffer에 저장된다. Log Ring Buffer는 Kernel Memory공간에 위치하고 있기 때문에, 재부팅이 된다면 사라지게 된다. 또한 Log Ring Buffer의 크기보다 많은양의 Log가 저장되면 이전의 Log 내용은 덮어 씌워지면서 사라지게 된다.
+`dmesg`는 Linux Kernel의 Log Ring Buffer에 저장되어 있는 Kernel Log의 내용을 보여주는 Tool이다. [Shell 1]은 `dmesg -H`를 이용하여 Kernel Log를 출력하는 Shell의 모습을 나타내고 있다. Linux Kernel에서 `printk()` 함수로 출력한 내용은 Log Ring Buffer에 저장된다. Log Ring Buffer는 Kernel Memory공간에 위치하고 있기 때문에, 재부팅이 된다면 사라지게 된다. 또한 Log Ring Buffer의 크기보다 많은양의 Log가 저장되면 이전의 Log 내용은 덮어 씌워지면서 사라지게 된다.
 
 ### 1.2. /var/log/kern.log
 
@@ -70,7 +70,7 @@ Jul 13 19:06:29 node09 sshd[2675]: Server listening on 0.0.0.0 port 22.
 Jul 13 19:06:29 node09 sshd[2675]: Server listening on :: port 22.
 ```
 
-journalctl은 systemd-journald가 기록한 각종 Log들의 내용을 출력하는 Tool이다. Log는 Kernel Log, Service (Daemon) Log, App Log등이 존재하며, `/var/log/journal`에 저장된다. [Shell 4]는 `journalctl -xu ssh`를 이용하여 ssh Service의 Log 내용을 출력하는 Shell의 모습을 나타내고 있다.
+`journalctl`은 systemd-journald가 기록한 각종 Log들의 내용을 출력하는 Tool이다. Log는 Kernel Log, Service (Daemon) Log, App Log등이 존재하며, `/var/log/journal`에 저장된다. [Shell 4]는 `journalctl -xu ssh`를 이용하여 `ssh` Service의 Log 내용을 출력하는 Shell의 모습을 나타내고 있다.
 
 ## 2. 참조
 

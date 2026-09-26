@@ -32,5 +32,5 @@ RX:                    23.8KB           67.5Kb                   672b   1.00Kb  
 TOTAL:                 35.0KB           86.6Kb                  1.31Kb  2.11Kb  6.48Kb 
 ```
 
-Classifies network bandwidth usage of [Interface] by source IP/destination IP and then outputs them sorted by usage in descending order. [Shell 1] shows the output of `iftop -i eth0` displaying network bandwidth usage of eth0. Each column represents, in order: packet source/destination, packet direction, packet source/destination, packet amount moved in 2 seconds, packet amount moved in 10 seconds, packet amount moved in 40 seconds.
+Classifies network bandwidth usage of [Interface] by source IP/destination IP and then outputs them sorted by usage in descending order. [Shell 1] shows the output of `iftop -i eth0` displaying network bandwidth usage of `eth0`. Each column represents, in order: packet source/destination, packet direction, packet source/destination, packet amount moved in 2 seconds, packet amount moved in 10 seconds, packet amount moved in 40 seconds.
 

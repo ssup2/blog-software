@@ -2,7 +2,7 @@
 title: mpstat
 ---
 
-CPU 사용량을 출력하는 **mpstat**의 사용법을 정리한다.
+CPU 사용량을 출력하는 `mpstat`의 사용법을 정리한다.
 
 ## 1. mpstat
 
@@ -22,10 +22,10 @@ CPU Core의 평균 사용률과 CPU Core별 사용률을 출력한다. [Shell 1]
 
 * `%usr` : nice값이 적용되지 않은 Process들의 User Code를 구동하는데 이용한 CPU 사용률을 나타낸다. 대부분의 User Process들의 사용률을 의미한다.
 * `%nice` : nice값이 적용된 Process들의 User Code들을 구동하는데 이용한 CPU 사용률을 나타낸다.
-* `%sys` : Kernel Code를 구동하는데 이용한 CPU 사용률 중에서 id, wa, hi, si의 사용률/대기율 제외한 사용률을 의미한다.
+* `%sys` : Kernel Code를 구동하는데 이용한 CPU 사용률 중에서 `id`, `wa`, `hi`, `si`의 사용률/대기율 제외한 사용률을 의미한다.
 * `%iowait` : I/O Wait로 인한 CPU 대기율을 나타낸다.
-* `%irq` : 순수 Hardware Interrupt 처리를 위해 사용된 CPU 사용률을 나타낸다. Kernel의 Interrupt Flag를 Set만 하는 Top Havles 부분을 처리를 위한 CPU 사용률을 의미한다.
-* `%soft` : Top Halves에서 Set한 Interrupt Flag에 따라서 실제 Interrupt를 처리하는 Bottom Havles의 CPU 사용률을 나타낸다.
+* `%irq` : 순수 Hardware Interrupt 처리를 위해 사용된 CPU 사용률을 나타낸다. Kernel의 Interrupt Flag를 Set만 하는 Top Halves 부분을 처리를 위한 CPU 사용률을 의미한다.
+* `%soft` : Top Halves에서 Set한 Interrupt Flag에 따라서 실제 Interrupt를 처리하는 Bottom Halves의 CPU 사용률을 나타낸다.
 * `%steal` : Kernel이 Hypervisor가 제어하는 가상 머신 안에서 동작할 때, Hypervisor나 다른 가상 머신에 의해서 사용을 뺏긴 CPU 사용률을 나타낸다.
 * `%guest` : Hypervisor를 통해서 가상 머신을 구동하는 경우, nice값이 적용되지 않은 가상 머신의 vCPU를 구동하는데 이용한 CPU 사용률을 의미한다.
 * `%gnice` : Hypervisor를 통해서 가상 머신을 구동하는 경우, nice값이 적용된 가상 머신의 vCPU를 구동하는데 이용한 CPU 사용률을 의미한다.

@@ -158,7 +158,7 @@ When there is an index on the `dept_id` column, only `Employees` rows with the c
 [Outer: Ssup (dept_id=NULL)]
 ```
 
-[Text 3] shows the processing during Nested Loop Join when the `Employees` table is the Outer Table, the `Departments` table is the Inner Table, and there is an index on the `dept_id` column. You can see that it operates by traversing each row of the Outer Table `Employees` and directly searching only matching rows through the index of the Inner Table `Departments`. In this case, 5 row scans are performed as in [Text 2], but 5 Index Lookups are also needed (`10`, `10`, `20`, `30`, `20`). `Ssup` has `dept_id` of NULL, so Index Lookup is not performed and it is immediately excluded from the join.
+[Text 3] shows the processing during Nested Loop Join when the `Employees` table is the Outer Table, the `Departments` table is the Inner Table, and there is an index on the `dept_id` column. You can see that it operates by traversing each row of the Outer Table `Employees` and directly searching only matching rows through the index of the Inner Table `Departments`. In this case, 5 row scans are performed as in [Text 2], but 5 Index Lookups are also needed (`10`, `10`, `20`, `30`, `20`). `Ssup` has `dept_id` of `NULL`, so Index Lookup is not performed and it is immediately excluded from the join.
 
 [Text 2] and [Text 3] are the same join operation, but the number of Index Lookups can differ depending on which table is chosen as the Outer Table, and this can greatly affect join algorithm performance. To reduce the number of Index Lookups, the Outer Table should have fewer rows than the Inner Table, and therefore the DB Optimizer generally automatically selects the table with fewer rows as the Outer Table.
 

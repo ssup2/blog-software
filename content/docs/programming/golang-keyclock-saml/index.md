@@ -82,19 +82,19 @@ func main() {
 
 동작 과정은 다음과 같다.
 
-* User가 Service Provider의 "/session" Path에 접속하면 Service Provider는 RequireAccount() Middleware 함수를 통해서 SAML Request를 Identity Provider에게 보내어 User가 인증을 할 수 있도록 Redirect한다. SAML Request에는 인증후 User가 요청한 URL 정보도 포함되어 있다. 
-* Identity Provider를 통해서 인증이 완료되면 Identity Provider는 이전에 등록된 Service Provider의 ACS Endpoint인 "/saml/acs"로 User를 다시 Redirect하고, 인증 정보인 SAML Response도 ACS Endpoint에 같이 전송한다. SAML Response에는 SAML Request에 포함된 User가 요청한 URL 정보도 포함되어 있다.
+* User가 Service Provider의 `/session` Path에 접속하면 Service Provider는 `RequireAccount()` Middleware 함수를 통해서 SAML Request를 Identity Provider에게 보내어 User가 인증을 할 수 있도록 Redirect한다. SAML Request에는 인증후 User가 요청한 URL 정보도 포함되어 있다. 
+* Identity Provider를 통해서 인증이 완료되면 Identity Provider는 이전에 등록된 Service Provider의 ACS Endpoint인 `/saml/acs`로 User를 다시 Redirect하고, 인증 정보인 SAML Response도 ACS Endpoint에 같이 전송한다. SAML Response에는 SAML Request에 포함된 User가 요청한 URL 정보도 포함되어 있다.
 * Service Provider의 ACS는 SAML Response를 수신한 다음 인증 정보를 확인하고 Web Browser의 Cookie에 인증을 설정한다. 이후에 Service Provider는 SAML Response에 포함된 User가 요청한 URL로 User를 다시 Redirect하여 User가 Service를 이용할 수 있도록 만든다.
 
 [Code 1]의 각 Line별 설명은 다음과 같다.
 
-* **Line 3, 51** : samlRequestPrinter() 함수는 ACS로 들어오는 요청을 출력하는 Middleware이다.
-* **Line 12** : echoSession() 함수는 SAML이 설정한 Session 정보를 반환하는 함수이다.
-* **Line 55** : samlSP.RequireAccount() 함수는 "/session" 경로 접근시 Identity Provider에게 인증을 요청하는 Middleware이다.
+* **Line 3, 51** : `samlRequestPrinter()` 함수는 ACS로 들어오는 요청을 출력하는 Middleware이다.
+* **Line 12** : `echoSession()` 함수는 SAML이 설정한 Session 정보를 반환하는 함수이다.
+* **Line 55** : `samlSP.RequireAccount()` 함수는 `/session` 경로 접근시 Identity Provider에게 인증을 요청하는 Middleware이다.
 
 ## 3. Service Provider Metadata 추출
 
-[Code 1]의 Service Provider의 Metadata를 추출해야 한다. 추출한 Metadata는 Identity Provider에 Service Provider를 등록하는데 이용된다. 다음의 명령어로 Service Provider의 Metadata를 추출한다. [Code 1]의 Service Provider는 "/saml/metadata" 경로를 통해서 추출할 수 있다.
+[Code 1]의 Service Provider의 Metadata를 추출해야 한다. 추출한 Metadata는 Identity Provider에 Service Provider를 등록하는데 이용된다. 다음의 명령어로 Service Provider의 Metadata를 추출한다. [Code 1]의 Service Provider는 `/saml/metadata` 경로를 통해서 추출할 수 있다.
 
 ```shell
 $ go run main.go
@@ -103,14 +103,14 @@ $ curl localhost:8000/saml/metadata > metadata
 
 ## 4. Keycloak 설치, 설정
 
-Docker를 이용하여 Keycloak을 설치한다. Keycloak의 Admin ID/Password는 admin/admin으로 설정한다.
+Docker를 이용하여 Keycloak을 설치한다. Keycloak의 Admin ID/Password는 `admin`/`admin`으로 설정한다.
 
 ```shell
 $ docker run --name keycloak -p 8080:8080 -e KEYCLOAK_ADMIN=admin -e KEYCLOAK_ADMIN_PASSWORD=admin -d quay.io/keycloak/keycloak:17.0.0 start-dev
 ```
 {{< figure caption="[Figure 1] Realm 생성" src="images/keycloak-create-realm.png" width="800px" >}}
 
-"localhost:8080"에 접속하여 Admin 계정으로 Login을 진행한 이후에 [Figure 1]과 같이 "ssup2" Realm을 생성한다. Keycloak의 Realm은 인증 범위를 의미한다. 하나의 Realm에 다수의 Service Provider가 등록될 수 있다.
+`localhost:8080`에 접속하여 Admin 계정으로 Login을 진행한 이후에 [Figure 1]과 같이 `ssup2` Realm을 생성한다. Keycloak의 Realm은 인증 범위를 의미한다. 하나의 Realm에 다수의 Service Provider가 등록될 수 있다.
 
 {{< figure caption="[Figure 2] Client 생성" src="images/keycloak-create-client.png" width="800px" >}}
 
@@ -122,11 +122,11 @@ Service Provider로부터 추출한 Metadata를 Load하여 [Figure 2]와 같이 
 
 {{< figure caption="[Figure 4] User Password 설정" src="images/keycloak-user-password.png" width="800px" >}}
 
-"users" Group을 생성하고 "users" Group 하위에 "user" User를 생성한다. 이후 [Figure 4]와 같이 생성한 "user" User의 Password를 "user"로 설정한다.
+`users` Group을 생성하고 `users` Group 하위에 `user` User를 생성한다. 이후 [Figure 4]와 같이 생성한 `user` User의 Password를 `user`로 설정한다.
 
 {{< figure caption="[Figure 5] User Role 확인" src="images/keycloak-user-role.png" width="800px" >}}
 
-이후 생성한 "user" User의 Role을 [Figure 5]와 같이 확인 한다.
+이후 생성한 `user` User의 Role을 [Figure 5]와 같이 확인 한다.
 
 ## 5. Service Provider 실행
 
@@ -136,7 +136,7 @@ Service Provider로부터 추출한 Metadata를 Load하여 [Figure 2]와 같이 
 http://localhost:8080/realms/ssup2/protocol/saml?SAMLRequest=nJJRb9MwFIX%2FiuX31I7TrJu1RCqrEJUGVGvhgbdb55ZacuzgewPs36Nmm1QklAde7fudc4997gn6MNj1yOf4hD9GJBa%2F%2BxDJXi4aOeZoE5AnG6FHsuzsfv3x0ZqFtkCEmX2K8goZ5pkhJ04uBSm2m0b6rtDa1VXd3VVLvKlOq7q86250V8LpiMu6rJzDVVdWx6MUXzGTT7GRZqGl2BKNuI3EELmRRhtTaFOY1aGsbF3b0izKevlNig0S%2Bwg8kWfmwSoVkoNwTsT2Vt9qlRFCT4poHIx6W1Bdwkixfsv4kCKNPeY95p%2Fe4Zenx3%2FKaT2BChxJsXvVeudj5%2BP3%2BZc5vgyR%2FXA47Ird5%2F1BttPv2ClqFu9T7oHnRS4nvitO06jFyJ6fZTuzZ48MHTDcqyur9rUVn6DH7WaXgnfP%2F2HPGSJ5jCzFOoT06yEjMDaS84hStS%2BWf3ev%2FRMAAP%2F%2F&RelayState=cah6dnvLyCdBHc0bl5F2D3EZs1myEwIcGXHgrrgABaRtr0VVrx7ntLhu
 ```
 
-Service Provider를 실행하고 "/session" Path에 접근하면 [Text 1]의 URL을 통해서 [Figure 6]과 같은 Login 화면을 확인할 수 있다. [Text 1]을 보면 URL의 Query 형태로 "SAML Request"와 "Relay State"를 확인할 수 있다. SAML Request는 Service Provider가 Identity Provider (Keycloak)에게 전송하는 인증 요청이고, Relay State는 Identity Provider의 인증 과정 이후 Identity Provider가 Service Provider의 ACS로 "SAML Response"와 함께 전달하는 값으로, Service Provider가 인증 이후 어떤 동작을 수행할지 판별하는 용도로 이용된다.
+Service Provider를 실행하고 `/session` Path에 접근하면 [Text 1]의 URL을 통해서 [Figure 6]과 같은 Login 화면을 확인할 수 있다. [Text 1]을 보면 URL의 Query 형태로 "SAML Request"와 "Relay State"를 확인할 수 있다. SAML Request는 Service Provider가 Identity Provider (Keycloak)에게 전송하는 인증 요청이고, Relay State는 Identity Provider의 인증 과정 이후 Identity Provider가 Service Provider의 ACS로 "SAML Response"와 함께 전달하는 값으로, Service Provider가 인증 이후 어떤 동작을 수행할지 판별하는 용도로 이용된다.
 
 ```xml {caption="[Text 2] SAML Request", linenos=table}
 <?xml version="1.0"?>
@@ -152,7 +152,7 @@ Service Provider를 실행하고 "/session" Path에 접근하면 [Text 1]의 URL
 Request : &{Method:POST URL:/saml/acs Proto:HTTP/1.1 ProtoMajor:1 ProtoMinor:1 Header:map[Accept:[text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9] Accept-Encoding:[gzip, deflate, br] Accept-Language:[ko] Cache-Control:[max-age=0] Connection:[keep-alive] Content-Length:[16013] Content-Type:[application/x-www-form-urlencoded] Cookie:[saml_cah6dnvLyCdBHc0bl5F2D3EZs1myEwIcGXHgrrgABaRtr0VVrx7ntLhu=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjgwMDAiLCJleHAiOjE2NDU5NzAyMDIsImlhdCI6MTY0NTk3MDExMiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDAwIiwibmJmIjoxNjQ1OTcwMTEyLCJzdWIiOiJjYWg2ZG52THlDZEJIYzBibDVGMkQzRVpzMW15RXdJY0dYSGdycmdBQmFSdHIwVlZyeDdudExodSIsImlkIjoiaWQtMDBjNTM1ZDkzNGU2M2Y3NTE5ZDYwZDFhZmJlNDUxM2NjZTdkMTNiYiIsInVyaSI6Ii9zZXNzaW9uIiwic2FtbC1hdXRobi1yZXF1ZXN0Ijp0cnVlfQ.oopqK9Ss-gpn_c8OegyIteY7FdIgDhvnd45ogbokbdeHKnUkoorQ-gbAvKbADcIJAAgChu6hU8gD9Cvz5smOpGc_gaFEL0O5Vjpsu7vNLmHxEMiTgJCWWe_vx9THq0VqXif4zANKTpabRMYNf0XLDH5D4Zf7sVQGdDKovKOd4ww89GXy8ImZx0Qvbbcqz45If6rJhPqMJMkNhwYjawttUiHyBBXAFp3u4Cm8f2ujGzSN_LK4J_HYwLmo-ufq9-hy-eKmn5Ji2qM5hkpzZ0N2s4d_IktIvX4rHryOCo8nktCBPYySvVLZ8sBLLtBjFKjQ6MVhkesUbwQWGy_T48R3-Q] Origin:[null] Sec-Ch-Ua:[" Not A;Brand";v="99", "Chromium";v="98", "Google Chrome";v="98"] Sec-Ch-Ua-Mobile:[?0] Sec-Ch-Ua-Platform:["Windows"] Sec-Fetch-Dest:[document] Sec-Fetch-Mode:[navigate] Sec-Fetch-Site:[same-site] Upgrade-Insecure-Requests:[1] User-Agent:[Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36]] Body:{Reader:SAMLResponse=PHNhbWxwOlJlc3BvbnNlIHhtbG5zOnNhbWxwPSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoyL...NaEhsNTV4Ym1UVzBpWE9nTjBPOTljYW8zVGJIR01DZGFiT3pNRGFKbjdkVzdmdWpIbU1GdFdkUHNzanBlRXFWeU5QYVVFRWQvUWVuZUlrWFZBeTFxRWJaaXk5N01uZTI3bEs2TGN1bkFWRjM2RmJ0WWVFQjNRL0l6QVlkS0hDY1Q5Y2thcWRJS2RORE9xMTNzQUkvSEw1NmNRT0VkNlUvbGx4cUtaRXBzcDlsSnVhdlRBMXhHRTRicmVRMUcrUjVlTjVuZHdjNGZMYjh5cll5QmdkNmlNc0JxN05LQTkvUUZUOWxoM2ZBTDA1Z2JkakUzNE9NMnpyVS9aV2dnbkNJT3lvamtTaWd3T3NJaGxlb3RubTA5UGg1NFV1MTdwUlozUVlNL255ZktKSnA4ZEpmUXdXb3R4UXdTZ3lBd3ovaS8weGFCOGY0akhlZEV6Yy93Tk9ObWlDTFlYMnViUTE0dDUxUzhWRGhKck9yTVphR3ZIT2pCNTJIc0pEazNDT2h2ZlExSXlHQ2hiVUx3clk3bUJybGJRQTNjVCtYcnVuNis2TXl6VlhpUXF6Si9HV2Rqd0szUXFYRW9HbXlUQUw1N0p3dWNNaDJ4OERkY0lvemEzbFJXL2lJbHAyWXlzMEV5Y3pqeVMwRkMrN1ZETVNDS2tNTGdnQktHS011SW1razhnZGw2MFFGMG8wVi9JbFlTY2JUbzYxU3BhTmtaTEVtV1l4NmNLZGFHMVduUGhPbzlPaERHWGowMXNQUFo4MTFpNFh4T25sZGN3VmdCOG5la291SnpyZjF1dkF4Y3htWGpGbVdDeURIbmdpdGl4RkNuR3pOR3ZNL21BPT08L3hlbmM6Q2lwaGVyVmFsdWU%2BPC94ZW5jOkNpcGhlckRhdGE%2BPC94ZW5jOkVuY3J5cHRlZERhdGE%2BPC9zYW1sOkVuY3J5cHRlZEFzc2VydGlvbj48L3NhbWxwOlJlc3BvbnNlPg%3D%3D&RelayState=cah6dnvLyCdBHc0bl5F2D3EZs1myEwIcGXHgrrgABaRtr0VVrx7ntLhu} GetBody:<nil> ContentLength:16013 TransferEncoding:[] Close:false Host:localhost:8000 Form:map[] PostForm:map[] MultipartForm:<nil> Trailer:map[] RemoteAddr:[::1]:43304 RequestURI:/saml/acs TLS:<nil> Cancel:<nil> Response:<nil> ctx:0xc00030a040}
 ```
 
-[Text 3]은 Keycloak에서 인증 완료 이후 Keycloak이 Service Provider의 ACS Endpoint로 전달하는 Request를 나타내고 있다. Request의 Body에는 "SAML Response"와 "Relay State"가 존재하는 것을 확인할 수 있다. Relay State는 [Text 1]의 Relay State와 동일한 것을 확인 할 수 있다. Service Provider는 ACS Endpoint로 전달되는 Relay State를 통해서 User를 "/session" Path로 Redirect 시키는 것을 판단하고 수행한다.
+[Text 3]은 Keycloak에서 인증 완료 이후 Keycloak이 Service Provider의 ACS Endpoint로 전달하는 Request를 나타내고 있다. Request의 Body에는 "SAML Response"와 "Relay State"가 존재하는 것을 확인할 수 있다. Relay State는 [Text 1]의 Relay State와 동일한 것을 확인 할 수 있다. Service Provider는 ACS Endpoint로 전달되는 Relay State를 통해서 User를 `/session` Path로 Redirect 시키는 것을 판단하고 수행한다.
 
 ```xml {caption="[Text 4] SAML Response", linenos=table}
 <?xml version="1.0"?>
@@ -218,7 +218,7 @@ Request : &{Method:POST URL:/saml/acs Proto:HTTP/1.1 ProtoMajor:1 ProtoMinor:1 H
 }
 ```
 
-Service Provider의 "/session" Endpoint에 접근하면 [Text 5]과 같이 현재의 Session 정보를 확인할 수 있다. Role에 [Figure 5]의 Role이 포함되어 있는것을 확인할 수 있다.
+Service Provider의 `/session` Endpoint에 접근하면 [Text 5]과 같이 현재의 Session 정보를 확인할 수 있다. Role에 [Figure 5]의 Role이 포함되어 있는것을 확인할 수 있다.
 
 ## 6. 참조
 

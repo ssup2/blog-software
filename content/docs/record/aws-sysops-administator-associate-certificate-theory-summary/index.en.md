@@ -24,10 +24,10 @@ Organize missing content based on the following organized content
     * Partition failure does not affect other partitions
     * 7 Partitions exist per AZ, maximum 100 EC2 instances per partition
   * Launch Exception
-    * InstanceLimitExceeded
+    * `InstanceLimitExceeded`
       * vCPU count exceeded in region
       * Can request increase through Service Quota
-    * InsufficientInstanceCapacity
+    * `InsufficientInstanceCapacity`
       * No available instances in AZ
       * AWS resource shortage issue
       * Can work around by selecting different instance type or different AZ
@@ -38,7 +38,7 @@ Organize missing content based on the following organized content
       * Collect metrics at 5-minute intervals, can change to 1-minute intervals but additional cost
       * Can collect CPU usage, Network I/O, Disk I/O, Instance status information
     * with CloudWatch Agent
-      * Memory usage, Disk usage, Process status (procstat Plugin)
+      * Memory usage, Disk usage, Process status (`procstat` Plugin)
       * Can set collection interval (minimum interval 1 second)
   * Status Check
     * System Status Check
@@ -54,7 +54,7 @@ Organize missing content based on the following organized content
 
 * Can create AMI without rebooting EC2 instance with No Reboot Option
 * Can create images through EC2 Image Builder
-* Can force use of only AMIs with Production tag in production environment using AMI tags
+* Can force use of only AMIs with `Production` tag in production environment using AMI tags
   * Using IAM permissions and AWS Config
 
 ## 4. Systems Manager
@@ -105,7 +105,7 @@ Organize missing content based on the following organized content
 * Forms hierarchy in directory format
 * Advanced Tier (paid)
   * Can specify parameter policies
-  * Can specify Expiration, ExpirationNotification, NoChangeNotification
+  * Can specify `Expiration`, `ExpirationNotification`, `NoChangeNotification`
 
 ### 4.5. SSM Inventory
 
@@ -135,7 +135,7 @@ Organize missing content based on the following organized content
 * Provides shell access to EC2 instances and on-premise systems
 * Not SSH method, no Bastion Host required, no SSH key required
 * Session logs can be stored in S3 and CloudWatch Logs
-* StartSession event records remain in CloudTrail
+* `StartSession` event records remain in CloudTrail
 
 ## 5. Cloud Formation
 
@@ -145,7 +145,7 @@ Organize missing content based on the following organized content
   * `Mapping` : Static variables
   * `Output` : Template execution results
   * `Conditions` : Set resource creation conditions
-  * MetaData
+  * `MetaData`
 * Stack Policy
   * Limits resources that the stack can change
   * Default All Deny when stack policy is set

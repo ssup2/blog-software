@@ -22,7 +22,7 @@ Goroutines actually have more diverse states, but they can be simplified into th
 
 In [Figure 1], Goroutines in the Network Poller and Goroutines in Blocking state refer to Goroutines in Waiting state. Goroutines in GRQ and LRQ are Goroutines in Runnable state. Goroutines that exist together with Processor(P) and Thread(M) are Goroutines in Executing state.
 
-Goroutines can only be in Executing state when they exist together with Processor(P) and Thread(M). Therefore, the maximum number of Goroutines that can be run simultaneously is determined by the number of Processors(P). The number of Processors(P) can be determined by the value of the **GOMAXPROCS** environment variable, and if the GOMAXPROCS environment variable is not set, the default value is set to the number of CPU Cores so that Goroutines can be run simultaneously on all CPU Cores. In [Figure 1], the GOMAXPROCS value is "3".
+Goroutines can only be in Executing state when they exist together with Processor(P) and Thread(M). Therefore, the maximum number of Goroutines that can be run simultaneously is determined by the number of Processors(P). The number of Processors(P) can be determined by the value of the `GOMAXPROCS` environment variable, and if the `GOMAXPROCS` environment variable is not set, the default value is set to the number of CPU Cores so that Goroutines can be run simultaneously on all CPU Cores. In [Figure 1], the `GOMAXPROCS` value is `3`.
 
 #### 1.2. Run Queue
 
@@ -30,7 +30,7 @@ Goroutines can only be in Executing state when they exist together with Processo
 
 {{< figure caption="[Figure 2] LRQ" src="images/lrq.png" width="600px" >}}
 
-LRQ has a form that combines FIFO (First In, First Out) and LIFO (Least In, First Out), not a general Queue. The LIFO part has a Size of "1", so only one Goroutine can be stored. [Figure 2] shows the operation of LRQ. When a Goroutine is enqueued to LRQ, it is first stored in the LIFO part and then stored in the FIFO part. Conversely, when a Goroutine is dequeued from LRQ, the Goroutine in the LIFO part comes out first, and then the Goroutine in the FIFO part comes out.
+LRQ has a form that combines FIFO (First In, First Out) and LIFO (Least In, First Out), not a general Queue. The LIFO part has a Size of `1`, so only one Goroutine can be stored. [Figure 2] shows the operation of LRQ. When a Goroutine is enqueued to LRQ, it is first stored in the LIFO part and then stored in the FIFO part. Conversely, when a Goroutine is dequeued from LRQ, the Goroutine in the LIFO part comes out first, and then the Goroutine in the FIFO part comes out.
 
 The reason LRQ is designed this way is to give Locality to Goroutines. When a new Goroutine is created from a Goroutine and the created Goroutine waits for termination, high performance can be achieved only when the newly created Goroutine is executed and terminated quickly. Considering the Cache perspective, the newly created Goroutine should be executed on the same Processor. The newly created Goroutine is basically stored in the LRQ of the Processor that created the Goroutine. Therefore, through the LIFO part of LRQ, the newly created Goroutine can be executed quickly on the same Processor.
 
@@ -48,7 +48,7 @@ When a Sync System Call is called within a Goroutine, the Thread that was runnin
 
 {{< figure caption="[Figure 4] Async System Call" src="images/async-system-call.png" width="500px" >}}
 
-[Figure 4] shows how the Golang Scheduler processes the Goroutine when an Async System Call is called from a Goroutine. The Goroutine that called the Async System Call enters the **Network Poller** and waits for the completion Event of the Async System Call. After that, the Network Poller receives the completion Event of the Async System Call and makes the Goroutine that is the target of the Event enter LRQ again to be executed later. The Network Poller operates in a separate Background Thread and receives Async System Call completion Events through the **epoll()** function in Linux environments.
+[Figure 4] shows how the Golang Scheduler processes the Goroutine when an Async System Call is called from a Goroutine. The Goroutine that called the Async System Call enters the **Network Poller** and waits for the completion Event of the Async System Call. After that, the Network Poller receives the completion Event of the Async System Call and makes the Goroutine that is the target of the Event enter LRQ again to be executed later. The Network Poller operates in a separate Background Thread and receives Async System Call completion Events through the `epoll()` function in Linux environments.
 
 #### 1.4. Work Stealing
 
@@ -65,7 +65,7 @@ runtime.schedule() {
 
 When there are no Goroutines in LRQ, the Golang Scheduler brings Goroutines from other places. [Code 1] shows the Goroutine Scheduling Algorithm performed by the Golang Scheduler. If there are no Goroutines in LRQ, it checks if Goroutines exist in other LRQs, and if Goroutines exist in LRQ, it takes half of the Goroutines.
 
-If no Goroutines exist in other LRQs, it checks if Goroutines exist in GRC and brings Goroutines if they exist. If no Goroutines exist in GRC, it checks if Goroutines exist in Net Poller and brings Goroutines if they exist. However, for the Locality of Goroutines, newly created Goroutines are restricted from being stolen for 3ms.
+If no Goroutines exist in other LRQs, it checks if Goroutines exist in GRQ and brings Goroutines if they exist. If no Goroutines exist in GRQ, it checks if Goroutines exist in Net Poller and brings Goroutines if they exist. However, for the Locality of Goroutines, newly created Goroutines are restricted from being stolen for 3ms.
 
 #### 1.5. Fairness
 

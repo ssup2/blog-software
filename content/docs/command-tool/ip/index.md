@@ -2,7 +2,7 @@
 title: ip
 ---
 
-Linux에서 Network를 제어하고 조회하는 **ip**의 사용법을 정리한다.
+Linux에서 Network를 제어하고 조회하는 `ip`의 사용법을 정리한다.
 
 ## 1. ip
 

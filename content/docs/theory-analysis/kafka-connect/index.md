@@ -12,7 +12,7 @@ Kafka Connect에 대해서 분석한다.
 
 * **Data Source** : Data Stream의 출발점이 되는 Data 저장소.
 * **Data Destination** : Data Stream의 도착점이 되는 Data 저장소.
-* **Kafka Connect Cluster** : Data 저장소와 Kakfa 사이에서 Data Stream을 주고받는 **Plugin**(Kafka Connector, Transform, Converter)을 관리한다. **Rest API**를 통해서 원격에서 관리가 가능하다. 하나 또는 다수의 **Worker**로 구성되어 있다. [Figure 1]에서는 다수의 Worker로 구성된 Distributed Mode의 Kafka Connect Cluster를 나타내고 있다.
+* **Kafka Connect Cluster** : Data 저장소와 Kafka 사이에서 Data Stream을 주고받는 **Plugin**(Kafka Connector, Transform, Converter)을 관리한다. **Rest API**를 통해서 원격에서 관리가 가능하다. 하나 또는 다수의 **Worker**로 구성되어 있다. [Figure 1]에서는 다수의 Worker로 구성된 Distributed Mode의 Kafka Connect Cluster를 나타내고 있다.
   * **Connector** : Data 저장소와 Converter 사이에서 실제로 Data Stream을 주고받는 역할을 수행한다. Data Source와 연동되는 Connector를 **Source Connector**, Data Destination와 연동되는 Connector를 **Sink Connector**라고 명칭한다.
   * **Converter** : Connector와 Kafka 사이에서 Data 직렬화/역직렬화를 수행한다의
   * **Transform** : Connector와 Converter 사이에서 간단한 Data 변환을 수행한다. 필수 요소는 아니며 선택적으로 사용할 수 있다.
@@ -155,7 +155,7 @@ transforms.insertValue.value.static.field=my-field
 transforms.insertValue.value.static.value=my-value
 ```
 
-[File 4]와 [File 5]는 Kafka Connect의 InsertField Transform 설정 예시를 나타내고 있다. [File 4]는 Record의 Key에 `my-field`라는 Field를 `my-value`로 추가하는 `insertKey` Transform을 정의하고 있으며, 이와 유사하게 [File 5]는 Record의 Value에 `my-field`라는 Field를 `my-value`로 추가하는 `insertValue` Transform을 정의하고 있는 것을 확인할 수 있다.
+[File 4]와 [File 5]는 Kafka Connect의 `InsertField` Transform 설정 예시를 나타내고 있다. [File 4]는 Record의 Key에 `my-field`라는 Field를 `my-value`로 추가하는 `insertKey` Transform을 정의하고 있으며, 이와 유사하게 [File 5]는 Record의 Value에 `my-field`라는 Field를 `my-value`로 추가하는 `insertValue` Transform을 정의하고 있는 것을 확인할 수 있다.
 
 ```properties {caption="[File 6] Kafka Connect Chaining Transform Properties Example" linenos=table}
 transforms=insertKey,insertValue
@@ -174,8 +174,8 @@ transforms.insertValue.value.static.value=my-value
 * Kafka Connect : [https://docs.confluent.io/platform/current/connect/index.html#](https://docs.confluent.io/platform/current/connect/index.html#)
 * Kafka Connect : [https://docs.lenses.io/latest/connectors/understanding-kafka-connect](https://docs.lenses.io/latest/connectors/understanding-kafka-connect)
 * Kafka Connect : [https://developer.confluent.io/courses/kafka-connect/how-connectors-work/](https://developer.confluent.io/courses/kafka-connect/how-connectors-work/)
-* Kakka Connect : [https://www.instaclustr.com/blog/apache-kafka-connect-architecture-overview/](https://www.instaclustr.com/blog/apache-kafka-connect-architecture-overview/)
-* Kakfa Connect : [https://kafka.apache.org/documentation.html#connect](https://kafka.apache.org/documentation.html#connect)
+* Kafka Connect : [https://www.instaclustr.com/blog/apache-kafka-connect-architecture-overview/](https://www.instaclustr.com/blog/apache-kafka-connect-architecture-overview/)
+* Kafka Connect : [https://kafka.apache.org/documentation.html#connect](https://kafka.apache.org/documentation.html#connect)
 * Kafka Connect : [https://cjw-awdsd.tistory.com/53](https://cjw-awdsd.tistory.com/53)
 * Kafka Connect Rest API : [https://docs.confluent.io/platform/current/connect/references/restapi.html](https://docs.confluent.io/platform/current/connect/references/restapi.html)
 * Kafka Connect Rebalancing : [https://cwiki.apache.org/confluence/display/KAFKA/KIP-415:+Incremental+Cooperative+Rebalancing+in+Kafka+Connect](https://cwiki.apache.org/confluence/display/KAFKA/KIP-415:+Incremental+Cooperative+Rebalancing+in+Kafka+Connect)

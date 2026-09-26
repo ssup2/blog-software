@@ -42,7 +42,7 @@ configInline:
 ...
 ```
 
-Configure MetalLB. Modify the value.yaml file of the MetalLB Chart as shown in [File 1]. Set MetalLB to ARP Mode and configure the range of LoadBalancer Service IPs.
+Configure MetalLB. Modify the `values.yaml` file of the MetalLB Chart as shown in [File 1]. Set MetalLB to ARP Mode and configure the range of LoadBalancer Service IPs.
 
 ```shell
 $ helm install --name metallb --namespace metallb .

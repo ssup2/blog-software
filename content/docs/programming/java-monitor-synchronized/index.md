@@ -2,7 +2,7 @@
 title: Java Monitor, synchronized
 ---
 
-Thread 사이의 동기화(Synchronization)를 위한 Monitor 기법을 정리하고, Java에서 Monitor를 기반으로 동작하는 synchronized 기법을 분석한다.
+Thread 사이의 동기화(Synchronization)를 위한 Monitor 기법을 정리하고, Java에서 Monitor를 기반으로 동작하는 `synchronized` 기법을 분석한다.
 
 ## 1. Monitor
 

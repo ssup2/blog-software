@@ -2,7 +2,7 @@
 title: top
 ---
 
-Process들을 CPU 사용률 또는 Memory 사용률 순서대로 출력하는 top의 사용법을 정리한다.
+Process들을 CPU 사용률 또는 Memory 사용률 순서대로 출력하는 `top`의 사용법을 정리한다.
 
 ## 1. top
 
@@ -40,10 +40,10 @@ KiB Swap:  8265724 total,        0 used,  8265724 free.   541164 cached Mem
 
 #### 1.1.1. CPU 정보
 
-[Shell 1]의 윗부분의 %Cpu(s) 부분은 모든 CPU Core의 평균 CPU 사용률을 타나내고 있다. 각 열은 다음과 같은 의미를 나타낸다.
+[Shell 1]의 윗부분의 `%Cpu(s)` 부분은 모든 CPU Core의 평균 CPU 사용률을 타나내고 있다. 각 열은 다음과 같은 의미를 나타낸다.
 
 * `us (user)` : nice값이 적용되지 않은 (un-niced, nice = 0) Process들의 User Code를 구동하는데 이용한 CPU 사용률을 나타낸다. 대부분의 User Process들의 사용률을 의미한다.
-* `sy (system)` : Kernel Code를 구동하는데 이용한 CPU 사용률 중에서 id, wa, hi, si의 사용률/대기율 제외한 사용률을 의미한다.
+* `sy (system)` : Kernel Code를 구동하는데 이용한 CPU 사용률 중에서 `id`, `wa`, `hi`, `si`의 사용률/대기율 제외한 사용률을 의미한다.
 * `ni (nice)` : nice값이 적용된 (niced) Process들의 User Code들을 구동하는데 이용한 CPU 사용률을 나타낸다.
 * `id (idle)` : I/O Wait를 제외한 CPU의 대기율를 나타낸다.
 * `wa (wait)` : I/O Wait로 인한 CPU 대기율을 나타낸다.
@@ -70,11 +70,11 @@ KiB Swap:  8265724 total,        0 used,  8265724 free.   541164 cached Mem
 
 * `PID` : Process의 ID를 나타낸다.
 * `USER` : Process Owner를 나타낸다.
-* `PR` : Kernel Scheduling시 실제로 이용하는 Scheduling Priority를 나타낸다. "0 ~ 39, rt"의 값을 갖을수 있고, 숫자의 경우 낮은 값일수록 높은 Priority를 갖는다. rt는 Real Time Scheduling Priority를 의미하며 0 Priority 보다 높은 Priority를 갖는다.
-* `NI` : nice 값을 나타낸다. "-20 ~ 19"의 값을 갖을수 있고, 숫자가 낮을수록 높은 Priority를 갖는다. "20 + NI" 값이 PR이 된다.
+* `PR` : Kernel Scheduling시 실제로 이용하는 Scheduling Priority를 나타낸다. `0 ~ 39, rt`의 값을 갖을수 있고, 숫자의 경우 낮은 값일수록 높은 Priority를 갖는다. `rt`는 Real Time Scheduling Priority를 의미하며 0 Priority 보다 높은 Priority를 갖는다.
+* `NI` : nice 값을 나타낸다. `-20 ~ 19`의 값을 갖을수 있고, 숫자가 낮을수록 높은 Priority를 갖는다. `20 + NI` 값이 `PR`이 된다.
 * `VIRT` : Virtual Memory 용량을 나타낸다. 현재 이용되지는 않더라도 Process를 위해서 할당된 모든 Memory 용량 및 Swap 용량의 합을 의미한다.
-* `RES` : 현재 이용되고 있는 실제 Memory 용량을 나타낸다. VIRT의 일부분이다.
-* `SHR` : 공유 Memory 용량을 나타낸다. RES의 일부분이다.
+* `RES` : 현재 이용되고 있는 실제 Memory 용량을 나타낸다. `VIRT`의 일부분이다.
+* `SHR` : 공유 Memory 용량을 나타낸다. `RES`의 일부분이다.
 * `S` : Process의 상태를 나타낸다.
 * `%CPU` : CPU 사용률을 나타낸다.
 * `%MEM` : Memory 사용률을 나타낸다.

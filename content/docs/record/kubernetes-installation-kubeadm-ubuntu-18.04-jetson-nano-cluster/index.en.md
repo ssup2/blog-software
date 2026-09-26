@@ -12,7 +12,7 @@ title: Kubernetes Installation / Using kubeadm / Ubuntu 18.04, Jetson Nano Clust
   * **Network Plugin** : using calico or flannel or cilium
   * **Dashboard Addon** : using Dashboard
 * kubeadm 1.18.14
-  * When building a Cluster environment using VMs, Kubernetes can be easily installed using kubeadm.
+  * When building a Cluster environment using VMs, Kubernetes can be easily installed using `kubeadm`.
 * CNI
   * flannel 0.13.0
 * Docker 19.03
@@ -46,7 +46,7 @@ Install Docker 19.03 Version for GPU usage.
 (All)$ apt-get install -y kubelet=1.18.14-00 kubeadm=1.18.14-00
 ```
 
-Install kubelet and kubeadm.
+Install `kubelet` and `kubeadm`.
 
 ```shell
 (All)$ swapoff -a
@@ -74,7 +74,7 @@ Initialize the Cluster on the Master Node.
 (Worker)$ kubeadm join 10.0.0.10:6443 --token x7tk20.4hp9x2x43g46ara5 --discovery-token-ca-cert-hash sha256:cab2cc0a4912164f45f502ad31f5d038974cf98ed10a6064d6632a07097fad79
 ```
 
-Add Workers to the Cluster using the "kubeadm join" command output from the Master Node on the Worker Node.
+Add Workers to the Cluster using the `kubeadm join` command output from the Master Node on the Worker Node.
 
 ### 2.4. Verification
 
@@ -87,7 +87,7 @@ jetson03   NotReady   <none>   62s    v1.18.14
 jetson04   NotReady   <none>   59s    v1.18.14
 ```
 
-Check the Cluster from the Master Node. All Nodes should appear in the list. They remain in NotReady state because Network configuration is not set. Ready state can be verified after Network Plugin installation.
+Check the Cluster from the Master Node. All Nodes should appear in the list. They remain in `NotReady` state because Network configuration is not set. `Ready` state can be verified after Network Plugin installation.
 
 ## 3. Flannel Network Plugin Installation
 
@@ -106,7 +106,7 @@ jetson03   Ready    <none>   12m   v1.18.14
 jetson04   Ready    <none>   12m   v1.18.14
 ```
 
-All Nodes can be verified to be in Ready state.
+All Nodes can be verified to be in `Ready` state.
 
 ## 4. References
 

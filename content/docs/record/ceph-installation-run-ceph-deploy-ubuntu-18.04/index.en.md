@@ -15,10 +15,10 @@ The installation and execution environment is as follows.
 
 Create virtual Nodes (VMs) using VirtualBox as shown in [Figure 1].
 
-* **Hostname** : Master Node - node01, Worker node01 - node02, Worker node02 - node03
-* **NAT** : Build a 10.0.0.0/24 Network using the "NAT Network" provided by Virtual Box.
-* **HDD** : Create and attach an additional HDD (/dev/sdb) for Ceph to use on each Node.
-* **Router** : Build a 192.168.0.0/24 Network using a router. (NAT)
+* **Hostname** : Master Node - `node01`, Worker node01 - `node02`, Worker node02 - `node03`
+* **NAT** : Build a `10.0.0.0/24` Network using the "NAT Network" provided by Virtual Box.
+* **HDD** : Create and attach an additional HDD (`/dev/sdb`) for Ceph to use on each Node.
+* **Router** : Build a `192.168.0.0/24` Network using a router. (NAT)
 
 ### 2.1. Ceph Node
 
@@ -39,7 +39,7 @@ network:
                 addresses: [8.8.8.8]
 ```
 
-Create the /etc/netplan/50-cloud-init.yaml file of Ceph Node 01 with the contents of [File 1].
+Create the `/etc/netplan/50-cloud-init.yaml` file of Ceph Node 01 with the contents of [File 1].
 
 ```yaml {caption="[File 2] Node 02 - /etc/netplan/50-cloud-init.yaml", linenos=table}
 network:
@@ -53,7 +53,7 @@ network:
                 addresses: [8.8.8.8]
 ```
 
-Create the /etc/netplan/50-cloud-init.yaml file of Ceph Node 02 with the contents of [File 2].
+Create the `/etc/netplan/50-cloud-init.yaml` file of Ceph Node 02 with the contents of [File 2].
 
 ```yaml {caption="[File 3] Node 03 - /etc/netplan/50-cloud-init.yaml", linenos=table}
 network:
@@ -67,7 +67,7 @@ network:
                 addresses: [8.8.8.8]
 ```
 
-Create the /etc/netplan/50-cloud-init.yaml file of Ceph Node 03 with the contents of [File 3].
+Create the `/etc/netplan/50-cloud-init.yaml` file of Ceph Node 03 with the contents of [File 3].
 
 ## 3. Package Installation
 
@@ -78,7 +78,7 @@ Create the /etc/netplan/50-cloud-init.yaml file of Ceph Node 03 with the content
 (Ceph)# sudo apt install python
 ```
 
-Install ntp and python Packages.
+Install `ntp` and `python` Packages.
 
 ```shell
 (Ceph)# sudo useradd -d /home/cephnode -m cephnode
@@ -91,9 +91,9 @@ passwd: password updated successfully
 (Ceph)# sudo chmod 0440 /etc/sudoers.d/cephnode
 ```
 
-Create a cephnode User.
+Create a `cephnode` User.
 
-* **Password** : cephnode
+* **Password** : `cephnode`
 
 ### 3.2. Deploy Node
 
@@ -105,7 +105,7 @@ Create a cephnode User.
 ...
 ```
 
-Modify the /etc/hosts file as shown in [File 4].
+Modify the `/etc/hosts` file as shown in [File 4].
 
 ```shell
 (Deploy)# wget -q -O- 'https://download.ceph.com/keys/release.asc' | sudo apt-key add -
@@ -114,7 +114,7 @@ Modify the /etc/hosts file as shown in [File 4].
 (Deploy)# sudo apt install ceph-deploy
 ```
 
-Install the ceph-deploy Package.
+Install the `ceph-deploy` Package.
 
 ```shell
 (Deploy)# sudo useradd -d /home/cephdeploy -m cephdeploy
@@ -127,9 +127,9 @@ passwd: password updated successfully
 (Deploy)# sudo chmod 0440 /etc/sudoers.d/cephdeploy
 ```
 
-Create a cephdeploy User.
+Create a `cephdeploy` User.
 
-* **Password** : cephdeploy
+* **Password** : `cephdeploy`
 
 ```shell
 (Deploy)# login cephdeploy
@@ -161,7 +161,7 @@ Host node03
    User cephnode
 ```
 
-Modify the /home/cephdeploy/.ssh/config file as shown in [File 5].
+Modify the `/home/cephdeploy/.ssh/config` file as shown in [File 5].
 
 ## 4. Ceph Cluster Configuration
 
@@ -198,7 +198,7 @@ Initialize the Ceph Cluster.
 (Deploy)$ ceph-deploy osd create --data /dev/sdb node03
 ```
 
-Build the Ceph Cluster. Install MON (Monitor Daemon) and MGR (Manager Daemon) on Ceph Node 01. If you want to install MON and MGR on other Nodes as well, include information about other Nodes to install when executing the "ceph-deploy new" command and "ceph-deploy mgr create" command, not just node01.
+Build the Ceph Cluster. Install MON (Monitor Daemon) and MGR (Manager Daemon) on Ceph Node 01. If you want to install MON and MGR on other Nodes as well, include information about other Nodes to install when executing the `ceph-deploy new` command and `ceph-deploy mgr create` command, not just `node01`.
 
 ```shell
 (Deploy)# login cephdeploy
@@ -206,7 +206,7 @@ Build the Ceph Cluster. Install MON (Monitor Daemon) and MGR (Manager Daemon) on
 (Deploy)$ ceph-deploy mds create node01
 ```
 
-Install MDS (Meta Data Server). MDS (Meta Data Server) is installed on Ceph Node 01. If you want to install MDS on other Nodes as well, include information about other Nodes where MDS will be installed when executing the "ceph-deploy mds create" command.
+Install MDS (Meta Data Server). MDS (Meta Data Server) is installed on Ceph Node 01. If you want to install MDS on other Nodes as well, include information about other Nodes where MDS will be installed when executing the `ceph-deploy mds create` command.
 
 ```shell
 (Deploy)# login cephdeploy
@@ -282,7 +282,7 @@ Check the admin Key.
 AQAk1SxcbTz/IBAAHCPTQ5x1SHFcA0fn2tTW7w==
 ```
 
-Create the /root/admin.secret file with the contents of [File 6] using the checked admin Key.
+Create the `/root/admin.secret` file with the contents of [File 6] using the checked admin Key.
 
 ```shell
 (Ceph)# mkdir mnt

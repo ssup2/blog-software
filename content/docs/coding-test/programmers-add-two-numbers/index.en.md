@@ -42,7 +42,7 @@ class Solution {
 ```
 
 * Description
-  * Uses TreeSet for deduplication and sorting functionality
+  * Uses `TreeSet` for deduplication and sorting functionality
 * Time Complexity
   * O(len(numbers)^2)
   * Two nested for loops of size len(numbers)

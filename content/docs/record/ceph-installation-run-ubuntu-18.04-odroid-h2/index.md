@@ -27,7 +27,7 @@ title: Ceph 설치, 실행 / Ubuntu 18.04, ODROID-H2 Cluster 환경
 (Ceph)$ sudo apt install python
 ```
 
-ntp, python Package를 설치한다.
+`ntp`, `python` Package를 설치한다.
 
 ```shell
 (Ceph)$ sudo useradd -d /home/cephnode -m cephnode
@@ -40,9 +40,9 @@ passwd: password updated successfully
 (Ceph)$ sudo chmod 0440 /etc/sudoers.d/cephnode
 ```
 
-cephnode User를 생성한다.
+`cephnode` User를 생성한다.
 
-* **Password** : cephnode
+* **Password** : `cephnode`
 
 ### 2.2. Deploy Node
 
@@ -55,7 +55,7 @@ cephnode User를 생성한다.
 ...
 ```
 
-/etc/hosts 파일을 [Text 1]의 내용처럼 수정한다.
+`/etc/hosts` 파일을 [Text 1]의 내용처럼 수정한다.
 
 ```shell
 (Deploy)$ wget -q -O- 'https://download.ceph.com/keys/release.asc' | sudo apt-key add -
@@ -64,7 +64,7 @@ cephnode User를 생성한다.
 (Deploy)$ sudo apt install ceph-deploy
 ```
 
-ceph-deploy Package를 설치한다.
+`ceph-deploy` Package를 설치한다.
 
 ```shell
 (Deploy)$ sudo useradd -d /home/cephdeploy -m cephdeploy
@@ -77,9 +77,9 @@ passwd: password updated successfully
 (Deploy)$ sudo chmod 0440 /etc/sudoers.d/cephdeploy
 ```
 
-cephdeploy User를 생성한다.
+`cephdeploy` User를 생성한다.
 
-* **Password** : cephdeploy
+* **Password** : `cephdeploy`
 
 ```shell
 (Deploy)$ login cephdeploy
@@ -111,7 +111,7 @@ Host node03
    User cephnode
 ```
 
-/home/cephdeploy/.ssh/config 파일을 [Text 2]와 같이 수정한다.
+`/home/cephdeploy/.ssh/config` 파일을 [Text 2]와 같이 수정한다.
 
 ## 3. Ceph Cluster 구성
 

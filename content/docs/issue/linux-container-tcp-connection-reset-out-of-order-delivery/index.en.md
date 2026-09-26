@@ -45,7 +45,7 @@ When packets sent by a client inside a container are SNATed to establish TCP con
 ...
 ```
 
-[Shell 1] is the result of dumping packets on the host interface using tshark when a connection reset occurred in a Docker container. 10.205.13.199 is the Docker container's client IP, and 192.168.0.100 is the server outside the host. It shows the Docker container's client establishing a TCP connection with the server outside the host and sending data, then experiencing a connection reset.
+[Shell 1] is the result of dumping packets on the host interface using `tshark` when a connection reset occurred in a Docker container. 10.205.13.199 is the Docker container's client IP, and 192.168.0.100 is the server outside the host. It shows the Docker container's client establishing a TCP connection with the server outside the host and sending data, then experiencing a connection reset.
 
 You can see in the 4th line of [Shell 1] that the server received the ACK for the Sequence Number 10149475 packet sent to the client. In the 7th line of [Shell 1], you can see that the ACK for the Sequence Number 10110467 packet was received. Since 10110467 is smaller than 10149475, the ACK for the Sequence Number 10110467 packet should originally be considered as TCP Spurious and ignored, but due to a bug in the conntrack module, it is considered an invalid packet and not DNATed.
 
@@ -75,7 +75,7 @@ Therefore, the ACK for the Sequence Number 10110467 packet is delivered to the h
 349016 1199.003098534 192.168.0.100 → 10.251.0.1   TCP 54 80 → 56284 [RST] Seq=26 Win=8397824 Len=0
 ```
 
-[Shell 2] is the result of dumping packets on the Docker container interface inside the Docker container using tshark when the connection reset phenomenon in [Shell 1] occurred. It is mostly the same as [Shell 1], but you can see that the ACK for the Sequence Number 10110467 packet does not exist. The ACK for the Sequence Number 10110467 packet was not delivered to the Docker container because it was considered an invalid packet due to a bug in the conntrack module on the host and was not DNATed.
+[Shell 2] is the result of dumping packets on the Docker container interface inside the Docker container using `tshark` when the connection reset phenomenon in [Shell 1] occurred. It is mostly the same as [Shell 1], but you can see that the ACK for the Sequence Number 10110467 packet does not exist. The ACK for the Sequence Number 10110467 packet was not delivered to the Docker container because it was considered an invalid packet due to a bug in the conntrack module on the host and was not DNATed.
 
 You also cannot see the TCP Reset packet sent by the host. Inside the Docker container, it receives a TCP Reset packet from the server without knowing the existence of the TCP Reset packet sent by the host. Therefore, inside the Docker container, it determines that the server terminated the connection first and delivers a "connection reset by peer" error to the Docker container app.
 

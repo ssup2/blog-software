@@ -71,7 +71,7 @@ type=CWD msg=audit(2018년 02월 14일 15:33:57.911:363) :  cwd=/root/linux
 type=SYSCALL msg=audit(2018년 02월 14일 15:33:57.911:363) : arch=x86-64 syscall=open success=yes exit=3 a0=0x7f995dee6c9d a1=O-RDONLY|O-CLOEXEC a2=0x1b6 a3=0x80000 items=1 ppid=12206 pid=14541 auid=unset uid=root gid=root euid=root suid=root fsuid=root egid=root sgid=root fsgid=root tty=pts13 ses=unset comm=passwd exe=/usr/bin/passwd key=(null)
 ```
 
-[Shell 1] is an example of setting Audit Rules on the passwd Binary that changes Linux User passwords and the /etc/shadow file that records passwords. It shows the process of setting Rules so that Audit Events occur when the passwd Binary is executed and when the /etc/shadow file is Read, and then checking the Logs left by auditd.
+[Shell 1] is an example of setting Audit Rules on the `passwd` Binary that changes Linux User passwords and the `/etc/shadow` file that records passwords. It shows the process of setting Rules so that Audit Events occur when the `passwd` Binary is executed and when the `/etc/shadow` file is Read, and then checking the Logs left by `auditd`.
 
 ## 2. References
 

@@ -60,7 +60,7 @@ DNS Flood는 특정 DNS Server에게 과도한 요청을 전송하여 DNS Server
 
 DNS Amplification은 DNS Query Protocol의 취약점을 이용한 공격 기법이다. 공격자는 Spoofing을 통해서 공격 대상 Server의 IP를 Source IP로 갖는 DNS Query를 다수의 DNS Server로 전송한다. DNS Query를 받은 DNS Server는 DNS Query의 공격 대상 Server의 IP로 설정된 Source IP를 보고 공격 대상 Server에게 DNS Reply를 전송한다. 공격자는 다수의 DNS Query를 DNS Server에 전송하여 공격 대상 Server는 DNS Server로부터 많은 DNS Reply를 받게 만들어 장애를 유발시킨다.
 
-DNS Amplification 수행시 공격자는 일반적으로 ANY Type의 DNS Query를 DNS Server에게 전송한다. ANY Type의 DNS Query는 DNS Server가 가지고 있는 특정 Domain의 모든 Record를 전송하기 때문에 DNS Reply의 크기는 일반적으로 매우 큰 크기를 갖기 때문이다. DNS Query의 크기는 크지 않지만 ANY Type을 활용한 DNS Reply의 크기는 훨씬 커지기 때문에 DNS Amplification이라는 명칭이 붙었다.
+DNS Amplification 수행시 공격자는 일반적으로 `ANY` Type의 DNS Query를 DNS Server에게 전송한다. `ANY` Type의 DNS Query는 DNS Server가 가지고 있는 특정 Domain의 모든 Record를 전송하기 때문에 DNS Reply의 크기는 일반적으로 매우 큰 크기를 갖기 때문이다. DNS Query의 크기는 크지 않지만 `ANY` Type을 활용한 DNS Reply의 크기는 훨씬 커지기 때문에 DNS Amplification이라는 명칭이 붙었다.
 
 DNS Query 수행시 DNS는 별도의 인증/인가 과정을 수행하지 않기 때문에 DNS Server 입장에서는 수신한 DNS Query가 정상적인 Query인지 공격을 위한 Query인지 구분하기 어렵다. 또한 DNS Query를 UDP로도 요청할 수 있기 때문에 IP Spoofing도 쉽게 수행이 가능하다.
 

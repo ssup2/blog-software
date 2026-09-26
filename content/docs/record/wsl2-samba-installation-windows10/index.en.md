@@ -4,7 +4,7 @@ title: WSL2 Samba Installation / Windows 10 Environment
 
 ## 1. Installation Background
 
-WSL2 VMs have a problem where I/O performance does not appear for directories under /mnt shared with Windows OS. This document summarizes a method to work around this issue by installing and using a Samba Server inside the WSL2 VM.
+WSL2 VMs have a problem where I/O performance does not appear for directories under `/mnt` shared with Windows OS. This document summarizes a method to work around this issue by installing and using a Samba Server inside the WSL2 VM.
 
 ## 2. Installation Environment
 
@@ -36,7 +36,7 @@ Install the Samba Server inside the WSL2 VM and add a root user for the Samba Se
 {% endhighlight %}
 ```
 
-Add the content from [File 1] to the /etc/samba/smb.conf file.
+Add the content from [File 1] to the `/etc/samba/smb.conf` file.
 
 ```shell
 (WSL2 Ubuntu)# service smbd restart
@@ -54,7 +54,7 @@ wsl -d ubuntu -u root ip addr add 192.168.10.100/24 broadcast 192.168.10.255 dev
 netsh interface ip add address "vEthernet (WSL)" 192.168.10.50 255.255.255.0
 ```
 
-Create the script from [File 2]. The script makes connections to 192.168.10.100 connect to the Samba Server.
+Create the script from [File 2]. The script makes connections to `192.168.10.100` connect to the Samba Server.
 
 ## 5. Register Script as Startup Script
 
@@ -67,7 +67,7 @@ Create the script from [File 2]. The script makes connections to 192.168.10.100 
 
 After rebooting Windows OS, access the following address from File Browser.
 
-* \\\\192.168.10.100\root
+* `\\192.168.10.100\root`
 
 ## 7. References
 

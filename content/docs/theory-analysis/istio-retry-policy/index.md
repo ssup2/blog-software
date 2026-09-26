@@ -30,7 +30,7 @@ spec:
 
 Retry Policy는 Virtual Service의 `http.retries` Field를 통해서 설정할 수 있다. 각 Field의 의미는 다음과 같다. [File 1]은 Retry Policy를 적용한 예제를 나타내고 있다. 
 
-* `attempts` : 최대 재시도 횟수를 설정한다. `http.timeout` Field와 `perTryTimeout` Field 값에 따라서 달라질수 있지만, 최대 요청 횟수는 `attempts` Field 값 + 1이다. 따라서 attempts의 값이 `3`이라면 최대 4번의 요청이 전송된다. 기본값은 `2`이며, `0`으로 설정하는 경우 재시도가 수행되지 않는다.
+* `attempts` : 최대 재시도 횟수를 설정한다. `http.timeout` Field와 `perTryTimeout` Field 값에 따라서 달라질수 있지만, 최대 요청 횟수는 `attempts` Field 값 + 1이다. 따라서 `attempts`의 값이 `3`이라면 최대 4번의 요청이 전송된다. 기본값은 `2`이며, `0`으로 설정하는 경우 재시도가 수행되지 않는다.
 * `perTryTimeout` : 각 재시도별 Timeout을 설정한다. `1h`, `1m`, `1s`, `1ms` 형태로 단위와 함께 설정하며, 최소값은 `1ms`이다. 값을 명시하지 않으면 `http.timeout` Field와 동일한 Timeout 값이 설정된다.
 * `retryOn` : 재시도 조건을 설정한다. Envoy에서 제공하는 다음과 같은 HTTP, GRPC Retry Policy 조건들을 설정할 수 있다. 기본값은 `connect-failure,refused-stream,unavailable,cancelled` 이다. 주요 설정은 다음과 같다.
   * HTTP Retry Policy
@@ -168,7 +168,7 @@ content-length: 0
 x-envoy-upstream-service-time: 107
 ```
 
-[Shell 1]은 Retry Policy Test를 위한 Kubernetes Manifest를 적용하고, `my-shell` Pod의 내부에서 `httpbin` Service에 요청을 보내는 예시를 나타내고 있다. `httpbin` Service는 `/status/{status_code}` Path에 요청을 보내면 해당 Status Code를 반환한다. 따라서 curl 명령어는 각각 `501`, `502`, `503` Status Code를 응답을 받는다.
+[Shell 1]은 Retry Policy Test를 위한 Kubernetes Manifest를 적용하고, `my-shell` Pod의 내부에서 `httpbin` Service에 요청을 보내는 예시를 나타내고 있다. `httpbin` Service는 `/status/{status_code}` Path에 요청을 보내면 해당 Status Code를 반환한다. 따라서 `curl` 명령어는 각각 `501`, `502`, `503` Status Code를 응답을 받는다.
 
 ```shell {caption="[Shell 2] my-shell istio-proxy Log"}
 $ kubectl logs my-shell istio-proxy
@@ -177,7 +177,7 @@ $ kubectl logs my-shell istio-proxy
 [2026-08-24T23:28:47.035Z] "HEAD /status/503" 503 retry_attempts=4 flags=URX details=via_upstream
 ```
 
-[Shell 2]는 이후에 `my-shell` Pod의 istio-proxy Log를 확인하는 예시를 나타내고 있다. 501, 502 Status Code는 재시도가 발생하지 않았기 때문에 `retry_attempts=1`이 기록되었으며, 503 Status Code는 재시도가 발생했기 때문에 `retry_attempts=4`가 기록된걸 확인할 수 있다.
+[Shell 2]는 이후에 `my-shell` Pod의 `istio-proxy` Log를 확인하는 예시를 나타내고 있다. `501`, `502` Status Code는 재시도가 발생하지 않았기 때문에 `retry_attempts=1`이 기록되었으며, `503` Status Code는 재시도가 발생했기 때문에 `retry_attempts=4`가 기록된걸 확인할 수 있다.
 
 ```shell {caption="[Shell 3] httpbin istio-proxy Log"}
 $ kubectl logs httpbin-7598dddc74-5zfpx istio-proxy
@@ -189,7 +189,7 @@ $ kubectl logs httpbin-7598dddc74-5zfpx istio-proxy
 [2026-08-24T23:28:47.141Z] "HEAD /status/503" 503 retry_attempts=1 flags=- details=via_upstream
 ```
 
-[Shell 3]은 Server 역할을 수행하는 `httpbin` Pod의 istio-proxy Log를 확인하는 예시를 나타내고 있다. 501, 502 Status Code는 재시도가 발생하지 않았기 때문에 요청이 한번씩만 기록된 반면, 503 Status Code는 `my-shell` Pod의 Sidecar Proxy에서 수행한 재시도로 인해서 동일한 요청이 총 4번 기록된걸 확인할 수 있다. 재시도는 Client Pod의 Sidecar Proxy에서 수행되기 때문에, Server Pod의 Sidecar Proxy 입장에서는 각 재시도가 별개의 요청으로 처리되어 모든 요청에 `retry_attempts=1`이 기록된다.
+[Shell 3]은 Server 역할을 수행하는 `httpbin` Pod의 `istio-proxy` Log를 확인하는 예시를 나타내고 있다. `501`, `502` Status Code는 재시도가 발생하지 않았기 때문에 요청이 한번씩만 기록된 반면, `503` Status Code는 `my-shell` Pod의 Sidecar Proxy에서 수행한 재시도로 인해서 동일한 요청이 총 4번 기록된걸 확인할 수 있다. 재시도는 Client Pod의 Sidecar Proxy에서 수행되기 때문에, Server Pod의 Sidecar Proxy 입장에서는 각 재시도가 별개의 요청으로 처리되어 모든 요청에 `retry_attempts=1`이 기록된다.
 
 ## 2. 참고
 

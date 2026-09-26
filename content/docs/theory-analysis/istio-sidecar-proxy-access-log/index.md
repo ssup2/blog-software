@@ -32,7 +32,7 @@ $ istioctl install --set profile=demo -y
 $ kubectl label namespace default istio-injection=enabled
 ```
 
-[Shell 1]은 Kubernetes, Istio 환경을 구성하는 Script를 나타내고 있다. `kind`를 활용하여 Kubernetes Cluster를 구성하고 Istio를 설치한다. 그리고 default Namespace에 Sidecar Injection을 활성화한다.
+[Shell 1]은 Kubernetes, Istio 환경을 구성하는 Script를 나타내고 있다. kind를 활용하여 Kubernetes Cluster를 구성하고 Istio를 설치한다. 그리고 `default` Namespace에 Sidecar Injection을 활성화한다.
 
 ```yaml {caption="[Text 1] Set Mesh Config", linenos=table}
 apiVersion: v1
@@ -295,7 +295,7 @@ message DelayResponse {
 $ kubectl cp mock.proto shell:mock.proto
 ```
 
-[File 3]은 `shell` Pod의 Manifest를 나타내고 있다. netshoot Image를 이용하여 `shell` Pod을 생성하며, Network Admin 권한을 부여하여 `iptables` 명령어를 이용할 수 있도록 한다. [File 4]는 `grpcurl` 명령어를 이용하여 `mock-server` gRPC Service를 호출하기 위한 Proto 파일을 나타내고 있다. [Shell 2]은 Proto 파일을 `shell` Pod에 복사하는 예시를 나타내고 있다.
+[File 3]은 `shell` Pod의 Manifest를 나타내고 있다. `netshoot` Image를 이용하여 `shell` Pod을 생성하며, Network Admin 권한을 부여하여 `iptables` 명령어를 이용할 수 있도록 한다. [File 4]는 `grpcurl` 명령어를 이용하여 `mock-server` gRPC Service를 호출하기 위한 Proto 파일을 나타내고 있다. [Shell 2]은 Proto 파일을 `shell` Pod에 복사하는 예시를 나타내고 있다.
 
 ### 1.2. HTTP Cases
 
@@ -650,7 +650,7 @@ ESTAB 1868933 0         10.244.2.7:50072  10.244.1.10:8080
 
 [Shell 7]은 `shell` Pod에서 `mock-server`의 `/bytes/50000000` Endpoint에 `GET` 요청을 전달하여 50MB 응답을 수신하는 도중에, 응답을 읽지 않고 4000ms 대기한 이후에 TCP RST Flag를 전송하여 요청을 강제로 종료하는 Downstream TCP RST with Backpressure Case를 나타내고 있다.
 
-Client가 응답을 읽지 않으면 `shell` Pod의 `istio-proxy`는 Client에게 전달하지 못한 데이터를 내부 Buffer에 보관하며, Buffer가 가득 차면(High Watermark) Upstream 데이터 읽기를 중단하는 Backpressure가 동작한다. 이후 `mock-server` Pod에서 전송된 데이터는 `istio-proxy`가 읽어가지 않기 때문에 Upstream Socket의 Kernel Receive Buffer에 쌓인다. [Shell 7]의 `ss` 명령어 출력에서 `istio-proxy`의 Upstream Socket(`10.244.1.10:8080`)의 Recv-Q에 약 1.8MB의 읽지 않은 데이터가 쌓여있는 것을 확인할 수 있다.
+Client가 응답을 읽지 않으면 `shell` Pod의 `istio-proxy`는 Client에게 전달하지 못한 데이터를 내부 Buffer에 보관하며, Buffer가 가득 차면(High Watermark) Upstream 데이터 읽기를 중단하는 Backpressure가 동작한다. 이후 `mock-server` Pod에서 전송된 데이터는 `istio-proxy`가 읽어가지 않기 때문에 Upstream Socket의 Kernel Receive Buffer에 쌓인다. [Shell 7]의 `ss` 명령어 출력에서 `istio-proxy`의 Upstream Socket(`10.244.1.10:8080`)의 `Recv-Q`에 약 1.8MB의 읽지 않은 데이터가 쌓여있는 것을 확인할 수 있다.
 
 이 상태에서 TCP RST Flag를 수신한 `shell` Pod의 `istio-proxy`는 Upstream Connection을 종료하는데, Downstream TCP RST Case와 다르게 Kernel Receive Buffer에 읽지 않은 데이터가 남아있는 Socket을 닫기 때문에 TCP 규칙에 따라 TCP FIN Flag가 아닌 TCP RST Flag가 `mock-server` Pod에게 전송된다. 즉 `istio-proxy`가 Upstream Connection을 종료할 때 전송하는 Flag는 종료 시점에 Kernel Receive Buffer에 읽지 않은 데이터가 존재하는지 여부에 따라서 결정된다. TCP RST Flag를 수신한 `mock-server` Pod의 `istio-proxy`도 동일한 이유로 `mock-server` Container에게 TCP RST Flag를 전송한다. Backpressure로 인해서 `mock-server` Pod의 `istio-proxy`도 `mock-server` Container가 전송한 데이터를 읽지 않고 있었기 때문에, `mock-server` Container와 연결된 Socket의 Kernel Receive Buffer에도 읽지 않은 데이터가 남아있기 때문이다.
 
@@ -1043,7 +1043,7 @@ upstream connect error or disconnect/reset before headers. reset reason: connect
 
 [Figure 10]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/close-before-response/1000` Endpoint에 `GET` 요청을 전달하고, `1000ms` 후에 `mock-server` Pod가 Connection을 강제로 종료하는 Upstream TCP Close before Response Case를 나타내고 있다. [Shell 11]은 [Figure 10]의 내용을 실행하는 예시를 나타내고 있다.
 
-`mock-server` Pod의 `istio-proxy`는 `mock-server` Container로부터 TCP FIN Flag를 수신하면 503 Service Unavailable 응답을 `shell` Pod에게 전송하여 요청이 비정상적으로 종료된것을 알린다.
+`mock-server` Pod의 `istio-proxy`는 `mock-server` Container로부터 TCP FIN Flag를 수신하면 `503 Service Unavailable` 응답을 `shell` Pod에게 전송하여 요청이 비정상적으로 종료된것을 알린다.
 
 ```json {caption="[Text 18] Upstream TCP Connection Close Case / shell Pod Access Log", linenos=table}
 {
@@ -1111,7 +1111,7 @@ upstream connect error or disconnect/reset before headers. reset reason: connect
 }
 ```
 
-[Text 18]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 19]는 `mock-server`의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/disconnect/1000` Endpoint에 접근하는 내역와 `503 Service Unavailable` 응답도 확인이 가능하다. 또한 `response_flags`가 `UC (UpstreamConnectionTermination)`로 나타나는 것을 확인할 수 있다.
+[Text 18]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 19]는 `mock-server`의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/close-before-response/1000` Endpoint에 접근하는 내역와 `503 Service Unavailable` 응답도 확인이 가능하다. 또한 `response_flags`가 `UC (UpstreamConnectionTermination)`로 나타나는 것을 확인할 수 있다.
 
 `response_code_details`에 `upstream_reset_before_response_started {connection_termination}`, 즉 응답을 시작하기전에 TCP FIN Flag가 Upstream에서 전송되었음을 나타내는 상세 내역도 확인할 수 있다. 이는 [Figure 8]에서 TCP RST Flag를 받을때와 동일한 상세 내역이며, `mock-server` Pod의 `istio-proxy`는 응답이 전송되기 전에 TCP FIN Flag 또는 TCP RST Flag를 수신하면 동일한 `response_code_details`를 남기는것을 확인할 수 있다.
 
@@ -1126,7 +1126,7 @@ dummy datacommand terminated with exit code 18
 
 [Figure 11]는 `shell` Pod에서 `curl` 명령어를 이용하여 `mock-server`의 `/close-after-response/1000` Endpoint에 `GET` 요청을 전달하고, `1000ms` 후에 `mock-server` Pod가 응답을 전송한 후에 Connection을 강제로 종료하는 Upstream TCP Close after Response Case를 나타내고 있다. [Shell 12]은 [Figure 11]의 내용을 실행하는 예시를 나타내고 있다.
 
-`mock-server` Pod의 `istio-proxy`는 `mock-server` Container로부터 TCP FIN Flag를 수신하면 503 Service Unavailable 응답을 `shell` Pod에게 전송하여 요청이 비정상적으로 종료된것을 알린다.
+`mock-server` Pod의 `istio-proxy`는 `mock-server` Container로부터 TCP FIN Flag를 수신하면 `503 Service Unavailable` 응답을 `shell` Pod에게 전송하여 요청이 비정상적으로 종료된것을 알린다.
 
 ```json {caption="[Text 20] Upstream TCP Close after Response Case / shell Pod Access Log", linenos=table}
 {
@@ -2909,7 +2909,7 @@ TCP RST Flag를 받은 `mock-server` Pod의 `istio-proxy`는 `Unavailable` 상�
 
 [Text 42]는 `shell` Pod의 `istio-proxy`의 Access Log를 나타내고 있으며, [Text 43]는 `mock-server` Pod의 `istio-proxy`의 Access Log를 나타내고 있다. 두 Access Log에서 모두 `/mock.MockService/ResetBeforeResponse` 함수에 접근하는 내역과 `response_code`가 `200`, `grpc_status`가 `Unavailable`로 나타나는 것을 확인할 수 있다. 또한 두 Access Log에서 모두 `response_flags`가 `UC (UpstreamConnectionTermination)`로 나타나는 것을 확인할 수 있다.
 
-`shell` Pod의 `istio-proxy`가 3번의 요청을 전송하기 때문에 `shell Pod`의 `istio-proxy`의 Access Log에서 `upstream_request_attempt_count`가 `3`으로 나타나는 것을 확인할 수 있다. 또한 `mock-server` Pod의 `istio-proxy`의 Access Log가 3번이 남아있는것을 확인할 수 있다.
+`shell` Pod의 `istio-proxy`가 3번의 요청을 전송하기 때문에 `shell` Pod의 `istio-proxy`의 Access Log에서 `upstream_request_attempt_count`가 `3`으로 나타나는 것을 확인할 수 있다. 또한 `mock-server` Pod의 `istio-proxy`의 Access Log가 3번이 남아있는것을 확인할 수 있다.
 
 #### 1.3.7. Upstream TCP RST after Response Case
 

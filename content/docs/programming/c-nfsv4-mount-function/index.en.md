@@ -123,7 +123,7 @@ static int freebsd_mount_nfs4(char *mount_point, char *server_ip, char *server_p
 }
 ```
 
-[Code 2] is a function that performs NFSv4 mount using the `mount()` function in a FreeBSD environment. It was created by referencing FreeBSD's mount_nfs tool. When checking the NFSv4 server status at line 57, the NFSv4 server is working fine, but if a problem occurs with the NFSv4 server when executing the `nmount()` function at line 78, the `nmount()` function blocks.
+[Code 2] is a function that performs NFSv4 mount using the `mount()` function in a FreeBSD environment. It was created by referencing FreeBSD's `mount_nfs` tool. When checking the NFSv4 server status at line 57, the NFSv4 server is working fine, but if a problem occurs with the NFSv4 server when executing the `nmount()` function at line 78, the `nmount()` function blocks.
 
 ## 3. References
 

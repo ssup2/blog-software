@@ -54,7 +54,7 @@ Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
 172.17.0.0      0.0.0.0         255.255.0.0     U     0      0        0 eth0
 ```
 
-Network 격리를 담당하는 Network Namespace를 알아본다. [Shell 1,2]는 각 Netshoot Container 내부에서 Network Interface 조회 및 Routing Table 조작 및 조회를 하는 과정을 나타내고 있다. Netshoot은 대부분의 Network Tool이 포함된 Container Image이다. netshoot-a Container와 netshoot-b Container가 다른 IP를 갖고 있는것을 확인할 수 있다. 또한 netshoot-a Container에서 IP "8.8.8.8" 관련 Routing Rule을 추가하였지만 netshoot-b Container에서는 관련 Routing Rule을 확인할 수 없는것을 알 수 있다.
+Network 격리를 담당하는 Network Namespace를 알아본다. [Shell 1,2]는 각 Netshoot Container 내부에서 Network Interface 조회 및 Routing Table 조작 및 조회를 하는 과정을 나타내고 있다. Netshoot은 대부분의 Network Tool이 포함된 Container Image이다. `netshoot-a` Container와 `netshoot-b` Container가 다른 IP를 갖고 있는것을 확인할 수 있다. 또한 `netshoot-a` Container에서 IP `8.8.8.8` 관련 Routing Rule을 추가하였지만 `netshoot-b` Container에서는 관련 Routing Rule을 확인할 수 없는것을 알 수 있다.
 
 ```console {caption="[Shell 3] Host Network", linenos=table}
 # Host의 Interface 확인
@@ -84,13 +84,13 @@ Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
 192.168.0.0     0.0.0.0         255.255.255.0   U     0      0        0 eth0
 ```
 
-[Shell 3]은 netshoot-a, netshoot-b Container를 생성한 다음 Host에서 보이는 Network Interface 조회 및 Routing Table 조회를 하는 과정을 나타내고 있다. IP가 완전히 다른 eth0 Interface가 있는것을 확인할 수 있으며, Netshoot Container들과는 완전히 다른 Routing Table을 갖고 있는것을 확인할 수 있다. 각 Container와 Host가 각각 다른 Network 정보를 갖을수 있는 이유는 Network Namespace 때문이다.
+[Shell 3]은 `netshoot-a`, `netshoot-b` Container를 생성한 다음 Host에서 보이는 Network Interface 조회 및 Routing Table 조회를 하는 과정을 나타내고 있다. IP가 완전히 다른 `eth0` Interface가 있는것을 확인할 수 있으며, Netshoot Container들과는 완전히 다른 Routing Table을 갖고 있는것을 확인할 수 있다. 각 Container와 Host가 각각 다른 Network 정보를 갖을수 있는 이유는 Network Namespace 때문이다.
 
 {{< figure caption="[Figure 1] Network Namespace" src="images/network-namespace.png" width="700px" >}}
 
-Network Namespace는 의미 그대로 Network 관련 설정, 상태를 격리하는 Namespace이다. [Figure 1]은 Host가 이용하는 Host Network Namespace, netshoot-a Container가 이용하는 netshoot-a Network Namespace, netshoot-b Container가 이용하는 netshoot-b Network Namespace, 3개의 Network Namespace를 나타내고 있다.
+Network Namespace는 의미 그대로 Network 관련 설정, 상태를 격리하는 Namespace이다. [Figure 1]은 Host가 이용하는 Host Network Namespace, `netshoot-a` Container가 이용하는 `netshoot-a` Network Namespace, `netshoot-b` Container가 이용하는 `netshoot-b` Network Namespace, 3개의 Network Namespace를 나타내고 있다.
 
-각 Network Namespace는 독립적으로 Routing Table, Socket, Netfilter 등 Network 관련 설정을 갖을수 있다. 따라서 각 Container 및 Host는 [Shell 1~3]에서 확인 했던것 처럼 별도의 Routing Table을 갖을수 있다. 또한 Socket도 격리되어 있기 때문에 각 Container 및 Host안에서 동일한 Port를 이용하는 Server도 동시에 구동할 수 있다. Netfilter도 격리 되어있기 때문에 Netfilter 기반으로 동작하는 iptables, IPVS 설정도 Container별로 다르게 설정할 수 있다.
+각 Network Namespace는 독립적으로 Routing Table, Socket, Netfilter 등 Network 관련 설정을 갖을수 있다. 따라서 각 Container 및 Host는 [Shell 1~3]에서 확인 했던것 처럼 별도의 Routing Table을 갖을수 있다. 또한 Socket도 격리되어 있기 때문에 각 Container 및 Host안에서 동일한 Port를 이용하는 Server도 동시에 구동할 수 있다. Netfilter도 격리 되어있기 때문에 Netfilter 기반으로 동작하는 `iptables`, IPVS 설정도 Container별로 다르게 설정할 수 있다.
 
 Network Namespace 사이는 기본적으로 격리되어 있지만, 필요에 따라서 Network Namespace 사이의 통신이 필요한 경우가 있다. 이런경우 **veth** Device라고 불리는 Virtual Network Device를 이용하여 Network Namespace 사이를 연결한다. [Figure 1]에서 Host Network Namespace와 Container Network Namespace 사이에 veth Device를 통해서 연결할 것을 확인할 수 있다. veth Device는 생성시 반드시 2개의 Interface가 생성되며 각 Interface를 연결할 Network Namespace에 각각 설정하면 된다.
 
@@ -158,7 +158,7 @@ Network Namespace 사이는 기본적으로 격리되어 있지만, 필요에 �
 
 {{< figure caption="[Figure 2] veth Device Setting" src="images/veth-device-setting.png" width="600px" >}}
 
-[Shell 4]는 ip 명령어를 이용하여 veth Device를 생성하고, 생성한 veth Device를 이용하여 Host Network Namespace와 nginx Container Network Namespace 사이를 연결하고, 마지막으로 연결된 veth를 통해서 Host에서 Container로 직접 통신하는 과정을 나타내고 있다. [Shell 3]을 통해서 Host와 nginx Container는 193.168.0.0/24 Network로 연결되며 서로 통신할 수 있게 된다. [Figure 2]는 [Shell 4]를 통해서 설정된 veth Device 및 Routing Table을 나타내고 있다.
+[Shell 4]는 `ip` 명령어를 이용하여 veth Device를 생성하고, 생성한 veth Device를 이용하여 Host Network Namespace와 `nginx` Container Network Namespace 사이를 연결하고, 마지막으로 연결된 veth를 통해서 Host에서 Container로 직접 통신하는 과정을 나타내고 있다. [Shell 3]을 통해서 Host와 `nginx` Container는 `193.168.0.0/24` Network로 연결되며 서로 통신할 수 있게 된다. [Figure 2]는 [Shell 4]를 통해서 설정된 veth Device 및 Routing Table을 나타내고 있다.
 
 ## Network Namespace 공유
 
@@ -199,4 +199,4 @@ Network Namespace 사이는 기본적으로 격리되어 있지만, 필요에 �
 ...
 ```
 
-하나의 Network Namespace를 다수의 Container 또는 Container와 Host가 공유하여 이용할 수도 있다. [Shell 5]는 netshoot Container를 Host Network Namespace를 이용하도록 설정하는 방법을 나타내고 있다. netshoot Container는 Host Network Namespace를 이용하기 때문에 Host에서 보이는 Network Interface 정보와 netshoot Container에서 보이는 Network Interface 정보가 동일할 것을 확인할 수 있다. Container가 자신의 전용 Network Namespace가 아닌 Host의 Network Namespace를 이용하면 Container Packet은 veth Device를 통과하지 않고 바로 Host 외부로 전송이 가능하기 때문에 Network 성능 이점을 얻을 수 있다.
+하나의 Network Namespace를 다수의 Container 또는 Container와 Host가 공유하여 이용할 수도 있다. [Shell 5]는 `netshoot` Container를 Host Network Namespace를 이용하도록 설정하는 방법을 나타내고 있다. `netshoot` Container는 Host Network Namespace를 이용하기 때문에 Host에서 보이는 Network Interface 정보와 `netshoot` Container에서 보이는 Network Interface 정보가 동일할 것을 확인할 수 있다. Container가 자신의 전용 Network Namespace가 아닌 Host의 Network Namespace를 이용하면 Container Packet은 veth Device를 통과하지 않고 바로 Host 외부로 전송이 가능하기 때문에 Network 성능 이점을 얻을 수 있다.

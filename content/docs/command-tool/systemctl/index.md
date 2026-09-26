@@ -2,7 +2,7 @@
 title: systemctl
 ---
 
-systemd를 제어하는 systemctl의 사용법을 정리한다.
+systemd를 제어하는 `systemctl`의 사용법을 정리한다.
 
 ## 1. systemctl
 
@@ -49,4 +49,4 @@ Aug 16 14:21:33 node09 sshd[23397]: Server listening on :: port 22.
 Aug 16 14:21:33 node09 systemd[1]: Started OpenBSD Secure Shell server.
 ```
 
-Service의 상태를 출력한다. [Shell 1]은 sshd Service의 상태를 출력하는 모습을 나타내고 있다.
+Service의 상태를 출력한다. [Shell 1]은 `sshd` Service의 상태를 출력하는 모습을 나타내고 있다.

@@ -14,7 +14,7 @@ Linux의 Security Framework인 LSM(Linux Security Module)을 분석한다.
 
 [Figure 2]는 LSM의 실제 동작을 간략하게 나타내고 있다. Linux Kernel은 Application이나 Device의 여러 요청들을 처리하면서 중간중간 LSM의 Hook을 만나게 된다. Linux Kernel은 Hook을 거치면서 Security Module의 Hook Function을 수행한다. 수행 결과는 오직 YES/No로 받는다. Yes를 받계 되면 계속해서 요청을 처리하고, No를 받게 되면 요청 처리를 멈춘다.
 
-LSM 위에 올라가는 Security Module은 lsmod 명령으로 조회 가능한 Loadable Module이 아니다. 따라서 Security Module은 반드시 Kernel Compile시 같이 Compile되어야 한다. 일부 Security Module은 같이 Compile 되었어도 Booting 설정을 통해 이용 유무를 설정 할 수 있다.
+LSM 위에 올라가는 Security Module은 `lsmod` 명령으로 조회 가능한 Loadable Module이 아니다. 따라서 Security Module은 반드시 Kernel Compile시 같이 Compile되어야 한다. 일부 Security Module은 같이 Compile 되었어도 Booting 설정을 통해 이용 유무를 설정 할 수 있다.
 
 ### 1.1. LSM with System Call
 
@@ -30,7 +30,7 @@ LSM 위에 다양한 Security Module들을 동시에 올릴 수 있다. 이러�
 
 {{< figure caption="[Figure 5] LSM security-hook-heads 구조체" src="images/linux-lsm-function-pointer.png" width="900px" >}}
 
-[Figure 5]는 여러개의 Security Module들이 실제로 LSM 위에 어떤 방법으로 올라가는지를 나타내고 있다. LSM은 **security-hook-heads**라는 Struct를 가지고 있다. `security-hook-heads`는 각 Security Module의 Hook Function으로 연결되는 Linked List의 Head(Hook Head)들을 가지고 있다. 그림에서는 `task-ptr`, `task-free`, `ptrace-access-check`같은 몇개의 Hook Head만을 나타냈지만 실제로 `security-hook-heads`는 LSM의 Hook 개수만큼의 Hook Head를 가지고 있다.
+[Figure 5]는 여러개의 Security Module들이 실제로 LSM 위에 어떤 방법으로 올라가는지를 나타내고 있다. LSM은 `security-hook-heads`라는 Struct를 가지고 있다. `security-hook-heads`는 각 Security Module의 Hook Function으로 연결되는 Linked List의 Head(Hook Head)들을 가지고 있다. 그림에서는 `task-ptr`, `task-free`, `ptrace-access-check`같은 몇개의 Hook Head만을 나타냈지만 실제로 `security-hook-heads`는 LSM의 Hook 개수만큼의 Hook Head를 가지고 있다.
 
 LSM에 올라온 Security Module의 순서대로 Security Module의 Hook Function들이 Hook Head에 연결된다. Capability Module, Yama Module, AppArmor Module 순으로 LSM에 올라갔기 때문에 `ptrace-access-check` Hook Head에 Capabilty, Yama, AppArmor의 `ptrace-access-check` Hook Function이 순서대로 연결된다. `task-ptr` Hook Head에는 Capability와 Yama의 Hook Function만 연결되어 있는데 AppArmor는 `task-ptr` Hook Function을 구현하지 않았기 때문이다.
 

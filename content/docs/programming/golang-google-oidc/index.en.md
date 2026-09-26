@@ -18,7 +18,7 @@ As shown in [Figure 2], go to the "APIs & Services" section and select "Add OAut
 
 {{< figure caption="[Figure 3] OAuth Client ID Creation" src="images/oauth-clientid-create.png" width="800px" >}}
 
-As shown in [Figure 3], create a Client ID of "Web Application" type. The "Name" can be set arbitrarily. For "Redirect URI", specify "/auth/google/callback", which is the path that will be processed in the example code. After creation is complete, check the **Client ID** and **Client Secret**.
+As shown in [Figure 3], create a Client ID of "Web Application" type. The "Name" can be set arbitrarily. For "Redirect URI", specify `/auth/google/callback`, which is the path that will be processed in the example code. After creation is complete, check the **Client ID** and **Client Secret**.
 
 ## 2. App Code
 
@@ -143,16 +143,16 @@ func main() {
 
 The operation process is as follows:
 
-* When a user accesses the "/" path of the Golang app, the Golang app redirects the user to the Google authentication/authorization web page.
-* When the user's authentication and authorization process is complete on the Google authentication/authorization web page, the Google authentication/authorization web page redirects the user back to the "/auth/google/callback" path of the Golang app. In this case, an authorization code is also passed as a URL query.
-* When the user accesses the "/auth/google/callback" path of the Golang app, the Golang app obtains the authorization code from the URL, then obtains and outputs ID tokens and access tokens through the obtained authorization code.
+* When a user accesses the `/` path of the Golang app, the Golang app redirects the user to the Google authentication/authorization web page.
+* When the user's authentication and authorization process is complete on the Google authentication/authorization web page, the Google authentication/authorization web page redirects the user back to the `/auth/google/callback` path of the Golang app. In this case, an authorization code is also passed as a URL query.
+* When the user accesses the `/auth/google/callback` path of the Golang app, the Golang app obtains the authorization code from the URL, then obtains and outputs ID tokens and access tokens through the obtained authorization code.
 
 Line-by-line explanations of [Code 1] are as follows:
 
 * **Line 16** : Scope sets the range of user information included in ID token values.
 * **Lines 21, 41** : State is a temporary string to prevent CSRF attacks on users. State is generated and stored in cookies before authentication/authorization, and after redirect, it is checked whether the State in the URL matches the State in cookies.
 * **Lines 26, 78** : Nonce is a string used to verify whether ID tokens are valid. ID tokens are generated to include nonce and stored in cookies, and after redirect, it is checked whether the nonce in the obtained ID token matches the nonce in cookies.
-* **Line 52** : Authorization code exists in the "code" query of the URL.
+* **Line 52** : Authorization code exists in the `code` query of the URL.
 
 ## 3. Google Authentication/Authorization
 
@@ -168,7 +168,7 @@ scope=openid%20profile%20email&
 state=usovevjnYZYpCTOaalbSWw&flowName=GeneralOAuthFlow
 ```
 
-[Figure 3] is the Google authentication screen that is accessed when redirected after accessing the "/" path of the Golang app. [Text 1] shows the URL used when accessing the Google authentication screen. You can see that Client ID, Nonce, Callback URL (Redirect URL), Scope, and State information are included in the URL as queries.
+[Figure 3] is the Google authentication screen that is accessed when redirected after accessing the `/` path of the Golang app. [Text 1] shows the URL used when accessing the Google authentication screen. You can see that Client ID, Nonce, Callback URL (Redirect URL), Scope, and State information are included in the URL as queries.
 
 ## 4. ID Token, Access Token
 
@@ -180,7 +180,7 @@ authuser=0&
 prompt=consent
 ```
 
-[Text 2] shows an example of a redirect URL. You can see that the "code" query contains the authorization code, and the "scope" query contains scope information.
+[Text 2] shows an example of a redirect URL. You can see that the `code` query contains the authorization code, and the `scope` query contains scope information.
 
 ```json {caption="[Text 3] Callback Result - Access Token, ID Token", linenos=table}
 {

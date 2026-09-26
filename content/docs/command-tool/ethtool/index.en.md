@@ -29,7 +29,7 @@ Settings for eth0:
         Link detected: yes
 ```
 
-Displays [Interface] NIC information. [Shell 1] shows the output of `ethtool eth0` displaying eth0 interface information. In [Shell 1], you can check the bandwidth (speed) and duplex mode of eth0.
+Displays [Interface] NIC information. [Shell 1] shows the output of `ethtool eth0` displaying `eth0` interface information. In [Shell 1], you can check the bandwidth (speed) and duplex mode of `eth0`.
 
 ### 1.2. ethtool [Interface] [speed 10|100|1000] [duplex half|full]
 

@@ -43,7 +43,7 @@ HTTP/2에서 **모든 요청과 응답은 반드시 Stream 위에서만 처리**
 
 HTTP Message는 **Header Section, Body, Trailer Section**의 세 구간으로 구성된다. Header와 Trailer는 모두 동일한 형식 (이름-값 쌍)의 Field 목록이며, Body 앞에 전송되면 Header, Body 뒤에 전송되면 Trailer라는 위치의 차이만 존재한다.
 
-HTTP/2에서는 Header와 Trailer 모두 **HEADERS Frame**으로 전송된다. Trailer를 위한 별도의 Frame Type은 존재하지 않으며, Stream을 시작하는 첫 HEADERS Frame이 Header 역할을, Body (DATA Frame) 뒤에 전송되는 마지막 HEADERS Frame (END_STREAM Flag 포함)이 Trailer 역할을 수행한다.
+HTTP/2에서는 Header와 Trailer 모두 **HEADERS Frame**으로 전송된다. Trailer를 위한 별도의 Frame Type은 존재하지 않으며, Stream을 시작하는 첫 HEADERS Frame이 Header 역할을, Body (DATA Frame) 뒤에 전송되는 마지막 HEADERS Frame (`END_STREAM` Flag 포함)이 Trailer 역할을 수행한다.
 
 * **Header** : 요청 또는 응답의 Meta Data를 나타낸다. HTTP/2에서는 HTTP/1.1의 Request Line (`GET /home HTTP/1.1`)과 Status Line (`HTTP/1.1 200 OK`)도 별도의 라인이 아니라 `:method`, `:path`, `:scheme`, `:authority`, `:status`와 같이 `:` Prefix를 갖는 **Pseudo-Header**로 변환되어 일반 Header와 함께 HEADERS Frame에 전송된다.
 * **Trailer** : Body를 모두 전송한 이후에만 확정할 수 있는 정보를 나타낸다. 응답의 최종 처리 결과나 Body의 Checksum이 대표적이며, gRPC가 RPC의 최종 처리 결과인 `grpc-status` Header를 Trailer로 전송하는 것이 대표적인 활용 예시이다. Trailer는 Body를 모두 수신한 이후에 도착하기 때문에, `:status`와 같은 Pseudo-Header와 `content-length`처럼 Body 해석에 필요한 Field는 Trailer에 설정할 수 없다.
@@ -56,9 +56,9 @@ HTTP/2에서는 Header와 Trailer 모두 **HEADERS Frame**으로 전송된다. T
 
 HTTP/2는 이러한 HTTP Header의 Overhead를 줄이기 위해서 Header 압축 기법을 제공한다. [Figure 4]는 Header 압축 기법을 나타내고 있다. HTTP/2의 Header 압축은 내부적으로 **HPACK**이라고 불리는 Module이 담당하는데 HPACK은 Huffman Algorithm과 Static Table, Dynamic Table을 통해서 압축을 수행한다. Huffman Algorithm은 자주 나오는 문자열 순서대로 짧은 Bitmap으로 Mapping하여 Data를 압축하는 기법이다. Static Table은 HTTP/2 Spec에 정의된 Table로 HTTP/2 Header로 자주 사용되는 Key-value 값 쌍을 저장하고 있는 Table이다. Dynamic Table은 한번 전송/수신한 Header의 Key-value 값을 임의로 저장하는 Buffer 역할을 수행하는 Table이다.
 
-[Figure 4]는 동일한 HTTP/2 Header를 2번 전송 하였을때의 압축 과정을 나타내고 있다. 처음으로 Header 전송시 전송하려는 Header의 Key-value 중에서 Static Table의 Key-value와 일치하는 경우에는 해당 Key-value는 Static Table의 Index로 변경된다. [Figure 4]에서 ":method GET", ":scheme POST"가 각각 Static Table의 Index 2, 7로 변경되는 것을 확인할 수 있다.
+[Figure 4]는 동일한 HTTP/2 Header를 2번 전송 하였을때의 압축 과정을 나타내고 있다. 처음으로 Header 전송시 전송하려는 Header의 Key-value 중에서 Static Table의 Key-value와 일치하는 경우에는 해당 Key-value는 Static Table의 Index로 변경된다. [Figure 4]에서 `:method GET`, `:scheme POST`가 각각 Static Table의 Index 2, 7로 변경되는 것을 확인할 수 있다.
 
-Static Table을 이용하여 변경되지 않은 나머지 Key-value들은 각각 Huffman Algorithm을 이용해 압축된다. 그리고 Huffman을 통해서 압축된 Key-value는 Dynamic Table에 저장된다. [Figure 4]에서 ":host ssup.com", ":path /home", "user-agent Mozila/5.0"는 Dynamic Table의 62에 저장되는 것을 확인할 수 있다. 그 뒤 동일 Header를 한번더 전송하는 경우 Dynamic Table을 이용하여 첫번째 Header를 전송할때보다 효율적으로 압축한다. [Figure 4]에서 두번째 전송하는 Header의 경우에는 Huffman Algorithm을 이용하지 않고 Static, Dynamic Table만을 이용하여 Header를 압축하는걸 확인할 수 있다.
+Static Table을 이용하여 변경되지 않은 나머지 Key-value들은 각각 Huffman Algorithm을 이용해 압축된다. 그리고 Huffman을 통해서 압축된 Key-value는 Dynamic Table에 저장된다. [Figure 4]에서 `:host ssup.com`, `:path /home`, `user-agent Mozilla/5.0`는 Dynamic Table의 62에 저장되는 것을 확인할 수 있다. 그 뒤 동일 Header를 한번더 전송하는 경우 Dynamic Table을 이용하여 첫번째 Header를 전송할때보다 효율적으로 압축한다. [Figure 4]에서 두번째 전송하는 Header의 경우에는 Huffman Algorithm을 이용하지 않고 Static, Dynamic Table만을 이용하여 Header를 압축하는걸 확인할 수 있다.
 
 Static Table은 61번 Index까지 갖고 있기 때문에 Dynamic Table의 Index는 62번부터 시작한다. Dynamic Table은 FIFO 형태로 동작한다. 즉 Dynamic Table이 가득차 새로운 Key-value를 저장할 공간이 부족할 경우, 가장 오랜 기간 저장된 Key-value를 제거하고 새로운 Key-value를 저장한다. Dynamic Table은 Stream 단위가 아니라 **Connection 단위로 공유**되기 때문에, 서로 다른 Stream이 전송하는 요청이라도 동일한 Header는 효율적으로 압축된다.
 
@@ -74,7 +74,7 @@ HTTP/2의 Stream은 Weight 기반 Priority 기능을 제공한다. Stream Priori
 
 {{< figure caption="[Figure 6] HTTP/2 Server Push" src="images/http2-server-push.png" width="450px" >}}
 
-HTTP/2에서 Server는 Client의 요청 Message를 받으면 요청에 대한 응답 Message 뿐만 아니라, Client에서 아직 요청하지 않았지만 Client에게 필요할 걸로 예상되는 다른 Message도 함께 전송하는 Server Push 기능을 제공한다. [Figure 6]은 Server Push 동작을 나타내고 있다. Client는 /index.html 파일만 Server에게 요청했지만 Server는 /index.html을 그리는데 필요한 PNG 파일들도 별도의 Strema을 통해서 동시에 같이 Client에게 전송하는 것을 확인할 수 있다.
+HTTP/2에서 Server는 Client의 요청 Message를 받으면 요청에 대한 응답 Message 뿐만 아니라, Client에서 아직 요청하지 않았지만 Client에게 필요할 걸로 예상되는 다른 Message도 함께 전송하는 Server Push 기능을 제공한다. [Figure 6]은 Server Push 동작을 나타내고 있다. Client는 `/index.html` 파일만 Server에게 요청했지만 Server는 `/index.html`을 그리는데 필요한 PNG 파일들도 별도의 Strema을 통해서 동시에 같이 Client에게 전송하는 것을 확인할 수 있다.
 
 [Figure 3]에서 PUSH-PROMISE Type의 Frame을 확인할 수 있는데, Server Push의 시작을 Client에게 알리는 역할을 수행한다. PUSH-PROMISE Type의 Frame에는 Message를 전송할 Stream을 명시하여 Client가 해당 Stream을 통해서 Message를 수신할 수 있도록 만든다.
 

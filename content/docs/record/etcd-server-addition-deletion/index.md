@@ -289,7 +289,7 @@ Member aa9ac53bcb1de8c6 promoted in cluster 35d99f7f50aa450
 +--------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
 ```
 
-Node03의 etcd Server가 Learner 상태였다가 promote 명령어를 통해서 Follower가 된것을 확인할 수 있다.
+Node03의 etcd Server가 Learner 상태였다가 `promote` 명령어를 통해서 Follower가 된것을 확인할 수 있다.
 
 ```shell
 (Node01)$ docker logs -f etcd
@@ -314,7 +314,7 @@ raft2021/03/06 13:42:15 INFO: 4eee438bb97e1153 switched to configuration voters=
 2021-03-06 13:42:15.610651 N | etcdserver/membership: promote member aa9ac53bcb1de8c6 in cluster 35d99f7f50aa4509
 ```
 
-Node03의 etcd Server가 Learner로 추가되고 Follower로 Promte될때 Node01의 etcd Server는 위와 같은 Log를 남긴다.
+Node03의 etcd Server가 Learner로 추가되고 Follower로 Promote될때 Node01의 etcd Server는 위와 같은 Log를 남긴다.
 
 ## 6. 참조
 

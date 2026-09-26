@@ -2,7 +2,7 @@
 title: Kafka Architecture
 ---
 
-분산 Message Queue인 kafka의 Architecture를 분석한다.
+분산 Message Queue인 Kafka의 Architecture를 분석한다.
 
 ## 1. Kafka Architecture
 

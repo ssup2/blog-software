@@ -20,15 +20,15 @@ MySQL의 Buffer Pool 및 Log Buffer과 연관된 Configuration을 분석한다.
 
 ### 2.1. innodb-buffer-pool-size
 
-innodb-buffer-pool-size는 Buffer Pool의 크기를 설정한다. 기본값은 128MB이다. 일반적으로 Buffer Pool Size가 클 수록 Disk에 접근하는 횟수가 줄어들기 때문에 DB의 성능이 좋아진다. 하지만 Server Memory 용량에 맞지 않게 너무 큰 값을 설정하면 잦은 Page Swap으로 인하여 오히려 성능이 저하된다. 따라서 적절한 값으로 설정해야 한다. Server에 MySQL만 구동되는 상태라면 Server Memory 크기의 80%를 설정하는 것을 추천한다.
+`innodb-buffer-pool-size`는 Buffer Pool의 크기를 설정한다. 기본값은 128MB이다. 일반적으로 Buffer Pool Size가 클 수록 Disk에 접근하는 횟수가 줄어들기 때문에 DB의 성능이 좋아진다. 하지만 Server Memory 용량에 맞지 않게 너무 큰 값을 설정하면 잦은 Page Swap으로 인하여 오히려 성능이 저하된다. 따라서 적절한 값으로 설정해야 한다. Server에 MySQL만 구동되는 상태라면 Server Memory 크기의 80%를 설정하는 것을 추천한다.
 
 ### 2.2. innodb-log-file-size
 
-innodb-log-file-size는 Redo Log의 크기를 설정한다. 위에서 설명한 것처럼 InnoDB는 주기적으로 또는 Redo Log이 가득찰 경우 Buffer Pool에 기록된 Data 변경 내용을 실제 Disk에 반영하는 Checkpoint 동작을 수행한다. Buffer Pool의 크기가 아무리 크더라도 Redo Log의 크기가 작다면 자주 Check Point가 발생하기 때문에 Buffer Pool를 제대로 이용 할 수 없게 된다. 따라서 Buffer Pool 크기 변경시 Redo Log의 크기도 같이 변경해야 한다. 일반적으로 Buffer Pool Size (innodb-buffer-pool-size)값의 반으로 설정한다.
+`innodb-log-file-size`는 Redo Log의 크기를 설정한다. 위에서 설명한 것처럼 InnoDB는 주기적으로 또는 Redo Log이 가득찰 경우 Buffer Pool에 기록된 Data 변경 내용을 실제 Disk에 반영하는 Checkpoint 동작을 수행한다. Buffer Pool의 크기가 아무리 크더라도 Redo Log의 크기가 작다면 자주 Check Point가 발생하기 때문에 Buffer Pool를 제대로 이용 할 수 없게 된다. 따라서 Buffer Pool 크기 변경시 Redo Log의 크기도 같이 변경해야 한다. 일반적으로 Buffer Pool Size (`innodb-buffer-pool-size`)값의 반으로 설정한다.
 
 ### 2.3. innodb-log-buffer-size
 
-innodb-log-buffer-size는 Log Buffer의 크기를 설정한다. innodb-log-buffer-size은 Redo Log Buffer Memory의 크기를 나타낸다. 한번의 Transaction내에서 많은 Data 변경이 발생하는 경우 Redo Log Buffer Memory의 크기를 늘려 Redo Log가 가득차지 않도록 만드는 것이 좋다. 일반적으로 1MB ~ 8MB 사이의 크기로 설정한다.
+`innodb-log-buffer-size`는 Log Buffer의 크기를 설정한다. `innodb-log-buffer-size`은 Redo Log Buffer Memory의 크기를 나타낸다. 한번의 Transaction내에서 많은 Data 변경이 발생하는 경우 Redo Log Buffer Memory의 크기를 늘려 Redo Log가 가득차지 않도록 만드는 것이 좋다. 일반적으로 1MB ~ 8MB 사이의 크기로 설정한다.
 
 ### 2.4. innodb-flush-log-at-trx-commit
 

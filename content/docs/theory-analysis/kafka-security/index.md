@@ -68,7 +68,7 @@ listener.name.sasl_plaintext.plain.sasl.jaas.config=org.apache.kafka.common.secu
   user_serviceb="serviceb-password";
 ```
 
-[Config 3]는 Security Protocol이 `SASL_PLAINTEXT`이고 SASL Mechanism이 `PLAIN`인 경우의 Kafka의 `server.properties` 예시를 나타내고 있다. Listener와 Inter-Broker Communication Protocol을 `SASL_SSL`로 설정하고 있으며, SASL Mechanism을 `PLAIN`으로 설정하고 있는걸 확인할 수 있다. 또한 Username과 Password를 설정하고 있는것도 확인할 수 있다. `username`과 `password`는 Kafka Broker 사이에 인증을 위한 Admin User/Password를 의미하며, `user_[username]`은 해당 User의 Password를 의미한다.
+[Config 3]는 Security Protocol이 `SASL_PLAINTEXT`이고 SASL Mechanism이 `PLAIN`인 경우의 Kafka의 `server.properties` 예시를 나타내고 있다. Listener와 Inter-Broker Communication Protocol을 `SASL_PLAINTEXT`로 설정하고 있으며, SASL Mechanism을 `PLAIN`으로 설정하고 있는걸 확인할 수 있다. 또한 Username과 Password를 설정하고 있는것도 확인할 수 있다. `username`과 `password`는 Kafka Broker 사이에 인증을 위한 Admin User/Password를 의미하며, `user_[username]`은 해당 User의 Password를 의미한다.
 
 ```properties {caption="[Config 4] Producer/Consumer config for SASL_PLAINTEXT security protocol and PLAIN SASL", linenos=table}
 # Broker configuration

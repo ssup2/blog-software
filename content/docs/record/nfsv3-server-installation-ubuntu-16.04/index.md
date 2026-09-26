@@ -8,9 +8,9 @@ title: NFSv3 Server, Client 설치 / Ubuntu 16.04 환경
 
 * Ubuntu 16.04 LTS 64bit, root user
 * **NFS Root** : NFSv3 Server의 Root Directory 절대 경로를 의미한다.
-  * NFS Root로 /nfs-root를 이용한다.
+  * NFS Root로 `/nfs-root`를 이용한다.
 * **NFS share** : NFSv3 Server를 통해 실제 공유할 Directory의 절대 경로를 의미한다.
-  * NFS share로 /root/nfs-share를 이용한다.
+  * NFS share로 `/root/nfs-share`를 이용한다.
 
 ## 2. NFSv3 Server 설정
 
@@ -38,7 +38,7 @@ $ mount --bind /root/nfs-share /nfs-root
 /root/nfs-share /nfs-root none bind  0  0
 ```s
 
-/etc/fstab에 다음 [File 1]의 내용을 추가하여 재부팅 후에도 Bind Mount 되도록 설정한다.
+`/etc/fstab`에 다음 [File 1]의 내용을 추가하여 재부팅 후에도 Bind Mount 되도록 설정한다.
 
 ### 2.3. 설정
 
@@ -46,7 +46,7 @@ $ mount --bind /root/nfs-share /nfs-root
 /nfs-root      *(rw,nohide,insecure,no-subtree-check,async,no-root-squash)
 ```
 
-/etc/exports 파일에 [File 2]의 내용을 추가한다.
+`/etc/exports` 파일에 [File 2]의 내용을 추가한다.
 
 ### 2.4. Restart
 

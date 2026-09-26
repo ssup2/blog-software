@@ -40,10 +40,10 @@ KiB Swap:  8265724 total,        0 used,  8265724 free.   541164 cached Mem
 
 #### 1.1.1. CPU Information
 
-The %Cpu(s) part in the upper part of [Shell 1] represents the average CPU usage of all CPU cores. Each column has the following meaning:
+The `%Cpu(s)` part in the upper part of [Shell 1] represents the average CPU usage of all CPU cores. Each column has the following meaning:
 
 * `us (user)` : CPU usage rate for running user code of processes without nice value applied (un-niced, nice = 0). Represents usage rate of most user processes
-* `sy (system)` : CPU usage rate for running kernel code, excluding usage/idle rates of id, wa, hi, si
+* `sy (system)` : CPU usage rate for running kernel code, excluding usage/idle rates of `id`, `wa`, `hi`, `si`
 * `ni (nice)` : CPU usage rate for running user code of processes with nice value applied (niced)
 * `id (idle)` : CPU idle rate excluding I/O Wait
 * `wa (wait)` : CPU idle rate due to I/O Wait
@@ -70,11 +70,11 @@ The lower part of [Shell 1] outputs process information. Each column has the fol
 
 * `PID` : Process ID
 * `USER` : Process owner
-* `PR` : Scheduling priority actually used during kernel scheduling. Can have values "0 ~ 39, rt", and in the case of numbers, lower values have higher priority. rt means Real Time Scheduling Priority and has higher priority than priority 0
-* `NI` : nice value. Can have values "-20 ~ 19", and lower numbers have higher priority. "20 + NI" becomes PR
+* `PR` : Scheduling priority actually used during kernel scheduling. Can have values `0 ~ 39, rt`, and in the case of numbers, lower values have higher priority. `rt` means Real Time Scheduling Priority and has higher priority than priority 0
+* `NI` : nice value. Can have values `-20 ~ 19`, and lower numbers have higher priority. `20 + NI` becomes `PR`
 * `VIRT` : Virtual memory capacity. Means the sum of all memory capacity and swap capacity allocated for the process, even if not currently in use
-* `RES` : Actual memory capacity currently in use. Part of VIRT
-* `SHR` : Shared memory capacity. Part of RES
+* `RES` : Actual memory capacity currently in use. Part of `VIRT`
+* `SHR` : Shared memory capacity. Part of `RES`
 * `S` : Process state
 * `%CPU` : CPU usage rate
 * `%MEM` : Memory usage rate

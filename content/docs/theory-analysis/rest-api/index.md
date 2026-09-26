@@ -52,7 +52,7 @@ REST API에서는 다음과 같은 HTTP Method들이 이용된다. 같은 Method
 http://restapi.example.com/house/apartments/101
 ```
 
-REST API의 URI는 Resource Model에 맞게 Directory 구조의 형태를 갖는다. 하나의 URI는 하나의 Resource를 나타내거나 Resource의 모음을 나타내는 하나의 Collection을 나타낸다. Resource는 **단수**로 표현하고 Collection은 **복수**로 표현한다. [URI 1]의 URI는 house Resource가 있고 그 아래 apartments라는 Collection이 존재하고 있고 다시 그 아래 101이란 Resource를 나타내고 있다.
+REST API의 URI는 Resource Model에 맞게 Directory 구조의 형태를 갖는다. 하나의 URI는 하나의 Resource를 나타내거나 Resource의 모음을 나타내는 하나의 Collection을 나타낸다. Resource는 **단수**로 표현하고 Collection은 **복수**로 표현한다. [URI 1]의 URI는 `house` Resource가 있고 그 아래 `apartments`라는 Collection이 존재하고 있고 다시 그 아래 `101`이란 Resource를 나타내고 있다.
 
 ```text {caption="[URI 2] REST API URI + Query String 예제"}
 http://restapi.example.com/house/apartments?color=white&floor=20
@@ -64,7 +64,7 @@ Collection을 대상으로 GET Method를 수행하여 가지고 오는 Resource�
 
 PUT은 Resource 전체를 Update하는 Method이고 PATCH는 Resource의 일부만 Upate하는 Method이다. PUT은 Resource 전체를 Update하기 때문에 해당 Resource의 모든 Data를 같이 전달해야한다. 즉 실제 Update하지 않을 Data도 같이 전달해야한다. 반면 PATCH Method는 실제 Update할 Data만 전달하면된다.
 
-Apartment Resource에 color=while, floor=20 Data가 저장되어 있다고 가정하자. Apartment의 색깔이 파랑색으로 바뀌어 color만 blue로 바꾸고 싶을때, PUT Method를 통해서는 color=blue, floor=20 처럼 Apartment의 전체 Data를 전달 해야한다. 하지만 PATCh Method를 통해서는 color=blue Data만 전달 하면된다.
+Apartment Resource에 `color=white`, `floor=20` Data가 저장되어 있다고 가정하자. Apartment의 색깔이 파랑색으로 바뀌어 `color`만 `blue`로 바꾸고 싶을때, PUT Method를 통해서는 `color=blue`, `floor=20` 처럼 Apartment의 전체 Data를 전달 해야한다. 하지만 PATCH Method를 통해서는 `color=blue` Data만 전달 하면된다.
 
 ## 2. 참조
 

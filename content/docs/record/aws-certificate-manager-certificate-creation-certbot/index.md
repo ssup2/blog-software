@@ -19,7 +19,7 @@ $ sudo ln -s /opt/certbot/bin/certbot /usr/local/bin/certbot
 $ sudo /opt/certbot/bin/pip install certbot-dns-route53
 ```
 
-인증서 생성을 위해서 certbot 및 certbot-dns-route53 Plugin 설치한다.
+인증서 생성을 위해서 `certbot` 및 `certbot-dns-route53` Plugin 설치한다.
 
 ## 3. letsencrypt IAM User 생성 & 설정, Access Key 생성
 
@@ -47,7 +47,7 @@ $ aws iam create-access-key --user-name letsencrypt
 }
 ```
 
-certbot이 이용하는 letsencrypt IAM 계정과 letsencrypt IAM 계정의 Access Key를 생성한다. 
+`certbot`이 이용하는 `letsencrypt` IAM 계정과 `letsencrypt` IAM 계정의 Access Key를 생성한다. 
 
 ## 4. letsencrypt IAM User에 Policy 적용
 
@@ -70,7 +70,7 @@ certbot이 이용하는 letsencrypt IAM 계정과 letsencrypt IAM 계정의 Acce
 }
 ```
 
-letsencrypt IAM 계정을 위한 Policy를 위해서 [File 1]의 내용으로 letsencrypt-policy.json 파일을 생성한다.
+`letsencrypt` IAM 계정을 위한 Policy를 위해서 [File 1]의 내용으로 `letsencrypt-policy.json` 파일을 생성한다.
 
 ```shell
 $ aws iam create-policy --policy-name letsencrypt-policy --policy-document file://letsencrypt-policy.json
@@ -92,7 +92,7 @@ $ aws iam create-policy --policy-name letsencrypt-policy --policy-document file:
 $ aws iam attach-user-policy --user-name letsencrypt --policy-arn arn:aws:iam::727618787612:policy/letsencrypt-policy
 ```
 
-[File 1]을 이용하여 Policy를 생성하고 letsencrypt IAM 계정에 설정한다.
+[File 1]을 이용하여 Policy를 생성하고 `letsencrypt` IAM 계정에 설정한다.
 
 ## 5. certbot을 이용하여 인증서 생성
 
@@ -102,7 +102,7 @@ aws-access-key-id={AWS-Access-ID}
 aws-secret-access-key={AWS-Secret-Key}
 ```
 
-certbot에서 이용하는 ~/.aws/credentials 파일을 [File 2]의 내용으로 생성한다.
+`certbot`에서 이용하는 `~/.aws/credentials` 파일을 [File 2]의 내용으로 생성한다.
 
 ```shell
 $ cd ~ && mkdir certbot && cd certbot
@@ -126,7 +126,7 @@ If you like Certbot, please consider supporting our work by:
  * Donating to EFF:                    https://eff.org/donate-le
 ```
 
-certbot을 이용하여 인증서를 생성한다.
+`certbot`을 이용하여 인증서를 생성한다.
 
 ## 6. 생성한 인증서를 AWS Certificate Manager에 등록
 

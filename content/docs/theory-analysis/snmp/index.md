@@ -16,19 +16,19 @@ title: SNMP
 
 MIB (Management Information Base)는 Network에 참여하고 각 Device들이 갖고 있는 Data를 관리하는 Database를 의미한다. MIB에서 Data는 Tree 형태로 관리되며 Data의 구분자로 OID (Ojbect ID)를 이용한다. OID는 Tree 형태의 계층 구조를 이용하기 때문에 Tree 형태로 Data를 관리하는 MIB의 Data의 구분자로 적합하다. 
 
-[Figure 2]는 MIB를 나타내기 위한 OID Tree를 나타내고 있다. OID Tree를 통해서 OID가 어떤 Data를 의미하는지를 파악할 수 있다. 만약 OID가 "1.3.6.1.2.1"로 시작한다면 OID Tree의 Root에서부터 OID의 앞에서 부터 숫자를 따라가다 보면 MIB 관련 Data를 나타낸다는 것을 알 수 있다. 또한 OID가 "1.3.6.1.2.1.4"라면 MIB의 IP를 나타내는 것을 알 수 있다. Manager는 Agent를 통해서 특정 Device의 IP 정보를 얻고 싶다면. OID "1.3.6.1.2.1.4"를 요청하여 Device의 IP 정보를 얻어온다.
+[Figure 2]는 MIB를 나타내기 위한 OID Tree를 나타내고 있다. OID Tree를 통해서 OID가 어떤 Data를 의미하는지를 파악할 수 있다. 만약 OID가 `1.3.6.1.2.1`로 시작한다면 OID Tree의 Root에서부터 OID의 앞에서 부터 숫자를 따라가다 보면 MIB 관련 Data를 나타낸다는 것을 알 수 있다. 또한 OID가 `1.3.6.1.2.1.4`라면 MIB의 IP를 나타내는 것을 알 수 있다. Manager는 Agent를 통해서 특정 Device의 IP 정보를 얻고 싶다면. OID `1.3.6.1.2.1.4`를 요청하여 Device의 IP 정보를 얻어온다.
 
 ### 1.2. SNMP Message Type
 
 SNMP Protocol의 Message Type에는 다음과 같은 종류가 존재한다. Message Type과 해당 Message Type이 도입된 SNMP의 Version, Message가 전송되는 방향도 같이 나타내고 있다.
 
-* GetRequest / v1 / Manager->Agent : Manager가 Agent를 통해서 MIB의 특정 Data를 얻기 위해 이용한다.
-* GetNextRequest / v1 / Manager->Agent : Manager가 Agent를 통해서 MIB가 저장하고 있는 Tree 구조 Data를 순회하기 위해서 이용된다. Manager가 Agent에게 GetNextRequest 요청을 전송 할때마다 하나의 Data를 응답 받는다.
-* GetBulkRequest/ v2 / Manager->Agent : GetNextRequest의 Bulk Version이다. MIB가 저장하고 있는 Tree 구조의 Data중에서 Subtree의 모든 Data를 받기 위해서 이용한다.
-* SetRequest/ v1 / Manager->Agent : Manager가 Agent를 통해서 MIB에 특정 Data를 설정하기 위해 이용한다.
-* GetResponse/ v1 / Agent->Manager : Manager의 Get/Set 관련 요청에 대한 응답을 위해 이용한다.
-* Trap / v1 / Agent->Manager : Manager의 요청때문이 아닌, Agent가 Manager에게 먼저 MIB의 Data를 전송하는 경우에 이용한다.
-* InfoRequest / v2 / Manager->Agent : Manager가 Agent로부터 전달받은 Trap Message가 올바른 Message인지 확인하기 위해 이용된다.
+* `GetRequest` / v1 / Manager->Agent : Manager가 Agent를 통해서 MIB의 특정 Data를 얻기 위해 이용한다.
+* `GetNextRequest` / v1 / Manager->Agent : Manager가 Agent를 통해서 MIB가 저장하고 있는 Tree 구조 Data를 순회하기 위해서 이용된다. Manager가 Agent에게 `GetNextRequest` 요청을 전송 할때마다 하나의 Data를 응답 받는다.
+* `GetBulkRequest`/ v2 / Manager->Agent : `GetNextRequest`의 Bulk Version이다. MIB가 저장하고 있는 Tree 구조의 Data중에서 Subtree의 모든 Data를 받기 위해서 이용한다.
+* `SetRequest`/ v1 / Manager->Agent : Manager가 Agent를 통해서 MIB에 특정 Data를 설정하기 위해 이용한다.
+* `GetResponse`/ v1 / Agent->Manager : Manager의 Get/Set 관련 요청에 대한 응답을 위해 이용한다.
+* `Trap` / v1 / Agent->Manager : Manager의 요청때문이 아닌, Agent가 Manager에게 먼저 MIB의 Data를 전송하는 경우에 이용한다.
+* `InfoRequest` / v2 / Manager->Agent : Manager가 Agent로부터 전달받은 `Trap` Message가 올바른 Message인지 확인하기 위해 이용된다.
 
 ## 2. 참조
 

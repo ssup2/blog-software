@@ -44,7 +44,7 @@ Topic Exchange is an Exchange that multicasts messages to multiple Queues or Exc
 
 Headers Exchange is an Exchange that multicasts messages to multiple Queues or Exchanges. The criterion for multicast is the Key, Value included in the Message Header. To bind with Headers Exchange, you must provide the Key, Value to be included in the Message Header. In [Figure 5], the Message Header provided to Headers Exchange during binding is expressed as **Binding Header**. Headers Exchange delivers messages to all Queues or Exchanges that have a Binding Header identical to the Key, Value in the Message Header.
 
-Headers Exchange provides an option called **x-match**, and x-match has two values: 'all' and 'any'. 'all' delivers messages to the Queue or Exchange only when all Key, Value values in the Message Header match the Key, Value values received during binding. 'any' delivers messages to the Queue or Exchange even if only some of the Key, Value values in the Message Header match the Key, Value values received during binding.
+Headers Exchange provides an option called `x-match`, and `x-match` has two values: `all` and `any`. `all` delivers messages to the Queue or Exchange only when all Key, Value values in the Message Header match the Key, Value values received during binding. `any` delivers messages to the Queue or Exchange even if only some of the Key, Value values in the Message Header match the Key, Value values received during binding.
 
 ## 2. References
 

@@ -10,7 +10,7 @@ Istio의 **Locality Load Balancing**은 의미 그대로 같은 Locality(지역�
 
 {{< figure caption="[Figure 1] Locality Load Balancing Test Environment" src="images/test-environment.png" width="900px" >}}
 
-[Figure 1]은 Istio의 Locality Load Balancing을 테스트하기 위한 Kubernetes Cluster를 나타내고 있다. 4개의 Node로 구성되어 있고 각 Node는 `kr`, `us` 두 가지 Region과 `a`, `b` 두 가지 Zone에 한대씩 구성되어 총 4개의 Locality를 구성한다. 각 Locality에는 마다 별도의 Deployment를 통해서 2개의 Pod, 총 8개의 Pod를 구성한다. 하지만 Service, Virtual Service, Destination Rule은 하나만 정의하여 모든 Deployment의 Pod에 적용되도록 구성한다. 접근 Test를 위해서 `kr` Region의 `a` Zone에 Shell Pod의 역할을 수행하는 `myshell-kr-a` Pod도 하나 구성한다.
+[Figure 1]은 Istio의 Locality Load Balancing을 테스트하기 위한 Kubernetes Cluster를 나타내고 있다. 4개의 Node로 구성되어 있고 각 Node는 `kr`, `us` 두 가지 Region과 `a`, `b` 두 가지 Zone에 한대씩 구성되어 총 4개의 Locality를 구성한다. 각 Locality에는 마다 별도의 Deployment를 통해서 2개의 Pod, 총 8개의 Pod를 구성한다. 하지만 Service, Virtual Service, Destination Rule은 하나만 정의하여 모든 Deployment의 Pod에 적용되도록 구성한다. 접근 Test를 위해서 `kr` Region의 `a` Zone에 Shell Pod의 역할을 수행하는 `my-shell-kr-a` Pod도 하나 구성한다.
 
 #### 1.1.1. Kubernetes, Istio 환경 구성
 
@@ -376,7 +376,7 @@ Hello version: v1, instance: helloworld-kr-a-57cdf4d447-skvgp
 Hello version: v1, instance: helloworld-kr-a-57cdf4d447-skvgp
 ```
 
-[File 4]는 `localityLbSettingdistribute` Field과 함께 Locality Load Balancing을 활성화하는 Destination Rule의 예제를 나타내고 있으며, [Shell 2]의 명령어를 실행하면 [Text 6]과 같은 결과를 확인할 수 있다. `from`과 `to`에는 `region/zone/subzone` 형태로 Traffic을 어느 Locality로 전송할지를 **Weight**과 함께 정의한다. 이때 Weight의 합은 100이어야 한다. [File 3]은 Client의 모든 요청이 동일한 Locality의 Server Pod에만 전송되도록 설정되어 있어 [Figure 1]과 같은 결과를 확인할 수 있다.
+[File 4]는 `localityLbSetting.distribute` Field과 함께 Locality Load Balancing을 활성화하는 Destination Rule의 예제를 나타내고 있으며, [Shell 2]의 명령어를 실행하면 [Text 6]과 같은 결과를 확인할 수 있다. `from`과 `to`에는 `region/zone/subzone` 형태로 Traffic을 어느 Locality로 전송할지를 **Weight**과 함께 정의한다. 이때 Weight의 합은 100이어야 한다. [File 3]은 Client의 모든 요청이 동일한 Locality의 Server Pod에만 전송되도록 설정되어 있어 [Figure 1]과 같은 결과를 확인할 수 있다.
 
 ```yaml {caption="[File 5] Locality Load Balancing Distribute Cross Region 예제"}
 apiVersion: networking.istio.io/v1beta1

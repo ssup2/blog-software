@@ -31,7 +31,7 @@ message Person {
 }
 ```
 
-[File 1] shows a .proto file that stores structured Person Data according to the ProtoBuf specification. ProtoBuf compiles the .proto file to generate Code that can be used by the gRPC Server and the gRPC Client. The Server and Client perform gRPC using the generated Code.
+[File 1] shows a `.proto` file that stores structured `Person` Data according to the ProtoBuf specification. ProtoBuf compiles the `.proto` file to generate Code that can be used by the gRPC Server and the gRPC Client. The Server and Client perform gRPC using the generated Code.
 
 ### 1.2. HTTP/2
 
@@ -49,7 +49,7 @@ gRPC operates by leveraging the advantages of HTTP/2 over HTTP/1.1.
 └── Stream 5 (RPC C) : HEADERS Frame → DATA Frame... → HEADERS Frame (Trailer)
 ```
 
-A single RPC is **mapped 1:1** to a single HTTP/2 Stream. As shown in [Text 1], every time the Client calls an RPC, a new Stream is dynamically created on the TCP Connection, and when the RPC completes, the Stream is also terminated. A single Stream is never shared or reused by multiple RPCs, and only Connection-level state (HPACK Header compression state, SETTINGS, Connection Flow Control Window) is shared by multiple Streams. The relationship between RPC and Stream has the following characteristics.
+A single RPC is **mapped 1:1** to a single HTTP/2 Stream. As shown in [Text 1], every time the Client calls an RPC, a new Stream is dynamically created on the TCP Connection, and when the RPC completes, the Stream is also terminated. A single Stream is never shared or reused by multiple RPCs, and only Connection-level state (HPACK Header compression state, `SETTINGS`, Connection Flow Control Window) is shared by multiple Streams. The relationship between RPC and Stream has the following characteristics.
 
 * Stream creation is completed simply by the Client sending a HEADERS Frame with a new Stream ID, without any separate negotiation process. Therefore, even if a Stream is dynamically created for each RPC, no additional round-trip (RTT) cost such as TCP Connection establishment occurs.
 * Streams created by the Client are assigned odd Stream IDs (`1`, `3`, `5`...) in monotonically increasing order, and Streams created by the Server (Server Push) are assigned even Stream IDs (`2`, `4`, `6`...) in monotonically increasing order. This is to prevent Stream ID collisions even when the Client and Server create Streams at the same time. Stream IDs are not reused within a single Connection, and when IDs are exhausted (2^31), a new Connection is created to process subsequent RPCs.
@@ -58,7 +58,7 @@ A single RPC is **mapped 1:1** to a single HTTP/2 Stream. As shown in [Text 1], 
   * **Server Streaming RPC** : When the Client sends one Message, the Server sends multiple Messages in succession. (e.g. real-time notification subscription, transmission of large query results)
   * **Client Streaming RPC** : The Client sends multiple Messages in succession, and then the Server responds with one Message. (e.g. File Upload, Metric transmission)
   * **Bidirectional Streaming RPC** : The Client and Server independently exchange multiple Messages on a single Stream. (e.g. chat)
-* Each Stream operates independently. Even if a specific RPC is canceled or an error occurs and the Stream is forcibly terminated with an RST_STREAM Frame, other RPCs on the same Connection are not affected.
+* Each Stream operates independently. Even if a specific RPC is canceled or an error occurs and the Stream is forcibly terminated with an `RST_STREAM` Frame, other RPCs on the same Connection are not affected.
 
 #### 1.2.2. Frame Structure and Trailer
 
@@ -79,28 +79,28 @@ A Trailer is a list of Fields in the same format as Headers (name-value pairs), 
 {{< table caption="[Table 1] GRPC Status Code" >}}
 | Status Code | Number | Description |
 | --- | --- | --- |
-| OK | 0 | The request was processed successfully. Not an error. |
-| CANCELLED | 1 | The operation was canceled. (Request canceled by the Client) |
-| UNKNOWN | 2 | An error of unknown cause occurred. Debugging through detailed messages is required. |
-| INVALID_ARGUMENT | 3 | The Client sent invalid request arguments. |
-| DEADLINE_EXCEEDED | 4 | Request Timeout occurred. No response was received within the specified time. |
-| NOT_FOUND | 5 | The requested Resource could not be found. |
-| ALREADY_EXISTS | 6 | The requested Resource already exists. (Duplicate creation request) |
-| PERMISSION_DENIED | 7 | Access denied due to insufficient permissions. (Authentication, Authorization failure) |
-| RESOURCE_EXHAUSTED | 8 | Resource exhaustion such as capacity exceeded or out of memory. (The Client sent too many requests, or the Server received too many requests) |
-| FAILED_PRECONDITION | 9 | Preconditions were not met. (Operation requested while a Lock is held) |
-| ABORTED | 10 | The operation was aborted due to a concurrency conflict. |
-| OUT_OF_RANGE | 11 | Request arguments exceeded the valid range. (Data type range exceeded) |
-| UNIMPLEMENTED | 12 | The requested Method is not implemented on the Server. |
-| INTERNAL | 13 | An error occurred inside the Server. Debugging is required. |
-| UNAVAILABLE | 14 | The Server is down or unreachable. Retry is possible. |
-| DATA_LOSS | 15 | Data loss occurred. |
-| UNAUTHENTICATED | 16 | Authentication failed. Token is missing or invalid. |
+| `OK` | 0 | The request was processed successfully. Not an error. |
+| `CANCELLED` | 1 | The operation was canceled. (Request canceled by the Client) |
+| `UNKNOWN` | 2 | An error of unknown cause occurred. Debugging through detailed messages is required. |
+| `INVALID_ARGUMENT` | 3 | The Client sent invalid request arguments. |
+| `DEADLINE_EXCEEDED` | 4 | Request Timeout occurred. No response was received within the specified time. |
+| `NOT_FOUND` | 5 | The requested Resource could not be found. |
+| `ALREADY_EXISTS` | 6 | The requested Resource already exists. (Duplicate creation request) |
+| `PERMISSION_DENIED` | 7 | Access denied due to insufficient permissions. (Authentication, Authorization failure) |
+| `RESOURCE_EXHAUSTED` | 8 | Resource exhaustion such as capacity exceeded or out of memory. (The Client sent too many requests, or the Server received too many requests) |
+| `FAILED_PRECONDITION` | 9 | Preconditions were not met. (Operation requested while a Lock is held) |
+| `ABORTED` | 10 | The operation was aborted due to a concurrency conflict. |
+| `OUT_OF_RANGE` | 11 | Request arguments exceeded the valid range. (Data type range exceeded) |
+| `UNIMPLEMENTED` | 12 | The requested Method is not implemented on the Server. |
+| `INTERNAL` | 13 | An error occurred inside the Server. Debugging is required. |
+| `UNAVAILABLE` | 14 | The Server is down or unreachable. Retry is possible. |
+| `DATA_LOSS` | 15 | Data loss occurred. |
+| `UNAUTHENTICATED` | 16 | Authentication failed. Token is missing or invalid. |
 {{< /table >}}
 
 [Table 1] shows the gRPC Status Codes. In gRPC, each RPC request determines its success through the **Status Code** returned in the response. The Status Code is delivered through the `grpc-status` Header in the Trailer that terminates the response Stream.
 
-It is similar to the HTTP/2 Status Code but serves a different role. The gRPC Status Code is the result of each RPC request, while the HTTP/2 Status Code represents the result of Data transmission and routing from the HTTP/2 perspective. For example, if a Client calls a Method that does not exist on the Server through gRPC, the Status Code responds with **UNIMPLEMENTED**, but the HTTP/2 Status Code may respond with **200**. This is because, from the HTTP/2 perspective, Data was exchanged successfully.
+It is similar to the HTTP/2 Status Code but serves a different role. The gRPC Status Code is the result of each RPC request, while the HTTP/2 Status Code represents the result of Data transmission and routing from the HTTP/2 perspective. For example, if a Client calls a Method that does not exist on the Server through gRPC, the Status Code responds with `UNIMPLEMENTED`, but the HTTP/2 Status Code may respond with `200`. This is because, from the HTTP/2 perspective, Data was exchanged successfully.
 
 ### 1.4. vs HTTP/1.1 + JSON
 

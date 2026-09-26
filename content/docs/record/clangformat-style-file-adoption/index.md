@@ -4,7 +4,7 @@ title: ClangFormat Sytle File, 적용
 
 ## 1. Style File
 
-ClangForamt은 Style 파일을 통해서 Format 형태를 설정할 수 있다.
+ClangFormat은 Style 파일을 통해서 Format 형태를 설정할 수 있다.
 
 ### 1.1. Ssup2's Cpp Sytle
 
@@ -106,7 +106,7 @@ UseTab:          Always
 ...
 ```
 
-Project Root 폴더에 **.clang-format** 파일을 [File 1] 내용으로 생성한다.
+Project Root 폴더에 `.clang-format` 파일을 [File 1] 내용으로 생성한다.
 
 ## 2. Style 적용
 

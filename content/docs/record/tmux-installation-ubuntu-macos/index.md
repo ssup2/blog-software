@@ -11,7 +11,7 @@ $ apt install tmux
 $ git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 ```
 
-apt을 이용하여 tmux를 설치한다.
+`apt`을 이용하여 tmux를 설치한다.
 
 ### 1.2. macOS
 
@@ -19,7 +19,7 @@ apt을 이용하여 tmux를 설치한다.
 $ brew install tmux
 ```
 
-brew를 이용하여 tmux를 설치한다.
+`brew`를 이용하여 tmux를 설치한다.
 
 ## 2. tmux 설정
 
@@ -64,7 +64,7 @@ if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] &&
 fi
 ```
 
-`~/.bashrc` 파일의 마지막에 [File 2]의 내용을 추가하여 Shell 실행시 tmux가 실행되도록 설정한다.
+`~/.bashrc` 파일의 마지막에 [File 2]의 내용을 추가하여 Shell 실행시 `tmux`가 실행되도록 설정한다.
 
 ### 3.2. macOS
 
@@ -74,7 +74,7 @@ fi
 
 `tmux ls && read tmux-session && tmux attach -t ${tmux-session:-default} \|\| tmux new -s ${tmux-session:-default}`
 
-[Figure 1]의 내용처럼 iTerm2 설정에 "Sends text at start"에 tmux 설정을 추가하여 iTerm2 실행시 tmux가 실행되도록 설정한다.
+[Figure 1]의 내용처럼 iTerm2 설정에 "Sends text at start"에 tmux 설정을 추가하여 iTerm2 실행시 `tmux`가 실행되도록 설정한다.
 
 {{< figure caption="[Figure 2] tmux clipboard setting with iTerm2" src="images/tmux-clipboard-iterm2.png" width="800px" >}}
 
@@ -95,7 +95,7 @@ TPM을 설치한다.
 ctrl + b, I
 ```
 
-tmux를 실행하고, tmux 안에서 단축키를 눌러 Plugin을 설치한다.
+`tmux`를 실행하고, tmux 안에서 단축키를 눌러 Plugin을 설치한다.
 
 ## 5. 참조
 

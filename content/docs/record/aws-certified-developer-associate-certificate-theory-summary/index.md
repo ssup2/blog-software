@@ -13,9 +13,9 @@ title: AWS Certified Developer Associate 자격증 이론 정리
 ### 2.1. API Call Limit (Quota)
 
 * API 호출에 제한이 걸려 있음
-  * Ex) EC2 DescribeInstance : 100 Call Per Seconds
-  * Ex) S3 GetObject 5500 : 5500 Call Per Seconds, Per Prefix
-  * 제한을 넘길시 ThrottlingException 오류 발생
+  * Ex) EC2 `DescribeInstance` : 100 Call Per Seconds
+  * Ex) S3 `GetObject` 5500 : 5500 Call Per Seconds, Per Prefix
+  * 제한을 넘길시 `ThrottlingException` 오류 발생
   * Exponential Backoff 수행
 * Exponential Backoff
   * AWS SDK를 이용한 API 호출시 AWS SDK 내부적으로 Exponential Backoff Logic이 포함되어 있음
@@ -26,10 +26,10 @@ title: AWS Certified Developer Associate 자격증 이론 정리
 ### 2.2. Credential Provider Chain
 
 * 다음의 순서대로 Credential을 찾아 적용
-  * **CLI Option** : "--region", "--output", "--profile"
-  * **Env** : AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN
-  * **CLI Credential File** : ~/.aws/credentials
-  * **CLI Configuration File** : ~/.aws/config
+  * **CLI Option** : `--region`, `--output`, `--profile`
+  * **Env** : `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SESSION_TOKEN`
+  * **CLI Credential File** : `~/.aws/credentials`
+  * **CLI Configuration File** : `~/.aws/config`
   * Container Credential
   * Instance Profile Credential
 
@@ -37,7 +37,7 @@ title: AWS Certified Developer Associate 자격증 이론 정리
 
 * 대부분의 API 호출시 Access Key, Secret Access key를 이용하여 요청에 Signing 필요
 * SDK, CLI를 통한 AWS API 호출시 SDK, CLI 내부적으로 Signing을 알아서 수행
-* AWS API를 직접 호출시 "SigV4" 방식으로 요청을 Signing하여 전송
+* AWS API를 직접 호출시 `SigV4` 방식으로 요청을 Signing하여 전송
 
 ## 3. CloudFront
 
@@ -183,12 +183,12 @@ title: AWS Certified Developer Associate 자격증 이론 정리
 
 * zip 파일 에 배포할 Code가 위치
 * Elastic Beanstalk의 설정은 zip 파일 내부에서도 설정 가능
-* zip 파일의 .ebextensions 하위 Dir에 위치
+* zip 파일의 `.ebextensions` 하위 Dir에 위치
 * YAML, JSON Format 둘다 지원
-* .config 확장자를 가지고 있어야함
-  * Ex) logging.config
-* option_setting 파일을 통해서 Default 설정 변경 가능
-* Elastic Beanstalk는 CloudFormation을 기반으로 하고 있기 때문에 .ebextensions Dir하위에 CloudFormation 설정파일을 두어 AWS Resource 배포 가능
+* `.config` 확장자를 가지고 있어야함
+  * Ex) `logging.config`
+* `option_setting` 파일을 통해서 Default 설정 변경 가능
+* Elastic Beanstalk는 CloudFormation을 기반으로 하고 있기 때문에 `.ebextensions` Dir하위에 CloudFormation 설정파일을 두어 AWS Resource 배포 가능
 
 ### 5.3. Cloning
 
@@ -214,17 +214,17 @@ title: AWS Certified Developer Associate 자격증 이론 정리
 
 * Single Docker Mode
   * EC2 Instance에 Docker를 설치하고 단일 Container만 실행
-  * Dockerfile 또는 Dockerrun.aws.json 파일을 통해서 EC2 Instance에 실행할 Container Image 및 설정 가능
+  * Dockerfile 또는 `Dockerrun.aws.json` 파일을 통해서 EC2 Instance에 실행할 Container Image 및 설정 가능
 * Multi Docker Container
   * EC2 Instance에 다수의 Container를 실행
   * Elastic Beanstalk에서 ECS Cluster를 생성하고 이용
-  * Dockerrun.aws.json 파일을 통해서 ECS Task 정의 가능
+  * `Dockerrun.aws.json` 파일을 통해서 ECS Task 정의 가능
   * Container Image는 사전에 ECR과 같은 Registry에 저장되어 있어야 한다.
 
 ### 5.6. HTTPS Certificate 설정
 
 * ALB에 Certificate 지정을 통해서 HTTPS 이용 가능
-* Certificate 지정은 Web Console에서 지정하거나, .ebextensions/securelistner-alb.config 파일에 지정 가능
+* Certificate 지정은 Web Console에서 지정하거나, `.ebextensions/securelistner-alb.config` 파일에 지정 가능
 * Certificate는 ACM 또는 CLI를 통해서 설정 가능
 
 ## 6. CI/CD
@@ -257,7 +257,7 @@ title: AWS Certified Developer Associate 자격증 이론 정리
 ### 6.3. CodeBuild
 
 * Code 위치 : CodeCommit, S3, Bitbucket, Github
-* Code에 존재하는 buildspec.yml 파일을 통해서 Build 수행
+* Code에 존재하는 `buildspec.yml` 파일을 통해서 Build 수행
 * Output Log는 S3 또는 CloudWatch Logs에 저장되어 확인 가능
 * CloudWatch Metric을 이용하여 Build 관련 통계 확인 가능
 * CloudWatch Events를 이용하여 실패한 Build에 대해 Notification 가능
@@ -272,7 +272,7 @@ title: AWS Certified Developer Associate 자격증 이론 정리
 
 * Build 방법 정의
 * 경로
-  * **Default** : Code Root의 buildspec.yml
+  * **Default** : Code Root의 `buildspec.yml`
   * User의 설정을 통해서 특정 파일 지정도 가능
 * `Env` : 환경 변수
   * `variables` : plaintext 이용
@@ -290,24 +290,24 @@ title: AWS Certified Developer Associate 자격증 이론 정리
 
 * App을 다수의 EC2 Instance, On-premise Server에 배포
 * EC2 Instance, On-premise Server에 CodeDeploy Agent 설치 필요
-* appspec.yml 파일을 통해서 배포 수행
+* `appspec.yml` 파일을 통해서 배포 수행
 * 배포 Group (EC2 Instance), 배포 Type (Once At A Time, Half At A Time, All At Once, Custom), IAM Instance Profile, App Revision등 지정 가능
 
 #### 6.4.1. CodeDeploy Agent
 
 * CodeDeploy Agent는 Polling을 통해서 CodeDeploy Service에게 배포할 App이 있는지 확인하고
-* 배포해애햘 App이 있다면 Code + appspec.yml 파일을 Download한 이후에 배포 수행
+* 배포해애햘 App이 있다면 Code + `appspec.yml` 파일을 Download한 이후에 배포 수행
 
 #### 6.4.2. appspec.yml
 
 * `files` : Source Code를 어디서 받을지 지정
 * `hooks` : 배포를 어떻게 진행할지 설정
-  * ApplicationStop
-  * DownloadBundle
-  * BeforeInstall
-  * Install
-  * AfterInstall
-  * ApplicationStart
+  * `ApplicationStop`
+  * `DownloadBundle`
+  * `BeforeInstall`
+  * `Install`
+  * `AfterInstall`
+  * `ApplicationStart`
   * `ValidateService` : 정상적으로 배포가 되었는지 확인, 반드시 설정 필요
 
 ### 6.5. CodeStar
@@ -399,7 +399,7 @@ title: AWS Certified Developer Associate 자격증 이론 정리
 * Data Event
   * AWS Resource에 Data CRUD Event
   * Data Event는 CloudTrail에서 기본적으로 기록하지 않도록 설정 (설정시 많은 Event가 기록되기 때문)
-  * Ex) S3 GetObject, S3 DeleteObject, S3 PutObject
+  * Ex) S3 `GetObject`, S3 `DeleteObject`, S3 `PutObject`
 * CloudTrail Insights Event
   * CloudTrail Insights에서 발생시키는 Event
 
@@ -500,7 +500,7 @@ title: AWS Certified Developer Associate 자격증 이론 정리
 * 동일한 Lamda 함수 사이의 Context를 공유하는 기능 제공
 * Context EX) DB Connection, HTTP Client, SDK Client
 * Context 공유를 통해서 Lambda 함수 초기화 시간을 줄일 수 있음
-* /tmp Directory도 Context로 활용 가능
+* `/tmp` Directory도 Context로 활용 가능
   * 최대 512MB 이용
 
 ### 10.10. Concurrency & Throttling
@@ -516,16 +516,16 @@ title: AWS Certified Developer Associate 자격증 이론 정리
 ### 10.11. Code Dependency
 
 * Lambda 함수 Build를 위한 Package도 같이 제공 필요
-  * **Node.js** : node_modules
-  * **Python** : pip --target
-  * **Java** : .jar
+  * **Node.js** : `node_modules`
+  * **Python** : `pip --target`
+  * **Java** : `.jar`
 * ZIP 파일을 통해 Lambda에 직접 Upload, 50MB 초과시 S3를 활용
 * Native Library는 ZIP 파일에 추가 필요, AWS SDK는 별도의 추가 필요 없음
 
 ### 10.12. with CloudFormation
 
 * CloudFormation을 통해서 Lambda 함수 생성 가능
-* Code.ZipFile 방식
+* `Code.ZipFile` 방식
   * CloudFormation Template에 Code를 직접 명시하는 방식
   * Dependency 명시가 불가능 하기 때문에 Dependency가 없는 간단한 Code만 가능
 * S3 방식
@@ -604,7 +604,7 @@ title: AWS Certified Developer Associate 자격증 이론 정리
     * RCU, WCU 단위로 설정
   * Capacity를 계획하고 이용
   * 설정한 RCU, WCU보다 더 많은 요청을 수행할 경우 일시적으로 Burst Capacity를 활용하여 처리 가능
-  * Burst Capacity도 다 이용한 경우 "ProvisionedThroughputExceededException" 발생
+  * Burst Capacity도 다 이용한 경우 `ProvisionedThroughputExceededException` 발생
   * WCU
     * One write per second for an item up to 1 KB in size
     * Ex) 10 items per seconds with item size 2KB : 10 * (2/1) = 20 WCU
@@ -650,7 +650,7 @@ title: AWS Certified Developer Associate 자격증 이론 정리
 ### 11.5. Optimistic Locking
 
 * Conditional Writes 요청을 이용한 Optimistic Locking을 이용할 수 있다.
-* Client는 GetItem 명령을 통해서 Item의 Version 정보를 얻어온뒤, Version 정보와 함께 Conditional Writes 요청 수행
+* Client는 `GetItem` 명령을 통해서 Item의 Version 정보를 얻어온뒤, Version 정보와 함께 Conditional Writes 요청 수행
 * Conditional Writes 요청에 포함된 Version과 현재 Item의 Version이 동일해야지만 Write 성공, 다르면 Write 실패
 
 ### 11.6. DynamoDB Accelerator (DAX)
@@ -785,18 +785,18 @@ title: AWS Certified Developer Associate 자격증 이론 정리
 * **Logging** : CloudWatch Logs를 통해서 Log 수집 가능
 * **Tracing** : X-Ray를 통해서 Tracing 정보 수집 가능
 * **Metric** : CloudWatch Metrics를 통해서 Metric 수집 가능
-  * CacheHitCount & CacheMissCount
+  * `CacheHitCount` & `CacheMissCount`
   * `Count`: API 호출 횟수
   * `IntegrationLatency`: API Gateway, Backend 사이의 요청, 수신 Latency 
   * `Latency` : Client, Backend 사이의 요청, 수신 Latency
-  * 4XXError & 5XXError
+  * `4XXError` & `5XXError`
 
 ### 12.7. Throttling
 
 * Account Throttling
   * 10000 RPS 제한
   * Soft Limit이며 요청을 통해서 증가 가능
-  * Limit 초과시 429 (TooManyRequests) Error 발생
+  * Limit 초과시 429 (`TooManyRequests`) Error 발생
 * Stage Throttling & Method Throttling 설정 가능
 * Usage Plan을 통한 Throttling 설정 가능
 
@@ -838,9 +838,9 @@ title: AWS Certified Developer Associate 자격증 이론 정리
 ### 13.1. Deployment Process
 
 * SAM Template + Code
-* --(sam build)--> CloudFormation Template + App Code
-* --(sam package)--> Zip in S3
-* --(sam deploy)--> Lambda + API Gateway + DynamoDB via CloudFormation
+* --(`sam build`)--> CloudFormation Template + App Code
+* --(`sam package`)--> Zip in S3
+* --(`sam deploy`)--> Lambda + API Gateway + DynamoDB via CloudFormation
 
 ## 14. CDK
 
@@ -943,7 +943,7 @@ title: AWS Certified Developer Associate 자격증 이론 정리
 * IAM 과의 연동 지원
 * AWS Service에서 암호화를 위한 Key 필요시 대부분 KMS를 이용
 * 최대 4KB의 Data만 암호화 지원
-  * 4KB 이상의 Data 암호화를 위해 GeneratedDataKey API 호출을 통한 Envelope Encription 기법 이용 
+  * 4KB 이상의 Data 암호화를 위해 `GeneratedDataKey` API 호출을 통한 Envelope Encription 기법 이용 
 * Regional Resource
 * 사용자는 Key값을 직접 볼수 없으며, Key를 지정해 암호화/복호화만 수행 가능
   * 암호화시 Key 지정 필요

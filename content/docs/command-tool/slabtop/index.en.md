@@ -52,22 +52,22 @@ Displays slab usage sorted by number of slab objects in descending order. [Shell
 
 A cache consists of multiple slabs, and each slab consists of a collection of slab objects. Each slab has a page size. Since page size is generally 4KB, the following formulas hold:
 
-* 4KB * SLABS = CACHE SIZE
-* OBJ/SLAB * OBJ SIZE < 4KB
+* 4KB * `SLABS` = `CACHE SIZE`
+* `OBJ/SLAB` * `OBJ SIZE` < 4KB
 
 ### 1.2. slabtop [-s a|b|c|l|v|n|p|s|u ]
 
 Outputs slab usage sorted by specific criteria. Criteria are as follows:
 
-* `a` : ACTIVE
-* `b` : OBJ/SLAB
-* `c` : CACHE SIZE
-* `l` : SLABS
+* `a` : `ACTIVE`
+* `b` : `OBJ/SLAB`
+* `c` : `CACHE SIZE`
+* `l` : `SLABS`
 * `v` : Number of active slabs
-* `n` : NAME
+* `n` : `NAME`
 * `p` : Number of slabs per page
-* `s` : OBJ SIZE
-* `u` : USE
+* `s` : `OBJ SIZE`
+* `u` : `USE`
 
 ## 2. References
 

@@ -112,7 +112,7 @@ kubeflow                    workflow-controller-78c979dc75-96d64                
 local-path-storage          local-path-provisioner-9cd9bd544-8mhgp                   1/1     Running   2 (5m14s ago)   24m
 ```
 
-kustomize를 이용하여 Kubeflow를 설치한다.
+`kustomize`를 이용하여 Kubeflow를 설치한다.
 
 ## 6. Kubeflow Dashboard 접근
 
@@ -120,11 +120,11 @@ kustomize를 이용하여 Kubeflow를 설치한다.
 $ kubectl port-forward svc/istio-ingressgateway -n istio-system 8080:80
 ```
 
-kubectl port-forward를 실행하고 아래의 경로에 접근한다.
+`kubectl port-forward`를 실행하고 아래의 경로에 접근한다.
 
 * http://127.0.0.1:8080
-* **ID** : user@example.com
-* **Password** : 12341234
+* **ID** : `user@example.com`
+* **Password** : `12341234`
 
 ## 7. 참고
 

@@ -119,13 +119,13 @@ OpenStack의 Octavia를 분석한다.
 +---------------------+--------------------------------------------------+
 ```
 
-이러한 Octavia의 Concept Component는 Octavia의 Resource로 관리된다. [Shell 1]은 openstack CLI를 이용여 Octavia의 Resource를 조회하는 Shell을 나타내고 있다. 이러한 Octavia Concept은 Neutron LBaaS V2와 동일하며, Octavia는 Neutron LBaaS V2 API를 그대로 지원한다는 특징도 갖고 있다.
+이러한 Octavia의 Concept Component는 Octavia의 Resource로 관리된다. [Shell 1]은 `openstack` CLI를 이용여 Octavia의 Resource를 조회하는 Shell을 나타내고 있다. 이러한 Octavia Concept은 Neutron LBaaS V2와 동일하며, Octavia는 Neutron LBaaS V2 API를 그대로 지원한다는 특징도 갖고 있다.
 
 ### 1.1. Architecture
 
 {{< figure caption="[Figure 2] OpenStack Octavia Architecture" src="images/octavia-architecture.png" width="900px" >}}
 
-[Figure 2]는 Octavia의 Architecture를 나타내고 있다. Controller Node에는 Octavia Service가 동작하고 있고, Octavia의 Load Balancer Instance인 Amphora는 Compute Node에서 동작한다. Amphora는 VM, PM, Container로 구성 가능하다. Octavia Service와 Amphora 사이의 통신은 일반적으로 Provider가 생성하는 Octvia 전용 Network를 통해서 이루어진다.
+[Figure 2]는 Octavia의 Architecture를 나타내고 있다. Controller Node에는 Octavia Service가 동작하고 있고, Octavia의 Load Balancer Instance인 Amphora는 Compute Node에서 동작한다. Amphora는 VM, PM, Container로 구성 가능하다. Octavia Service와 Amphora 사이의 통신은 일반적으로 Provider가 생성하는 Octavia 전용 Network를 통해서 이루어진다.
 
 Octavia Client는 Octavia Service의 API Controller에게 LB 생성을 요청하면 API Controller는 Nova, Neutron 같은 다른 OpenStack Service의 도움을 받아 Amphora를 생성한다. Amphora 생성이 완료되면 Octavia Service의 Controller Worker는 Amphora의 Agent를 통해서 HAProxy의 Config 파일을 생성하고 HAProxy를 구동한다. Member의 Health Check는 Agent의 설정에 따라서 HAProxy가 수행한다. HAProxy가 수집한 Member의 Health 상태는 Unix Socket을 통해서 Agent에 전달되며, Agent는 다시 Controller Worker에게 전달한다.
 

@@ -121,7 +121,7 @@ overlay on / type overlay (rw,relatime,lowerdir=/var/lib/docker/overlay2/l/BAAGB
 ...
 ```
 
-[Shell 1~3]은 Container를 통해서 Namespace의 격리 특성을 실험하기 위해서 하나의 Host안에서 nginx Container와 httpd Container를 구동한 다음, Host 및 각 Container 내부에서 Process, Network, Hostname, Mount 정보를 확인하는 과정을 나타내고 있다. nginx Container와 httpd Container는 동일한 Host안에서 동작하고 있지만 서로 다른 Process, Network, Hostname, Mount 정보를 갖고 있는걸 확인 할 수 있다. 이러한 현상이 나타나는 이유는 Host, nginx Container, httpd Container가 서로 다른 Namespace를 이용하고 있기 때문이다. 좀더 구체적으로 말하면 Host, nginx Container, httpd Container의 Process가 서로 다른 Namespace에 소속되어 있기 때문이다.
+[Shell 1~3]은 Container를 통해서 Namespace의 격리 특성을 실험하기 위해서 하나의 Host안에서 `nginx` Container와 `httpd` Container를 구동한 다음, Host 및 각 Container 내부에서 Process, Network, Hostname, Mount 정보를 확인하는 과정을 나타내고 있다. `nginx` Container와 `httpd` Container는 동일한 Host안에서 동작하고 있지만 서로 다른 Process, Network, Hostname, Mount 정보를 갖고 있는걸 확인 할 수 있다. 이러한 현상이 나타나는 이유는 Host, `nginx` Container, `httpd` Container가 서로 다른 Namespace를 이용하고 있기 때문이다. 좀더 구체적으로 말하면 Host, `nginx` Container, `httpd` Container의 Process가 서로 다른 Namespace에 소속되어 있기 때문이다.
 
 ## Namespace Type
 
@@ -136,4 +136,4 @@ Namespace는 격리하는 대상에 따라 여러가지 Type이 존재한다. �
 
 {{< figure caption="[Figure 1] Host, Container Namespace" src="images/namespace.png" width="900px" >}}
 
-**각 Process는 반드시 모든 Namespace Type의 Namespace에 소속되어야 한다.** 따라서 [Shell 1~3]에서 예시로든 Host 및 nginx, httpd Container의 Namespace와 Process의 관계는 [Figure 1]과 같아진다. PID Namespace를 제외하고는 Host의 Process는 Host가 소유하는 각 Namespace에 소속되어 있고, nginx 및 httpd Container의 Process는 nginx 및 httpd Container가 소유하는 각 Namespace에 소속되어 있는것을 확인할 수 있다. PID Namespace와 Process의 관계는 PID Namespace를 설명할때 좀더 자세히 설명할 예정이다. 이외에 반드시 알고 넘어가야 하는 Network Namespace, Mount Namespace도 뒤에서 자세히 설명할 예정이다.
+**각 Process는 반드시 모든 Namespace Type의 Namespace에 소속되어야 한다.** 따라서 [Shell 1~3]에서 예시로든 Host 및 `nginx`, `httpd` Container의 Namespace와 Process의 관계는 [Figure 1]과 같아진다. PID Namespace를 제외하고는 Host의 Process는 Host가 소유하는 각 Namespace에 소속되어 있고, `nginx` 및 `httpd` Container의 Process는 `nginx` 및 `httpd` Container가 소유하는 각 Namespace에 소속되어 있는것을 확인할 수 있다. PID Namespace와 Process의 관계는 PID Namespace를 설명할때 좀더 자세히 설명할 예정이다. 이외에 반드시 알고 넘어가야 하는 Network Namespace, Mount Namespace도 뒤에서 자세히 설명할 예정이다.

@@ -93,9 +93,9 @@ spec:
 
 [File 2]는 HTTP, HTTPS, TLS, TCP, UDP Traffic을 수신하는 Gateway의 예제를 나타내고 있다. `gatewayClassName`에는 Gateway의 생성과 관리를 담당할 GatewayClass의 이름을 명시하며, `listeners`에는 Gateway가 Traffic을 수신하는 진입점을 정의한다. 하나의 Gateway에는 다수의 Listener를 정의할 수 있으며, 각 Listener에는 Protocol, Port, Hostname을 설정할 수 있다. Listener의 Protocol에는 `HTTP`, `HTTPS`, `TLS`, `TCP`, `UDP`를 설정할 수 있다.
 
-[File 2]의 https Listener처럼 `tls`의 `certificateRefs`에 인증서가 저장된 Secret을 명시하면 Listener는 TLS Termination을 수행한다. 반면 tls Listener처럼 TLS Mode가 `Passthrough`로 설정되어 있으면 Listener는 TLS Termination을 수행하지 않고 Traffic을 그대로 전달한다.
+[File 2]의 `https` Listener처럼 `tls`의 `certificateRefs`에 인증서가 저장된 Secret을 명시하면 Listener는 TLS Termination을 수행한다. 반면 `tls` Listener처럼 TLS Mode가 `Passthrough`로 설정되어 있으면 Listener는 TLS Termination을 수행하지 않고 Traffic을 그대로 전달한다.
 
-`allowedRoutes`는 Listener에 연결될 수 있는 Route를 제한하는 역할을 수행한다. http Listener의 `allowedRoutes`에는 `All`이 설정되어 있기 때문에 모든 Namespace의 Route가 연결될 수 있지만, https Listener의 `allowedRoutes`에는 `Selector`가 설정되어 있기 때문에 `gateway-access: "true"` Label이 설정된 Namespace의 Route만 연결될 수 있다. `allowedRoutes`의 기본값은 `Same`이며, 이 경우에는 Gateway와 동일한 Namespace의 Route만 연결될 수 있다. 이처럼 Cluster Operator는 `allowedRoutes`를 통해서 App 개발자가 이용할 수 있는 Listener의 범위를 제어할 수 있다.
+`allowedRoutes`는 Listener에 연결될 수 있는 Route를 제한하는 역할을 수행한다. `http` Listener의 `allowedRoutes`에는 `All`이 설정되어 있기 때문에 모든 Namespace의 Route가 연결될 수 있지만, `https` Listener의 `allowedRoutes`에는 `Selector`가 설정되어 있기 때문에 `gateway-access: "true"` Label이 설정된 Namespace의 Route만 연결될 수 있다. `allowedRoutes`의 기본값은 `Same`이며, 이 경우에는 Gateway와 동일한 Namespace의 Route만 연결될 수 있다. 이처럼 Cluster Operator는 `allowedRoutes`를 통해서 App 개발자가 이용할 수 있는 Listener의 범위를 제어할 수 있다.
 
 ### 1.3. Route
 
@@ -149,7 +149,7 @@ spec:
 
 **HTTPRoute**는 Gateway가 수신한 HTTP Traffic을 Service로 Routing하는 규칙을 정의하는 Resource이다. [File 3]은 `version.ssup2.com` Hostname으로 수신한 Traffic을 `version-v1`, `version-v2` Service로 Routing하는 HTTPRoute의 예제를 나타내고 있다. `parentRefs`에는 HTTPRoute가 연결될 Gateway를 명시하며, `hostnames`에는 Routing 대상이 되는 Hostname을 명시한다.
 
-[File 3]처럼 `parentRefs`에 `sectionName` 없이 Gateway만 명시하면 HTTPRoute는 Protocol이 호환되는 모든 Listener에 연결된다. 따라서 [File 3]의 HTTPRoute는 [File 2]의 http Listener가 수신한 HTTP Traffic뿐만 아니라, https Listener가 TLS Termination을 수행한 HTTPS Traffic도 같이 Routing한다. 다만 https Listener의 `allowedRoutes`에는 `Selector`가 설정되어 있기 때문에, `version-namespace` Namespace에 `gateway-access: "true"` Label이 설정되어 있어야 https Listener에 연결될 수 있다.
+[File 3]처럼 `parentRefs`에 `sectionName` 없이 Gateway만 명시하면 HTTPRoute는 Protocol이 호환되는 모든 Listener에 연결된다. 따라서 [File 3]의 HTTPRoute는 [File 2]의 `http` Listener가 수신한 HTTP Traffic뿐만 아니라, `https` Listener가 TLS Termination을 수행한 HTTPS Traffic도 같이 Routing한다. 다만 `https` Listener의 `allowedRoutes`에는 `Selector`가 설정되어 있기 때문에, `version-namespace` Namespace에 `gateway-access: "true"` Label이 설정되어 있어야 `https` Listener에 연결될 수 있다.
 
 HTTPRoute의 `hostnames`는 연결된 Gateway Listener의 `hostname`과 겹치는 경우에만 유효하며, [File 3]의 `version.ssup2.com`은 [File 2]의 `*.ssup2.com`에 포함되기 때문에 HTTPRoute는 정상적으로 Gateway에 연결된다. 동일한 Hostname을 명시한 다수의 HTTPRoute도 하나의 Gateway에 연결될 수 있으며, 이 경우 모든 HTTPRoute의 규칙이 **병합되어 하나의 Routing 규칙**처럼 동작한다.
 
@@ -227,7 +227,7 @@ spec:
       port: 5432
 ```
 
-**TCPRoute**는 Gateway가 수신한 TCP Traffic을 Service로 Routing하는 규칙을 정의하는 Resource이다. [File 6]은 Gateway의 tcp Listener가 수신한 Traffic을 `database` Service로 전달하는 TCPRoute의 예제를 나타내고 있다. TCPRoute는 L4 기반으로 동작하기 때문에 HTTPRoute와 다르게 `matches`, `filters` 없이 `backendRefs`만 정의할 수 있으며, Traffic을 구분하는 기준은 연결된 Listener의 Port만 존재한다. 따라서 TCPRoute는 일반적으로 `sectionName`을 통해서 특정 Listener에 연결하여 이용하며, Database와 같은 HTTP 기반이 아닌 App을 Cluster 외부에 노출할 때 이용된다.
+**TCPRoute**는 Gateway가 수신한 TCP Traffic을 Service로 Routing하는 규칙을 정의하는 Resource이다. [File 6]은 Gateway의 `tcp` Listener가 수신한 Traffic을 `database` Service로 전달하는 TCPRoute의 예제를 나타내고 있다. TCPRoute는 L4 기반으로 동작하기 때문에 HTTPRoute와 다르게 `matches`, `filters` 없이 `backendRefs`만 정의할 수 있으며, Traffic을 구분하는 기준은 연결된 Listener의 Port만 존재한다. 따라서 TCPRoute는 일반적으로 `sectionName`을 통해서 특정 Listener에 연결하여 이용하며, Database와 같은 HTTP 기반이 아닌 App을 Cluster 외부에 노출할 때 이용된다.
 
 #### 1.3.5. UDPRoute
 
@@ -248,7 +248,7 @@ spec:
       port: 53
 ```
 
-**UDPRoute**는 Gateway가 수신한 UDP Traffic을 Service로 Routing하는 규칙을 정의하는 Resource이다. [File 7]은 Gateway의 udp Listener가 수신한 Traffic을 `dns` Service로 전달하는 UDPRoute의 예제를 나타내고 있다. UDPRoute도 TCPRoute와 동일하게 L4 기반으로 동작하기 때문에 연결된 Listener의 Port 기반으로만 Traffic을 구분하며, DNS, VoIP, Game Server와 같은 UDP 기반의 App을 Cluster 외부에 노출할 때 이용된다.
+**UDPRoute**는 Gateway가 수신한 UDP Traffic을 Service로 Routing하는 규칙을 정의하는 Resource이다. [File 7]은 Gateway의 `udp` Listener가 수신한 Traffic을 `dns` Service로 전달하는 UDPRoute의 예제를 나타내고 있다. UDPRoute도 TCPRoute와 동일하게 L4 기반으로 동작하기 때문에 연결된 Listener의 Port 기반으로만 Traffic을 구분하며, DNS, VoIP, Game Server와 같은 UDP 기반의 App을 Cluster 외부에 노출할 때 이용된다.
 
 ### 1.4. ReferenceGrant
 

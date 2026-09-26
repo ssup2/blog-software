@@ -35,9 +35,9 @@ class Solution {
 * Description
   * Performs brute force search without duplicates
 * Time Complexity
-  * O(len(nums)^2)
-  * Two nested for loops of size len(nums)
+  * `O(len(nums)^2)`
+  * Two nested for loops of size `len(nums)`
 * Space Complexity
-  * O(len(nums))
-  * Memory usage proportional to len(nums) for function input
+  * `O(len(nums))`
+  * Memory usage proportional to `len(nums)` for function input
 

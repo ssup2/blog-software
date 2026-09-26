@@ -21,7 +21,7 @@ int main()
 THIS IS TEST CODE
 ```
 
-문자열화 연산자 (#)는 Macro Parameter를 문자열로 변경한다. `" "`를 붙이는 효과와 동일하다. [Code 1]은 `THIS IS TEST CODE` Macro Parameter가 `printf()` 함수의 문자열로 넘어가는 예제를 보여주고 있다.
+문자열화 연산자 (`#`)는 Macro Parameter를 문자열로 변경한다. `" "`를 붙이는 효과와 동일하다. [Code 1]은 `THIS IS TEST CODE` Macro Parameter가 `printf()` 함수의 문자열로 넘어가는 예제를 보여주고 있다.
 
 ## 2. Token 붙여넣기 연산자 (##) 
 

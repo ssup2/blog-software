@@ -15,7 +15,7 @@ title: Grafana 설치, 실행 / Ubuntu 18.04 환경
 deb https://packagecloud.io/grafana/stable/debian/ stretch main
 ```
 
-/etc/apt/sources.list에 다음의 [File 1]의 내용을 추가한다.
+`/etc/apt/sources.list`에 다음의 [File 1]의 내용을 추가한다.
 
 ```shell
 $ curl https://packagecloud.io/gpg.key | sudo apt-key add -
@@ -35,7 +35,7 @@ $ systemctl enable grafana-server.service
 Grafana를 실행하고 접속을 확인한다.
 
 * http://192.168.0.150:3000/login
-* **ID**, **PW** : admin/admin
+* **ID**, **PW** : `admin`/`admin`
 
 ## 3. 참조
 

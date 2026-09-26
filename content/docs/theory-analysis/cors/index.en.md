@@ -28,9 +28,9 @@ Through CORS technique, Cross-Origin can prevent unverified arbitrary Web Applic
 
 [Figure 3] shows the processing procedure of **Simple Request** method of CORS. It is a method that requests Cross-Origin's Resources immediately with **Origin** Header without receiving Resource usage permission from Cross-Origin. To use Simple Request method, Simple Request's Method and Header have the following restrictions.
 
-* **Method restrictions** : Only HEAD, GET, POST Methods can be used
-* **Header restrictions** : Only Accept, Accept-Language, Content-Language, Content-Type Headers can be used
-  * **Content-Type Header Value restrictions** : Only application/x-www-form-urlencoded, multipart/form-data, text/plain Values can exist in Content-Type Header
+* **Method restrictions** : Only `HEAD`, `GET`, `POST` Methods can be used
+* **Header restrictions** : Only `Accept`, `Accept-Language`, `Content-Language`, `Content-Type` Headers can be used
+  * **Content-Type Header Value restrictions** : Only `application/x-www-form-urlencoded`, `multipart/form-data`, `text/plain` Values can exist in `Content-Type` Header
 
 ## 2. References
 

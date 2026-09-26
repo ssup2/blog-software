@@ -13,4 +13,4 @@ gruvbox colorscheme를 받는다.
 
 > Preferences... -> Profiles -> Colors -> Color Presents... -> Import -> gruvbox-dark.itermcolors 선택
 
-git을 통해서 받은 gruvbox-dark.itermcolors를 iTerm2에서 Import 및 적용한다.
+git을 통해서 받은 `gruvbox-dark.itermcolors`를 iTerm2에서 Import 및 적용한다.

@@ -123,7 +123,7 @@ static int freebsd_mount_nfs4(char *mount_point, char *server_ip, char *server_p
 }
 ```
 
-[Code 2]는 FreeBSD 환경에서 `mount()` 함수를 이용하여 NFSv4 Mount를 수행하는 함수이다. FreeBSD의 mount_nfs Tool을 참고하여 제작하였다. 57 줄에서 NFSv4 서버 상태를 점검 하였을때는 NFSv4 서버의 동작이 문제 없다가, 78 줄에서 `nmount()` 함수 수행 시 NFSv4 서버에 문제가 생기면 `nmount()` 함수에서 Blocking 되는 문제가 발생한다.
+[Code 2]는 FreeBSD 환경에서 `mount()` 함수를 이용하여 NFSv4 Mount를 수행하는 함수이다. FreeBSD의 `mount_nfs` Tool을 참고하여 제작하였다. 57 줄에서 NFSv4 서버 상태를 점검 하였을때는 NFSv4 서버의 동작이 문제 없다가, 78 줄에서 `nmount()` 함수 수행 시 NFSv4 서버에 문제가 생기면 `nmount()` 함수에서 Blocking 되는 문제가 발생한다.
 
 ## 3. 참조
 

@@ -24,42 +24,42 @@ CSI has left the composition and deployment of Controller Plugin and Node Plugin
 
 {{< figure caption="[Figure 2] CSI Volume Lifecycle" src="images/csi-volume-lifecycle.png" width="450px" >}}
 
-CSI defines Storage's Lifecycle. CSI uses the term Volume Lifecycle instead of Storage Lifecycle. CSI does not define only one Volume Lifecycle but defines multiple Life Cycles to satisfy various Storage characteristics and configuration environments. [Figure 2] shows the longest Lifecycle among Volume Lifecycles defined in CSI. CO determines Volume Lifecycle through Capability information (ControllerGetCapabilities) obtained from Controller Plugin and Capability information (NodeGetCapabilities) obtained from Node Plugin.
+CSI defines Storage's Lifecycle. CSI uses the term Volume Lifecycle instead of Storage Lifecycle. CSI does not define only one Volume Lifecycle but defines multiple Life Cycles to satisfy various Storage characteristics and configuration environments. [Figure 2] shows the longest Lifecycle among Volume Lifecycles defined in CSI. CO determines Volume Lifecycle through Capability information (`ControllerGetCapabilities`) obtained from Controller Plugin and Capability information (`NodeGetCapabilities`) obtained from Node Plugin.
 
 ### 1.3. Interface
 
 CSI defines Interface between CO and Plugin based on defined Plugin and Volume Lifecycle. Interface is composed based on gRPC. Interface is divided into **Identity Service**, **Controller Service**, and **Node Service**. Identity Service is an Interface commonly used by Controller Plugin and Node Plugin. Controller Service is an Interface used by Controller Plugin, and Node Service is an Interface used by Node Plugin. The Interface list is as follows.
 
 * Identity Service
-  * GetPluginInfo
-  * GetPluginCapabilities
-  * Probe
+  * `GetPluginInfo`
+  * `GetPluginCapabilities`
+  * `Probe`
 * Controller Service
-  * CreateVolume
-  * DeleteVolume
-  * ControllerPublishVolume
-  * ControllerUnpublishVolume
-  * ValidateVolumeCapabilities
-  * ListVolumes 
-  * GetCapacity 
-  * ControllerGetCapabilities 
-  * CreateSnapshot 
-  * DeleteSnapshot 
-  * ListSnapshots 
-  * ControllerExpandVolume 
+  * `CreateVolume`
+  * `DeleteVolume`
+  * `ControllerPublishVolume`
+  * `ControllerUnpublishVolume`
+  * `ValidateVolumeCapabilities`
+  * `ListVolumes` 
+  * `GetCapacity` 
+  * `ControllerGetCapabilities` 
+  * `CreateSnapshot` 
+  * `DeleteSnapshot` 
+  * `ListSnapshots` 
+  * `ControllerExpandVolume` 
 * Node Service
-  * NodeStageVolume
-  * NodeUnstageVolume
-  * NodePublishVolume 
-  * NodeUnpublishVolume 
-  * NodeGetVolumeStats 
-  * NodeExpandVolume
-  * NodeGetCapabilities 
-  * NodeGetInfo
+  * `NodeStageVolume`
+  * `NodeUnstageVolume`
+  * `NodePublishVolume` 
+  * `NodeUnpublishVolume` 
+  * `NodeGetVolumeStats` 
+  * `NodeExpandVolume`
+  * `NodeGetCapabilities` 
+  * `NodeGetInfo`
 
-Each Interface is composed in the form of defining Request/Response. CSI also defines Error Code and Secret rules. Interface can be classified into Interface that controls Storage and Interface that obtains Plugin information. Looking only at Interface that controls Storage, Controller Service defines Interface for CreateVolume/DeleteVolume, ControllerPublishVolume/ControllerUnpublishVolume corresponding to the front and back parts of Volume LifeCycle, and requests related to Storage and Snapshot. Node Service defines Interface for requests related to NodeStageVolume/NodeUnstageVolume, NodePublishVolume/NodeUnpublishVolume corresponding to the middle part of Volume LifeCycle.
+Each Interface is composed in the form of defining Request/Response. CSI also defines Error Code and Secret rules. Interface can be classified into Interface that controls Storage and Interface that obtains Plugin information. Looking only at Interface that controls Storage, Controller Service defines Interface for `CreateVolume`/`DeleteVolume`, `ControllerPublishVolume`/`ControllerUnpublishVolume` corresponding to the front and back parts of Volume LifeCycle, and requests related to Storage and Snapshot. Node Service defines Interface for requests related to `NodeStageVolume`/`NodeUnstageVolume`, `NodePublishVolume`/`NodeUnpublishVolume` corresponding to the middle part of Volume LifeCycle.
  
-As CSI's Plugin and Volume Lifecycle exist in various forms, CO must obtain Plugin information and Volume Lifecycle information from Plugin. CO identifies Interface list and Volume Lifecycle provided by Plugin through Interface that obtains Plugin information, and controls Storage based on the identified information. GetPluginCapabilities tells whether that Plugin provides Controller Service Interface. ControllerGetCapabilities tells the Controller Service Interface list provided by that Plugin. NodeGetCapabilities tells the Node Service Interface list provided by that Plugin. CO identifies and controls Volume's Lifecycle through information obtained through ControllerGetCapabilities and NodeGetCapabilities.
+As CSI's Plugin and Volume Lifecycle exist in various forms, CO must obtain Plugin information and Volume Lifecycle information from Plugin. CO identifies Interface list and Volume Lifecycle provided by Plugin through Interface that obtains Plugin information, and controls Storage based on the identified information. `GetPluginCapabilities` tells whether that Plugin provides Controller Service Interface. `ControllerGetCapabilities` tells the Controller Service Interface list provided by that Plugin. `NodeGetCapabilities` tells the Node Service Interface list provided by that Plugin. CO identifies and controls Volume's Lifecycle through information obtained through `ControllerGetCapabilities` and `NodeGetCapabilities`.
 
 ## 2. References
 

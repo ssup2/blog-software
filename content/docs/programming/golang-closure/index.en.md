@@ -40,7 +40,7 @@ func main() {
 
 However, since Golang supports closures, a closure is formed when the `nextFunc()` function ends, and the `i` parameter and `j` local variable are stored in the formed closure. Here, forming a closure means copying variables stored on the stack to the **heap** and storing and managing them. Therefore, the `i` parameter and `j` local variable are also stored on the heap. Therefore, the function returned by the `nextFunc()` function operates through variables stored in the closure.
 
-In [Code 1], the next10 and next20 variables each store functions returned by the function nextFunc(), so separate closures are formed for each. They then operate using variables stored in each closure. The closure of the next10 variable has `j = 0, i = 10` stored. Since the value of j increases each time the next10 variable is called, the values `11, 12, 13` are output. The closure of the next20 variable has `j = 0, i = 20` stored. Since the value of j increases each time the next20 variable is called, the values `21, 22, 23` are output.
+In [Code 1], the `next10` and `next20` variables each store functions returned by the function `nextFunc()`, so separate closures are formed for each. They then operate using variables stored in each closure. The closure of the `next10` variable has `j = 0, i = 10` stored. Since the value of `j` increases each time the `next10` variable is called, the values `11, 12, 13` are output. The closure of the `next20` variable has `j = 0, i = 20` stored. Since the value of `j` increases each time the `next20` variable is called, the values `21, 22, 23` are output.
 
 ```golang {caption="[Code 2] Golang Closure to Replace Global Variables", linenos=table}
 package main
@@ -60,7 +60,7 @@ func main() {
 }
 ```
 
-[Code 2] shows how to replace global variables using closures. By storing variables in closures, you can reduce the use of global variables. [Code 2] shows an example of allocating and using an integer slice in the closure of the `arrayFunc()` function.
+[Code 2] shows how to replace global variables using closures. By storing variables in closures, you can reduce the use of global variables. [Code 2] shows an example of allocating and using an integer slice in the closure of the `arryFunc()` function.
 
 ## 2. References
 

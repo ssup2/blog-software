@@ -20,19 +20,19 @@ Primary Key는 Table에서 반드시 고유한 값을 가져야 한다. Primary 
 
 #### 1.2.1. Partition Key
 
-Partition Key는 이름 그대로 Item이 위치할 Disk의 Partition를 결정하는 Key이다. [Figure 1]에서 "USER#1111"를 Partition Key로 갖는 3개의 Item은 모두 동일한 Disk의 Partition에 위치하게 된다. DynamoDB는 Parition Key를 기반으로 **Consistent Hashing**을 이용하여 Disk의 Partition을 결정하는 것으로 알려져 있다.
+Partition Key는 이름 그대로 Item이 위치할 Disk의 Partition를 결정하는 Key이다. [Figure 1]에서 `USER#1111`를 Partition Key로 갖는 3개의 Item은 모두 동일한 Disk의 Partition에 위치하게 된다. DynamoDB는 Parition Key를 기반으로 **Consistent Hashing**을 이용하여 Disk의 Partition을 결정하는 것으로 알려져 있다.
 
 DynamoDB의 성능을 끌어올리기 위해서는 Item들을 여러 Disk의 Parition으로 분배하여 각 Disk Partition의 성능을 이끌어내야 한다. 따라서 Partition Key를 잘 설계하여 Item들이 다수의 Disk Partition으로 골고루 분배되도록 설계해야 한다. 만약 요청이 하나의 Partition Key 또는 하나의 Disk Partition으로 쏠릴경우 Throttling이 발생하여 일시적으로 Data Read/Write 동작이 수행되지 않을 수 있다.
 
-Partition Key는 "=", "!="과 같은 비교 연산자만 이용할 수 있다.
+Partition Key는 `=`, `!=`과 같은 비교 연산자만 이용할 수 있다.
 
 #### 1.2.2. Sort Key
 
-Sort Key는 이름 그대로 Disk 내부의 Partition에서 Column을 정렬하는데 이용하는 Key이다. Sort Key를 기반으로 내부적으로 Index를 생성하기 때문에 비교 연산자와 ">", "<="과 같은 범위 연산를 이용할 수 있다. 따라서 DynamoDB에서 정렬과 같은 동작을 수행하기 위해서는 반드시 Sort Key를 활용해야 한다.
+Sort Key는 이름 그대로 Disk 내부의 Partition에서 Column을 정렬하는데 이용하는 Key이다. Sort Key를 기반으로 내부적으로 Index를 생성하기 때문에 비교 연산자와 `>`, `<=`과 같은 범위 연산를 이용할 수 있다. 따라서 DynamoDB에서 정렬과 같은 동작을 수행하기 위해서는 반드시 Sort Key를 활용해야 한다.
 
 ### 1.3. Attribute
 
-Attribute는 Table의 **Column** 역할을 수행한다. 각 Item마다 다른 Attribute를 갖을 수 있다. [Figure 1]에서 첫번째 Item에서는 "Email Address", "Total Amount", "Phone"을 Attribute를 갖고 있고, 두번째 Item에서는 "Purchase Price", "Purchase Count"를 Attribute로 가지고 있다. 서로 다른 Attribute를 갖고 있는 것을 확인할 수 있다.
+Attribute는 Table의 **Column** 역할을 수행한다. 각 Item마다 다른 Attribute를 갖을 수 있다. [Figure 1]에서 첫번째 Item에서는 `Email Address`, `Total Amount`, `Phone`을 Attribute를 갖고 있고, 두번째 Item에서는 `Purchase Price`, `Purchase Count`를 Attribute로 가지고 있다. 서로 다른 Attribute를 갖고 있는 것을 확인할 수 있다.
 
 일반적인 Attribute를 대상으로는 비교 연산자, 또는 범위 연산자를 이용할 수 없고, **LSI (Local Secondary Index)** 또는 **GSI** (Global Secondary Index)와 같은 Secondary Index를 생성하고 이용해야 한다.
 
@@ -44,9 +44,9 @@ Secondary Index는 Table 생성시 Sort Key로 인해서 생성되는 Index와 �
 
 {{< figure caption="[Figure 1] DynamoDB LSI" src="images/aws-dynamodb-lsi.png" width="800px" >}}
 
-[Figure 2]은 [Figure 1]의 Table을 Base Table로 하여 생성한 LSI의 예제를 나타내고 있다. LSI의 Partition Key는 반드시 Base Table의 Partition Key와 동일해야 한다. 하지만 Sort Key의 경우에는 Base Table의 임의의 Attribute를 선택하여 이용할 수 있다. [Figure 2]에서도 [Figure 1]과 Partition Key는 "PK"로 동일하지만, Sort Key는 Base Table의 "Created Date" Attribute를 "LSI_SK"라는 이름으로 이용하고 있다.
+[Figure 2]은 [Figure 1]의 Table을 Base Table로 하여 생성한 LSI의 예제를 나타내고 있다. LSI의 Partition Key는 반드시 Base Table의 Partition Key와 동일해야 한다. 하지만 Sort Key의 경우에는 Base Table의 임의의 Attribute를 선택하여 이용할 수 있다. [Figure 2]에서도 [Figure 1]과 Partition Key는 `PK`로 동일하지만, Sort Key는 Base Table의 `Created Date` Attribute를 `LSI_SK`라는 이름으로 이용하고 있다.
 
-LSI 구성시 Base Table의 전체 또는 일부 Attribute들을 Projection 수행을 통해서 LSI의 Projected Attribute로 가져올 수 있다. [Figure 2]에서는 "Email Address", "Purchase Price", "Purchase Count", "Count" 4개의 Attribute를 Projected Attribute로 이용하고 있다. LSI의 경우에는 Projected Attribute로 존재하지 않더라도 Base Table에서 Attribute를 가져올 수 있는 장점을 가지고 있다. 하지만 Base Table을 한번더 읽으면서 비용이 추가적으로 발생하고 성능도 느려지는 문제가 있기 때문에, LSI를 이용하는 경우에는 가능하면 Projected Attribute만 이용하는 것이 권장된다.
+LSI 구성시 Base Table의 전체 또는 일부 Attribute들을 Projection 수행을 통해서 LSI의 Projected Attribute로 가져올 수 있다. [Figure 2]에서는 `Email Address`, `Purchase Price`, `Purchase Count`, `Count` 4개의 Attribute를 Projected Attribute로 이용하고 있다. LSI의 경우에는 Projected Attribute로 존재하지 않더라도 Base Table에서 Attribute를 가져올 수 있는 장점을 가지고 있다. 하지만 Base Table을 한번더 읽으면서 비용이 추가적으로 발생하고 성능도 느려지는 문제가 있기 때문에, LSI를 이용하는 경우에는 가능하면 Projected Attribute만 이용하는 것이 권장된다.
 
 LSI의 Read 동작은 Base Table의 RCU (Read Capacity Unit)를 소모한다. Base Table의 Write 동작이 발생하면 LSI에도 Write된 내용이 반영되며 이경우에도 Base Table의 WCU (Write Capacity Unit)를 소모하며, Base Table, LSI 두번 Write를 수행하기 때문에 WCU도 두배 많이 소모된다.
 

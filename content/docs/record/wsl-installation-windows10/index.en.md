@@ -67,7 +67,7 @@ White=168,153,132
 BoldWhite=235,219,178
 ```
 
-Create the %APPDATA%\wsltty\themes\grubbox file and save it with the content from [File 1] to configure the grubbox theme for use in wsltty.
+Create the `%APPDATA%\wsltty\themes\grubbox` file and save it with the content from [File 1] to configure the grubbox theme for use in wsltty.
 
 ``` {caption="[File 2] WSLtty Config", linenos=table}
 # To use common configuration in %APPDATA%\mintty, simply remove this file
@@ -77,7 +77,7 @@ FontHeight=10
 AllowSetSelection=yes
 ```
 
-Modify the %APPDATA%\wsltty\config file with the content from [File 2].
+Modify the `%APPDATA%\wsltty\config` file with the content from [File 2].
 
 ## 5. References
 

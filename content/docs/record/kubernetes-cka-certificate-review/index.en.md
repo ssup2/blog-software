@@ -28,9 +28,9 @@ title: CKA Certificate Exam Review
 
 ## 3. Pre-Exam Checklist
 
-* Verify kubectl bash autocompletion
+* Verify `kubectl` bash autocompletion
   * https://kubernetes.io/docs/reference/kubectl/cheatsheet/
-* Verify tmux functionality
+* Verify `tmux` functionality
   * https://linuxize.com/post/getting-started-with-tmux/
 
 ## 4. Commands to Know During the Exam
@@ -39,9 +39,9 @@ title: CKA Certificate Exam Review
   * ctrl + insert
 * Windows Paste
   * shift + insert
-* kubectl
-  * Check Resource API Version: kubectl api-resources
-  * Check Resource Spec/Status: kubectl explain --recursive <resource>
+* `kubectl`
+  * Check Resource API Version: `kubectl api-resources`
+  * Check Resource Spec/Status: `kubectl explain --recursive <resource>`
 
 ## 5. Exam Review
 

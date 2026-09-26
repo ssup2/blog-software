@@ -34,7 +34,7 @@ Build an ODROID-H2 Cluster for Ceph and OpenStack installation.
 
 {{< figure caption="[Figure 3] OpenStack Configuration on ODROID-H2 Cluster" src="images/openstack.png" width="1000px" >}}
 
-[Figure 3] shows the components required for OpenStack configuration. Node01 is used as OpenStack's Controller Node and Network Node, and Node02 and Node03 are used as OpenStack's Compute Nodes. Since Node01 performs the role of OpenStack's Network Node, it has an additional network interface (enx88366cf9f9ed) for OpenStack's external network. No IP is assigned to this network interface. NAT network is used as the external network (provider network). Private network is used for guest (tenant network) and management network.
+[Figure 3] shows the components required for OpenStack configuration. Node01 is used as OpenStack's Controller Node and Network Node, and Node02 and Node03 are used as OpenStack's Compute Nodes. Since Node01 performs the role of OpenStack's Network Node, it has an additional network interface (`enx88366cf9f9ed`) for OpenStack's external network. No IP is assigned to this network interface. NAT network is used as the external network (provider network). Private network is used for guest (tenant network) and management network.
 
 ## 2. References
 

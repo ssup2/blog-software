@@ -9,7 +9,7 @@ The Sidecar Container Pattern is used in various ways in Kubernetes environments
 * It was not possible to specify dependency relationships between Sidecar Containers and App Containers. It was impossible to make Sidecar Containers start first and then App Containers start, or to make App Containers die first and Sidecar Containers die later.
 * There was a problem where Pods would not terminate even if App Containers terminated normally, as long as Sidecar Containers did not terminate. This was particularly problematic in Job Pods performing Job workloads.
 
-To solve these problems with the Sidecar Container Pattern, Kubernetes released the **Sidecar Container** feature. It is available from `version 1.28`. Kubernetes' Sidecar Container feature has the following characteristics:
+To solve these problems with the Sidecar Container Pattern, Kubernetes released the **Sidecar Container** feature. It is available from version 1.28. Kubernetes' Sidecar Container feature has the following characteristics:
 
 * Sidecar Containers start before App Containers start. When there are multiple Sidecar Containers, they start one by one according to the manifest order.
 * When a Pod terminates, App Containers terminate first, and Sidecar Containers terminate in reverse order of creation. That is, they terminate in reverse order of the manifest.
@@ -40,7 +40,7 @@ spec:
 
 [File 1] shows a simple Sidecar Container example. In Kubernetes, Sidecar Containers are considered **special Init Containers**. Therefore, to declare Sidecar Containers within a Pod, they must be defined under `initContainers`, and among Init Containers, those with `restartPolicy` set to `Always` are considered Sidecar Containers. If `restartPolicy` is not set or not set to `Always`, they are considered regular Init Containers that run briefly before App Containers start.
 
-Since Sidecar Containers have `restartPolicy` set to `Always`, they continue to restart repeatedly even if terminated for any reason, and operate independently of App Containers. Unlike regular Init Containers, Sidecar Containers can have **Probe** settings. They automatically restart when Liveness Probe fails, and change Pod status to non-**Ready** when Readiness Probe fails, so care must be taken when configuring Readiness Probe.
+Since Sidecar Containers have `restartPolicy` set to `Always`, they continue to restart repeatedly even if terminated for any reason, and operate independently of App Containers. Unlike regular Init Containers, Sidecar Containers can have **Probe** settings. They automatically restart when Liveness Probe fails, and change Pod status to non-`Ready` when Readiness Probe fails, so care must be taken when configuring Readiness Probe.
 
 ### 1.1. Verifying Sidecar Container Creation and Termination Order
 
@@ -98,7 +98,7 @@ LAST SEEN   TYPE     REASON      OBJECT                                MESSAGE
 
 [Shell 1] shows an example of creating and deleting the Pod defined in [File 2] and checking events. Since the `first-sidecar` container is defined above the `second-sidecar` container, it can be confirmed through events that the `first-sidecar` container is created first, the `second-sidecar` container is created later, and then the `app` container is created.
 
-When a Pod terminates, events show that Killing events occur simultaneously for each container, but the actual termination time of each container cannot be confirmed. The actual termination time of each container can be confirmed through container logs. [Log 1] shows the logs of each container. It can be confirmed that the `app` container terminates first, the `second-sidecar` container terminates 3 seconds later, and the `first-sidecar` container terminates 3 seconds after that. It can be confirmed that creation and termination occur in reverse order.
+When a Pod terminates, events show that `Killing` events occur simultaneously for each container, but the actual termination time of each container cannot be confirmed. The actual termination time of each container can be confirmed through container logs. [Log 1] shows the logs of each container. It can be confirmed that the `app` container terminates first, the `second-sidecar` container terminates 3 seconds later, and the `first-sidecar` container terminates 3 seconds after that. It can be confirmed that creation and termination occur in reverse order.
 
 ### 1.2. Verifying Sidecar Container Termination After App Container Termination
 
@@ -246,7 +246,7 @@ Events:
   Warning  Unhealthy  2s (x11 over 71s)  kubelet            Readiness probe failed:
 ```
 
-[File 5] shows an example for verifying when a Sidecar Container's Readiness Probe fails. [Shell 4] shows an example of creating the Pod defined in [File 5] and checking Pod status and events. It can be confirmed that the Sidecar's Readiness Probe fails and the Pod status remains non-**Ready**.
+[File 5] shows an example for verifying when a Sidecar Container's Readiness Probe fails. [Shell 4] shows an example of creating the Pod defined in [File 5] and checking Pod status and events. It can be confirmed that the Sidecar's Readiness Probe fails and the Pod status remains non-`Ready`.
 
 ## 2. References
 

@@ -2,7 +2,7 @@
 title: iostat
 ---
 
-Block Device I/O 통계 정보와 CPU 통계 정보를 보여주는 **iostat** 사용법을 정리한다.
+Block Device I/O 통계 정보와 CPU 통계 정보를 보여주는 `iostat` 사용법을 정리한다.
 
 ## 1. iostat
 
@@ -24,8 +24,8 @@ sdb               0.01         0.29         0.00      25400          0
 
 Block Device의 I/O 통계 정보와 CPU 통계 정보를 출력한다. [Shell 1]은 `iostat`을 이용하여 Block Device의 I/O 통계 정보와 CPU 통계 정보를 출력하는 Shell의 모습을 나타내고 있다. 윗부분에는 CPU 통계 정보가 출력된다. 출력 내용은 아래와 같다.
 
-* `user` : nice 값이 적용되지 않은 Process들의 User Level 사용률을 나타낸다.
-* `nice` : nice 값이 적용된 Process들의 User Level 사용률을 나타낸다.
+* `user` : `nice` 값이 적용되지 않은 Process들의 User Level 사용률을 나타낸다.
+* `nice` : `nice` 값이 적용된 Process들의 User Level 사용률을 나타낸다.
 * `system` : Process들의 Kernel Level 사용률을 나타낸다.
 * `iowait` : I/O Wait로 인한 CPU 대기율을 나타낸다.
 * `steal` : Kernel이 Hypervisor가 제어하는 가상 머신 안에서 동작할 때, Hypervisor나 다른 가상 머신에 의해서 사용을 뺏긴(steal) CPU 사용률을 의미한다.
@@ -56,7 +56,7 @@ sda              4.83   35.87     43.79   7568.11     0.49    64.44   9.14  64.2
 sdb              0.01    0.00      0.28      0.00     0.00     0.00   0.00   0.00   22.65    0.00   0.00    28.86     0.00  16.74   0.02
 ```
 
-확장된 Block Device의 I/O 통계 정보와 CPU 통계 정보를 출력한다. [Shell 2]는 "iostat -x"을 이용하여 확장된 Block Device의 I/O 통계 정보와 CPU 통계 정보를 출력하는 Shell의 모습을 나타내고 있다. CPU 통계 정보는 [Shell 1]과 동일하며 Block Device의 I/O 통계 정보는 아래와 같다.
+확장된 Block Device의 I/O 통계 정보와 CPU 통계 정보를 출력한다. [Shell 2]는 `iostat -x`을 이용하여 확장된 Block Device의 I/O 통계 정보와 CPU 통계 정보를 출력하는 Shell의 모습을 나타내고 있다. CPU 통계 정보는 [Shell 1]과 동일하며 Block Device의 I/O 통계 정보는 아래와 같다.
 
 * `r/s` : 초당 완료된 Read 요청 개수를 의미한다.
 * `w/s` : 초당 완료된 Write 요청 개수를 의미한다.

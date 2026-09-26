@@ -11,10 +11,10 @@ title: KVM, QEMU 설치, 실행 / Arndale 환경
 * **VM on KVM** : Ubuntu 14.04LTS 32bit, root User
 * **Cross compiler** : arm-linux-gnueabihf-4.9.3
 * Network 192.168.0.xxx (NAT)
-  * **HostOS** : 192.168.0.150
-  * `br0` : 192.168.0.200
-  * **GuestOS-01** : 192.168.0.160, **GuestOS-02** : 192.168.0.161
-  * `tap0` : 192.168.0.201, `tap1` : 192.168.0.202
+  * **HostOS** : `192.168.0.150`
+  * `br0` : `192.168.0.200`
+  * **GuestOS-01** : `192.168.0.160`, **GuestOS-02** : `192.168.0.161`
+  * `tap0` : `192.168.0.201`, `tap1` : `192.168.0.202`
 
 ## 2. Cross Compiler 설치
 
@@ -28,7 +28,7 @@ Kernel Build를 위한 Cross Compiler를 설치한다.
 PATH=$PATH:/usr/local/gcc-linaro-arm-linux-gnueabihf-4.8/bin
 ```
 
-/usr/local Directory에 압축을 풀고 ~/.bashrc 파일에 [File 1]의 내용을 추가하여, 어느 Directory에서나 Cross Compiler를 설치 할 수 있도록 한다.
+`/usr/local` Directory에 압축을 풀고 `~/.bashrc` 파일에 [File 1]의 내용을 추가하여, 어느 Directory에서나 Cross Compiler를 설치 할 수 있도록 한다.
 
 ## 3. Ubuntu Package 설치
 
@@ -133,7 +133,7 @@ $ cd /mnt
 $ qemu-debootstrap --arch=armhf trusty .
 ```
 
-debootstrap을 이용하여 기본 Rootfs을 구성한다.
+`debootstrap`을 이용하여 기본 Rootfs을 구성한다.
 
 ```shell
 $ vim etc/apt/sources.list
@@ -238,8 +238,8 @@ QEMU를 Build 한다.
 
 uSD Card의 Partiton을 아래와 같이 구성한다. 
 
-* 0 ~ 2M, 2M, No Filesystem: Bootloader (bl1, spl, U-boot)
-* `2M ~ 18M`, `16M`, `ext2`, `boot` : uImage, exynos5250-arndale.dtb
+* `0 ~ 2M`, `2M`, No Filesystem: Bootloader (bl1, spl, U-boot)
+* `2M ~ 18M`, `16M`, `ext2`, `boot` : `uImage`, `exynos5250-arndale.dtb`
 * `18M ~ rest`, `ext3`, `root` : Root-Filesystem
 
 ## 14. uSD Card에 u-boot Fusing
@@ -267,7 +267,7 @@ uSD Card에 Host Root Filesystem을 복사한다.
 
 ## 16. binary, image, dtb 복사
 
-Host Kernel uImage, exynos5250-arndale.dtb 파일을 uSD Card boot Partition에 복사한다. Host Guest zImage, qemu-system-arm, rootfs-host.img, rootfs-guest-01.img, rootfs-guest-02.img, guest-vexpress.dtb 파일을 root Partition에 복사한다.
+Host Kernel `uImage`, `exynos5250-arndale.dtb` 파일을 uSD Card `boot` Partition에 복사한다. Host Guest `zImage`, `qemu-system-arm`, `rootfs-host.img`, `rootfs-guest-01.img`, `rootfs-guest-02.img`, `guest-vexpress.dtb` 파일을 `root` Partition에 복사한다.
 
 ## 17. u-boot 설정
 
@@ -307,7 +307,7 @@ Host에 Guest를 위한 Bridge를 설정한다.
 (Host)$ tightvncserver -nolisten tcp :1
 ```
 
-Host에서 VNC Server를 실행한다. VNC Client를 통해서 192.168.0.150:1에 접속한다.
+Host에서 VNC Server를 실행한다. VNC Client를 통해서 `192.168.0.150:1`에 접속한다.
 
 ## 21. Guest 실행
 

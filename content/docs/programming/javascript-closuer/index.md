@@ -33,7 +33,7 @@ console.log(next20()); // 23
 
 하지만 JavaScript는 Closure를 지원하기 때문에 `innerFunc()` 함수가 `outerFunc()` 함수의 종료와 함께 객채화가 되는 순간 Closure가 구성되고 `i` Parameter와 `j` 지역변수는 Closure에 저장된다. 여기서 Closure가 구성된다는 의미는 Stack에 저장되어 변수들을 **Heap**에 복사하여 저장하고 관리된다는 의미를 뜻한다. 따라서 `i` Parameter와 `j` 지역변수도 Heap에 저장된다. 그리고 객체화된 `innerFunc()` 함수는 Closure (Heap)에 저장된 `i` Parameter와 `j` 지역변수를 이용하여 동작하게 된다.
 
-[Code 1]에서 `next10`, `next20` 변수는 함수 `outerFunc()`에 의해서 객체화된 함수 `innerFunc()`를 저장하고 있다. 2개의 객채화된 `innerFunc`가 존재하기 때문에 2개의 Clousre가 구성된다. `next10` 변수의 Closure에는 `j = 0, i = 10` 값이 저장되어 있다. `next10` 변수를 호출 할 때마다 `j`의 값이 증가하기 때문에 `11, 12, 13` 값이 출력된다. `next20` 변수의 Closure에는 `j = 0, i = 20` 값이 저장되어 있다. `next20` 변수를 호출 할 때마다 j 변수의 값이 증가하기 때문에 `21, 22, 23` 값이 출력된다.
+[Code 1]에서 `next10`, `next20` 변수는 함수 `outerFunc()`에 의해서 객체화된 함수 `innerFunc()`를 저장하고 있다. 2개의 객채화된 `innerFunc`가 존재하기 때문에 2개의 Clousre가 구성된다. `next10` 변수의 Closure에는 `j = 0, i = 10` 값이 저장되어 있다. `next10` 변수를 호출 할 때마다 `j`의 값이 증가하기 때문에 `11, 12, 13` 값이 출력된다. `next20` 변수의 Closure에는 `j = 0, i = 20` 값이 저장되어 있다. `next20` 변수를 호출 할 때마다 `j` 변수의 값이 증가하기 때문에 `21, 22, 23` 값이 출력된다.
 
 [Code 1]을 통해서 Closure는 **정보 은닉화**가 필요할 경우에도 이용가능한 것을 확인할 수 있다. [Code 1]에서 객채화된 함수 `innerFunc()`를 저장하고 있는 `next10`, `next20` 변수는 Closure에 저장된 값을 이용할 뿐이지, Closure에 저장된 값을 명시적으로 접근하지 않는걸 알 수 있다.
 

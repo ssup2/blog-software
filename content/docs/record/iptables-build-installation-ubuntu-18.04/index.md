@@ -10,7 +10,7 @@ Ubuntu 18.04에서는 iptables 1.6.1 Version 까지만 Ubuntu Package로 제공�
 $ apt install build-essential
 ```
 
-iptables Bulid에 필요한 Ubuntu Package를 설치한다.
+iptables Build에 필요한 Ubuntu Package를 설치한다.
 
 ## 2. iptables Build & 설치
 

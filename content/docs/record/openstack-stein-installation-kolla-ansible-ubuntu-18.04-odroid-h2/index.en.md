@@ -125,7 +125,7 @@ network:
     version: 2
 ```
 
-Configure the IP of the Node04 interface.
+Configure the IP of the Node09 interface.
 
 ## 4. Package Installation
 
@@ -165,7 +165,7 @@ If the Open vSwitch package is installed, remove it to eliminate Open vSwitch ru
 (All Node)$ apt-get remove --purge netplan.io
 ```
 
-Install ifupdown and remove netplan.
+Install `ifupdown` and remove `netplan`.
 
 ## 5. Ansible Configuration
 
@@ -204,7 +204,7 @@ Generate an SSH key on the Deploy Node. Enter a blank for the passphrase (passwo
 (Deploy)$ ssh-copy-id root@10.0.0.19
 ```
 
-Copy the generated SSH public key to the ~/.ssh/authorized_keys file of the remaining nodes using the ssh-copy-id command.
+Copy the generated SSH public key to the `~/.ssh/authorized_keys` file of the remaining nodes using the `ssh-copy-id` command.
 
 ```text {caption="[Text 5] Deploy Node - /etc/hosts", linenos=table}
 ...
@@ -215,7 +215,7 @@ Copy the generated SSH public key to the ~/.ssh/authorized_keys file of the rema
 ...
 ```
 
-Modify the /etc/hosts file on the Deploy Node as shown in [Text 5].
+Modify the `/etc/hosts` file on the Deploy Node as shown in [Text 5].
 
 ```text {caption="[Text 6] Deploy Node - /etc/ansible/ansible.cfg", linenos=table}
 ...
@@ -226,7 +226,7 @@ forks=100
 ...
 ```
 
-Modify the /etc/ansible/ansible.cfg file on the Deploy Node as shown in [Text 6].
+Modify the `/etc/ansible/ansible.cfg` file on the Deploy Node as shown in [Text 6].
 
 ## 6. Kolla-Ansible Configuration
 
@@ -237,7 +237,7 @@ Modify the /etc/ansible/ansible.cfg file on the Deploy Node as shown in [Text 6]
 (Deploy)$ cp -r /usr/local/share/kolla-ansible/etc_examples/kolla/* /etc/kolla
 ```
 
-Copy inventory files. Also copy the `global.yaml` config file and the `passwords.yml` file containing password information.
+Copy inventory files. Also copy the `globals.yml` config file and the `passwords.yml` file containing password information.
 
 ```text {caption="[Text 7] Deploy Node - ~/kolla-ansible/multinode", linenos=table}
 # These initial groups are the only groups required to be modified. The
@@ -288,7 +288,7 @@ haproxy
 ...
 ```
 
-Configure the Ansible inventory. Change the ~/kolla-ansible/multinode file on the Deploy Node to the contents of [Text 7]. Only the [control], [network], [external-compute], [monitoring], [storage], [deployment] sections at the top of the ~/kolla-ansible/multinode file have been modified to match the ODROID-H2 cluster environment, and the rest of the file's lower sections remain with default settings.
+Configure the Ansible inventory. Change the `~/kolla-ansible/multinode` file on the Deploy Node to the contents of [Text 7]. Only the `[control]`, `[network]`, `[external-compute]`, `[monitoring]`, `[storage]`, `[deployment]` sections at the top of the `~/kolla-ansible/multinode` file have been modified to match the ODROID-H2 cluster environment, and the rest of the file's lower sections remain with default settings.
 
 ```yaml {caption="[Text 8] Deploy Node - /etc/kolla/passwords.yml", linenos=table}
 # Database
@@ -522,7 +522,7 @@ grafana_database_password: admin
 grafana_admin_password: admin
 ```
 
-Enter password information used by OpenStack. Modify the /etc/kolla/passwords.yml file on the Deploy Node as shown in [Text 8]. Most passwords are set to **admin**.
+Enter password information used by OpenStack. Modify the `/etc/kolla/passwords.yml` file on the Deploy Node as shown in [Text 8]. Most passwords are set to `admin`.
 
 ```yaml {caption="[Text 9] Deploy Node - /etc/kolla/globals.yml", linenos=table}
 # Kolla
@@ -588,13 +588,13 @@ ceph_enable_cache: "no"
 #octavia_amp_secgroup_list:
 ```
 
-Configure Kolla-Ansible. Modify the /etc/kolla/globals.yml file on the Deploy Node as shown in [Text 9]. Since Octavia can only be configured after running OpenStack at least once, the Octavia settings are left commented out.
+Configure Kolla-Ansible. Modify the `/etc/kolla/globals.yml` file on the Deploy Node as shown in [Text 9]. Since Octavia can only be configured after running OpenStack at least once, the Octavia settings are left commented out.
 
 ```shell
 (Deploy)$ kolla-ansible -i ~/kolla-ansible/multinode bootstrap-servers
 ```
 
-Install the required Ubuntu and Python packages on each node using Kolla Ansible bootstrap-servers.
+Install the required Ubuntu and Python packages on each node using Kolla Ansible `bootstrap-servers`.
 
 ## 7. Docker Configuration
 
@@ -606,7 +606,7 @@ Install the required Ubuntu and Python packages on each node using Kolla Ansible
 (Registry)$ docker run -d -p 5000:5000 --restart=always --name registry_private -v ~/auth:/auth -e "REGISTRY_AUTH=htpasswd" -e "REGISTRY_AUTH_HTPASSWD_REALM=Registry Realm" -e "REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd" registry:2
 ```
 
-Start the Docker Registry on the Registry Node. Set ID/Password to admin/admin.
+Start the Docker Registry on the Registry Node. Set ID/Password to `admin`/`admin`.
 
 ### 7.2. All Node
 
@@ -620,7 +620,7 @@ ExecStart=/usr/bin/dockerd --insecure-registry 10.0.0.19:5000 --log-opt max-file
 (All)$ service docker restart
 ```
 
-Register the Docker Registry running on the Registry Node as an insecure registry for all Docker daemons running on nodes. Create the /etc/systemd/system/docker.service.d/kolla.conf file on all nodes with the contents of [Text 10], then restart Docker.
+Register the Docker Registry running on the Registry Node as an insecure registry for all Docker daemons running on nodes. Create the `/etc/systemd/system/docker.service.d/kolla.conf` file on all nodes with the contents of [Text 10], then restart Docker.
 
 ## 8. Octavia Certificate Configuration
 
@@ -644,7 +644,7 @@ Generate certificates used by Octavia on the Network Node.
 (Ceph)$ printf 'KERNEL=="nvme0n1p1", SYMLINK+="nvme0n11"\nKERNEL=="nvme0n1p2", SYMLINK+="nvme0n12"' > /etc/udev/rules.d/local.rules
 ```
 
-Label the /dev/nvme0n1 block device on Ceph nodes with KOLLA_CEPH_OSD_BOOTSTRAP_BS. Kolla-Ansible is configured to use block devices labeled with KOLLA_CEPH_OSD_BOOTSTRAP_BS for OSDs. Due to a bug in Kolla-Ansible's role, when using NVME as Ceph storage, there is a bug that references incorrect partition names. To resolve this issue, create partition symbolic links via udev.
+Label the `/dev/nvme0n1` block device on Ceph nodes with `KOLLA_CEPH_OSD_BOOTSTRAP_BS`. Kolla-Ansible is configured to use block devices labeled with `KOLLA_CEPH_OSD_BOOTSTRAP_BS` for OSDs. Due to a bug in Kolla-Ansible's role, when using NVME as Ceph storage, there is a bug that references incorrect partition names. To resolve this issue, create partition symbolic links via udev.
 
 ## 10. Kolla Container Image Creation and Push
 
@@ -690,7 +690,7 @@ export OS_IDENTITY_API_VERSION=3
 export OS_IMAGE_API_VERSION=2
 ```
 
-After initialization is complete, you can check the /etc/kolla/admin-openrc.sh file with the contents of [Shell 1].
+After initialization is complete, you can check the `/etc/kolla/admin-openrc.sh` file with the contents of [Shell 1].
 
 ## 13. External Network and Octavia Network Creation
 
@@ -703,7 +703,7 @@ After initialization is complete, you can check the /etc/kolla/admin-openrc.sh f
 (Deploy)$ openstack network delete demo-net
 ```
 
-Delete all networks and routers created by the init-runonce script.
+Delete all networks and routers created by the `init-runonce` script.
 
 ```shell
 (Deploy)$ . /etc/kolla/admin-openrc.sh
@@ -760,7 +760,7 @@ After downloading the Ubuntu image, configure the root account and SSHD settings
 (Deploy)$ openstack image create --disk-format qcow2 --container-format bare --public --tag amphora --file ./amphora-x64-haproxy.qcow2 ubuntu-16.04-amphora
 ```
 
-Create the Octavia Amphora image as the octavia user and register it in Glance. The tag must be set to amphora.
+Create the Octavia Amphora image as the `octavia` user and register it in Glance. The tag must be set to `amphora`.
 
 ## 15. Octavia Flavor, Keypair, Security Group Configuration and Octavia Deployment
 
@@ -770,7 +770,7 @@ Create the Octavia Amphora image as the octavia user and register it in Glance. 
 (Deploy)$ openstack flavor create --id 100 --vcpus 2 --ram 2048 --disk 10 "m1.amphora" --public
 ```
 
-Create a flavor for the Octavia Amphora VM as the octavia user. Since the Flavor ID is planned to be set to 100, the Flavor ID must be created as 100.
+Create a flavor for the Octavia Amphora VM as the `octavia` user. Since the Flavor ID is planned to be set to `100`, the Flavor ID must be created as `100`.
 
 ```shell
 (Deploy)$ . /etc/kolla/admin-openrc.sh
@@ -778,7 +778,7 @@ Create a flavor for the Octavia Amphora VM as the octavia user. Since the Flavor
 (Deploy)$ openstack keypair create -- octavia_ssh_key 
 ```
 
-Create the octavia_ssh_key keypair as the octavia user. The keypair name must be created as octavia_ssh_key.
+Create the `octavia_ssh_key` keypair as the `octavia` user. The keypair name must be created as `octavia_ssh_key`.
 
 ```shell
 (Deploy)$ . /etc/kolla/admin-openrc.sh
@@ -789,7 +789,7 @@ Create the octavia_ssh_key keypair as the octavia user. The keypair name must be
 (Deploy)$ openstack security group rule create --protocol tcp --dst-port 9443 octavia-sec
 ```
 
-Create the octavia-sec security group as the octavia user.
+Create the `octavia-sec` security group as the `octavia` user.
 
 ```yaml {caption="[Text 11] Deploy Node - /etc/kolla/globals.yml", linenos=table}
 ...
@@ -800,7 +800,7 @@ octavia_amp_boot_network_list: "[octavia-net Network ID]"
 octavia_amp_secgroup_list: "[octavia-sec Security Group ID]"
 ```
 
-Modify the /etc/kolla/globals.yml file as shown in [Text 11] to configure Octavia by removing the Octavia configuration comments. Enter the ID of the octavia-net network created above in octavia_amp_boot_network_list. Enter the ID of the octavia-sec security group created above in octavia_amp_secgroup_list.
+Modify the `/etc/kolla/globals.yml` file as shown in [Text 11] to configure Octavia by removing the Octavia configuration comments. Enter the ID of the `octavia-net` network created above in `octavia_amp_boot_network_list`. Enter the ID of the `octavia-sec` security group created above in `octavia_amp_secgroup_list`.
 
 ```shell
 (Deploy)$ kolla-ansible -i ~/kolla-ansible/multinode deploy -t octavia
@@ -829,11 +829,11 @@ Initialize OSD blocks on all Ceph nodes.
 
 Accessible dashboard information is as follows. Listed in order of URL, ID, Password.
 
-* **Horizon** : http://10.0.0.20:80, admin, admin
-* **RabbitMQ** : http://10.0.0.20:15672, openstack, admin
+* **Horizon** : http://10.0.0.20:80, `admin`, `admin`
+* **RabbitMQ** : http://10.0.0.20:15672, `openstack`, `admin`
 * **Prometheus** : http://10.0.0.20:9091
-* **Grafana** : http://10.0.0.20:3000, admin, admin
-* **Alertmanager** : http://10.0.0.20:9093, admin, admin
+* **Grafana** : http://10.0.0.20:3000, `admin`, `admin`
+* **Alertmanager** : http://10.0.0.20:9093, `admin`, `admin`
 
 ## 18. Debugging
 

@@ -23,7 +23,7 @@ $ dmesg -H
 [  +0.000000] x86/fpu: Supporting XSAVE feature 0x010: 'MPX CSR'
 ```
 
-dmesg is a tool that shows the contents of kernel logs stored in the Linux kernel's log ring buffer. [Shell 1] shows the output of `dmesg -H` displaying kernel logs. Content output by the printk() function in the Linux kernel is stored in the log ring buffer. Since the log ring buffer is located in kernel memory space, it disappears upon reboot. Also, if more logs than the size of the log ring buffer are stored, previous log content is overwritten and disappears.
+`dmesg` is a tool that shows the contents of kernel logs stored in the Linux kernel's log ring buffer. [Shell 1] shows the output of `dmesg -H` displaying kernel logs. Content output by the `printk()` function in the Linux kernel is stored in the log ring buffer. Since the log ring buffer is located in kernel memory space, it disappears upon reboot. Also, if more logs than the size of the log ring buffer are stored, previous log content is overwritten and disappears.
 
 ### 1.2. /var/log/kern.log
 
@@ -70,7 +70,7 @@ Jul 13 19:06:29 node09 sshd[2675]: Server listening on 0.0.0.0 port 22.
 Jul 13 19:06:29 node09 sshd[2675]: Server listening on :: port 22.
 ```
 
-journalctl is a tool that outputs the contents of various logs recorded by systemd-journald. Logs include kernel logs, service (daemon) logs, application logs, etc., and are stored in `/var/log/journal`. [Shell 4] shows the output of `journalctl -xu ssh` displaying ssh service log contents.
+`journalctl` is a tool that outputs the contents of various logs recorded by systemd-journald. Logs include kernel logs, service (daemon) logs, application logs, etc., and are stored in `/var/log/journal`. [Shell 4] shows the output of `journalctl -xu ssh` displaying `ssh` service log contents.
 
 ## 2. References
 

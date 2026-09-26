@@ -12,7 +12,7 @@ title: CKAD 자격증 시험 정리/후기
   * https://kubernetes.io/blog/
   * 나머지 Site 참고 불가능
 * 시험 환경
-  * Kuberntes v1.21
+  * Kubernetes v1.21
 
 ## 2. 시험 준비
 
@@ -26,9 +26,9 @@ title: CKAD 자격증 시험 정리/후기
 
 ## 3. 시험전 확인
 
-* kubectl bash autocompletion 동작 확인
+* `kubectl` bash autocompletion 동작 확인
   * https://kubernetes.io/docs/reference/kubectl/cheatsheet/
-* tmux 동작 확인
+* `tmux` 동작 확인
   * https://linuxize.com/post/getting-started-with-tmux/
 
 ## 4. 시험중 알아야할 명렁어

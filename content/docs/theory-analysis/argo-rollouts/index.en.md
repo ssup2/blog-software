@@ -359,7 +359,7 @@ $ kubectl label namespace default istio-injection=enabled
 $ kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.28/samples/addons/prometheus.yaml
 ```
 
-[Shell 1] shows a script that configures the Test environment. It configures a Kubernetes Cluster using `kind` and installs Argo Rollouts. It installs Istio for Traffic Routing and enables Sidecar Injection in the default Namespace. It also installs Prometheus for testing AnalysisTemplate/AnalysisRun.
+[Shell 1] shows a script that configures the Test environment. It configures a Kubernetes Cluster using `kind` and installs Argo Rollouts. It installs Istio for Traffic Routing and enables Sidecar Injection in the `default` Namespace. It also installs Prometheus for testing AnalysisTemplate/AnalysisRun.
 
 ```yaml {caption="[Manifest 9] shell Pod Manifest", linenos=table}
 apiVersion: v1
@@ -383,7 +383,7 @@ spec:
 
 {{< figure caption="[Figure 2] Argo Rollouts Blue/Green Case" src="images/argo-rollouts-case-bluegreen.png" width="800px" >}}
 
-[Figure 2] diagrams a Test Case for Argo Rollouts Blue/Green deployment. After changing the Container Image twice, Promotion is performed, skipping `Revision 2` and performing Promotion to `Revision 3` at once. Because it is a Blue/Green deployment, the number of Pods for Green Version is maintained at 5, the same as the number of Pods for Blue Version. The `Preview` Kubernetes Service points to `Revision 1`, `Revision 2`, and `Revision 3` in order, and the `Active` Kubernetes Service points to `Revision 1` and then points to `Revision 3` after Promotion is completed.
+[Figure 2] diagrams a Test Case for Argo Rollouts Blue/Green deployment. After changing the Container Image twice, Promotion is performed, skipping Revision 2 and performing Promotion to Revision 3 at once. Because it is a Blue/Green deployment, the number of Pods for Green Version is maintained at 5, the same as the number of Pods for Blue Version. The Preview Kubernetes Service points to Revision 1, Revision 2, and Revision 3 in order, and the Active Kubernetes Service points to Revision 1 and then points to Revision 3 after Promotion is completed.
 
 ```yaml {caption="[Manifest 10] Blue/Green Test Case", linenos=table}
 apiVersion: argoproj.io/v1alpha1
@@ -626,9 +626,9 @@ Selector:                 app=mock-server,rollouts-pod-template-hash=6fcb56df9b
 
 {{< figure caption="[Figure 3] Canary Success Test Case" src="images/argo-rollouts-case-canary-success.png" width="1100px" >}}
 
-[Figure 3] diagrams a successful Test Case for Argo Rollouts Canary deployment. After changing the Container Image twice, Promotion is performed, skipping `Revision 2` and performing Promotion to `Revision 3` at once. Immediately after changing the Image, one Pod is created immediately due to Weight 20% setting, after Promotion is performed, Pods increase to 2 due to Weight 40% setting, and after 30 seconds, Pods increase to 5 due to Weight 100% setting.
+[Figure 3] diagrams a successful Test Case for Argo Rollouts Canary deployment. After changing the Container Image twice, Promotion is performed, skipping Revision 2 and performing Promotion to Revision 3 at once. Immediately after changing the Image, one Pod is created immediately due to Weight 20% setting, after Promotion is performed, Pods increase to 2 due to Weight 40% setting, and after 30 seconds, Pods increase to 5 due to Weight 100% setting.
 
-The `Canary` Kubernetes Service points to `Revision 1`, `Revision 2`, and `Revision 3` in order, and the `Stable` Kubernetes Service points to `Revision 1` and then points to `Revision 3` after Promotion is completed. The `Main` Service always points to all Revisions and distributes Traffic to Stable and Canary Versions.
+The Canary Kubernetes Service points to Revision 1, Revision 2, and Revision 3 in order, and the Stable Kubernetes Service points to Revision 1 and then points to Revision 3 after Promotion is completed. The Main Service always points to all Revisions and distributes Traffic to Stable and Canary Versions.
 
 ```yaml {caption="[Manifest 11] Canary Success Test Case"}
 apiVersion: argoproj.io/v1alpha1
@@ -941,7 +941,7 @@ Selector:                 app=mock-server,rollouts-pod-template-hash=6fcb56df9b
 
 {{< figure caption="[Figure 4] Canary with Undo and Abort Test Case" src="images/argo-rollouts-case-canary-undo-abort.png" width="1100px" >}}
 
-[Figure 4] diagrams an Undo and Abort Test Case for Argo Rollouts Canary deployment. After changing the Container Image three times, Undo is performed twice, and finally Abort is performed. The notable point is that when performing the first Undo, it does not go back to `Revision 2`, but a new `Revision 4` is created and only the Container Image is changed to Version `2.0.0`, and when performing the second Undo, a new `Revision 5` is created and only the Container Image is changed to Version `3.0.0`. That is, when performing Undo, it can be confirmed that it does not use the previous Revision but creates a new Revision and only changes the Container Image to the previous Version.
+[Figure 4] diagrams an Undo and Abort Test Case for Argo Rollouts Canary deployment. After changing the Container Image three times, Undo is performed twice, and finally Abort is performed. The notable point is that when performing the first Undo, it does not go back to Revision 2, but a new Revision 4 is created and only the Container Image is changed to Version `2.0.0`, and when performing the second Undo, a new Revision 5 is created and only the Container Image is changed to Version `3.0.0`. That is, when performing Undo, it can be confirmed that it does not use the previous Revision but creates a new Revision and only changes the Container Image to the previous Version.
 
 ```yaml {caption="[Manifest 12] Canary with Undo and Abort Test Case"}
 apiVersion: argoproj.io/v1alpha1
@@ -1215,7 +1215,7 @@ NAME                                     KIND        STATUS        AGE  INFO
 
 [Figure 5] diagrams a Traffic Routing Test Case using Istio Virtual Service. After changing the Container Image once, two Promotions are performed. Immediately after changing the Container Image, one Canary Version Pod is created immediately due to Weight 20% setting, after Promotion is performed, Canary Version Pods increase to 2 due to Weight 40% setting, and after performing Promotion once more, Canary Version Pods increase to 5 due to Weight 100% setting.
 
-And as the **Virtual Service's Weight** changes according to Weight, Traffic is distributed to Canary Version and Stable Version. The `Canary` Kubernetes Service points to `Revision 1` and `Revision 2` in order, and the `Stable` Kubernetes Service points to `Revision 1` and then points to `Revision 2` after Promotion is completed. Since Istio Virtual Service is used for Traffic Routing, the number of Pods for Stable Version is maintained at 5 in all steps.
+And as the **Virtual Service's Weight** changes according to Weight, Traffic is distributed to Canary Version and Stable Version. The Canary Kubernetes Service points to Revision 1 and Revision 2 in order, and the Stable Kubernetes Service points to Revision 1 and then points to Revision 2 after Promotion is completed. Since Istio Virtual Service is used for Traffic Routing, the number of Pods for Stable Version is maintained at 5 in all steps.
 
 ```yaml {caption="[Manifest 13] Canary with Istio Virtual Service Test Case"}
 apiVersion: argoproj.io/v1alpha1

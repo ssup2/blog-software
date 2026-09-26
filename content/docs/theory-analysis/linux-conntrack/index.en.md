@@ -18,12 +18,12 @@ tcp      6 7 CLOSE src=10.0.0.11 dst=10.0.0.19 sport=36892 dport=9093 src=10.0.0
 tcp      6 28 TIME-WAIT src=10.0.0.19 dst=10.0.0.19 sport=34306 dport=18080 src=10.0.0.19 dst=10.0.0.19 sport=18080 dport=34306 [ASSURED] mark=0 use=1
 ```
 
-Connection information managed by the conntrack Module can be checked through the conntrack command. conntrack manages 4 Tables: conntrack, expect, dying, and unconfirmed. The Table where Connection information is stored is determined according to Connection Status.
+Connection information managed by the conntrack Module can be checked through the `conntrack` command. `conntrack` manages 4 Tables: `conntrack`, `expect`, `dying`, and `unconfirmed`. The Table where Connection information is stored is determined according to Connection Status.
 
-* **conntrack** : Stores most Connection information. [Shell 1] shows the conntrack Table.
-* **expect** : Stores Connection information classified as Related Connections by Connection Tracking Helper.
-* **dying** : Stores Connection information that is expired or being deleted through the conntrack command.
-* **unconfirmed** : Refers to Connection information that Packets stored in the Kernel's Socket Buffer have, but have not yet been confirmed and therefore not stored in the conntrack Table. Connection information that Packets have is Confirmed when the Packet reaches the Postrouting Hook.
+* `conntrack` : Stores most Connection information. [Shell 1] shows the `conntrack` Table.
+* `expect` : Stores Connection information classified as Related Connections by Connection Tracking Helper.
+* `dying` : Stores Connection information that is expired or being deleted through the `conntrack` command.
+* `unconfirmed` : Refers to Connection information that Packets stored in the Kernel's Socket Buffer have, but have not yet been confirmed and therefore not stored in the `conntrack` Table. Connection information that Packets have is Confirmed when the Packet reaches the Postrouting Hook.
 
 ### 1.2. Connection Tracking Helper
 
@@ -58,7 +58,7 @@ iptables provides Connection State condition functions based on the conntrack Mo
 * `INVALID` : Refers to a state not belonging to any Connection.
 * `UNTRACKED` : Refers to a state where Connections are not tracked.
 
-[Shell 3] shows the process of setting a Rule through the iptables command that allows Packets coming in through Port 22 when they attempt to create a new Connection or communicate through an existing Connection. iptables also uses the conntrack Module when performing NAT. When NAT Rules are set in iptables, Reverse NAT in the opposite direction is automatically performed even if there is no Reverse NAT Rule in iptables, because iptables performs Reverse NAT **implicitly** based on Connection information from the conntrack Module.
+[Shell 3] shows the process of setting a Rule through the `iptables` command that allows Packets coming in through Port 22 when they attempt to create a new Connection or communicate through an existing Connection. iptables also uses the conntrack Module when performing NAT. When NAT Rules are set in iptables, Reverse NAT in the opposite direction is automatically performed even if there is no Reverse NAT Rule in iptables, because iptables performs Reverse NAT **implicitly** based on Connection information from the conntrack Module.
 
 ### 1.4. Max Connection Count
 

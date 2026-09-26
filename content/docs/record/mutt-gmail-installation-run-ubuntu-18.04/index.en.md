@@ -55,7 +55,7 @@ set charset = "utf-8"
 set record = ''
 ```
 
-Create the ~/.muttrc file with the content from [File 1].
+Create the `~/.muttrc` file with the content from [File 1].
 
 ## 5. Usage
 
@@ -65,8 +65,8 @@ $ mutt
 
 Run mutt. Shortcuts are as follows.
 
-* m: Compose a new mail message.
-* G: Fetch new messages.
+* `m`: Compose a new mail message.
+* `G`: Fetch new messages.
 
 ## 6. References
 

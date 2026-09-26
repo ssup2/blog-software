@@ -279,7 +279,7 @@ resources:
           socket_address: { address: 10.0.0.51, port_value: 9092 }   # TCP backend — its own port
 ```
 
-[Config 4] shows an example EDS configuration corresponding to the Endpoint part of [Figure 1]. The `cluster_name` of each ClusterLoadAssignment must match the Cluster name defined in CDS, which links the Cluster to the actual instance list. Requests to the `reviews-v1` Cluster are distributed across the two Endpoints `10.0.0.11:80` and `10.0.0.12:80`, and the `kafka` Cluster, a TCP Upstream, has the `10.0.0.51:9092` Endpoint.
+[Config 4] shows an example EDS configuration corresponding to the Endpoint part of [Figure 1]. The `cluster_name` of each `ClusterLoadAssignment` must match the Cluster name defined in CDS, which links the Cluster to the actual instance list. Requests to the `reviews-v1` Cluster are distributed across the two Endpoints `10.0.0.11:80` and `10.0.0.12:80`, and the `kafka` Cluster, a TCP Upstream, has the `10.0.0.51:9092` Endpoint.
 
 #### 1.1.5. SDS (Secret Discovery Service)
 
@@ -329,11 +329,11 @@ resources:
           local: { filename: "/etc/envoy/filter.wasm" }
 ```
 
-[Config 6] shows an ECDS example that delivers the actual configuration of `internal-wasm`, which the `internal-listener` of [Config 1] references via `config_discovery`. In the Listener's HTTP Filter slot, only a reference (name and type_url) is placed instead of the configuration body, and the actual Filter configuration is delivered separately as a TypedExtensionConfig Resource of the same name.
+[Config 6] shows an ECDS example that delivers the actual configuration of `internal-wasm`, which the `internal-listener` of [Config 1] references via `config_discovery`. In the Listener's HTTP Filter slot, only a reference (name and `type_url`) is placed instead of the configuration body, and the actual Filter configuration is delivered separately as a `TypedExtensionConfig` Resource of the same name.
 
 If the Filter configuration is Inlined inside the Listener, changing the Filter configuration also becomes a Listener change. Envoy cannot directly modify the configuration of a running Listener, so it creates a new Listener with the changed configuration and swaps it in. During this process, the connections handled by the old Listener go through a Drain and are all disconnected within a certain time. In other words, changing even one line of Filter configuration can break Long-lived connections on that Port.
 
-In contrast, with ECDS the Filter configuration is separated into an independent Resource outside the Listener, so on configuration updates the Listener stays intact and only the referenced configuration is replaced. Existing connections are unaffected, and the updated Filter configuration applies to new requests from then on. Just as RDS separated Routes from Listeners so that Route changes do not trigger Listener replacement, ECDS performs the same separation for Filter configuration. It is mainly used for Extensions with large or frequently changing configuration, such as Wasm Filters, and Istio's WasmPlugin CR being reflected this way is a representative example.
+In contrast, with ECDS the Filter configuration is separated into an independent Resource outside the Listener, so on configuration updates the Listener stays intact and only the referenced configuration is replaced. Existing connections are unaffected, and the updated Filter configuration applies to new requests from then on. Just as RDS separated Routes from Listeners so that Route changes do not trigger Listener replacement, ECDS performs the same separation for Filter configuration. It is mainly used for Extensions with large or frequently changing configuration, such as Wasm Filters, and Istio's `WasmPlugin` CR being reflected this way is a representative example.
 
 #### 1.1.7. ADS (Aggregated Discovery Service)
 

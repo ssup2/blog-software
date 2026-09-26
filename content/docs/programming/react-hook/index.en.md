@@ -35,7 +35,7 @@ ReactDOM.render(
 // Hello, ssup2, 오후 10:47:59
 ```
 
-The `usetState()` Hook is a Hook used to store State of React Components. It replaces the state Class variable of existing React Component Classes. Pass the initial value of State as a Parameter to the `useState()` Hook. The `useState()` Hook returns State with an initial value set and a State change function that can change State. In [Code 1], the `useState()` Hook is used to initialize the date State of the Hello Component, and the function that changes the date State is used to change the date State every 1 second.
+The `useState()` Hook is a Hook used to store State of React Components. It replaces the `state` Class variable of existing React Component Classes. Pass the initial value of State as a Parameter to the `useState()` Hook. The `useState()` Hook returns State with an initial value set and a State change function that can change State. In [Code 1], the `useState()` Hook is used to initialize the `date` State of the `Hello` Component, and the function that changes the `date` State is used to change the `date` State every 1 second.
 
 ### 1.2. useEffect()
 
@@ -153,7 +153,7 @@ ReactDOM.render(
 // + button
 ```
 
-The `useReducer()` Hook is a Hook used to store Global State of React Apps. It was added to replace existing React Redux. Pass a Reducer function that changes Global State according to Actions and the initial value of Global State as Parameters to the `useReducer()` Hook. The `useReducer()` Hook returns Global State with an initial value set and a `Dispatch()` function that can change State. [Code 3] creates a Button in the `Hello` Component. When the created Button is pressed, an add Action occurs through the `Dispatch()` function and increases the Count value.
+The `useReducer()` Hook is a Hook used to store Global State of React Apps. It was added to replace existing React Redux. Pass a Reducer function that changes Global State according to Actions and the initial value of Global State as Parameters to the `useReducer()` Hook. The `useReducer()` Hook returns Global State with an initial value set and a `dispatch()` function that can change State. [Code 3] creates a Button in the `Hello` Component. When the created Button is pressed, an `add` Action occurs through the `dispatch()` function and increases the Count value.
 
 ## 2. References
 

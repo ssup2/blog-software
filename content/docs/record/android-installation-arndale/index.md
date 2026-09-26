@@ -32,7 +32,7 @@ Arndale Board의 USB OTG 단자를 통해 PC와 연결한 다음 Hardware ID 확
 %CompositeAdbInterface%     = USB-Install, USB\VID-18D1&PID-0002
 ```
 
-android-winusb.inf 파일 아래에 [File 1]의 내용을 추가한 다음 Windows의 Device Manager를 통해 ADB USB Driver 설치한다.
+`android-winusb.inf` 파일 아래에 [File 1]의 내용을 추가한 다음 Windows의 Device Manager를 통해 ADB USB Driver 설치한다.
 
 ## 3. Ubuntu Package 설치
 
@@ -76,7 +76,7 @@ $ mv adb ~/bin
 $ mv fastboot ~/bin
 ```
 
-fastboot와 adb는 Build한 Android를 Device에 Flash할때 이용된다. fastboot와 adb를 설치한다.
+`fastboot`와 `adb`는 Build한 Android를 Device에 Flash할때 이용된다. `fastboot`와 `adb`를 설치한다.
 
 * `fastboot`, `adb` Download : http://forum.insignal.co.kr/download/file.php?id=90
 
@@ -106,7 +106,7 @@ $ repo init -u git://git.insignal.co.kr/samsung/exynos/android/manifest.git -b j
 $ repo sync
 ```
 
-u-boot, Linux Kernel, Android jb-mr1 Source를 받는다.
+u-boot, Linux Kernel, Android `jb-mr1` Source를 받는다.
 
 ## 8. Download Proprietary
 
@@ -135,7 +135,7 @@ $ prebuilts/misc/linux-x86/ccache/ccache -M 20G
 $ watch -n1 -d prebuilts/misc/linux-x86/ccache/ccache -s
 ```
 
-Build 성능 향상을 위해서 ccache를 설정한다.
+Build 성능 향상을 위해서 `ccache`를 설정한다.
 
 ## 10. Build
 
@@ -174,7 +174,7 @@ $ source ./arndale-envsetup.sh
 $ mksdboot /dev/sdb
 ```
 
-uSD Card를 Ubuntu에 연결 및 Device Name (/dev/sdb) 확인한 다음 uSD Card Format한다.
+uSD Card를 Ubuntu에 연결 및 Device Name (`/dev/sdb`) 확인한 다음 uSD Card Format한다.
 
 ## 12. uSD Card에 Partition 생성
 
@@ -194,7 +194,7 @@ uSD Card를 Arndale에 넣은 뒤 Arndale의 u-boot에 접근한 다음 u-boot�
 Arndale $ fastboot
 ``` 
 
-Arndale Board의 USB OTG 단자를 통해 PC와 연결한 다음 u-boot에서 fastboot에 진입하여 Flash를 준비한다.
+Arndale Board의 USB OTG 단자를 통해 PC와 연결한 다음 u-boot에서 `fastboot`에 진입하여 Flash를 준비한다.
 
 ```shell
 $ fastboot flash fwbl1 ./vendor/insignal/arndale/exynos5250/exynos5250.bl1.bin
@@ -207,7 +207,7 @@ $ fastboot flash system ./out/debug/target/product/arndale/system.img
 $ fastboot reboot
 ```
 
-fastboot에서 Flash를 수행한다.
+`fastboot`에서 Flash를 수행한다.
 
 ## 14. 참조
 

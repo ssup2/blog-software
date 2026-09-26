@@ -28,7 +28,7 @@ Install Ansible on the Control Node.
 172.35.0.102
 ```
 
-Store IP information of Managed Nodes in the /etc/ansible/hosts file of the Control Node as in [File 1].
+Store IP information of Managed Nodes in the `/etc/ansible/hosts` file of the Control Node as in [File 1].
 
 ## 4. SSH Key Generation and Setting
 
@@ -63,7 +63,7 @@ Generate an ssh key on the Control Node. Enter blank for passphrase (Password) t
 (Control)$ ssh-copy-id root@172.35.0.102
 ```
 
-Copy the generated ssh Public Key to the ~/.ssh/authorized-keys file of all Managed Nodes using the ssh-copy-id command from the Control Node.
+Copy the generated ssh Public Key to the `~/.ssh/authorized_keys` file of all Managed Nodes using the `ssh-copy-id` command from the Control Node.
 
 ## 5. Ansible Execution
 
@@ -79,7 +79,7 @@ Copy the generated ssh Public Key to the ~/.ssh/authorized-keys file of all Mana
 }
 ```
 
-Check if ssh connection from Control Node to Managed Nodes is possible using the ansible all -m ping command from the Control Node.
+Check if ssh connection from Control Node to Managed Nodes is possible using the `ansible all -m ping` command from the Control Node.
 
 ## 6. References
 

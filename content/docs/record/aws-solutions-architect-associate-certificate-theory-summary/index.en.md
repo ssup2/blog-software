@@ -60,13 +60,13 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 ### 3.1. Instance Type (Flavor)
 
 * Instance Type Format
-  * <FamilyName><GenerationNum>.<Size>
-    * t3.large / c5.xlarge / p3.2xlarge
+  * `<FamilyName><GenerationNum>.<Size>`
+    * `t3.large` / `c5.xlarge` / `p3.2xlarge`
 * Instance Type
-  * **General Purpose** : Starts with t
-  * **Compute Optimized** : Starts with c
-  * **Memory Optimized** : Starts with r, x, z
-  * **Storage Optimized** : Starts with i, d, h
+  * **General Purpose** : Starts with `t`
+  * **Compute Optimized** : Starts with `c`
+  * **Memory Optimized** : Starts with `r`, `x`, `z`
+  * **Storage Optimized** : Starts with `i`, `d`, `h`
 * Can scale up/down flavor
 * Higher generation provides better cost-performance
 
@@ -98,7 +98,7 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 * Spot Request Type
   * `one-time` : Runs spot instance and then does not intervene
   * `persistent` : Runs spot instance and continues to check if spot instance is working properly, recreates spot instance if not working
-    * If persistent type, need to remove spot request first then remove persistent type
+    * If `persistent` type, need to remove spot request first then remove `persistent` type
 * Spot Fleets
   * Creates multiple spot instances based on instance type, OS, and AZ desired by user
     * Spot instance can only specify single AZ and single flavor
@@ -143,10 +143,10 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 
 ### 3.10. Metadata
 
-* Can check EC2 instance meta information by accessing "http://169.254.169.254/latest" from inside EC2 instance
+* Can check EC2 instance meta information by accessing `http://169.254.169.254/latest` from inside EC2 instance
 * Can check the following information
-  * Instance-IP
-  * Local-IPv4
+  * `Instance-IP`
+  * `Local-IPv4`
   * IAM
   * ETC...
 
@@ -158,7 +158,7 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 
 * Network-based volume storage
 * One EBS volume can only be attached to one EC2 instance at a time
-  * Exceptionally, io1 and io2 volumes can be attached to multiple EC2 instances simultaneously (Multi Attach)
+  * Exceptionally, `io1` and `io2` volumes can be attached to multiple EC2 instances simultaneously (Multi Attach)
 * EBS volumes are tied to AZ and can only be attached to EC2 instances located in the same AZ
 
 #### 4.1.1. EBS Snapshot
@@ -251,14 +251,14 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
   * ECS Task
   * Lambda Function
 * Has fixed hostname
-  * XXX.region.elb.amazonaws.com
+  * `XXX.region.elb.amazonaws.com`
 * Cross-Zone Load Balancing
   * Always enabled and cannot be disabled
   * No additional cost
 * App server cannot know client IP through packet source IP because source IP of packet received by app server is ALB IP
-  * Delivers client IP to app server through X-Forwarded-For header
-  * Delivers client port to app server through X-Forwarded-Port header
-  * Delivers client protocol to app server through X-Forwarded-Proto header
+  * Delivers client IP to app server through `X-Forwarded-For` header
+  * Delivers client port to app server through `X-Forwarded-Port` header
+  * Delivers client protocol to app server through `X-Forwarded-Proto` header
 
 ### 5.3. NLB (Network Load Balancer)
 
@@ -291,7 +291,7 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
     * Custom Cookie
       * TODO
     * Application Cookie
-      * Uses cookie name AWSALBAPP
+      * Uses cookie name `AWSALBAPP`
   * Duration-based Cookie
     * TODO
 
@@ -305,7 +305,7 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 ### 5.7. Connection Draining
 
 * Called Connection Draining in CLB, Deregistration Delay in ALB/NLB
-* Targets (EC2 instances) in DRAINING state maintain existing TCP connections but new TCP connections are not created
+* Targets (EC2 instances) in `DRAINING` state maintain existing TCP connections but new TCP connections are not created
 * Connection Draining functionality is disabled when draining timeout is set to 0 seconds
 
 ### 5.8. ASG (Auto Scaling Group)
@@ -601,7 +601,7 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 * Bucket is created in specific region (S3 is not a global service)
 * Naming Convention
   * Only lowercase allowed
-  * Cannot use _ (underscore)
+  * Cannot use `_` (underscore)
   * 3~63 characters
   * Cannot use IP
   * Can only start with lowercase and numbers
@@ -610,8 +610,8 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 
 * Acts as file in S3
 * Has one key and acts as full path
-  * s3://<bucket-name>/<object-key>
-  * Ex) s3://ssup2-bucket/root-folder/sub-folder/file.txt
+  * `s3://<bucket-name>/<object-key>`
+  * Ex) `s3://ssup2-bucket/root-folder/sub-folder/file.txt`
     * `ssup2-bucket` : Bucket name
     * `root-folder/sub-folder/file.txt` : Object key
 * One object is maximum 5TB
@@ -638,10 +638,10 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
   * **SSE-S3** : Uses encryption key managed by AWS S3 service
     * Server-side encryption
     * AES-256 encryption
-    * Set "x-amz-server-side-encryption":"AES256" in HTTP request header
+    * Set `x-amz-server-side-encryption`:`AES256` in HTTP request header
   * **SSE-KMS** : Uses encryption key managed by AWS KMS service
     * Server-side encryption
-    * Set "x-amz-server-side-encryption":"aws:kms" in HTTP request header
+    * Set `x-amz-server-side-encryption`:`aws:kms` in HTTP request header
   * **SSE-C** : Uses own encryption key
     * AWS does not manage encryption key
     * Uses HTTPS
@@ -675,8 +675,8 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 
 * Provides static webserver functionality
 * URL
-  * <bucket-name>.s3-website-<AWS-region>.amazonaws.com
-  * <bucket-name>.s3-website.<AWS-region>.amazonaws.com
+  * `<bucket-name>.s3-website-<AWS-region>.amazonaws.com`
+  * `<bucket-name>.s3-website.<AWS-region>.amazonaws.com`
 * Error
   * Need to check permissions when 403 error occurs
 
@@ -767,7 +767,7 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 
 * **Transition Action** : Automatically changes storage class based on time elapsed since object creation
 * **Expiration Action** : Automatically deletes object after time elapsed since object creation
-* **Action Target** : Actions can be set based on object tags or object path prefix (s3://mybucket/music/*)
+* **Action Target** : Actions can be set based on object tags or object path prefix (`s3://mybucket/music/*`)
 * Can analyze when to change from standard class to standard IA class through S3 analytics functionality
 
 ### 9.11. Performance
@@ -898,15 +898,15 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 
 * Checks message existence through polling (not event-based)
   * Short Polling
-    * WaitTimeSeconds = 0 or ReceiveMessageWaitTimeSeconds = 0
+    * `WaitTimeSeconds` = 0 or `ReceiveMessageWaitTimeSeconds` = 0
     * Checks only some queues and returns empty message even if message does not exist
     * May not be immediately delivered to client even if message exists in queue because only some queues are checked
   * Long Polling
-    * WaitTimeSeconds > 0 or ReceiveMessageWaitTimeSeconds > 0
+    * `WaitTimeSeconds` > 0 or `ReceiveMessageWaitTimeSeconds` > 0
     * Checks all queues and returns when at least one message exists, when max message count is reached, or when set timeout is reached
     * Can reduce cost by reducing number of receive message requests
 * Can receive up to 10 messages at once
-* Must delete message through DeleteMessage API after receiving message and performing action (ACK)
+* Must delete message through `DeleteMessage` API after receiving message and performing action (ACK)
 * Can configure consumer autoscaling by configuring CloudWatch Metric Queue Length -> CloudWatch Alarm -> ASG Scaling
 
 #### 12.1.2. Security
@@ -929,7 +929,7 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 
 #### 12.1.4. Dead Letter Queue
 
-* Message is sent to dead letter queue when number of requeues due to message visibility timeout exceeds MaximumReceives
+* Message is sent to dead letter queue when number of requeues due to message visibility timeout exceeds `MaximumReceives`
 * Used for debugging and failure handling
 * **Redrive** : Functionality to send messages stored in dead letter queue back to original queue
 
@@ -1088,10 +1088,10 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
   * **Memory** : 128MB ~ 10GB
   * **Maximum execution time** : 15 minutes
   * **Maximum env** : 4KB
-  * **Disk capacity** : tmp DIR : 512MB
+  * **Disk capacity** : `tmp` DIR : 512MB
   * **Concurrency executions** : 1000
 * Deployment
-  * Compressed deployment size (.zip): 50MB
+  * Compressed deployment size (`.zip`): 50MB
   * **Uncompressed deployment size** : 250MB
 
 #### 14.1.3. Lambda Edge
@@ -1515,12 +1515,12 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 * Default VPC exists per account
 * Can create up to 5 VPCs per account (soft limit)
 * CIDR
-  * **Min CIDR** : /28 (16 IP addresses)
-  * **Max CIDR** : /16 (65536 IP addresses)
+  * **Min CIDR** : `/28` (16 IP addresses)
+  * **Max CIDR** : `/16` (65536 IP addresses)
 * Only the following network ranges can be assigned because VPC is a private network
-  * 10.0.0.0 ~ 10.255.255.255 (10.0.0.0/8)
-  * 172.16.0.0 ~ 172.31.255.255 (172.16.0.0/12)
-  * 192.168.0.0 ~ 192.168.255.255 (192.168.0.0/16)
+  * `10.0.0.0` ~ `10.255.255.255` (`10.0.0.0/8`)
+  * `172.16.0.0` ~ `172.31.255.255` (`172.16.0.0/12`)
+  * `192.168.0.0` ~ `192.168.255.255` (`192.168.0.0/16`)
 * VPCs cannot have overlapping CIDRs
 * One VPC router exists per VPC
 
@@ -1528,7 +1528,7 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 
 * Subnet Reserved IP
   * 5 reserved IPs exist for every subnet
-  * When subnet CIDR is 10.0.0.0/24
+  * When subnet CIDR is `10.0.0.0/24`
   * `10.0.0.0` : Network address
   * `10.0.0.1` : VPC router
   * `10.0.0.3` : DNS server

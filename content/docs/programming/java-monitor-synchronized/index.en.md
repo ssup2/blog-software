@@ -2,7 +2,7 @@
 title: Java Monitor, synchronized
 ---
 
-This document summarizes the Monitor technique for synchronization between Threads and analyzes the synchronized technique that operates based on Monitor in Java.
+This document summarizes the Monitor technique for synchronization between Threads and analyzes the `synchronized` technique that operates based on Monitor in Java.
 
 ## 1. Monitor
 

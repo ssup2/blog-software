@@ -47,7 +47,7 @@ Docker를 설치한다.
 (All)$ apt-get install -y kubeadm=1.15.3-00 kubelet=1.15.3-00
 ```
 
-kubelet, kubeadm를 설치한다.
+`kubelet`, `kubeadm`를 설치한다.
 
 ## 3. Kubernetes Cluster 구축
 
@@ -60,7 +60,7 @@ Environment="KUBELET-KUBECONFIG-ARGS=--cloud-provider=external --bootstrap-kubec
 ...
 ```
 
-모든 Node에서 /etc/systemd/system/kubelet.service.d/10-kubeadm.conf 파일의 내용을 [File 1]의 내용처럼 수정하여 kubelet이 External Cloud Provider를 이용하도록 설정한다.
+모든 Node에서 `/etc/systemd/system/kubelet.service.d/10-kubeadm.conf` 파일의 내용을 [File 1]의 내용처럼 수정하여 `kubelet`이 External Cloud Provider를 이용하도록 설정한다.
 
 ### 3.2. Master Node
 
@@ -70,7 +70,7 @@ Environment="KUBELET-KUBECONFIG-ARGS=--cloud-provider=external --bootstrap-kubec
 kubeadm join 30.0.0.11:6443 --token x7tk20.4hp9x2x43g46ara5 --discovery-token-ca-cert-hash sha256:cab2cc0a4912164f45f502ad31f5d038974cf98ed10a6064d6632a07097fad79
 ```
 
-kubeadm를 초기화 한다. --pod-network-cidr는 --pod-network-cidr와 중복만 되지 않으면 된다. 위에서는 --pod-network-cidr를 192.167.0.0/16으로 설정하였다.
+`kubeadm`를 초기화 한다. `--pod-network-cidr`는 `--pod-network-cidr`와 중복만 되지 않으면 된다. 위에서는 `--pod-network-cidr`를 `192.167.0.0/16`으로 설정하였다.
 
 ```shell
 (Master)$ mkdir -p $HOME/.kube 
@@ -86,7 +86,7 @@ kubernetes config 파일을 설정한다.
 (Worker)$ kubeadm join 30.0.0.11:6443 --token v40peg.uyrgkkmiu1rl6dmn --discovery-token-ca-cert-hash sha256:1474a36cdae4b45da503fd48b4a516e72040ad35fa8f0456edfcacf9cd954522
 ```
 
-kubeadm init 결과로 나온 **kubeadm join ~~** 명령어를 모든 Worker Node에서 수행한다.
+`kubeadm init` 결과로 나온 `kubeadm join ~~` 명령어를 모든 Worker Node에서 수행한다.
 
 ## 4. Cilium 설치
 
@@ -97,7 +97,7 @@ kubeadm init 결과로 나온 **kubeadm join ~~** 명령어를 모든 Worker Nod
 (All)$ echo "bpffs                      /sys/fs/bpf             bpf     defaults 0 0" >> /etc/fstab
 ```
 
-모든 Node에서 bpffs를 Mount하도록 설정한다. 
+모든 Node에서 `bpffs`를 Mount하도록 설정한다. 
 
 ### 4.2. Master Node
 
@@ -137,14 +137,14 @@ monitor-timeout=30s
 monitor-max-retries=3
 ```
 
-모든 Master Node에 /etc/kubernetes/cloud-config 파일을 [File 2]의 내용으로 생성한다. [File 2]의 Global 영역에는 Kubernetes VM의 User ID/PW, Tenant, Region 정보등이 저장되어 있다. LoadBalancer 영역에는 Load Balancer 관련 설정 정보가 저장되어 있다. subnet-id는 Kubernetes Network의 Subnet ID를 의미한다. floating-network-id는 External Network ID를 의미한다. lb-method는 Load Balancing 알고리즘을 의미한다. monitor 관련 설정은 Octavia Member VM Monitoring 정책을 결정한다.
+모든 Master Node에 `/etc/kubernetes/cloud-config` 파일을 [File 2]의 내용으로 생성한다. [File 2]의 `Global` 영역에는 Kubernetes VM의 User ID/PW, Tenant, Region 정보등이 저장되어 있다. `LoadBalancer` 영역에는 Load Balancer 관련 설정 정보가 저장되어 있다. `subnet-id`는 Kubernetes Network의 Subnet ID를 의미한다. `floating-network-id`는 External Network ID를 의미한다. `lb-method`는 Load Balancing 알고리즘을 의미한다. monitor 관련 설정은 Octavia Member VM Monitoring 정책을 결정한다.
 
 ```shell
 (Master)$ kubectl create secret -n kube-system generic cloud-config --from-literal=cloud.conf="$(cat /etc/kubernetes/cloud-config)" --dry-run -o yaml > cloud-config-secret.yaml
 (Master)$ kubectl -f cloud-config-secret.yaml apply
 ```
 
-Openstack Cloud Controller Manager와 Cinder CSI Plugin이 이용할 cloud-config secret을 생성한다.
+Openstack Cloud Controller Manager와 Cinder CSI Plugin이 이용할 `cloud-config` secret을 생성한다.
 
 ## 6. Kubernetes Cluster 설정
 
@@ -165,7 +165,7 @@ Openstack Cloud Controller Manager와 Cinder CSI Plugin이 이용할 cloud-confi
 ...
 ```
 
-모든 Master Node의 /etc/kubernetes/manifests/kube-controller-manager.yaml 파일을 [File 3]의 내용으로 수정하여 Kubernetes Controller Manager가 cloud-config 파일을 이용할 수 있도록 설정한다. kube-controller-manager.yaml 파일을 수정하면 Kubernetes는 자동으로 Kubernetes Controller Manager를 재시작한다.
+모든 Master Node의 `/etc/kubernetes/manifests/kube-controller-manager.yaml` 파일을 [File 3]의 내용으로 수정하여 Kubernetes Controller Manager가 `cloud-config` 파일을 이용할 수 있도록 설정한다. `kube-controller-manager.yaml` 파일을 수정하면 Kubernetes는 자동으로 Kubernetes Controller Manager를 재시작한다.
 
 ```yaml {caption="[File 4] Master Node - /etc/kubernetes/manifests/kube-apiserver.yaml", linenos=table}
 ...
@@ -180,7 +180,7 @@ spec:
 ...
 ```
 
-모든 Master Node의 /etc/kubernetes/manifests/kube-apiserver.yaml 파일을 [File 4]의 내용으로 수정하여 Kubernetes API Server가 Storage API를 제공하도록 설정한다. kube-apiserver.yaml 파일을 수정하면 Kubernetes는 자동으로 Kubernetes API Server를 재시작한다.
+모든 Master Node의 `/etc/kubernetes/manifests/kube-apiserver.yaml` 파일을 [File 4]의 내용으로 수정하여 Kubernetes API Server가 Storage API를 제공하도록 설정한다. `kube-apiserver.yaml` 파일을 수정하면 Kubernetes는 자동으로 Kubernetes API Server를 재시작한다.
 
 ## 7. Openstack CCM(Cloud Controller Manager) 설치
 
@@ -209,7 +209,7 @@ NAME                       CREATED AT
 cinder.csi.openstack.org   2019-10-16T15:36:27Z
 ```
 
-csi-secret은 cloud-config-secret으로 대체하기 때문에 불필요한 csi-secret-cinderplugin.yaml을 삭제하고, Cinder CSI Plugin을 설치한다. Cinder CSI Plugin v1.15.0 Version은 동작하지 않기 때문에 v1.16.0 Version으로 변경하여 설치한다. Cinder CSI Plugin이 정상적으로 설치되었다면 "cinder.csi.openstack.org" Object 조회가 가능하다.
+`csi-secret`은 `cloud-config-secret`으로 대체하기 때문에 불필요한 `csi-secret-cinderplugin.yaml`을 삭제하고, Cinder CSI Plugin을 설치한다. Cinder CSI Plugin v1.15.0 Version은 동작하지 않기 때문에 v1.16.0 Version으로 변경하여 설치한다. Cinder CSI Plugin이 정상적으로 설치되었다면 `cinder.csi.openstack.org` Object 조회가 가능하다.
 
 ```yaml {caption="[File 5] Master Node - ~/storageclass.yaml", linenos=table}
 apiVersion: storage.k8s.io/v1

@@ -9,8 +9,8 @@ title: Hyper-V NAT 설정 / Windows 10 환경
 * NAT Network
   * **Network** : 172.35.0.0/24
   * **Gateway** : 172.35.0.1
-  * **Switch Name** : NAT-Switch
-  * **Network Name** : NAT-Network
+  * **Switch Name** : `NAT-Switch`
+  * **Network Name** : `NAT-Network`
 * VM
   * **Address** : 172.35.0.100
 
@@ -47,7 +47,7 @@ network:
     version: 2
 ```
 
-/etc/netplan/50-cloud-init.yaml 파일을 [File 1]과 같이 설정한다. NAT로 구성한 Network 안에는 DHCP Server가 없기 때문에 수동으로 IP 설정이 필요하다.
+`/etc/netplan/50-cloud-init.yaml` 파일을 [File 1]과 같이 설정한다. NAT로 구성한 Network 안에는 DHCP Server가 없기 때문에 수동으로 IP 설정이 필요하다.
 
 ```shell
 $ netplan apply

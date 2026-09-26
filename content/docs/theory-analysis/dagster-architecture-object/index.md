@@ -57,7 +57,7 @@ def process_numbers():
 
 **Op**는 Workflow에서 실행되는 가장 작은 단위의 Action을 의미한다. 이러한 Op들을 조합하여 Workflow를 구성할 수 있다. Airflow를 기준으로 하나의 Task가 Dagster에서는 Op에 해당한다. **Job**은 하나의 Workflow를 의미하며 하나 이상의 Op를 포함할 수 있다.
 
-[Code 1]은 Op와 Job의 예제를 나타내고 있다. `generate_numbers`, `filter_even_numbers`, `filter_odd_numbers`, `sum_even_numbers`, `sum_odd_numbers`, `sum_two_numbers` 6개의 Action 함수가 정의되어 있고, `@Op` Decorator를 통해 Op인것을 명시하고 있다. 또한 `process_numbers` Job 함수가 정의되어 있고, `@job` Decorator를 통해 Job 인것을 명시하고 있다. 정의된 Op는 Job 함수 내부에서 DAG 형태로 호출되고 있는것을 확인할 수 있다. Decorator를 통해서 Object 명시와 함께 **Description** 또는 **Tag**등의 다양한 Metadata를 같이 정의할 수 있다.
+[Code 1]은 Op와 Job의 예제를 나타내고 있다. `generate_numbers`, `filter_even_numbers`, `filter_odd_numbers`, `sum_even_numbers`, `sum_odd_numbers`, `sum_two_sums` 6개의 Action 함수가 정의되어 있고, `@op` Decorator를 통해 Op인것을 명시하고 있다. 또한 `process_numbers` Job 함수가 정의되어 있고, `@job` Decorator를 통해 Job 인것을 명시하고 있다. 정의된 Op는 Job 함수 내부에서 DAG 형태로 호출되고 있는것을 확인할 수 있다. Decorator를 통해서 Object 명시와 함께 **Description** 또는 **Tag**등의 다양한 Metadata를 같이 정의할 수 있다.
 
 {{< figure caption="[Figure 2] Dagster Op, Job Example" src="images/dagster-op-job-example.png" width="700px" >}}
 
@@ -109,11 +109,11 @@ process_numbers_asset = define_asset_job(
 
 Asset은 Workflow 과정중에 생성되는 Data를 의미한다. ETL 과정의 최종 Data 뿐만 아니라 ETL 과정 중간중간 생성되는 Data 또한 Asset으로 정의할 수 있다. 즉 Workflow를 순차적인 Action의 실행이 아닌 Data의 변화 과정으로 이해할 수 있으며, 이 경우 이용되는 Dagster의 Object가 Asset이다.
 
-[Code 2]는 Asset의 예제를 나타내고 있다. `generated_numbers`, `filtered_even_numbers`, `filtered_odd_numbers`, `summed_even_numbers`, `summed_odd_numbers`, `summed_two_numbers` 6개의 Asset 함수가 정의되어 있고, `@asset` Decorator를 통해 Asset인것을 명시한다. [Code 1]의 Op들과 동일한 역할을 수행하지만 Action이 중심이 아닌 Data가 중심이며, Asset 이름도 Data인 `numbers`를 기준으로 수동태가 사용된것을 확인할 수 있다.
+[Code 2]는 Asset의 예제를 나타내고 있다. `generated_numbers`, `filtered_even_numbers`, `filtered_odd_numbers`, `summed_even_numbers`, `summed_odd_numbers`, `summed_two_sums` 6개의 Asset 함수가 정의되어 있고, `@asset` Decorator를 통해 Asset인것을 명시한다. [Code 1]의 Op들과 동일한 역할을 수행하지만 Action이 중심이 아닌 Data가 중심이며, Asset 이름도 Data인 `numbers`를 기준으로 수동태가 사용된것을 확인할 수 있다.
 
-Asset과 Op의 문법적인 차이는 Parameter로 Asset을 받는다는 점이다. `filtered_even_numbers`와 `filtered_odd_numbers` asset의 Parameter는 `generated_numbers`로 명시되어 있고 이는 `generated_numbers` asset을 Input으로 받는걸 의미한다. 이와 유사하게 `summed_two_numbers` asset의 Parameter는 `summed_even_numbers`와 `summed_odd_numbers` asset으로 명시되어 있고 이는 `summed_even_numbers`와 `summed_odd_numbers` asset을 Input으로 받는걸 의미한다.
+Asset과 Op의 문법적인 차이는 Parameter로 Asset을 받는다는 점이다. `filtered_even_numbers`와 `filtered_odd_numbers` asset의 Parameter는 `generated_numbers`로 명시되어 있고 이는 `generated_numbers` asset을 Input으로 받는걸 의미한다. 이와 유사하게 `summed_two_sums` asset의 Parameter는 `summed_even_numbers`와 `summed_odd_numbers` asset으로 명시되어 있고 이는 `summed_even_numbers`와 `summed_odd_numbers` asset을 Input으로 받는걸 의미한다.
 
-즉 Asset의 Parameter를 통해서 Asset 사이의 의존성을 나타낼 수 있으며, 자연스럽게 DAG 형태로 표현된다. `define_asset_job` 함수는 이러한 Asset들을 하나의 Job으로 변환하는 함수이다. selection은 어떤 Asset들을 포함할지를 명시하며, [Code 2]에서는 `numbers` 그룹에 속한 Asset들을 포함하도록 명시하고 있다.
+즉 Asset의 Parameter를 통해서 Asset 사이의 의존성을 나타낼 수 있으며, 자연스럽게 DAG 형태로 표현된다. `define_asset_job` 함수는 이러한 Asset들을 하나의 Job으로 변환하는 함수이다. `selection`은 어떤 Asset들을 포함할지를 명시하며, [Code 2]에서는 `numbers` 그룹에 속한 Asset들을 포함하도록 명시하고 있다.
 
 {{< figure caption="[Figure 3] Dagster Asset Example" src="images/dagster-asset-example.png" width="1000px" >}}
 
@@ -145,7 +145,7 @@ def get_io_manager():
         })
 ```
 
-[Code 3]은 I/O Manager를 정의하는 External Resource 예제를 나타내고 있다. 예제에서는 S3PickleIOManager를 I/O Manager로 이용하고 있고, Backend로 이용할 S3도 External Resource로 정의하고 있다. 설정들은 Python Dictionary 형태로 정의된다.
+[Code 3]은 I/O Manager를 정의하는 External Resource 예제를 나타내고 있다. 예제에서는 `S3PickleIOManager`를 I/O Manager로 이용하고 있고, Backend로 이용할 S3도 External Resource로 정의하고 있다. 설정들은 Python Dictionary 형태로 정의된다.
 
 I/O Manager는 비교적 작은 크기의 데이터를 손쉽게 전달하도록 설계되어 있으며, 몇십 TB 이상의 큰 데이터를 병렬처리를 통해서 빠르게 전달하도록 설계되어 있지는 않다. 따라서 큰 데이터를 주고 받는 경우에는 외부 저장소에 Data를 저장한 이후에 Data가 저장된 경로를 I/O Manager를 통해서 전달하는 방식이 효과적이다. Op 또는 Asset을 수행하는 방식을 결정하는 Run Launcher나 Executor에 따라서 이용할 수 있는 I/O Manager가 제한되기도 한다.
 
@@ -365,9 +365,9 @@ Dagster가 지원하는 주요 Executor는 다음과 같다.
 Run Coordinator는 Workflow Scheduling을 수행하며 Dagster Instance([File 1])에 설정된다. Dagster에서 지원하는 Run Coordinator는 다음과 같다.
 
 * `DefaultRunCoordinator` : Workflow 생성 요청이 오면 즉시 Run Launcher를 호출하여 Run을 생성한다. Dagster Web Server와 Dagster CLI에서 이용된다.
-* `QueuedRunCoordinator` : Workflow 생성 요청이 오면 요청을 Queue에 저장한다음 규칙에 맞게 가져와 Run을 생성한다. Dagster Daemon에서 이용된다. QueuedRunCoordinator를 이용하도록 설정되어 있으면 Dagster Web Server는 Workflow 생성 요청을 직접 처리하지 않고 Dagster Daemon에게 전달한다.
+* `QueuedRunCoordinator` : Workflow 생성 요청이 오면 요청을 Queue에 저장한다음 규칙에 맞게 가져와 Run을 생성한다. Dagster Daemon에서 이용된다. `QueuedRunCoordinator`를 이용하도록 설정되어 있으면 Dagster Web Server는 Workflow 생성 요청을 직접 처리하지 않고 Dagster Daemon에게 전달한다.
 
-Dagster Daemon은 Dagster 운영에 필수적인 Component는 아니며, Dagster Daemon이 없으면 Schedule Object, Sensor Object와 QueuedRunCoordinator를 이용하지 못하지만 Workflow 실행에는 문제가 없다.
+Dagster Daemon은 Dagster 운영에 필수적인 Component는 아니며, Dagster Daemon이 없으면 Schedule Object, Sensor Object와 `QueuedRunCoordinator`를 이용하지 못하지만 Workflow 실행에는 문제가 없다.
 
 ### 1.5. Compute Log
 

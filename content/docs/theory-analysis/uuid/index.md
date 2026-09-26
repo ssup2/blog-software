@@ -32,10 +32,10 @@ v4 UUID는 완전 Random을 기반으로 UUID를 생성한다. UUID의 Version, 
 
 v5 UUID는 **SHA-1** Hashing을 기반으로 UUID를 생성한다. v5 UUID를 생성하기 위해서는 **Namespace**와 **Name**값이 필요하다. Namespace와 Name값이 동일하다면 동일한 UUID가 생성된다. Namespace 값은 아래와 같이 정의되어 있으며, 정의된 값 말고 다른 값도 이용할 수 있다.
 
-* `NAMESPACE-DNS` : Name이 Domain 이름이다.
-* `NAMESPACE-URL` : Name이 URL이다.
-* `NAMESPACE-OID` : Name이 OID (Object Identitfier)이다.
-* `NAMESPACE-X500` : Name이 LDAP Protocol의 Directory Name이다.
+* `NAMESPACE_DNS` : Name이 Domain 이름이다.
+* `NAMESPACE_URL` : Name이 URL이다.
+* `NAMESPACE_OID` : Name이 OID (Object Identitfier)이다.
+* `NAMESPACE_X500` : Name이 LDAP Protocol의 Directory Name이다.
 
 #### 1.4. v2
 

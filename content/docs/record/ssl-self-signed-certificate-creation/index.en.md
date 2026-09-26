@@ -7,7 +7,7 @@ title: SSL Self-signed Certificate Creation
 The creation environment and features are as follows.
 
 * Ubuntu 18.04 LTS
-* Resolved the missing-subjectAltName issue that occurs in Chrome 58+ versions.
+* Resolved the `missing-subjectAltName` issue that occurs in Chrome 58+ versions.
 
 ## 2. Root CA Key and Root Certificate Creation
 
@@ -19,13 +19,13 @@ $ openssl req -x509 -new -nodes -key rootca.key -sha256 -days 356 -subj /C=KO/ST
 Create `rootca.key` and `rootca.crt` files.
 
 * Key: RSA-based 2048 bytes
-* CN: ssup2 (can be changed arbitrarily)
+* `CN`: `ssup2` (can be changed arbitrarily)
 
 ## 3. Server Certificate Creation
 
-Enter the server's IP or domain name for CN (Common Name). Domain names require exact matches. For example, if CN is ssup2.com, it cannot be used from www.ssup2.com.
+Enter the server's IP or domain name for `CN` (Common Name). Domain names require exact matches. For example, if `CN` is `ssup2.com`, it cannot be used from `www.ssup2.com`.
 
-* Example: 192.168.0.100, ssup2.com, www.ssup2.com, *.ssup2.com (wildcard)
+* Example: `192.168.0.100`, `ssup2.com`, `www.ssup2.com`, `*.ssup2.com` (wildcard)
 
 ### 3.1. v3.ext File Creation
 
@@ -41,7 +41,7 @@ IP.1 = 192.168.0.100
 
 Create the `v3.ext` file with the content from [File 1].
 
-* CN (Common Name): 192.168.0.100
+* `CN` (Common Name): `192.168.0.100`
 
 ### 3.2. Server Key, Server Certificate, and Server pem File Creation
 
@@ -51,9 +51,9 @@ $ openssl x509 -req -in server.csr -CA rootca.crt -CAkey rootca.key -CAcreateser
 $ cat server.crt server.key > server.pem
 ```
 
-Create server.key, server.crt, and server.pem files.
+Create `server.key`, `server.crt`, and `server.pem` files.
 
-* CN (Common Name): 192.168.0.100
+* `CN` (Common Name): `192.168.0.100`
 
 ## 4. References
 

@@ -26,7 +26,7 @@ title: AWS IAM Assume Role / Using aws CLI / Ubuntu 18.04
 }
 ```
 
-Create a Policy file with only AssumeRole permissions as shown in [File 1].
+Create a Policy file with only `AssumeRole` permissions as shown in [File 1].
 
 ```shell
 $ aws iam create-policy --policy-name assume-role-policy --policy-document file://assume-role-policy.json
@@ -46,7 +46,7 @@ $ aws iam create-policy --policy-name assume-role-policy --policy-document file:
 }
 ```
 
-Create a Policy with the name assume-role-policy using [File 1].
+Create a Policy with the name `assume-role-policy` using [File 1].
 
 ## 3. User Creation, Configuration
 
@@ -63,7 +63,7 @@ $ aws iam create-user --user-name assume-role-user
 }
 ```
 
-Create an assume-role-user User to perform Role Assume.
+Create an `assume-role-user` User to perform Role Assume.
 
 ```shell
 $ aws iam create-access-key --user-name assume-role-user
@@ -78,13 +78,13 @@ $ aws iam create-access-key --user-name assume-role-user
 }
 ```
 
-Create an Access Key for assume-role-user.
+Create an Access Key for `assume-role-user`.
 
 ```shell
 $ aws iam attach-user-policy --user-name assume-role-user --policy-arn arn:aws:iam::278805249149:policy/assume-role-policy
 ```
 
-Grant the assume-role-policy Policy to the assume-role-user User.
+Grant the `assume-role-policy` Policy to the `assume-role-user` User.
 
 ## 4. Role Creation, Configuration
 
@@ -102,7 +102,7 @@ Grant the assume-role-policy Policy to the assume-role-user User.
 }
 ```
 
-Create [File 2] to configure the Trust Relationship of the Role. The AWS in Principal refers to **the ID of the account receiving the Role**.
+Create [File 2] to configure the Trust Relationship of the Role. The `AWS` in `Principal` refers to **the ID of the account receiving the Role**.
 
 ```shell
 $ aws iam create-role --role-name assume-role-role --assume-role-policy-document file://assume-role-trust-relationship.json
@@ -130,13 +130,13 @@ $ aws iam create-role --role-name assume-role-role --assume-role-policy-document
 }
 ```
 
-Create assume-role-role, the Role to Assume.
+Create `assume-role-role`, the Role to Assume.
 
 ```shell
 $ aws iam attach-role-policy --role-name assume-role-role --policy-arn arn:aws:iam::aws:policy/AmazonEC2FullAccess
 ```
 
-Grant EC2 control permissions to the assume-role-role Role.
+Grant EC2 control permissions to the `assume-role-role` Role.
 
 ## 5. Assume Role
 
@@ -151,7 +151,7 @@ $ aws ec2 describe-instances
 An error occurred (UnauthorizedOperation) when calling the DescribeInstances operation: You are not authorized to perform this operation.
 ```
 
-After configuring AWS CLI with assume-role-user, perform an EC2 Instance Describe operation. Since the assume-role-user User only has Assume Role permissions, you can see that the EC2 Describe operation cannot be performed.
+After configuring AWS CLI with `assume-role-user`, perform an EC2 Instance Describe operation. Since the `assume-role-user` User only has Assume Role permissions, you can see that the EC2 Describe operation cannot be performed.
 
 ```shell
 $ aws sts assume-role --role-arn arn:aws:iam::278805249149:role/assume-role-role --role-session-name assume-role-session
@@ -169,7 +169,7 @@ $ aws sts assume-role --role-arn arn:aws:iam::278805249149:role/assume-role-role
 }
 ```
 
-Perform an Assume Role operation to obtain temporary AccessKeyID, SecretAccessKey, and SessionToken.
+Perform an Assume Role operation to obtain temporary `AccessKeyID`, `SecretAccessKey`, and `SessionToken`.
 
 ```shell
 $ export AWS-ACCESS-KEY-ID=<Access Key>
@@ -192,7 +192,7 @@ $ aws ec2 describe-instances
 ...
 ```
 
-Configure aws CLI using the obtained AccessKeyID, SecretAccessKey, and SessionToken. Afterward, when performing an EC2 Describe operation, you can see that it works.
+Configure aws CLI using the obtained `AccessKeyID`, `SecretAccessKey`, and `SessionToken`. Afterward, when performing an EC2 Describe operation, you can see that it works.
 
 ## 6. References
 

@@ -43,7 +43,7 @@ func TestCover(t *testing.T) {
 }
 ```
 
-[Code 1] shows a simple function `testFunc()` for testing, and [Code 2] shows simple Test Code using the `testFunct()` function from [Code 1].
+[Code 1] shows a simple function `TestFunc()` for testing, and [Code 2] shows simple Test Code using the `TestFunc()` function from [Code 1].
 
 ### 1.1. Test with Coverage
 
@@ -52,7 +52,7 @@ $ go test -cover .
 ok      ssup2.com/test  0.001s  coverage: 80.0% of statements
 ```
 
-[Shell 1] shows checking Package-level Coverage using the cover Option when performing Tests from [Code 2]. You can check Package-level Coverage through the cover Option.
+[Shell 1] shows checking Package-level Coverage using the `cover` Option when performing Tests from [Code 2]. You can check Package-level Coverage through the `cover` Option.
 
 ### 1.2. Test with Coverage Profile
 
@@ -65,9 +65,9 @@ $ go tool cover -html=cover.prof -o cover.html
 
 {{< figure caption="[Figure 1] go tool cover Output" src="images/golang-test-coverage.png" width="600px" >}}
 
-When you want to check Code-level Coverage in detail, you can create and use a Coverage Profile. [Shell 2] shows creating a Coverage Profile using the coverprofile Option when performing Tests from [Code 2].
+When you want to check Code-level Coverage in detail, you can create and use a Coverage Profile. [Shell 2] shows creating a Coverage Profile using the `coverprofile` Option when performing Tests from [Code 2].
 
-The created Coverage Profile can be converted to an HTML file through the `go tool cover` command, and you can easily check Coverage in a Web Browser using the converted HTML file. [Figure 1] shows the generated HTML from [Code 2]. Since the Test Code does not have cases where `n` is greater than 1, the last part of the `testFunc()` function is not executed, so you can see that Coverage does not reach 100%. You can check Coverage by file.
+The created Coverage Profile can be converted to an HTML file through the `go tool cover` command, and you can easily check Coverage in a Web Browser using the converted HTML file. [Figure 1] shows the generated HTML from [Code 2]. Since the Test Code does not have cases where `n` is greater than 1, the last part of the `TestFunc()` function is not executed, so you can see that Coverage does not reach 100%. You can check Coverage by file.
 
 ## 2. References
 

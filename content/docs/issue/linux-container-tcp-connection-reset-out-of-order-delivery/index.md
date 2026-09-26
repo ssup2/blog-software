@@ -14,7 +14,7 @@ Docker Container의 경우 Host 외부로 Packet을 전송하는 경우에 Packe
 
 Client와 Server가 TCP Connection을 맺고 TCP Connection을 맺고 통신을 하는 과정에서 다양한 외부의 요인에 의해서 전송한 Packet의 순서가 변경되는 Out of Order Delivery 현상이 발생 할 수 있다. Out of Order Delivery 현상에 의해서 Client가 전송한 Sequence Number 100번 Packet의 ACK보다 Client가 이전에 전송한 Sequence Number 90번 Packet의 ACK가 Client에게 먼저 도착할 수 있다. 
 
-Client가 Server로부터 Sequence Number 100번 Packet의 ACK를 받았다는 의미는 TCP Protocol에 의해서 Server가 Sequence Number 90번 Packet도 잘 수신했다는 의미도 포함하고 있다. 따라서 Client가 늦게 수신한 Sequence Number 90번 Packet의 ACK는 TCP의 Spurious Retranmission 기법으로 인해서 재전송된 Packet으로 간주하고 Kernel에 의해서 무시된다.
+Client가 Server로부터 Sequence Number 100번 Packet의 ACK를 받았다는 의미는 TCP Protocol에 의해서 Server가 Sequence Number 90번 Packet도 잘 수신했다는 의미도 포함하고 있다. 따라서 Client가 늦게 수신한 Sequence Number 90번 Packet의 ACK는 TCP의 Spurious Retransmission 기법으로 인해서 재전송된 Packet으로 간주하고 Kernel에 의해서 무시된다.
 
 Container안의 Client가 전송한 Packet이 SNAT를 통해서 Host 외부의 Server와 TCP Connection을 맺는 경우, Server가 Client에게 전송하는 Packet은 DNAT되어 Client에게 전송되야 한다. 문제는 이 경우 Server가 전송한 ACK에게 Out of Order Delivery 현상이 발생하면, 해당 ACK는 Linux의 conntrack Module의 Bug로 인해서 Invalid Packet으로 분류된다. conntrack Module에 의해서 Invalid 상태가된 ACK는 DNAT되지 않기 때문에 Container가 아닌 Host로 전달된다. ACK를 받은 Host는 Host가 모르는 Connection으로부터 Packet을 수신하기 때문에 TCP Reset Flag를 통해서 Server와의 Connection을 강제로 종료한다.
 
@@ -45,7 +45,7 @@ Container안의 Client가 전송한 Packet이 SNAT를 통해서 Host 외부의 S
 ...
 ```
 
-[Shell 1]은 Docker Container의 Connection Reset이 발생하였을때의 tshark를 이용하여 Host Interface의 Packet을 Dump한 결과이다. 10.205.13.199은 Docker Container의 Client IP이고, 192.168.0.100은 Host 외부의 Server이다. Docker Container의 Client가 Host 외부의 Server에게 TCP Connection을 맺고 Data를 전송하다가 Connection Reset 현상이 발생한 모습이다.
+[Shell 1]은 Docker Container의 Connection Reset이 발생하였을때의 `tshark`를 이용하여 Host Interface의 Packet을 Dump한 결과이다. 10.205.13.199은 Docker Container의 Client IP이고, 192.168.0.100은 Host 외부의 Server이다. Docker Container의 Client가 Host 외부의 Server에게 TCP Connection을 맺고 Data를 전송하다가 Connection Reset 현상이 발생한 모습이다.
 
 [Shell 1]의 4번째 줄에 Server가 Client에게 전송한 Sequence Number 10149475번 Packet의 Ack를 수신한걸 확인할 수 있다. [Shell 1]의 7번째 줄에서는 Sequence Number 10110467번 Packet의 ACK를 수신한 것을 확인할 수 있다. 10110467번이 10149475번 보다 작기 때문에 Sequence Number 10110467번의 Packet의 Ack는 원래라면 TCP Spurious로 간주되고 무시되어야 하지만, conntrack Module의 Bug로 인해서 Invalid Packet으로 간주되고 DNAT되지 않는다.
 
@@ -75,7 +75,7 @@ Container안의 Client가 전송한 Packet이 SNAT를 통해서 Host 외부의 S
 349016 1199.003098534 192.168.0.100 → 10.251.0.1   TCP 54 80 → 56284 [RST] Seq=26 Win=8397824 Len=0
 ```
 
-[Shell 2]는 [Shell 1]의 Connection Reset 현상이 발생하였을때 tshark를 이용하여 Docker Container 내부에서 Docker Container Interface의 Packet을 Dump한 결과이다. [Shell 1]과 대부분 동일하지만 Sequence Number 10110467번 Packet의 ACK가 존재하지 않는걸 확인할 수 있다. Sequence Number 10110467번 Packet의 ACK는 Host에서 conntrack Module의 Bug로 인해서 Invalid Packet을 간주되어 DNAT 되지 않았기 때문에, Docker Container로 전달되지 않았기 때문이다.
+[Shell 2]는 [Shell 1]의 Connection Reset 현상이 발생하였을때 `tshark`를 이용하여 Docker Container 내부에서 Docker Container Interface의 Packet을 Dump한 결과이다. [Shell 1]과 대부분 동일하지만 Sequence Number 10110467번 Packet의 ACK가 존재하지 않는걸 확인할 수 있다. Sequence Number 10110467번 Packet의 ACK는 Host에서 conntrack Module의 Bug로 인해서 Invalid Packet을 간주되어 DNAT 되지 않았기 때문에, Docker Container로 전달되지 않았기 때문이다.
 
 Host가 전송한 TCP Reset Packet도 확인할 수 없다. Docker Container 내부에서는 Host가 전송한 TCP Reset Packet의 존재를 알지 못한체로 Server로부터 TCP Reset Packet을 받게된다. 따라서 Docker Container 내부에서는 Server가 먼저 Connection을 종료한다고 판단하고 "connection reset by peer" Error를 Docker Container App에게 전달한다.
 
@@ -89,7 +89,7 @@ Host가 전송한 TCP Reset Packet도 확인할 수 없다. Docker Container 내
 
 * Invalid 상태의 Packet을 Drop하는 iptables Rule 추가
 
-두번째 방법은 Invalid 상태의 Packet을 Drop하는 방법이다. Docker Container의 경우에는 `iptables -I INPUT -m conntrack --ctstate INVALID -j DROP` 명령어 수행을 통해서 iptable Rule을 설정하여 Invalid 상태의 Packet을 Drop 시킬수 있다. 앞의 iptables Rule을 적용하면, [Shell 1]의 경우 7번째 줄에서는 Sequence Number 10110467번 Packet의 ACK가 Drop되기 때문에 Host가 Connection을 Reset시키지 않게된다.
+두번째 방법은 Invalid 상태의 Packet을 Drop하는 방법이다. Docker Container의 경우에는 `iptables -I INPUT -m conntrack --ctstate INVALID -j DROP` 명령어 수행을 통해서 iptables Rule을 설정하여 Invalid 상태의 Packet을 Drop 시킬수 있다. 앞의 iptables Rule을 적용하면, [Shell 1]의 경우 7번째 줄에서는 Sequence Number 10110467번 Packet의 ACK가 Drop되기 때문에 Host가 Connection을 Reset시키지 않게된다.
 
 ## 4. 참조
 

@@ -12,9 +12,9 @@ This document analyzes the `offsetof()` macro function.
 
 The `offsetof()` macro function calculates the **memory offset** of member variables that make up a struct. [Code 1] shows the `offsetof()` macro function. The `offsetof()` macro function works as follows:
 
-* (TYPE *)0 : The address is 0, and this address is a pointer to a TYPE struct.
-* &((TYPE *)0)->MEMBER : Gets the offset of MEMBER.
-* ((sizet) &((TYPE *)0)->MEMBER) : Casts the obtained offset to sizet.
+* `(TYPE *)0` : The address is 0, and this address is a pointer to a `TYPE` struct.
+* `&((TYPE *)0)->MEMBER` : Gets the offset of `MEMBER`.
+* `((sizet) &((TYPE *)0)->MEMBER)` : Casts the obtained offset to `sizet`.
 
 ## 2. Example
 
@@ -50,5 +50,5 @@ d : 12
 e : 20
 ```
 
-You can check the memory offset of each member variable of the offset struct through the `offsetof()` macro function.
+You can check the memory offset of each member variable of the `offset` struct through the `offsetof()` macro function.
 

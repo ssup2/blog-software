@@ -67,7 +67,7 @@ White=168,153,132
 BoldWhite=235,219,178
 ```
 
-%APPDATA%\wsltty\themes\grubbox 파일을 생성하고 [File 1]의 내용으로 저장하여 wsltty에서 이용할 grubbox Theme를 설정한다.
+`%APPDATA%\wsltty\themes\grubbox` 파일을 생성하고 [File 1]의 내용으로 저장하여 wsltty에서 이용할 grubbox Theme를 설정한다.
 
 ``` {caption="[File 2] WSLtty Config", linenos=table}
 # To use common configuration in %APPDATA%\mintty, simply remove this file
@@ -77,7 +77,7 @@ FontHeight=10
 AllowSetSelection=yes
 ```
 
-%APPDATA%\wsltty\config 파일을 [File 2]의 내용으로 수정한다.
+`%APPDATA%\wsltty\config` 파일을 [File 2]의 내용으로 수정한다.
 
 ## 5. 참고
 

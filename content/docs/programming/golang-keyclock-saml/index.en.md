@@ -82,19 +82,19 @@ func main() {
 
 The operation process is as follows.
 
-* When a User accesses the "/session" Path of the Service Provider, the Service Provider sends a SAML Request to the Identity Provider through the RequireAccount() Middleware function to redirect the User for authentication. The SAML Request also includes the URL information requested by the User after authentication.
-* When authentication is completed through the Identity Provider, the Identity Provider redirects the User back to the Service Provider's ACS Endpoint "/saml/acs" that was previously registered, and also sends the SAML Response containing authentication information to the ACS Endpoint. The SAML Response also includes the URL information requested by the User that was included in the SAML Request.
+* When a User accesses the `/session` Path of the Service Provider, the Service Provider sends a SAML Request to the Identity Provider through the `RequireAccount()` Middleware function to redirect the User for authentication. The SAML Request also includes the URL information requested by the User after authentication.
+* When authentication is completed through the Identity Provider, the Identity Provider redirects the User back to the Service Provider's ACS Endpoint `/saml/acs` that was previously registered, and also sends the SAML Response containing authentication information to the ACS Endpoint. The SAML Response also includes the URL information requested by the User that was included in the SAML Request.
 * The Service Provider's ACS receives the SAML Response, verifies the authentication information, and sets authentication in the Web Browser's Cookie. Afterward, the Service Provider redirects the User back to the URL requested by the User included in the SAML Response so that the User can use the service.
 
 The line-by-line explanation of [Code 1] is as follows.
 
-* **Line 3, 51** : The samlRequestPrinter() function is a Middleware that outputs requests coming to the ACS.
-* **Line 12** : The echoSession() function is a function that returns Session information set by SAML.
-* **Line 55** : The samlSP.RequireAccount() function is a Middleware that requests authentication from the Identity Provider when accessing the "/session" path.
+* **Line 3, 51** : The `samlRequestPrinter()` function is a Middleware that outputs requests coming to the ACS.
+* **Line 12** : The `echoSession()` function is a function that returns Session information set by SAML.
+* **Line 55** : The `samlSP.RequireAccount()` function is a Middleware that requests authentication from the Identity Provider when accessing the `/session` path.
 
 ## 3. Service Provider Metadata Extraction
 
-The Metadata of the Service Provider in [Code 1] must be extracted. The extracted Metadata is used to register the Service Provider with the Identity Provider. Extract the Service Provider's Metadata using the following command. The Service Provider in [Code 1] can extract it through the "/saml/metadata" path.
+The Metadata of the Service Provider in [Code 1] must be extracted. The extracted Metadata is used to register the Service Provider with the Identity Provider. Extract the Service Provider's Metadata using the following command. The Service Provider in [Code 1] can extract it through the `/saml/metadata` path.
 
 ```shell
 $ go run main.go
@@ -103,14 +103,14 @@ $ curl localhost:8000/saml/metadata > metadata
 
 ## 4. Keycloak Installation and Configuration
 
-Install Keycloak using Docker. Set Keycloak's Admin ID/Password to admin/admin.
+Install Keycloak using Docker. Set Keycloak's Admin ID/Password to `admin`/`admin`.
 
 ```shell
 $ docker run --name keycloak -p 8080:8080 -e KEYCLOAK_ADMIN=admin -e KEYCLOAK_ADMIN_PASSWORD=admin -d quay.io/keycloak/keycloak:17.0.0 start-dev
 ```
 {{< figure caption="[Figure 1] Realm Creation" src="images/keycloak-create-realm.png" width="800px" >}}
 
-After accessing "localhost:8080" and logging in with the Admin account, create a "ssup2" Realm as shown in [Figure 1]. Keycloak's Realm represents the authentication scope. Multiple Service Providers can be registered in one Realm.
+After accessing `localhost:8080` and logging in with the Admin account, create a `ssup2` Realm as shown in [Figure 1]. Keycloak's Realm represents the authentication scope. Multiple Service Providers can be registered in one Realm.
 
 {{< figure caption="[Figure 2] Client Creation" src="images/keycloak-create-client.png" width="800px" >}}
 
@@ -122,11 +122,11 @@ Enter the created Client as shown in [Figure 3] and turn off Client Signature Re
 
 {{< figure caption="[Figure 4] User Password Setting" src="images/keycloak-user-password.png" width="800px" >}}
 
-Create a "users" Group and create a "user" User under the "users" Group. Then set the Password of the created "user" User to "user" as shown in [Figure 4].
+Create a `users` Group and create a `user` User under the `users` Group. Then set the Password of the created `user` User to `user` as shown in [Figure 4].
 
 {{< figure caption="[Figure 5] User Role Check" src="images/keycloak-user-role.png" width="800px" >}}
 
-Then check the Role of the created "user" User as shown in [Figure 5].
+Then check the Role of the created `user` User as shown in [Figure 5].
 
 ## 5. Service Provider Execution
 
@@ -136,7 +136,7 @@ Then check the Role of the created "user" User as shown in [Figure 5].
 http://localhost:8080/realms/ssup2/protocol/saml?SAMLRequest=nJJRb9MwFIX%2FiuX31I7TrJu1RCqrEJUGVGvhgbdb55ZacuzgewPs36Nmm1QklAde7fudc4997gn6MNj1yOf4hD9GJBa%2F%2BxDJXi4aOeZoE5AnG6FHsuzsfv3x0ZqFtkCEmX2K8goZ5pkhJ04uBSm2m0b6rtDa1VXd3VVLvKlOq7q86250V8LpiMu6rJzDVVdWx6MUXzGTT7GRZqGl2BKNuI3EELmRRhtTaFOY1aGsbF3b0izKevlNig0S%2Bwg8kWfmwSoVkoNwTsT2Vt9qlRFCT4poHIx6W1Bdwkixfsv4kCKNPeY95p%2Fe4Zenx3%2FKaT2BChxJsXvVeudj5%2BP3%2BZc5vgyR%2FXA47Ird5%2F1BttPv2ClqFu9T7oHnRS4nvitO06jFyJ6fZTuzZ48MHTDcqyur9rUVn6DH7WaXgnfP%2F2HPGSJ5jCzFOoT06yEjMDaS84hStS%2BWf3ev%2FRMAAP%2F%2F&RelayState=cah6dnvLyCdBHc0bl5F2D3EZs1myEwIcGXHgrrgABaRtr0VVrx7ntLhu
 ```
 
-When you run the Service Provider and access the "/session" Path, you can see a Login screen like [Figure 6] through the URL in [Text 1]. Looking at [Text 1], you can see "SAML Request" and "Relay State" in the URL's Query format. SAML Request is an authentication request sent by the Service Provider to the Identity Provider (Keycloak), and Relay State is a value that the Identity Provider delivers to the Service Provider's ACS along with "SAML Response" after the Identity Provider's authentication process, used to determine what action the Service Provider should perform after authentication.
+When you run the Service Provider and access the `/session` Path, you can see a Login screen like [Figure 6] through the URL in [Text 1]. Looking at [Text 1], you can see "SAML Request" and "Relay State" in the URL's Query format. SAML Request is an authentication request sent by the Service Provider to the Identity Provider (Keycloak), and Relay State is a value that the Identity Provider delivers to the Service Provider's ACS along with "SAML Response" after the Identity Provider's authentication process, used to determine what action the Service Provider should perform after authentication.
 
 ```xml {caption="[Text 2] SAML Request", linenos=table}
 <?xml version="1.0"?>
@@ -152,7 +152,7 @@ By performing URL Decoding, Base64 Decoding, and XML Inflate on the SAML Request
 Request : &{Method:POST URL:/saml/acs Proto:HTTP/1.1 ProtoMajor:1 ProtoMinor:1 Header:map[Accept:[text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9] Accept-Encoding:[gzip, deflate, br] Accept-Language:[ko] Cache-Control:[max-age=0] Connection:[keep-alive] Content-Length:[16013] Content-Type:[application/x-www-form-urlencoded] Cookie:[saml_cah6dnvLyCdBHc0bl5F2D3EZs1myEwIcGXHgrrgABaRtr0VVrx7ntLhu=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjgwMDAiLCJleHAiOjE2NDU5NzAyMDIsImlhdCI6MTY0NTk3MDExMiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDAwIiwibmJmIjoxNjQ1OTcwMTEyLCJzdWIiOiJjYWg2ZG52THlDZEJIYzBibDVGMkQzRVpzMW15RXdJY0dYSGdycmdBQmFSdHIwVlZyeDdudExodSIsImlkIjoiaWQtMDBjNTM1ZDkzNGU2M2Y3NTE5ZDYwZDFhZmJlNDUxM2NjZTdkMTNiYiIsInVyaSI6Ii9zZXNzaW9uIiwic2FtbC1hdXRobi1yZXF1ZXN0Ijp0cnVlfQ.oopqK9Ss-gpn_c8OegyIteY7FdIgDhvnd45ogbokbdeHKnUkoorQ-gbAvKbADcIJAAgChu6hU8gD9Cvz5smOpGc_gaFEL0O5Vjpsu7vNLmHxEMiTgJCWWe_vx9THq0VqXif4zANKTpabRMYNf0XLDH5D4Zf7sVQGdDKovKOd4ww89GXy8ImZx0Qvbbcqz45If6rJhPqMJMkNhwYjawttUiHyBBXAFp3u4Cm8f2ujGzSN_LK4J_HYwLmo-ufq9-hy-eKmn5Ji2qM5hkpzZ0N2s4d_IktIvX4rHryOCo8nktCBPYySvVLZ8sBLLtBjFKjQ6MVhkesUbwQWGy_T48R3-Q] Origin:[null] Sec-Ch-Ua:[" Not A;Brand";v="99", "Chromium";v="98", "Google Chrome";v="98"] Sec-Ch-Ua-Mobile:[?0] Sec-Ch-Ua-Platform:["Windows"] Sec-Fetch-Dest:[document] Sec-Fetch-Mode:[navigate] Sec-Fetch-Site:[same-site] Upgrade-Insecure-Requests:[1] User-Agent:[Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36]] Body:{Reader:SAMLResponse=PHNhbWxwOlJlc3BvbnNlIHhtbG5zOnNhbWxwPSJ1cm46b2FzaXM6bmFtZXM6dGM6U0FNTDoyL...NaEhsNTV4Ym1UVzBpWE9nTjBPOTljYW8zVGJIR01DZGFiT3pNRGFKbjdkVzdmdWpIbU1GdFdkUHNzanBlRXFWeU5QYVVFRWQvUWVuZUlrWFZBeTFxRWJaaXk5N01uZTI3bEs2TGN1bkFWRjM2RmJ0WWVFQjNRL0l6QVlkS0hDY1Q5Y2thcWRJS2RORE9xMTNzQUkvSEw1NmNRT0VkNlUvbGx4cUtaRXBzcDlsSnVhdlRBMXhHRTRicmVRMUcrUjVlTjVuZHdjNGZMYjh5cll5QmdkNmlNc0JxN05LQTkvUUZUOWxoM2ZBTDA1Z2JkakUzNE9NMnpyVS9aV2dnbkNJT3lvamtTaWd3T3NJaGxlb3RubTA5UGg1NFV1MTdwUlozUVlNL255ZktKSnA4ZEpmUXdXb3R4UXdTZ3lBd3ovaS8weGFCOGY0akhlZEV6Yy93Tk9ObWlDTFlYMnViUTE0dDUxUzhWRGhKck9yTVphR3ZIT2pCNTJIc0pEazNDT2h2ZlExSXlHQ2hiVUx3clk3bUJybGJRQTNjVCtYcnVuNis2TXl6VlhpUXF6Si9HV2Rqd0szUXFYRW9HbXlUQUw1N0p3dWNNaDJ4OERkY0lvemEzbFJXL2lJbHAyWXlzMEV5Y3pqeVMwRkMrN1ZETVNDS2tNTGdnQktHS011SW1razhnZGw2MFFGMG8wVi9JbFlTY2JUbzYxU3BhTmtaTEVtV1l4NmNLZGFHMVduUGhPbzlPaERHWGowMXNQUFo4MTFpNFh4T25sZGN3VmdCOG5la291SnpyZjF1dkF4Y3htWGpGbVdDeURIbmdpdGl4RkNuR3pOR3ZNL21BPT08L3hlbmM6Q2lwaGVyVmFsdWU%2BPC94ZW5jOkNpcGhlckRhdGE%2BPC94ZW5jOkVuY3J5cHRlZERhdGE%2BPC9zYW1sOkVuY3J5cHRlZEFzc2VydGlvbj48L3NhbWxwOlJlc3BvbnNlPg%3D%3D&RelayState=cah6dnvLyCdBHc0bl5F2D3EZs1myEwIcGXHgrrgABaRtr0VVrx7ntLhu} GetBody:<nil> ContentLength:16013 TransferEncoding:[] Close:false Host:localhost:8000 Form:map[] PostForm:map[] MultipartForm:<nil> Trailer:map[] RemoteAddr:[::1]:43304 RequestURI:/saml/acs TLS:<nil> Cancel:<nil> Response:<nil> ctx:0xc00030a040}
 ```
 
-[Text 3] shows the Request that Keycloak delivers to the Service Provider's ACS Endpoint after authentication is completed in Keycloak. You can see that the Request's Body contains "SAML Response" and "Relay State". You can see that the Relay State is the same as the Relay State in [Text 1]. The Service Provider determines and performs redirecting the User to the "/session" Path through the Relay State delivered to the ACS Endpoint.
+[Text 3] shows the Request that Keycloak delivers to the Service Provider's ACS Endpoint after authentication is completed in Keycloak. You can see that the Request's Body contains "SAML Response" and "Relay State". You can see that the Relay State is the same as the Relay State in [Text 1]. The Service Provider determines and performs redirecting the User to the `/session` Path through the Relay State delivered to the ACS Endpoint.
 
 ```xml {caption="[Text 4] SAML Response", linenos=table}
 <?xml version="1.0"?>
@@ -218,7 +218,7 @@ By performing URL Decoding and Base64 Decoding on the SAML Response in [Text 3],
 }
 ```
 
-When accessing the Service Provider's "/session" Endpoint, you can check the current Session information as shown in [Text 5]. You can see that the Role includes the Role from [Figure 5].
+When accessing the Service Provider's `/session` Endpoint, you can check the current Session information as shown in [Text 5]. You can see that the Role includes the Role from [Figure 5].
 
 ## 6. References
 

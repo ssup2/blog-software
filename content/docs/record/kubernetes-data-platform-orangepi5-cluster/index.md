@@ -43,7 +43,7 @@ nmcli con mod "Wired connection 1" \
 
 [Figure 1]를 참조하여 고정 IP를 설정한다.
 
-## 4. contaienrd, kubelet 설치
+## 4. containerd, kubelet 설치
 
 ```shell
 cat <<EOF | tee /etc/modules-load.d/k8s.conf
@@ -67,7 +67,7 @@ EOF
 sysctl --system
 ```
 
-sysctl Parameter를 설정한다.
+`sysctl` Parameter를 설정한다.
 
 ```
 swapoff -a
@@ -141,7 +141,7 @@ kubectl config 파일을 복사한다.
 kubectl patch deployment coredns -n kube-system -p '{"spec":{"template":{"spec":{"nodeSelector":{"node-group.dp.ssup2":"master"}}}}}'
 ```
 
-core-dns가 Master Node에만 동작하도록 설정한다.
+`coredns`가 Master Node에만 동작하도록 설정한다.
 
 ```shell
 kubectl apply -f https://github.com/flannel-io/flannel/releases/download/v0.26.2/kube-flannel.yml

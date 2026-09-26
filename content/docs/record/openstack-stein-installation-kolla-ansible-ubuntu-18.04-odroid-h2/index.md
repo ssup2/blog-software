@@ -125,7 +125,7 @@ network:
     version: 2
 ```
 
-Node04 Interface의 IP를 설정한다.
+Node09 Interface의 IP를 설정한다.
 
 ## 4. Package 설치
 
@@ -140,7 +140,7 @@ Node04 Interface의 IP를 설정한다.
 (Deploy)$ pip install python-openstackclient python-glanceclient python-neutronclient
 ```
 
-Deploy Node에 Ansible과 Kolla-ansible 및 Kolla Container Image Build를 위한 Ubuntu, Python Package를 설치한다. 또한 OpenSTack CLI Client도 설치한다.
+Deploy Node에 Ansible과 Kolla-ansible 및 Kolla Container Image Build를 위한 Ubuntu, Python Package를 설치한다. 또한 OpenStack CLI Client도 설치한다.
 
 ### 4.2. Registry Node
 
@@ -166,7 +166,7 @@ Open vSwitch Package가 설치되어 있다면 해당 Package를 지워서 Host�
 (All Node)$ apt-get remove --purge netplan.io
 ```
 
-ifupdown을 설치하고 netplan을 삭제한다.
+`ifupdown`을 설치하고 `netplan`을 삭제한다.
 
 ## 5. Ansible 설정
 
@@ -205,7 +205,7 @@ Deploy Node에서 ssh key를 생성한다. passphrase (Password)는 공백을 �
 (Deploy)$ ssh-copy-id root@10.0.0.19
 ```
 
-ssh-copy-id 명령어를 이용하여 생성한 ssh Public Key를 나머지 Node의 ~/.ssh/authorized_keys 파일에 복사한다.
+`ssh-copy-id` 명령어를 이용하여 생성한 ssh Public Key를 나머지 Node의 `~/.ssh/authorized_keys` 파일에 복사한다.
 
 ```text {caption="[Text 5] Deploy Node - /etc/hosts", linenos=table}
 ...
@@ -216,7 +216,7 @@ ssh-copy-id 명령어를 이용하여 생성한 ssh Public Key를 나머지 Node
 ...
 ```
 
-Deploy Node의 /etc/hosts 파일 내용을 [Text 5]과 같이 수정한다.
+Deploy Node의 `/etc/hosts` 파일 내용을 [Text 5]과 같이 수정한다.
 
 ```text {caption="[Text 6] Deploy Node - /etc/ansible/ansible.cfg", linenos=table}
 ...
@@ -227,7 +227,7 @@ forks=100
 ...
 ```
 
-Deploy Node의 /etc/ansible/ansible.cfg 파일을 [Text 6]와 같이 수정한다.
+Deploy Node의 `/etc/ansible/ansible.cfg` 파일을 [Text 6]와 같이 수정한다.
 
 ## 6. Kolla-Ansible 설정
 
@@ -238,7 +238,7 @@ Deploy Node의 /etc/ansible/ansible.cfg 파일을 [Text 6]와 같이 수정한�
 (Deploy)$ cp -r /usr/local/share/kolla-ansible/etc_examples/kolla/* /etc/kolla
 ```
 
-Inventory 파일들을 복사한다. 또한 Config 파일인 `global.yaml` 파일과 Password 정보가 포함되어 있는 `passwords.yml` 파일을 복사한다.
+Inventory 파일들을 복사한다. 또한 Config 파일인 `globals.yml` 파일과 Password 정보가 포함되어 있는 `passwords.yml` 파일을 복사한다.
 
 ```text {caption="[Text 7] Deploy Node - ~/kolla-ansible/multinode", linenos=table}
 # These initial groups are the only groups required to be modified. The
@@ -289,7 +289,7 @@ haproxy
 ...
 ```
 
-Ansible Inventory를 설정한다. Deploy Node에 ~/kolla-ansible/multinode 파일을 [Text 7]의 내용으로 변경한다. ~/kolla-ansible/multinode 파일의 윗부분에 있는 [control], [network], [external-compute], [monitoring], [storage], [deployment] 부분만 ODROID-H2 Cluster 환경에 맞게 번경하였고 나머지 파일의 아랫부분은 기본 설정값을 그대로 유지한다.
+Ansible Inventory를 설정한다. Deploy Node에 `~/kolla-ansible/multinode` 파일을 [Text 7]의 내용으로 변경한다. `~/kolla-ansible/multinode` 파일의 윗부분에 있는 `[control]`, `[network]`, `[external-compute]`, `[monitoring]`, `[storage]`, `[deployment]` 부분만 ODROID-H2 Cluster 환경에 맞게 번경하였고 나머지 파일의 아랫부분은 기본 설정값을 그대로 유지한다.
 
 ```yaml {caption="[Text 8] Deploy Node - /etc/kolla/passwords.yml", linenos=table}
 # Database
@@ -523,7 +523,7 @@ grafana_database_password: admin
 grafana_admin_password: admin
 ```
 
-OpenStack에서 이용하는 Password 정보를 입력한다. Deploy Node의 /etc/kolla/passwords.yml 파일을 [Text 8]의 내용처럼 수정한다. 대부분의 password는 **admin**으로 설정한다.
+OpenStack에서 이용하는 Password 정보를 입력한다. Deploy Node의 `/etc/kolla/passwords.yml` 파일을 [Text 8]의 내용처럼 수정한다. 대부분의 password는 `admin`으로 설정한다.
 
 ```yaml {caption="[Text 9] Deploy Node - /etc/kolla/globals.yml", linenos=table}
 # Kolla
@@ -589,13 +589,13 @@ ceph_enable_cache: "no"
 #octavia_amp_secgroup_list:
 ```
 
-Kolla-Ansible을 설정한다. Deploy Node의 /etc/kolla/globals.yml 파일을 [Text 9]의 내용처럼 수정한다. Octavia는 OpenStack을 한번이상 구동한 다음에 설정할 수 있기 때문에, Octavia 설정은 주석처리 상태로 놔둔다.
+Kolla-Ansible을 설정한다. Deploy Node의 `/etc/kolla/globals.yml` 파일을 [Text 9]의 내용처럼 수정한다. Octavia는 OpenStack을 한번이상 구동한 다음에 설정할 수 있기 때문에, Octavia 설정은 주석처리 상태로 놔둔다.
 
 ```shell
 (Deploy)$ kolla-ansible -i ~/kolla-ansible/multinode bootstrap-servers
 ```
 
-Kolla Ansible bootstrap-servers을 각 Node에 필요한 Ubuntu, Python Package를 설치한다.
+Kolla Ansible `bootstrap-servers`을 각 Node에 필요한 Ubuntu, Python Package를 설치한다.
 
 ## 7. Docker 설정
 
@@ -607,7 +607,7 @@ Kolla Ansible bootstrap-servers을 각 Node에 필요한 Ubuntu, Python Package�
 (Registry)$ docker run -d -p 5000:5000 --restart=always --name registry_private -v ~/auth:/auth -e "REGISTRY_AUTH=htpasswd" -e "REGISTRY_AUTH_HTPASSWD_REALM=Registry Realm" -e "REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd" registry:2
 ```
 
-Registry Node에서 Docker Registry를 구동시킨다. ID/Password는 admin/admin으로 설정한다.
+Registry Node에서 Docker Registry를 구동시킨다. ID/Password는 `admin`/`admin`으로 설정한다.
 
 ### 7.2. All Node
 
@@ -621,7 +621,7 @@ ExecStart=/usr/bin/dockerd --insecure-registry 10.0.0.19:5000 --log-opt max-file
 (All)$ service docker restart
 ```
 
-Node에서 동작하는 모든 Docker Daemon에 Registry Node에서 동작하는 Docker Registry를 Insecure Registry로 등록한다. 모든 Node의 /etc/systemd/system/docker.service.d/kolla.conf 파일을 [Text 10]의 내용으로 생성한 다음, Docker를 재시작한다.
+Node에서 동작하는 모든 Docker Daemon에 Registry Node에서 동작하는 Docker Registry를 Insecure Registry로 등록한다. 모든 Node의 `/etc/systemd/system/docker.service.d/kolla.conf` 파일을 [Text 10]의 내용으로 생성한 다음, Docker를 재시작한다.
 
 ## 8. Octavia 인증서 설정
 
@@ -645,7 +645,7 @@ Network Node에서 Octavia에서 이용하는 인증서를 생성한다.
 (Ceph)$ printf 'KERNEL=="nvme0n1p1", SYMLINK+="nvme0n11"\nKERNEL=="nvme0n1p2", SYMLINK+="nvme0n12"' > /etc/udev/rules.d/local.rules
 ```
 
-Ceph Node의 /dev/nvme0n1 Block Device에 KOLLA_CEPH_OSD_BOOTSTRAP_BS Label을 붙인다. Kolla-Ansible은 OSD가 KOLLA_CEPH_OSD_BOOTSTRAP_BS 붙은 Block Device를 이용하도록 설정한다. Kolla-Ansible의 Role의 오류로 인해서 NVME를 Ceph의 Storage로 이용할 경우 잘못된 Partition 이름을 참조하는 버그가 있다. 이러한 문제를 해결하기 위해서 Partiton Symbolic Link를 udev를 통해서 생성한다.
+Ceph Node의 `/dev/nvme0n1` Block Device에 `KOLLA_CEPH_OSD_BOOTSTRAP_BS` Label을 붙인다. Kolla-Ansible은 OSD가 `KOLLA_CEPH_OSD_BOOTSTRAP_BS` 붙은 Block Device를 이용하도록 설정한다. Kolla-Ansible의 Role의 오류로 인해서 NVME를 Ceph의 Storage로 이용할 경우 잘못된 Partition 이름을 참조하는 버그가 있다. 이러한 문제를 해결하기 위해서 Partiton Symbolic Link를 udev를 통해서 생성한다.
 
 ## 10. Kolla Container Image 생성 및 Push
 
@@ -691,7 +691,7 @@ export OS_IDENTITY_API_VERSION=3
 export OS_IMAGE_API_VERSION=2
 ```
 
-초기화가 완료되면 [Shell 1]의 내용을 갖는 /etc/kolla/admin-openrc.sh 파일을 확인할 수 있다.
+초기화가 완료되면 [Shell 1]의 내용을 갖는 `/etc/kolla/admin-openrc.sh` 파일을 확인할 수 있다.
 
 ## 13. External Network, Octavia Network 생성
 
@@ -704,7 +704,7 @@ export OS_IMAGE_API_VERSION=2
 (Deploy)$ openstack network delete demo-net
 ```
 
-init-runonce Script로 인해서 생긴 모든 Network와 Router를 삭제한다.
+`init-runonce` Script로 인해서 생긴 모든 Network와 Router를 삭제한다.
 
 ```shell
 (Deploy)$ . /etc/kolla/admin-openrc.sh
@@ -722,7 +722,7 @@ External Router, External Network, External Subnet를 생성하고 External Rout
 (Deploy)$ openstack router add subnet external-router octavia-sub
 ```
 
-Octavia Network와 Octvia Subnet을 생성하고 External Network를 연결한다.
+Octavia Network와 Octavia Subnet을 생성하고 External Network를 연결한다.
 
 ```shell
 (Controller)$ route add -net 20.0.0.0/24 gw 192.168.0.225
@@ -761,7 +761,7 @@ Ubuntu Image를 Download 받은 후 root 계정 설정, SSHD 설정을 진행한
 (Deploy)$ openstack image create --disk-format qcow2 --container-format bare --public --tag amphora --file ./amphora-x64-haproxy.qcow2 ubuntu-16.04-amphora
 ```
 
-octavia User로 Octavia Amphora Image를 생성하고 Glance에 등록한다. tag는 반드시 amphora라고 설정해야 한다.
+`octavia` User로 Octavia Amphora Image를 생성하고 Glance에 등록한다. tag는 반드시 `amphora`라고 설정해야 한다.
 
 ## 15. Octavia Flavor, Keypair, Security Group 설정 및 Octavia 배포
 
@@ -771,7 +771,7 @@ octavia User로 Octavia Amphora Image를 생성하고 Glance에 등록한다. ta
 (Deploy)$ openstack flavor create --id 100 --vcpus 2 --ram 2048 --disk 10 "m1.amphora" --public
 ```
 
-octavia User로 Octavia Amphora VM을 위해서 Flavor를 생성한다. Flavor ID는 100으로 설정할 예정이기 때문에 Flavor ID는 반드시 100으로 생성해야 한다.
+`octavia` User로 Octavia Amphora VM을 위해서 Flavor를 생성한다. Flavor ID는 `100`으로 설정할 예정이기 때문에 Flavor ID는 반드시 `100`으로 생성해야 한다.
 
 ```shell
 (Deploy)$ . /etc/kolla/admin-openrc.sh
@@ -779,7 +779,7 @@ octavia User로 Octavia Amphora VM을 위해서 Flavor를 생성한다. Flavor I
 (Deploy)$ openstack keypair create -- octavia_ssh_key 
 ```
 
-octavia User로 octavia_ssh_key Keypair를 생성한다. Keypair 이름은 반드시 octavia_ssh_key로 생성해야 한다.
+`octavia` User로 `octavia_ssh_key` Keypair를 생성한다. Keypair 이름은 반드시 `octavia_ssh_key`로 생성해야 한다.
 
 ```shell
 (Deploy)$ . /etc/kolla/admin-openrc.sh
@@ -790,7 +790,7 @@ octavia User로 octavia_ssh_key Keypair를 생성한다. Keypair 이름은 반�
 (Deploy)$ openstack security group rule create --protocol tcp --dst-port 9443 octavia-sec
 ```
 
-octavia User로 octavia-sec Security Group을 생성한다.
+`octavia` User로 `octavia-sec` Security Group을 생성한다.
 
 ```yaml {caption="[Text 11] Deploy Node - /etc/kolla/globals.yml", linenos=table}
 ...
@@ -801,7 +801,7 @@ octavia_amp_boot_network_list: "[octavia-net Network ID]"
 octavia_amp_secgroup_list: "[octavia-sec Security Group ID]"
 ```
 
-/etc/kolla/globals.yml 파일을 [Text 11]의 내용처럼, Octavia 설정 주석을 제거하여 Octavia를 설정한다. octavia_amp_boot_network_list에는 위에서 생성한 octavia-net Network의 ID를 넣는다. octavia_amp_secgroup_list에는 위에서 생성한 octavia-sec Security Group의 ID를 넣는다.
+`/etc/kolla/globals.yml` 파일을 [Text 11]의 내용처럼, Octavia 설정 주석을 제거하여 Octavia를 설정한다. `octavia_amp_boot_network_list`에는 위에서 생성한 `octavia-net` Network의 ID를 넣는다. `octavia_amp_secgroup_list`에는 위에서 생성한 `octavia-sec` Security Group의 ID를 넣는다.
 
 ```shell
 (Deploy)$ kolla-ansible -i ~/kolla-ansible/multinode deploy -t octavia
@@ -830,11 +830,11 @@ Octavia만 배포한다.
 
 접속할 수 있는 Dashboard 정보는 아래와 같다. URL, ID, Password 순서로 나열하였다.
 
-* **Horizon** : http://10.0.0.20:80, admin, admin
-* **RabbitMQ** : http://10.0.0.20:15672, openstack, admin
+* **Horizon** : http://10.0.0.20:80, `admin`, `admin`
+* **RabbitMQ** : http://10.0.0.20:15672, `openstack`, `admin`
 * **Prometheus** : http://10.0.0.20:9091
-* **Grafana** : http://10.0.0.20:3000, admin, admin
-* **Alertmanager** : http://10.0.0.20:9093, admin, admin
+* **Grafana** : http://10.0.0.20:3000, `admin`, `admin`
+* **Alertmanager** : http://10.0.0.20:9093, `admin`, `admin`
 
 ## 18. Debugging
 

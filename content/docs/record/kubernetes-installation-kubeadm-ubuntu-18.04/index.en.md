@@ -15,7 +15,7 @@ The installation environment is as follows:
 * kubeadm 1.12.3
   * When building a Cluster environment using VMs, Kubernetes can be easily installed using kubeadm.
 * Password
-  * For easy installation, all passwords required for Kubernetes installation are unified to **root**.
+  * For easy installation, all passwords required for Kubernetes installation are unified to `root`.
 * Installation is performed with root user on all nodes.
 
 ## 2. Node Configuration
@@ -24,7 +24,7 @@ The installation environment is as follows:
 
 Create virtual Master and Worker Nodes (VMs) using VirtualBox as shown in [Figure 1].
 
-* **Hostname** : Master Node - node1, Worker Node1 - node2, Worker Node2 - node3
+* **Hostname** : Master Node - `node1`, Worker Node1 - `node2`, Worker Node2 - `node3`
 * **NAT** : Build 10.0.0.0/24 Network using "NAT network" provided by Virtual Box.
 * **Router** : Build 192.168.0.0/24 Network using router. (NAT)
 
@@ -47,7 +47,7 @@ network:
                 addresses: [8.8.8.8]
 ```
 
-Configure the Master Node's /etc/netplan/50-cloud-init.yaml file as shown in [File 1].
+Configure the Master Node's `/etc/netplan/50-cloud-init.yaml` file as shown in [File 1].
 
 ### 2.2. Worker Node
 
@@ -63,7 +63,7 @@ network:
                 addresses: [8.8.8.8]
 ```
 
-Configure the Worker Node 01's /etc/netplan/50-cloud-init.yaml file as shown in [File 2].
+Configure the Worker Node 01's `/etc/netplan/50-cloud-init.yaml` file as shown in [File 2].
 
 ```yaml {caption="[File 3] Worker Node 02 - /etc/netplan/50-cloud-init.yaml", linenos=table}
 network:
@@ -77,7 +77,7 @@ network:
                 addresses: [8.8.8.8]
 ```
 
-Configure the Worker Node 02's /etc/netplan/50-cloud-init.yaml file as shown in [File 3].
+Configure the Worker Node 02's `/etc/netplan/50-cloud-init.yaml` file as shown in [File 3].
 
 ## 3. Package Installation
 
@@ -115,7 +115,7 @@ The options for kubeadm commands for cluster setup vary depending on the network
 kubeadm join 10.0.0.10:6443 --token x7tk20.4hp9x2x43g46ara5 --discovery-token-ca-cert-hash sha256:cab2cc0a4912164f45f502ad31f5d038974cf98ed10a6064d6632a07097fad79
 ```
 
-Initialize kubeadm. --pod-network-cidr must be set to **192.168.0.0/16**. If an error occurs due to Docker version, add '--ignore-preflight-errors=SystemVerification' at the end of kubeadm init.
+Initialize kubeadm. `--pod-network-cidr` must be set to **192.168.0.0/16**. If an error occurs due to Docker version, add `--ignore-preflight-errors=SystemVerification` at the end of `kubeadm init`.
 
 #### 4.1.2. Flannel-based Setup
 
@@ -127,7 +127,7 @@ Initialize kubeadm. --pod-network-cidr must be set to **192.168.0.0/16**. If an 
 kubeadm join 10.0.0.10:6443 --token x7tk20.4hp9x2x43g46ara5 --discovery-token-ca-cert-hash sha256:cab2cc0a4912164f45f502ad31f5d038974cf98ed10a6064d6632a07097fad79
 ```
 
-Initialize kubeadm. --pod-network-cidr must be set to **10.244.0.0/16**. If an error occurs due to Docker version, add '--ignore-preflight-errors=SystemVerification' at the end of kubeadm init.
+Initialize kubeadm. `--pod-network-cidr` must be set to **10.244.0.0/16**. If an error occurs due to Docker version, add `--ignore-preflight-errors=SystemVerification` at the end of `kubeadm init`.
 
 #### 4.1.3. Cilium-based Setup
 
@@ -139,7 +139,7 @@ Initialize kubeadm. --pod-network-cidr must be set to **10.244.0.0/16**. If an e
 kubeadm join 10.0.0.10:6443 --token x7tk20.4hp9x2x43g46ara5 --discovery-token-ca-cert-hash sha256:cab2cc0a4912164f45f502ad31f5d038974cf98ed10a6064d6632a07097fad79
 ```
 
-Initialize kubeadm. --pod-network-cidr just needs to not overlap with --pod-network-cidr. In the above, --pod-network-cidr is set to 192.167.0.0/16. If an error occurs due to Docker version, add '--ignore-preflight-errors=SystemVerification' at the end of kubeadm init.
+Initialize kubeadm. `--pod-network-cidr` just needs to not overlap with `--pod-network-cidr`. In the above, `--pod-network-cidr` is set to `192.167.0.0/16`. If an error occurs due to Docker version, add `--ignore-preflight-errors=SystemVerification` at the end of `kubeadm init`.
 
 #### 4.1.4. Common
 
@@ -165,7 +165,7 @@ fi
 source <(kubectl completion bash)
 ```
 
-Configure kubectl autocomplete. Add the content of [File 4] to ~/.bashrc.
+Configure kubectl autocomplete. Add the content of [File 4] to `~/.bashrc`.
 
 ### 4.2. Worker Node
 
@@ -175,7 +175,7 @@ Configure kubectl autocomplete. Add the content of [File 4] to ~/.bashrc.
 (Worker)$ kubeadm join 10.0.0.10:6443 --token 46i2fg.yoidccf4k485z74u --discovery-token-ca-cert-hash sha256:cab2cc0a4912164f45f502ad31f5d038974cf98ed10a6064d6632a07097fad79
 ```
 
-Configure the cluster. Execute the **kubeadm join ~~** command that appeared as a result of kubeadm init on all Worker Nodes. If an error occurs due to Docker version, add '--ignore-preflight-errors=SystemVerification' at the end of kubeadm join.
+Configure the cluster. Execute the **kubeadm join ~~** command that appeared as a result of `kubeadm init` on all Worker Nodes. If an error occurs due to Docker version, add `--ignore-preflight-errors=SystemVerification` at the end of `kubeadm join`.
 
 ### 4.3. Verification
 
@@ -187,7 +187,7 @@ node2   NotReady   <none>   31s   v1.12.3
 node3   NotReady   <none>   27s   v1.12.3
 ```
 
-Check the cluster from the Master Node. All nodes should appear in the list. They remain in NotReady state because network configuration is not set. Ready state can be confirmed after network plugin installation.
+Check the cluster from the Master Node. All nodes should appear in the list. They remain in `NotReady` state because network configuration is not set. `Ready` state can be confirmed after network plugin installation.
 
 ## 5. Network Plugin Installation
 
@@ -219,7 +219,7 @@ Install Flannel.
 (Master)$ echo "bpffs                      /sys/fs/bpf             bpf     defaults 0 0" >> /etc/fstab
 ```
 
-Perform bpffs mount and configuration.
+Perform `bpffs` mount and configuration.
 
 ```shell
 (Master)$ wget https://github.com/cilium/cilium/archive/v1.3.0.zip
@@ -246,7 +246,7 @@ Download Cilium and install etcd required for Cilium operation.
 ...
 ```
 
-Modify Cilium configuration to enable Prefilter functionality. The prefilter interface must specify the NIC interface that constitutes the Kubernetes Cluster Network. If the device driver of the NIC that constitutes the Kubernetes Cluster Network does not support XDP, --prefilter-mode must be set to generic. Modify the cilium-1.3.0/examples/kubernetes/1.12/cilium.yaml file as shown in [File 5].
+Modify Cilium configuration to enable Prefilter functionality. The prefilter interface must specify the NIC interface that constitutes the Kubernetes Cluster Network. If the device driver of the NIC that constitutes the Kubernetes Cluster Network does not support XDP, `--prefilter-mode` must be set to `generic`. Modify the `cilium-1.3.0/examples/kubernetes/1.12/cilium.yaml` file as shown in [File 5].
 
 ```shell
 (Master)$ kubectl apply -f cilium-1.3.0/examples/kubernetes/1.12/cilium.yaml
@@ -267,7 +267,7 @@ No work is required on Worker Nodes.
 (Worker)$ echo "bpffs                      /sys/fs/bpf             bpf     defaults 0 0" >> /etc/fstab
 ```
 
-Perform bpffs mount and configuration.
+Perform `bpffs` mount and configuration.
 
 ## 6. Web UI (Dashboard) Installation
 
@@ -290,7 +290,7 @@ spec:
 ...
 ```
 
-Configure Insecure Option for kube-apiserver. Modify the command in the /etc/kubernetes/manifests/kube-apiserver.yaml file as shown in [File 6].
+Configure Insecure Option for kube-apiserver. Modify the `command` in the `/etc/kubernetes/manifests/kube-apiserver.yaml` file as shown in [File 6].
 
 ```shell
 (Master)$ service kubelet restart
@@ -315,7 +315,7 @@ subjects:
   namespace: kube-system
 ```
 
-Create a config file for Web UI privilege permissions. Create ~/dashboard-admin.yaml file with the content of [File 7].
+Create a config file for Web UI privilege permissions. Create `~/dashboard-admin.yaml` file with the content of [File 7].
 
 ```shell
 (Master)$ kubectl create -f ~/dashboard-admin.yaml

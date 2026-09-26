@@ -46,7 +46,7 @@ $ cd linux
 $ git checkout v4.20
 ```
 
-Since it is not currently provided as a package for Ubuntu and CentOS, download the kernel code and build bpftool directly. **Kernel version v4.20 or higher** is required to use bpftool's net and perf options.
+Since it is not currently provided as a package for Ubuntu and CentOS, download the kernel code and build bpftool directly. **Kernel version v4.20 or higher** is required to use bpftool's `net` and `perf` options.
 
 ```shell
 $ make -C tools/bpf/bpftool/
@@ -74,7 +74,7 @@ $ make -C tools/bpf/bpftool/
 ...
 ```
 
-When a compile error occurs due to conflicts between linux/if.h and net/if.h, the above symptoms appear.
+When a compile error occurs due to conflicts between `linux/if.h` and `net/if.h`, the above symptoms appear.
 
 ```c {caption="[File 1] tools/bpf/bpftool/net.c", linenos=table}
 ...
@@ -84,7 +84,7 @@ When a compile error occurs due to conflicts between linux/if.h and net/if.h, th
 ...
 ```
 
-Modify the tools/bpf/bpftool/net.c file as shown in [File 1].
+Modify the `tools/bpf/bpftool/net.c` file as shown in [File 1].
 
 ## 4. References
 

@@ -15,7 +15,7 @@ The installation and execution environment is as follows.
 deb https://packagecloud.io/grafana/stable/debian/ stretch main
 ```
 
-Add the contents of [File 1] to /etc/apt/sources.list.
+Add the contents of [File 1] to `/etc/apt/sources.list`.
 
 ```shell
 $ curl https://packagecloud.io/gpg.key | sudo apt-key add -
@@ -35,7 +35,7 @@ $ systemctl enable grafana-server.service
 Start Grafana and verify access.
 
 * http://192.168.0.150:3000/login
-* **ID**, **PW** : admin/admin
+* **ID**, **PW** : `admin`/`admin`
 
 ## 3. References
 

@@ -26,9 +26,9 @@ Enter new UNIX password: kafka
 Retype new UNIX password: kafka
 ```
 
-kafka 계정을 생성한다.
+`kafka` 계정을 생성한다.
 
-* **Password** : kafka
+* **Password** : `kafka`
 
 ```shell
 $ cd /opt
@@ -45,7 +45,7 @@ Kafka Download 및 압축을 푼다.
 delete.topic.enable = true
 ```
 
-/opt/kafka/config/server.properties 파일의 마지막에 [File 1]의 내용을 추가한다.
+`/opt/kafka/config/server.properties` 파일의 마지막에 [File 1]의 내용을 추가한다.
 
 ```text {caption="[File 2] /lib/systemd/system/zookeeper.service", linenos=table}
 ...
@@ -65,7 +65,7 @@ Restart=on-abnormal
 WantedBy=multi-user.target
 ```
 
-/lib/systemd/system/zookeeper.service에 [File 2]의 내용을 저장한다.
+`/lib/systemd/system/zookeeper.service`에 [File 2]의 내용을 저장한다.
 
 ```text {caption="[File 3] /lib/systemd/system/kafka.service", linenos=table}
 [Unit]
@@ -83,7 +83,7 @@ Restart=on-abnormal
 WantedBy=multi-user.target
 ```
 
-/lib/systemd/system/kafka.service에 [File 3]의 내용을 저장한다.
+`/lib/systemd/system/kafka.service`에 [File 3]의 내용을 저장한다.
 
 ```shell
 $ systemctl daemon-reload
@@ -117,7 +117,7 @@ $ ./kafka-topics.sh --create --zookeeper localhost:2181 \
 --topic HakaseTesting
 ```
 
-HakaseTesting Topic을 생성한다.
+`HakaseTesting` Topic을 생성한다.
 
 ```shell
 $ su - kafka

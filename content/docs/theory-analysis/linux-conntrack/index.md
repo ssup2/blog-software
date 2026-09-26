@@ -18,12 +18,12 @@ tcp      6 7 CLOSE src=10.0.0.11 dst=10.0.0.19 sport=36892 dport=9093 src=10.0.0
 tcp      6 28 TIME-WAIT src=10.0.0.19 dst=10.0.0.19 sport=34306 dport=18080 src=10.0.0.19 dst=10.0.0.19 sport=18080 dport=34306 [ASSURED] mark=0 use=1
 ```
 
-conntrack Module이 관리하고 있는 Connection 정보는 conntrack 명령어롤 통해서 확인할 수 있다. conntrack은 conntrack, expect, dying, unconfirmed 4개의 Table을 관리한다. Connection 정보가 저장되는 Table은 Connection Status에 따라 결정된다.
+conntrack Module이 관리하고 있는 Connection 정보는 `conntrack` 명령어롤 통해서 확인할 수 있다. `conntrack`은 `conntrack`, `expect`, `dying`, `unconfirmed` 4개의 Table을 관리한다. Connection 정보가 저장되는 Table은 Connection Status에 따라 결정된다.
 
-* **conntrack** : 대부분의 Connection 정보들을 저장하고 있다. [Shell 1]은 conntrack Table을 나타내고있다.
-* **expect** : Connection Tracking Helper에 의해서 Related Connection으로 분류된 Connection 정보들을 저정하고 있다.
-* **dying** : Connection이 만기가 되거나, conntrack 명령어를 통해서 삭제되고 있는 Connection 정보들을 저장하고 있다.
-* **unconfirmed** : Kernel의 Socket Buffer에 저장된 Packet이 갖고 있는 Connection 정보이지만, 아직 확인하지 못하여 conntrack Table에는 저장되지 못한 Connection 정보들을 의미한다. Packet이 갖고 있는 Connection 정보는 Packet이 Postrouting Hook에 도달하였을 때 Confirm된다.
+* `conntrack` : 대부분의 Connection 정보들을 저장하고 있다. [Shell 1]은 `conntrack` Table을 나타내고있다.
+* `expect` : Connection Tracking Helper에 의해서 Related Connection으로 분류된 Connection 정보들을 저정하고 있다.
+* `dying` : Connection이 만기가 되거나, `conntrack` 명령어를 통해서 삭제되고 있는 Connection 정보들을 저장하고 있다.
+* `unconfirmed` : Kernel의 Socket Buffer에 저장된 Packet이 갖고 있는 Connection 정보이지만, 아직 확인하지 못하여 `conntrack` Table에는 저장되지 못한 Connection 정보들을 의미한다. Packet이 갖고 있는 Connection 정보는 Packet이 Postrouting Hook에 도달하였을 때 Confirm된다.
 
 ### 1.2. Connection Tracking Helper
 
@@ -58,7 +58,7 @@ iptables에서는 conntrack Module을 기반으로 하여 Connection State 조�
 * `INVALID` : 어떠한 Connection에도 소속되지 않은 상태를 의미한다.
 * `UNTRACKED` : Connection을 추적하지 않는 상태를 의미한다.
 
-[Shell 3]은 22번 Port로 들어온는 Packet이 새로운 Connection을 생성하려고 하거나, 기존의 Connection을 통해서 통신하려는 경우 허용하는 Rule을 iptable 명령어를 통해서 설정하는 과정을 나타내고 있다. iptables에서는 NAT를 수행 할 때도 conntrack Module을 이용한다. iptables에서 NAT Rule을 설정하면 이와 반대대는 Reverse NAT는 iptables에 Reverse NAT Rule이 없어도 자동으로 수행되는데, iptables는 conntrack Module의 Connection 정보를 바탕으로 **암묵적으로** Reverse NAT를 수행하기 때문이다.
+[Shell 3]은 22번 Port로 들어온는 Packet이 새로운 Connection을 생성하려고 하거나, 기존의 Connection을 통해서 통신하려는 경우 허용하는 Rule을 `iptables` 명령어를 통해서 설정하는 과정을 나타내고 있다. iptables에서는 NAT를 수행 할 때도 conntrack Module을 이용한다. iptables에서 NAT Rule을 설정하면 이와 반대대는 Reverse NAT는 iptables에 Reverse NAT Rule이 없어도 자동으로 수행되는데, iptables는 conntrack Module의 Connection 정보를 바탕으로 **암묵적으로** Reverse NAT를 수행하기 때문이다.
 
 ### 1.4. Max Connection Count
 

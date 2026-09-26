@@ -6,7 +6,7 @@ CQRS (Command and Query Responsibility Segregation) Pattern을 분석한다.
 
 ## 1. CQRS (Command and Query Responsibility Segregation) Pattern
 
-{{< figure caption="[Figure 1] CORS Pattern" src="images/cqrs-pattern.png" width="700px" >}}
+{{< figure caption="[Figure 1] CQRS Pattern" src="images/cqrs-pattern.png" width="700px" >}}
 
 **CQRS (Command and Query Responsibility Segregation) Pattern**은 의미 그대로 Command Responsibility와 Query Responsibility을 분리하는 Pattern을 의미한다. 여기서 Responsibility는 Model을 의미한다. 즉 Command와 Query가 다른 **Model**을 이용하여 동작하는 방식을 의미한다. 
 
@@ -16,7 +16,7 @@ Command Model과 Query Model을 분리할 수 있다는 장점을 가지고 있�
 
 {{< figure caption="[Figure 2] Event Sourcing Pattern" src="images/event-sourcing-pattern.png" width="700px" >}}
 
-CQRS Pattern을 이용하는 대표적인 곳이 **Event Sourcing Pattern**이다. [Figure 2]는 Event Sourcing Pattern을 이용하는 Order Service에 적용한 CQRS Pattern을 나타내고 있다. Event Soucing Pattern에서 Event는 CQRS Pattern의 Command와 일치한다. Create, Update, Delete Order 동작을 통해서 생성된 Event는 Event Store에 저장되며, Message Queue를 통해서 Read Database에 비동기 적으로 Event가 반영(Projection)된다. 이후에 Read Order 동작은 Read Database에 저장된 Order의 상태 정보를 이용한다.
+CQRS Pattern을 이용하는 대표적인 곳이 **Event Sourcing Pattern**이다. [Figure 2]는 Event Sourcing Pattern을 이용하는 Order Service에 적용한 CQRS Pattern을 나타내고 있다. Event Sourcing Pattern에서 Event는 CQRS Pattern의 Command와 일치한다. Create, Update, Delete Order 동작을 통해서 생성된 Event는 Event Store에 저장되며, Message Queue를 통해서 Read Database에 비동기 적으로 Event가 반영(Projection)된다. 이후에 Read Order 동작은 Read Database에 저장된 Order의 상태 정보를 이용한다.
 
 ## 2. 참조
 

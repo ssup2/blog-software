@@ -30,7 +30,7 @@ root      2478  2476  0 15:47 pts/1    00:00:00 stress --vm 1 --vm-bytes 1024M -
 152
 ```
 
-OOM Killer는 Process를 죽일때 임의의 Process를 죽이지 않고, Badness Score라고 불리는 점수가 높은 Process부터 죽인다. Badness Score는 Memory 사용량이 높을수록 같이 높아진다. 각 Process의 Badness Score는 `/proc/[PID]/oom-score` 파일에서 확인 할 수 있다. [Shell 1]은 stress 명령어를 활용하여 Memory 사용량에 따른 Badness Score를 확인하는 과정을 나타내고 있다. 첫번째 stress 명령어는 512MB의 Memory를 이용하는 Child Process를 생성하고, 두번째 stress 명령어는 1024MB의 Memory를 이용하는 Child Process를 생성한다. 두번째 stress 명령어의 Child Process가 첫번째 stress 명령어의 Child Process보다 2배의 Memory를 더 많이 이용하는 만큼, Badness Score도 2배가 차이나는것을 확인할 수 있다.
+OOM Killer는 Process를 죽일때 임의의 Process를 죽이지 않고, Badness Score라고 불리는 점수가 높은 Process부터 죽인다. Badness Score는 Memory 사용량이 높을수록 같이 높아진다. 각 Process의 Badness Score는 `/proc/[PID]/oom-score` 파일에서 확인 할 수 있다. [Shell 1]은 `stress` 명령어를 활용하여 Memory 사용량에 따른 Badness Score를 확인하는 과정을 나타내고 있다. 첫번째 `stress` 명령어는 512MB의 Memory를 이용하는 Child Process를 생성하고, 두번째 `stress` 명령어는 1024MB의 Memory를 이용하는 Child Process를 생성한다. 두번째 `stress` 명령어의 Child Process가 첫번째 `stress` 명령어의 Child Process보다 2배의 Memory를 더 많이 이용하는 만큼, Badness Score도 2배가 차이나는것을 확인할 수 있다.
 
 Memory 사용량 뿐만 아니라 Badness Score에 영향을 주는 요소가 존재한다. 다음의 요소는 Badness Score를 줄이는 요소이다. 
 
@@ -41,7 +41,7 @@ Memory 사용량 뿐만 아니라 Badness Score에 영향을 주는 요소가 �
 다음의 요소들은 Badness Score를 올리는 요소이다.
 
 * 많은 Child Process를 생성한 Process
-* 낮은 nice 값을 갖는 Process
+* 낮은 `nice` 값을 갖는 Process
 
 ```shell {caption="[Shell 2] Badness Score 조정"}
 # Badness Score 감소

@@ -68,7 +68,7 @@ listener.name.sasl_plaintext.plain.sasl.jaas.config=org.apache.kafka.common.secu
   user_serviceb="serviceb-password";
 ```
 
-[Config 3] shows an example of Kafka's `server.properties` when the Security Protocol is `SASL_PLAINTEXT` and the SASL Mechanism is `PLAIN`. It can be seen that the Listener and Inter-Broker Communication Protocol are set to `SASL_SSL`, and the SASL Mechanism is set to `PLAIN`. It can also be seen that Username and Password are configured. `username` and `password` refer to Admin User/Password for authentication between Kafka Brokers, and `user_[username]` refers to the Password of that User.
+[Config 3] shows an example of Kafka's `server.properties` when the Security Protocol is `SASL_PLAINTEXT` and the SASL Mechanism is `PLAIN`. It can be seen that the Listener and Inter-Broker Communication Protocol are set to `SASL_PLAINTEXT`, and the SASL Mechanism is set to `PLAIN`. It can also be seen that Username and Password are configured. `username` and `password` refer to Admin User/Password for authentication between Kafka Brokers, and `user_[username]` refers to the Password of that User.
 
 ```properties {caption="[Config 4] Producer/Consumer config for SASL_PLAINTEXT security protocol and PLAIN SASL", linenos=table}
 # Broker configuration

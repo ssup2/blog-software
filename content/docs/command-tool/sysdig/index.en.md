@@ -33,7 +33,7 @@ $ sysdig
 8484 01:23:53.859665937 1 sshd (30637) > switch next=3591(sysdig) pgft_maj=3 pgft_min=452 vm_size=72356 vm_rss=6396 vm_swap=0
 ```
 
-Outputs all kernel operations that sysdig can detect. [Shell 1] shows the output of `sysdig` displaying kernel operations.
+Outputs all kernel operations that `sysdig` can detect. [Shell 1] shows the output of `sysdig` displaying kernel operations.
 
 ### 1.2. sysdig -c topprocs_cpu
 
@@ -77,7 +77,7 @@ Bytes               Process             PID
 254B                chronyd             2540
 ```
 
-Displays processes sorted by disk bandwidth usage in descending order. [Shell 4] shows the output of `sysdig -c topprocs_net` displaying processes sorted by disk bandwidth usage.
+Displays processes sorted by disk bandwidth usage in descending order. [Shell 4] shows the output of `sysdig -c topprocs_file` displaying processes sorted by disk bandwidth usage.
 
 ### 1.5. sysdig -c topfiles_bytes
 

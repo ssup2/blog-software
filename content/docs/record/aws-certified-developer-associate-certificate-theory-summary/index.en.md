@@ -13,9 +13,9 @@ Summarizes the missing parts based on the following summary
 ### 2.1. API Call Limit (Quota)
 
 * API calls are limited
-  * Ex) EC2 DescribeInstance : 100 Call Per Seconds
-  * Ex) S3 GetObject 5500 : 5500 Call Per Seconds, Per Prefix
-  * ThrottlingException error occurs when the limit is exceeded
+  * Ex) EC2 `DescribeInstance` : 100 Call Per Seconds
+  * Ex) S3 `GetObject` 5500 : 5500 Call Per Seconds, Per Prefix
+  * `ThrottlingException` error occurs when the limit is exceeded
   * Perform Exponential Backoff
 * Exponential Backoff
   * When calling APIs with the AWS SDK, the Exponential Backoff Logic is included inside the AWS SDK
@@ -26,10 +26,10 @@ Summarizes the missing parts based on the following summary
 ### 2.2. Credential Provider Chain
 
 * Credentials are found and applied in the following order
-  * **CLI Option** : "--region", "--output", "--profile"
-  * **Env** : AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN
-  * **CLI Credential File** : ~/.aws/credentials
-  * **CLI Configuration File** : ~/.aws/config
+  * **CLI Option** : `--region`, `--output`, `--profile`
+  * **Env** : `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SESSION_TOKEN`
+  * **CLI Credential File** : `~/.aws/credentials`
+  * **CLI Configuration File** : `~/.aws/config`
   * Container Credential
   * Instance Profile Credential
 
@@ -37,7 +37,7 @@ Summarizes the missing parts based on the following summary
 
 * Most API calls require Signing the request using the Access Key and Secret Access Key
 * When calling AWS APIs through the SDK or CLI, the SDK and CLI perform Signing internally
-* When calling AWS APIs directly, sign the request with the "SigV4" method and send it
+* When calling AWS APIs directly, sign the request with the `SigV4` method and send it
 
 ## 3. CloudFront
 
@@ -183,12 +183,12 @@ Summarizes the missing parts based on the following summary
 
 * The Code to deploy is located in a zip file
 * Elastic Beanstalk settings can also be configured inside the zip file
-* Located under the .ebextensions Dir inside the zip file
+* Located under the `.ebextensions` Dir inside the zip file
 * Supports both YAML and JSON Formats
-* Must have the .config extension
-  * Ex) logging.config
-* Default settings can be changed through the option_setting file
-* Since Elastic Beanstalk is based on CloudFormation, AWS Resources can be deployed by placing CloudFormation configuration files under the .ebextensions Dir
+* Must have the `.config` extension
+  * Ex) `logging.config`
+* Default settings can be changed through the `option_setting` file
+* Since Elastic Beanstalk is based on CloudFormation, AWS Resources can be deployed by placing CloudFormation configuration files under the `.ebextensions` Dir
 
 ### 5.3. Cloning
 
@@ -214,17 +214,17 @@ Summarizes the missing parts based on the following summary
 
 * Single Docker Mode
   * Installs Docker on the EC2 Instance and runs only a single Container
-  * The Container Image and settings to run on the EC2 Instance can be configured through a Dockerfile or the Dockerrun.aws.json file
+  * The Container Image and settings to run on the EC2 Instance can be configured through a Dockerfile or the `Dockerrun.aws.json` file
 * Multi Docker Container
   * Runs multiple Containers on the EC2 Instance
   * Elastic Beanstalk creates and uses an ECS Cluster
-  * ECS Tasks can be defined through the Dockerrun.aws.json file
+  * ECS Tasks can be defined through the `Dockerrun.aws.json` file
   * Container Images must be stored in advance in a Registry such as ECR
 
 ### 5.6. HTTPS Certificate Configuration
 
 * HTTPS can be used by specifying a Certificate on the ALB
-* The Certificate can be specified in the Web Console or in the .ebextensions/securelistner-alb.config file
+* The Certificate can be specified in the Web Console or in the `.ebextensions/securelistner-alb.config` file
 * The Certificate can be configured through ACM or the CLI
 
 ## 6. CI/CD
@@ -257,7 +257,7 @@ Summarizes the missing parts based on the following summary
 ### 6.3. CodeBuild
 
 * Code location : CodeCommit, S3, Bitbucket, Github
-* Builds are performed through the buildspec.yml file in the Code
+* Builds are performed through the `buildspec.yml` file in the Code
 * Output Logs are stored in S3 or CloudWatch Logs for review
 * Build-related statistics can be checked using CloudWatch Metrics
 * Notifications for failed Builds are possible using CloudWatch Events
@@ -272,7 +272,7 @@ Summarizes the missing parts based on the following summary
 
 * Defines the Build method
 * Path
-  * **Default** : buildspec.yml at the Code Root
+  * **Default** : `buildspec.yml` at the Code Root
   * A specific file can also be designated through User configuration
 * `Env` : Environment variables
   * `variables` : Uses plaintext
@@ -290,24 +290,24 @@ Summarizes the missing parts based on the following summary
 
 * Deploys Apps to multiple EC2 Instances and On-premise Servers
 * CodeDeploy Agent installation required on EC2 Instances and On-premise Servers
-* Deployment is performed through the appspec.yml file
+* Deployment is performed through the `appspec.yml` file
 * Deployment Group (EC2 Instances), deployment Type (Once At A Time, Half At A Time, All At Once, Custom), IAM Instance Profile, App Revision, etc. can be specified
 
 #### 6.4.1. CodeDeploy Agent
 
 * The CodeDeploy Agent checks with the CodeDeploy Service through Polling whether there is an App to deploy
-* If there is an App to deploy, it downloads the Code + appspec.yml file and then performs the deployment
+* If there is an App to deploy, it downloads the Code + `appspec.yml` file and then performs the deployment
 
 #### 6.4.2. appspec.yml
 
 * `files` : Specifies where to get the Source Code
 * `hooks` : Configures how to proceed with the deployment
-  * ApplicationStop
-  * DownloadBundle
-  * BeforeInstall
-  * Install
-  * AfterInstall
-  * ApplicationStart
+  * `ApplicationStop`
+  * `DownloadBundle`
+  * `BeforeInstall`
+  * `Install`
+  * `AfterInstall`
+  * `ApplicationStart`
   * `ValidateService` : Verifies that the deployment was successful, must be configured
 
 ### 6.5. CodeStar
@@ -399,7 +399,7 @@ Summarizes the missing parts based on the following summary
 * Data Event
   * Data CRUD Events on AWS Resources
   * Data Events are not recorded by CloudTrail by default (because many Events would be recorded if enabled)
-  * Ex) S3 GetObject, S3 DeleteObject, S3 PutObject
+  * Ex) S3 `GetObject`, S3 `DeleteObject`, S3 `PutObject`
 * CloudTrail Insights Event
   * Events generated by CloudTrail Insights
 
@@ -500,7 +500,7 @@ Summarizes the missing parts based on the following summary
 * Provides a feature to share Context between executions of the same Lambda function
 * Context Ex) DB Connection, HTTP Client, SDK Client
 * Sharing Context can reduce Lambda function initialization time
-* The /tmp Directory can also be used as Context
+* The `/tmp` Directory can also be used as Context
   * Up to 512MB available
 
 ### 10.10. Concurrency & Throttling
@@ -516,16 +516,16 @@ Summarizes the missing parts based on the following summary
 ### 10.11. Code Dependency
 
 * Packages for building Lambda functions must also be provided together
-  * **Node.js** : node_modules
-  * **Python** : pip --target
-  * **Java** : .jar
+  * **Node.js** : `node_modules`
+  * **Python** : `pip --target`
+  * **Java** : `.jar`
 * Upload directly to Lambda via a ZIP file; use S3 when exceeding 50MB
 * Native Libraries must be added to the ZIP file; the AWS SDK does not need to be added separately
 
 ### 10.12. with CloudFormation
 
 * Lambda functions can be created through CloudFormation
-* Code.ZipFile method
+* `Code.ZipFile` method
   * A method of specifying the Code directly in the CloudFormation Template
   * Since Dependencies cannot be specified, only simple Code without Dependencies is possible
 * S3 method
@@ -604,7 +604,7 @@ Summarizes the missing parts based on the following summary
     * Configured in RCU and WCU units
   * Plan and use Capacity
   * When more requests than the configured RCU/WCU are performed, Burst Capacity can be used temporarily
-  * When Burst Capacity is also exhausted, "ProvisionedThroughputExceededException" occurs
+  * When Burst Capacity is also exhausted, `ProvisionedThroughputExceededException` occurs
   * WCU
     * One write per second for an item up to 1 KB in size
     * Ex) 10 items per seconds with item size 2KB : 10 * (2/1) = 20 WCU
@@ -650,7 +650,7 @@ Summarizes the missing parts based on the following summary
 ### 11.5. Optimistic Locking
 
 * Optimistic Locking can be used through Conditional Writes requests.
-* The Client obtains the Item's Version information through the GetItem command, and then performs a Conditional Writes request with the Version information
+* The Client obtains the Item's Version information through the `GetItem` command, and then performs a Conditional Writes request with the Version information
 * The Write succeeds only if the Version included in the Conditional Writes request matches the current Item's Version; if different, the Write fails
 
 ### 11.6. DynamoDB Accelerator (DAX)
@@ -785,18 +785,18 @@ Summarizes the missing parts based on the following summary
 * **Logging** : Logs can be collected through CloudWatch Logs
 * **Tracing** : Tracing information can be collected through X-Ray
 * **Metric** : Metrics can be collected through CloudWatch Metrics
-  * CacheHitCount & CacheMissCount
+  * `CacheHitCount` & `CacheMissCount`
   * `Count`: Number of API calls
   * `IntegrationLatency`: Request/receive Latency between API Gateway and the Backend
   * `Latency` : Request/receive Latency between the Client and the Backend
-  * 4XXError & 5XXError
+  * `4XXError` & `5XXError`
 
 ### 12.7. Throttling
 
 * Account Throttling
   * 10000 RPS limit
   * A Soft Limit that can be increased upon request
-  * A 429 (TooManyRequests) Error occurs when the Limit is exceeded
+  * A 429 (`TooManyRequests`) Error occurs when the Limit is exceeded
 * Stage Throttling & Method Throttling configurable
 * Throttling configurable through Usage Plans
 
@@ -838,9 +838,9 @@ Summarizes the missing parts based on the following summary
 ### 13.1. Deployment Process
 
 * SAM Template + Code
-* --(sam build)--> CloudFormation Template + App Code
-* --(sam package)--> Zip in S3
-* --(sam deploy)--> Lambda + API Gateway + DynamoDB via CloudFormation
+* --(`sam build`)--> CloudFormation Template + App Code
+* --(`sam package`)--> Zip in S3
+* --(`sam deploy`)--> Lambda + API Gateway + DynamoDB via CloudFormation
 
 ## 14. CDK
 
@@ -943,7 +943,7 @@ Summarizes the missing parts based on the following summary
 * Supports integration with IAM
 * Most AWS Services use KMS when a Key is needed for encryption
 * Supports encryption of Data up to 4KB only
-  * For encrypting Data larger than 4KB, the Envelope Encryption technique is used through the GeneratedDataKey API call
+  * For encrypting Data larger than 4KB, the Envelope Encryption technique is used through the `GeneratedDataKey` API call
 * Regional Resource
 * Users cannot see the Key value directly, and can only perform encryption/decryption by specifying a Key
   * Key specification required for encryption

@@ -29,7 +29,7 @@ Container에게 GPU를 할당하기 위해서는 **NVIDIA Container Toolkit**을
 
 ### 1.2. NVIDIA GPU 할당 과정
 
-Container에 GPU를 할당하기 위해서는 `containerd`가 `runc` CLI 대신에 `nvidia-container-runtime` CLI를 실행하도록 설정해야 한다. `nvidia-container-runtime` CLI는 `containerd`가 생성한 OCI Runtime Spec에 GPU 할당을 위한 추가적인 설정을 주입하고, 이후에 `runc` CLI를 실행하는 역할을 수행한다. 즉 `containerd`와 `runc` CLI 사이에서 Cotnainer에 GPU 할당을 위한 OCI Runtime Spec을 변경하는 역할을 수행한다. OCI Runtime Spec 변경 및 `run` CLI를 실행한 다음에 `nvidia-container-runtime` CLI는 종료된다.
+Container에 GPU를 할당하기 위해서는 `containerd`가 `runc` CLI 대신에 `nvidia-container-runtime` CLI를 실행하도록 설정해야 한다. `nvidia-container-runtime` CLI는 `containerd`가 생성한 OCI Runtime Spec에 GPU 할당을 위한 추가적인 설정을 주입하고, 이후에 `runc` CLI를 실행하는 역할을 수행한다. 즉 `containerd`와 `runc` CLI 사이에서 Cotnainer에 GPU 할당을 위한 OCI Runtime Spec을 변경하는 역할을 수행한다. OCI Runtime Spec 변경 및 `runc` CLI를 실행한 다음에 `nvidia-container-runtime` CLI는 종료된다.
 
 ```toml {caption="[File 1] /etc/containerd/config.toml Example", linenos=table}
 version = 3
@@ -247,7 +247,7 @@ tmpfs on /proc/driver/nvidia/params type tmpfs (rw,relatime,seclabel,size=4k)
 ...
 ```
 
-[Figure 4]는 CDI Mode의 Architecture를 나타내고 있다. CDI Mode와 Legacy Mode의 가장 큰 차이점은 Device File을 Bind Mount 방식으로 주입하지 않고, runc CLI가 직접 Device File을 생성하는 방식을 활용한다는 점이다. 따라서 [Shell 3]과 Mount 정보 조회시 CUDA Library/Tool만 Bind Mount가 수행되어 있고, Device File은 Bind Mount가 수행되지 않은것을 확인할 수 있다.
+[Figure 4]는 CDI Mode의 Architecture를 나타내고 있다. CDI Mode와 Legacy Mode의 가장 큰 차이점은 Device File을 Bind Mount 방식으로 주입하지 않고, `runc` CLI가 직접 Device File을 생성하는 방식을 활용한다는 점이다. 따라서 [Shell 3]과 Mount 정보 조회시 CUDA Library/Tool만 Bind Mount가 수행되어 있고, Device File은 Bind Mount가 수행되지 않은것을 확인할 수 있다.
 
 ```yaml {caption="[File 4] /etc/cdi/nvidia.yaml Example", linenos=table}
 cdiVersion: 0.5.0

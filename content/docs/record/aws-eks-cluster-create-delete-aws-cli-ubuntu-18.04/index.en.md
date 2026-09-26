@@ -368,7 +368,7 @@ $ aws eks update-kubeconfig --name ssup2-eks-cluster
 Updated context arn:aws:eks:ap-northeast-2:132099918825:cluster/ssup2-eks-cluster in /root/.kube/config
 ```
 
-Configure kubeconfig for the created EKS Cluster.
+Configure `kubeconfig` for the created EKS Cluster.
 
 ```shell
 $ kubectl version

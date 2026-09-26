@@ -12,13 +12,13 @@ JWT (JSON Web Token)을 분석한다.
 
 ### 1.1. Header
 
-Header에는 Type을 나타내는 "typ" Key와 Algorithm을 나타내는 "alg" Key가 존재한다. Type은 Token의 Type을 의미하며 JWT는 "JWT"라는 문자열을 고정값으로 갖는다. Algorithm은 Header와 Payload를 기반으로 Signature를 생성할때 이용하는 암호화 Algorithm을 의미한다. Header의 내용은 Base64로 Encoding되어 JWT에 저장된다.
+Header에는 Type을 나타내는 `typ` Key와 Algorithm을 나타내는 `alg` Key가 존재한다. Type은 Token의 Type을 의미하며 JWT는 `JWT`라는 문자열을 고정값으로 갖는다. Algorithm은 Header와 Payload를 기반으로 Signature를 생성할때 이용하는 암호화 Algorithm을 의미한다. Header의 내용은 Base64로 Encoding되어 JWT에 저장된다.
 
 ### 1.2. Payload
 
-Payload에는 Token의 Meta Data와 Token이 전달하려는 실제 Data가 Key-value 형태로 저장된다. Payload의 Key-value는 Claim이라고 부르며 Claim에는 Reserved Claim과 Custom Claim으로 구분된다. Custom Claim은 다시 Public Claim과 Private Claim으로 구분된다. Reserved Claim은 Token의 Meta 정보를 저장한다. Reserved Claim의 이름으로는 Token의 발급자를 의미하는 "iss", Token의 이름을 나타내는 "sub", 토근의 발급시간을 나타내는 "iat" 등이 존재한다.
+Payload에는 Token의 Meta Data와 Token이 전달하려는 실제 Data가 Key-value 형태로 저장된다. Payload의 Key-value는 Claim이라고 부르며 Claim에는 Reserved Claim과 Custom Claim으로 구분된다. Custom Claim은 다시 Public Claim과 Private Claim으로 구분된다. Reserved Claim은 Token의 Meta 정보를 저장한다. Reserved Claim의 이름으로는 Token의 발급자를 의미하는 `iss`, Token의 이름을 나타내는 `sub`, 토근의 발급시간을 나타내는 `iat` 등이 존재한다.
 
-Custom Claim에는 Token이 전달하려는 실제 Data가 저장된다. Public Claim의 이름은 모두에게 공개되어 있으며, 각 Public Claim의 이름은 일반적으로 많이 전송하는 Data들을 나타낸다. 즉 Public Claim은 일반적으로 많이 전송하는 Data를 저장한다. Public Claim의 이름으로는 Full Name을 의미하는 "name", Email 주소를 의미하는 "email" 등의 존재한다. Private Claim의 이름은 Token을 주고 받는 App들의 협의하에 결정된 이름을 이용한다. [Figure 1]의 "app" Key는 Private Claim의 Key를 나타내고 있다.
+Custom Claim에는 Token이 전달하려는 실제 Data가 저장된다. Public Claim의 이름은 모두에게 공개되어 있으며, 각 Public Claim의 이름은 일반적으로 많이 전송하는 Data들을 나타낸다. 즉 Public Claim은 일반적으로 많이 전송하는 Data를 저장한다. Public Claim의 이름으로는 Full Name을 의미하는 `name`, Email 주소를 의미하는 `email` 등의 존재한다. Private Claim의 이름은 Token을 주고 받는 App들의 협의하에 결정된 이름을 이용한다. [Figure 1]의 `app` Key는 Private Claim의 Key를 나타내고 있다.
 
 Reserved Claim과 Public Claim의 이름은 [링크](https://www.iana.org/assignments/jwt/jwt.xhtml#claims)에서 확인 가능하다. Payload의 내용 또한 Header처럼 Base64로 Encoding되어 JWT에 저장된다.
 

@@ -66,7 +66,7 @@ users:
     client-key-data: <CLIENT-KEY>
 ```
 
-Client certificates can also be used in kubectl through kubeconfig settings. [Text 3] shows a kubeconfig using a client certificate. Set the client certificate content in the `client-certificate-data` field and set the client key in the `client-key-data` field.
+Client certificates can also be used in `kubectl` through kubeconfig settings. [Text 3] shows a kubeconfig using a client certificate. Set the client certificate content in the `client-certificate-data` field and set the client key in the `client-key-data` field.
 
 ## 2. References
 

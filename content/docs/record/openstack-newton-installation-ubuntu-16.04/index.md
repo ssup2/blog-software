@@ -13,7 +13,7 @@ title: OpenStack Newton 설치 / Ubuntu 16.04 환경
 * OpenStack Newton Version
   * **Network** : Self-service
 * Password
-  * OpenStack 설치에 필요한 Password는 간편한 설치를 위해 **root**로 통일한다.
+  * OpenStack 설치에 필요한 Password는 간편한 설치를 위해 `root`로 통일한다.
 * 모든 Node에서 root User로 설치를 진행한다.
 
 ## 2. Node 설정
@@ -41,7 +41,7 @@ VirtualBox를 이용하여 [그림 1]과 같이 가상의 Controller, Compute, S
 10.0.0.41       block1
 ```
 
-/etc/hosts에 [Text 1]의 내용으로 파일을 생성한다.
+`/etc/hosts`에 [Text 1]의 내용으로 파일을 생성한다.
 
 #### 2.1.1. OpenStack Package 설치
 
@@ -86,7 +86,7 @@ gateway 192.168.77.1
 dns-nameservers 8.8.8.8
 ```
 
-/etc/network/interfaces을 [Text 2]과 같이 수정한다.
+`/etc/network/interfaces`을 [Text 2]과 같이 수정한다.
 
 #### 2.2.2. NTP (Network Time Protocol) 설정
 
@@ -94,7 +94,7 @@ dns-nameservers 8.8.8.8
 (Controller)$ apt install chrony
 ```
 
-chrony Package를 설치한다.
+`chrony` Package를 설치한다.
 
 ```text {caption="[Text 3] Controller Node - /etc/chrony/chrony.conf", linenos=table}
 ...
@@ -106,13 +106,13 @@ server 3.asia.pool.ntp.org
 allow 10.0.0.0/24
 ```
 
-/etc/chrony/chrony.conf에 [Text 3]의 내용을 추가한다.
+`/etc/chrony/chrony.conf`에 [Text 3]의 내용을 추가한다.
 
 ```shell
 (Controller)$ service chrony restart
 ```
 
-chrony를 재시작한다.
+`chrony`를 재시작한다.
 
 #### 2.2.3. SQL Database 설치
 
@@ -134,7 +134,7 @@ collation-server = utf8_general_ci
 character-set-server = utf8
 ```
 
-/etc/mysql/mariadb.conf.d/99-openstack.cnf 생성 및 [Text 4]와 같이 수정한다.
+`/etc/mysql/mariadb.conf.d/99-openstack.cnf` 생성 및 [Text 4]와 같이 수정한다.
 
 ```shell
 (Controller)$ service mysql restart
@@ -170,7 +170,7 @@ Memcached Package를 설치한다.
 -l 10.0.0.11
 ```
 
-/etc/memcached.conf에 [Text 5]의 내용을 추가한다.
+`/etc/memcached.conf`에 [Text 5]의 내용을 추가한다.
 
 #### 2.2.6. 환경 변수 파일 생성
 
@@ -185,7 +185,7 @@ export OS_IDENTITY_API_VERSION=3
 export OS_IMAGE_API_VERSION=2
 ```
 
-/root/admin-openrc 생성 및 [Text 6]와 같이 수정한다.
+`/root/admin-openrc` 생성 및 [Text 6]와 같이 수정한다.
 
 ```text {caption="[Text 7] Controller Node - /root/demo-openrc", linenos=table}
 export OS_PROJECT_DOMAIN_NAME=Default
@@ -198,7 +198,7 @@ export OS_IDENTITY_API_VERSION=3
 export OS_IMAGE_API_VERSION=2
 ```
 
-/root/demo-openrc 생성 및 [Text 7]과 같이 수정한다.
+`/root/demo-openrc` 생성 및 [Text 7]과 같이 수정한다.
 
 ### 2.3. Compute Node
 
@@ -227,7 +227,7 @@ gateway 192.168.77.1
 dns-nameservers 8.8.8.8
 ```
 
-/etc/network/interfaces을 [Text 8]과 같이 수정한다.
+`/etc/network/interfaces`을 [Text 8]과 같이 수정한다.
 
 #### 2.3.2. NTP (Network Time Protocol) 설정
 
@@ -235,20 +235,20 @@ dns-nameservers 8.8.8.8
 (Compute)$ apt install chrony
 ```
 
-chrony Package를 설치한다.
+`chrony` Package를 설치한다.
 
 ```text {caption="[Text 9] Compute Node - /etc/chrony/chrony.conf", linenos=table}
 ...
 server controller iburst
 ```
 
-/etc/chrony/chrony.conf에 [Text 9]의 내용을 추가한다.
+`/etc/chrony/chrony.conf`에 [Text 9]의 내용을 추가한다.
 
 ```shell
 (Compute)$ service chrony restart
 ```
 
-chrony를 재시작한다.
+`chrony`를 재시작한다.
 
 ### 2.4. Storage Node
 
@@ -270,7 +270,7 @@ gateway 10.0.0.1
 dns-nameservers 8.8.8.8
 ```
 
-/etc/network/interfaces을 [Text 10]과 같이 수정한다.
+`/etc/network/interfaces`을 [Text 10]과 같이 수정한다.
 
 #### 2.4.2. NTP (Network Time Protocol) 설정
 
@@ -278,20 +278,20 @@ dns-nameservers 8.8.8.8
 (Storage)$ apt install chrony
 ```
 
-chrony Package를 설치한다.
+`chrony` Package를 설치한다.
 
 ```text {caption="[Text 11] Storage Node - /etc/chrony/chrony.conf", linenos=table}
 ...
 server controller iburst
 ```
 
-/etc/chrony/chrony.conf에 [Text 11]의 내용을 추가한다.
+`/etc/chrony/chrony.conf`에 [Text 11]의 내용을 추가한다.
 
 ```shell
 (Storage)$ service chrony restart
 ```
 
-chrony를 재시작한다.
+`chrony`를 재시작한다.
 
 ## 3. Keystone 설치
 
@@ -322,7 +322,7 @@ connection = mysql+pymysql://keystone:root@controller/keystone
 provider = fernet
 ```
 
-/etc/keystone/keystone.conf에 [Text 12]의 내용을 추가한다.
+`/etc/keystone/keystone.conf`에 [Text 12]의 내용을 추가한다.
 
 ```shell
 (Controller)$ su -s /bin/sh -c "keystone-manage db_sync" keystone
@@ -338,7 +338,7 @@ Keystone을 설정한다.
 ServerName controller
 ```
 
-/etc/apache2/apache2.conf에 [Text 13]의 내용을 추가한다.
+`/etc/apache2/apache2.conf`에 [Text 13]의 내용을 추가한다.
 
 ```shell
 (Controller)$ service apache2 restart
@@ -463,7 +463,7 @@ default_store = file
 filesystem_store_datadir = /var/lib/glance/images/
 ```
 
-/etc/glance/glance-api.conf에 [Text 14]의 내용을 추가한다.
+`/etc/glance/glance-api.conf`에 [Text 14]의 내용을 추가한다.
 
 ```text {caption="[Text 15] Controller Node - /etc/glance/glance-api.conf", linenos=table}
 ...
@@ -485,7 +485,7 @@ password = root
 flavor = keystone
 ```
 
-/etc/glance/glance-registry.conf에 [Text 15]의 내용을 추가한다.
+`/etc/glance/glance-registry.conf`에 [Text 15]의 내용을 추가한다.
 
 ```shell
 (Controller)$ su -s /bin/sh -c "glance-manage db_sync" glance
@@ -589,7 +589,7 @@ api_servers = http://controller:9292
 lock_path = /var/lib/nova/tmp
 ```
 
-/etc/nova/nova.conf에 [Text 16]의 내용을 추가한다.
+`/etc/nova/nova.conf`에 [Text 16]의 내용을 추가한다.
 
 ```shell
 (Controller)$ su -s /bin/sh -c "nova-manage api_db sync" nova
@@ -645,7 +645,7 @@ api_servers = http://controller:9292
 lock_path = /var/lib/nova/tmp
 ```
 
-/etc/nova/nova.conf에 [Text 17]의 내용을 추가한다.
+`/etc/nova/nova.conf`에 [Text 17]의 내용을 추가한다.
 
 ```text {caption="[Text 18] Compute Node - /etc/nova/nova-compute.conf", linenos=table}
 ...
@@ -655,7 +655,7 @@ compute_driver=libvirt.LibvirtDriver
 virt_type=qemu
 ```
 
-현재 VirtualBox의 VM은 CPU의 Intel의 VT-X같은 Virtualization Extension을 이용하지 못한다. 따라서 Compute Node는 KVM+QEMU 조합의 가상 머신을 이용하지 못하고 QEMU만을 이용하여 가상 머신을 구동한다. /etc/nova/nova-compute.conf을 [Text 18]과 같이 수정한다.
+현재 VirtualBox의 VM은 CPU의 Intel의 VT-X같은 Virtualization Extension을 이용하지 못한다. 따라서 Compute Node는 KVM+QEMU 조합의 가상 머신을 이용하지 못하고 QEMU만을 이용하여 가상 머신을 구동한다. `/etc/nova/nova-compute.conf`을 [Text 18]과 같이 수정한다.
 
 ```shell
 (Compute)$ service nova-compute restart
@@ -753,7 +753,7 @@ username = nova
 password = root
 ```
 
-/etc/neutron/neutron.conf에 [Text 19]의 내용을 추가한다.
+`/etc/neutron/neutron.conf`에 [Text 19]의 내용을 추가한다.
 
 ```text {caption="[Text 20] Controller Node - /etc/neutron/plugins/ml2/ml2_conf.ini", linenos=table}
 ...
@@ -773,7 +773,7 @@ vni_ranges = 1:1000
 enable_ipset = True
 ```
 
-/etc/neutron/plugins/ml2/ml2_conf.ini에 [Text 20]의 내용을 추가한다.
+`/etc/neutron/plugins/ml2/ml2_conf.ini`에 [Text 20]의 내용을 추가한다.
 
 ```text {caption="[Text 21] Controller Node - /etc/neutron/plugins/ml2/linuxbridge_agent.ini", linenos=table}
 ...
@@ -790,7 +790,7 @@ enable_security_group = True
 firewall_driver = neutron.agent.linux.iptables_firewall.IptablesFirewallDriver
 ```
 
-/etc/neutron/plugins/ml2/linuxbridge_agent.ini에 [Text 21]의 내용을 추가한다.
+`/etc/neutron/plugins/ml2/linuxbridge_agent.ini`에 [Text 21]의 내용을 추가한다.
 
 ```text {caption="[Text 22] Controller Node - /etc/neutron/l3_agent.ini", linenos=table}
 ...
@@ -798,7 +798,7 @@ firewall_driver = neutron.agent.linux.iptables_firewall.IptablesFirewallDriver
 interface_driver = neutron.agent.linux.interface.BridgeInterfaceDriver
 ```
 
-/etc/neutron/l3_agent.ini에 [Text 22]의 내용을 추가한다.
+`/etc/neutron/l3_agent.ini`에 [Text 22]의 내용을 추가한다.
 
 ```text {caption="[Text 23] Controller Node - /etc/neutron/dhcp_agent.ini", linenos=table}
 ...
@@ -808,7 +808,7 @@ dhcp_driver = neutron.agent.linux.dhcp.Dnsmasq
 enable_isolated_metadata = True
 ```
 
-/etc/neutron/dhcp_agent.ini에 [Text 23]의 내용을 추가한다.
+`/etc/neutron/dhcp_agent.ini`에 [Text 23]의 내용을 추가한다.
 
 ```text {caption="[Text 24] Controller Node - /etc/neutron/metadata_agent.ini", linenos=table}
 ...
@@ -817,7 +817,7 @@ nova_metadata_ip = controller
 metadata_proxy_shared_secret = root
 ```
 
-/etc/neutron/metadata_agent.ini에 [Text 24]의 내용을 추가한다.
+`/etc/neutron/metadata_agent.ini`에 [Text 24]의 내용을 추가한다.
 
 ```text {caption="[Text 25] Controller Node - /etc/nova/nova.conf", linenos=table}
 ...
@@ -835,7 +835,7 @@ service_metadata_proxy = True
 metadata_proxy_shared_secret = root
 ```
 
-/etc/nova/nova.conf에 [Text 25]의 내용을 추가한다.
+`/etc/nova/nova.conf`에 [Text 25]의 내용을 추가한다.
 
 ```shell
 (Contorller)$ su -s /bin/sh -c "neutron-db-manage --config-file /etc/neutron/neutron.conf --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade head" neutron
@@ -875,7 +875,7 @@ username = neutron
 password = root
 ```
 
-/etc/neutron/neutron.conf에 [Text 26]의 내용을 추가한다.
+`/etc/neutron/neutron.conf`에 [Text 26]의 내용을 추가한다.
 
 ```text {caption="[Text 27] Compute Node - /etc/neutron/plugins/ml2/linuxbridge_agent.ini", linenos=table}
 ...
@@ -892,7 +892,7 @@ enable_security_group = True
 firewall_driver = neutron.agent.linux.iptables_firewall.IptablesFirewallDriver
 ```
 
-/etc/neutron/plugins/ml2/linuxbridge_agent.ini에 [Text 27의] 내용을 추가한다.
+`/etc/neutron/plugins/ml2/linuxbridge_agent.ini`에 [Text 27의] 내용을 추가한다.
 
 ```text {caption="[Text 28] Compute Node - /etc/nova/nova.conf", linenos=table}
 ...
@@ -908,7 +908,7 @@ username = neutron
 password = root
 ```
 
-/etc/nova/nova.conf에 [Text 28]의 내용을 추가한다.
+`/etc/nova/nova.conf`에 [Text 28]의 내용을 추가한다.
 
 ```shell
 (Compute)$ service nova-compute restart
@@ -1000,7 +1000,7 @@ OPENSTACK_API_VERSIONS = {
 }
 ```
 
-/etc/openstack-dashboard/local_settings.py에 [Code 1]와 같이 수정한다.
+`/etc/openstack-dashboard/local_settings.py`에 [Code 1]와 같이 수정한다.
 
 ```shell
 (Controller)$ service apache2 reload
@@ -1013,7 +1013,7 @@ Horizon 시작
 Web Brower를 통해 Horizon에 접속한다.
 
 * http://192.168.77.170/horizon
-* **Login** : Domain - default, 사용자 이름 - admin, 암호 - root
+* **Login** : Domain - `default`, 사용자 이름 - `admin`, 암호 - `root`
 
 ## 8. Cinder 설치
 
@@ -1025,7 +1025,7 @@ Web Brower를 통해 Horizon에 접속한다.
 os_region_name = RegionOne
 ```
 
-/etc/nova.nova.conf에 [Text 29]의 내용을 추가한다.
+`/etc/nova.nova.conf`에 [Text 29]의 내용을 추가한다.
 
 ### 8.2. Controller Node
 
@@ -1092,7 +1092,7 @@ password = root
 lock_path = /var/lib/cinder/tmp
 ```
 
-/etc/cinder/cinder.conf에 [Text 30]의 내용을 추가한다.
+`/etc/cinder/cinder.conf`에 [Text 30]의 내용을 추가한다.
 
 ```shell
 (Controller)$ service nova-api restart
@@ -1120,7 +1120,7 @@ filter = [ "a/sdb/", "r/.*/"]
 }
 ```
 
-/etc/lvm/lvm.conf에 [Text 31]의 내용을 추가한다.
+`/etc/lvm/lvm.conf`에 [Text 31]의 내용을 추가한다.
 
 ```shell
 (Storage)$ apt install cinder-volume
@@ -1161,7 +1161,7 @@ iscsi_helper = tgtadm
 lock_path = /var/lib/cinder/tmp
 ```
 
-/etc/cinder/cinder.conf에 [Text 32]의 내용을 추가한다.
+`/etc/cinder/cinder.conf`에 [Text 32]의 내용을 추가한다.
 
 ```shell
 (Storage)$ service tgt restart

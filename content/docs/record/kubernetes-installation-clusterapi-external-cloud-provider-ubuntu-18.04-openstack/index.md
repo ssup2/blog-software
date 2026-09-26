@@ -11,9 +11,9 @@ title: Kubernetes 설치 / ClusterAPI, External Cloud Provider 이용 / Ubuntu 1
 * **Local Node** : Ubuntu 18.04, KVM Enable, 4CPU, 4GB Memory
 * **Master, Worker Node** : Ubuntu 18.04, 4vCPU, 4GB Memory
 * Network
-  * **External Network** : 192.168.0.0/24
-  * **Octavia Network** : 20.0.0.0/24
-  * **Tenant Network** : 10.6.0.0/24
+  * **External Network** : `192.168.0.0/24`
+  * **Octavia Network** : `20.0.0.0/24`
+  * **Tenant Network** : `10.6.0.0/24`
 * **Kubernetes** : 1.17.11
   * **CNI** : Cilium 1.7.11 Plugin
 * External Cloud Provider
@@ -34,7 +34,7 @@ export OS_IDENTITY_API_VERSION=3
 export OS_IMAGE_API_VERSION=2
 ```
 
-[Text 1]의 내용을 갖고 있는 admin-openrc.sh 파일을 생성한다.
+[Text 1]의 내용을 갖고 있는 `admin-openrc.sh` 파일을 생성한다.
 
 ## 3. Local Kubernetes Cluster 설치
 
@@ -55,7 +55,7 @@ Cluster API 구동하기 위한 Local Kubernetes Cluster를 설치하고 구동�
 (Local)$ snap install yq
 ```
 
-clusterctl에서 이용하는 yq를 설치한다.
+`clusterctl`에서 이용하는 `yq`를 설치한다.
 
 ```shell
 (Local)$ curl -L https://github.com/kubernetes-sigs/cluster-api/releases/download/v0.3.11/clusterctl-linux-amd64 -o clusterctl
@@ -65,7 +65,7 @@ clusterctl에서 이용하는 yq를 설치한다.
 clusterctl version: &version.Info{Major:"0", Minor:"3", GitVersion:"v0.3.11", GitCommit:"e9cf6846b6d93dedadfcf44c00357d15f5ccba64", GitTreeState:"clean", BuildDate:"2020-11-19T18:49:17Z", GoVersion:"go1.13.15", Compiler:"gc", Platform:"linux/amd64"}
 ```
 
-Cluster API를 Local Kubernetes Cluster에 설치하고 이용하도록 도와주는 clusterctl를 설치한다.
+Cluster API를 Local Kubernetes Cluster에 설치하고 이용하도록 도와주는 `clusterctl`를 설치한다.
 
 ## 5. Cluster API 설치
 
@@ -86,7 +86,7 @@ cert-manager                        cert-manager-webhook-845d9df8bf-9m4l8       
 ...
 ```
 
-clusterctl을 이용하여 Local Kubernetes Cluster에 Cluster API를 설치한다.
+`clusterctl`을 이용하여 Local Kubernetes Cluster에 Cluster API를 설치한다.
 
 ```shell
 (Local)$ kubectl -n capo-system set env deployment/capo-controller-manager CLUSTER_API_OPENSTACK_INSTANCE_CREATE_TIMEOUT=60
@@ -119,7 +119,7 @@ Ansible을 설치한다.
 (Local)$ sudo mv packer /usr/local/bin 
 ```
 
-packer를 설치한다.
+`packer`를 설치한다.
 
 ```shell
 (Local)$ curl -L https://github.com/kubernetes-sigs/image-builder/tarball/master -o image-builder.tgz
@@ -187,7 +187,7 @@ clouds:
     region: RegionOne
 ```
 
-clusterctl에서 이용할 [Text 2]의 내용을 갖고 있는 clouds.yaml 파일을 생성한다.
+`clusterctl`에서 이용할 [Text 2]의 내용을 갖고 있는 `clouds.yaml` 파일을 생성한다.
 
 ```yaml {caption="[Text 3] template.yaml", linenos=table}
 ---
@@ -340,7 +340,7 @@ data:
   cacert: ${OPENSTACK_CLOUD_CACERT_B64}
 ```
 
-Cluster Manifest Template 역할을 수행하는 [Text 3]의 내용을 갖고 있는 template.yaml 파일을 생성한다. https://raw.githubusercontent.com/kubernetes-sigs/cluster-api-provider-openstack/v0.3.3/templates/cluster-template-external-cloud-provider.yaml 파일에서 "disableServerTags: true" 제거, cidrBlocks을 "192.167.0.0/16"으로 변경, Bastion VM 설정을 추가하였다.
+Cluster Manifest Template 역할을 수행하는 [Text 3]의 내용을 갖고 있는 `template.yaml` 파일을 생성한다. https://raw.githubusercontent.com/kubernetes-sigs/cluster-api-provider-openstack/v0.3.3/templates/cluster-template-external-cloud-provider.yaml 파일에서 `disableServerTags: true` 제거, `cidrBlocks`을 `192.167.0.0/16`으로 변경, Bastion VM 설정을 추가하였다.
 
 ClusterAPI는 기본적으로 생성한 Kubernetes Cluster의 Node에 SSH 접근이 불가능 하도록 Security Group을 설정한다. Bastion VM은 ClusterAPI를 통해 생성한 Kubernetes Cluster의 Node에 SSH로 접근할 수 있게 만드는 통로 역할을 수행한다.
 
@@ -348,7 +348,7 @@ ClusterAPI는 기본적으로 생성한 Kubernetes Cluster의 Node에 SSH 접근
 (Local)$ wget https://raw.githubusercontent.com/kubernetes-sigs/cluster-api-provider-openstack/master/templates/env.rc -O env.rc
 ```
 
-clusterctl에서 이용할 환경변수를 설정하는 env.rc Script 파일을 받는다.
+`clusterctl`에서 이용할 환경변수를 설정하는 `env.rc` Script 파일을 받는다.
 
 ```shell
 (Local)$ source env.rc clouds.yaml openstack
@@ -360,7 +360,7 @@ export OPENSTACK_CONTROL_PLANE_MACHINE_FLAVOR=m1.medium \
 export OPENSTACK_NODE_MACHINE_FLAVOR=m1.medium
 ```
 
-clusterctl에서 이용할 환경변수를 설정한다. VM Image, VM Flavor, DNS 등을 환경변수로 설정한다. 
+`clusterctl`에서 이용할 환경변수를 설정한다. VM Image, VM Flavor, DNS 등을 환경변수로 설정한다. 
 
 ```shell
 (Local)$ clusterctl config cluster ssup2 --from template.yaml --kubernetes-version v1.17.11 --control-plane-machine-count=3 --worker-machine-count=1 > ssup2_cluster.yaml
@@ -371,13 +371,13 @@ Cluster Manifest 파일을 생성하고, 생성한 Cluster Manifest 파일을 �
 
 ## 9. Cilium CNI & OpenStack External Cloud Provider 설치
 
-Kubernetes Cluster를 생성하면 Control Plain (Master Node) VM이 하나만 생성되고, 더 이상 Control Plain이 생성되지 않는다. Control Plain Node VM의 Node Object의 "spec.providerID" 값이 설정 되어있지 않기 때문이다. "spec.providerID" 값은 OpenStack External Cloud Provider가 설치되어야 설정된다.
+Kubernetes Cluster를 생성하면 Control Plane (Master Node) VM이 하나만 생성되고, 더 이상 Control Plane이 생성되지 않는다. Control Plane Node VM의 Node Object의 `spec.providerID` 값이 설정 되어있지 않기 때문이다. `spec.providerID` 값은 OpenStack External Cloud Provider가 설치되어야 설정된다.
 
 ```shell
 (Local)$ clusterctl get kubeconfig ssup2 > /root/.kube/ssup2.kubeconfig
 ```
 
-clusterctl 파일을 이용하여 생성한 Kubernetes Cluster의 kubeconfig 파일을 생성한다.
+`clusterctl` 파일을 이용하여 생성한 Kubernetes Cluster의 kubeconfig 파일을 생성한다.
 
 ```shell
 (Local)$ kubectl --kubeconfig='/root/.kube/ssup2.kubeconfig' create -f https://raw.githubusercontent.com/cilium/cilium/1.7.11/install/kubernetes/quick-install.yaml
@@ -401,7 +401,7 @@ floating-network-id=00a8e738-c81e-45f6-9788-3e58186076b6
 lb-method=ROUND_ROBIN
 ```
 
-OpenStack External Cloud Controller Manager에서 이용할 [Text 4]의 내용을 갖고 있는 cloud.conf 파일을 생성한다.
+OpenStack External Cloud Controller Manager에서 이용할 [Text 4]의 내용을 갖고 있는 `cloud.conf` 파일을 생성한다.
 
 ```shell
 (Local)$ kubectl --kubeconfig='/root/.kube/ssup2.kubeconfig' create secret -n kube-system generic cloud-config --from-file=cloud.conf
@@ -410,12 +410,12 @@ OpenStack External Cloud Controller Manager에서 이용할 [Text 4]의 내용�
 (Local)$ kubectl --kubeconfig='/root/.kube/ssup2.kubeconfig' apply -f https://raw.githubusercontent.com/kubernetes/cloud-provider-openstack/v1.17.0/manifests/controller-manager/openstack-cloud-controller-manager-ds.yaml
 ```
 
-cloud-config Secret을 생성하고, OpenStack External Cloud Provider를 배포한다.
+`cloud-config` Secret을 생성하고, OpenStack External Cloud Provider를 배포한다.
 
 ```shell
 ```
 
-OpenStack External Cloud Provider를 배포된 이후에 나머지 Control Plain (Master Node) VM이 생성되는걸 확인할 수 있다.
+OpenStack External Cloud Provider를 배포된 이후에 나머지 Control Plane (Master Node) VM이 생성되는걸 확인할 수 있다.
 
 ## 10. Kubernetes Cluster 동작 확인
 
@@ -470,7 +470,7 @@ Kubernetes Cluster 동작을 확인한다.
 
 ## 11. Kubernetes Cluster VM Node에 SSH 접근
 
-Bastion VM으로 ssup2 Keypair를 이용해 SSH로 접속한 다음, Bastion VM 내부에서 다시 ssup2 Keypair를 이용하여 Kubernetes Cluster VM Node에 접근해야 한다.
+Bastion VM으로 `ssup2` Keypair를 이용해 SSH로 접속한 다음, Bastion VM 내부에서 다시 `ssup2` Keypair를 이용하여 Kubernetes Cluster VM Node에 접근해야 한다.
 
 ## 12. 참조
 

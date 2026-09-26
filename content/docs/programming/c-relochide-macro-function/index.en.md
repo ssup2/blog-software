@@ -13,7 +13,7 @@ This document analyzes the `RELOC_HIDE()` macro function.
     (typeof(ptr)) (__ptr + (off)); })
 ```
 
-The `RELOC_HIDE()` macro function calculates the sum of ptr and off passed as parameters. It is used to remove errors that can occur due to compiler optimization techniques. [Code 1] shows the `RELOC_HIDE()` macro function. Due to the inline assembly on line 3 of [Code 1], the compiler cannot perform optimization. `__asm__ ("" : "=r"(__ptr) : "0"(ptr))` is equivalent to `__ptr = ptr`.
+The `RELOC_HIDE()` macro function calculates the sum of `ptr` and `off` passed as parameters. It is used to remove errors that can occur due to compiler optimization techniques. [Code 1] shows the `RELOC_HIDE()` macro function. Due to the inline assembly on line 3 of [Code 1], the compiler cannot perform optimization. `__asm__ ("" : "=r"(__ptr) : "0"(ptr))` is equivalent to `__ptr = ptr`.
 
 ## 2. References
 

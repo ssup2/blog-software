@@ -26,7 +26,7 @@ NetHogs version 0.8.5-2
   TOTAL 0.000 0.000 KB/sec                                                  0.337       0.329
 ```
 
-Displays processes sorted by network bandwidth usage in descending order. [Shell 1] shows the output of `nethogs` displaying network bandwidth usage per process. When PID is "?" and DEV interface is blank, it means packets are being processed by kernel threads that are unknown at the user level.
+Displays processes sorted by network bandwidth usage in descending order. [Shell 1] shows the output of `nethogs` displaying network bandwidth usage per process. When `PID` is `?` and `DEV` interface is blank, it means packets are being processed by kernel threads that are unknown at the user level.
 
 ### 1.2. nethogs [Interface]
 

@@ -8,28 +8,28 @@ title: 정보처리기사 자격증 이론 정리
 
 * DDL (Data Definititon Language)
   * `CREATE` : Table 생성한다.
-    * ex) CREATE TABLE Persons ( PersonID int, LastName varchar(255) );
+    * ex) `CREATE TABLE Persons ( PersonID int, LastName varchar(255) );`
   * `ALTER` : Table 변경한다.
-    * ex) ALTER TABLE Persons ADD Email varchar(255);
-    * ex) ALTER TABLE Persons DROP Email;
-    * ex) ALTER TABLE Persons MODIFY ( Email varchar(128) );
-    * ex) ALTER TABLE Persons RENAME Email TO Address;
+    * ex) `ALTER TABLE Persons ADD Email varchar(255);`
+    * ex) `ALTER TABLE Persons DROP Email;`
+    * ex) `ALTER TABLE Persons MODIFY ( Email varchar(128) );`
+    * ex) `ALTER TABLE Persons RENAME Email TO Address;`
   * `DROP` : Table을 삭제한다.
-    * ex) DROP TABLE Persons; 
+    * ex) `DROP TABLE Persons;` 
   * `TRUNCATE` : Table의 모든 내용을 삭제한다.
-    * ex) TRUNCATE TABLE Persons;
+    * ex) `TRUNCATE TABLE Persons;`
 * DML (Data Manipulation Language)
   * `SELECT` : Table에서 Data를 읽는다.
-    * ex) SELECT PersonID, LastName FROM Persons WHERE PersonID = 1;
-    * ex) SELECT PersonID, LastName FROM Persons WHERE PersonID IN (1, 2);
-    * ex) SELECT PersonID, LastName FROM Persons BETWEEN 1 AND 10;
-    * ex) SELECT * FROM Persons;
+    * ex) `SELECT PersonID, LastName FROM Persons WHERE PersonID = 1;`
+    * ex) `SELECT PersonID, LastName FROM Persons WHERE PersonID IN (1, 2);`
+    * ex) `SELECT PersonID, LastName FROM Persons BETWEEN 1 AND 10;`
+    * ex) `SELECT * FROM Persons;`
   * `INSERT` : Table에 Data를 넣는다.
-    * ex) INSERT INTO Persons (PersonID, LastName) VALUES (1 , ssup2);
+    * ex) `INSERT INTO Persons (PersonID, LastName) VALUES (1 , ssup2);`
   * `UPDATE` : Table의 Data를 변경한다.
-    * ex) UPDATE Persons SET PersonID = 10 WHERE LastName = 'ssup2';
+    * ex) `UPDATE Persons SET PersonID = 10 WHERE LastName = 'ssup2';`
   * `DELETE` : Table의 Data를 삭제한다.
-    * ex) DELETE FROM Persons WHERE PersonID = 1;
+    * ex) `DELETE FROM Persons WHERE PersonID = 1;`
 * DCL (Data Control Language)
   * `COMMIT` : 변경내용을 반영한다.
   * `ROLLBACK` : 변경내용을 반영하지 않고 되돌린다.

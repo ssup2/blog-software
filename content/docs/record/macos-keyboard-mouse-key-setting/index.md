@@ -99,4 +99,4 @@ Key 변경을 위해서 Karabiner-Elements을 설치한다.
 
 {{< figure caption="[Figure 2] Complex Modification Rules 설정후" src="images/karabiner-elements-complex-modification-rules-after-setting.png" width="900px" >}}
 
-Karabiner-Elements에서 [File 1], [File 2]의 Complex Modification Rules을 적용한다. [Figure 1]에서 "Add rule" Button을 눌러 설정한다.
+Karabiner-Elements에서 [File 1], [File 2]의 Complex Modification Rules을 적용한다. [Figure 1]에서 `Add rule` Button을 눌러 설정한다.

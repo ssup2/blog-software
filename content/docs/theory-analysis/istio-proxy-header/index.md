@@ -35,7 +35,7 @@ $ kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.9/con
 $ kubectl label namespace default istio-injection=enabled
 ```
 
-[Shell 1]은 Kubernetes, Istio 환경을 구성하는 Script를 나타내고 있다. `kind`를 활용하여 Kubernetes Cluster를 구성하고 Istio를 설치한다. 그리고 default Namespace에 Sidecar Injection을 활성화한다. kind 환경에는 LoadBalancer Type의 Service에게 External IP를 할당하는 Component가 존재하지 않기 때문에, istio-ingressgateway Service의 External IP 할당을 위해서 MetalLB도 함께 설치한다.
+[Shell 1]은 Kubernetes, Istio 환경을 구성하는 Script를 나타내고 있다. `kind`를 활용하여 Kubernetes Cluster를 구성하고 Istio를 설치한다. 그리고 `default` Namespace에 Sidecar Injection을 활성화한다. `kind` 환경에는 `LoadBalancer` Type의 Service에게 External IP를 할당하는 Component가 존재하지 않기 때문에, `istio-ingressgateway` Service의 External IP 할당을 위해서 MetalLB도 함께 설치한다.
 
 ```yaml {caption="[File 1] MetalLB IPAddressPool, L2Advertisement Manifest", linenos=table}
 apiVersion: metallb.io/v1beta1
@@ -57,7 +57,7 @@ spec:
   - kind-pool
 ```
 
-[File 1]은 MetalLB의 IP Pool 설정을 나타내고 있다. kind Node가 연결되어 있는 Docker Network의 대역 (`192.168.97.0/24`) 중 일부를 Pool로 설정하여, Docker Network에 연결되어 있는 Host에서 External IP로 직접 접근할 수 있도록 구성한다. 설정 이후 istio-ingressgateway Service는 `192.168.97.200` External IP를 할당받는다.
+[File 1]은 MetalLB의 IP Pool 설정을 나타내고 있다. `kind` Node가 연결되어 있는 Docker Network의 대역 (`192.168.97.0/24`) 중 일부를 Pool로 설정하여, Docker Network에 연결되어 있는 Host에서 External IP로 직접 접근할 수 있도록 구성한다. 설정 이후 `istio-ingressgateway` Service는 `192.168.97.200` External IP를 할당받는다.
 
 ```shell {caption="[Shell 2] External Client 환경 구성"}
 # Preserve client ip by local external traffic policy
@@ -73,7 +73,7 @@ $ kubectl get svc -n istio-system istio-ingressgateway -o jsonpath='{.status.loa
 192.168.97.200
 ```
 
-[Shell 2]는 Mesh 외부의 External Client 환경을 구성하는 Script를 나타내고 있다. Ingress Gateway로의 접근은 MetalLB가 할당한 External IP를 이용하며, kind Node와 같은 Docker Network에 연결되어 있는 Host에서 요청을 전송한다. Host의 주소는 사설 IP이기 때문에 그대로 접근하면 istio-ingressgateway가 요청을 Internal 요청으로 판단한다. 따라서 공인 IP를 이용하는 실제 External Client 환경을 재현하기 위해서, istio-ingressgateway Service에 `externalTrafficPolicy: Local`을 설정하여 Client의 주소를 보존하고, kind Node에서 SNAT를 통해서 Host의 주소를 공인 대역의 주소 (`203.0.113.9`)로 변환한다.
+[Shell 2]는 Mesh 외부의 External Client 환경을 구성하는 Script를 나타내고 있다. Ingress Gateway로의 접근은 MetalLB가 할당한 External IP를 이용하며, `kind` Node와 같은 Docker Network에 연결되어 있는 Host에서 요청을 전송한다. Host의 주소는 사설 IP이기 때문에 그대로 접근하면 istio-ingressgateway가 요청을 Internal 요청으로 판단한다. 따라서 공인 IP를 이용하는 실제 External Client 환경을 재현하기 위해서, `istio-ingressgateway` Service에 `externalTrafficPolicy: Local`을 설정하여 Client의 주소를 보존하고, `kind` Node에서 SNAT를 통해서 Host의 주소를 공인 대역의 주소 (`203.0.113.9`)로 변환한다.
 
 #### 1.1.2. Workload 구성
 

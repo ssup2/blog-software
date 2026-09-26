@@ -14,14 +14,14 @@ title: Vim 설치 / Ubuntu, macOS 환경
 
 이용하는 VIM Plugin의 목록은 아래와 같다.
 
-* `vundle` : Vim Plugin Manager 역할을 수행한다. .vimrc에 설치할 Vim Plugin을 넣어두면 vundle을 통해서 손쉽게 Vim Plugin을 설치할 수 있다.
-* `nerdtree` : 파일 탐색기 역할을 수행한다.
-* `tagbar` : Code의 Tag 목록을 보여준다.
+* **vundle** : Vim Plugin Manager 역할을 수행한다. `.vimrc`에 설치할 Vim Plugin을 넣어두면 vundle을 통해서 손쉽게 Vim Plugin을 설치할 수 있다.
+* **nerdtree** : 파일 탐색기 역할을 수행한다.
+* **tagbar** : Code의 Tag 목록을 보여준다.
 * **YouCompleteMe** : Code 자동완성 기능 (Code Autocomplete)을 수행한다.
-* `vim-gutentags` : Ctag 파일을 자동으로 관리한다.
-* `vim-airline` : Vim의 Status Line의 가독성을 높여준다.
-* `vim-clang-format` : clang-format을 이용하여 Code Align을 수행한다.
-* `vim-go` : golang을 위한 환경을 구성한다.
+* **vim-gutentags** : Ctag 파일을 자동으로 관리한다.
+* **vim-airline** : Vim의 Status Line의 가독성을 높여준다.
+* **vim-clang-format** : `clang-format`을 이용하여 Code Align을 수행한다.
+* **vim-go** : golang을 위한 환경을 구성한다.
 
 ## 3. Vim 기본 설치, 설정
 
@@ -62,7 +62,7 @@ export TERM=xterm-256color
 source "$HOME/.vim/bundle/gruvbox/gruvbox_256palette.sh"
 ```
 
- ~/.bashrc 파일에 [File 1]의 내용을 추가하여 Vundle이 vim-go를 설치하도록 설정한다.
+ `~/.bashrc` 파일에 [File 1]의 내용을 추가하여 Vundle이 vim-go를 설치하도록 설정한다.
 
 ### 3.3. Vundle Plugin 설치
 
@@ -70,7 +70,7 @@ source "$HOME/.vim/bundle/gruvbox/gruvbox_256palette.sh"
 $ git clone https://github.com/gmarik/Vundle.vim.git ~/.vim/bundle/Vundle.vim
 ```
 
-git을 이용하여 Vundle 설치한다.
+`git`을 이용하여 Vundle 설치한다.
 
 ### 3.4. .vimrc 파일 설정
 
@@ -152,7 +152,7 @@ nmap <Leader>C :ClangFormatAutoToggle<CR>
 let g:clang_format#auto_format = 0
 ```
 
-~/.vimrc 파일을 [File 2]와 같이 생성하여, Plugin 설치 및 설정 정보를 저장한다.
+`~/.vimrc` 파일을 [File 2]와 같이 생성하여, Plugin 설치 및 설정 정보를 저장한다.
 
 ### 3.5. Vundle을 이용하여 Vim Plugin 설치
 
@@ -160,7 +160,7 @@ let g:clang_format#auto_format = 0
 : PluginInstall
 ```
 
-~/.vimrc에 저장되어 있는 Vim Plugin을 설치한다. Vim의 명령어 Mode에서 실행한다.
+`~/.vimrc`에 저장되어 있는 Vim Plugin을 설치한다. Vim의 명령어 Mode에서 실행한다.
 
 ### 3.6. YouCompleteMe 설치
 
@@ -212,7 +212,7 @@ Plugin 'fatih/vim-go'
 ...
 ```
 
-~/.vimrc 파일의 Vundle Plugins에 [File 3]의 내용을 추가하여 Vundle이 vim-go를 설치하도록 설정한다.
+`~/.vimrc` 파일의 Vundle Plugins에 [File 3]의 내용을 추가하여 Vundle이 vim-go를 설치하도록 설정한다.
 
 ```shell
 : PluginInstall
@@ -241,7 +241,7 @@ YouCompleteMe에 Golang Option을 추가하여 Compile 및 설치를 수행한�
 
 ### 5.1. YouCompleteMe
 
-C, Cpp Project의 경우 Project Root 폴더에 ~/.vim/.ycm_extra_conf.py 파일을 복사하여 YouCompleteMe가 동작하도록 설정한다.
+C, Cpp Project의 경우 Project Root 폴더에 `~/.vim/.ycm_extra_conf.py` 파일을 복사하여 YouCompleteMe가 동작하도록 설정한다.
 
 | 단축키 | 동작 |
 |-------|------|
@@ -251,16 +251,16 @@ C, Cpp Project의 경우 Project Root 폴더에 ~/.vim/.ycm_extra_conf.py 파일
 
 ### 5.2. vim-clang-format
 
-Auto Mode는 파일 저장시 저장되는 파일에 clang-format을 자동으로 적용하는 Mode이다.
+Auto Mode는 파일 저장시 저장되는 파일에 `clang-format`을 자동으로 적용하는 Mode이다.
 
 | 단축키 | 동작 |
 |-------|------|
-| \cf | clang-format 적용 |
+| \cf | `clang-format` 적용 |
 | \C | Auto Mode Enable/Disable |
 
 ### 5.3. vim-gutentags
 
-vim-gutentags는 .git, .svn 파일이 있는 폴더를 Project Root 폴더로 인식한다. 만약 해당 파일이 존재하지 않는다면 Project Root 폴더에 **.tag_root** 파일을 생성하여 vim-gutentags가 Project Root 폴더를 인식하게 만들수 있다.
+vim-gutentags는 `.git`, `.svn` 파일이 있는 폴더를 Project Root 폴더로 인식한다. 만약 해당 파일이 존재하지 않는다면 Project Root 폴더에 `.tag_root` 파일을 생성하여 vim-gutentags가 Project Root 폴더를 인식하게 만들수 있다.
 
 ## 6. 참조
 

@@ -13,7 +13,7 @@ $ uptime
 10:00:00 up  8:04,  1 user,  load average: 3.37, 3.37, 3.45
 ```
 
-uptime is a tool that shows Linux uptime and average CPU load. [Shell 1] shows what can be checked through `uptime`. It displays current time / Linux uptime / number of users currently logged in / average load over 1, 5, and 15 minutes. Load means the number of processes in waiting state.
+`uptime` is a tool that shows Linux uptime and average CPU load. [Shell 1] shows what can be checked through `uptime`. It displays current time / Linux uptime / number of users currently logged in / average load over 1, 5, and 15 minutes. Load means the number of processes in waiting state.
 
 ### 1.2. free
 
@@ -24,7 +24,7 @@ Mem:           7977        1185        2710           1        4081        6490
 Swap:          4095           0        4095
 ```
 
-free is a tool that outputs memory and swap usage. [Shell 2] shows the output of `free -m` displaying memory usage and swap usage in MB.
+`free` is a tool that outputs memory and swap usage. [Shell 2] shows the output of `free -m` displaying memory usage and swap usage in MB.
 
 ### 1.3. vmstat
 
@@ -39,7 +39,7 @@ procs -----------memory---------- ---swap-- -----io---- -system-- ------cpu-----
  2  3      0 2661392 815768 3469476    0    0    28 13628  347 3175 14  2 44 40  0
 ```
 
-vmstat is a tool that outputs overall system usage such as CPU, memory, and disk. [Shell 3] shows the output of `vmstat 1` displaying overall system usage at 1-second intervals.
+`vmstat` is a tool that outputs overall system usage such as CPU, memory, and disk. [Shell 3] shows the output of `vmstat 1` displaying overall system usage at 1-second intervals.
 
 ### 1.4. pidstat
 
@@ -55,7 +55,7 @@ Average:        0      3968    0.00    0.99    0.00    0.00    0.99     -  kwork
 Average:        0      7361    0.00    0.99    0.00    0.00    0.99     -  pidstat
 ```
 
-pidstat is a tool that outputs resource usage per process. [Shell 4] shows the output of `pidstat 1` displaying CPU usage per process at 1-second intervals. pidstat can output not only CPU usage but also memory, stack, block I/O, and kernel usage information.
+`pidstat` is a tool that outputs resource usage per process. [Shell 4] shows the output of `pidstat 1` displaying CPU usage per process at 1-second intervals. `pidstat` can output not only CPU usage but also memory, stack, block I/O, and kernel usage information.
 
 ### 1.5. mpstat
 
@@ -69,7 +69,7 @@ Linux 4.15.0-60-generic (node09)        09/22/19        _x86_64_        (2 CPU)
 11:25:07       1    3.06    0.00    2.04   48.98    0.00    0.00    0.00    0.00    0.00   45.92
 ```
 
-mpstat is a tool that outputs usage per CPU core. [Shell 5] shows the output of `mpstat -P ALL 1` displaying CPU usage of all CPU cores at 1-second intervals.
+`mpstat` is a tool that outputs usage per CPU core. [Shell 5] shows the output of `mpstat -P ALL 1` displaying CPU usage of all CPU cores at 1-second intervals.
 
 ### 1.6. iostat
 
@@ -90,7 +90,7 @@ sda              8.65   53.40     80.75  15987.95     0.90   101.52   9.43  65.5
 sdb              0.03    0.00      0.75      0.00     0.00     0.00   0.00   0.00   22.65    0.00   0.00    28.86     0.00  16.74   0.04
 ```
 
-iostat is a tool that outputs usage per block device. [Shell 6] shows the output of `iostat -x 1` displaying usage of all block devices at 1-second intervals. iostat also outputs average CPU usage.
+`iostat` is a tool that outputs usage per block device. [Shell 6] shows the output of `iostat -x 1` displaying usage of all block devices at 1-second intervals. `iostat` also outputs average CPU usage.
 
 ### 1.7. netstat
 
@@ -105,7 +105,7 @@ lo       65536   196363      0      0 0        196363      0      0      0 LRU
 vetheeab  1500        0      0      0 0            74      0      0      0 BMRU
 ```
 
-netstat is a tool that outputs most network information held by the Linux kernel. netstat can also be used for measuring network performance. [Shell 7] shows the output of `netstat -i` measuring performance of all network interfaces.
+`netstat` is a tool that outputs most network information held by the Linux kernel. `netstat` can also be used for measuring network performance. [Shell 7] shows the output of `netstat -i` measuring performance of all network interfaces.
 
 ### 1.8. nicstat
 
@@ -119,7 +119,7 @@ $ nicstat 1
 15:41:38     eth1    7.32    0.55   12.19    5.00   614.8   111.7  0.01   0.00
 ```
 
-nicstat is a tool that outputs performance per network interface. [Shell 8] shows the output of `nicstat 1` displaying performance of all network interfaces at 1-second intervals.
+`nicstat` is a tool that outputs performance per network interface. [Shell 8] shows the output of `nicstat 1` displaying performance of all network interfaces at 1-second intervals.
 
 ### 1.9. top
 
@@ -138,7 +138,7 @@ KiB Swap:  4194300 total,  4194300 free,        0 used.  6637292 avail Mem
  1529 root      20   0 1290564  82076  37524 S   1.0  1.0   1:55.27 dockerd
 ```
 
-top is a tool that shows processes or threads sorted by CPU usage or memory usage in descending order. [Shell 9] shows the output of `top` displaying CPU usage of processes.
+`top` is a tool that shows processes or threads sorted by CPU usage or memory usage in descending order. [Shell 9] shows the output of `top` displaying CPU usage of processes.
 
 ### 1.10. slabtop
 
@@ -159,7 +159,7 @@ $ slabtop
 123776 122174   0%    0.06K   1934       64      7736K kmalloc-64
 ```
 
-slabtop is a tool that outputs slab memory usage used by the kernel. [Shell 10] shows the output of `slabtop` displaying slab memory usage. The sorting criteria for usage can be changed through various options.
+`slabtop` is a tool that outputs slab memory usage used by the kernel. [Shell 10] shows the output of `slabtop` displaying slab memory usage. The sorting criteria for usage can be changed through various options.
 
 ### 1.11. iotop
 
@@ -178,7 +178,7 @@ Actual DISK READ:      46.79 K/s | Actual DISK WRITE:       5.52 M/s
     2 be/4 root        0.00 B/s    0.00 B/s  0.00 %  0.00 % [kthreadd]            
 ```
 
-iotop is a tool that outputs processes or threads sorted by block I/O usage in descending order. [Shell 11] shows the output of `iotop` displaying block I/O usage.
+`iotop` is a tool that outputs processes or threads sorted by block I/O usage in descending order. [Shell 11] shows the output of `iotop` displaying block I/O usage.
 
 ### 1.12. iftop
 
@@ -207,7 +207,7 @@ RX:                    23.8KB           67.5Kb                   672b   1.00Kb  
 TOTAL:                 35.0KB           86.6Kb                  1.31Kb  2.11Kb  6.48Kb 
 ```
 
-iftop is a tool that classifies network bandwidth usage of a specific interface by source IP/destination IP and then outputs them sorted by usage in descending order. [Shell 12] shows the output of `iftop` displaying network bandwidth usage.
+`iftop` is a tool that classifies network bandwidth usage of a specific interface by source IP/destination IP and then outputs them sorted by usage in descending order. [Shell 12] shows the output of `iftop` displaying network bandwidth usage.
 
 ### 1.13. nethogs
 
@@ -228,7 +228,7 @@ NetHogs version 0.8.5-2
   TOTAL 0.000 0.000 KB/sec                                     0.500       0.371
 ```
 
-nethogs is a tool that outputs processes sorted by network bandwidth usage in descending order. [Shell 13] shows the output of `nethogs` displaying network bandwidth usage.
+`nethogs` is a tool that outputs processes sorted by network bandwidth usage in descending order. [Shell 13] shows the output of `nethogs` displaying network bandwidth usage.
 
 ## 2. References
 

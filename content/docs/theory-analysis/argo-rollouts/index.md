@@ -359,7 +359,7 @@ $ kubectl label namespace default istio-injection=enabled
 $ kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.28/samples/addons/prometheus.yaml
 ```
 
-[Shell 1]은 Test 환경을 구성하는 Script를 나타내고 있다. `kind`를 활용하여 Kubernetes Cluster를 구성하고, Argo Rollouts를 설치한다. Traffic Routing을 위해서 Istio를 설치하고, default Namespace에 Sidecar Injection을 활성화한다. AnalysisTemplate/AnalysisRun을 Test하기 위한 Prometheus도 설치한다.
+[Shell 1]은 Test 환경을 구성하는 Script를 나타내고 있다. `kind`를 활용하여 Kubernetes Cluster를 구성하고, Argo Rollouts를 설치한다. Traffic Routing을 위해서 Istio를 설치하고, `default` Namespace에 Sidecar Injection을 활성화한다. AnalysisTemplate/AnalysisRun을 Test하기 위한 Prometheus도 설치한다.
 
 ```yaml {caption="[Manifest 9] shell Pod Manifest", linenos=table}
 apiVersion: v1
@@ -375,7 +375,7 @@ spec:
     command: ["sleep", "infinity"]
 ```
 
-[File 1]은 `shell` Pod의 Manifest를 나타내고 있다. `netshoot` Container Image를 이용하여 `shell` Pod을 생성하며, Argo Rollout으로 구성한 Service에 접근하여 istio Metric을 발생시키기 위해서 사용한다.
+[File 1]은 `shell` Pod의 Manifest를 나타내고 있다. `netshoot` Container Image를 이용하여 `shell` Pod을 생성하며, Argo Rollout으로 구성한 Service에 접근하여 Istio Metric을 발생시키기 위해서 사용한다.
 
 ### 2.2. Test Cases
 
@@ -383,7 +383,7 @@ spec:
 
 {{< figure caption="[Figure 2] Argo Rollouts Blue/Green Case" src="images/argo-rollouts-case-bluegreen.png" width="800px" >}}
 
-[Figure 2]는 Argo Rollouts Blue/Green 배포를 위한 Test Case를 도식화 하고 있다. Container Image를 2번 변경한 이후에 Promotion을 진행하여, `Revision 2`를 건너뛰고 `Revision 3`으로 한번에 Promotion을 수행한다. Blue/Green 배포이기 때문에 Green Version의 Pod의 개수는 Blue Version의 Pod의 개수와 동일하게 5개로 유지된다. `Preview` Kubernetes Service는 `Revision 1`, `Revision 2`, `Revision 3`을 차례대로 가리키고 있으며, `Active` Kubernetes Service는 `Revision 1`을 가리키고 있다가, Promotion이 완료되면 `Revision 3`을 가리키는 것을 확인할 수 있다.
+[Figure 2]는 Argo Rollouts Blue/Green 배포를 위한 Test Case를 도식화 하고 있다. Container Image를 2번 변경한 이후에 Promotion을 진행하여, Revision 2를 건너뛰고 Revision 3으로 한번에 Promotion을 수행한다. Blue/Green 배포이기 때문에 Green Version의 Pod의 개수는 Blue Version의 Pod의 개수와 동일하게 5개로 유지된다. Preview Kubernetes Service는 Revision 1, Revision 2, Revision 3을 차례대로 가리키고 있으며, Active Kubernetes Service는 Revision 1을 가리키고 있다가, Promotion이 완료되면 Revision 3을 가리키는 것을 확인할 수 있다.
 
 ```yaml {caption="[Manifest 10] Blue/Green Test Case", linenos=table}
 apiVersion: argoproj.io/v1alpha1
@@ -626,9 +626,9 @@ Selector:                 app=mock-server,rollouts-pod-template-hash=6fcb56df9b
 
 {{< figure caption="[Figure 3] Canary Success Test Case" src="images/argo-rollouts-case-canary-success.png" width="1100px" >}}
 
-[Figure 3]는 Argo Rollouts Canary 배포 성공 Test Case를 도식화 하고 있다. Container Image를 2번 변경한 이후에 Promotion을 진행하여, `Revision 2`를 건너뛰고 `Revision 3`으로 한번에 Promotion을 수행한다. Image를 변경한 직후에는 Weight 20% 설정으로 인해서 한개의 Pod가 바로 생기며, Promotion이 수행된 이후에 Weight 40% 설정으로 인해서 Pod가 2개로 증가하고, 30초 뒤에 Weight 100% 설정으로 인해서 Pod가 5개로 증가하는 것을 확인할 수 있다.
+[Figure 3]는 Argo Rollouts Canary 배포 성공 Test Case를 도식화 하고 있다. Container Image를 2번 변경한 이후에 Promotion을 진행하여, Revision 2를 건너뛰고 Revision 3으로 한번에 Promotion을 수행한다. Image를 변경한 직후에는 Weight 20% 설정으로 인해서 한개의 Pod가 바로 생기며, Promotion이 수행된 이후에 Weight 40% 설정으로 인해서 Pod가 2개로 증가하고, 30초 뒤에 Weight 100% 설정으로 인해서 Pod가 5개로 증가하는 것을 확인할 수 있다.
 
-`Canary` Kubernetes Service는 `Revision 1`, `Revision 2`, `Revision 3`을 차례대로 가리키고 있으며, `Stable` Kubernetes Service는 `Revision 1`을 가리키고 있다가, Promotion이 완료되면 `Revision 3`을 가리키는 것을 확인할 수 있다. `Main` Service는 언제나 모든 Revision을 가리키며 Stable과 Canary Version에 Traffic을 분배한다.
+Canary Kubernetes Service는 Revision 1, Revision 2, Revision 3을 차례대로 가리키고 있으며, Stable Kubernetes Service는 Revision 1을 가리키고 있다가, Promotion이 완료되면 Revision 3을 가리키는 것을 확인할 수 있다. Main Service는 언제나 모든 Revision을 가리키며 Stable과 Canary Version에 Traffic을 분배한다.
 
 ```yaml {caption="[Manifest 11] Canary Success Test Case"}
 apiVersion: argoproj.io/v1alpha1
@@ -941,7 +941,7 @@ Selector:                 app=mock-server,rollouts-pod-template-hash=6fcb56df9b
 
 {{< figure caption="[Figure 4] Canary with Undo and Abort Test Case" src="images/argo-rollouts-case-canary-undo-abort.png" width="1100px" >}}
 
-[Figure 4]는 Argo Rollouts Canary 배포 Undo 및 Abort Test Case를 도식화 하고 있다. Container Image를 3번 변경한 이후에 Undo를 두번 수행하며, 마지막에는 Abort를 수행한다. 주목해야하는 점은 첫번째 Undo를 수행할때는 `Revision 2`로 되돌아가지 않고, 새로운 `Revision 4`가 생성되며 Container Image만 Version `2.0.0`으로 변경되며, 두번째 Undo를 수행할때는 새로운 `Revision 5`가 생성되며 Container Image만 Version `3.0.0`으로 변경되는 것을 확인할 수 있다. 즉 Undo 수행시 이전의 Revision을 이용하지 않고 새로운 Revision을 생성하고 Container Image만 이전의 Version으로 변경하는 것을 확인할 수 있다.
+[Figure 4]는 Argo Rollouts Canary 배포 Undo 및 Abort Test Case를 도식화 하고 있다. Container Image를 3번 변경한 이후에 Undo를 두번 수행하며, 마지막에는 Abort를 수행한다. 주목해야하는 점은 첫번째 Undo를 수행할때는 Revision 2로 되돌아가지 않고, 새로운 Revision 4가 생성되며 Container Image만 Version `2.0.0`으로 변경되며, 두번째 Undo를 수행할때는 새로운 Revision 5가 생성되며 Container Image만 Version `3.0.0`으로 변경되는 것을 확인할 수 있다. 즉 Undo 수행시 이전의 Revision을 이용하지 않고 새로운 Revision을 생성하고 Container Image만 이전의 Version으로 변경하는 것을 확인할 수 있다.
 
 ```yaml {caption="[Manifest 12] Canary with Undo and Abort Test Case"}
 apiVersion: argoproj.io/v1alpha1
@@ -1215,7 +1215,7 @@ NAME                                     KIND        STATUS        AGE  INFO
 
 [Figure 5]는 Istio Virtual Service를 활용한 Traffic Routing Test Case를 도식화 하고 있다. Container Image를 한번 변경한 이후에 두번의 Promotion을 수행한다. Container Image 변경을 직후에는 Weight 20% 설정으로 인해서 한개의 Canary Version Pod가 바로 생기며, Promotion이 수행된 이후에 Weight 40% 설정으로 인해서 Canary Version Pod가 2개로 증가하고, 한번더 Promotion을 수행하면 Weight 100% 설정으로 인해서 Canary Version Pod가 5개로 증가하는 것을 확인할 수 있다.
 
-그리고 Weight에 맞게 **Virtual Service의 Weight**가 변경되면서 Canary Version과 Stable Version에 Traffic이 분배된다. `Canary` Kubernetes Service는 `Revision 1`, `Revision 2`을 차례대로 가리키고 있으며, `Stable` Kubernetes Service는 `Revision 1`을 가리키고 있다가, Promotion이 완료되면 `Revision 2`을 가리키는 것을 확인할 수 있다. Istio Virtual Service를 Traffic Routing에 이용하고 있기 때문에 모든 단계에서 Stable Version의 Pod 개수는 5개로 유지된다.
+그리고 Weight에 맞게 **Virtual Service의 Weight**가 변경되면서 Canary Version과 Stable Version에 Traffic이 분배된다. Canary Kubernetes Service는 Revision 1, Revision 2을 차례대로 가리키고 있으며, Stable Kubernetes Service는 Revision 1을 가리키고 있다가, Promotion이 완료되면 Revision 2을 가리키는 것을 확인할 수 있다. Istio Virtual Service를 Traffic Routing에 이용하고 있기 때문에 모든 단계에서 Stable Version의 Pod 개수는 5개로 유지된다.
 
 ```yaml {caption="[Manifest 13] Canary with Istio Virtual Service Test Case"}
 apiVersion: argoproj.io/v1alpha1

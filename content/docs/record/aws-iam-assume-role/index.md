@@ -26,7 +26,7 @@ title: AWS IAM Assume Role / aws CLI 이용 / Ubuntu 18.04
 }
 ```
 
-[File 1]의 내용과 같이 AssumeRole 권한만 갖고 있는 Policy 파일을 작성한다.
+[File 1]의 내용과 같이 `AssumeRole` 권한만 갖고 있는 Policy 파일을 작성한다.
 
 ```shell
 $ aws iam create-policy --policy-name assume-role-policy --policy-document file://assume-role-policy.json
@@ -46,7 +46,7 @@ $ aws iam create-policy --policy-name assume-role-policy --policy-document file:
 }
 ```
 
-[File 1]을 이용하여 assume-role-policy 이름을 갖는 Policy를 생성한다.
+[File 1]을 이용하여 `assume-role-policy` 이름을 갖는 Policy를 생성한다.
 
 ## 3. User 생성, 설정
 
@@ -63,7 +63,7 @@ $ aws iam create-user --user-name assume-role-user
 }
 ```
 
-Role을 Assume을 수행할 assume-role-user User를 생성한다.
+Role을 Assume을 수행할 `assume-role-user` User를 생성한다.
 
 ```shell
 $ aws iam create-access-key --user-name assume-role-user
@@ -78,13 +78,13 @@ $ aws iam create-access-key --user-name assume-role-user
 }
 ```
 
-assume-role-user의 Access Key를 생성한다.
+`assume-role-user`의 Access Key를 생성한다.
 
 ```shell
 $ aws iam attach-user-policy --user-name assume-role-user --policy-arn arn:aws:iam::278805249149:policy/assume-role-policy
 ```
 
-assume-role-user User에 assume-role-policy Policy를 부여한다.
+`assume-role-user` User에 `assume-role-policy` Policy를 부여한다.
 
 ## 4. Role 생성, 설정
 
@@ -102,7 +102,7 @@ assume-role-user User에 assume-role-policy Policy를 부여한다.
 }
 ```
 
-Role의 Trust Relationship을 설정하는 [File 2]을 생성한다. Principal의 AWS는 **Role을 부여받는 계정의 ID**를 의미한다.
+Role의 Trust Relationship을 설정하는 [File 2]을 생성한다. `Principal`의 `AWS`는 **Role을 부여받는 계정의 ID**를 의미한다.
 
 ```shell
 $ aws iam create-role --role-name assume-role-role --assume-role-policy-document file://assume-role-trust-relationship.json
@@ -130,13 +130,13 @@ $ aws iam create-role --role-name assume-role-role --assume-role-policy-document
 }
 ```
 
-Assume할 Role인 assume-role-role을 생성한다.
+Assume할 Role인 `assume-role-role`을 생성한다.
 
 ```shell
 $ aws iam attach-role-policy --role-name assume-role-role --policy-arn arn:aws:iam::aws:policy/AmazonEC2FullAccess
 ```
 
-assume-role-role Role에 EC2 제어 권한을 부여한다.
+`assume-role-role` Role에 EC2 제어 권한을 부여한다.
 
 ## 5. Assume Role
 
@@ -151,7 +151,7 @@ $ aws ec2 describe-instances
 An error occurred (UnauthorizedOperation) when calling the DescribeInstances operation: You are not authorized to perform this operation.
 ```
 
-assume-role-user로 AWS CLI를 설정한 이후에, EC2 Instance Describe 동작을 수행한다. assume-role-user User는 Assume Role 권한만 가지고 있기 때문에, EC2 Desribe 동작이 수행되지 못하는 것을 확인 할 수 있다.
+`assume-role-user`로 AWS CLI를 설정한 이후에, EC2 Instance Describe 동작을 수행한다. `assume-role-user` User는 Assume Role 권한만 가지고 있기 때문에, EC2 Describe 동작이 수행되지 못하는 것을 확인 할 수 있다.
 
 ```shell
 $ aws sts assume-role --role-arn arn:aws:iam::278805249149:role/assume-role-role --role-session-name assume-role-session
@@ -169,7 +169,7 @@ $ aws sts assume-role --role-arn arn:aws:iam::278805249149:role/assume-role-role
 }
 ```
 
-Assume Role 동작을 수행하여 임시 AccessKeyID, SecretAccessKey, SessionToken을 얻는다.
+Assume Role 동작을 수행하여 임시 `AccessKeyID`, `SecretAccessKey`, `SessionToken`을 얻는다.
 
 ```shell
 $ export AWS-ACCESS-KEY-ID=<Access Key>
@@ -192,7 +192,7 @@ $ aws ec2 describe-instances
 ...
 ```
 
-획득한 AccessKeyID, SecretAccessKey, SessionToken을 이용하여 aws CLI를 설정한다. 이후에 EC2 Describe 동작을 수행하면, 동작하는 것을 확인 할 수 있다.
+획득한 `AccessKeyID`, `SecretAccessKey`, `SessionToken`을 이용하여 aws CLI를 설정한다. 이후에 EC2 Describe 동작을 수행하면, 동작하는 것을 확인 할 수 있다.
 
 ## 6. 참조
 

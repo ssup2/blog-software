@@ -32,7 +32,7 @@ Data 저장 비용은 One Zone Class에 비해 낮지만 Data Read 수행시 추
 
 [Figure 1]은 Standard, Standard-IA Class를 이용시 AWS EFS의 Architecture를 나타내고 있다. EFS Storage는 AWS가 관리하는 별도의 VPC 내부에 존재하며 EC2 Instance는 동일 AZ에 존재하는 ENI를 통해서 EFS를 Mount하고 이용한다. EFS Meta, Data, ENI 모두 AZ마다 존재하기 때문에 특정 AZ 장애시에도 나머지 AZ에서는 EFS를 Downtime 없이 이용 가능하다.
 
-EC2 Instance가 동일 AZ에 존재하는 ENI를 이용할 수 있는 이유는 Route 53을 활용하기 때문이다. EFS를 생성하면 Route 53은 "xxx.efs.region.amazonaws.com" 형태의 EFS Mount Point에 대한 Domain을 생성한다. EC2 Instance가 어느 AZ에 위치하냐에 따라서 Route 53은 EC2 Instance가 위치하는 동일 AZ의 ENI IP 주소를 반환한다. 따라서 각 EC2 Instance는 EFS Mount Point Domain을 대상으로 Mount를 수행하면 자연스럽게 동일 AZ에 존재하는 ENI를 통해서 EFS에 접근하게 된다.
+EC2 Instance가 동일 AZ에 존재하는 ENI를 이용할 수 있는 이유는 Route 53을 활용하기 때문이다. EFS를 생성하면 Route 53은 `xxx.efs.region.amazonaws.com` 형태의 EFS Mount Point에 대한 Domain을 생성한다. EC2 Instance가 어느 AZ에 위치하냐에 따라서 Route 53은 EC2 Instance가 위치하는 동일 AZ의 ENI IP 주소를 반환한다. 따라서 각 EC2 Instance는 EFS Mount Point Domain을 대상으로 Mount를 수행하면 자연스럽게 동일 AZ에 존재하는 ENI를 통해서 EFS에 접근하게 된다.
 
 EFS Storage 및 EFS VPC의 경우에는 AWS에서 완전히 관리하기 때문에 AWS User는 신경쓸 필요가 없지만 ENI 생성 및 ENI와 연동되는 Security Group은 AWS User가 직접 관리해주어야 한다. ENI Security Group이 EFS를 이용 해야하는 EC2 Instance의 접근을 허용하도록 반드시 설정되어 있어야 한다.
 

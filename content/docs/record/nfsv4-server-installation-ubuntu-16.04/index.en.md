@@ -8,9 +8,9 @@ The installation environment is as follows.
 
 * Ubuntu 16.04 LTS 64bit, root user
 * **NFS Root** : Refers to the absolute path of the Root Directory of the NFSv4 Server.
-  * Use /export/nfs-root as the NFS Root.
+  * Use `/export/nfs-root` as the NFS Root.
 * **NFS share** : Refers to the absolute path of the Directory to be actually shared through the NFSv4 Server.
-  * Use /root/nfs-share as the NFS share.
+  * Use `/root/nfs-share` as the NFS share.
 
 ## 2. NFSv4 Server Configuration
 
@@ -38,7 +38,7 @@ Create shared folders and perform Bind Mount.
 /root/nfs-share /export/nfs-root none bind  0  0
 ```
 
-Add the contents of [File 1] to /etc/fstab to ensure Bind Mount persists after reboot.
+Add the contents of [File 1] to `/etc/fstab` to ensure Bind Mount persists after reboot.
 
 ### 2.3. Configuration
 
@@ -47,7 +47,7 @@ Add the contents of [File 1] to /etc/fstab to ensure Bind Mount persists after r
 /export/nfs-root      *(rw,nohide,insecure,no-subtree-check,async,no-root-squash)
 ```
 
-Add the contents of [File 2] to the /etc/exports file.
+Add the contents of [File 2] to the `/etc/exports` file.
 
 ### 2.4. Restart
 

@@ -28,7 +28,7 @@ However, because only row locks are used and table locks are not, when another t
 
 ##### 1.2.2. Snapshot + Row Lock
 
-Using snapshot together with row locks can secure parallelism for read (SELECT) operations and eliminate phantom read. When only row locks are used, because row locks are held until the transaction ends, multiple transactions cannot read the same row concurrently.
+Using snapshot together with row locks can secure parallelism for read (`SELECT`) operations and eliminate phantom read. When only row locks are used, because row locks are held until the transaction ends, multiple transactions cannot read the same row concurrently.
 
 When using snapshot, when performing a read operation inside a transaction, a transaction-specific snapshot is created, and subsequent read operations inside the transaction are performed against that transaction-specific snapshot. Therefore, even when multiple transactions read the same row concurrently, each transaction actually reads its own transaction-specific snapshot, so concurrent reads are possible and phantom read does not occur.
 
@@ -107,7 +107,7 @@ Non-repeatable read is a phenomenon where values change depending on other trans
 | SELECT * FROM users WHERE age BETWEEN 10 AND 30; <br> COMMIT;| |
 {{< /table >}}
 
-Phantom read is a phenomenon where newly added rows by other transactions are reflected in results. In [Table 5], T1 does not read Bob's information in the first SELECT query, but reads Bob's information in the second SELECT query due to T2's transaction.
+Phantom read is a phenomenon where newly added rows by other transactions are reflected in results. In [Table 5], T1 does not read Bob's information in the first `SELECT` query, but reads Bob's information in the second `SELECT` query due to T2's transaction.
 
 ## 3. RDBMS Isolation Level
 

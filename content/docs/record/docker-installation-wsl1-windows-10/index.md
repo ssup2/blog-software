@@ -27,7 +27,7 @@ Visual Studio Code의 Terminal에서 Docker 이용을 위한 Docker for Windows�
 > route add 172.17.0.0 MASK 255.255.0.0 10.0.75.2
 ```
 
-Windows에서 Container의 IP에 바로 접근할 수 있도록 Routing Rule을 추가한다. Default Docker Network인 172.17.0.0/24 Network 관련 Routing Rule을 추가한다. PowerShell을 관리자 권한으로 실행하여 위의 명령어를 입력한다.
+Windows에서 Container의 IP에 바로 접근할 수 있도록 Routing Rule을 추가한다. Default Docker Network인 `172.17.0.0/24` Network 관련 Routing Rule을 추가한다. PowerShell을 관리자 권한으로 실행하여 위의 명령어를 입력한다.
 
 ## 3. WSL1에서 Docker 설치, 설정
 

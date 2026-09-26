@@ -14,14 +14,14 @@ The installation and configuration environment is as follows.
 
 The list of VIM plugins used is as follows.
 
-* vundle: Serves as a Vim Plugin Manager. By placing Vim plugins to install in .vimrc, you can easily install Vim plugins through vundle.
-* nerdtree: Serves as a file explorer.
-* tagbar: Shows a list of code tags.
-* YouCompleteMe: Performs code autocomplete functionality.
-* vim-gutentags: Automatically manages Ctag files.
-* vim-airline: Improves readability of Vim's status line.
-* vim-clang-format: Performs code alignment using clang-format.
-* vim-go: Configures the environment for golang.
+* **vundle**: Serves as a Vim Plugin Manager. By placing Vim plugins to install in `.vimrc`, you can easily install Vim plugins through vundle.
+* **nerdtree**: Serves as a file explorer.
+* **tagbar**: Shows a list of code tags.
+* **YouCompleteMe**: Performs code autocomplete functionality.
+* **vim-gutentags**: Automatically manages Ctag files.
+* **vim-airline**: Improves readability of Vim's status line.
+* **vim-clang-format**: Performs code alignment using `clang-format`.
+* **vim-go**: Configures the environment for golang.
 
 ## 3. Vim Basic Installation and Configuration
 
@@ -62,7 +62,7 @@ export TERM=xterm-256color
 source "$HOME/.vim/bundle/gruvbox/gruvbox_256palette.sh"
 ```
 
-Add the content from [File 1] to the ~/.bashrc file to configure Vundle to install vim-go.
+Add the content from [File 1] to the `~/.bashrc` file to configure Vundle to install vim-go.
 
 ### 3.3. Vundle Plugin Installation
 
@@ -70,7 +70,7 @@ Add the content from [File 1] to the ~/.bashrc file to configure Vundle to insta
 $ git clone https://github.com/gmarik/Vundle.vim.git ~/.vim/bundle/Vundle.vim
 ```
 
-Install Vundle using git.
+Install Vundle using `git`.
 
 ### 3.4. .vimrc File Configuration
 
@@ -152,7 +152,7 @@ nmap <Leader>C :ClangFormatAutoToggle<CR>
 let g:clang_format#auto_format = 0
 ```
 
-Create the ~/.vimrc file as shown in [File 2] to store plugin installation and configuration information.
+Create the `~/.vimrc` file as shown in [File 2] to store plugin installation and configuration information.
 
 ### 3.5. Vim Plugin Installation Using Vundle
 
@@ -160,7 +160,7 @@ Create the ~/.vimrc file as shown in [File 2] to store plugin installation and c
 : PluginInstall
 ```
 
-Install Vim plugins stored in ~/.vimrc. Execute in Vim command mode.
+Install Vim plugins stored in `~/.vimrc`. Execute in Vim command mode.
 
 ### 3.6. YouCompleteMe Installation
 
@@ -212,7 +212,7 @@ Plugin 'fatih/vim-go'
 ...
 ```
 
-Add the content from [File 3] to Vundle Plugins in the ~/.vimrc file to configure Vundle to install vim-go.
+Add the content from [File 3] to Vundle Plugins in the `~/.vimrc` file to configure Vundle to install vim-go.
 
 ```shell
 : PluginInstall
@@ -241,7 +241,7 @@ Compile and install YouCompleteMe with the Golang option added.
 
 ### 5.1. YouCompleteMe
 
-For C, Cpp projects, copy the ~/.vim/.ycm_extra_conf.py file to the project root folder to configure YouCompleteMe to work.
+For C, Cpp projects, copy the `~/.vim/.ycm_extra_conf.py` file to the project root folder to configure YouCompleteMe to work.
 
 | Shortcut | Action |
 |-------|------|
@@ -251,16 +251,16 @@ For C, Cpp projects, copy the ~/.vim/.ycm_extra_conf.py file to the project root
 
 ### 5.2. vim-clang-format
 
-Auto Mode is a mode that automatically applies clang-format to files when saving.
+Auto Mode is a mode that automatically applies `clang-format` to files when saving.
 
 | Shortcut | Action |
 |-------|------|
-| \cf | Apply clang-format |
+| \cf | Apply `clang-format` |
 | \C | Enable/Disable Auto Mode |
 
 ### 5.3. vim-gutentags
 
-vim-gutentags recognizes folders containing .git or .svn files as project root folders. If these files do not exist, you can create a **.tag_root** file in the project root folder to make vim-gutentags recognize the project root folder.
+vim-gutentags recognizes folders containing `.git` or `.svn` files as project root folders. If these files do not exist, you can create a `.tag_root` file in the project root folder to make vim-gutentags recognize the project root folder.
 
 ## 6. References
 

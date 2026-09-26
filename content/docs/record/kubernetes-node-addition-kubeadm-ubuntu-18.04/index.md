@@ -16,8 +16,8 @@ title: Kubernetes Node 추가 / kubeadm 이용 / Ubuntu 18.04 환경
 * kubeadm 1.15.3
   * VM을 이용하여 Cluster 환경을 구축하는 경우 kubeadm을 이용하여 쉽게 Kubernetes를 설치 할 수 있다.
 * Password
-  * Kubernetes 설치에 필요한 Password는 간편한 설치를 위해 **root**로 통일한다.
-* 모든 Node에서 root User로 설치를 진행한다.
+  * Kubernetes 설치에 필요한 Password는 간편한 설치를 위해 `root`로 통일한다.
+* 모든 Node에서 `root` User로 설치를 진행한다.
 
 ## 2. Package 설치
 
@@ -66,7 +66,7 @@ CA 인증서의 Hash값을 얻는다.
 (Added Node)$ kubeadm join 30.0.0.34:6443 --token 4n1agp.j97evoelu2k35dre --discovery-token-ca-cert-hash sha256:060896fc4bfe949304b8c1af7b23bb5c4e60e6d242722ce5bd02fe4cbc94aabe
 ```
 
-kubeadm으로 생성한 Token과 CA 인증서의 Hash 값을 이용하여 Cluster에 Join한다. 30.0.0.34은 Master Node의 IP이다.
+kubeadm으로 생성한 Token과 CA 인증서의 Hash 값을 이용하여 Cluster에 Join한다. `30.0.0.34`은 Master Node의 IP이다.
 
 ## 4. Node 추가 확인
 
@@ -79,7 +79,7 @@ vm03   Ready    <none>   236d   v1.15.3
 vm04   Ready    <none>   101s   v1.15.3
 ```
 
-Master Node에서 추가된 Node를 확인한다. Node04가 추가된 Node이다.
+Master Node에서 추가된 Node를 확인한다. `vm04`가 추가된 Node이다.
 
 ## 5. 참조
 

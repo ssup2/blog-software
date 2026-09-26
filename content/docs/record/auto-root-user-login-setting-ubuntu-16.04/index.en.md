@@ -16,7 +16,7 @@ Enter new UNIX password:
 Retype new UNIX password:
 ```
 
-Set the root Password using the passwd tool.
+Set the `root` Password using the `passwd` tool.
 
 ## 3. Auto Login Setting
 
@@ -27,7 +27,7 @@ autologin-user=root
 autologin-user-timeout=0
 ```
 
-Create the /etc/lightdm/lightdm.conf file with the contents of [File 1]. (If the file already exists, modify it.)
+Create the `/etc/lightdm/lightdm.conf` file with the contents of [File 1]. (If the file already exists, modify it.)
 
 ## 4. Remove /root/.profile Error
 
@@ -37,5 +37,5 @@ Create the /etc/lightdm/lightdm.conf file with the contents of [File 1]. (If the
 tty -s && mesg n
 ```
 
-After rebooting, change the contents of the /root/.profile file to the contents of [File 2].
+After rebooting, change the contents of the `/root/.profile` file to the contents of [File 2].
 

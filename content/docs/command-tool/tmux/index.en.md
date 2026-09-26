@@ -2,7 +2,7 @@
 title: tmux
 ---
 
-This document summarizes the usage of tmux, a Terminal Multiplexer.
+This document summarizes the usage of `tmux`, a Terminal Multiplexer.
 
 ## 1. tmux
 

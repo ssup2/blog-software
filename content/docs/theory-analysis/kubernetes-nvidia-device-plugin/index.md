@@ -37,7 +37,7 @@ NVIDIA Device Plugin의 두번째 역할은 어떤 GPU를 컨테이너에게 할
 1. Kubernetes Client는 Pod의 Resource에 `nvidia.com/gpu` Type으로 GPU의 개수를 명시하여 GPU Pod를 생성한다.
 2. Kubernetes Scheduler는 GPU Pod가 요청한 수량의 GPU를 제공할 수 있는 Node를 선택하여 해당 Pod를 배치한다.
 3. Kubernetes Scheduler로부터 선택된 Node의 kubelet은 GPU Pod에 명시된 GPU의 개수 정보를 수신한다.
-4. kubelet은 GPU Pod에 명시된 GPU 개수만큼 NVIDIA Device Plugin에 Allocation() gRPC 요청을 보내 GPU를 할당받는다. 이때 kubelet이 전달받는 GPU 할당 정보는 GPU Pod의 NVIDIA_VISIBLE_DEVICES 환경 변수에 설정될 GPU UUID 배열 형태로 제공된다.
+4. kubelet은 GPU Pod에 명시된 GPU 개수만큼 NVIDIA Device Plugin에 `Allocate()` gRPC 요청을 보내 GPU를 할당받는다. 이때 kubelet이 전달받는 GPU 할당 정보는 GPU Pod의 `NVIDIA_VISIBLE_DEVICES` 환경 변수에 설정될 GPU UUID 배열 형태로 제공된다.
 5. kubelet은 할당받은 GPU 정보를 Node에 설치된 NVIDIA Container Toolkit을 통해서 Pod/Container에게 주입한다.
 
 ### 1.3. GPU Health Check
@@ -140,7 +140,7 @@ Time-slicing 기법과 동일하게 MPS 기법이 적용된 Node의 GPU는 [Conf
 
 {{< figure caption="[Figure 7] NVIDIA Device Plugin Architecture with MIG" src="images/nvidia-device-plugin-architecture-mig.png" width="1100px" >}}
 
-MIG (Multi-Instance GPU) 기법은 GPU의 SM과 Memory를 완전히 격리하여 vGPU를 생성하고, vGPU를 CUDA App에서 사용할 수 있도록 제공하는 Hardware Level의 가상화 기법이다. Hardware Level의 가상화 기법이기 때문에 MIG를 지원하는 Ampere Architecture 이후의 GPU(a100)에서만 이용 가능하다. [Figure 7]는 MIG 기법의 구조를 나타내고 있다. MIG 기법은 Memory를 격리하는 **GPU Instance**와 SM을 격리하는 **Compute Instance** 두가지 단위로 GPU를 가상화 한다.
+MIG (Multi-Instance GPU) 기법은 GPU의 SM과 Memory를 완전히 격리하여 vGPU를 생성하고, vGPU를 CUDA App에서 사용할 수 있도록 제공하는 Hardware Level의 가상화 기법이다. Hardware Level의 가상화 기법이기 때문에 MIG를 지원하는 Ampere Architecture 이후의 GPU(A100)에서만 이용 가능하다. [Figure 7]는 MIG 기법의 구조를 나타내고 있다. MIG 기법은 Memory를 격리하는 **GPU Instance**와 SM을 격리하는 **Compute Instance** 두가지 단위로 GPU를 가상화 한다.
 
 GPU Instance와 Compute Instance는 1:1 또는 1:N으로 구성될 수 있다. 1:N으로 구성된 경우에는 Compute Instance는 GPU Instance의 Memory를 공유하여 이용한다. Compute Instance와 GPU Instance가 1:1로 구성된 경우에는 `[x]g.[x]gb` 형태의 Profile을 이용하여 Compute Instance를 생성한다. 여기서 `[x]g`는 Compute Instance에 할당되는 SM Slice의 개수를 의미하며, `[x]gb`는 Compute Instance에 할당되는 Memory의 크기를 의미한다. 또한 Compute Instance와 GPU Instance가 1:N으로 구성된 경우에는 `[x]c.[x]g.[x]gb` 형태의 Profile을 이용하여 Compute Instance를 생성한다. 여기서 `[x]c`는 Compute Instance에 할당되는 SM Slice의 개수를 의미한다.
 

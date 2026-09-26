@@ -12,13 +12,13 @@ This document analyzes JWT (JSON Web Token).
 
 ### 1.1. Header
 
-The Header contains the "typ" Key that indicates the Type and the "alg" Key that indicates the Algorithm. Type refers to the type of Token, and JWT has "JWT" as a fixed string value. Algorithm refers to the encryption Algorithm used when generating Signature based on Header and Payload. The content of the Header is encoded in Base64 and stored in JWT.
+The Header contains the `typ` Key that indicates the Type and the `alg` Key that indicates the Algorithm. Type refers to the type of Token, and JWT has `JWT` as a fixed string value. Algorithm refers to the encryption Algorithm used when generating Signature based on Header and Payload. The content of the Header is encoded in Base64 and stored in JWT.
 
 ### 1.2. Payload
 
-The Payload stores the Meta Data of the Token and the actual Data that the Token wants to deliver in Key-value format. The Key-value of Payload is called Claim, and Claims are divided into Reserved Claims and Custom Claims. Custom Claims are further divided into Public Claims and Private Claims. Reserved Claims store Meta information of the Token. Names of Reserved Claims include "iss" which means the issuer of the Token, "sub" which indicates the name of the Token, "iat" which indicates the issuance time of the Token, etc.
+The Payload stores the Meta Data of the Token and the actual Data that the Token wants to deliver in Key-value format. The Key-value of Payload is called Claim, and Claims are divided into Reserved Claims and Custom Claims. Custom Claims are further divided into Public Claims and Private Claims. Reserved Claims store Meta information of the Token. Names of Reserved Claims include `iss` which means the issuer of the Token, `sub` which indicates the name of the Token, `iat` which indicates the issuance time of the Token, etc.
 
-Custom Claims store the actual Data that the Token wants to deliver. The names of Public Claims are open to everyone, and the names of each Public Claim generally represent Data that is commonly transmitted. In other words, Public Claims generally store Data that is commonly transmitted. Names of Public Claims include "name" which means Full Name, "email" which means Email address, etc. The names of Private Claims use names determined by agreement between Apps that exchange Tokens. The "app" Key in [Figure 1] represents the Key of a Private Claim.
+Custom Claims store the actual Data that the Token wants to deliver. The names of Public Claims are open to everyone, and the names of each Public Claim generally represent Data that is commonly transmitted. In other words, Public Claims generally store Data that is commonly transmitted. Names of Public Claims include `name` which means Full Name, `email` which means Email address, etc. The names of Private Claims use names determined by agreement between Apps that exchange Tokens. The `app` Key in [Figure 1] represents the Key of a Private Claim.
 
 The names of Reserved Claims and Public Claims can be checked at [this link](https://www.iana.org/assignments/jwt/jwt.xhtml#claims). The content of Payload is also encoded in Base64 like Header and stored in JWT.
 

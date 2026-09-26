@@ -32,7 +32,7 @@ ice1{color="red", size="medium"} 4
 ice1{color="green", size="big"} 6
 ```
 
-[Instant Vector 1]과 [Instant Vector 2]는 One-to-one Vector Matching 설명을 위해서 이용되는 가상의 Instant Vector Type의 Data인 candy1-count, ice1-count를 나타내고 있다.
+[Instant Vector 1]과 [Instant Vector 2]는 One-to-one Vector Matching 설명을 위해서 이용되는 가상의 Instant Vector Type의 Data인 `candy1`, `ice1`를 나타내고 있다.
 
 #### 1.1.1. 모든 Label Matching
 
@@ -88,7 +88,7 @@ candy1{} + ignoring(size) ice1{}
 candy1{} / ignoring(size) ice1{}
 ```
 
-[SQL Syntax 3]은 ignoring 문법을 이용하여 Matching에서 제외시키는 Label을 명시적으로 제외하는 경우의 문법과 예제를 나타내고 있다.
+[SQL Syntax 3]은 `ignoring` 문법을 이용하여 Matching에서 제외시키는 Label을 명시적으로 제외하는 경우의 문법과 예제를 나타내고 있다.
 
 ```promql {caption="[Query 3] One-to-one, 일부 Label Matching, ignoring"}
 #--- query --- 
@@ -115,7 +115,7 @@ candy1{} + on(size) ice1{}
 Error
 ```
 
-[Query 4]는 `candy1`과 `ice1`를 대상으로 `size` Label을 선택하여 Matching에 실패하는 경우를 나타내고 있다. `size` Label 선택시 Error가 발생하는 이유는 `ice1`의 `size` Label의 값중 하나인 "big"이 중복되기 때문이다. Label 선택 규칙중 첫번째 규칙에 어긋난다.
+[Query 4]는 `candy1`과 `ice1`를 대상으로 `size` Label을 선택하여 Matching에 실패하는 경우를 나타내고 있다. `size` Label 선택시 Error가 발생하는 이유는 `ice1`의 `size` Label의 값중 하나인 `big`이 중복되기 때문이다. Label 선택 규칙중 첫번째 규칙에 어긋난다.
 
 `candy1`과 `ice1`를 대상으로 모든 Label 선택 규칙을 만족시키는 Label은 `color` Label만이 유일하다. 만약 `candy1`과 `ice1`를 대상으로 `size` Label을 선택하여 Matching을 수행하기 위해서는 One-to-one이 아닌 One-to-many Matching을 이용해야 한다.
 
@@ -156,7 +156,7 @@ candy2{} * on(color) group-right ice2{}
 
 [SQL Syntax 4]는 One-to-many Matching의 문법을 나타내고 있다. One-to-one 일부 Label Matching 문법에서 `group-left`, `group-right`만 추가된것을 확인할 수 있다. 1:N Matching시 `group-left`는 왼쪽 Instant Vector Type의 Data를 "N"으로 설정하고 오른쪽 Instant Vector Type의 Data를 "1"으로 설정할때 이용하며, `group-right`는 오른쪽 Instant Vector Type의 Data를 "N"으로 설정하고 왼쪽 Instant Vector Type의 Data를 "1"으로 설정할때 이용한다.
 
-여기서 "1"으로 설정된 Instant Vector Type의 Data는 반드시 on, ignoring 문법으로 명시되는 Label에 의해서 **하나의 값만 선택**이 되어야 하며, "N"으로 설정된 Instant Vector Type의 Data는 on, ignoring 문법으로 명시되는 Label에 의해서 0개를 포함하여 다수의 값이 선택되어도 관계없다.
+여기서 "1"으로 설정된 Instant Vector Type의 Data는 반드시 `on`, `ignoring` 문법으로 명시되는 Label에 의해서 **하나의 값만 선택**이 되어야 하며, "N"으로 설정된 Instant Vector Type의 Data는 `on`, `ignoring` 문법으로 명시되는 Label에 의해서 0개를 포함하여 다수의 값이 선택되어도 관계없다.
 
 ```promql {caption="[Query 5] One-to-many, group-left"}
 #--- query --- 
@@ -168,7 +168,7 @@ candy2{} * on(color) group-left ice2{}
 {color="green", size="big"} 30 (5*6)
 ```
 
-[Query 5]는 group-left를 활용한 One-to-mnay Query를 나타내고 있다. color Label을 기준으로 `ice2`에서는 blue/1개, green/1개, red/1개 즉 모두 1개의 Value만 선택이 되기 때문에 "1"이 될 수 있는 자격이되고, `candy2`에서는 color Label을 기준으로 blue/1개, green/2개, red/0개가 되기 때문에 "1"이 될 수 없고 "N"만 될 수 있다. 따라서 group-left를 통해서 `candy2`가 "N"이 되도록 Matching을 수행해야 한다.
+[Query 5]는 `group-left`를 활용한 One-to-many Query를 나타내고 있다. `color` Label을 기준으로 `ice2`에서는 `blue`/1개, `green`/1개, `red`/1개 즉 모두 1개의 Value만 선택이 되기 때문에 "1"이 될 수 있는 자격이되고, `candy2`에서는 `color` Label을 기준으로 `blue`/1개, `green`/2개, `red`/0개가 되기 때문에 "1"이 될 수 없고 "N"만 될 수 있다. 따라서 `group-left`를 통해서 `candy2`가 "N"이 되도록 Matching을 수행해야 한다.
 
 ```promql {caption="[SQL Syntax 5] One-to-many, Many-to-one Matching with Label"}
 <Instant Vector> <Op> on/ignoring(<label>, ...) group-left(<label>, ...) <Instant Vector>

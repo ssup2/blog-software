@@ -2,7 +2,7 @@
 title: vmstat
 ---
 
-Memory 통계 정보를 보여주는 vmstat 사용법을 정리한다.
+Memory 통계 정보를 보여주는 `vmstat` 사용법을 정리한다.
 
 ## 1. vmstat
 

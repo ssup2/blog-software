@@ -17,7 +17,7 @@ title: Kubernetes 설치 / kubeadm 이용 / Ubuntu 16.04 환경
 * Docker 1.12.6
   * Kubernetes에서 1.12.x Version을 권장하고 있다.
 * Password
-  * Kubernetes 설치에 필요한 Password는 간편한 설치를 위해 **root**로 통일한다.
+  * Kubernetes 설치에 필요한 Password는 간편한 설치를 위해 `root`로 통일한다.
 * 모든 Node에서 root User로 설치를 진행한다.
 
 ## 2. Node 설정
@@ -26,7 +26,7 @@ title: Kubernetes 설치 / kubeadm 이용 / Ubuntu 16.04 환경
 
 VirtualBox를 이용하여 [Figure 1]과 같이 가상의 Master, Worker Node (VM)을 생성한다.
 
-* **Hostname** : Master Node - ubuntu01, Worker Node1 - ubuntu02, Worker Node2 - ubuntu03
+* **Hostname** : Master Node - `ubuntu01`, Worker Node1 - `ubuntu02`, Worker Node2 - `ubuntu03`
 * **NAT** : Virtual Box에서 제공하는 "NAT 네트워크" 이용하여 10.0.0.0/24 Network를 구축한다.
 * **Router** : 공유기를 이용하여 192.168.77.0/24 Network를 구축한다. (NAT)
 
@@ -55,7 +55,7 @@ gateway 192.168.77.1
 dns-nameservers 8.8.8.8
 ```
 
-/etc/network/interfaces을 [File 1]과 같이 수정한다.
+`/etc/network/interfaces`을 [File 1]과 같이 수정한다.
 
 ### 2.2. Worker Node
 
@@ -75,7 +75,7 @@ gateway 10.0.0.1
 dns-nameservers 8.8.8.8
 ```
 
-Worker Node 01의 /etc/network/interfaces을 [File 2]와 같이 수정한다.
+Worker Node 01의 `/etc/network/interfaces`을 [File 2]와 같이 수정한다.
 
 ```text {caption="[File 3] Worker Node 02 - /etc/network/interfaces", linenos=table}
 source /etc/network/interfaces.d/*
@@ -93,7 +93,7 @@ gateway 10.0.0.1
 dns-nameservers 8.8.8.8
 ```
 
-Worker Node 02의 /etc/network/interfaces을 [File 3]과 같이 수정한다.
+Worker Node 02의 `/etc/network/interfaces`을 [File 3]과 같이 수정한다.
 
 ## 3. Package 설치
 
@@ -156,7 +156,7 @@ fi
 source <(kubectl completion bash)
 ```
 
-kubectl autocomplete 설정을 진행한다. ~/.bashrc에 [File 4]의 내용을 추가한다.
+kubectl autocomplete 설정을 진행한다. `~/.bashrc`에 [File 4]의 내용을 추가한다.
 
 ```shell
 (Master)$ kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel-rbac.yml
@@ -177,7 +177,7 @@ Dashboard Addon (Dashboard)을 설치한다.
 (Worker)$ kubeadm join --token 76f75a.6fbcc5e0e6e74c89 10.0.0.11:6443
 ```
 
-Cluster를 구성한다. kubeadm init 결과로 나온 **kubeadm join ~~** 명령어를 모든 Worker Node에서 수행한다.
+Cluster를 구성한다. `kubeadm init` 결과로 나온 `kubeadm join ~~` 명령어를 모든 Worker Node에서 수행한다.
 
 ### 4.3. 검증
 
@@ -195,7 +195,7 @@ Master Node에서 Cluster를 확인한다.
 (Master)$ kubectl proxy
 ```
 
-kubectl proxy 명령어 실행 후 Master Node에서 Web Brower를 통해 **http://localhost:8001/ui**에 접속한다.
+`kubectl proxy` 명령어 실행 후 Master Node에서 Web Brower를 통해 `http://localhost:8001/ui`에 접속한다.
 
 ## 5. 참조
 

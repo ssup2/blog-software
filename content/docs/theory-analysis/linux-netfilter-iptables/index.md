@@ -22,7 +22,7 @@ Netfilter는 5개의 Hook Point를 제공한다.
 
 {{< figure caption="[Figure 1] Netfilter Packet 경로" src="images/netfilter-packet-routine.png" width="700px" >}}
 
-[Figure 1]은 Netfilter의 Packet의 경로를 나타내고 있다. Routing1은 Network Interface에서 전달받은 Packet이 자신이 받아야하는 Packet인지 아니면 다른 Host가 받아야하는 Packet인지 구분하여 Routing하는 과정을 나타낸다. Routing2는 Process에서 전송한 Packet이 NF-IP-LOCAL-OUT에서 DNAT될 경우 다시 Routing하는 과정을 나타낸다. Packet 경로는 아래의 3가지로 구분할 수 있다. 
+[Figure 1]은 Netfilter의 Packet의 경로를 나타내고 있다. Routing1은 Network Interface에서 전달받은 Packet이 자신이 받아야하는 Packet인지 아니면 다른 Host가 받아야하는 Packet인지 구분하여 Routing하는 과정을 나타낸다. Routing2는 Process에서 전송한 Packet이 `NF-IP-LOCAL-OUT`에서 DNAT될 경우 다시 Routing하는 과정을 나타낸다. Packet 경로는 아래의 3가지로 구분할 수 있다. 
 
 * 외부에서 온 Packet의 목적지가 자신인 경우 : `NF-IP-PRE-ROUTING` -> `NF-IP-LOCAL-IN` -> Process
 * 외부에서 온 Packet의 목적지가 자신이 아닌 경우 : `NF-IP-PRE-ROUTING` -> `NF-IP-FORWARD` -> `NF-IP-POST-ROUTING` -> Network Interface
@@ -32,7 +32,7 @@ Netfilter는 5개의 Hook Point를 제공한다.
 
 {{< figure caption="[Figure 2] iptables Packet 경로" src="images/iptables-packet-traversal.png" width="800px" >}}
 
-iptables는 Netfilter Framework를 이용하는 대표 Tool이다. iptables를 이용하여 Packet을 제어하거나 조작 할 수 있다. [Figure 2]는 Netfilter를 이용한 iptables의 Packet 경로을 나타내고 있다. 그림에서 `PREROUTING`, `FOWRARD`, `INPUT`, `OUTPUT`, `POSTROUTING`은 각각 Netfilter의 `NF-IP-PRE-ROUTING`, `NF-IP-LOCAL-IN`, `NF-IP-FORWARD`, `NF-IP-LOCAL-OUT`, `NF-IP-POST-ROUTING` Hook을 의미한다.
+iptables는 Netfilter Framework를 이용하는 대표 Tool이다. iptables를 이용하여 Packet을 제어하거나 조작 할 수 있다. [Figure 2]는 Netfilter를 이용한 iptables의 Packet 경로을 나타내고 있다. 그림에서 `PREROUTING`, `FORWARD`, `INPUT`, `OUTPUT`, `POSTROUTING`은 각각 Netfilter의 `NF-IP-PRE-ROUTING`, `NF-IP-LOCAL-IN`, `NF-IP-FORWARD`, `NF-IP-LOCAL-OUT`, `NF-IP-POST-ROUTING` Hook을 의미한다.
 
 ### 2.1. Tables
 

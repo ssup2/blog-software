@@ -38,7 +38,7 @@ A Receiver is syntax used to create Methods for Structs. [Code 1] shows an examp
 
 Receivers include **Value Receiver** and **Pointer Receiver**. Value Receiver passes the Struct by Call-by-value, while Pointer Receiver passes it by Call-by-reference. Therefore, even if you change a Struct's variables using the Receiver in a function that uses Value Receiver, the Struct's variables are not changed. Conversely, when using Pointer Receiver, if you change Struct variables using the Receiver, the Struct's variables are also changed.
 
-In [Code 1], you can see that even if you add 10 using the `addValue()` function that uses Value Receiver, the Point struct's Value does not change. Conversely, if you add 10 using the `addPointer()` function, you can see that the Point struct's Value changes.
+In [Code 1], you can see that even if you add 10 using the `addValue()` function that uses Value Receiver, the `Point` struct's Value does not change. Conversely, if you add 10 using the `addPointer()` function, you can see that the `Point` struct's Value changes.
 
 ## 2. References
 

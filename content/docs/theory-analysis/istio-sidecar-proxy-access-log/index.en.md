@@ -32,7 +32,7 @@ $ istioctl install --set profile=demo -y
 $ kubectl label namespace default istio-injection=enabled
 ```
 
-[Shell 1] shows the script for setting up the Kubernetes and Istio environment. A Kubernetes Cluster is created using `kind`, and Istio is installed. Then, Sidecar Injection is enabled for the default Namespace.
+[Shell 1] shows the script for setting up the Kubernetes and Istio environment. A Kubernetes Cluster is created using kind, and Istio is installed. Then, Sidecar Injection is enabled for the `default` Namespace.
 
 ```yaml {caption="[Text 1] Set Mesh Config", linenos=table}
 apiVersion: v1
@@ -295,7 +295,7 @@ message DelayResponse {
 $ kubectl cp mock.proto shell:mock.proto
 ```
 
-[File 3] shows the Manifest for the `shell` Pod. The `shell` Pod is created using the netshoot Image, with Network Admin privileges to enable the use of the `iptables` command. [File 4] shows the Proto file for calling the `mock-server` gRPC Service using the `grpcurl` command. [Shell 2] shows an example of copying the Proto file to the `shell` Pod.
+[File 3] shows the Manifest for the `shell` Pod. The `shell` Pod is created using the `netshoot` Image, with Network Admin privileges to enable the use of the `iptables` command. [File 4] shows the Proto file for calling the `mock-server` gRPC Service using the `grpcurl` command. [Shell 2] shows an example of copying the Proto file to the `shell` Pod.
 
 ### 1.2. HTTP Cases
 
@@ -650,7 +650,7 @@ ESTAB 1868933 0         10.244.2.7:50072  10.244.1.10:8080
 
 [Shell 7] shows the Downstream TCP RST with Backpressure Case where a `GET` request is sent to the `mock-server`'s `/bytes/50000000` Endpoint from the `shell` Pod to receive a 50MB response, and while receiving the response, the request is forcefully terminated by sending a TCP RST Flag after waiting 4000ms without reading the response.
 
-When the Client does not read the response, the `shell` Pod's `istio-proxy` keeps the data it could not deliver to the Client in its internal Buffer, and when the Buffer becomes full (High Watermark), Backpressure kicks in and the `istio-proxy` stops reading Upstream data. The data subsequently sent by the `mock-server` Pod accumulates in the Kernel Receive Buffer of the Upstream Socket since the `istio-proxy` no longer reads it. The `ss` command output in [Shell 7] shows about 1.8MB of unread data stacked in the Recv-Q of the `istio-proxy`'s Upstream Socket (`10.244.1.10:8080`).
+When the Client does not read the response, the `shell` Pod's `istio-proxy` keeps the data it could not deliver to the Client in its internal Buffer, and when the Buffer becomes full (High Watermark), Backpressure kicks in and the `istio-proxy` stops reading Upstream data. The data subsequently sent by the `mock-server` Pod accumulates in the Kernel Receive Buffer of the Upstream Socket since the `istio-proxy` no longer reads it. The `ss` command output in [Shell 7] shows about 1.8MB of unread data stacked in the `Recv-Q` of the `istio-proxy`'s Upstream Socket (`10.244.1.10:8080`).
 
 In this state, the `shell` Pod's `istio-proxy` that received the TCP RST Flag terminates the Upstream Connection, but unlike the Downstream TCP RST Case, it closes a Socket with unread data remaining in the Kernel Receive Buffer, so according to TCP rules, a TCP RST Flag is sent to the `mock-server` Pod instead of a TCP FIN Flag. In other words, the Flag that `istio-proxy` sends when terminating the Upstream Connection is determined by whether unread data exists in the Kernel Receive Buffer at the time of termination. The `mock-server` Pod's `istio-proxy` that received the TCP RST Flag also sends a TCP RST Flag to the `mock-server` Container for the same reason. Due to Backpressure, the `mock-server` Pod's `istio-proxy` was also not reading the data sent by the `mock-server` Container, so unread data also remains in the Kernel Receive Buffer of the Socket connected to the `mock-server` Container.
 
@@ -1043,7 +1043,7 @@ upstream connect error or disconnect/reset before headers. reset reason: connect
 
 [Figure 10] shows the Upstream TCP Close before Response Case where a `GET` request is sent to the `mock-server`'s `/close-before-response/1000` Endpoint using the `curl` command from the `shell` Pod, and after `1000ms`, the `mock-server` Pod forcefully terminates the Connection. [Shell 11] shows an example of executing [Figure 10].
 
-When the `mock-server` Pod's `istio-proxy` receives a TCP FIN Flag from the `mock-server` Container, it sends a 503 Service Unavailable response to the `shell` Pod to indicate that the request was abnormally terminated.
+When the `mock-server` Pod's `istio-proxy` receives a TCP FIN Flag from the `mock-server` Container, it sends a `503 Service Unavailable` response to the `shell` Pod to indicate that the request was abnormally terminated.
 
 ```json {caption="[Text 18] Upstream TCP Connection Close Case / shell Pod Access Log", linenos=table}
 {
@@ -1111,7 +1111,7 @@ When the `mock-server` Pod's `istio-proxy` receives a TCP FIN Flag from the `moc
 }
 ```
 
-[Text 18] shows the Access Log of the `shell` Pod's `istio-proxy`, and [Text 19] shows the Access Log of the `mock-server`'s `istio-proxy`. Both Access Logs confirm the access to the `/disconnect/1000` Endpoint and the `503 Service Unavailable` response. Also, `response_flags` showing as `UC (UpstreamConnectionTermination)` can be confirmed.
+[Text 18] shows the Access Log of the `shell` Pod's `istio-proxy`, and [Text 19] shows the Access Log of the `mock-server`'s `istio-proxy`. Both Access Logs confirm the access to the `/close-before-response/1000` Endpoint and the `503 Service Unavailable` response. Also, `response_flags` showing as `UC (UpstreamConnectionTermination)` can be confirmed.
 
 `response_code_details` shows `upstream_reset_before_response_started{connection_termination}`, indicating that a TCP FIN Flag was sent from the Upstream before the response started. This is the same detail as when receiving a TCP RST Flag in [Figure 8], confirming that the `mock-server` Pod's `istio-proxy` logs the same `response_code_details` when receiving either a TCP FIN Flag or TCP RST Flag before the response is sent.
 
@@ -1126,7 +1126,7 @@ dummy datacommand terminated with exit code 18
 
 [Figure 11] shows the Upstream TCP Close after Response Case where a `GET` request is sent to the `mock-server`'s `/close-after-response/1000` Endpoint using the `curl` command from the `shell` Pod, and after `1000ms`, the `mock-server` Pod sends a response and then forcefully terminates the Connection. [Shell 12] shows an example of executing [Figure 11].
 
-When the `mock-server` Pod's `istio-proxy` receives a TCP FIN Flag from the `mock-server` Container, it sends a 503 Service Unavailable response to the `shell` Pod to indicate that the request was abnormally terminated.
+When the `mock-server` Pod's `istio-proxy` receives a TCP FIN Flag from the `mock-server` Container, it sends a `503 Service Unavailable` response to the `shell` Pod to indicate that the request was abnormally terminated.
 
 ```json {caption="[Text 20] Upstream TCP Close after Response Case / shell Pod Access Log", linenos=table}
 {
@@ -2909,7 +2909,7 @@ The `mock-server` Pod's `istio-proxy` that receives the TCP RST Flag returns an 
 
 [Text 42] shows the Access Log of the `shell` Pod's `istio-proxy`, and [Text 43] shows the Access Log of the `mock-server` Pod's `istio-proxy`. Both Access Logs show the access to the `/mock.MockService/ResetBeforeResponse` function with `response_code` as `200` and `grpc_status` as `Unavailable`. Also, both Access Logs show `response_flags` as `UC (UpstreamConnectionTermination)`.
 
-Since the `shell` Pod's `istio-proxy` sends 3 requests, `upstream_request_attempt_count` shows `3` in the `shell Pod`'s `istio-proxy` Access Log. Also, 3 Access Logs are left in the `mock-server` Pod's `istio-proxy`.
+Since the `shell` Pod's `istio-proxy` sends 3 requests, `upstream_request_attempt_count` shows `3` in the `shell` Pod's `istio-proxy` Access Log. Also, 3 Access Logs are left in the `mock-server` Pod's `istio-proxy`.
 
 #### 1.3.7. Upstream TCP RST after Response Case
 

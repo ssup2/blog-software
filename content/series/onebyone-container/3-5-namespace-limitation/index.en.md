@@ -6,7 +6,7 @@ title: 3.5. Limitations of Namespace
 
 So far, we have looked at PID, Network, and Mount Namespaces. Through these Namespaces, each container can operate in a highly isolated environment. However, Namespace does not provide a completely isolated environment. For example, some settings related to Linux Kernel's Network Stack are shared and used across all Network Namespaces.
 
-conntrack is a module that manages network connections in Linux. The maximum number of connections that conntrack can manage can be checked in the "/proc/sys/net/netfilter/nf-conntrack-max" file, and in the Host Network Namespace, you can set the maximum number of connections for conntrack by writing a number to the "/proc/sys/net/netfilter/nf-conntrack-max" file. In other Network Namespaces, the maximum number of connections for conntrack set in the Host Network Namespace is exposed as is.
+conntrack is a module that manages network connections in Linux. The maximum number of connections that conntrack can manage can be checked in the `/proc/sys/net/netfilter/nf-conntrack-max` file, and in the Host Network Namespace, you can set the maximum number of connections for conntrack by writing a number to the `/proc/sys/net/netfilter/nf-conntrack-max` file. In other Network Namespaces, the maximum number of connections for conntrack set in the Host Network Namespace is exposed as is.
 
 ```console {caption="[Shell 1] Change Maximum Number of conntrack Connections", linenos=table}
 # Create netshoot Container
@@ -30,7 +30,7 @@ conntrack is a module that manages network connections in Linux. The maximum num
 200000
 ```
 
-[Shell 1] shows the process of checking and changing the maximum number of conntrack connections in the Host, and then checking the maximum number of conntrack connections in the netshoot Container. You can see that the maximum number of conntrack connections changed in the Host is also visible in the netshoot Container.
+[Shell 1] shows the process of checking and changing the maximum number of conntrack connections in the Host, and then checking the maximum number of conntrack connections in the `netshoot` Container. You can see that the maximum number of conntrack connections changed in the Host is also visible in the `netshoot` Container.
 
 The important point is that the sum of all connections in the Host and Container cannot exceed the maximum number of conntrack connections setting. In other words, when the maximum number of conntrack connections is set to 100, if the Host has 100 connections, it means that no additional connections can be created not only in the Host but also in other containers. Like this, Network Namespace is expected to isolate and manage network connections separately for each Network Namespace, but in reality, it does not isolate and manage them separately.
 

@@ -21,7 +21,7 @@ The installation environment is as follows:
 (Worker/Master)# apt-get install nfs-common
 ```
 
-Install nfs-common package on Master and Worker Nodes to use NFS Client Provisioner in Kubernetes Cluster.
+Install `nfs-common` package on Master and Worker Nodes to use NFS Client Provisioner in Kubernetes Cluster.
 
 ## 3. NFS Client Provisioner Installation
 
@@ -40,7 +40,7 @@ Install NFS Client Provisioner using Helm.
 (User)# kubectl patch storageclass nfs-client -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 ```
 
-Set nfs-client Storage Class as Default Storage Class.
+Set `nfs-client` Storage Class as Default Storage Class.
 
 ## 4. Kubernetes API Server Configuration
 
@@ -55,7 +55,7 @@ spec:
 ...
 ```
 
-Add service-account-signing-key-file and service-account-issuer settings to the Master Node's /etc/kubernetes/manifests/kube-apiserver.yaml file as shown in [File 1] for Istio installation.
+Add `service-account-signing-key-file` and `service-account-issuer` settings to the Master Node's `/etc/kubernetes/manifests/kube-apiserver.yaml` file as shown in [File 1] for Istio installation.
 
 ## 5. kfctl Installation
 
@@ -67,7 +67,7 @@ Add service-account-signing-key-file and service-account-issuer settings to the 
 (User)# rm kfctl-v1.2.0-0-gbc038f9-linux.tar.gz
 ```
 
-Install kfctl, the kubeflow management tool.
+Install `kfctl`, the kubeflow management tool.
 
 ## 6. Kubeflow Installation
 
@@ -79,7 +79,7 @@ export KF-DIR=${BASE-DIR}/${KF-NAME}
 export CONFIG-URI="https://raw.githubusercontent.com/kubeflow/manifests/v1.2-branch/kfdef/kfctl-k8s-istio.v1.2.0.yaml"
 ```
 
-Create an env file for kfctl with the content of [File 2].
+Create an env file for `kfctl` with the content of [File 2].
 
 ```shell
 (User)# . ~/kubeflow/kfctl-env
@@ -88,7 +88,7 @@ Create an env file for kfctl with the content of [File 2].
 (User)# kfctl apply -V -f ${CONFIG-URI}
 ```
 
-Install Kubeflow. After installation is complete, access Kubeflow Dashboard using the NodePort of the istio-ingressgateway Service in the istio-system Namespace.
+Install Kubeflow. After installation is complete, access Kubeflow Dashboard using the NodePort of the `istio-ingressgateway` Service in the `istio-system` Namespace.
   * http://192.168.0.61:31380/
 
 ## 7. References

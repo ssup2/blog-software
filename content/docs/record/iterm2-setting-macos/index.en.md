@@ -13,5 +13,5 @@ Get the gruvbox colorscheme.
 
 > Preferences... -> Profiles -> Colors -> Color Presents... -> Import -> Select gruvbox-dark.itermcolors
 
-Import and apply gruvbox-dark.itermcolors obtained through git in iTerm2.
+Import and apply `gruvbox-dark.itermcolors` obtained through git in iTerm2.
 

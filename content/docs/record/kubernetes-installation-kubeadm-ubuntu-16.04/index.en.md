@@ -17,7 +17,7 @@ The installation environment is as follows.
 * Docker 1.12.6
   * Kubernetes recommends version 1.12.x.
 * Password
-  * For easy installation, all passwords required for Kubernetes installation are unified to **root**.
+  * For easy installation, all passwords required for Kubernetes installation are unified to `root`.
 * Installation proceeds as the root user on all nodes.
 
 ## 2. Node Configuration
@@ -26,7 +26,7 @@ The installation environment is as follows.
 
 Create virtual Master and Worker nodes (VMs) as shown in [Figure 1] using VirtualBox.
 
-* Hostname: Master Node - ubuntu01, Worker Node1 - ubuntu02, Worker Node2 - ubuntu03
+* Hostname: Master Node - `ubuntu01`, Worker Node1 - `ubuntu02`, Worker Node2 - `ubuntu03`
 * NAT: Build a 10.0.0.0/24 network using the "NAT network" provided by VirtualBox.
 * Router: Build a 192.168.77.0/24 network using a router. (NAT)
 
@@ -55,7 +55,7 @@ gateway 192.168.77.1
 dns-nameservers 8.8.8.8
 ```
 
-Modify /etc/network/interfaces as shown in [File 1].
+Modify `/etc/network/interfaces` as shown in [File 1].
 
 ### 2.2. Worker Nodes
 
@@ -75,7 +75,7 @@ gateway 10.0.0.1
 dns-nameservers 8.8.8.8
 ```
 
-Modify Worker Node 01's /etc/network/interfaces as shown in [File 2].
+Modify Worker Node 01's `/etc/network/interfaces` as shown in [File 2].
 
 ```text {caption="[File 3] Worker Node 02 - /etc/network/interfaces", linenos=table}
 source /etc/network/interfaces.d/*
@@ -93,7 +93,7 @@ gateway 10.0.0.1
 dns-nameservers 8.8.8.8
 ```
 
-Modify Worker Node 02's /etc/network/interfaces as shown in [File 3].
+Modify Worker Node 02's `/etc/network/interfaces` as shown in [File 3].
 
 ## 3. Package Installation
 
@@ -156,7 +156,7 @@ fi
 source <(kubectl completion bash)
 ```
 
-Configure kubectl autocomplete. Add the content from [File 4] to ~/.bashrc.
+Configure kubectl autocomplete. Add the content from [File 4] to `~/.bashrc`.
 
 ```shell
 (Master)$ kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel-rbac.yml
@@ -177,7 +177,7 @@ Install the Dashboard Addon (Dashboard).
 (Worker)$ kubeadm join --token 76f75a.6fbcc5e0e6e74c89 10.0.0.11:6443
 ```
 
-Configure the cluster. Execute the **kubeadm join ~~** command that appears as a result of kubeadm init on all worker nodes.
+Configure the cluster. Execute the `kubeadm join ~~` command that appears as a result of `kubeadm init` on all worker nodes.
 
 ### 4.3. Verification
 
@@ -195,7 +195,7 @@ Check the cluster from the Master Node.
 (Master)$ kubectl proxy
 ```
 
-After executing the kubectl proxy command, access **http://localhost:8001/ui** from the Master Node via a web browser.
+After executing the `kubectl proxy` command, access `http://localhost:8001/ui` from the Master Node via a web browser.
 
 ## 5. References
 

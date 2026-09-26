@@ -14,7 +14,7 @@ The **Collection Interface** performs the role of a framework that provides Inte
 
 #### 1.1.1. Collection
 
-The Collection Interface provides **basic** Interfaces necessary for **Object Group** management. It provides Methods such as Group size (size()), Object addition (add()), Object deletion (remove()), Iterator (Iterator()), etc.
+The Collection Interface provides **basic** Interfaces necessary for **Object Group** management. It provides Methods such as Group size (`size()`), Object addition (`add()`), Object deletion (`remove()`), Iterator (`Iterator()`), etc.
 
 #### 1.1.2. Set
 
@@ -22,19 +22,19 @@ The Set Interface provides Interfaces necessary for managing Object Groups that 
 
 #### 1.1.3. SortedSet, NavigableSet
 
-The SortedSet and NavigableSet Interfaces provide Interfaces necessary for managing Object Groups that are **sorted without having identical Objects**. In addition to Methods inherited from the Set Interface, they include additional Methods that take advantage of sorting. They have additional Methods such as the largest Object (head()), the smallest Object (tail()), and ranges (subSet(), headSet(), tailSet()).
+The SortedSet and NavigableSet Interfaces provide Interfaces necessary for managing Object Groups that are **sorted without having identical Objects**. In addition to Methods inherited from the Set Interface, they include additional Methods that take advantage of sorting. They have additional Methods such as the largest Object (`head()`), the smallest Object (`tail()`), and ranges (`subSet()`, `headSet()`, `tailSet()`).
 
 #### 1.1.4. List
 
-The List Interface provides Interfaces necessary for managing **Indexed** Object Groups. It allows duplicate Objects. In addition to Methods inherited from the Collection Interface, it includes additional Methods that take advantage of indexing. It has additional Methods such as position-based access (get(index)) and search (indexOf(), lastIndexOf()).
+The List Interface provides Interfaces necessary for managing **Indexed** Object Groups. It allows duplicate Objects. In addition to Methods inherited from the Collection Interface, it includes additional Methods that take advantage of indexing. It has additional Methods such as position-based access (`get(index)`) and search (`indexOf()`, `lastIndexOf()`).
 
 #### 1.1.5. Queue
 
-The Queue Interface provides Interfaces necessary for managing Object Groups that **perform Queue data structure operations**. It allows duplicate Objects. In addition to Methods inherited from the Collection Interface, it has additional Methods for performing Queueing operations. It has additional Methods such as Push (offer()) and Pop (poll()).
+The Queue Interface provides Interfaces necessary for managing Object Groups that **perform Queue data structure operations**. It allows duplicate Objects. In addition to Methods inherited from the Collection Interface, it has additional Methods for performing Queueing operations. It has additional Methods such as Push (`offer()`) and Pop (`poll()`).
 
 #### 1.1.6. Dequeue
 
-The Dequeue Interface provides Interfaces necessary for managing Object Groups that **perform Dequeue data structure operations**. It allows duplicate Objects. It has additional Methods such as inserting Objects at the front of the Queue (addFirst()), deleting (removeFirst()), inserting Objects at the back of the Queue (addLast()), and deleting (removeLast()).
+The Dequeue Interface provides Interfaces necessary for managing Object Groups that **perform Dequeue data structure operations**. It allows duplicate Objects. It has additional Methods such as inserting Objects at the front of the Queue (`addFirst()`), deleting (`removeFirst()`), inserting Objects at the back of the Queue (`addLast()`), and deleting (`removeLast()`).
 
 ### 1.2. Class
 
@@ -56,7 +56,7 @@ A Class that implements the List Interface using an **Array**. Since it is Array
 
 #### 1.2.5. Vector
 
-Vector is similar to ArrayList but is inefficient in Single Thread environments because all Methods have the **synchronized** keyword attached for synchronization. It is a Class that appeared before ArrayList and is not commonly used now, existing for backward compatibility.
+Vector is similar to ArrayList but is inefficient in Single Thread environments because all Methods have the `synchronized` keyword attached for synchronization. It is a Class that appeared before ArrayList and is not commonly used now, existing for backward compatibility.
 
 #### 1.2.6. LinkedList
 
@@ -80,17 +80,17 @@ The Map Interface performs the role of a framework that provides Interfaces for 
 
 #### 2.1.1. Map
 
-The Map Interface provides **basic** Interfaces necessary for **key-Value Group** management. Keys cannot be duplicated. It provides Methods such as Group size (size()), Key-Value addition (put()), Value retrieval (get()), Key-Value deletion (remove()), Set Interface retrieval (entrySet(), keySet()), etc. The Map Interface does not provide an Iterator. Use the Iterator of the Set Interface obtained through the entrySet() and ketSet() Methods.
+The Map Interface provides **basic** Interfaces necessary for **key-Value Group** management. Keys cannot be duplicated. It provides Methods such as Group size (`size()`), Key-Value addition (`put()`), Value retrieval (`get()`), Key-Value deletion (`remove()`), Set Interface retrieval (`entrySet()`, `keySet()`), etc. The Map Interface does not provide an Iterator. Use the Iterator of the Set Interface obtained through the `entrySet()` and `keySet()` Methods.
 
 #### 2.1.1. SortedMap, NavigableMap
 
-The SortedMap and NavigableMap Interfaces provide Interfaces necessary for managing Key-Value Groups that are **sorted by Key without having identical Keys**. In addition to Methods inherited from the Map Interface, they include additional Methods that take advantage of sorting. They have additional Methods such as the largest Key (firstKey()), the smallest Key (lastKey()), and ranges (subMap(), headMap(), tailMap()).
+The SortedMap and NavigableMap Interfaces provide Interfaces necessary for managing Key-Value Groups that are **sorted by Key without having identical Keys**. In addition to Methods inherited from the Map Interface, they include additional Methods that take advantage of sorting. They have additional Methods such as the largest Key (`firstKey()`), the smallest Key (`lastKey()`), and ranges (`subMap()`, `headMap()`, `tailMap()`).
 
 ### 2.2. Class
 
 #### 2.2.1. HashMap
 
-A Class that implements the Map Interface using **Hashtable + Chaining** based on Key. One Null can be entered for Key, and Null can also be entered for Value. Also, HashMap does not guarantee traversal in insertion order when iterating. HashMap Methods are not synchronized. Therefore, problems occur when used in Multi-Thread environments. In Multi-Thread environments, use the ConcurrentHashMap Class.
+A Class that implements the Map Interface using **Hashtable + Chaining** based on Key. One Null can be entered for Key, and Null can also be entered for Value. Also, HashMap does not guarantee traversal in insertion order when iterating. HashMap Methods are not `synchronized`. Therefore, problems occur when used in Multi-Thread environments. In Multi-Thread environments, use the ConcurrentHashMap Class.
 
 #### 2.2.2. LinkedHashMap
 
@@ -98,7 +98,7 @@ Unlike HashMap, LinkedHashMap performs traversal in Key-Value insertion order. I
 
 #### 2.2.3. HashTable
 
-HashTable is similar to HashMap but is inefficient in Single Thread environments because all Methods have the synchronized keyword attached for synchronization. Null cannot be entered for Key and Value. Since Lock Granularity is larger than ConcurrentHashMap, performance is slow. It is a Class that appeared before HashMap and ConcurrentHashMap and is not commonly used now, existing for backward compatibility.
+HashTable is similar to HashMap but is inefficient in Single Thread environments because all Methods have the `synchronized` keyword attached for synchronization. Null cannot be entered for Key and Value. Since Lock Granularity is larger than ConcurrentHashMap, performance is slow. It is a Class that appeared before HashMap and ConcurrentHashMap and is not commonly used now, existing for backward compatibility.
 
 #### 2.2.4. EnumMap
 

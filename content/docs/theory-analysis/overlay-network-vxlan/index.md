@@ -32,13 +32,13 @@ VTEP은 가상 Network Packet이 Encapsulation되는 지점이기 때문에 Enca
 
 {{< figure caption="[Figure 4] VXLAN Address Learning 과정" src="images/vxlan-address-learning.png" width="900px" >}}
 
-[Figure 4]는 가상 Network안에서 발생한 ARP Packet에 따른 VTEP의 MAC Address Learning 과정을 나타내고 있다. ARP Packet의 처리 과정을 통해서 VXLAN Broadcast의 처리 과정을 이해 할 수 있다. [Figure 4]의 모든 VTEP은 VNI 10과 239.1.1.1 Multicast Group을 Mapping하도록 설정되어 있고. 또한 VNI 10과 VLAN 1을 Mapping하도록 설정되어 있다.
+[Figure 4]는 가상 Network안에서 발생한 ARP Packet에 따른 VTEP의 MAC Address Learning 과정을 나타내고 있다. ARP Packet의 처리 과정을 통해서 VXLAN Broadcast의 처리 과정을 이해 할 수 있다. [Figure 4]의 모든 VTEP은 VNI 10과 `239.1.1.1` Multicast Group을 Mapping하도록 설정되어 있고. 또한 VNI 10과 VLAN 1을 Mapping하도록 설정되어 있다.
 
 1. Machine A에서 IP B의 Mac Address를 알기 위해 ARP Request Packet을 VLAN ID 1과 함께 전송한다.
 
-1. VTEP 1은 가상 Network Packet의 VLAN ID가 1인것을 확인한다. VTEP에 VLAN 1과 VNI 10이 Mapping 되어 있고, VNI 10은 Multicast 239.1.1.1에 Mapping되어 있기 때문에, 가상 Network Packet은 VNI 10으로 Encapsulation 된 후 239.1.1.1 Multicast Group에 전송된다.
+1. VTEP 1은 가상 Network Packet의 VLAN ID가 1인것을 확인한다. VTEP에 VLAN 1과 VNI 10이 Mapping 되어 있고, VNI 10은 Multicast `239.1.1.1`에 Mapping되어 있기 때문에, 가상 Network Packet은 VNI 10으로 Encapsulation 된 후 `239.1.1.1` Multicast Group에 전송된다.
 
-1. Encapsulation된 Packet은 239.1.1.1 Multicast Group에 참여한 VTEP 2, VTEP 3에 전송된다. VTEP 2, VTEP 3은 Encapsulation된 Packet의 정보를 바탕으로 **Src MAC/VNI/Outer Src IP** Mapping Table을 생성한다.
+1. Encapsulation된 Packet은 `239.1.1.1` Multicast Group에 참여한 VTEP 2, VTEP 3에 전송된다. VTEP 2, VTEP 3은 Encapsulation된 Packet의 정보를 바탕으로 **Src MAC/VNI/Outer Src IP** Mapping Table을 생성한다.
 
 1. VTEP 2, VTEP 3은 Encapsulation된 Packet을 Decapsulation하여 원래의 ARP Packet으로 변환한다. 그 후 Machine B, Machine C에 각각 전송한다.
 

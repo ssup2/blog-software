@@ -14,7 +14,7 @@ title: Istio Pod Gracefully Termination
 
 [Figure 2] shows the process of performing Graceful Termination of the App Container. The Graceful Termination process of the App Container is the same as the Graceful Termination process of an App Container inside a general Pod in a non-Istio environment, and generally, the following 3 settings must be configured to perform Graceful Termination.
 
-* `sleep` CLI-based preStop Hook to solve the problem of not being able to process some new Requests due to Envoy Proxy Propagation Delay
+* `sleep` CLI-based `preStop` Hook to solve the problem of not being able to process some new Requests due to Envoy Proxy Propagation Delay
 * App completes currently processing Requests and then terminates when receiving `SIGTERM` Signal
 * Set Pod's `terminationGracePeriodSeconds` to a time greater than the time it takes for the App to process Requests
 
@@ -34,7 +34,7 @@ The Termination process of the Envoy Proxy Container differs depending on whethe
 
 This means that even if Envoy that entered Drain Mode has processed all Requests before the `terminationDrainDuration` time, it must wait for the `terminationDrainDuration` setting value and then terminate. Therefore, if the `terminationDrainDuration` time is too long, the termination time of the Envoy Proxy Container is delayed. Conversely, if Envoy has Requests that it could not process even after the `terminationDrainDuration` time, those Requests are not processed and it terminates. Therefore, an appropriate `terminationDrainDuration` setting value is necessary.
 
-Envoy Proxy can continue to process new Requests even after entering Drain Mode. This allows new Requests that arrive late due to **Envoy Proxy Propagation Delay** shown in [Figure 3] to be processed without problems. This is also the reason why preStop does not exist in the Envoy Proxy Container, unlike the App Container. The Pod's `terminationGracePeriodSeconds` value must be set to at least the `terminationDrainDuration` value. Otherwise, Envoy Proxy cannot wait for the `terminationDrainDuration` time and is forcibly terminated by the `SIGKILL` Signal due to Pod's `terminationGracePeriodSeconds`.
+Envoy Proxy can continue to process new Requests even after entering Drain Mode. This allows new Requests that arrive late due to **Envoy Proxy Propagation Delay** shown in [Figure 3] to be processed without problems. This is also the reason why `preStop` does not exist in the Envoy Proxy Container, unlike the App Container. The Pod's `terminationGracePeriodSeconds` value must be set to at least the `terminationDrainDuration` value. Otherwise, Envoy Proxy cannot wait for the `terminationDrainDuration` time and is forcibly terminated by the `SIGKILL` Signal due to Pod's `terminationGracePeriodSeconds`.
 
 ```yaml {caption="[File 1] terminationDrainDuration Configuration on IstioOperator", linenos=table}
 apiVersion: install.istio.io/v1alpha1
@@ -56,7 +56,7 @@ spec:
 ...
 ```
 
-The `terminationDrainDuration` value can be set both globally and per Pod. [File 1] shows an IstioOperator to set the `terminationDrainDuration` setting value to 30 seconds globally, and [File 2] shows an Annotation example to set it to 30 seconds only for a specific Pod. If `terminationDrainDuration` is not set separately, it is set to the default value of **5 seconds**.
+The `terminationDrainDuration` value can be set both globally and per Pod. [File 1] shows an `IstioOperator` to set the `terminationDrainDuration` setting value to 30 seconds globally, and [File 2] shows an Annotation example to set it to 30 seconds only for a specific Pod. If `terminationDrainDuration` is not set separately, it is set to the default value of **5 seconds**.
 
 ```text {caption="[Log 1] Envoy Proxy Termination Log with terminationDrainDuration", linenos=table}
 2025-01-06T15:53:11.767769Z     info    Status server has successfully terminated
@@ -80,7 +80,7 @@ The `terminationDrainDuration` value can be set both globally and per Pod. [File
 
 [Figure 4] shows the Termination process of an Envoy Proxy Container with `EXIT_ON_ZERO_ACTIVE_CONNECTIONS` set. pilot-agent, which receives the `SIGTERM` Signal, immediately switches Envoy Proxy to **Drain Mode** and waits for the time set by the `MINIMUM_DRAIN_DURATION` setting value. After that, it waits until all Connections of Envoy Proxy are terminated, and when all Connections are terminated, it terminates Envoy Proxy and terminates itself. When pilot-agent terminates, the Envoy Proxy Container is removed.
 
-When `EXIT_ON_ZERO_ACTIVE_CONNECTIONS` is set, the `terminationDrainDuration` setting value is ignored. Similar to when terminating with the `terminationDrainDuration` setting value, Envoy Proxy that entered Drain Mode can continue to process new Requests, and for this reason, preStop does not exist in the Envoy Proxy Container. The `terminationGracePeriodSeconds` value must also be set large so that Envoy Proxy is not forcibly removed by the `SIGKILL` Signal.
+When `EXIT_ON_ZERO_ACTIVE_CONNECTIONS` is set, the `terminationDrainDuration` setting value is ignored. Similar to when terminating with the `terminationDrainDuration` setting value, Envoy Proxy that entered Drain Mode can continue to process new Requests, and for this reason, `preStop` does not exist in the Envoy Proxy Container. The `terminationGracePeriodSeconds` value must also be set large so that Envoy Proxy is not forcibly removed by the `SIGKILL` Signal.
 
 ```yaml {caption="[File 3] EXIT_ON_ZERO_ACTIVE_CONNECTIONS Configuration on IstioOperator", linenos=table}
 apiVersion: install.istio.io/v1alpha1
@@ -107,7 +107,7 @@ spec:
 ...
 ```
 
-Both `EXIT_ON_ZERO_ACTIVE_CONNECTIONS` and `MINIMUM_DRAIN_DURATION` values can be set both globally and per Pod. [File 3] shows an IstioOperator to set `EXIT_ON_ZERO_ACTIVE_CONNECTIONS` globally and set the `MINIMUM_DRAIN_DURATION` setting value to 15 seconds, and [File 4] shows an Annotation example to apply the same settings only to a specific Pod. If `MINIMUM_DRAIN_DURATION` is not set separately, it is set to the default value of **5 seconds**.
+Both `EXIT_ON_ZERO_ACTIVE_CONNECTIONS` and `MINIMUM_DRAIN_DURATION` values can be set both globally and per Pod. [File 3] shows an `IstioOperator` to set `EXIT_ON_ZERO_ACTIVE_CONNECTIONS` globally and set the `MINIMUM_DRAIN_DURATION` setting value to 15 seconds, and [File 4] shows an Annotation example to apply the same settings only to a specific Pod. If `MINIMUM_DRAIN_DURATION` is not set separately, it is set to the default value of **5 seconds**.
 
 ```text {caption="[Log 2] Envoy Proxy Termination Log with EXIT_ON_ZERO_ACTIVE_CONNECTIONS", linenos=table}
 2025-01-06T18:27:37.713164Z     info    Status server has successfully terminated

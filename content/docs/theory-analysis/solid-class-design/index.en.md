@@ -28,7 +28,7 @@ class Text {
 }
 ```
 
-Text Class has two responsibilities: changing Text and outputting Text.
+`Text` Class has two responsibilities: changing Text and outputting Text.
 
 ```java {caption="[Code 2] After Applying Single Responsibility", linenos=table}
 class Text {
@@ -53,7 +53,7 @@ class Printer {
 }
 ```
 
-By defining Printer Class and delegating output responsibility that Text Class had to Printer Class, Text Class and Printer Class can each have only one responsibility.
+By defining `Printer` Class and delegating output responsibility that `Text` Class had to `Printer` Class, `Text` Class and `Printer` Class can each have only one responsibility.
 
 ### 1.2. Open/closed
 
@@ -76,7 +76,7 @@ public class ClaimApprovaManager {
 }
 ```
 
-ClaimApprovalManager Class has the disadvantage that a Method for ClaimApprovalManager must be added for each Surveyor Class whenever Surveyor Class is added.
+`ClaimApprovalManager` Class has the disadvantage that a Method for `ClaimApprovalManager` must be added for each Surveyor Class whenever Surveyor Class is added.
 
 ```java {caption="[Code 4] After Applying Open/closed", linenos=table}
 public abstract class InsuranceSurveyor {
@@ -106,7 +106,7 @@ public class ClaimApprovalManager {
 }
 ```
 
-ClaimApprovalManager can now accommodate various Surveyor Classes without code changes through InsuranceSurveyor Interface.
+`ClaimApprovalManager` can now accommodate various Surveyor Classes without code changes through `InsuranceSurveyor` Interface.
 
 ### 1.3. Liskov Substitution
 
@@ -139,7 +139,7 @@ public class Square : Rectangle {
 }
 ```
 
-Since a square is also a rectangle, Square Class was implemented by inheriting Rectangle Class. In Rectangle Class, Width and Height could be set separately, but in Square Class, Width and Height are set to the same value simultaneously. Therefore, this is a Class design that violates the Liskov Substitution principle.
+Since a square is also a rectangle, `Square` Class was implemented by inheriting `Rectangle` Class. In `Rectangle` Class, Width and Height could be set separately, but in `Square` Class, Width and Height are set to the same value simultaneously. Therefore, this is a Class design that violates the Liskov Substitution principle.
 
 ### 1.4. Interface Segregation
 
@@ -154,7 +154,7 @@ public interface Toy {
 }
 ```
 
-Toy Interface of [Code 6] defines three types of methods: color, movement, and flight. The problem is that since not all toys have movement and flight functions, move and fly Methods of Toy Classes without movement and flight functions become dummy Methods.
+`Toy` Interface of [Code 6] defines three types of methods: color, movement, and flight. The problem is that since not all toys have movement and flight functions, `move` and `fly` Methods of Toy Classes without movement and flight functions become dummy Methods.
 
 ```java {caption="[Code 7] After Applying Interface Segregation", linenos=table}
 public interface Toy {
@@ -171,7 +171,7 @@ public interface Flyable {
 }
 ```
 
-Toy Interface was separated to create Movable and Flyable Interfaces. When configuring Toy Classes, only necessary Interfaces can be selected and configured.
+`Toy` Interface was separated to create `Movable` and `Flyable` Interfaces. When configuring Toy Classes, only necessary Interfaces can be selected and configured.
 
 ### 1.5. Dependency Inversion
 
@@ -210,7 +210,7 @@ public class ElectricSwitch {
 }
 ```
 
-ElectricSwitch Class directly references and uses LightBulb Class. ElectricSwitch Class must continue to change whenever new electronic products are added.
+`ElectricSwitch` Class directly references and uses `LightBulb` Class. `ElectricSwitch` Class must continue to change whenever new electronic products are added.
 
 ```java {caption="[Code 9] After Applying Dependency Inversion", linenos=table}
 public interface Switchable {
@@ -265,7 +265,7 @@ public class Fan implements Switchable {
 }
 ```
 
-ElectricSwitch Class depends only on Switchable Class. And the action of Switchable Class differs depending on whether LightBulb or Fan is injected into Switchable Class.
+`ElectricSwitch` Class depends only on `Switchable` Class. And the action of `Switchable` Class differs depending on whether `LightBulb` or `Fan` is injected into `Switchable` Class.
 
 ## 2. References
 

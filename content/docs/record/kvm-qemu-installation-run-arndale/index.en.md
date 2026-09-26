@@ -11,10 +11,10 @@ The installation and execution environment is as follows.
 * VM on KVM: Ubuntu 14.04LTS 32bit, root User
 * Cross compiler: arm-linux-gnueabihf-4.9.3
 * Network 192.168.0.xxx (NAT)
-  * HostOS: 192.168.0.150
-  * br0: 192.168.0.200
-  * GuestOS-01: 192.168.0.160, GuestOS-02: 192.168.0.161
-  * tap0: 192.168.0.201, tap1: 192.168.0.202
+  * HostOS: `192.168.0.150`
+  * `br0`: `192.168.0.200`
+  * GuestOS-01: `192.168.0.160`, GuestOS-02: `192.168.0.161`
+  * `tap0`: `192.168.0.201`, `tap1`: `192.168.0.202`
 
 ## 2. Cross Compiler Installation
 
@@ -28,7 +28,7 @@ Install a cross compiler for kernel building.
 PATH=$PATH:/usr/local/gcc-linaro-arm-linux-gnueabihf-4.8/bin
 ```
 
-Extract to the /usr/local directory and add the content from [File 1] to the ~/.bashrc file so that the cross compiler can be used from any directory.
+Extract to the `/usr/local` directory and add the content from [File 1] to the `~/.bashrc` file so that the cross compiler can be used from any directory.
 
 ## 3. Ubuntu Package Installation
 
@@ -133,7 +133,7 @@ $ cd /mnt
 $ qemu-debootstrap --arch=armhf trusty .
 ```
 
-Configure the basic rootfs using debootstrap.
+Configure the basic rootfs using `debootstrap`.
 
 ```shell
 $ vim etc/apt/sources.list
@@ -238,9 +238,9 @@ Build QEMU.
 
 Configure the uSD Card partitions as follows.
 
-* 0 ~ 2M, 2M, No Filesystem: Bootloader (bl1, spl, U-boot)
-* 2M ~ 18M, 16M, ext2, boot: uImage, exynos5250-arndale.dtb
-* 18M ~ rest, ext3, root: Root-Filesystem
+* `0 ~ 2M`, `2M`, No Filesystem: Bootloader (bl1, spl, U-boot)
+* `2M ~ 18M`, `16M`, `ext2`, `boot`: `uImage`, `exynos5250-arndale.dtb`
+* `18M ~ rest`, `ext3`, `root`: Root-Filesystem
 
 ## 14. u-boot Fusing to uSD Card
 
@@ -267,7 +267,7 @@ Copy the Host root filesystem to the uSD Card.
 
 ## 16. Binary, Image, dtb Copy
 
-Copy Host Kernel uImage and exynos5250-arndale.dtb files to the uSD Card boot partition. Copy Host Guest zImage, qemu-system-arm, rootfs-host.img, rootfs-guest-01.img, rootfs-guest-02.img, guest-vexpress.dtb files to the root partition.
+Copy Host Kernel `uImage` and `exynos5250-arndale.dtb` files to the uSD Card `boot` partition. Copy Host Guest `zImage`, `qemu-system-arm`, `rootfs-host.img`, `rootfs-guest-01.img`, `rootfs-guest-02.img`, `guest-vexpress.dtb` files to the `root` partition.
 
 ## 17. u-boot Configuration
 
@@ -307,7 +307,7 @@ Configure a bridge for Guests on the Host.
 (Host)$ tightvncserver -nolisten tcp :1
 ```
 
-Run the VNC Server on the Host. Access 192.168.0.150:1 via a VNC Client.
+Run the VNC Server on the Host. Access `192.168.0.150:1` via a VNC Client.
 
 ## 21. Guest Execution
 

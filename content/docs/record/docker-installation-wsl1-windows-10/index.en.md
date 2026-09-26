@@ -27,7 +27,7 @@ Open Docker Daemon to port 2375 as in [Figure 2] so that Docker can be accessed 
 > route add 172.17.0.0 MASK 255.255.0.0 10.0.75.2
 ```
 
-Add Routing Rules so that Container IPs can be directly accessed from Windows. Add Routing Rules related to the 172.17.0.0/24 Network, which is the Default Docker Network. Run PowerShell with administrator privileges and enter the above command.
+Add Routing Rules so that Container IPs can be directly accessed from Windows. Add Routing Rules related to the `172.17.0.0/24` Network, which is the Default Docker Network. Run PowerShell with administrator privileges and enter the above command.
 
 ## 3. Docker Installation and Setting in WSL1
 

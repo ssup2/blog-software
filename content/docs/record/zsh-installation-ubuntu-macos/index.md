@@ -13,7 +13,7 @@ $ chsh -s `which zsh`
 $ zsh
 ```
 
-zsh, oh-my-zsh을 설치하고 기본 Shell을 Zsh로 설정한다. 이후 진행은 **Zsh**에서 진행한다. 
+`zsh`, `oh-my-zsh`을 설치하고 기본 Shell을 Zsh로 설정한다. 이후 진행은 **Zsh**에서 진행한다. 
 
 ### 1.2. macOS
 
@@ -25,7 +25,7 @@ $ chsh -s `which zsh`
 $ zsh
 ```
 
-zsh, zsh-completions, oh-my-zsh을 설치하고 기본 Shell을 Zsh로 설정한다. 이후 진행은 **Zsh**에서 진행한다.
+`zsh`, `zsh-completions`, `oh-my-zsh`을 설치하고 기본 Shell을 Zsh로 설정한다. 이후 진행은 **Zsh**에서 진행한다.
 
 ## 2. Zsh Plugin Download
 
@@ -35,7 +35,7 @@ $ git clone https://github.com/zsh-users/zsh-autosuggestions $ZSH_CUSTOM/plugins
 $ git clone https://github.com/zsh-users/zsh-completions $ZSH_CUSTOM/plugins/zsh-completions
 ```
 
-zsh-syntax-highlighting, zsh-autosuggestions, zsh-completions을 설치한다.
+`zsh-syntax-highlighting`, `zsh-autosuggestions`, `zsh-completions`을 설치한다.
 
 ## 3. Zsh Plugin 설정
 
@@ -59,7 +59,7 @@ ZSH_THEME_GIT_PROMPT_CLEAN="%{$fg[blue]%})"
 PROMPT+='%{$fg_bold[blue]%}k8s:(%{$fg[red]%}$(kubectx_prompt_info)%{$fg_bold[blue]%})%{$reset_color%} ' # k8s context
 ```
 
-~/.zshrc 파일을 [파일 1]의 내용으로 수정하여 Plugin을 설정한다. 
+`~/.zshrc` 파일을 [파일 1]의 내용으로 수정하여 Plugin을 설정한다. 
 
 ## 4. 참조
 

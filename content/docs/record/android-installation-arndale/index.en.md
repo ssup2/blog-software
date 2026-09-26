@@ -32,7 +32,7 @@ Connect the Arndale Board to PC through USB OTG port and verify Hardware ID.
 %CompositeAdbInterface%     = USB-Install, USB\VID-18D1&PID-0002
 ```
 
-Add the content of [File 1] below the android-winusb.inf file and install ADB USB Driver through Windows Device Manager.
+Add the content of [File 1] below the `android-winusb.inf` file and install ADB USB Driver through Windows Device Manager.
 
 ## 3. Ubuntu Package Installation
 
@@ -76,7 +76,7 @@ $ mv adb ~/bin
 $ mv fastboot ~/bin
 ```
 
-fastboot and adb are used when flashing built Android to device. Install fastboot and adb.
+`fastboot` and `adb` are used when flashing built Android to device. Install `fastboot` and `adb`.
 
 * `fastboot`, `adb` Download : http://forum.insignal.co.kr/download/file.php?id=90
 
@@ -106,7 +106,7 @@ $ repo init -u git://git.insignal.co.kr/samsung/exynos/android/manifest.git -b j
 $ repo sync
 ```
 
-Download u-boot, Linux Kernel, Android jb-mr1 source.
+Download u-boot, Linux Kernel, Android `jb-mr1` source.
 
 ## 8. Download Proprietary
 
@@ -135,7 +135,7 @@ $ prebuilts/misc/linux-x86/ccache/ccache -M 20G
 $ watch -n1 -d prebuilts/misc/linux-x86/ccache/ccache -s
 ```
 
-Configure ccache for build performance improvement.
+Configure `ccache` for build performance improvement.
 
 ## 10. Build
 
@@ -174,7 +174,7 @@ $ source ./arndale-envsetup.sh
 $ mksdboot /dev/sdb
 ```
 
-Connect uSD Card to Ubuntu, verify Device Name (/dev/sdb), then format uSD Card.
+Connect uSD Card to Ubuntu, verify Device Name (`/dev/sdb`), then format uSD Card.
 
 ## 12. Create Partition on uSD Card
 
@@ -194,7 +194,7 @@ Insert uSD Card into Arndale, access Arndale's u-boot, then create partitions fr
 Arndale $ fastboot
 ``` 
 
-Connect Arndale Board to PC through USB OTG port, then enter fastboot from u-boot to prepare for flashing.
+Connect Arndale Board to PC through USB OTG port, then enter `fastboot` from u-boot to prepare for flashing.
 
 ```shell
 $ fastboot flash fwbl1 ./vendor/insignal/arndale/exynos5250/exynos5250.bl1.bin
@@ -207,7 +207,7 @@ $ fastboot flash system ./out/debug/target/product/arndale/system.img
 $ fastboot reboot
 ```
 
-Perform flashing from fastboot.
+Perform flashing from `fastboot`.
 
 ## 14. References
 

@@ -29,13 +29,13 @@ nodes:
 - role: worker
 ```
 
-Create a kind-config.yaml file with the contents shown in [File 1] to configure kind to create a Kubernetes cluster with 1 Master and 2 Workers.
+Create a `kind-config.yaml` file with the contents shown in [File 1] to configure kind to create a Kubernetes cluster with 1 Master and 2 Workers.
 
 ```shell
 $ kind create cluster --config kind-config.yaml
 ```
 
-Create a Kubernetes cluster using the created kind-config.yaml file.
+Create a Kubernetes cluster using the created `kind-config.yaml` file.
 
 ## 4. Cluster Verification
 

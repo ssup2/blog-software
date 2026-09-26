@@ -208,9 +208,9 @@ public class main {
 }
 ```
 
-There are two ways to initialize a `String` Instance: using a Constructor and using a String Literal. Lines 4 and 5 of [Code 4] show the method using a Constructor, and Lines 7 and 8 of [Code 4] show the method using a String Literal. Since all `String` Instances have the string "ssup2", when comparing using the `equal()` Method, the result shows that the strings are the same, but you can see different results when comparing with the "==" operator.
+There are two ways to initialize a `String` Instance: using a Constructor and using a String Literal. Lines 4 and 5 of [Code 4] show the method using a Constructor, and Lines 7 and 8 of [Code 4] show the method using a String Literal. Since all `String` Instances have the string `ssup2`, when comparing using the `equals()` Method, the result shows that the strings are the same, but you can see different results when comparing with the `==` operator.
 
-When initializing a `String` Instance with a Constructor, the String Instance is newly allocated in the Heap area. Therefore, the address of `strConstuctor1` and the address of `strConstuctor2` are different. On the other hand, when initializing using a String Literal, if the strings are the same, the same String Literal is shared. Therefore, the address of `strLiteral1` and the address of `strLiteral2` are the same.
+When initializing a `String` Instance with a Constructor, the `String` Instance is newly allocated in the Heap area. Therefore, the address of `strConstuctor1` and the address of `strConstuctor2` are different. On the other hand, when initializing using a String Literal, if the strings are the same, the same String Literal is shared. Therefore, the address of `strLiteral1` and the address of `strLiteral2` are the same.
 
 String Literals are located in the **Constant String Pool**. The Constant String Pool is located in the "Permanent Generation" area of the Heap in Java 6 Version and below, and is located in the "Young/Old Generation" of the Heap from Java 7 Version onwards, making it subject to Garbage Collection.
 

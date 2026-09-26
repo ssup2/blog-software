@@ -30,7 +30,7 @@ root      2478  2476  0 15:47 pts/1    00:00:00 stress --vm 1 --vm-bytes 1024M -
 152
 ```
 
-OOM Killer does not kill arbitrary Processes when killing Processes, but kills Processes with high scores called Badness Scores first. Badness Score increases as Memory usage increases. Each Process's Badness Score can be checked in the `/proc/[PID]/oom-score` file. [Shell 1] shows the process of checking Badness Score according to Memory usage using the stress command. The first stress command creates a Child Process using 512MB of Memory, and the second stress command creates a Child Process using 1024MB of Memory. Since the second stress command's Child Process uses twice as much Memory as the first stress command's Child Process, you can see that the Badness Score also differs by 2 times.
+OOM Killer does not kill arbitrary Processes when killing Processes, but kills Processes with high scores called Badness Scores first. Badness Score increases as Memory usage increases. Each Process's Badness Score can be checked in the `/proc/[PID]/oom-score` file. [Shell 1] shows the process of checking Badness Score according to Memory usage using the `stress` command. The first `stress` command creates a Child Process using 512MB of Memory, and the second `stress` command creates a Child Process using 1024MB of Memory. Since the second `stress` command's Child Process uses twice as much Memory as the first `stress` command's Child Process, you can see that the Badness Score also differs by 2 times.
 
 Not only Memory usage but also factors that affect Badness Score exist. The following factors are factors that reduce Badness Score:
 
@@ -41,7 +41,7 @@ Not only Memory usage but also factors that affect Badness Score exist. The foll
 The following factors are factors that increase Badness Score:
 
 * Process that creates many Child Processes
-* Process with low nice value
+* Process with low `nice` value
 
 ```shell {caption="[Shell 2] Adjust Badness Score"}
 # Decrease Badness Score

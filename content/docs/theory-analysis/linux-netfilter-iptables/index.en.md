@@ -22,7 +22,7 @@ Netfilter provides 5 Hook Points.
 
 {{< figure caption="[Figure 1] Netfilter Packet Path" src="images/netfilter-packet-routine.png" width="700px" >}}
 
-[Figure 1] shows the Packet path of Netfilter. Routing1 represents the process of Routing by distinguishing whether Packets received from Network Interfaces are Packets that should be received by itself or Packets that should be received by other Hosts. Routing2 represents the process of re-Routing when Packets sent from Processes are DNATed at NF-IP-LOCAL-OUT. Packet paths can be divided into the following 3 types:
+[Figure 1] shows the Packet path of Netfilter. Routing1 represents the process of Routing by distinguishing whether Packets received from Network Interfaces are Packets that should be received by itself or Packets that should be received by other Hosts. Routing2 represents the process of re-Routing when Packets sent from Processes are DNATed at `NF-IP-LOCAL-OUT`. Packet paths can be divided into the following 3 types:
 
 * When the destination of Packets from outside is itself: `NF-IP-PRE-ROUTING` -> `NF-IP-LOCAL-IN` -> Process
 * When the destination of Packets from outside is not itself: `NF-IP-PRE-ROUTING` -> `NF-IP-FORWARD` -> `NF-IP-POST-ROUTING` -> Network Interface

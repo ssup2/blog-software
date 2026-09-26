@@ -18,7 +18,7 @@ Google Cloud Platform에서 OIDC 기반의 ID Token, OAuth 기반의 Access Toke
 
 {{< figure caption="[Figure 3] OAuth Client ID 생성" src="images/oauth-clientid-create.png" width="800px" >}}
 
-[Figure 3]과 같이 "웹 애플리케이션" 유형의 Client ID를 생성한다. "이름"은 임의로 지정하면 된다. "리다이렉션 URI"의 경우에는 예제 Code에서 처리할 경로인 "/auth/google/callback"을 명시한다. 생성이 완료되면 **Client ID**와 **Client Secret**을 확인한다.
+[Figure 3]과 같이 "웹 애플리케이션" 유형의 Client ID를 생성한다. "이름"은 임의로 지정하면 된다. "리다이렉션 URI"의 경우에는 예제 Code에서 처리할 경로인 `/auth/google/callback`을 명시한다. 생성이 완료되면 **Client ID**와 **Client Secret**을 확인한다.
 
 ## 2. App Code
 
@@ -143,16 +143,16 @@ func main() {
 
 동작 과정은 다음과 같다.
 
-* User가 Golang App의 "/" Path에 접속하면 Golang App은 User를 Google 인증/인가 Web Page로 Redirect 한다.
-* Google 인증/인가 Web Page는 User의 인증 및 인가 과정이 완료되면 Google 인증/인가 Web Page는 다시 Golang App의 "/auth/google/callback" Path로 Redirect 한다. 이 경우 Authorization Code를 URL Query로 같이 전달한다.
-* User가 Golang App의 "/auth/google/callback" Path로 접속하면 Golang App은 URL에 있는 Authorization Code를 얻은 다음, 얻은 Authorization Code를 통해서 ID Token, Access Token을 얻고 출력한다.
+* User가 Golang App의 `/` Path에 접속하면 Golang App은 User를 Google 인증/인가 Web Page로 Redirect 한다.
+* Google 인증/인가 Web Page는 User의 인증 및 인가 과정이 완료되면 Google 인증/인가 Web Page는 다시 Golang App의 `/auth/google/callback` Path로 Redirect 한다. 이 경우 Authorization Code를 URL Query로 같이 전달한다.
+* User가 Golang App의 `/auth/google/callback` Path로 접속하면 Golang App은 URL에 있는 Authorization Code를 얻은 다음, 얻은 Authorization Code를 통해서 ID Token, Access Token을 얻고 출력한다.
 
 [Code 1]의 각 Line별 설명은 다음과 같다.
 
 * **Line 16** : Scope는 ID Token 값에 포함되는 User의 정보 범위를 설정한다.
 * **Line 21, 41** : State는 User의 CSRF 공격을 막기 위한 임시 문자열이다. 인증/인가전에 State를 생성 및 Cookie에 저장하며, Redirect 이후에 URL의 State와 Cookie의 State가 일치하는지 확인한다.
 * **Line 26, 78** : Nonce는 ID Token이 유효한지 검증하는 용도로 이용되는 문자열이다. Nonce가 포함되도록 ID Token을 생성 및 Cookie에 저장하며, Redirect 이후에 얻은 ID Token의 Nonce와 Cookie의 Nonce가 일치하는지 확인한다.
-* **Line 52** : Authorization Code는 URL의 "code" Query에 존재한다.
+* **Line 52** : Authorization Code는 URL의 `code` Query에 존재한다.
 
 ## 3. Google 인증/인가
 
@@ -168,7 +168,7 @@ scope=openid%20profile%20email&
 state=usovevjnYZYpCTOaalbSWw&flowName=GeneralOAuthFlow
 ```
 
-[그림 3]은 Golang App의 "/" Path에 접속하면 Redirect 되어 접속되는 Google 인증 화면이다. [Text 1]은 Google 인증화면 접속시 이용되는 URL을 나타낸다. URL에 Query 형태로 Client ID, Nonce, Callback URL (Redirect URL), Scope, State 정보가 포함되어 있는것을 확인할 수 있다.
+[그림 3]은 Golang App의 `/` Path에 접속하면 Redirect 되어 접속되는 Google 인증 화면이다. [Text 1]은 Google 인증화면 접속시 이용되는 URL을 나타낸다. URL에 Query 형태로 Client ID, Nonce, Callback URL (Redirect URL), Scope, State 정보가 포함되어 있는것을 확인할 수 있다.
 
 ## 4. ID Token, Access Token
 
@@ -180,7 +180,7 @@ authuser=0&
 prompt=consent
 ```
 
-[Text 2]은 Redirect URL의 예제를 나타내고 있다. "code" Query에는 Authorization Code, "scope" Query에는 Scope 정보등이 포함되어 있는것을 확인할 수 있다.
+[Text 2]은 Redirect URL의 예제를 나타내고 있다. `code` Query에는 Authorization Code, `scope` Query에는 Scope 정보등이 포함되어 있는것을 확인할 수 있다.
 
 ```json {caption="[Text 3] Callback Result - Access Token, ID Token", linenos=table}
 {

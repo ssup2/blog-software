@@ -30,7 +30,7 @@ struct fuse-operations fuse-oper = {
 };
 ```
 
-[Code 1] shows the fuse-operations structure provided by libfuse. FUSE Daemon developers write functions corresponding to each System Call and then only need to map the written functions to actual System Calls through the fuse-operations structure.
+[Code 1] shows the `fuse-operations` structure provided by `libfuse`. FUSE Daemon developers write functions corresponding to each System Call and then only need to map the written functions to actual System Calls through the `fuse-operations` structure.
 
 ## 2. References
 

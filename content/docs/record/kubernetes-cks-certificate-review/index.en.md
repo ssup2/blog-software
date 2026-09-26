@@ -48,21 +48,21 @@ title: CKS Certificate Exam Summary/Review
 * Windows Paste
   * shift + insert
 * kubectl
-  * **Check Resource API Version** : kubectl api-resources
-  * **Check Resource Spec/Status** : kubectl explain --recursive {resource}
+  * **Check Resource API Version** : `kubectl api-resources`
+  * **Check Resource Spec/Status** : `kubectl explain --recursive {resource}`
 * AppArmor
-  * **Apply Profile** : apparmor_parser {profile_path}
-  * **Check Profile** : aa-status \| grep {profile_name}
+  * **Apply Profile** : `apparmor_parser {profile_path}`
+  * **Check Profile** : `aa-status | grep {profile_name}`
 * kubesec
-  * **Scan Resource** : kubesec scan {resource}
+  * **Scan Resource** : `kubesec scan {resource}`
 * Trivy
-  * **Scan Image** : trivy image --severity {UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL} {image_name}
-  * **Scan Tar Image** : trivy image --severity {UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL} --input {image_tar}
+  * **Scan Image** : `trivy image --severity {UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL} {image_name}`
+  * **Scan Tar Image** : `trivy image --severity {UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL} --input {image_tar}`
 * Falco
-  * **Start Falco** : systemctl start falco
-  * **Change Falco Config** : vim /etc/falco/falco.yaml
-  * **Apply Falco Config Changes** : systemctl restart falco
-  * **Add/Change Falco Rule** : vim /etc/falco/falco_rules.local.yaml
+  * **Start Falco** : `systemctl start falco`
+  * **Change Falco Config** : `vim /etc/falco/falco.yaml`
+  * **Apply Falco Config Changes** : `systemctl restart falco`
+  * **Add/Change Falco Rule** : `vim /etc/falco/falco_rules.local.yaml`
 
 ## 5. Exam Review
 

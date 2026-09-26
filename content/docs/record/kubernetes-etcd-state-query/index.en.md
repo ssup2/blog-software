@@ -28,7 +28,7 @@ The execution environment is as follows.
 ...
 ```
 
-After entering the etcd container using kubectl, execute the etcdctl key query command. The API version must be explicitly specified using the ETCDCTL-API environment variable, and certificate-related files must also be specified via options. Since the query was performed on the **/ (root)** path, all keys held by etcd are queried.
+After entering the etcd container using `kubectl`, execute the `etcdctl` key query command. The API version must be explicitly specified using the `ETCDCTL-API` environment variable, and certificate-related files must also be specified via options. Since the query was performed on the `/` (root) path, all keys held by etcd are queried.
 
 ## 3. References
 

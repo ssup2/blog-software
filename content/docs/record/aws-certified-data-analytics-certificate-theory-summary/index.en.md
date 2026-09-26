@@ -52,12 +52,12 @@ Organize missing content based on the following organized content
 * Ex) Application, SDK KPL, Kinesis Agent, CloudWatch Logs, AWS IoT, Kinesis Data Analytics
 * Performance
   * 1 MB/sec, 1000 msg/sec limit per shard
-  * ProvisionedThroughputExceeded Exception occurs when exceeded
+  * `ProvisionedThroughputExceeded` Exception occurs when exceeded
     * Need to check if sending more data or if hot shard is occurring
     * Resolve by retrying with backoff, increasing shards, checking partition key
 * API
-  * **Single** : PutRecord
-  * **Multiple** : PutRecords
+  * **Single** : `PutRecord`
+  * **Multiple** : `PutRecords`
 * Kinesis Producer Library (KPL)
   * Supports C++/Java
   * Retry logic support
@@ -66,7 +66,7 @@ Organize missing content based on the following organized content
   * Sends metrics to CloudWatch
   * Performs batching
     * Increases throughput, reduces cost
-    * Waits for RecordMaxBufferedTime duration then sends at once (Default 100ms)
+    * Waits for `RecordMaxBufferedTime` duration then sends at once (Default 100ms)
     * Latency occurs compared to using Write API directly, so KPL is not recommended for applications where latency is important
   * Does not provide compression, needs to be implemented in app
   * Records encoded with KPL must be decoded through KPL or Helper Library
@@ -82,7 +82,7 @@ Organize missing content based on the following organized content
   * **Default** : 2 MB/sec for all consumers
   * With Enhanced Fan Out : 2 MB/sec per consumer
 * API
-  * GetRecords
+  * `GetRecords`
     * Retrieves multiple records
     * Requires client polling
     * Can receive up to 2 MB data per shard per call
@@ -347,7 +347,7 @@ Organize missing content based on the following organized content
     * **Flink Source** : MSK, Kinesis Data Streams
     * Flink Datastream API
     * **Flink Sink** : S3, Kinesis Datastream, Kinesis Data Firehose
-  * RANDOM_CUT_FOREST
+  * `RANDOM_CUT_FOREST`
     * SQL function that performs anomaly detection
 
 ### 4.2. OpenSearch
@@ -472,7 +472,7 @@ Organize missing content based on the following organized content
   * Utilize partition functionality
 * Transaction
   * Available through Iceberg
-    * Specify ICEBERG in table type
+    * Specify `ICEBERG` in table type
   * Transaction functionality also available through Lake Formation's governed tables
 
 ### 4.4. Redshift
@@ -519,7 +519,7 @@ Organize missing content based on the following organized content
   * `Compound` : Combines multiple columns to use as sort key
   * `Interleaved` : ??
 * Data Replication
-  * COPY
+  * `COPY`
     * Performs data replication from S3, EMR, DynamoDB remote hosts
     * Performs data replication in parallel
   * `UNLOAD` : Performs replication of processed results to S3
@@ -541,9 +541,9 @@ Organize missing content based on the following organized content
   * Sends and processes queries queued in WLM to added clusters
 * SQA (Short Query Acceleration)
   * Uses queue for short queries in WLM
-  * Applies to read-only queries and CREATE TABLE AS queries
+  * Applies to read-only queries and `CREATE TABLE AS` queries
   * Can set short criteria time
-* VACUUM
+* `VACUUM`
   * `VACUUM FULL` :
   * `VACUUM DELETE ONLY` :
   * `VACUUM SORT ONLY` :

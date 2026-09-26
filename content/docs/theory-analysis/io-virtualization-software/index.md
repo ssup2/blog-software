@@ -16,9 +16,9 @@ I/O Full-virtualization은 물리 머신의 Device Driver를 그대로 이용하
 
 {{< figure caption="[Figure 2] KVM + QEMU의 I/O 처리과정" src="images/kvm-qemu-io-process.png" width="650px" >}}
 
-[Figure 2]는 KVM+QEMU에서 I/O Full-virtualization 처리 과정을 나타내고 있다. 그림에서 QEMU는 vCPU와 Main Loop라는 2개의 Thread를 이용하는걸 나타내고 있다. vCPU Thread가 Guest(가상 머신)의 Device Driver를 수행하다가 I/O 수행을 요청하면 Exception이 발생하여 Host(물리 머신)의 KVM Module이 수행된다. KVM Module은 QEMU에게 왜 Exception이 발생하였는지 이유를 전달한다. 전달받은 내용을 바탕으로 QEMU는 I/O 실제 Device에게 I/O 요청 한다. 처리가 끝나면 QEMU는 KVM Module에게 irqfd를 통해서 Guest에게 Virtual IRQ를 Inject 하도록 명령한다. Virtual IRQ를 받은 가상 머신은 자신이 요청한 I/O 처리가 완료되었다고 생각한다.
+[Figure 2]는 KVM+QEMU에서 I/O Full-virtualization 처리 과정을 나타내고 있다. 그림에서 QEMU는 vCPU와 Main Loop라는 2개의 Thread를 이용하는걸 나타내고 있다. vCPU Thread가 Guest(가상 머신)의 Device Driver를 수행하다가 I/O 수행을 요청하면 Exception이 발생하여 Host(물리 머신)의 KVM Module이 수행된다. KVM Module은 QEMU에게 왜 Exception이 발생하였는지 이유를 전달한다. 전달받은 내용을 바탕으로 QEMU는 I/O 실제 Device에게 I/O 요청 한다. 처리가 끝나면 QEMU는 KVM Module에게 `irqfd`를 통해서 Guest에게 Virtual IRQ를 Inject 하도록 명령한다. Virtual IRQ를 받은 가상 머신은 자신이 요청한 I/O 처리가 완료되었다고 생각한다.
 
-물리 머신에서 I/O 처리는 Application -> Device Driver -> Device -> 요청 완료 IRQ 발생 -> Device Driver -> Application의 순으로 진행된다. 가상 머신에서의 I/O 처리는 Device Drvier와 요청 완료 IRQ 사이에서 KVM+QEMU가 관여하여 Device Emulation을 수행하게 된다. 따라서 가상 머신은
+물리 머신에서 I/O 처리는 Application -> Device Driver -> Device -> 요청 완료 IRQ 발생 -> Device Driver -> Application의 순으로 진행된다. 가상 머신에서의 I/O 처리는 Device Driver와 요청 완료 IRQ 사이에서 KVM+QEMU가 관여하여 Device Emulation을 수행하게 된다. 따라서 가상 머신은
 자신이 이용하는 Device가 가상 Device인지 인식하지 못한다.
 
 {{< figure caption="[Figure 3] KVM + QEMU 가상 머신이 보는 I/O Device" src="images/kvm-qemu-device.png" width="900px" >}}
@@ -35,17 +35,17 @@ I/O Para-virtualization은 가상 머신에서 물리 머신의 Device Driver를
 
 {{< figure caption="[Figure 4] Virtio Architecture" src="images/virtio-architecture.png" width="600px" >}}
 
-[Figure 4]는 VirtIO의 Architecture를 간략히 나타내고 있다. VirtIO는 크게 Frontend 부분인 VirtIO Driver, Backend 부분인 VirtIO Device Emulator 그리고 Frontend와 Backend를 연결해주는 Virtqueue 3가지로 구성되어 있다. Virio Driver는 가상 머신의 Kernel에 탑재되는 Device Driver이다. Virito Device Driver에는 여러가지가 있는데, 대표적으로 Network를 위한 virito-net과 Block 장치를 위한 virtio-Blk, virtio-scsi가 있다. VirtIO Device Emulator는 QEMU가 담당한다. Virtqueue는 가상 머신과 QEMU의 공유 메모리에 위치하여 Frontend와 Backend사이에서 가상 머신의 I/O Data를 전달하는 역할을 수행한다.
+[Figure 4]는 VirtIO의 Architecture를 간략히 나타내고 있다. VirtIO는 크게 Frontend 부분인 VirtIO Driver, Backend 부분인 VirtIO Device Emulator 그리고 Frontend와 Backend를 연결해주는 Virtqueue 3가지로 구성되어 있다. VirtIO Driver는 가상 머신의 Kernel에 탑재되는 Device Driver이다. VirtIO Device Driver에는 여러가지가 있는데, 대표적으로 Network를 위한 `virtio-net`과 Block 장치를 위한 `virtio-blk`, `virtio-scsi`가 있다. VirtIO Device Emulator는 QEMU가 담당한다. Virtqueue는 가상 머신과 QEMU의 공유 메모리에 위치하여 Frontend와 Backend사이에서 가상 머신의 I/O Data를 전달하는 역할을 수행한다.
 
 {{< figure caption="[Figure 5] KVM + QEMU + VirtIO의 I/O 처리과정" src="images/kvm-qemu-virtio-process.png" width="650px" >}}
 
-[Figure 5]는 KVM+QEMU+VirtIO에서 I/O Para-virtualization 처리 과정을 나타내고 있다. 가상 머신은 VirtIO Device Drvier를 통해 I/O를 요청한다. VirtIO Device Driver는 Kick이라는 동작을 통해 Exception을 발생시켜 KVM을 깨운다. KVM은 다시 ioeventfd를 이용하여 QEMU의 Main Loop을 깨운다. 깨어난 QEMU는 VirtIO Queue에 있는 I/O Data를 실제 I/O Device에 Write하고 그 응답을 다시 Virtqueue에 Write한다. 그 후 QEMU는 KVM Module에게 irqfd를 통해서 Guest에게 Virtual IRQ를 Inject 하도록 명령하여 가상 머신의 I/O 처리를 끝낸다.
+[Figure 5]는 KVM+QEMU+VirtIO에서 I/O Para-virtualization 처리 과정을 나타내고 있다. 가상 머신은 VirtIO Device Driver를 통해 I/O를 요청한다. VirtIO Device Driver는 Kick이라는 동작을 통해 Exception을 발생시켜 KVM을 깨운다. KVM은 다시 `ioeventfd`를 이용하여 QEMU의 Main Loop을 깨운다. 깨어난 QEMU는 VirtIO Queue에 있는 I/O Data를 실제 I/O Device에 Write하고 그 응답을 다시 Virtqueue에 Write한다. 그 후 QEMU는 KVM Module에게 `irqfd`를 통해서 Guest에게 Virtual IRQ를 Inject 하도록 명령하여 가상 머신의 I/O 처리를 끝낸다.
 
 {{< figure caption="[Figure 6] KVM + QEMU + VirtIO 가상 머신이 보는 Block Device" src="images/kvm-qemu-virtio-device-blk.png" width="900px" >}}
 
 {{< figure caption="[Figure 7] KVM + QEMU + VirtIO 가상 머신이 보는 SCSI Device" src="images/kvm-qemu-virtio-device-scsi.png" width="900px" >}}
 
-[Figure 6], [Figure 7]은 QEMU+KVM+Virtio의 x86 가상 머신 안에서 보이는 PCI 장치들과 SCSI 장치들을 나타내고 있다. PCI 장치에 VirtIO 장치들이 있는걸 확인 할 수 있다. virtio-scsi의 경우 SCSI 장치로도 인식되는걸 확인 할 수 있다.
+[Figure 6], [Figure 7]은 QEMU+KVM+Virtio의 x86 가상 머신 안에서 보이는 PCI 장치들과 SCSI 장치들을 나타내고 있다. PCI 장치에 VirtIO 장치들이 있는걸 확인 할 수 있다. `virtio-scsi`의 경우 SCSI 장치로도 인식되는걸 확인 할 수 있다.
 
 #### 3.2. vhost
 
@@ -57,7 +57,7 @@ vhost는 QEMU의 Virtio Device Emulation 역할을 수행하는 **Kernel Module*
 
 {{< figure caption="[Figure 9] KVM + QEMU + VirtIO + vhostscsi의 I/O 처리과정" src="images/kvm-qemu-virtio-vhostscsi-progress.png" width="650px" >}}
 
-[Figure 8], [Figure 9]는 KVM+QEMU+VirtIO+vhost에서 I/O Para-virtualization 처리 과정을 나타내고 있다. QEMU대신 vhost가 VirtIO Device Emulation 역할을 수행하는 것을 알 수 있다. 나머지 과정은 VirtIO만을 이용 할 때와 동일하다. vhost-net은 virtio-net의 Emulation 역할을 수행하고, vhost-scsi+LIO가 virtio-scsi의 Emulation 역할을 수행한다.
+[Figure 8], [Figure 9]는 KVM+QEMU+VirtIO+vhost에서 I/O Para-virtualization 처리 과정을 나타내고 있다. QEMU대신 vhost가 VirtIO Device Emulation 역할을 수행하는 것을 알 수 있다. 나머지 과정은 VirtIO만을 이용 할 때와 동일하다. `vhost-net`은 `virtio-net`의 Emulation 역할을 수행하고, `vhost-scsi`+LIO가 `virtio-scsi`의 Emulation 역할을 수행한다.
 
 {{< figure caption="[Figure 10] KVM + QEMU + VirtIO + vhost 가상 머신이 보는 Device" src="images/kvm-qemu-virtio-vhost-device.png" width="900px" >}}
 

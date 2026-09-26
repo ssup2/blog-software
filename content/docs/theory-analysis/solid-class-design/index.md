@@ -28,7 +28,7 @@ class Text {
 }
 ```
 
-Text Class는 Text를 변경하는 책임과 Text를 출력하는 책임 2가지의 책임을 갖고 있다.
+`Text` Class는 Text를 변경하는 책임과 Text를 출력하는 책임 2가지의 책임을 갖고 있다.
 
 ```java {caption="[Code 2] Single Responsibility 적용후", linenos=table}
 class Text {
@@ -53,7 +53,7 @@ class Printer {
 }
 ```
 
-Printer Class를 정의하고 Text Class가 갖고 있던 출력 책임을 Printer Class에게 위임하는 식으로 설계하여 Text Class와 Printer Class가 각각 하나의 책임만을 갖도록 변경할 수 있다.
+`Printer` Class를 정의하고 `Text` Class가 갖고 있던 출력 책임을 `Printer` Class에게 위임하는 식으로 설계하여 `Text` Class와 `Printer` Class가 각각 하나의 책임만을 갖도록 변경할 수 있다.
 
 ### 1.2. Open/closed
 
@@ -76,7 +76,7 @@ public class ClaimApprovaManager {
 }
 ```
 
-ClaimApprovalManager Class는 Surveyor Class가 추가 될때마다 해당 Surveyor Class를 위한 ClaimApprovaManager의 Method가 추가되어야 하는 단점을 가지고 있다.
+`ClaimApprovalManager` Class는 Surveyor Class가 추가 될때마다 해당 Surveyor Class를 위한 `ClaimApprovalManager`의 Method가 추가되어야 하는 단점을 가지고 있다.
 
 ```java {caption="[Code 4] Open/closed 적용후", linenos=table}
 public abstract class InsuranceSurveyor {
@@ -106,7 +106,7 @@ public class ClaimApprovalManager {
 }
 ```
 
-ClaimApprovaManager는 InsuranceSurveyor Interface를 통해서 Code의 변화 없이 다양한 Surveyor Class를 수용 할 수 있게 되었다.
+`ClaimApprovalManager`는 `InsuranceSurveyor` Interface를 통해서 Code의 변화 없이 다양한 Surveyor Class를 수용 할 수 있게 되었다.
 
 ### 1.3. Liskov Substitution
 
@@ -139,7 +139,7 @@ public class Square : Rectangle {
 }
 ```
 
-정사각형도 사각형이기 때문에 Square Class는 Rectangle Class를 상속해서 구현하였다. Rectangle Class에서는 Width와 Height를 각각 설정 할 수 있었지만, Sqaure Class에서는 Width와 Height가 동시에 같은 값으로 설정된다. 따라서 Liskov Substitution 원칙에 위반된 Class 설계이다.
+정사각형도 사각형이기 때문에 `Square` Class는 `Rectangle` Class를 상속해서 구현하였다. `Rectangle` Class에서는 Width와 Height를 각각 설정 할 수 있었지만, `Square` Class에서는 Width와 Height가 동시에 같은 값으로 설정된다. 따라서 Liskov Substitution 원칙에 위반된 Class 설계이다.
 
 ### 1.4. Interface Segregation
 
@@ -154,7 +154,7 @@ public interface Toy {
 }
 ```
 
-[Code 6]의 Toy Interface는 색깔, 이동, 비행 3가지 종류의 method를 정의하고 있다. 문제는 모든 장난감이 이동, 비행 기능을 갖고 있지 않기 때문에 이동, 비행 기능이 없는 Toy Class의 move, fly Method는 dummy Method가 된다는 점이 문제이다.
+[Code 6]의 `Toy` Interface는 색깔, 이동, 비행 3가지 종류의 method를 정의하고 있다. 문제는 모든 장난감이 이동, 비행 기능을 갖고 있지 않기 때문에 이동, 비행 기능이 없는 Toy Class의 `move`, `fly` Method는 dummy Method가 된다는 점이 문제이다.
 
 ```java {caption="[Code 7] Interface Segregation 적용후", linenos=table}
 public interface Toy {
@@ -171,7 +171,7 @@ public interface Flyable {
 }
 ```
 
-Toy Interface를 분리하여 Movable, Flyable Interface를 만들었다. Toy Class 구성시 해당 Toy에 필요한 Interface만 선택하여 구성하면 된다.
+`Toy` Interface를 분리하여 `Movable`, `Flyable` Interface를 만들었다. Toy Class 구성시 해당 Toy에 필요한 Interface만 선택하여 구성하면 된다.
 
 ### 1.5. Dependency Invsersion
 
@@ -210,7 +210,7 @@ public class ElectricSwitch {
 }
 ```
 
-ElectricSwitch Class는 LightBulb Class를 직접 참조하여 이용하고 있다. 새로운 전자제품이 추가 될때마다 ElectricSwith Class도 계속 변경되야 한다.
+`ElectricSwitch` Class는 `LightBulb` Class를 직접 참조하여 이용하고 있다. 새로운 전자제품이 추가 될때마다 `ElectricSwitch` Class도 계속 변경되야 한다.
 
 ```java {caption="[Code 9] Dependency Invsersion 적용후", linenos=table}
 public interface Switchable {
@@ -265,7 +265,7 @@ public class Fan implements Switchable {
 }
 ```
 
-ElectricSwitch Class는 Switchable Class에만 의존한다. 그리고 Switchable Class의 동작은 Switchable Class에 LightBulb가 Injection 되었는지 아니면 FAN이 Injection 되었는지에 따라 달라진다.
+`ElectricSwitch` Class는 `Switchable` Class에만 의존한다. 그리고 `Switchable` Class의 동작은 `Switchable` Class에 `LightBulb`가 Injection 되었는지 아니면 `Fan`이 Injection 되었는지에 따라 달라진다.
 
 ## 2. 참조
 

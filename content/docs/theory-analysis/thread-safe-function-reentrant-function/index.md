@@ -19,7 +19,7 @@ int thread-safe-function()
 }
 ```
 
-[Code 1]은 Thread-safe 함수를 나타내고 있다. Global 변수인 global-var를 안전하게 증가시키기 위해서 Mutex를 이용한다. 따라서 각 Thread가 thread-safe-function() 함수를 호출하는 횟수만큼 global-var 값이 증가할 것이다. 각 Thread는 global-var값에 따라서 다른 반환값을 얻게 된다.
+[Code 1]은 Thread-safe 함수를 나타내고 있다. Global 변수인 `global-var`를 안전하게 증가시키기 위해서 Mutex를 이용한다. 따라서 각 Thread가 `thread-safe-function()` 함수를 호출하는 횟수만큼 `global-var` 값이 증가할 것이다. 각 Thread는 `global-var`값에 따라서 다른 반환값을 얻게 된다.
 
 ## 2. Reentrant 함수
 
@@ -34,4 +34,4 @@ int reentrant-function()
 }
 ```
 
-[Code 2]는 Reentrant 함수를 나타내고 있다. 지역변수인 local-var만을 이용하고 있다. 따라서 여러 Thread들이 동시에 reentrant-function() 함수를 호출해도 각 Thread는 언제나 1을 반환 받는다.
+[Code 2]는 Reentrant 함수를 나타내고 있다. 지역변수인 `local-var`만을 이용하고 있다. 따라서 여러 Thread들이 동시에 `reentrant-function()` 함수를 호출해도 각 Thread는 언제나 1을 반환 받는다.

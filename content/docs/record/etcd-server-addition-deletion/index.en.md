@@ -289,7 +289,7 @@ Member aa9ac53bcb1de8c6 promoted in cluster 35d99f7f50aa450
 +--------------------------+------------------+---------+---------+-----------+------------+-----------+------------+--------------------+--------+
 ```
 
-You can see that Node03's etcd Server was in Learner state and then became a Follower through the promote command.
+You can see that Node03's etcd Server was in Learner state and then became a Follower through the `promote` command.
 
 ```shell
 (Node01)$ docker logs -f etcd

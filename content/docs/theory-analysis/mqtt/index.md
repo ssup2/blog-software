@@ -14,7 +14,7 @@ MQ(Message Queue) Protocol인 MQTT(Message Queuing Telemetry Transport)를 분�
 
 {{< figure caption="[Figure 2] MQTT Topic" src="images/mqtt-topic.png" width="600px" >}}
 
-[Figure 2]는 MQTT의 Topic 구조를 나타내고 있다. Topic은 Directory 구조 처럼 /를 기준으로 계층 구조를 갖게 된다.
+[Figure 2]는 MQTT의 Topic 구조를 나타내고 있다. Topic은 Directory 구조 처럼 `/`를 기준으로 계층 구조를 갖게 된다.
 
 ### 1.2. QoS
 

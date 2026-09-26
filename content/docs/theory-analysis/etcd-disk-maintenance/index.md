@@ -51,11 +51,11 @@ key2
 
 Log와 별개로 etcd는 Key-Value Data의 Revision (History)를 관리한다. [Shell 1]은 etcd Revision의 예제를 나타내고 있다. key가 하나씩 설정될때 마다 Revision도 증가한다. `--rev` Option을 통해서 특정 Revision의 Key-Value Data를 가져올 수 있다. 이러한 Revision이 쌓일수록 etcd가 이용하는 Disk의 용량도 증가한다. Snapshot을 수행해도 Revision은 Log가 아닌 별도의 영역에서 관리되는 Data이기 때문에 Revision은 제거되지 않는다.
 
-`etcdctl compact` 명령어를 통해서 Revision을 강제로 제거할 수 있다. 또한 etcd Server의 `--auto-compaction` 명령어를 통해서 revsion 기반 또는 특정 주기를 기반으로 Revision을 제거할 수 있다. 기본적으로 한시간마다 Revision을 제거하도록 설정된다.
+`etcdctl compact` 명령어를 통해서 Revision을 강제로 제거할 수 있다. 또한 etcd Server의 `--auto-compaction` 명령어를 통해서 Revision 기반 또는 특정 주기를 기반으로 Revision을 제거할 수 있다. 기본적으로 한시간마다 Revision을 제거하도록 설정된다.
 
 ## 2. etcd Defragmentation
 
-Log Compaction과 Revision Compaction을 수행하더라도 Key-Value Data가 Read/Write를 반복하게 된다면 Fragmentation 현상이 발생하여 실제 etcd의 Disk 사용량이 조금씩 증가하게 된다. etcd는 이러한 Fragmenation 현상을 제거하기 위해서 Defragmentation을 제공한다. `etcdctl defrag` 명령어를 통해서 Defragmentation을 수행할 수 있다.
+Log Compaction과 Revision Compaction을 수행하더라도 Key-Value Data가 Read/Write를 반복하게 된다면 Fragmentation 현상이 발생하여 실제 etcd의 Disk 사용량이 조금씩 증가하게 된다. etcd는 이러한 Fragmentation 현상을 제거하기 위해서 Defragmentation을 제공한다. `etcdctl defrag` 명령어를 통해서 Defragmentation을 수행할 수 있다.
 
 etcd가 Defragmentation을 수행하는 동안에는 기능이 중지된다. 기능 중지에 따른 장애를 막기 위해서는 etcd를 Server Cluster로 구성한 다음, 각 Server별로 Defragmentation을 수행해야 한다. Defragmentation 동작은 Server 사이에 복제되어 다른 Server에게 전달되지 않는다. 따라서 etcd 관리자는 Server Cluster의 각 Server에게 하나씩 `etcdctl defrag` 명령어를 통해서 Defragmentation을 수행 해야한다.
 

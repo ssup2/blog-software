@@ -12,8 +12,8 @@ Practice managing schemas using Kafka Schema Registry.
 
 * **Kafka Schema Registry** : Manages schemas for Kafka messages.
 * **Kafka** : Transmits messages between Producer and Consumer.
-  * **_schema_ Topic** : Topic that stores schemas registered in Schema Registry.
-  * **user-events Topic** : Topic that stores messages sent by Producer.
+  * **`_schemas` Topic** : Topic that stores schemas registered in Schema Registry.
+  * **`user-events` Topic** : Topic that stores messages sent by Producer.
 * **Producer** : Retrieves schemas from Kafka Schema Registry, serializes them in Avro format, and sends them to Kafka topics.
 * **Consumer** : Receives messages serialized in Avro format from Kafka topics and deserializes them.
 

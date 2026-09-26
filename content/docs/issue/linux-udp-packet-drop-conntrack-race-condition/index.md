@@ -24,7 +24,7 @@ Linux conntrack은 하나의 Connection 정보를 저장할때 Original Table, R
 
 TCP의 Connection 정보는 Connection이 생성되는 시점에 conntrack에 저장된다. UDP의 경우 Connection-less Protocol이기 때문에 Connection이 존재하지 않지만, UDP Packet의 Reverse NAT등의 동작을 수행하기 위해서 conntrack은 UDP Packet의 Src,Dst IP/Port 정보를 바탕으로 Connection 정보를 생성하고 관리한다. conntrack에 UDP의 Connection 정보가 저장되는 시점은 실제 UDP Packet이 전송되는 시점이다.
 
-conntrack은 Connection 정보를 추가 할 때 마다 Original Table과 Replay Table을 검사하여 추가할 Connection이 유효한지 확인한다. 추가할 Connection 정보가 Original Table과 중복되거나 Reply Table과 중복될 경우 conntrack은 해당 Connection 정보는 유효하지 않다고 간주하고 Table에 추가하지 않는다. 또한 conntrack은 추가할 Connection 정보를 갖고 있던 Packet을 Drop한다.
+conntrack은 Connection 정보를 추가 할 때 마다 Original Table과 Reply Table을 검사하여 추가할 Connection이 유효한지 확인한다. 추가할 Connection 정보가 Original Table과 중복되거나 Reply Table과 중복될 경우 conntrack은 해당 Connection 정보는 유효하지 않다고 간주하고 Table에 추가하지 않는다. 또한 conntrack은 추가할 Connection 정보를 갖고 있던 Packet을 Drop한다.
 
 ## 3. 원인, 해결 방안
 
@@ -47,19 +47,19 @@ DNAT를 수행하여 서로 다른 곳으로 Packet이 전송하는 경우 발�
 * Distro Linux Kernel
   * **Ubuntu** : 4.15.0-56+
 
-UDP Packet이 DNAT 되어 서로 다른 상대에게 전송되는 경우에 발생하는 Issue는 아직 완전히 Kernel에서 해결하지 못한 상태이다. 따라서 App 내부에서 하나의 Socket을 통해서 동시에 UDP Packet을 전송하지 못하도록 제한하여 conntrack Race Condition을 방지하거나, 위의 Kernel Patch가 적용된 상태에서 UDP Packet이 DNAT 되어 전송되어도 서로 다른 상대가 아닌 동일한 상대한테 전송되도록 Kernel의 DNAT Rule을 설정하여 본 Issue를 우회해야 한다. 또는 iptables의 mangle Table을 활용하여 특정 IP, Port 대상으로 전송되는 Packet은 conntrack을 통해서 Connection 정보가 관리되지 않도록 설정하여 conntrack Race Condition을 방지할 수도 있다.
+UDP Packet이 DNAT 되어 서로 다른 상대에게 전송되는 경우에 발생하는 Issue는 아직 완전히 Kernel에서 해결하지 못한 상태이다. 따라서 App 내부에서 하나의 Socket을 통해서 동시에 UDP Packet을 전송하지 못하도록 제한하여 conntrack Race Condition을 방지하거나, 위의 Kernel Patch가 적용된 상태에서 UDP Packet이 DNAT 되어 전송되어도 서로 다른 상대가 아닌 동일한 상대한테 전송되도록 Kernel의 DNAT Rule을 설정하여 본 Issue를 우회해야 한다. 또는 `iptables`의 `mangle` Table을 활용하여 특정 IP, Port 대상으로 전송되는 Packet은 conntrack을 통해서 Connection 정보가 관리되지 않도록 설정하여 conntrack Race Condition을 방지할 수도 있다.
 
 ## 4. DNS Timeout Issue with Kubernetes
  
 Kubernetes에서는 Service Record를 이용하여 Service Discovery를 수행하는데, Kubernetes 환경에서는 본 Issue로 인해서 Domain Resolve 수행시 발생하는 UDP Packet이 Drop되어 Service Discovery가 일시적으로 실패하는 현상이 발생할 수 있다. Kubernetes에서는 일반적으로 Master Node에 DNS Server 역할을 수행하는 CoreDNS를 다수 띄우고 Service로 묶어서 Kubernetes Cluster 내부의 App들에게 제공한다. 따라서 App에서 Domain Resolve를 위해서 CoreDNS로 전송되는 UDP Packet은 App Pod이 있는 Host(Node)에서 **DNAT** 되어 Master의 CoreDNS로 분배된다.
 
-또한 Domain Resolve를 수행시 App에서 가장 많이 이용하는 C Library인 glibc과 musl은, Kernel이 IPv4와 IPv6를 둘다 이용하도록 설정되어 있으면, A Record와 AAAA Record를 동일 Socket(동일 Port)을 이용하여 동시에 수행한다. 즉 Kubernetes에서 동작하는 glic 또는 musl 기반의 App이 전송하는 A Record Resolve Packet과 AAAA Record Resolve Packet은 동시에 동일한 Src IP/Port를 갖고 DNAT를 통해서 CoreDNS로 전송 되지만, 본 Issue로 인해서 두 Resolve Packet 중에서 하나의 Packet은 conntrack에 의해서 Drop이 발생한다.
+또한 Domain Resolve를 수행시 App에서 가장 많이 이용하는 C Library인 glibc과 musl은, Kernel이 IPv4와 IPv6를 둘다 이용하도록 설정되어 있으면, A Record와 AAAA Record를 동일 Socket(동일 Port)을 이용하여 동시에 수행한다. 즉 Kubernetes에서 동작하는 glibc 또는 musl 기반의 App이 전송하는 A Record Resolve Packet과 AAAA Record Resolve Packet은 동시에 동일한 Src IP/Port를 갖고 DNAT를 통해서 CoreDNS로 전송 되지만, 본 Issue로 인해서 두 Resolve Packet 중에서 하나의 Packet은 conntrack에 의해서 Drop이 발생한다.
 
-Pod의 Network Namespace에서는 DNAT가 발생하지 않기 때문에, 위에서 언급한 Patch가 적용된 Kernel Version을 이용하면 Pod의 Network Namespace에서는 본 Issue를 해결할 수 있다. **문제는 DNAT가 발생하는 Host(Node)에서는 위에서 언급한 Patch로도 해결하지 못하기 때문에 우회 방법을 적용하여 문제를 해결해야 한다.** 가장 직관적인 접근법은 동시에 수행되는 Domain Resolve를 막아 conntrack Race Condition을 방지하는 방법이다. glibc는 /etc/resolv.conf 파일에 “single-request” 또는 “single-request-reopen” Option을 주어 동시에 A Record와 AAAA Record를 동시에 Resolve하지 못하게 제한할 수 있다. 하지만 musl은 이러한 Opiton을 지원하지 않는다. musl은 많은 곳에서 이용중인 Alpine Image에서 이용되는 C Library이다.
+Pod의 Network Namespace에서는 DNAT가 발생하지 않기 때문에, 위에서 언급한 Patch가 적용된 Kernel Version을 이용하면 Pod의 Network Namespace에서는 본 Issue를 해결할 수 있다. **문제는 DNAT가 발생하는 Host(Node)에서는 위에서 언급한 Patch로도 해결하지 못하기 때문에 우회 방법을 적용하여 문제를 해결해야 한다.** 가장 직관적인 접근법은 동시에 수행되는 Domain Resolve를 막아 conntrack Race Condition을 방지하는 방법이다. glibc는 `/etc/resolv.conf` 파일에 `single-request` 또는 `single-request-reopen` Option을 주어 동시에 A Record와 AAAA Record를 동시에 Resolve하지 못하게 제한할 수 있다. 하지만 musl은 이러한 Option을 지원하지 않는다. musl은 많은 곳에서 이용중인 Alpine Image에서 이용되는 C Library이다.
 
-또 하나의 우회 방법은 하나의 App에서 전송되는 Domain Resolve Packet은 무조건 동일한 CoreDNS로 DNAT 되도록 설정하는 방법이 있다. CoreDNS를 하나만 구동시켜서 DNAT가 되어도 무조건 동일한 Pod으로 Domain Resolve Packet을 전송하도록 만들면 된다. 아니면 Packet의 Header Hashing을 기반으로 하는 Load Balancing을 수행하는 알고리즘을 이용하면 된다. Kubernetes Cluster에서 Service Loadbalancing을 IPVS를 통해서 수행하고 있다면 IPVS의 Load Balancing 알고리즘을 dh(Destination Hashing Scheduling), sh(Source Hashing Scheduling)을 이용하면 된다.
+또 하나의 우회 방법은 하나의 App에서 전송되는 Domain Resolve Packet은 무조건 동일한 CoreDNS로 DNAT 되도록 설정하는 방법이 있다. CoreDNS를 하나만 구동시켜서 DNAT가 되어도 무조건 동일한 Pod으로 Domain Resolve Packet을 전송하도록 만들면 된다. 아니면 Packet의 Header Hashing을 기반으로 하는 Load Balancing을 수행하는 알고리즘을 이용하면 된다. Kubernetes Cluster에서 Service Loadbalancing을 IPVS를 통해서 수행하고 있다면 IPVS의 Load Balancing 알고리즘을 `dh`(Destination Hashing Scheduling), `sh`(Source Hashing Scheduling)을 이용하면 된다.
 
-마지막 우회 방법은 Domain Resolve Packet이 conntrack에 의해서 Connection 관리가 안되도록 설정하여 conntrack Race Condition을 방지하는 방법이다. [LocalNode DNSCache](https://kubernetes.io/docs/tasks/administer-cluster/nodelocaldns/) 기법은 iptables의 mangle Table을 활용하여 Domain Resolve Packet이 conntrack에 의해서 Connection 관리가 안되도록 하여 본 Issue를 우회하는 기법이다. Cilium CNI를 이용하면 conntrack을 이용하지 않을수 있다. 
+마지막 우회 방법은 Domain Resolve Packet이 conntrack에 의해서 Connection 관리가 안되도록 설정하여 conntrack Race Condition을 방지하는 방법이다. [LocalNode DNSCache](https://kubernetes.io/docs/tasks/administer-cluster/nodelocaldns/) 기법은 `iptables`의 `mangle` Table을 활용하여 Domain Resolve Packet이 conntrack에 의해서 Connection 관리가 안되도록 하여 본 Issue를 우회하는 기법이다. Cilium CNI를 이용하면 conntrack을 이용하지 않을수 있다. 
 
 Cilium CNI는 Pod의 Network Namespace와 Service 사이의 Connection 관리를 conntrack을 이용하지 않고 BPF와 BPF Map을 이용한다. Host Network Namespace를 이용하는 Pod 또는 Host Processes와 Service 사이의 Connection 관리는 cgroup eBPF를 지원하는 Cilium CNI Version (1.6.0+)에서는 conntrack을 이용하지 않고 BPF와 BPF Map을 이용한다. 따라서 cgroup eBPF를 지원하는 Cilium CNI Version과 Kernel Version을 이용한다면 본 Issue를 우회할 수 있다.
 

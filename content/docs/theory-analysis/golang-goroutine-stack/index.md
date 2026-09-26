@@ -24,7 +24,7 @@ morestack:           // call runtime to allocate more stack
 callq <runtime.morestack>
 ```
 
-[Code 1]은 이러한 Logic을 Assembly Code로 나타내고 있다. 함수 첫부분에서 TLS (Thread Local Storage)에 저장된 Goroutine이 이용 가능한 Stack의 크기 (Limit)와 Stack Pointer를 저장하고 있는 RSP를 비교하고 있다. RSP가 Stack의 크기를 초과하고 있다면 morestack 함수를 통해서 동적으로 Stack을 할당 받는다.
+[Code 1]은 이러한 Logic을 Assembly Code로 나타내고 있다. 함수 첫부분에서 TLS (Thread Local Storage)에 저장된 Goroutine이 이용 가능한 Stack의 크기 (Limit)와 Stack Pointer를 저장하고 있는 RSP를 비교하고 있다. RSP가 Stack의 크기를 초과하고 있다면 `morestack` 함수를 통해서 동적으로 Stack을 할당 받는다.
 
 {{< figure caption="[Figure 1] Goroutine Split Stack" src="images/split-stack.png" width="600px" >}}
 

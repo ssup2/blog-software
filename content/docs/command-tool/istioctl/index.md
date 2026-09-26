@@ -3,7 +3,7 @@ title: istioctl
 draft: true
 ---
 
-istioctl의 사용법을 정리한다.
+`istioctl`의 사용법을 정리한다.
 
 ## 1. istioctl
 

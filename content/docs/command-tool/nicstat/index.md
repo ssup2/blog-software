@@ -2,7 +2,7 @@
 title: nicstat
 ---
 
-NIC의 통계 정보를 출력하는 nicstat의 사용법을 정리한다.
+NIC의 통계 정보를 출력하는 `nicstat`의 사용법을 정리한다.
 
 ## 1. nicstat
 
@@ -25,7 +25,7 @@ $ nicstat
 * `rAvs` : 수신하는 평균 Packet의 크기를 나타낸다.
 * `wAvs` : 송싱하는 평균 Packet의 크기를 나타낸다.
 * `%Util` : 송수신 Bandwidth 사용률을 나타낸다.
-* `Sat` : 초당 발생한 Error의 개수를 나타낸다. -x 옵션을 통해서 상세하게 확인 가능하다.
+* `Sat` : 초당 발생한 Error의 개수를 나타낸다. `-x` 옵션을 통해서 상세하게 확인 가능하다.
 
 ### 1.2. nicstat -U
 

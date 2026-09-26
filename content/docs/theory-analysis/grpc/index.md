@@ -31,7 +31,7 @@ message Person {
 }
 ```
 
-[File 1]은 구조화된 Data인 Person Data를 ProtoBuf 규격에 맞게 저장하고 있는 .proto 파일을 나타내고 있다. ProtoBuf는 .proto 파일을 컴파일하여 gRPC Server와 gRPC Client에서 이용할 수 있는 Code를 생성한다. 생성된 Code를 이용하여 Server와 Client는 gRPC를 수행한다.
+[File 1]은 구조화된 Data인 `Person` Data를 ProtoBuf 규격에 맞게 저장하고 있는 `.proto` 파일을 나타내고 있다. ProtoBuf는 `.proto` 파일을 컴파일하여 gRPC Server와 gRPC Client에서 이용할 수 있는 Code를 생성한다. 생성된 Code를 이용하여 Server와 Client는 gRPC를 수행한다.
 
 ### 1.2. HTTP/2
 
@@ -49,7 +49,7 @@ TCP Connection 1개
 └── Stream 5 (RPC C) : HEADERS Frame → DATA Frame... → HEADERS Frame (Trailer)
 ```
 
-하나의 RPC는 하나의 HTTP/2 Stream에 **1:1로 매핑**된다. [Text 1]과 같이 Client가 RPC를 호출할 때마다 TCP Connection 위에 새로운 Stream이 동적으로 생성되며, RPC가 완료되면 해당 Stream도 함께 종료된다. 하나의 Stream을 여러 RPC가 공유하거나 재사용하는 경우는 없으며, Connection 수준의 상태 (HPACK Header 압축 상태, SETTINGS, Connection Flow Control Window)만 여러 Stream이 공유한다. RPC와 Stream의 관계는 다음과 같은 특징을 갖는다.
+하나의 RPC는 하나의 HTTP/2 Stream에 **1:1로 매핑**된다. [Text 1]과 같이 Client가 RPC를 호출할 때마다 TCP Connection 위에 새로운 Stream이 동적으로 생성되며, RPC가 완료되면 해당 Stream도 함께 종료된다. 하나의 Stream을 여러 RPC가 공유하거나 재사용하는 경우는 없으며, Connection 수준의 상태 (HPACK Header 압축 상태, `SETTINGS`, Connection Flow Control Window)만 여러 Stream이 공유한다. RPC와 Stream의 관계는 다음과 같은 특징을 갖는다.
 
 * Stream의 생성은 별도의 협상 과정 없이 Client가 새로운 Stream ID를 부여한 HEADERS Frame을 전송하는 것으로 완료된다. 따라서 RPC마다 Stream을 동적으로 생성하더라도 TCP Connection 수립과 같은 추가적인 왕복 (RTT) 비용은 발생하지 않는다.
 * Client가 생성하는 Stream에는 홀수의 Stream ID (`1`, `3`, `5`...)가 단조 증가하며 부여되며, Server가 생성하는 Stream (Server Push)에는 짝수의 Stream ID (`2`, `4`, `6`...)가 단조 증가하며 부여된다. 이는 Client와 Server가 동시에 Stream을 생성해도 Stream ID가 충돌하지 않도록 하기 위함이다. Stream ID는 하나의 Connection 안에서 재사용되지 않으며, ID가 고갈되면 (2^31) 새로운 Connection을 생성하여 이후의 RPC를 처리한다.
@@ -58,7 +58,7 @@ TCP Connection 1개
   * **Server Streaming RPC** : Client가 하나의 Message를 전송하면 Server가 여러 개의 Message를 연속해서 전송한다. (예: 실시간 알림 구독, 대용량 조회 결과 전송)
   * **Client Streaming RPC** : Client가 여러 개의 Message를 연속해서 전송한 다음 Server가 하나의 Message로 응답한다. (예: File Upload, Metric 전송)
   * **Bidirectional Streaming RPC** : Client와 Server가 하나의 Stream 위에서 서로 독립적으로 여러 개의 Message를 주고받는다. (예: 채팅)
-* 각 Stream은 독립적으로 동작한다. 특정 RPC가 취소되거나 오류가 발생하여 해당 Stream이 RST_STREAM Frame과 함께 강제로 종료되어도, 같은 Connection의 다른 RPC들은 영향을 받지 않는다.
+* 각 Stream은 독립적으로 동작한다. 특정 RPC가 취소되거나 오류가 발생하여 해당 Stream이 `RST_STREAM` Frame과 함께 강제로 종료되어도, 같은 Connection의 다른 RPC들은 영향을 받지 않는다.
 
 #### 1.2.2. Frame 구성과 Trailer
 
@@ -79,32 +79,32 @@ Trailer는 Header와 동일한 형식 (이름-값 쌍)의 Field 목록이며, �
 {{< table caption="[Table 1] GRPC Status Code" >}}
 | Status Code | Number | Description |
 | --- | --- | --- |
-| OK | 0 | 요청이 정상적으로 처리됨. 오류 아님. |
-| CANCELLED | 1 | 작업이 취소됨. (Client의 요청 취소) |
-| UNKNOWN | 2 | 원인을 알 수 없는 오류 발생. 상세 메시지를 통해 디버깅 필요. |
-| INVALID_ARGUMENT | 3 | Client가 잘못된 요청 인자를 보냄. |
-| DEADLINE_EXCEEDED | 4 | 요청 Timeout이 발생. 지정된 시간 내에 응답이 오지 않음. |
-| NOT_FOUND | 5 | 요청한 Resource를 찾을 수 없음. |
-| ALREADY_EXISTS | 6 | 요청한 Resource가 이미 존재함. (중복 생성 요청) |
-| PERMISSION_DENIED | 7 | 권한 부족으로 접근 거부. (인증, 인가 실패) |
-| RESOURCE_EXHAUSTED | 8 | 용량 초과, 메모리 부족 등 리소스 소진. (Client가 너무 많은 요청을 보내거나, Server가 너무 많은 요청을 받은 경우) |
-| FAILED_PRECONDITION | 9 | 사전 조건이 충족되지 않음. (Lock이 걸린 상태에서 작업 요청) |
-| ABORTED | 10 | 동시성 충돌로 인해 작업이 중단됨. |
-| OUT_OF_RANGE | 11 | 요청 인자가 유효한 범위를 초과함. (자료형 범위 초과) |
-| UNIMPLEMENTED | 12 | Server에 요청한 Method가 구현되어 있지 않음. |
-| INTERNAL | 13 | Server 내부에서 오류가 발생. 디버깅 필요. |
-| UNAVAILABLE | 14 | Server가 다운되었거나 연결 불가. 재시도 가능. |
-| DATA_LOSS | 15 | Data 손실 발생. |
-| UNAUTHENTICATED | 16 | 인증 실패. 토큰 누락 또는 유효하지 않음. |
+| `OK` | 0 | 요청이 정상적으로 처리됨. 오류 아님. |
+| `CANCELLED` | 1 | 작업이 취소됨. (Client의 요청 취소) |
+| `UNKNOWN` | 2 | 원인을 알 수 없는 오류 발생. 상세 메시지를 통해 디버깅 필요. |
+| `INVALID_ARGUMENT` | 3 | Client가 잘못된 요청 인자를 보냄. |
+| `DEADLINE_EXCEEDED` | 4 | 요청 Timeout이 발생. 지정된 시간 내에 응답이 오지 않음. |
+| `NOT_FOUND` | 5 | 요청한 Resource를 찾을 수 없음. |
+| `ALREADY_EXISTS` | 6 | 요청한 Resource가 이미 존재함. (중복 생성 요청) |
+| `PERMISSION_DENIED` | 7 | 권한 부족으로 접근 거부. (인증, 인가 실패) |
+| `RESOURCE_EXHAUSTED` | 8 | 용량 초과, 메모리 부족 등 리소스 소진. (Client가 너무 많은 요청을 보내거나, Server가 너무 많은 요청을 받은 경우) |
+| `FAILED_PRECONDITION` | 9 | 사전 조건이 충족되지 않음. (Lock이 걸린 상태에서 작업 요청) |
+| `ABORTED` | 10 | 동시성 충돌로 인해 작업이 중단됨. |
+| `OUT_OF_RANGE` | 11 | 요청 인자가 유효한 범위를 초과함. (자료형 범위 초과) |
+| `UNIMPLEMENTED` | 12 | Server에 요청한 Method가 구현되어 있지 않음. |
+| `INTERNAL` | 13 | Server 내부에서 오류가 발생. 디버깅 필요. |
+| `UNAVAILABLE` | 14 | Server가 다운되었거나 연결 불가. 재시도 가능. |
+| `DATA_LOSS` | 15 | Data 손실 발생. |
+| `UNAUTHENTICATED` | 16 | 인증 실패. 토큰 누락 또는 유효하지 않음. |
 {{< /table >}}
 
 [Table 1]은 gRPC의 Status Code를 나타내고 있다. gRPC에서 각각의 RPC 요청은 응답으로 돌아오는 **Status Code**를 통해 요청의 성공 여부를 판단한다. Status Code는 응답 Stream을 종료하는 Trailer의 `grpc-status` Header를 통해서 전달된다.
 
-HTTP/2의 Status Code와 유사하지만 서로 다른 역할을 수행한다. gRPC의 Status Code는 각 RPC 요청에 대한 결과이지만, HTTP/2의 Status Code는 HTTP/2 관점에서의 Data 전송 및 라우팅 결과를 나타낸다. 예를들어 Client가 gRPC를 통해서 Server로 존재하지 않는 Method를 호출할 경우 Status Code는 **UNIMPLEMENTED**으로 응답되지만, HTTP/2의 Status Code는 **200**으로 응답될 수 있다. 왜냐하면 HTTP/2 관점에서는 Data를 성공적으로 주고 받았기 때문이다.
+HTTP/2의 Status Code와 유사하지만 서로 다른 역할을 수행한다. gRPC의 Status Code는 각 RPC 요청에 대한 결과이지만, HTTP/2의 Status Code는 HTTP/2 관점에서의 Data 전송 및 라우팅 결과를 나타낸다. 예를들어 Client가 gRPC를 통해서 Server로 존재하지 않는 Method를 호출할 경우 Status Code는 `UNIMPLEMENTED`으로 응답되지만, HTTP/2의 Status Code는 `200`으로 응답될 수 있다. 왜냐하면 HTTP/2 관점에서는 Data를 성공적으로 주고 받았기 때문이다.
 
 ### 1.4. vs HTTP/1.1 + JSON
 
-gRPC가 현재 주목받는 가장큰 이유는 기존의 HTTP/1.1 + JSON Protocol보다 빠르기 때문이다. HTTP/1.1과 JSON은 Text Protocol인 만큼 성능면에서는 불리하다. gRPC에서 이용하는 HTTP/2와 ProtoBuf는 Binray Protocol인 만큼 상대적을 적은양의 Packet을 주고 받는다. 또한 gRPC는 HTTP/2에서 지원하는 Connection Multiplexing, Server/Client Streaming을 이용하여 효율성을 좀더 끌어 올리고 있다.
+gRPC가 현재 주목받는 가장큰 이유는 기존의 HTTP/1.1 + JSON Protocol보다 빠르기 때문이다. HTTP/1.1과 JSON은 Text Protocol인 만큼 성능면에서는 불리하다. gRPC에서 이용하는 HTTP/2와 ProtoBuf는 Binary Protocol인 만큼 상대적을 적은양의 Packet을 주고 받는다. 또한 gRPC는 HTTP/2에서 지원하는 Connection Multiplexing, Server/Client Streaming을 이용하여 효율성을 좀더 끌어 올리고 있다.
 
 ## 2. 참조
 

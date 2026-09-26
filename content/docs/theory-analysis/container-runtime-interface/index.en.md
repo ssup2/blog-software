@@ -10,7 +10,7 @@ Analyze Container Runtime Interface (CRI).
 
 **Container Runtime Interface** (CRI) means the defined Interface between kubelet and Container Runtime among Kubernetes Components. kubelet operates on all Nodes of Kubernetes Cluster and performs the role of managing Node's Containers using Container Runtime. [Figure 1] shows CRI. CRI communicates using gRPC. Container Runtimes that support CRI receive commands directly from kubelet and control Containers. Container Runtimes that do not support CRI can connect to kubelet through a Layer called CRI Shim.
 
-Docker Container Runtime does not support CRI. Therefore, kubelet controls Docker Container through **dockershim**, a CRI shim developed by Kubernetes. containerd Container Runtime supports CRI internally through **CRI Plugin**. **crictl** command is a command used when controlling containerd through CRI.
+Docker Container Runtime does not support CRI. Therefore, kubelet controls Docker Container through **dockershim**, a CRI shim developed by Kubernetes. containerd Container Runtime supports CRI internally through **CRI Plugin**. `crictl` command is a command used when controlling containerd through CRI.
 
 ## 1.1. Interface
 
@@ -46,7 +46,7 @@ service ImageService {
 }
 ```
 
-[File 1] shows a part of CRI's protobuf file. Through protobuf file, you can identify what Interface CRI defines. In Runtime Service, you can see functions that manage Containers and Pods, which are collections of Containers. In Image Service, you can see functions that manage Container Images.
+[File 1] shows a part of CRI's protobuf file. Through protobuf file, you can identify what Interface CRI defines. In `RuntimeService`, you can see functions that manage Containers and Pods, which are collections of Containers. In `ImageService`, you can see functions that manage Container Images.
 
 ## 2. References
 

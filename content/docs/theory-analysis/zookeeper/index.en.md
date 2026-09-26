@@ -22,7 +22,7 @@ ZNode information is stored in In-memory DB. Replication of In-memory DB can be 
 
 {{< figure caption="[Figure 2] ZooKeeper ZNode" src="images/zookeeper-znode.png" width="700px" >}}
 
-ZooKeeper stores Data and creates hierarchies in **ZNode** units. [Figure 2] shows the Data Model composed of ZNodes. ZNodes are structured in a Tree form based on Root, like a File System. Each ZNode can have Data (byte[]) and Child Nodes.
+ZooKeeper stores Data and creates hierarchies in **ZNode** units. [Figure 2] shows the Data Model composed of ZNodes. ZNodes are structured in a Tree form based on Root, like a File System. Each ZNode can have Data (`byte[]`) and Child Nodes.
 
 ZNodes are classified into **Persistent Nodes** and **Ephemeral Nodes**. Persistent Nodes are Nodes that remain even if Clients terminate. Ephemeral Nodes are Nodes that disappear when Clients terminate and cannot have Children. Also, ZNodes can be classified into **Sequence Nodes** and regular Nodes. Sequence Nodes have numbers appended after the Node name when created, and the numbers do not overlap. Both Persistent Nodes and Ephemeral Nodes can become Sequence Nodes. Through Server's Atomic Broadcast, ZNode create/change/delete operations show Sequential Consistency and Atomicity characteristics from the Client's perspective.
 
@@ -41,8 +41,8 @@ Various functionalities required in distributed system environments can be imple
 Ephemeral Nodes are Nodes that disappear when the Client that created the Ephemeral Node disconnects from the Server Cluster. Therefore, Machine status can be easily identified using Ephemeral Nodes.
 
 * Install Clients on each Machine and connect them to Server Cluster.
-* Connected Clients create an Ephemeral Node with a unique ID as the name under a specific Node, like the machine Node in the first figure. Then register a Watcher to detect machine Node.
-* When Client connection terminates and Ephemeral Node disappears, Events are delivered to all Clients that registered machine Node Watcher.
+* Connected Clients create an Ephemeral Node with a unique ID as the name under a specific Node, like the `machine` Node in the first figure. Then register a Watcher to detect `machine` Node.
+* When Client connection terminates and Ephemeral Node disappears, Events are delivered to all Clients that registered `machine` Node Watcher.
 * Clients that received Events can identify Machine termination status through other Clients' termination information.
 
 #### 1.4.2. Distributed Lock
@@ -50,10 +50,10 @@ Ephemeral Nodes are Nodes that disappear when the Client that created the Epheme
 Distributed Locks can be implemented using the characteristic that Sequence Node numbers are not created with duplicates.
 
 * Install Clients on each Node.
-* Clients that want to acquire Lock connect to Server Cluster and then create an Ephemeral/Sequence Node under a specific Node, like the lock Node in the first figure, and check the created Sequence number. Then register a Watcher to detect lock Node and wait.
-* When an Event comes from Watcher, Clients check whether the Node with the smallest Sequence number among lock Node's Child Nodes matches the Sequence number they created.
+* Clients that want to acquire Lock connect to Server Cluster and then create an Ephemeral/Sequence Node under a specific Node, like the `lock` Node in the first figure, and check the created Sequence number. Then register a Watcher to detect `lock` Node and wait.
+* When an Event comes from Watcher, Clients check whether the Node with the smallest Sequence number among `lock` Node's Child Nodes matches the Sequence number they created.
 * If the numbers match, the Client acquires Lock and performs operations. After operations are completed, it disconnects.
-* When connection is terminated, Ephemeral Node disappears, so lock Node Watcher generates Events again and delivers them to Clients.
+* When connection is terminated, Ephemeral Node disappears, so `lock` Node Watcher generates Events again and delivers them to Clients.
 
 ## 2. References
 

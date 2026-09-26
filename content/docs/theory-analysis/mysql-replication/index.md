@@ -30,7 +30,7 @@ Master DB는 Transaction 수행 중 Slave DB로 인한 추가적인 동작을 �
 
 {{< figure caption="[Figure 3] MySQL Master-Slave Semi-sync Replication 과정" src="images/master-slave-semi-sync-replication.png" width="900px" >}}
 
-[Figure 3]은 Semi-sync Replication 과정을 나타내고 있다. Semi-sync Replication은 Master DB가 Slave DB로부터 Relay Log 기록이 완료되었다는 ACK를 받고 Transaction을 진행하는 방식이다. 따라서 Async Replication 방식에 비해서 좀더 많은 DB 성능저하가 발생하지만, Master-Slave DB 사이의 동기화를 좀더 보장해준다. Semi-sync Replicaiton 방식에는 Master DB가 Slave DB에게 DB 변경 내용을 언제 전달하냐에 따라서 AFTER-COMMIT, AFTER-SYNC 2가지 방식으로 구분된다.
+[Figure 3]은 Semi-sync Replication 과정을 나타내고 있다. Semi-sync Replication은 Master DB가 Slave DB로부터 Relay Log 기록이 완료되었다는 ACK를 받고 Transaction을 진행하는 방식이다. 따라서 Async Replication 방식에 비해서 좀더 많은 DB 성능저하가 발생하지만, Master-Slave DB 사이의 동기화를 좀더 보장해준다. Semi-sync Replicaiton 방식에는 Master DB가 Slave DB에게 DB 변경 내용을 언제 전달하냐에 따라서 `AFTER-COMMIT`, `AFTER-SYNC` 2가지 방식으로 구분된다.
 
 만약 Master DB가 Slave DB로부터 Relay Log를 받지 못하면 Transaction은 중단된다. 이러한 Transcation 중단은 다수의 Slave DB를 두어 최소화 할 수 있다. Master DB는 모든 Slave DB에게 DB 변경 내용을 전달하지만 하나의 Slave DB로부터 Relay Log ACK를 받으면 Transaction을 진행하기 때문이다.
 

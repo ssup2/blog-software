@@ -19,7 +19,7 @@ $ sudo ln -s /opt/certbot/bin/certbot /usr/local/bin/certbot
 $ sudo /opt/certbot/bin/pip install certbot-dns-route53
 ```
 
-Install certbot and certbot-dns-route53 Plugin for certificate creation.
+Install `certbot` and `certbot-dns-route53` Plugin for certificate creation.
 
 ## 3. letsencrypt IAM User Creation & Configuration, Access Key Generation
 
@@ -47,7 +47,7 @@ $ aws iam create-access-key --user-name letsencrypt
 }
 ```
 
-Create the letsencrypt IAM account used by certbot and the Access Key for the letsencrypt IAM account.
+Create the `letsencrypt` IAM account used by `certbot` and the Access Key for the `letsencrypt` IAM account.
 
 ## 4. Policy Application to letsencrypt IAM User
 
@@ -70,7 +70,7 @@ Create the letsencrypt IAM account used by certbot and the Access Key for the le
 }
 ```
 
-Create the letsencrypt-policy.json file with the contents of [File 1] for the Policy for the letsencrypt IAM account.
+Create the `letsencrypt-policy.json` file with the contents of [File 1] for the Policy for the `letsencrypt` IAM account.
 
 ```shell
 $ aws iam create-policy --policy-name letsencrypt-policy --policy-document file://letsencrypt-policy.json
@@ -92,7 +92,7 @@ $ aws iam create-policy --policy-name letsencrypt-policy --policy-document file:
 $ aws iam attach-user-policy --user-name letsencrypt --policy-arn arn:aws:iam::727618787612:policy/letsencrypt-policy
 ```
 
-Create a Policy using [File 1] and configure it for the letsencrypt IAM account.
+Create a Policy using [File 1] and configure it for the `letsencrypt` IAM account.
 
 ## 5. Certificate Creation Using certbot
 
@@ -102,7 +102,7 @@ aws-access-key-id={AWS-Access-ID}
 aws-secret-access-key={AWS-Secret-Key}
 ```
 
-Create the ~/.aws/credentials file used by certbot with the contents of [File 2].
+Create the `~/.aws/credentials` file used by `certbot` with the contents of [File 2].
 
 ```shell
 $ cd ~ && mkdir certbot && cd certbot
@@ -126,7 +126,7 @@ If you like Certbot, please consider supporting our work by:
  * Donating to EFF:                    https://eff.org/donate-le
 ```
 
-Create a certificate using certbot.
+Create a certificate using `certbot`.
 
 ## 6. Register Created Certificate in AWS Certificate Manager
 

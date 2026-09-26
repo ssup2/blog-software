@@ -28,7 +28,7 @@ func main() {
 }
 ```
 
-The net/http/pprof Package is a Package used for Profiling Apps that continue to run like Servers. Using the pprof Package, you can easily create HTTP Endpoints in Apps to obtain Profiles. [Code 1] shows how to use the net/http/pprof Package. Initialize the net/http/pprof Package and run the HTTP Server through the http Package.
+The `net/http/pprof` Package is a Package used for Profiling Apps that continue to run like Servers. Using the `pprof` Package, you can easily create HTTP Endpoints in Apps to obtain Profiles. [Code 1] shows how to use the `net/http/pprof` Package. Initialize the `net/http/pprof` Package and run the HTTP Server through the `http` Package.
 
 ```go {caption="[Code 2] net/http/pprof init() Function", linenos=table}
 func init() {
@@ -40,7 +40,7 @@ func init() {
 }
 ```
 
-[Code 2] shows the `init()` function called when initializing the net/http/pprof Package. You can see that 5 HTTP Endpoints are registered with the HTTP Server. Although not shown in [Code 2], there are also various Endpoints under the Index Handler to obtain Profiles. You can obtain the following Profiles through "Get" requests to the following Endpoints.
+[Code 2] shows the `init()` function called when initializing the `net/http/pprof` Package. You can see that 5 HTTP Endpoints are registered with the HTTP Server. Although not shown in [Code 2], there are also various Endpoints under the `Index` Handler to obtain Profiles. You can obtain the following Profiles through `Get` requests to the following Endpoints.
 
 * **CPU** : http://localhost:6060/debug/pprof/profile
 * **Memory Heap** : http://localhost:6060/debug/pprof/heap
@@ -49,7 +49,7 @@ func init() {
 * **Goroutine** : http://localhost:6060/debug/pprof/goroutine
 * **Mutex** : http://localhost:6060/debug/pprof/mutex
 
-You can set how many seconds to perform Profiling using the **seconds** Query String on all HTTP Endpoints.
+You can set how many seconds to perform Profiling using the `seconds` Query String on all HTTP Endpoints.
 
 * `seconds` : http://localhost:6060/debug/pprof/profile?seconds=30
 
@@ -110,7 +110,7 @@ func main() {
 }
 ```
 
-The runtime/profile Package is a Package used for Profiling Apps that run once and terminate like CLI (Command Line Interface). [Code 3] shows an example of the runtime/profile Package. The runtime/profile Package can only obtain two Profiles: CPU and Memory Heap. CPU Profile Files are created at the path specified through the cpuprofile Option, and Memory Heap Profiles are created at the path specified through the memprofile Option.
+The `runtime/pprof` Package is a Package used for Profiling Apps that run once and terminate like CLI (Command Line Interface). [Code 3] shows an example of the `runtime/pprof` Package. The `runtime/pprof` Package can only obtain two Profiles: CPU and Memory Heap. CPU Profile Files are created at the path specified through the `cpuprofile` Option, and Memory Heap Profiles are created at the path specified through the `memprofile` Option.
 
 To obtain a CPU Profile, call the `StartCPUProfile()` function at the beginning of Profiling and call the `StopCPUProfile()` function at the end of Profiling. To obtain a Memory Profile, call the `GC()` function and then call the `WriteHeapProfile()` function.
 
@@ -170,18 +170,18 @@ Entering interactive mode (type "help" for commands, "o" for options)
 {% endhighlight %}
 ```
 
-Profiling of Apps that continue to run like Servers can also be performed through the github.com/google/gops Package and gops CLI. Only CPU and Memory Heap Profiles can be obtained. [Code 4] shows how to use the github.com/google/gops Package. Start the gops Agent. Then, as shown in [Shell 3], query the PID through the gops command and then acquire CPU and Memory Profiles and run pprof through the gops pprof-cpu and gops pprof-heap commands.
+Profiling of Apps that continue to run like Servers can also be performed through the `github.com/google/gops` Package and `gops` CLI. Only CPU and Memory Heap Profiles can be obtained. [Code 4] shows how to use the `github.com/google/gops` Package. Start the `gops` Agent. Then, as shown in [Shell 3], query the PID through the `gops` command and then acquire CPU and Memory Profiles and run pprof through the `gops pprof-cpu` and `gops pprof-heap` commands.
 
 ## 2. pprof
 
-Obtained Profiles can be visualized through the [pprof](https://github.com/google/pprof) tool installed along with Golang. If you set the `-http [Port]` Option together, you can access "localhost:[Port]" through a Web Browser to obtain visualized Profiles. It provides visualization in forms such as Top, Graph, Flame Graph, and Peek.
+Obtained Profiles can be visualized through the [pprof](https://github.com/google/pprof) tool installed along with Golang. If you set the `-http [Port]` Option together, you can access `localhost:[Port]` through a Web Browser to obtain visualized Profiles. It provides visualization in forms such as Top, Graph, Flame Graph, and Peek.
 
 ```shell {caption="[Shell 4] Run pprof with CPU profile"}
 $ go tool pprof -http :8080 [Profile File]
 $ go tool pprof -http :8080 [Profile HTTP Endpoint]
 ```
 
-[Shell 4] shows how to use pprof. Specify the Profile HTTP Endpoint set through the net/http/pprof Package or the Profile File obtained through the runtime/pprof Package or Tests along with the `-http` Option.
+[Shell 4] shows how to use pprof. Specify the Profile HTTP Endpoint set through the `net/http/pprof` Package or the Profile File obtained through the `runtime/pprof` Package or Tests along with the `-http` Option.
 
 ### 2.1. Flat, Cum
 
@@ -198,7 +198,7 @@ To understand Profiles visualized through pprof, you must know the concepts of *
 
 ## 3. Profile Types and Analysis
 
-Profile types and analysis are conducted through the example App below. Profiles are set to be exposed through port 6060 through the net/http/pprof Package, and various functions have been developed to apply load.
+Profile types and analysis are conducted through the example App below. Profiles are set to be exposed through port 6060 through the `net/http/pprof` Package, and various functions have been developed to apply load.
 
 * **Example App** : [https://github.com/ssup2/golang-profiling-example](https://github.com/ssup2/golang-profiling-example)
 

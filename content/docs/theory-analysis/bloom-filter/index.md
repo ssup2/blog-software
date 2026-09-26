@@ -24,7 +24,7 @@ Bloom Filter는 Bitmap을 활용하는 방식이기 때문에 적은양의 메�
 
 Cassandra, HBase, Oracle과 같이 Disk에 큰 데이터를 저장하고 관리하는 Database에서 Disk에 데이터 유무를 빠르게 판변하기 위해서 Bloom Filter를 이용하고 있다. Bloom Filter 결과 Data가 없다라고 한다면 Disk에 접근을 수행하지 않으며, Bloom Filter 결과 Data가 있다라고 판단되면 Data가 존재하지 않을수 있는걸 가정하고 Disk에서 탐색 동작을 수행한다. 즉 Bloom Filter를 통해서 Disk 접근을 최소화 하는 용도로 이용하고 있다.
 
-Bloom Filter는 한번 데이터 집합이 구성되면 제거할수 없다는 제약점도 같는다. [Figure 1]에서 구성된 Bloom Filter에서 `hyo` 데이터를 나타내는 Bit를 1에서 0으로 변경한다면 `eun` 데이터도 영향을 받는다는 것을 확인할 수 있다. Bloom Filter의 Data 제거를 못한다는 제약점을 개선한 알고리즘으로 **Cockoo Filter**가 존재한다.
+Bloom Filter는 한번 데이터 집합이 구성되면 제거할수 없다는 제약점도 같는다. [Figure 1]에서 구성된 Bloom Filter에서 `hyo` 데이터를 나타내는 Bit를 1에서 0으로 변경한다면 `eun` 데이터도 영향을 받는다는 것을 확인할 수 있다. Bloom Filter의 Data 제거를 못한다는 제약점을 개선한 알고리즘으로 **Cuckoo Filter**가 존재한다.
 
 ## 2. 참조
 

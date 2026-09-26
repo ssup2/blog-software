@@ -30,7 +30,7 @@ spec:
 
 Retry Policy can be configured through the `http.retries` field of Virtual Service. The meaning of each field is as follows. [File 1] shows an example of applying Retry Policy.
 
-* `attempts` : Sets the maximum number of retries. Although it may vary depending on the `http.timeout` field and `perTryTimeout` field values, the maximum number of requests is `attempts` field value + 1. Therefore, if the attempts value is `3`, a maximum of 4 requests are sent. The default value is `2`, and if set to `0`, no retry is performed.
+* `attempts` : Sets the maximum number of retries. Although it may vary depending on the `http.timeout` field and `perTryTimeout` field values, the maximum number of requests is `attempts` field value + 1. Therefore, if the `attempts` value is `3`, a maximum of 4 requests are sent. The default value is `2`, and if set to `0`, no retry is performed.
 * `perTryTimeout` : Sets the timeout for each retry. It is set with units in the form of `1h`, `1m`, `1s`, `1ms`, and the minimum value is `1ms`. If no value is specified, the same timeout value as the `http.timeout` field is set.
 * `retryOn` : Sets retry conditions. You can set the following HTTP and gRPC Retry Policy conditions provided by Envoy. The default value is `connect-failure,refused-stream,unavailable,cancelled`. The main settings are as follows.
   * HTTP Retry Policy
@@ -168,7 +168,7 @@ content-length: 0
 x-envoy-upstream-service-time: 107
 ```
 
-[Shell 1] shows an example of applying the Kubernetes Manifest for Retry Policy testing and sending requests to the `httpbin` service from inside the `my-shell` pod. The `httpbin` service returns the corresponding Status Code when a request is sent to the `/status/{status_code}` path. Therefore, the curl commands receive `501`, `502`, and `503` Status Code responses respectively.
+[Shell 1] shows an example of applying the Kubernetes Manifest for Retry Policy testing and sending requests to the `httpbin` service from inside the `my-shell` pod. The `httpbin` service returns the corresponding Status Code when a request is sent to the `/status/{status_code}` path. Therefore, the `curl` commands receive `501`, `502`, and `503` Status Code responses respectively.
 
 ```shell {caption="[Shell 2] my-shell istio-proxy Log"}
 $ kubectl logs my-shell istio-proxy
@@ -177,7 +177,7 @@ $ kubectl logs my-shell istio-proxy
 [2026-08-24T23:28:47.035Z] "HEAD /status/503" 503 retry_attempts=4 flags=URX details=via_upstream
 ```
 
-[Shell 2] shows an example of checking the istio-proxy log of the `my-shell` pod afterwards. Since no retry occurred for 501, 502 Status Codes, `retry_attempts=1` was recorded, and since retry occurred for 503 Status Code, `retry_attempts=4` was recorded.
+[Shell 2] shows an example of checking the `istio-proxy` log of the `my-shell` pod afterwards. Since no retry occurred for `501`, `502` Status Codes, `retry_attempts=1` was recorded, and since retry occurred for `503` Status Code, `retry_attempts=4` was recorded.
 
 ```shell {caption="[Shell 3] httpbin istio-proxy Log"}
 $ kubectl logs httpbin-7598dddc74-5zfpx istio-proxy
@@ -189,7 +189,7 @@ $ kubectl logs httpbin-7598dddc74-5zfpx istio-proxy
 [2026-08-24T23:28:47.141Z] "HEAD /status/503" 503 retry_attempts=1 flags=- details=via_upstream
 ```
 
-[Shell 3] shows an example of checking the istio-proxy log of the `httpbin` pod that serves as a server. While the 501, 502 Status Code requests were recorded only once since no retry occurred, the 503 Status Code request was recorded a total of 4 times due to the retries performed by the Sidecar Proxy of the `my-shell` pod. Since retries are performed by the Sidecar Proxy of the client pod, each retry is handled as a separate request from the perspective of the server pod's Sidecar Proxy, so `retry_attempts=1` is recorded for every request.
+[Shell 3] shows an example of checking the `istio-proxy` log of the `httpbin` pod that serves as a server. While the `501`, `502` Status Code requests were recorded only once since no retry occurred, the `503` Status Code request was recorded a total of 4 times due to the retries performed by the Sidecar Proxy of the `my-shell` pod. Since retries are performed by the Sidecar Proxy of the client pod, each retry is handled as a separate request from the perspective of the server pod's Sidecar Proxy, so `retry_attempts=1` is recorded for every request.
 
 ## 2. References
 

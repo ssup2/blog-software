@@ -339,18 +339,18 @@ Even without any Istio CR applied, istiod builds the default configuration requi
     ...
 ```
 
-[Figure 2] shows the Outbound part of the `client` Pod's Envoy Configuration, and [Config 2] shows the Dump that composes it. Every request sent by the App Container is redirected by iptables to the virtualOutbound Listener on Port `15001`. The role of each Listener in [Config 2] is as follows.
+[Figure 2] shows the Outbound part of the `client` Pod's Envoy Configuration, and [Config 2] shows the Dump that composes it. Every request sent by the App Container is redirected by iptables to the `virtualOutbound` Listener on Port `15001`. The role of each Listener in [Config 2] is as follows.
 
-* **virtualOutbound Listener** : The entry point for all Outbound requests. It does not handle requests directly but branches into three paths. The default path hands the request off, according to the `use_original_dst` setting, to the `0.0.0.0_<Port>` Listener that matches the request's original destination Port. Requests whose original destination is Port `15001` itself are sent to BlackHoleCluster and blocked by the `virtualOutbound-blackhole` Network Filter Chain, and requests with no matching Listener are sent to PassthroughCluster by the `virtualOutbound-catchall-tcp` Network Filter Chain.
+* **`virtualOutbound` Listener** : The entry point for all Outbound requests. It does not handle requests directly but branches into three paths. The default path hands the request off, according to the `use_original_dst` setting, to the `0.0.0.0_<Port>` Listener that matches the request's original destination Port. Requests whose original destination is Port `15001` itself are sent to `BlackHoleCluster` and blocked by the `virtualOutbound-blackhole` Network Filter Chain, and requests with no matching Listener are sent to `PassthroughCluster` by the `virtualOutbound-catchall-tcp` Network Filter Chain.
 * **`0.0.0.0_8080`, `0.0.0.0_9090` Listener** : Per-Port Outbound Listeners. They are created based not on the Ports the Pod itself opens but on the **Ports of Services that exist in the Mesh**, because istiod cannot know in advance which Pod will send requests where, so it creates an Outbound Listener for every Service Port in the Mesh and distributes them to every Sidecar. These Listeners exist even on the `client` Pod, which opens no Port at all, because the `server-a` and `server-b` Services expose the `8080` Port and the `server-c` Service exposes the `9090` Port regardless of `client` itself. No matter how many Services expose the same Port, there is one Listener per Port. Requests are split into two Network Filter Chains according to the Protocol detected by the Listener Filters.
   * **HTTP connections** : Matched by `filter_chain_match` and handled by the HTTP Connection Manager. They are routed by referring to the Route Table of the same name (`"8080"`, `"9090"`) received via RDS.
-  * **Non-HTTP connections** : Matching no Chain, they fall into the `default_filter_chain`. Only TCP-level Metrics are recorded by `istio.stats`, and `tcp_proxy` passes them through to the original destination via PassthroughCluster.
+  * **Non-HTTP connections** : Matching no Chain, they fall into the `default_filter_chain`. Only TCP-level Metrics are recorded by `istio.stats`, and `tcp_proxy` passes them through to the original destination via `PassthroughCluster`.
 
-The Outbound Network Filter configurations are mostly identical across Chains, and what differs per Chain is mainly the part that specifies the destination. In the TCP-family Chains (the virtualOutbound Chains and the `default_filter_chain` of the per-Port Outbound Listeners), `istio.stats` is identical in every Chain down to its configuration, and `tcp_proxy` is also identical among the Chains that send to PassthroughCluster. Only the `tcp_proxy` of the `virtualOutbound-blackhole` Chain differs in its destination Cluster (BlackHoleCluster) and the presence of an Access Log. For the HTTP Connection Manager, only the `route_config_name` of `rds`, which specifies the Route Table to reference, and the `stat_prefix` differ per per-Port Outbound Listener, and the rest of the configuration, including the internal HTTP Filter composition, is all identical.
+The Outbound Network Filter configurations are mostly identical across Chains, and what differs per Chain is mainly the part that specifies the destination. In the TCP-family Chains (the `virtualOutbound` Chains and the `default_filter_chain` of the per-Port Outbound Listeners), `istio.stats` is identical in every Chain down to its configuration, and `tcp_proxy` is also identical among the Chains that send to `PassthroughCluster`. Only the `tcp_proxy` of the `virtualOutbound-blackhole` Chain differs in its destination Cluster (`BlackHoleCluster`) and the presence of an Access Log. For the HTTP Connection Manager, only the `route_config_name` of `rds`, which specifies the Route Table to reference, and the `stat_prefix` differ per per-Port Outbound Listener, and the rest of the configuration, including the internal HTTP Filter composition, is all identical.
 
 The configurations are identical because istiod replicates the same configuration into each Chain when distributing it, and it does not mean Envoy shares Filter instances. Filter instances are newly created per connection (per request for HTTP Filters) and share no state; only the Clusters and Stats that Filters reference by name are shared.
 
-The per-Port Outbound Listener determines the Protocol of a connection with Listener Filters before selecting a Network Filter Chain. The virtualOutbound Listener only hands requests off to the per-Port Listeners, so it has no Listener Filters. The role of each Listener Filter in [Config 2] is as follows.
+The per-Port Outbound Listener determines the Protocol of a connection with Listener Filters before selecting a Network Filter Chain. The `virtualOutbound` Listener only hands requests off to the per-Port Listeners, so it has no Listener Filters. The role of each Listener Filter in [Config 2] is as follows.
 
 * **`tls_inspector`** : Inspects the first Bytes of the connection to determine whether it is TLS. The result is used as the `transport_protocol` value (`tls`, `raw_buffer`) in Network Filter Chain matching.
 * **`http_inspector`** : Determines whether a Plaintext connection is HTTP and its version. The result is used as the `application_protocols` value (`http/1.1`, `h2c`, etc.) in Network Filter Chain matching.
@@ -369,14 +369,14 @@ The Route Table referenced by the last router Filter is created one per Port wit
 
 * **`"8080"` Route Table** : Since the two Services `server-a` and `server-b` both expose the `8080` Port, there are two Virtual Hosts. The `0.0.0.0_8080` Listener receives every request headed to the `8080` Port regardless of the destination Service, so it is not the Listener but the Route Table's Domain matching that distinguishes requests per Service. The `domains` of each Virtual Host lists all the name variants of the Service (`server-a`, `server-a.default`, `server-a.default.svc`, FQDN) and the Service's ClusterIP, so no matter what form the App uses to call, the request's Host Header matches that Service's Virtual Host. Each Virtual Host also contains one default Route named `default` created by istiod, and this Route routes requests to that Service's Cluster (`outbound|8080||server-a...`, `outbound|8080||server-b...`). In the end, requests entering through the same Listener are split into different Services at the Route Table.
 * **`"9090"` Route Table** : Has only the single Virtual Host of the `server-c` Service, and routes to the `outbound|9090||server-c...` Cluster in the same way.
-* **`allow_any` Virtual Host** : The Catch-all Virtual Host at the end of every Route Table, which forwards requests that match no Virtual Host to PassthroughCluster.
+* **`allow_any` Virtual Host** : The Catch-all Virtual Host at the end of every Route Table, which forwards requests that match no Virtual Host to `PassthroughCluster`.
 * **`ignore_port_in_host_matching` setting** : Set commonly on every Route Table; before Domain matching it strips the Port notation, such as `server-a:8080`, from the Host Header. Thanks to this, whether the App calls with or without the Port attached, it matches the same Virtual Host.
 
 The role of each Cluster in [Config 2] is as follows.
 
 * **`outbound|8080||server-a...`, `outbound|8080||server-b...`, `outbound|9090||server-c...` Cluster** : `EDS` Type Clusters created per Mesh Service Port with the name `outbound|<Port>||<Host>`, which receive their Endpoint list via EDS. They are the routing targets of the default Route (`name: default`) in each Route Table. Even `server-a` and `server-b`, which share the `0.0.0.0_8080` Listener and the `"8080"` Route Table, have separate Clusters, because unlike Listeners and Route Tables, Clusters are per Service rather than per Port. The Endpoints received via EDS are the IP:Port of the Pods belonging to the Service, as in the EDS excerpt of [Config 2], and istiod watches Kubernetes Endpoint information and pushes updates whenever Pods appear or disappear. The `tlsMode: istio` marker in the Endpoint metadata indicates that a Sidecar is injected into that Pod, and it matches the Cluster's `transport_socket_matches` so that the mTLS transport socket is selected for connections to this Endpoint.
-* **BlackHoleCluster** : A `STATIC` Type Cluster with no Endpoints at all, so connection attempts fail immediately; it is used by the virtualOutbound Listener to block requests whose original destination is Port `15001` itself.
-* **PassthroughCluster** : An `ORIGINAL_DST` Type Cluster that connects directly to the request's original destination IP:Port without separate Endpoints; it is the routing target of the virtualOutbound Listener's `virtualOutbound-catchall-tcp` Network Filter Chain and the `allow_any` Virtual Host of the Route Tables.
+* **`BlackHoleCluster`** : A `STATIC` Type Cluster with no Endpoints at all, so connection attempts fail immediately; it is used by the `virtualOutbound` Listener to block requests whose original destination is Port `15001` itself.
+* **`PassthroughCluster`** : An `ORIGINAL_DST` Type Cluster that connects directly to the request's original destination IP:Port without separate Endpoints; it is the routing target of the `virtualOutbound` Listener's `virtualOutbound-catchall-tcp` Network Filter Chain and the `allow_any` Virtual Host of the Route Tables.
 
 This Outbound configuration is not tied to a specific Pod, and every Sidecar in the Mesh receives it identically. The scope of the received configuration can be limited with the Sidecar CR.
 
@@ -552,30 +552,30 @@ This Outbound configuration is not tied to a specific Pod, and every Sidecar in 
     type: STATIC
 ```
 
-[Config 3] shows the Inbound configuration of the `server-a` Pod's Envoy Configuration. Requests coming in from other Pods are redirected by iptables to the virtualInbound Listener on Port `15006`. The virtualInbound Listener is the entry point for all Inbound requests, and it obtains information about the request with Listener Filters before selecting a Network Filter Chain. The role of each Listener Filter in [Config 3] is as follows.
+[Config 3] shows the Inbound configuration of the `server-a` Pod's Envoy Configuration. Requests coming in from other Pods are redirected by iptables to the `virtualInbound` Listener on Port `15006`. The `virtualInbound` Listener is the entry point for all Inbound requests, and it obtains information about the request with Listener Filters before selecting a Network Filter Chain. The role of each Listener Filter in [Config 3] is as follows.
 
 * **`original_dst`** : Restores the original destination address (IP:Port) from before the iptables Redirect. The restored Port is used as the `destination_port` value in Network Filter Chain matching.
 * **`tls_inspector`** : Inspects the first Bytes of the connection to determine whether it is TLS, and for TLS connections also reads the ALPN values advertised in the Handshake. The results are used for the `transport_protocol` value in Network Filter Chain matching and the `application_protocols` matching of the `tls` Chain.
 * **`http_inspector`** : Determines whether a Plaintext connection is HTTP and its version.
 
-The virtualInbound Listener has one blocking Chain, five Catch-all Chains, and a Chain pair matched by `destination_port` for each Port exposed by a Service. The role of each Network Filter Chain in [Config 3] is as follows.
+The `virtualInbound` Listener has one blocking Chain, five Catch-all Chains, and a Chain pair matched by `destination_port` for each Port exposed by a Service. The role of each Network Filter Chain in [Config 3] is as follows.
 
-* **`virtualInbound-blackhole` Chain** : Blocks requests whose original destination is Port `15006` itself by sending them to BlackHoleCluster. It plays the same role as the `virtualOutbound-blackhole` Network Filter Chain of the virtualOutbound Listener.
-* **`virtualInbound-catchall-http` Chain** : The Fallback that handles HTTP requests arriving at Ports no Service exposes. Since they pass through the HTTP Connection Manager, HTTP-level Metrics and Access Logs are recorded, and then the Route forwards them to InboundPassthroughCluster.
+* **`virtualInbound-blackhole` Chain** : Blocks requests whose original destination is Port `15006` itself by sending them to `BlackHoleCluster`. It plays the same role as the `virtualOutbound-blackhole` Network Filter Chain of the `virtualOutbound` Listener.
+* **`virtualInbound-catchall-http` Chain** : The Fallback that handles HTTP requests arriving at Ports no Service exposes. Since they pass through the HTTP Connection Manager, HTTP-level Metrics and Access Logs are recorded, and then the Route forwards them to `InboundPassthroughCluster`.
   * **For Sidecar mTLS** : Selects mTLS connections created by Sidecars with the ALPN `istio-http/1.0`·`istio-http/1.1`·`istio-h2` Match, and performs TLS Termination.
   * **For Plaintext** : Selects Plaintext HTTP connections with the `http/1.1`·`h2c` Match.
-* **`virtualInbound` Chain** : The final Fallback that handles all remaining connections not caught even by the HTTP Catch-all. `tcp_proxy` records only TCP-level information and forwards to InboundPassthroughCluster. The Plaintext and other-TLS Chains have only `transport_protocol` as their Match condition, so any connection is guaranteed to be caught, which is why virtualInbound has no `default_filter_chain`, unlike the per-Port Outbound Listener.
+* **`virtualInbound` Chain** : The final Fallback that handles all remaining connections not caught even by the HTTP Catch-all. `tcp_proxy` records only TCP-level information and forwards to `InboundPassthroughCluster`. The Plaintext and other-TLS Chains have only `transport_protocol` as their Match condition, so any connection is guaranteed to be caught, which is why `virtualInbound` has no `default_filter_chain`, unlike the per-Port Outbound Listener.
   * **For Sidecar mTLS** : Selects mTLS TCP connections created by Sidecars with the ALPN `istio-peer-exchange`·`istio` Match, and performs TLS Termination.
   * **For Plaintext** : Matches with only `transport_protocol: raw_buffer` and receives all remaining Plaintext connections.
   * **For other TLS** : Matches with only `transport_protocol: tls`, and passes TLS connections without Istio ALPN, such as TLS the App handles itself, through still encrypted without Termination.
 * **`tls` Chain** : The Chain that handles Sidecar-to-Sidecar mTLS connections arriving at the `8080` Port, and together with the Plaintext Chain it bears the name `0.0.0.0_8080`. It selects mTLS connections created by the sending Sidecar with the `transport_protocol: tls` and `application_protocols` Match. The values listed in `application_protocols` are all Istio-specific ALPN values: `istio` is the basic marker indicating Sidecar mTLS, `istio-peer-exchange` is the marker indicating that metadata can be exchanged over TCP connections with the Network Filter version of `istio.metadata_exchange`, and `istio-http/1.0`·`istio-http/1.1`·`istio-h2` are values that combine the mTLS marker with the HTTP version inside the Tunnel. TLS connections the App handles itself advertise standard ALPN, so they do not match this Chain. Matched connections have the Client certificate verified according to the `require_client_certificate` setting, TLS is Terminated, and then the request is processed.
 * **`raw_buffer` Chain** : The Chain that handles Plaintext connections. `PERMISSIVE`, Istio's default mTLS Mode, is a Mode that accepts both mTLS and Plaintext connections, meant to keep communication working with Clients that cannot use mTLS, such as Pods without a Sidecar. So in `PERMISSIVE` Mode a `tls` Chain for mTLS and a `raw_buffer` Chain for Plaintext exist as a pair per Port, and switching to `STRICT` Mode, which allows only mTLS connections, removes the `raw_buffer` Chain.
 
-The Catch-all Chains exist because requests can also arrive at Ports not declared in any Service. A Service is not a firewall, so any Port the App has opened can be accessed directly via the Pod IP. Examples include Ports the App opened but did not declare in a Service, Metrics Ports that Prometheus scrapes directly via the Pod IP, and direct Pod communication through a Headless Service. Pod-to-Pod communication that was possible in Kubernetes must remain possible even after the Sidecar is injected, so istiod creates Catch-all Chains that pass such requests through to the App instead of blocking them. This is symmetrical to the Outbound side passing requests headed to destinations not registered in the Mesh through PassthroughCluster.
+The Catch-all Chains exist because requests can also arrive at Ports not declared in any Service. A Service is not a firewall, so any Port the App has opened can be accessed directly via the Pod IP. Examples include Ports the App opened but did not declare in a Service, Metrics Ports that Prometheus scrapes directly via the Pod IP, and direct Pod communication through a Headless Service. Pod-to-Pod communication that was possible in Kubernetes must remain possible even after the Sidecar is injected, so istiod creates Catch-all Chains that pass such requests through to the App instead of blocking them. This is symmetrical to the Outbound side passing requests headed to destinations not registered in the Mesh through `PassthroughCluster`.
 
-The virtualInbound Network Filter configurations are mostly identical across Chains, and what differs per Chain is mainly the part that specifies the destination. `istio.metadata_exchange` is identical in every Chain, and `istio.stats` is identical down to its configuration in every TCP-family Chain. `tcp_proxy` is identical among the TCP Catch-all Chains, and only the `virtualInbound-blackhole` Chain differs in its destination Cluster (BlackHoleCluster) and the presence of an Access Log.
+The `virtualInbound` Network Filter configurations are mostly identical across Chains, and what differs per Chain is mainly the part that specifies the destination. `istio.metadata_exchange` is identical in every Chain, and `istio.stats` is identical down to its configuration in every TCP-family Chain. `tcp_proxy` is identical among the TCP Catch-all Chains, and only the `virtualInbound-blackhole` Chain differs in its destination Cluster (`BlackHoleCluster`) and the presence of an Access Log.
 
-The HTTP Connection Manager is also identical in every Chain that has one, except for the `route_config` that specifies the destination (InboundPassthroughCluster for the Catch-all Chains, `inbound|8080||` for the `0.0.0.0_8080` Chains) and the `stat_prefix`. Accordingly, the internal HTTP Filter composition is exactly the same in every Chain, and when an HTTP Filter is inserted due to an Istio CR, it is reflected identically in every Chain. [Config 3] shows only the one from the mTLS Chain. The Inbound Filter composition is also mostly the same as the Outbound one, with only the following two differences.
+The HTTP Connection Manager is also identical in every Chain that has one, except for the `route_config` that specifies the destination (`InboundPassthroughCluster` for the Catch-all Chains, `inbound|8080||` for the `0.0.0.0_8080` Chains) and the `stat_prefix`. Accordingly, the internal HTTP Filter composition is exactly the same in every Chain, and when an HTTP Filter is inserted due to an Istio CR, it is reflected identically in every Chain. [Config 3] shows only the one from the mTLS Chain. The Inbound Filter composition is also mostly the same as the Outbound one, with only the following two differences.
 
 * **Additional `istio.metadata_exchange` Network Filter** : Present additionally at the front of the Chain, separate from the HTTP Filter version, it performs the same style of metadata exchange even on TCP connections where HTTP Headers cannot be used.
 * **Absence of the `istio.alpn` HTTP Filter** : Inbound is not the side that sends requests to an Upstream, so there is no need to advertise ALPN.
@@ -584,8 +584,8 @@ The role of the Route and Clusters in [Config 3] is as follows.
 
 * **`inbound|8080||` Route** : Unlike Outbound, it does not use RDS but is Inlined into the HTTP Connection Manager as `route_config`, with a simple structure that sends every request to the `inbound|8080||` Cluster. Since there is always only one Route, there is no need to update it dynamically.
 * **`inbound|8080||` Cluster** : An `ORIGINAL_DST` Type that forwards to the request's original destination, the App Container's `8080` Port. It uses `127.0.0.6` as the Source address, which is a Loop-prevention mechanism so that iptables does not redirect Traffic originating from this address back to Outbound.
-* **InboundPassthroughCluster** : The routing target of the Catch-all Chains. An `ORIGINAL_DST` Type Cluster with the same structure as the `inbound|8080||` Cluster, it forwards requests arriving at Ports not exposed by a Service to the App Container with the original destination Port intact.
-* **BlackHoleCluster** : The routing target of the `virtualInbound-blackhole` Chain. Only one BlackHoleCluster exists in Envoy, and it is the same Cluster in [Config 2] that the Outbound `virtualOutbound-blackhole` Chain references.
+* **`InboundPassthroughCluster`** : The routing target of the Catch-all Chains. An `ORIGINAL_DST` Type Cluster with the same structure as the `inbound|8080||` Cluster, it forwards requests arriving at Ports not exposed by a Service to the App Container with the original destination Port intact.
+* **`BlackHoleCluster`** : The routing target of the `virtualInbound-blackhole` Chain. Only one `BlackHoleCluster` exists in Envoy, and it is the same Cluster in [Config 2] that the Outbound `virtualOutbound-blackhole` Chain references.
 
 ### 1.2. Envoy Configuration with Kubernetes Resources
 
@@ -660,7 +660,7 @@ spec:
        locality: {}
 ```
 
-[Config 4] shows the Manifest of a second Pod with the same `app: server-a` Label as the existing server-a Pod. When applied, the new Pod IP is registered in the Endpoints of the `server-a` Service, and istiod detects this and, as shown in [Diff 4], **only adds one Endpoint** to the server-a Cluster's EDS while the Listeners, Route Tables, and Clusters do not change at all (measurement confirmed that the diff of the entire Config Dump excluding EDS is 0 lines). The `workload` marker of the Endpoint identifies which Pod it corresponds to, and the Locality-level `load_balancing_weight` also increases from `1` to `2` following the Endpoint count.
+[Config 4] shows the Manifest of a second Pod with the same `app: server-a` Label as the existing `server-a` Pod. When applied, the new Pod IP is registered in the Endpoints of the `server-a` Service, and istiod detects this and, as shown in [Diff 4], **only adds one Endpoint** to the `server-a` Cluster's EDS while the Listeners, Route Tables, and Clusters do not change at all (measurement confirmed that the diff of the entire Config Dump excluding EDS is 0 lines). The `workload` marker of the Endpoint identifies which Pod it corresponds to, and the Locality-level `load_balancing_weight` also increases from `1` to `2` following the Endpoint count.
 
 Everyday changes such as Replica scaling of a Deployment or Pod replacement during a Rolling Update are all handled by this EDS update alone. Since only the LB target list changes without recreating Listeners or Clusters, the most frequent change in the Mesh is absorbed by the cheapest configuration update.
 
@@ -790,7 +790,7 @@ spec:
 +            ...
 ```
 
-[Config 5] shows the Manifest of the `server-d` Service exposing the `7070` Port, which did not exist in the Mesh, along with its target Pod, and [Diff 5] shows the proxy-config change of the `client` Pod before and after applying it. Since a new Service Port has appeared in the Mesh, **a Cluster, a Listener, and a Route Table are created all at once**. The Cluster is created as an `EDS` Type with the per-Service name `outbound|7070||server-d...`, the Listener is created at the per-Port address `0.0.0.0_7070` with the same structure as the per-Port Outbound Listener in [Config 2], and the Route Table `"7070"` contains the server-d Virtual Host and the Catch-all `allow_any` Virtual Host.
+[Config 5] shows the Manifest of the `server-d` Service exposing the `7070` Port, which did not exist in the Mesh, along with its target Pod, and [Diff 5] shows the proxy-config change of the `client` Pod before and after applying it. Since a new Service Port has appeared in the Mesh, **a Cluster, a Listener, and a Route Table are created all at once**. The Cluster is created as an `EDS` Type with the per-Service name `outbound|7070||server-d...`, the Listener is created at the per-Port address `0.0.0.0_7070` with the same structure as the per-Port Outbound Listener in [Config 2], and the Route Table `"7070"` contains the `server-d` Virtual Host and the Catch-all `allow_any` Virtual Host.
 
 ```yaml {caption="[Config 6] EDS Endpoint Dump of the server-d Cluster", linenos=table}
 # EDS: Endpoints of the server-d Cluster - Pod IP with targetPort
@@ -813,7 +813,7 @@ spec:
             ...
 ```
 
-[Config 6] shows the Endpoint that the server-d Cluster received via EDS. While the Listener address, the Route Table name, and the Cluster name are all based on the Service's `port` value of `7070`, the Endpoint is the combination of the Pod IP and the `targetPort` value of `8080`. In other words, the translation from the Service's `port` to its `targetPort` happens at the **boundary between the Cluster and the Endpoint** in the Envoy configuration, and Envoy connects directly to the Pod IP and targetPort without the help of kube-proxy.
+[Config 6] shows the Endpoint that the `server-d` Cluster received via EDS. While the Listener address, the Route Table name, and the Cluster name are all based on the Service's `port` value of `7070`, the Endpoint is the combination of the Pod IP and the `targetPort` value of `8080`. In other words, the translation from the Service's `port` to its `targetPort` happens at the **boundary between the Cluster and the Endpoint** in the Envoy configuration, and Envoy connects directly to the Pod IP and `targetPort` without the help of kube-proxy.
 
 #### 1.2.3. Service Port Sharing
 
@@ -880,7 +880,7 @@ spec:
          name: allow_any
 ```
 
-When the same server-d Pod is registered this time with a Service exposing the same `8080` Port as the existing `server-a` and `server-b`, as in [Config 7] (the Pod Manifest is omitted since it is the same as [Config 5]), **the Listener does not change at all**, as shown in [Diff 7]. This is because the `0.0.0.0_8080` Listener already exists and there is one Listener per Port. What is added is only the server-d Cluster and the server-d Virtual Host in the `"8080"` Route Table, and the structure from 1.1.1 — where requests entering through the same Listener are split per Service by the Route Table's Domain matching — is confirmed by measurement.
+When the same `server-d` Pod is registered this time with a Service exposing the same `8080` Port as the existing `server-a` and `server-b`, as in [Config 7] (the Pod Manifest is omitted since it is the same as [Config 5]), **the Listener does not change at all**, as shown in [Diff 7]. This is because the `0.0.0.0_8080` Listener already exists and there is one Listener per Port. What is added is only the `server-d` Cluster and the `server-d` Virtual Host in the `"8080"` Route Table, and the structure from 1.1.1 — where requests entering through the same Listener are split per Service by the Route Table's Domain matching — is confirmed by measurement.
 
 #### 1.2.4. TCP Service
 
@@ -968,7 +968,7 @@ spec:
 
 Istio determines the Protocol of a Service Port from the `name` Prefix (`http`, `grpc`, `tcp`, etc.) or the `appProtocol` field, and the structure of the Listener it creates differs accordingly. When only the Port name of the Service in [Config 5] is changed from `http` to `tcp` as in [Config 8], the `0.0.0.0_7070` Listener is **replaced by the `10.96.121.134_7070` Listener bound to the ClusterIP**, as shown in [Diff 8]. This is because TCP Traffic has no Host Header, so the destination Service cannot be distinguished by the Route Table, and the Traffic must be distinguished by the destination IP itself.
 
-The inside of the Listener also becomes simpler. Instead of the HTTP Connection Manager, tcp_proxy connects directly to the server-d Cluster, the Route Table `"7070"` is removed entirely since nothing references it anymore, and the Listener Filters disappear since there is no need to detect the Protocol. On the other hand, the Cluster and its EDS Endpoints do not change, because the Protocol declaration only affects how a request is delivered to the Cluster and has nothing to do with the per-Cluster Endpoint management.
+The inside of the Listener also becomes simpler. Instead of the HTTP Connection Manager, `tcp_proxy` connects directly to the `server-d` Cluster, the Route Table `"7070"` is removed entirely since nothing references it anymore, and the Listener Filters disappear since there is no need to detect the Protocol. On the other hand, the Cluster and its EDS Endpoints do not change, because the Protocol declaration only affects how a request is delivered to the Cluster and has nothing to do with the per-Cluster Endpoint management.
 
 #### 1.2.5. Headless Service
 
@@ -1052,7 +1052,7 @@ spec:
 
 [Config 10] shows the Manifest of an `ExternalName` Type Service pointing to an external Host. In Kubernetes, an ExternalName Service is used as a DNS alias for calling an external Host by a Service name, but applying it makes **no change at all to the Envoy configuration** (measurement confirmed that the diff of the entire Config Dump is 0 lines). istiod does not create a separate Listener or Cluster for an ExternalName Service and treats it only as an alias of the target Host, and since `external.example.com` is not registered in the Mesh, there is no Virtual Host to reflect the alias into.
 
-Accordingly, requests sent to `server-external` go through DNS CNAME resolution and are handled by the Catch-all path (PassthroughCluster), and to register an external Host in the Envoy configuration a ServiceEntry must be used. The alias treatment becomes visible only when `externalName` points to a Host registered in the Mesh, in which case measurement confirmed that the name variants of server-external are added to the `domains` of the target Host's Virtual Host.
+Accordingly, requests sent to `server-external` go through DNS CNAME resolution and are handled by the Catch-all path (`PassthroughCluster`), and to register an external Host in the Envoy configuration a ServiceEntry must be used. The alias treatment becomes visible only when `externalName` points to a Host registered in the Mesh, in which case measurement confirmed that the name variants of `server-external` are added to the `domains` of the target Host's Virtual Host.
 
 #### 1.2.7. ServiceAccount
 
@@ -1103,7 +1103,7 @@ spec:
                  ...
 ```
 
-[Config 11] shows the Manifest that adds, on top of the [Config 5] state, a second server-d Pod using the dedicated ServiceAccount `server-d-sa`. When applied, the only change is that **one `match_subject_alt_names` entry is added** to the mTLS validation configuration of the server-d Cluster, as shown in [Diff 11]. In Istio, a Workload's Identity is derived from its ServiceAccount in the form `spiffe://<trust-domain>/ns/<namespace>/sa/<serviceaccount>`, and the sending Envoy verifies during the mTLS Handshake that the SAN of the peer certificate is included in this list.
+[Config 11] shows the Manifest that adds, on top of the [Config 5] state, a second `server-d` Pod using the dedicated ServiceAccount `server-d-sa`. When applied, the only change is that **one `match_subject_alt_names` entry is added** to the mTLS validation configuration of the `server-d` Cluster, as shown in [Diff 11]. In Istio, a Workload's Identity is derived from its ServiceAccount in the form `spiffe://<trust-domain>/ns/<namespace>/sa/<serviceaccount>`, and the sending Envoy verifies during the mTLS Handshake that the SAN of the peer certificate is included in this list.
 
 So istiod maintains the set of ServiceAccounts used by a Service's Endpoints as the SAN list of that Cluster, and when a Pod using a new ServiceAccount is added to the Service, a CDS update occurs in addition to EDS. This contrasts with 1.2.1, where adding a Pod with the same ServiceAccount updated only EDS.
 
@@ -1151,7 +1151,7 @@ metadata:
 +        zone: zone-a
 ```
 
-[Config 12] shows the Topology Labels attached to the two Worker Nodes (the `region` is common while the `zone` differs per Node), and [Diff 12] shows the EDS change of the server-a Cluster when the server-a Pod is recreated after attaching the Labels. The previously empty `locality` of the Endpoint is filled with the Label values of the kind-worker Node where the Pod is located, because when istiod registers an Endpoint, it looks up the Node via the Pod's `nodeName` and reads its Topology Labels. The locality filled this way becomes the basis for Locality Load Balancing, which prefers Endpoints in the same Zone, and for Traffic distribution across Zones.
+[Config 12] shows the Topology Labels attached to the two Worker Nodes (the `region` is common while the `zone` differs per Node), and [Diff 12] shows the EDS change of the `server-a` Cluster when the `server-a` Pod is recreated after attaching the Labels. The previously empty `locality` of the Endpoint is filled with the Label values of the `kind-worker` Node where the Pod is located, because when istiod registers an Endpoint, it looks up the Node via the Pod's `nodeName` and reads its Topology Labels. The locality filled this way becomes the basis for Locality Load Balancing, which prefers Endpoints in the same Zone, and for Traffic distribution across Zones.
 
 A point to note is that attaching Labels to a Node alone is **not retroactively reflected in already registered Endpoints** (measurement confirmed that the EDS diff after labeling is 0 lines). It is reflected only when the Pod is deleted and recreated so that the Endpoint is registered again, and the Pod IP in [Diff 12] has also changed because of the recreation. In Cloud environments, the Cloud Provider attaches the Topology Labels at Node creation time, so Endpoint localities are registered already filled from the beginning.
 
@@ -1167,11 +1167,11 @@ This section examines the changes made by applying **Istio CRs** (Custom Resourc
 | DestinationRule | - | - | O | - | Additional Cluster created per Subset |
 | ServiceEntry | - | O | O | - | Virtual Host and Cluster added for the external Host |
 | Sidecar | O | O | O | - | Limits the received configuration scope rather than adding configuration |
-| EnvoyFilter | O | - | - | - | Can Patch arbitrary locations depending on applyTo (example is an HTTP Filter) |
-| WorkloadEntry | - | - | O | O | Combined with a ServiceEntry, its address is registered as an Endpoint |
+| EnvoyFilter | O | - | - | - | Can Patch arbitrary locations depending on `applyTo` (example is an HTTP Filter) |
+| WorkloadEntry | - | - | O | O | Combined with a ServiceEntry, its `address` is registered as an Endpoint |
 | WorkloadGroup | - | - | - | - | No change by itself since it is a Template for WorkloadEntry |
 | ProxyConfig | - | - | - | - | Bootstrap configuration, reflected when the Pod is recreated |
-| PeerAuthentication | O | - | - | - | Changes the virtualInbound Network Filter Chains |
+| PeerAuthentication | O | - | - | - | Changes the `virtualInbound` Network Filter Chains |
 | RequestAuthentication | O | - | - | - | Adds the jwt_authn HTTP Filter |
 | AuthorizationPolicy | O | - | - | - | Adds the rbac HTTP Filter |
 | Telemetry | O | - | - | - | Replaces the Listener's Access Logger |
@@ -1256,7 +1256,7 @@ spec:
    static_route_configs:
 ```
 
-A Gateway is **reflected in the Envoy of the Gateway Pod (istio-ingressgateway) selected by its selector**, not in a Sidecar. Although the Gateway CR declares the `80` Port, the Listener is created at `0.0.0.0_8080`, because istiod follows the Port mapping of the istio-ingressgateway Service (the `80` Port → `8080` targetPort in [Config 13]) and creates the Listener at the targetPort where the Traffic actually arrives. The Listener and Route names (`http.8080`) are based on the actual binding port, while the Virtual Host name (`blackhole:80`) is based on the Server Port declared in the Gateway CR. Since no VirtualService is bound to this Gateway yet, every request is handled as `404` by the `blackhole` Virtual Host.
+A Gateway is **reflected in the Envoy of the Gateway Pod (istio-ingressgateway) selected by its `selector`**, not in a Sidecar. Although the Gateway CR declares the `80` Port, the Listener is created at `0.0.0.0_8080`, because istiod follows the Port mapping of the istio-ingressgateway Service (the `80` Port → `8080` `targetPort` in [Config 13]) and creates the Listener at the `targetPort` where the Traffic actually arrives. The Listener and Route names (`http.8080`) are based on the actual binding port, while the Virtual Host name (`blackhole:80`) is based on the Server Port declared in the Gateway CR. Since no VirtualService is bound to this Gateway yet, every request is handled as `404` by the `blackhole` Virtual Host.
 
 #### 1.3.2. VirtualService
 
@@ -1579,7 +1579,7 @@ spec:
          name: allow_any
 ```
 
-The Sidecar CR does not add new configuration to Envoy but **limits the scope of the configuration the Sidecar receives**. By default every Sidecar receives the Clusters, Listeners, and Routes of every service in the Mesh, and limiting the egress hosts to `server-a` removes the Outbound configuration of every other service including `server-b` and `server-c`. The removal looks different depending on the unit of the configuration. Clusters are per Service, so every Cluster except `server-a` is removed; the `9090` Port, exposed only by `server-c`, has its Listener itself removed; and for `server-b`, which shared the Port with `server-a`, the `0.0.0.0_8080` Listener remains and only its Virtual Host in the `"8080"` Route Table is removed. Since this example limits only egress, the Inbound configuration (the virtualInbound Listener) does not change. It is the key means of reducing Sidecar Memory usage and xDS Push cost in large Clusters.
+The Sidecar CR does not add new configuration to Envoy but **limits the scope of the configuration the Sidecar receives**. By default every Sidecar receives the Clusters, Listeners, and Routes of every service in the Mesh, and limiting the egress hosts to `server-a` removes the Outbound configuration of every other service including `server-b` and `server-c`. The removal looks different depending on the unit of the configuration. Clusters are per Service, so every Cluster except `server-a` is removed; the `9090` Port, exposed only by `server-c`, has its Listener itself removed; and for `server-b`, which shared the Port with `server-a`, the `0.0.0.0_8080` Listener remains and only its Virtual Host in the `"8080"` Route Table is removed. Since this example limits only egress, the Inbound configuration (the `virtualInbound` Listener) does not change. It is the key means of reducing Sidecar Memory usage and xDS Push cost in large Clusters.
 
 #### 1.3.6. EnvoyFilter
 
@@ -1648,7 +1648,7 @@ spec:
 
 An EnvoyFilter is a CR that **directly Patches the Envoy configuration** generated by istiod, giving access to Envoy features that other CRs do not abstract. The example inserts a Lua Filter into the Inbound HTTP Filter Chain of the `server-a` Sidecar to add a response Header. `context: SIDECAR_INBOUND` limits the Patch target to the Sidecar's Inbound configuration; the Outbound configuration is specified with `SIDECAR_OUTBOUND` and the Gateway Pod with `GATEWAY`. `applyTo: HTTP_FILTER` means the `http_filters` array of the HTTP Connection Manager is the Patch target.
 
-`operation: INSERT_BEFORE` is an operation that inserts the new Filter before the reference Filter specified by the match's `subFilter`. In [Diff 20] the Lua Filter can be seen added right before the reference Filter `envoy.filters.http.router`, and if `subFilter` is not specified, it is inserted at the front of the array. Since an EnvoyFilter depends directly on Envoy's internal implementation like this, it can break on Istio Upgrades and requires caution.
+`operation: INSERT_BEFORE` is an operation that inserts the new Filter before the reference Filter specified by the `match`'s `subFilter`. In [Diff 20] the Lua Filter can be seen added right before the reference Filter `envoy.filters.http.router`, and if `subFilter` is not specified, it is inserted at the front of the array. Since an EnvoyFilter depends directly on Envoy's internal implementation like this, it can break on Istio Upgrades and requires caution.
 
 #### 1.3.7. WorkloadEntry
 
@@ -1711,7 +1711,7 @@ spec:
 +          load_balancing_weight: 1
 ```
 
-A WorkloadEntry is a CR that **registers a Workload running outside the Kubernetes Cluster into the Mesh in the same way as a Pod**. The representative target is a Server Process running on a VM outside the Cluster. It has no effect on its own and must be used together with a ServiceEntry that selects it via workloadSelector. When the Labels match, the WorkloadEntry's address is registered as an Endpoint (EDS) of the corresponding Outbound Cluster, becoming an LB target in the same way as a Pod's Endpoint.
+A WorkloadEntry is a CR that **registers a Workload running outside the Kubernetes Cluster into the Mesh in the same way as a Pod**. The representative target is a Server Process running on a VM outside the Cluster. It has no effect on its own and must be used together with a ServiceEntry that selects it via `workloadSelector`. When the Labels match, the WorkloadEntry's `address` is registered as an Endpoint (EDS) of the corresponding Outbound Cluster, becoming an LB target in the same way as a Pod's Endpoint.
 
 #### 1.3.8. WorkloadGroup
 
@@ -1732,7 +1732,7 @@ spec:
 
 Applying a WorkloadGroup makes **no change to the Envoy configuration**. A WorkloadGroup is not a resource that registers a Workload into the Mesh by itself, but a Template for WorkloadEntries to be created later.
 
-When istio-agent runs outside the Kubernetes Cluster, it connects to istiod's xDS Server, announcing the WorkloadGroup it belongs to along with its own address. istiod creates a WorkloadEntry object in the Kubernetes API Server by filling the received address into that WorkloadGroup's `template` (serviceAccount, network, etc.), and automatically deletes it if there is no reconnection within a grace period after the connection with istio-agent is lost. The WorkloadEntry created this way is reflected in the Cluster's Endpoints in the same way as the WorkloadEntry of the previous section, so the change in the Envoy configuration appears only at that point.
+When istio-agent runs outside the Kubernetes Cluster, it connects to istiod's xDS Server, announcing the WorkloadGroup it belongs to along with its own `address`. istiod creates a WorkloadEntry object in the Kubernetes API Server by filling the received `address` into that WorkloadGroup's `template` (`serviceAccount`, `network`, etc.), and automatically deletes it if there is no reconnection within a grace period after the connection with istio-agent is lost. The WorkloadEntry created this way is reflected in the Cluster's Endpoints in the same way as the WorkloadEntry of the previous section, so the change in the Envoy configuration appears only at that point.
 
 #### 1.3.9. ProxyConfig
 
@@ -1789,7 +1789,7 @@ spec:
 -          ... (the whole inbound|8080|| Plaintext Chain removed)
 ```
 
-A PeerAuthentication is **reflected in the Network Filter Chains of the Inbound `virtualInbound` Listener of the Workload selected by its selector**. In the default `PERMISSIVE` Mode, a `tls` Chain for mTLS and a `raw_buffer` Chain for Plaintext exist together per Port, but changing to `STRICT` Mode removes all the `raw_buffer` Chains, making non-mTLS connections impossible to even establish.
+A PeerAuthentication is **reflected in the Network Filter Chains of the Inbound `virtualInbound` Listener of the Workload selected by its `selector`**. In the default `PERMISSIVE` Mode, a `tls` Chain for mTLS and a `raw_buffer` Chain for Plaintext exist together per Port, but changing to `STRICT` Mode removes all the `raw_buffer` Chains, making non-mTLS connections impossible to even establish.
 
 The values `istio`, `istio-peer-exchange`, `istio-http/1.1`, and `istio-h2` listed in the `application_protocols` Match of the `tls` Chain are Istio-specific ALPN values that the sending Sidecar advertises during the mTLS Handshake to announce that the connection is an mTLS connection created by a Sidecar. In `PERMISSIVE` Mode, TLS connections handled by the App itself can also arrive at the same Port, so Envoy performs TLS Termination and decrypts only the Sidecar mTLS connections selected by this ALPN condition, and passes other TLS connections through to the App still encrypted.
 
@@ -1912,7 +1912,7 @@ spec:
                    '@type': type.googleapis.com/envoy.extensions.filters.http.grpc_stats.v3.FilterConfig
 ```
 
-An AuthorizationPolicy **adds the `rbac` Filter to the Sidecar's Inbound HTTP Filter Chains**. The example is a DENY policy that rejects requests to the `/admin` path, converted into RBAC Filter Rules, and matching requests are rejected with 403. Since the policy uses L7 attributes (path, Method, etc.), it is implemented as an HTTP Filter, and a separate Network Filter is used for TCP Ports.
+An AuthorizationPolicy **adds the `rbac` Filter to the Sidecar's Inbound HTTP Filter Chains**. The example is a `DENY` policy that rejects requests to the `/admin` path, converted into RBAC Filter Rules, and matching requests are rejected with 403. Since the policy uses L7 attributes (path, Method, etc.), it is implemented as an HTTP Filter, and a separate Network Filter is used for TCP Ports.
 
 #### 1.3.13. Telemetry
 
@@ -1960,7 +1960,7 @@ spec:
 +                    transport_api_version: V3
 ```
 
-A Telemetry is **reflected in the Access Logger, Tracing, and Stats configuration of every Listener and HTTP Connection Manager, regardless of Inbound/Outbound**. The example environment has the global File Logger (`/dev/stdout`) enabled via meshConfig's `accessLogFile`, and when the `otel` Provider (an OpenTelemetry ALS defined in meshConfig's extensionProviders) is specified via Telemetry, every File Logger of the `server-a` Workload selected by the selector is replaced with the OpenTelemetry Logger. Note that the Service the Provider points to must exist in the Cluster for it to be reflected.
+A Telemetry is **reflected in the Access Logger, Tracing, and Stats configuration of every Listener and HTTP Connection Manager, regardless of Inbound/Outbound**. The example environment has the global File Logger (`/dev/stdout`) enabled via `meshConfig`'s `accessLogFile`, and when the `otel` Provider (an OpenTelemetry ALS defined in `meshConfig`'s `extensionProviders`) is specified via Telemetry, every File Logger of the `server-a` Workload selected by the `selector` is replaced with the OpenTelemetry Logger. Note that the Service the Provider points to must exist in the Cluster for it to be reflected.
 
 #### 1.3.14. WasmPlugin
 

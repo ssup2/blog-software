@@ -11,7 +11,7 @@ $ apt install tmux
 $ git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 ```
 
-Install tmux using apt.
+Install tmux using `apt`.
 
 ### 1.2. macOS
 
@@ -19,7 +19,7 @@ Install tmux using apt.
 $ brew install tmux
 ```
 
-Install tmux using brew.
+Install tmux using `brew`.
 
 ## 2. tmux Configuration
 
@@ -64,7 +64,7 @@ if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] &&
 fi
 ```
 
-Add the content from [File 2] to the end of the `~/.bashrc` file to configure tmux to run when the shell starts.
+Add the content from [File 2] to the end of the `~/.bashrc` file to configure `tmux` to run when the shell starts.
 
 ### 3.2. macOS
 
@@ -74,7 +74,7 @@ Add the content from [File 2] to the end of the `~/.bashrc` file to configure tm
 
 `tmux ls && read tmux-session && tmux attach -t ${tmux-session:-default} \|\| tmux new -s ${tmux-session:-default}`
 
-Configure iTerm2 settings as shown in [Figure 1] by adding tmux configuration to "Sends text at start" so that tmux runs when iTerm2 starts.
+Configure iTerm2 settings as shown in [Figure 1] by adding tmux configuration to "Sends text at start" so that `tmux` runs when iTerm2 starts.
 
 {{< figure caption="[Figure 2] tmux clipboard setting with iTerm2" src="images/tmux-clipboard-iterm2.png" width="800px" >}}
 
@@ -95,7 +95,7 @@ Install TPM.
 ctrl + b, I
 ```
 
-Run tmux and press the shortcut keys inside tmux to install plugins.
+Run `tmux` and press the shortcut keys inside tmux to install plugins.
 
 ## 5. References
 

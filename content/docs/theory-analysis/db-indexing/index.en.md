@@ -8,13 +8,13 @@ This document analyzes DB indexing techniques.
 
 {{< figure caption="[Figure 1] DB Indexing" src="images/db-indexing.png" width="600px" >}}
 
-**DB indexing** is literally a technique that improves DB performance by creating an index. [Figure 1] briefly illustrates DB indexing. The table on the right represents a DB table, and the table on the left represents an index based on the State column. The index **sorts** record values in the State column and stores the **ID** of each record value.
+**DB indexing** is literally a technique that improves DB performance by creating an index. [Figure 1] briefly illustrates DB indexing. The table on the right represents a DB table, and the table on the left represents an index based on the `State` column. The index **sorts** record values in the `State` column and stores the **ID** of each record value.
 
 ```sql {caption="[Query 1] SELECT with single WHERE condition"}
 SELECT * FROM Fruit_Info WHERE State = 'NC'
 ```
 
-The DB can use created indexes to improve the performance of specific SQL queries. When executing [Query 1], if there is no index, the DB must read all record values in the Fruit_Info table and check whether the State field value is 'NC'. That is, a table full scan occurs. However, if an index exists, search algorithms such as binary search can be used, so records with the value 'NC' can be found quickly without reading all record values.
+The DB can use created indexes to improve the performance of specific SQL queries. When executing [Query 1], if there is no index, the DB must read all record values in the `Fruit_Info` table and check whether the `State` field value is `NC`. That is, a table full scan occurs. However, if an index exists, search algorithms such as binary search can be used, so records with the value `NC` can be found quickly without reading all record values.
 
 Conversely, when an index exists, the index must also be updated when records are created or deleted, which causes **overhead**. Therefore, indexes should not be created unconditionally in large numbers; they should be applied appropriately according to schema and SQL queries. Note that the DB creates and manages an index on the primary key field by default. Indexes on other user-defined fields can be created and deleted through DDL (Data Definition Language).
 
@@ -30,7 +30,7 @@ In [Figure 2], the red arrow shows the process of accessing the record with Frui
 
 A **non-clustered index** is an index built on **references** that point to actual records stored on disk. Therefore, when using a non-clustered index, only the reference to the record can be accessed, and an additional access step through the reference is required to obtain the record. Thus, slower record access compared to clustered index is a disadvantage. On the other hand, it has the advantage that the non-clustered index does not need to change even when records change. It also has the advantage that multiple non-clustered indexes can be created for one table.
 
-The blue arrow in [Figure 2] shows the process of accessing records with NC state through a non-clustered index. You can see that after finding Fruit IDs with NC state through the non-clustered index, actual records are accessed again through the clustered index. You can also see that the index in [Figure 1] is a non-clustered index. In general, indexes created on columns other than the primary key use non-clustered indexes.
+The blue arrow in [Figure 2] shows the process of accessing records with `NC` state through a non-clustered index. You can see that after finding Fruit IDs with `NC` state through the non-clustered index, actual records are accessed again through the clustered index. You can also see that the index in [Figure 1] is a non-clustered index. In general, indexes created on columns other than the primary key use non-clustered indexes.
 
 ### 1.2. Index Column Selection
 

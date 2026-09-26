@@ -57,7 +57,7 @@ def process_numbers():
 
 **Op** represents the smallest unit of action executed in a workflow. Workflows can be composed by combining these Ops. In Airflow terms, a Task corresponds to an Op in Dagster. **Job** represents a single workflow and can contain one or more Ops.
 
-[Code 1] shows an example of Op and Job. Six action functions are defined: `generate_numbers`, `filter_even_numbers`, `filter_odd_numbers`, `sum_even_numbers`, `sum_odd_numbers`, `sum_two_numbers`, and they are marked as Ops through the `@op` decorator. Also, a `process_numbers` Job function is defined and marked as a Job through the `@job` decorator. You can see that the defined Ops are called in DAG form within the Job function. Through decorators, you can define various metadata such as **Description** or **Tags** along with Object specification.
+[Code 1] shows an example of Op and Job. Six action functions are defined: `generate_numbers`, `filter_even_numbers`, `filter_odd_numbers`, `sum_even_numbers`, `sum_odd_numbers`, `sum_two_sums`, and they are marked as Ops through the `@op` decorator. Also, a `process_numbers` Job function is defined and marked as a Job through the `@job` decorator. You can see that the defined Ops are called in DAG form within the Job function. Through decorators, you can define various metadata such as **Description** or **Tags** along with Object specification.
 
 {{< figure caption="[Figure 2] Dagster Op, Job Example" src="images/dagster-op-job-example.png" width="700px" >}}
 
@@ -109,11 +109,11 @@ process_numbers_asset = define_asset_job(
 
 Asset refers to data created during the workflow process. Not only the final data in the ETL process but also intermediate data created during the ETL process can be defined as Assets. That is, workflows can be understood as a process of data transformation rather than sequential execution of actions, and the Dagster Object used in this case is Asset.
 
-[Code 2] shows an example of Assets. Six Asset functions are defined: `generated_numbers`, `filtered_even_numbers`, `filtered_odd_numbers`, `summed_even_numbers`, `summed_odd_numbers`, `summed_two_numbers`, and they are marked as Assets through the `@asset` decorator. They perform the same role as the Ops in [Code 1], but are centered on Data rather than Action, and you can see that the Asset names use passive voice based on the data `numbers`.
+[Code 2] shows an example of Assets. Six Asset functions are defined: `generated_numbers`, `filtered_even_numbers`, `filtered_odd_numbers`, `summed_even_numbers`, `summed_odd_numbers`, `summed_two_sums`, and they are marked as Assets through the `@asset` decorator. They perform the same role as the Ops in [Code 1], but are centered on Data rather than Action, and you can see that the Asset names use passive voice based on the data `numbers`.
 
-The grammatical difference between Assets and Ops is that Assets receive other Assets as parameters. The parameters of the `filtered_even_numbers` and `filtered_odd_numbers` assets are specified as `generated_numbers`, which means they receive the `generated_numbers` asset as input. Similarly, the parameters of the `summed_two_numbers` asset are specified as `summed_even_numbers` and `summed_odd_numbers` assets, which means they receive the `summed_even_numbers` and `summed_odd_numbers` assets as inputs.
+The grammatical difference between Assets and Ops is that Assets receive other Assets as parameters. The parameters of the `filtered_even_numbers` and `filtered_odd_numbers` assets are specified as `generated_numbers`, which means they receive the `generated_numbers` asset as input. Similarly, the parameters of the `summed_two_sums` asset are specified as `summed_even_numbers` and `summed_odd_numbers` assets, which means they receive the `summed_even_numbers` and `summed_odd_numbers` assets as inputs.
 
-That is, dependencies between Assets can be expressed through Asset parameters, and they are naturally expressed in DAG form. The `define_asset_job` function converts these Assets into a single Job. Selection specifies which Assets to include, and [Code 2] specifies to include Assets belonging to the `numbers` group.
+That is, dependencies between Assets can be expressed through Asset parameters, and they are naturally expressed in DAG form. The `define_asset_job` function converts these Assets into a single Job. `selection` specifies which Assets to include, and [Code 2] specifies to include Assets belonging to the `numbers` group.
 
 {{< figure caption="[Figure 3] Dagster Asset Example" src="images/dagster-asset-example.png" width="1000px" >}}
 
@@ -145,7 +145,7 @@ def get_io_manager():
         })
 ```
 
-[Code 3] shows an example of defining an I/O Manager as an External Resource. The example uses S3PickleIOManager as the I/O Manager and also defines S3 used as the backend as an External Resource. Settings are defined in Python dictionary format.
+[Code 3] shows an example of defining an I/O Manager as an External Resource. The example uses `S3PickleIOManager` as the I/O Manager and also defines S3 used as the backend as an External Resource. Settings are defined in Python dictionary format.
 
 I/O Manager is designed to easily transfer relatively small-sized data and is not designed to quickly transfer very large data of several tens of TB or more through parallel processing. Therefore, when transferring large data, it is effective to store the data in external storage first and then pass the path where the data is stored through the I/O Manager. The I/O Managers that can be used may be limited depending on the Run Launcher or Executor that determines how Ops or Assets are executed.
 
@@ -365,9 +365,9 @@ The main Executors supported by Dagster are as follows.
 Run Coordinator performs workflow scheduling and is configured in the Dagster Instance ([File 1]). The Run Coordinators supported by Dagster are as follows.
 
 * `DefaultRunCoordinator` : When a workflow creation request comes in, it immediately calls the Run Launcher to create a Run. Used in Dagster Web Server and Dagster CLI.
-* `QueuedRunCoordinator` : When a workflow creation request comes in, it stores the request in a queue and then retrieves it according to rules to create a Run. Used in Dagster Daemon. If configured to use QueuedRunCoordinator, Dagster Web Server does not directly process workflow creation requests but passes them to Dagster Daemon.
+* `QueuedRunCoordinator` : When a workflow creation request comes in, it stores the request in a queue and then retrieves it according to rules to create a Run. Used in Dagster Daemon. If configured to use `QueuedRunCoordinator`, Dagster Web Server does not directly process workflow creation requests but passes them to Dagster Daemon.
 
-Dagster Daemon is not an essential Component for Dagster operation. If Dagster Daemon is not present, Schedule Objects, Sensor Objects, and QueuedRunCoordinator cannot be used, but workflow execution is not affected.
+Dagster Daemon is not an essential Component for Dagster operation. If Dagster Daemon is not present, Schedule Objects, Sensor Objects, and `QueuedRunCoordinator` cannot be used, but workflow execution is not affected.
 
 ### 1.5. Compute Log
 

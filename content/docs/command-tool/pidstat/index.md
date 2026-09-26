@@ -2,7 +2,7 @@
 title: pidstat
 ---
 
-process별 Resource 사용량을 출력하는 **pidstat**의 사용법을 정리한다.
+process별 Resource 사용량을 출력하는 `pidstat`의 사용법을 정리한다.
 
 ## 1. pidstat
 

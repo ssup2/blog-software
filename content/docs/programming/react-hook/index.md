@@ -35,7 +35,7 @@ ReactDOM.render(
 // Hello, ssup2, 오후 10:47:59
 ```
 
-`usetState()` Hook은 React Component의 State를 저장하는 용도로 이용되는 Hook이다. 기존의 React Component Class의 state Class 변수를 대체한다. `useState()` Hook의 Parameter로는 State의 초기값을 넘겨준다. `useState()` Hook은 초기값이 설정된 State와 State를 변경할 수 있는 State 변경 함수를 반환한다. [Code 1]에서는 `useState()` Hook를 이용해 Hello Component의 date State 초기화 하고, date State를 변경하는 함수를 이용하여 1초마다 date State를 변경하고 있다.
+`useState()` Hook은 React Component의 State를 저장하는 용도로 이용되는 Hook이다. 기존의 React Component Class의 `state` Class 변수를 대체한다. `useState()` Hook의 Parameter로는 State의 초기값을 넘겨준다. `useState()` Hook은 초기값이 설정된 State와 State를 변경할 수 있는 State 변경 함수를 반환한다. [Code 1]에서는 `useState()` Hook를 이용해 `Hello` Component의 `date` State 초기화 하고, `date` State를 변경하는 함수를 이용하여 1초마다 `date` State를 변경하고 있다.
 
 ### 1.2. useEffect()
 
@@ -153,7 +153,7 @@ ReactDOM.render(
 // + button
 ```
 
-`useReducer()` Hook은 React App의 Global State를 저장하는 용도로 이용하는 Hook이다. 기존의 React Redux를 대체하기 위해서 추가된 Hook이다. `useReducer()` Hook의 Parameter로는 Global State를 Action에 따라 변경하는 Reducer 함수와 Global State의 초기값을 넘겨준다. `useReducer()` Hook은 초기값이 설정된 Global State와 State를 변경할 수 있는 `Dispatch()` 함수를 반환한다. [Code 3]은 `Hello` Component에서 Button을 생성한다. 생성한 Button을 누르면 `Dispatch()` 함수를 통해서 add Action이 발생하고 Count 값을 증가 시킨다.
+`useReducer()` Hook은 React App의 Global State를 저장하는 용도로 이용하는 Hook이다. 기존의 React Redux를 대체하기 위해서 추가된 Hook이다. `useReducer()` Hook의 Parameter로는 Global State를 Action에 따라 변경하는 Reducer 함수와 Global State의 초기값을 넘겨준다. `useReducer()` Hook은 초기값이 설정된 Global State와 State를 변경할 수 있는 `dispatch()` 함수를 반환한다. [Code 3]은 `Hello` Component에서 Button을 생성한다. 생성한 Button을 누르면 `dispatch()` 함수를 통해서 `add` Action이 발생하고 Count 값을 증가 시킨다.
 
 ## 2. 참조
 

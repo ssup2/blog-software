@@ -68,11 +68,11 @@ apparmor module is loaded.
 0 processes are unconfined but have a profile defined.
 ```
 
-[Shell 1] shows the result of querying AppArmor's status using the aa-status command. You can check the Profiles available to AppArmor and Processes that have Profiles applied. AppArmor's information is located in the /sys/kernel/security/apparmor folder, and the aa-status command organizes and displays the contents of the /sys/kernel/security/apparmor folder.
+[Shell 1] shows the result of querying AppArmor's status using the `aa-status` command. You can check the Profiles available to AppArmor and Processes that have Profiles applied. AppArmor's information is located in the `/sys/kernel/security/apparmor` folder, and the `aa-status` command organizes and displays the contents of the `/sys/kernel/security/apparmor` folder.
 
 ### 1.1. AppArmor Profile
 
-AppArmor Profile names can be classified into names starting with `/` and names that do not start with `/`. For Profiles starting with `/`, the Profile name represents the program to which the Profile will be applied. Among the Profile list queried in [Shell 1], you can see the /usr/sbin/tcpdump Profile, and when the /usr/sbin/tcpdump program is executed, the /usr/sbin/tcpdump Profile is automatically applied. For Profiles that do not start with `/`, the Profile must be manually applied using the aa-exec command when executing a specific program. Of course, Profiles starting with `/` can also be applied to specific programs using the aa-exec command. Profiles are located in `/etc/apparmor.d`.
+AppArmor Profile names can be classified into names starting with `/` and names that do not start with `/`. For Profiles starting with `/`, the Profile name represents the program to which the Profile will be applied. Among the Profile list queried in [Shell 1], you can see the `/usr/sbin/tcpdump` Profile, and when the `/usr/sbin/tcpdump` program is executed, the `/usr/sbin/tcpdump` Profile is automatically applied. For Profiles that do not start with `/`, the Profile must be manually applied using the `aa-exec` command when executing a specific program. Of course, Profiles starting with `/` can also be applied to specific programs using the `aa-exec` command. Profiles are located in `/etc/apparmor.d`.
 
 ```text {caption="[File 1] /etc/apparmor.d/test/apparmor-example AppArmor Profile", linenos=table}
 #include <tunables/global>
@@ -94,14 +94,14 @@ profile apparmor-example {
 }
 ```
 
-[File 1] shows an example AppArmor Profile called apparmor-example. It has the following meanings.
+[File 1] shows an example AppArmor Profile called `apparmor-example`. It has the following meanings.
 
-* Can use net_admin, setuid, setgid Capabilities.
-* Can mount proc File System only under the /mnt/proc path.
-* Can read and write the /etc/hosts.allow file.
-* Can read, write, and execute the /root/test.sh file.
-* Can only write the /root/test_file file.
-* Can only use tcp protocol.
+* Can use `net_admin`, `setuid`, `setgid` Capabilities.
+* Can mount `proc` File System only under the `/mnt/proc` path.
+* Can read and write the `/etc/hosts.allow` file.
+* Can read, write, and execute the `/root/test.sh` file.
+* Can only write the `/root/test_file` file.
+* Can only use `tcp` protocol.
 
 ```shell {caption="[Shell 2] Register and Check AppArmor Profile"}
 $ apparmor_parser /etc/apparmor.d/test/apparmor-example
@@ -118,7 +118,7 @@ apparmor module is loaded.
 ...
 ```
 
-[Shell 2] shows the process of registering the written Profile to AppArmor using the apparmor_parser command and checking Profile registration using the aa-status command. After registration is complete, you can check the apparmor-example Profile through the aa-status command.
+[Shell 2] shows the process of registering the written Profile to AppArmor using the `apparmor_parser` command and checking Profile registration using the `aa-status` command. After registration is complete, you can check the `apparmor-example` Profile through the `aa-status` command.
 
 ```shell {caption="[Shell 3] Apply AppArmor to cat, echo Commands"}
 $ echo test > /root/test_file
@@ -129,7 +129,7 @@ $ cat /root/test_file
 apparmor
 ```
 
-[Shell 3] shows an example of applying the apparmor-example Profile using the aa-exec command and executing read/write operations on the "/root/test_file" file. Since only write permission is applied to the `/root/test_file` file in the Profile, you can see that write operations are performed but read operations are not performed.
+[Shell 3] shows an example of applying the `apparmor-example` Profile using the `aa-exec` command and executing read/write operations on the `/root/test_file` file. Since only write permission is applied to the `/root/test_file` file in the Profile, you can see that write operations are performed but read operations are not performed.
 
 ## 2. References
 

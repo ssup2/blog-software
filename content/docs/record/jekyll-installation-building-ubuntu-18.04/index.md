@@ -14,7 +14,7 @@ Build 환경은 다음과 같다.
 $ apt install ruby-full build-essential zlib1g-dev
 ```
 
-Jeykll 구동에 필요한 Ubuntu Package를 설치한다.
+Jekyll 구동에 필요한 Ubuntu Package를 설치한다.
 
 ## 3. Ruby Gem, Jekyll 설치
 
@@ -32,7 +32,7 @@ Jekyll 구동에 필요한 Ruby Gem 및 Jekyll을 설치한다.
 $ bundle exec jekyll serve
 ```
 
-Jekyll Blog의 Root 폴더에서 jekyll serve 명령어를 이용하여 Local에서 Jekyll Blog를 구동하고, 동작을 확인한다.
+Jekyll Blog의 Root 폴더에서 `jekyll serve` 명령어를 이용하여 Local에서 Jekyll Blog를 구동하고, 동작을 확인한다.
 
 *  http://127.0.0.1:4000
 

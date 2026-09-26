@@ -7,7 +7,7 @@ title: PromQL Range Vector Increase Calculation Functions
 PromQL can calculate increase amounts, increase rates, etc. using Range Vectors, and provides the functions `increase()`, `rate()`, `irate()`, `changes()`, `delta()`, `idelta()`, and `deriv()` for this purpose.
 
 {{< table caption="[Table 1] Example Data" >}}
-| Timestamp | Value (http_requests_total) |
+| Timestamp | Value (`http_requests_total`) |
 | --- | --- |
 | 10:00 | 100 |
 | 10:05 | 120 |
@@ -54,7 +54,7 @@ irate(http_requests_total[10m])
 
 The `irate()` function calculates the **increase rate per second** for a given time range. It is a function that calculates the difference between the final value and the immediately previous value of a given Range Vector. It is similar to the `rate()` function, but the `rate()` function calculates the difference between the final value and the initial value, so results differ depending on the time range of the Range Vector, while the `irate()` function calculates the difference between the final value and the immediately previous value, so it always returns the same result even if the time range of the Range Vector changes. Because of this characteristic, the `rate()` function shows overall increase rates, while the `irate()` function better shows sudden increase rates.
 
-In [Query 3], since `10:20` has the value `200` and `10:15` has the value `160`, it returns the value `(200 - 160) / 10m = 40 / 300s = 0.1333`. Although the time range of the given Range Vector is 10m, it uses the value from `10:15` instead of `10:10` for calculation because it uses the immediately previous value of the final value.
+In [Query 3], since `10:20` has the value `200` and `10:15` has the value `160`, it returns the value `(200 - 160) / 10m = 40 / 300s = 0.1333`. Although the time range of the given Range Vector is `10m`, it uses the value from `10:15` instead of `10:10` for calculation because it uses the immediately previous value of the final value.
 
 ### 4. changes() function
 
@@ -90,7 +90,7 @@ idelta(http_requests_total[10m])
 # 200 - 160 = 40
 ```
 
-The `idelta()` function calculates the **increase amount of the last interval** for a given time range. In [Query 6], since `10:20` has the value `200` and `10:15` has the value `160`, it returns the value `200 - 160 = 40`. Although the time range of the given Range Vector is 10m, it uses the value from `10:15` instead of `10:10` for calculation because it uses the immediately previous value of the final value.
+The `idelta()` function calculates the **increase amount of the last interval** for a given time range. In [Query 6], since `10:20` has the value `200` and `10:15` has the value `160`, it returns the value `200 - 160 = 40`. Although the time range of the given Range Vector is `10m`, it uses the value from `10:15` instead of `10:10` for calculation because it uses the immediately previous value of the final value.
 
 ### 7. deriv() function
 

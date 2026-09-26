@@ -7,11 +7,11 @@ title: AWS EKS Cluster 생성 / eksctl CLI 이용 / Ubuntu 18.04
 * Ubuntu 18.04 LTS 64bit, root user
 * EKS Cluster
   * Version 1.18
-  * Subnet 10.0.0.0/16
-* aws CLI
-  * Region ap-northeast-2
+  * Subnet `10.0.0.0/16`
+* `aws` CLI
+  * Region `ap-northeast-2`
   * Version 2.1.34
-* eksctl CLI
+* `eksctl` CLI
   * Version 0.43.0
 
 ## 2. aws CLI 설치
@@ -22,7 +22,7 @@ $ unzip awscliv2.zip
 $ sudo ./aws/install
 ```
 
-aws CLI를 설치한다.
+`aws` CLI를 설치한다.
 
 ```shell
 $ aws configure
@@ -32,7 +32,7 @@ Default region name [None]: ap-northeast-2
 Default output format [None]:
 ```
 
-aws CLI에 인증정보를 설정한다.
+`aws` CLI에 인증정보를 설정한다.
 
 ## 3. eksctl 설치
 
@@ -171,7 +171,7 @@ $ eksctl create cluster -f ssup2-eks-cluster.yaml
 2021-04-06 14:39:57 [✔]  EKS cluster "ssup2-eks-cluster" in "ap-northeast-2" region is ready
 ```
 
-작성한 EKS Cluster Spec과 eksctl CLI를 통해서 EKS Cluster를 생성한다.
+작성한 EKS Cluster Spec과 `eksctl` CLI를 통해서 EKS Cluster를 생성한다.
 
 ## 6. EKS Cluster 동작 확인
 

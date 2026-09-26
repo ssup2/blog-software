@@ -29,13 +29,13 @@ nodes:
 - role: worker
 ```
 
-[File 1]의 내용을 갖는 kind-config.yaml 파일을 작성하여 kind가 1 Master, 2 Worker를 Kubernetes Cluster를 구성하도록 만든다.
+[File 1]의 내용을 갖는 `kind-config.yaml` 파일을 작성하여 kind가 1 Master, 2 Worker를 Kubernetes Cluster를 구성하도록 만든다.
 
 ```shell
 $ kind create cluster --config kind-config.yaml
 ```
 
-작성한 kind-config.yaml 파일을 이용하여 Kubernetes Cluster를 구성한다.
+작성한 `kind-config.yaml` 파일을 이용하여 Kubernetes Cluster를 구성한다.
 
 ## 4. Cluster 확인
 

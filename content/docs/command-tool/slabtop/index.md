@@ -2,7 +2,7 @@
 title: slabtop
 ---
 
-Slab 사용량을 출력하는 **slabtop**의 사용법을 정리한다.
+Slab 사용량을 출력하는 `slabtop`의 사용법을 정리한다.
 
 ## 1. slabtop
 
@@ -52,22 +52,22 @@ Slab Object가 많은 순서대로 Slab 사용량을 출력한다. [Shell 1]은 
 
 Cache는 다수의 Slab의 집합으로 구성되고, 각 Slab은 Slab Object의 집합으로 구성된다. 각 Slab은 Page Size 크기를 갖는다. 일반적으로 Page Size는 4KB이기 때문에 아래와 같은 공식이 성립한다.
 
-* 4KB * SLABS = CACHE SIZE
-* OBJ/SLAB * OBJ SIZE < 4KB
+* 4KB * `SLABS` = `CACHE SIZE`
+* `OBJ/SLAB` * `OBJ SIZE` < 4KB
 
 ### 1.2. slabtop [-s a|b|c|l|v|n|p|s|u ]
 
 특정 기준에 맞게 정렬하여 Slab 사용량을 출력한다. 기준은 아래와 같다.
 
-* `a` : ACTIVE
-* `b` : OBJ/SLAB
-* `c` : CACHE SIZE
-* `l` : SLABS
+* `a` : `ACTIVE`
+* `b` : `OBJ/SLAB`
+* `c` : `CACHE SIZE`
+* `l` : `SLABS`
 * `v` : Active Slab의 개수
-* `n` : NAME
+* `n` : `NAME`
 * `p` : Page당 Slab의 개수
-* `s` : OBJ SIZE
-* `u` : USE
+* `s` : `OBJ SIZE`
+* `u` : `USE`
 
 ## 2. 참고
 

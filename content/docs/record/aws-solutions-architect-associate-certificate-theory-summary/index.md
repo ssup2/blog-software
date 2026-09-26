@@ -60,13 +60,13 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 ### 3.1. Instance Type (Flavor)
 
 * Instance Type Format
-  * <FamilyName><GenerationNum>.<Size>
-    * t3.large / c5.xlarge / p3.2xlarge
+  * `<FamilyName><GenerationNum>.<Size>`
+    * `t3.large` / `c5.xlarge` / `p3.2xlarge`
 * Instance Type
-  * **General Purpose** : t로 시작
-  * **Compute Optimized** : c로 시작
-  * **Memory Optimized** : r,x,z으로 시작
-  * **Storage Optimized** : i,d,h으로 시작
+  * **General Purpose** : `t`로 시작
+  * **Compute Optimized** : `c`로 시작
+  * **Memory Optimized** : `r`,`x`,`z`으로 시작
+  * **Storage Optimized** : `i`,`d`,`h`으로 시작
 * Flavor Scale Up/Down 가능
 * Genration이 높을수록 가성비가 좋아짐
 
@@ -97,8 +97,8 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 * Batch Job을 처리하는데 적합
 * Spot Request Type
   * `one-time` : Spot Instnace를 구동하고 이후에는 관여 X
-  * `persistance` : Spot Instance를 구동하고 이후에도 Spot Instance가 잘 동작하고 있는지 확인, 만약에 동작하고 있지 않다면 Spot Instance를 다시 생성
-    * persistance Type일 경우 Spot Request를 먼저 제거하고 persistance Type 제거 필요
+  * `persistent` : Spot Instance를 구동하고 이후에도 Spot Instance가 잘 동작하고 있는지 확인, 만약에 동작하고 있지 않다면 Spot Instance를 다시 생성
+    * `persistent` Type일 경우 Spot Request를 먼저 제거하고 `persistent` Type 제거 필요
 * Spot Fleets
   * 사용자가 원하는 Instance Type, OS, AZ에 따라서 다수의 Spot Instance를 생성
     * Spot Instance는 단일 AZ, 단일 Flavor만 지정가능
@@ -143,10 +143,10 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 
 ### 3.10. Metadata
 
-* EC2 Instance 내부에서 "http://169.254.169.254/latest"로 접근하여 EC2 Instance의 Meta 정보들 확인 가능
+* EC2 Instance 내부에서 `http://169.254.169.254/latest`로 접근하여 EC2 Instance의 Meta 정보들 확인 가능
 * 다음의 정보들 확인 가능
-  * Instance-IP
-  * Local-IPv4
+  * `Instance-IP`
+  * `Local-IPv4`
   * IAM
   * ETC...
 
@@ -158,7 +158,7 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 
 * Network 기반 Volume Storage
 * 하나의 EBS Volume은 동시에 하나의 EC2 Instance에만 Attach 가능
-  * 예외 적으로 io1, io2 Volume은 동시에 여러개의 EC2 Instance에 Attach 가능 (Multi Attach)
+  * 예외 적으로 `io1`, `io2` Volume은 동시에 여러개의 EC2 Instance에 Attach 가능 (Multi Attach)
 * EBS Volume은 AZ에 종족되며, 동일한 AZ에 위치한 EC2 Instance에만 Attach 가능
 
 #### 4.1.1. EBS Snapshot
@@ -251,14 +251,14 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
   * ECS Task
   * Lambda Function
 * 고정된 Hostname을 갖음
-  * XXX.region.elb.amazonaws.com
+  * `XXX.region.elb.amazonaws.com`
 * Cross-Zone Load Balancing
   * 항상 Enable 상태이며 Disable 불가능
   * 추가 비용 발생 X
 * App Server가 받는 Packet의 Src IP는 ALB IP이기 때문에 App Server는 Packet의 Src IP를 통해서 Client IP를 알 수 없음
-  * X-Forwarded-For Header를 통해서 App Server에게 Client IP를 App Server에게 전달
-  * X-Forwarded-Port Header를 통해서 Client의 Port를 App Server에게 전달
-  * X-Forwarded-Proto Header를 통해서 Client의 Protocol을 App Server에게 전달
+  * `X-Forwarded-For` Header를 통해서 App Server에게 Client IP를 App Server에게 전달
+  * `X-Forwarded-Port` Header를 통해서 Client의 Port를 App Server에게 전달
+  * `X-Forwarded-Proto` Header를 통해서 Client의 Protocol을 App Server에게 전달
 
 ### 5.3. NLB (Network Load Balancer)
 
@@ -291,7 +291,7 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
     * Custom Cookie
       * TODO
     * Application Cookie
-      * AWSALBAPP 이름의 Cookie 이름 이용
+      * `AWSALBAPP` 이름의 Cookie 이름 이용
   * Duration-based Cookie
     * TODO
 
@@ -305,7 +305,7 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 ### 5.7. Connection Draining
 
 * CLB에서는 Connection Draining, ALB/NLB에서는 Deregistration Delay라교 명칭
-* DRAINING 상태에 존재하는 Target (EC2 Instance)은 기존의 TCP Connection은 유지되지만, 신규 TCP Connection은 생성되지 않음
+* `DRAINING` 상태에 존재하는 Target (EC2 Instance)은 기존의 TCP Connection은 유지되지만, 신규 TCP Connection은 생성되지 않음
 * Draining Timeout을 0초로 설정할 경우 Connection Draining 기능 Disable
 
 ### 5.8. ASG (Auto Scaling Group)
@@ -601,7 +601,7 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 * Bucket은 특정 Region 생성 (S3는 Global Service X)
 * Naming Convention
   * 소문자만 이용 가능
-  * _ (Underscore) 이용 불가능
+  * `_` (Underscore) 이용 불가능
   * 3~63 글자
   * IP 이용 불가능
   * 소문자 및 숫자로만 시작 가능
@@ -610,8 +610,8 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 
 * S3의 File 역할
 * 하나의 Key를 가지며 Full Path 역할 수행
-  * s3://<bucket-name>/<object-key>
-  * Ex) s3://ssup2-bucket/root-folder/sub-folder/file.txt
+  * `s3://<bucket-name>/<object-key>`
+  * Ex) `s3://ssup2-bucket/root-folder/sub-folder/file.txt`
     * `ssup2-bucket` : Bucket 이름
     * `root-folder/sub-folder/file.txt` : Object Key
 * 하나의 Object는 최대 5TB
@@ -638,10 +638,10 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
   * **SSE-S3** : AWS S3 Service에서 관리하는 암호화 Key 이용
     * Server Side Encrpytion
     * AES-256 암호화
-    * HTTP Request Header에 "x-amz-server-side-encryption":"AES256" 설정
+    * HTTP Request Header에 `x-amz-server-side-encryption`:`AES256` 설정
   * **SSE-KMS** : AWS KMS Service에서 관리하는 암호화 Key 이용
     * Server Side Encrpytion
-    * HTTP Request Header에 "x-amz-server-side-encryption":"aws:kms" 설정
+    * HTTP Request Header에 `x-amz-server-side-encryption`:`aws:kms` 설정
   * **SSE-C** : 자신만의 암호화 Key 이용
     * AWS에서 암호화 Key 관리 X
     * HTTPS 이용
@@ -675,8 +675,8 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 
 * Static Webserver 기능 제공
 * URL
-  * <bucket-name>.s3-website-<AWS-region>.amazonaws.com
-  * <bucket-name>.s3-website.<AWS-region>.amazonaws.com
+  * `<bucket-name>.s3-website-<AWS-region>.amazonaws.com`
+  * `<bucket-name>.s3-website.<AWS-region>.amazonaws.com`
 * Error
   * 403 Error 발생시 권한 확인 필요
 
@@ -767,7 +767,7 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 
 * **Transition Action** : Object가 생성되고 경과된 시간에 따라서 자동으로 Storage Class를 변경
 * **Expiration Action** : Object가 생성되고 경과된 시간이 지나면 자동으로 Object 삭제
-* **Action Target** : Action은 Object Tag 또는 Object Path Prefix (s3://mybucket/music/*)에 따라서 설정 가능
+* **Action Target** : Action은 Object Tag 또는 Object Path Prefix (`s3://mybucket/music/*`)에 따라서 설정 가능
 * S3 Analysics 기능을 통해서 언제 Standard Class에서 Standard IA Class로 변경하면 좋을지 분석 가능
 
 ### 9.11. Performance
@@ -898,15 +898,15 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 
 * Polling을 통해서 Message 존재 확인 (Event 기반 X)
   * Short Polling
-    * WaitTimeSeconds = 0 or ReceiveMessageWaitTimeSeconds = 0
+    * `WaitTimeSeconds` = 0 or `ReceiveMessageWaitTimeSeconds` = 0
     * 일부 Queue만 확인하며 Message가 존재하지 않더라도 빈 Message 반환
     * 일부 Queue만 확인하기 때문에 Queue에 Message가 존재하고 있더라도 Client에 당장 전달되지 않을 수 있음
   * Long Polling
-    * WaitTimeSeconds > 0 or ReceiveMessageWaitTimeSeconds > 0
+    * `WaitTimeSeconds` > 0 or `ReceiveMessageWaitTimeSeconds` > 0
     * 모든 Queue를 확인하며 최소 하나의 Message가 존재할 경우, Max Message 개수에 도달할 경우, 설정한 Timeout이 도달할 경우에 반환
     * Receive Message 요청 횟수를 줄여 비용 감소 가능
 * 한번에 최대 10개의 Message 수신 가능
-* Message 수신 및 동작 수행후 DeleteMessage API를 통해서 Message 삭제 필요 (ACK)
+* Message 수신 및 동작 수행후 `DeleteMessage` API를 통해서 Message 삭제 필요 (ACK)
 * CloudWatch Metric Queue Length -> CloudWatch Alarm -> ASG Scaling 형태로 구성하여 Consumer Autoscaling 구성 가능
 
 #### 12.1.2. Security
@@ -929,7 +929,7 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 
 #### 12.1.4. Dead Letter Queue
 
-* Message Visibility Timeout이 초과하여 Requeue되는 횟수가 MaximumRecevies를 초과하는 경우 Message는 Dead Letter Queue로 전송
+* Message Visibility Timeout이 초과하여 Requeue되는 횟수가 `MaximumReceives`를 초과하는 경우 Message는 Dead Letter Queue로 전송
 * Debugging, 장애 처리를 위해 이용
 * **Redrive** : Dead Letter Queue에 저장되어 있는 Message를 다시 원래의 Queue로 전송하는 기능
 
@@ -1088,10 +1088,10 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
   * **Memory** : 128MB ~ 10GB
   * **Maximum Execution Time** : 15분
   * **Maximum Env** : 4KB
-  * **Disk Capacity** : tmp DIR : 512MB
+  * **Disk Capacity** : `tmp` DIR : 512MB
   * **Concurrency Executions** : 1000
 * Deployment
-  * Compressed Deployment Size (.zip): 50MB
+  * Compressed Deployment Size (`.zip`): 50MB
   * **Uncompressed Deployment Size** : 250MB
 
 #### 14.1.3. Lambda Edge
@@ -1515,12 +1515,12 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 * 걔정마다 Default VPC 존재
 * 하나의 계정에 최대 5개의 VPC까지 생성 가능 (Softlimit)
 * CIDR
-  * **Min CIDR** : /28 (16 IP Address)
-  * **Max CIDR** : /16 (65536 IP Address)
+  * **Min CIDR** : `/28` (16 IP Address)
+  * **Max CIDR** : `/16` (65536 IP Address)
 * VPC는 Private Network이기 때문에 다음의 Network 영역만 할당 가능
-  * 10.0.0.0 ~ 10.255.255.255 (10.0.0.0/8)
-  * 172.16.0.0 ~ 172.31.255.255 (172.16.0.0/12)
-  * 192.168.0.0 ~ 192.168.255.255 (192.168.0.0/16)
+  * `10.0.0.0` ~ `10.255.255.255` (`10.0.0.0/8`)
+  * `172.16.0.0` ~ `172.31.255.255` (`172.16.0.0/12`)
+  * `192.168.0.0` ~ `192.168.255.255` (`192.168.0.0/16`)
 * VPC끼리 CIDR가 겹치면 안됨
 * 하나의 VPC당 하나의 VPC Router 존재
 
@@ -1528,7 +1528,7 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 
 * Subnet Reserved IP
   * 모든 Subnet마다 5개의 예약된 IP가 존재
-  * Subnet의 CIDR가 10.0.0.0/24일 경우
+  * Subnet의 CIDR가 `10.0.0.0/24`일 경우
   * `10.0.0.0` : Network Address
   * `10.0.0.1` : VPC Router
   * `10.0.0.3` : DNS Server

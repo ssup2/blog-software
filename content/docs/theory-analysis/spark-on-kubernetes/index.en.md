@@ -8,15 +8,15 @@ Spark supports Kubernetes as a Cluster Manager. That is, Spark can use Computing
 
 ### 1.1. Spark Job Submission
 
-There are two ways to submit Spark Jobs to Kubernetes Cluster in Spark: using spark-submit CLI and using Spark Operator. The method of submitting Spark Jobs and Architecture differ depending on each method.
+There are two ways to submit Spark Jobs to Kubernetes Cluster in Spark: using `spark-submit` CLI and using Spark Operator. The method of submitting Spark Jobs and Architecture differ depending on each method.
 
 #### 1.1.1. spark-submit CLI
 
 {{< figure caption="[Figure 1] spark-submit Architecture" src="images/spark-submit-architecture.png" width="1000px" >}}
 
-spark-submit CLI is a tool for submitting Spark Jobs in Spark, and can also submit Spark Jobs to Kubernetes Cluster. The blue arrows in [Figure 1] show the Spark Job processing flow when Spark Job is submitted to Kubernetes Cluster through spark-submit CLI.
+`spark-submit` CLI is a tool for submitting Spark Jobs in Spark, and can also submit Spark Jobs to Kubernetes Cluster. The blue arrows in [Figure 1] show the Spark Job processing flow when Spark Job is submitted to Kubernetes Cluster through `spark-submit` CLI.
 
-This shows the Architecture when submitting Spark Jobs with spark-submit CLI. Driver Pod is created through spark-submit CLI, and Driver Pod creates Executor Pods to process Spark Jobs. Detailed settings for Spark Jobs through spark-submit CLI can be configured through [Property](https://spark.apache.org/docs/latest/configuration.html) settings using "\-\-conf" Parameter or "\-\-properties-file" Parameter.
+This shows the Architecture when submitting Spark Jobs with `spark-submit` CLI. Driver Pod is created through `spark-submit` CLI, and Driver Pod creates Executor Pods to process Spark Jobs. Detailed settings for Spark Jobs through `spark-submit` CLI can be configured through [Property](https://spark.apache.org/docs/latest/configuration.html) settings using `--conf` Parameter or `--properties-file` Parameter.
 
 ```shell {caption="[Shell 1] spark-submit CLI Example"}
 $ spark-submit \
@@ -33,7 +33,7 @@ $ spark-submit \
  local:///opt/spark/examples/src/main/python/pi.py
 ```
 
-[Shell 1] shows an example of submitting a Spark Job to Kubernetes Cluster through spark-submit CLI. When spark-submit CLI runs, it first creates a Driver ConfigMap with configuration information needed for Driver Pod and Spark Job startup. Then, when creating Driver Pod, it sets the previously created Driver ConfigMap as a Volume of Driver Pod, so that Driver inside Driver Pod can reference the contents of Driver ConfigMap.
+[Shell 1] shows an example of submitting a Spark Job to Kubernetes Cluster through `spark-submit` CLI. When `spark-submit` CLI runs, it first creates a Driver ConfigMap with configuration information needed for Driver Pod and Spark Job startup. Then, when creating Driver Pod, it sets the previously created Driver ConfigMap as a Volume of Driver Pod, so that Driver inside Driver Pod can reference the contents of Driver ConfigMap.
 
 ```yaml {caption="[File 1] Driver Pod ConfigMap Example", linenos=table}
 apiVersion: v1
@@ -108,9 +108,9 @@ Afterwards, Driver creates Executor Pods that use Executor ConfigMap as Volume, 
 
 {{< figure caption="[Figure 2] spark-operator Architecture" src="images/spark-operator-architecture.png" width="1000px" >}}
 
-Spark Operator is a tool that helps define Spark Job submission as Kubernetes Objects. [Figure 2] shows the Architecture when submitting Spark Jobs through Spark Operator. Compared to spark-submit CLI's Architecture, the biggest difference is that Users do not use spark-submit CLI but define SparkApplication, ScheduledSparkApplication Objects to submit Spark Jobs.
+Spark Operator is a tool that helps define Spark Job submission as Kubernetes Objects. [Figure 2] shows the Architecture when submitting Spark Jobs through Spark Operator. Compared to `spark-submit` CLI's Architecture, the biggest difference is that Users do not use `spark-submit` CLI but define SparkApplication, ScheduledSparkApplication Objects to submit Spark Jobs.
 
-Both SparkApplication and ScheduledSparkApplication are unique Objects provided by Spark Operator. SparkApplication is used for ad-hoc submission of a single Spark Job, and ScheduledSparkApplication Object is used when Spark Jobs need to be submitted periodically like Cron. When SparkApplication, ScheduledSparkApplication Objects are created, spark-submit CLI inside Spark Operator performs Spark Job submission. Detailed Specs of SparkApplication, ScheduledSparkApplication can be found at [Operator API Page](https://googlecloudplatform.github.io/spark-on-k8s-operator/docs/api-docs.html).
+Both SparkApplication and ScheduledSparkApplication are unique Objects provided by Spark Operator. SparkApplication is used for ad-hoc submission of a single Spark Job, and ScheduledSparkApplication Object is used when Spark Jobs need to be submitted periodically like Cron. When SparkApplication, ScheduledSparkApplication Objects are created, `spark-submit` CLI inside Spark Operator performs Spark Job submission. Detailed Specs of SparkApplication, ScheduledSparkApplication can be found at [Operator API Page](https://googlecloudplatform.github.io/spark-on-k8s-operator/docs/api-docs.html).
 
 ```yaml {caption="[File 3] SparkApplication Example", linenos=table}
 apiVersion: sparkoperator.k8s.io/v1beta2
@@ -163,7 +163,7 @@ spec:
 
 [File 4] shows a ScheduledSparkApplication example. The Template section of ScheduledSparkApplication's Spec is the same as SparkApplication's Spec section. However, Schedule, Concurrency Policy, etc. located in Spec are only available in ScheduledSparkApplication.
 
-Another difference when using Spark Operator compared to using spark-submit CLI is that Spark Operator creates Service and Ingress so that Users can access the Web UI provided by Spark Driver. The green arrows in [Figure 2] show the process of Users accessing Spark Web UI through Spark Driver's Service and Ingress.
+Another difference when using Spark Operator compared to using `spark-submit` CLI is that Spark Operator creates Service and Ingress so that Users can access the Web UI provided by Spark Driver. The green arrows in [Figure 2] show the process of Users accessing Spark Web UI through Spark Driver's Service and Ingress.
 
 ### 1.2. Pod Template
 
@@ -228,7 +228,7 @@ $ spark-submit \
 ...
 ```
 
-[Shell 2] shows an example of specifying Pod Template. Pod Template can be specified through podTemplateFile setting in Spark Config. Driver Pod and Executor Pod can each be specified separately.
+[Shell 2] shows an example of specifying Pod Template. Pod Template can be specified through `podTemplateFile` setting in Spark Config. Driver Pod and Executor Pod can each be specified separately.
 
 ### 1.3. Spark History Server
 
@@ -255,7 +255,7 @@ $ spark-submit \
  local:///opt/spark/examples/src/main/python/pi.py
 ```
 
-The red arrows in [Figure 1] show the process of Event Logs being delivered to users through Spark History Server. When submitting Spark Jobs with spark-submit CLI, Event Log path can be set through eventLog.dir setting in Config Parameter as shown in [Shell 3]. secretKeyRef settings represent Access Key and Secret Access Key stored in Kubernetes Secret to access s3 (s3a://ssup2-spark/history) specified as Event Log path.
+The red arrows in [Figure 1] show the process of Event Logs being delivered to users through Spark History Server. When submitting Spark Jobs with `spark-submit` CLI, Event Log path can be set through `eventLog.dir` setting in Config Parameter as shown in [Shell 3]. `secretKeyRef` settings represent Access Key and Secret Access Key stored in Kubernetes Secret to access s3 (`s3a://ssup2-spark/history`) specified as Event Log path.
 
 ```yaml {caption="[File 6] SparkApplication Example with Event Log", linenos=table}
 apiVersion: sparkoperator.k8s.io/v1beta2
@@ -285,7 +285,7 @@ spec:
     memory: 512m
 ```
 
-The red arrows in [Figure 2] also show the process of Event Logs being delivered to users through Spark History Server. [File 6] shows a SparkApplication with Event Log settings. Event Log path can be set through eventLog.dir setting in sparkConf section.
+The red arrows in [Figure 2] also show the process of Event Logs being delivered to users through Spark History Server. [File 6] shows a SparkApplication with Event Log settings. Event Log path can be set through `eventLog.dir` setting in `sparkConf` section.
 
 ### 1.4. Scheduler for Spark
 
@@ -303,7 +303,7 @@ Using Batch Scheduling techniques helps process Spark Jobs quickly even in envir
 
 ### 1.5. Monitoring with Prometheus
 
-From Spark 3.0 Version, Driver can receive Metrics from Executors and expose Executor Metrics at the ":4040/metrics/executors/prometheus" path. Exposed Executor Metrics can be found at [Link](https://spark.apache.org/docs/latest/monitoring.html#executor-metrics).
+From Spark 3.0 Version, Driver can receive Metrics from Executors and expose Executor Metrics at the `:4040/metrics/executors/prometheus` path. Exposed Executor Metrics can be found at [Link](https://spark.apache.org/docs/latest/monitoring.html#executor-metrics).
 
 ```shell {caption="[Shell 4] spark-submit CLI with Prometheus Monitoring"}
 $ spark-submit \

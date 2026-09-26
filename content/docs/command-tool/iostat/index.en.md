@@ -24,8 +24,8 @@ sdb               0.01         0.29         0.00      25400          0
 
 Displays Block Device I/O statistics and CPU statistics. [Shell 1] shows the output of `iostat` displaying Block Device I/O statistics and CPU statistics. The upper part shows CPU statistics. The output is as follows:
 
-* `user` : User level usage rate of processes without nice value applied
-* `nice` : User level usage rate of processes with nice value applied
+* `user` : User level usage rate of processes without `nice` value applied
+* `nice` : User level usage rate of processes with `nice` value applied
 * `system` : Kernel level usage rate of processes
 * `iowait` : CPU idle rate due to I/O Wait
 * `steal` : CPU usage rate stolen by the hypervisor or other virtual machines when the kernel runs inside a virtual machine controlled by a hypervisor

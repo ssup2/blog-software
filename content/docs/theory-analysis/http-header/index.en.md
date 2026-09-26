@@ -56,7 +56,7 @@ Cache-Control: <cache-directive>
 The `Cache-Control` header is a header for directing cache policies. Here, Cache refers to **Local Cache** located in the browser and **Shared Cache** located in CDN and Proxy servers. [Text 4] shows the format of the `Cache-Control` header. When a client sends a request including the `Cache-Control` header, it means policy direction for Shared Cache, and conversely, when a server sends a response including the `Cache-Control` header, it means policy direction for Local Cache. Therefore, the Cache Directives used by clients and servers are different.
 
 * Client's `<cache-directive>` : Indicates policy direction for Shared Cache.
-  * `max-age=<seconds>` : If Shared Cache has cached data less than seconds, it responds with cached data, and if it has cached data more than seconds, it re-caches new data from the Origin Server and then responds.
+  * `max-age=<seconds>` : If Shared Cache has cached data less than `seconds`, it responds with cached data, and if it has cached data more than `seconds`, it re-caches new data from the Origin Server and then responds.
   * `max-stale=<seconds>` : If Shared Cache has cached data less than `data validity period + seconds`, it responds with cached data, and if it has cached data more than `data validity period + seconds`, it re-caches new data from the Origin Server and then responds.
   * `min-fresh=<seconds>` : If Shared Cache has cached data less than `data validity period - seconds`, it responds with cached data, and if it has cached data more than `data validity period - seconds`, it re-caches new data from the Origin Server and then responds.
   * `no-cache` : Shared Cache must verify original data from the Origin Server before responding. Used together with headers like `If-Modified-Since`, `If-None-Match`.
@@ -64,8 +64,8 @@ The `Cache-Control` header is a header for directing cache policies. Here, Cache
   * `no-transform` : Shared Cache does not transform data.
   * `only-if-cached` : Shared Cache checks if there is cached data and responds with that data if available, otherwise does not respond.
 * Server's `<cache-directive>` : Indicates policy direction for Local Cache or Shared Cache. Multiple Cache Directives can be used.
-  * `max-age=<seconds>` : If Local Cache has cached data less than seconds, it responds with cached data, and if it has cached data more than seconds, it re-caches new data from the Origin Server and then responds.
-  * `s-maxage=<seconds>` : If Shared Cache has cached data less than seconds, it responds with cached data, and if it has cached data more than seconds, it re-caches new data from the Origin Server and then responds.
+  * `max-age=<seconds>` : If Local Cache has cached data less than `seconds`, it responds with cached data, and if it has cached data more than `seconds`, it re-caches new data from the Origin Server and then responds.
+  * `s-maxage=<seconds>` : If Shared Cache has cached data less than `seconds`, it responds with cached data, and if it has cached data more than `seconds`, it re-caches new data from the Origin Server and then responds.
   * `no-cache` : Local Cache must verify original data from the Origin Server before responding.
   * `no-store` : Local Cache does not cache data. The client always receives new data from the Origin Server.
   * `no-transform` : Local Cache does not transform data.
@@ -74,14 +74,14 @@ The `Cache-Control` header is a header for directing cache policies. Here, Cache
   * `private` : Caches data only in Local Cache.
   * `public` : Caches data in both Local Cache and Shared Cache.
   * `immutable` : Indicates that data received from the Origin Server does not change.
-  * `stale-while-revalidate=<seconds>` : When data expires, Local Cache fetches original data from the Origin Server for seconds time, and temporarily responds with cached invalid data while fetching data.
-  * `stale-if-error=<seconds>` : When the Origin Server sends a 5XX response, Local Cache responds with cached data for seconds time.
+  * `stale-while-revalidate=<seconds>` : When data expires, Local Cache fetches original data from the Origin Server for `seconds` time, and temporarily responds with cached invalid data while fetching data.
+  * `stale-if-error=<seconds>` : When the Origin Server sends a 5XX response, Local Cache responds with cached data for `seconds` time.
 
 Generally, clients use the `no-cache` value in Request Headers, and servers use the `no-cache` value in Response Headers.
 
 ### 1.2. Request Header
 
-`Request` Header refers to headers used in requests.
+Request Header refers to headers used in requests.
 
 #### 1.2.1. Host
 
@@ -135,7 +135,7 @@ User-Agent: curl/7.64.1
 User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36
 ```
 
-[Text 10] shows some examples of the `User-Agent` header. It shows examples of curl client and Chrome browser on macOS.
+[Text 10] shows some examples of the `User-Agent` header. It shows examples of `curl` client and Chrome browser on macOS.
 
 #### 1.2.4. If-Modified-Since
 
@@ -263,7 +263,7 @@ X-Forwarded-For: 203.0.113.45, 10.0.0.1, 192.168.10.2
 X-Forwarded-Host: <host>
 ```
 
-The `X-Forwarded-Host` header is used to preserve the host information that the client originally requested. This is because the Host header can be changed when routing requests based on the host. [Text 23] shows the format of the `X-Forwarded-Host` header.
+The `X-Forwarded-Host` header is used to preserve the host information that the client originally requested. This is because the `Host` header can be changed when routing requests based on the host. [Text 23] shows the format of the `X-Forwarded-Host` header.
 
 * `<host>` : Indicates host information.
 

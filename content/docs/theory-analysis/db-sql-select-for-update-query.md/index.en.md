@@ -6,7 +6,7 @@ This document analyzes the SQL `SELECT FOR UPDATE` query.
 
 ## 1. `SELECT FOR UPDATE` Query
 
-The `SELECT FOR UPDATE` query is a query that acquires an exclusive (write) row lock before performing a read operation during SELECT, and the acquired lock is held until the transaction ends. This contrasts with a regular `SELECT` query, which reads an MVCC snapshot without acquiring a lock.
+The `SELECT FOR UPDATE` query is a query that acquires an exclusive (write) row lock before performing a read operation during `SELECT`, and the acquired lock is held until the transaction ends. This contrasts with a regular `SELECT` query, which reads an MVCC snapshot without acquiring a lock.
 
 In a DB environment based on MVCC (Multi-Version Concurrency Control), such as MySQL InnoDB, a regular `SELECT` query operates as consistent read (snapshot read), reading a snapshot from the time the transaction started without acquiring a lock. Therefore, even if another transaction holds an exclusive row lock on that row, a regular `SELECT` query can read snapshot data without waiting.
 

@@ -76,9 +76,9 @@ users:
         value: regional
 ```
 
-[File 1] shows kubelet's kubeconfig, and [File 2] shows kubectl's kubeconfig. Looking at the user section of both kubeconfigs, you can see that they execute the "aws eks get-token" command. The "aws eks get-token" command generates a **Presigned URL** of AWS STS's **GetCallerIdentity API** that identifies who the Identity (target) executing "aws eks get-token" is, and generates a Token by encoding the generated URL. Here, Identity refers to **AWS IAM's User/Role**.
+[File 1] shows kubelet's kubeconfig, and [File 2] shows kubectl's kubeconfig. Looking at the `user` section of both kubeconfigs, you can see that they execute the `aws eks get-token` command. The `aws eks get-token` command generates a **Presigned URL** of AWS STS's **GetCallerIdentity API** that identifies who the Identity (target) executing `aws eks get-token` is, and generates a Token by encoding the generated URL. Here, Identity refers to **AWS IAM's User/Role**.
 
-Presigned URL literally means a pre-assigned URL. To call AWS STS's GetCallerIdentity API, Secrets such as AccessKey/SecretAccessKey are needed, but when calling GetCallerIdentity API using Presigned URL, it can be called without Secrets. The Presigned URL of GetCallerIdentity API delivered through Token is passed to AWS IAM Authenticator and used to identify who the Identity executing the "aws eks get-token" command is.
+Presigned URL literally means a pre-assigned URL. To call AWS STS's GetCallerIdentity API, Secrets such as AccessKey/SecretAccessKey are needed, but when calling GetCallerIdentity API using Presigned URL, it can be called without Secrets. The Presigned URL of GetCallerIdentity API delivered through Token is passed to AWS IAM Authenticator and used to identify who the Identity executing the `aws eks get-token` command is.
 
 ```shell {caption="[Shell 1] aws eks get-token Command Output"}
 $ aws eks get-token --cluster-name ssup2-eks-cluster
@@ -93,14 +93,14 @@ $ aws eks get-token --cluster-name ssup2-eks-cluster
 }
 ```
 
-[Shell 1] shows the output result of the "aws eks get-token" command.
+[Shell 1] shows the output result of the `aws eks get-token` command.
 
 ```shell {caption="[Shell 2] Decode Token"}
 $ base64url decode aHR0cHM6Ly9zdHMuYXAtbm9ydGhlYXN0LTIuYW1hem9uYXdzLmNvbS8_QWN0aW9uPUdldENhbGxlcklkZW50aXR5JlZlcnNpb249MjAxMS0wNi0xNSZYLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFSNVFPRVpQVTRRWFg1SDRGJTJGMjAyMjA0MjYlMkZhcC1ub3J0aGVhc3QtMiUyRnN0cyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjIwNDI2VDE3MzI0MlomWC1BbXotRXhwaXJlcz02MCZYLUFtei1TaWduZWRIZWFkZXJzPWhvc3QlM0J4LWs4cy1hd3MtaWQmWC1BbXotU2lnbmF0dXJlPTIxOGQ4MDQ5NTBlZGMxMWRlZmQ0OWMwYTFkNWZkYWNjMzI0Y2M4MzBmZDZmMDZkNTlhN2Q5NzUwMGZhM2U3Mzg
 https://sts.ap-northeast-2.amazonaws.com/?Action=GetCallerIdentity&Version=2011-06-15&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAR5QOEZPU4QXX5H4F%2F20220426%2Fap-northeast-2%2Fsts%2Faws4_request&X-Amz-Date=20220426T173242Z&X-Amz-Expires=60&X-Amz-SignedHeaders=host%3Bx-k8s-aws-id&X-Amz-Signature=218d804950edc11defd49c0a1d5fdacc324cc830fd6f06d59a7d97500fa3e738
 ```
 
-If you perform base64url decoding on the string after "k8s-aws-v1" in the token of [Shell 1], you can see the Presigned URL of GetCallerIdentity API as shown in [Shell 2].
+If you perform base64url decoding on the string after `k8s-aws-v1` in the `token` of [Shell 1], you can see the Presigned URL of GetCallerIdentity API as shown in [Shell 2].
 
 ```shell {caption="[Shell 3] Decode Token"}
 $ curl -H "x-k8s-aws-id: ssup2-eks-cluster" "https://sts.ap-northeast-2.amazonaws.com/?Action=GetCallerIdentity&Version=2011-06-15&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAR5QOEZPU4QXX5H4F%2F20220426%2Fap-northeast-2%2Fsts%2Faws4_request&X-Amz-Date=20220426T173242Z&X-Amz-Expires=60&X-Amz-SignedHeaders=host%3Bx-k8s-aws-id&X-Amz-Signature=218d804950edc11defd49c0a1d5fdacc324cc830fd6f06d59a7d97500fa3e738"
@@ -116,9 +116,9 @@ $ curl -H "x-k8s-aws-id: ssup2-eks-cluster" "https://sts.ap-northeast-2.amazonaw
 </GetCallerIdentityResponse>
 ```
 
-If you perform a Get request to the Presigned URL of GetCallerIdentity API with the "x-k8s-aws-id: Cluster name" Header, you can identify who the Identity executing the "aws eks get-token" command is. [Shell 3] shows an example of performing a Get request to the Presigned URL of GetCallerIdentity API obtained in [Shell 2]. You can see that the "ssup2" User executed the "aws eks get-token" command.
+If you perform a Get request to the Presigned URL of GetCallerIdentity API with the `x-k8s-aws-id: Cluster name` Header, you can identify who the Identity executing the `aws eks get-token` command is. [Shell 3] shows an example of performing a Get request to the Presigned URL of GetCallerIdentity API obtained in [Shell 2]. You can see that the `ssup2` User executed the `aws eks get-token` command.
 
-AWS IAM Authenticator is registered as an authentication Webhook Server in EKS Cluster's K8s API Server. Therefore, the Token generated by kubelet/kubectl through the "aws eks get-token" command is passed to AWS IAM Authenticator. AWS IAM Authenticator identifies the target executing the "aws eks get-token" command through the process of [Shell 2] and [Shell 3].
+AWS IAM Authenticator is registered as an authentication Webhook Server in EKS Cluster's K8s API Server. Therefore, the Token generated by kubelet/kubectl through the `aws eks get-token` command is passed to AWS IAM Authenticator. AWS IAM Authenticator identifies the target executing the `aws eks get-token` command through the process of [Shell 2] and [Shell 3].
 
 ```yaml {caption="[File 3] aws-auth ConfigMap in kube-system Namespace", linenos=table}
 apiVersion: v1
@@ -146,11 +146,11 @@ metadata:
 ...
 ```
 
-After identifying the Identity executing the "aws eks get-token" command, AWS IAM Authenticator checks which User/Group of EKS Cluster the identified Identity is **Mapped** to. Then AWS IAM Authenticator passes the Mapped EKS Cluster's User/Group to EKS Cluster's K8s API Server.
+After identifying the Identity executing the `aws eks get-token` command, AWS IAM Authenticator checks which User/Group of EKS Cluster the identified Identity is **Mapped** to. Then AWS IAM Authenticator passes the Mapped EKS Cluster's User/Group to EKS Cluster's K8s API Server.
 
-The Mapping information between the Identity executing the "aws eks get-token" command and EKS Cluster's User/Group is stored in the **aws-auth** ConfigMap that exists in the kube-system Namespace. [File 3] shows an example of the "aws-auth" ConfigMap. The mapUsers item is used to Map AWS IAM Users executing the "aws eks get-token" command with EKS Cluster's User/Group, and the mapRoles item is used to Map AWS IAM Roles executing the "aws eks get-token" command with EKS Cluster's User/Group.
+The Mapping information between the Identity executing the `aws eks get-token` command and EKS Cluster's User/Group is stored in the `aws-auth` ConfigMap that exists in the `kube-system` Namespace. [File 3] shows an example of the `aws-auth` ConfigMap. The `mapUsers` item is used to Map AWS IAM Users executing the `aws eks get-token` command with EKS Cluster's User/Group, and the `mapRoles` item is used to Map AWS IAM Roles executing the `aws eks get-token` command with EKS Cluster's User/Group.
 
-In [File 3], you can see that the ssup2 AWS IAM User is Mapped to EKS Cluster's admin User or system:masters Group. When creating Node Groups in EKS Cluster, AWS IAM Roles used by each Node Group are created, and Node Group's AWS IAM Roles can also be seen in the mapRoles item of [File 3].
+In [File 3], you can see that the `ssup2` AWS IAM User is Mapped to EKS Cluster's `admin` User or `system:masters` Group. When creating Node Groups in EKS Cluster, AWS IAM Roles used by each Node Group are created, and Node Group's AWS IAM Roles can also be seen in the `mapRoles` item of [File 3].
 
 ## 2. References
 

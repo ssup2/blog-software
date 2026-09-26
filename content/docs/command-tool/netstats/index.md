@@ -2,7 +2,7 @@
 title: netstat
 ---
 
-Network 통계 정보를 보여주는 netstat 사용법을 정리한다.
+Network 통계 정보를 보여주는 `netstat` 사용법을 정리한다.
 
 ## 1. netstat
 

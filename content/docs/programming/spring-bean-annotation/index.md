@@ -40,7 +40,7 @@ public class MyConfig {
 }
 ```
 
-`@Configuration`은 Spring에게 **Bean Method**를 포함하고 있는 Class라는걸 알려주기 위한 Annotation이다. 또한 `@Configuration`은 Spring의 Component Scanner에게 Component의 Package를 알려주어, Component Scanner가 Component를 발견 할 수 있도록 도와준다. [Code 2], [Code 3]에서 `@Bean`을 이용하여 `myBeanA`이라는 Bean Method를 정의하고 있다. 또한 `@ComponentScan`을 이용하여 Component Scanner에게 `MyBeanB`가 있는 Package를 알려주고 있다. Configuration은 `@Component`를 상속하고 있다. 따라서 `@Configuration`이 붙은 Class의 Instance 역시 Spring의 Bean으로 관리된다.
+`@Configuration`은 Spring에게 **Bean Method**를 포함하고 있는 Class라는걸 알려주기 위한 Annotation이다. 또한 `@Configuration`은 Spring의 Component Scanner에게 Component의 Package를 알려주어, Component Scanner가 Component를 발견 할 수 있도록 도와준다. [Code 2], [Code 3]에서 `@Bean`을 이용하여 `myBeanA`이라는 Bean Method를 정의하고 있다. 또한 `@ComponentScan`을 이용하여 Component Scanner에게 `MyBeanB`가 있는 Package를 알려주고 있다. `@Configuration`은 `@Component`를 상속하고 있다. 따라서 `@Configuration`이 붙은 Class의 Instance 역시 Spring의 Bean으로 관리된다.
 
 ### 2.1. @Bean
 

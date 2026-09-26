@@ -42,7 +42,7 @@ class Solution {
 ```
 
 * Description
-  * TreeSet을 활용한 중복 제거 및 정렬 기능 활용
+  * `TreeSet`을 활용한 중복 제거 및 정렬 기능 활용
 * Time Complexity
   * O(len(numbers)^2)
   * len(numbers)의 크기만큼 두번의 중복 for Loop 수행

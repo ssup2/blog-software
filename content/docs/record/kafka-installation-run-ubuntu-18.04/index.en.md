@@ -26,9 +26,9 @@ Enter new UNIX password: kafka
 Retype new UNIX password: kafka
 ```
 
-Create a kafka account.
+Create a `kafka` account.
 
-* **Password** : kafka
+* **Password** : `kafka`
 
 ```shell
 $ cd /opt
@@ -45,7 +45,7 @@ Download Kafka and extract it.
 delete.topic.enable = true
 ```
 
-Add the contents of [File 1] to the end of the /opt/kafka/config/server.properties file.
+Add the contents of [File 1] to the end of the `/opt/kafka/config/server.properties` file.
 
 ```text {caption="[File 2] /lib/systemd/system/zookeeper.service", linenos=table}
 ...
@@ -65,7 +65,7 @@ Restart=on-abnormal
 WantedBy=multi-user.target
 ```
 
-Save the contents of [File 2] to /lib/systemd/system/zookeeper.service.
+Save the contents of [File 2] to `/lib/systemd/system/zookeeper.service`.
 
 ```text {caption="[File 3] /lib/systemd/system/kafka.service", linenos=table}
 [Unit]
@@ -83,7 +83,7 @@ Restart=on-abnormal
 WantedBy=multi-user.target
 ```
 
-Save the contents of [File 3] to /lib/systemd/system/kafka.service.
+Save the contents of [File 3] to `/lib/systemd/system/kafka.service`.
 
 ```shell
 $ systemctl daemon-reload
@@ -117,7 +117,7 @@ $ ./kafka-topics.sh --create --zookeeper localhost:2181 \
 --topic HakaseTesting
 ```
 
-Create the HakaseTesting Topic.
+Create the `HakaseTesting` Topic.
 
 ```shell
 $ su - kafka

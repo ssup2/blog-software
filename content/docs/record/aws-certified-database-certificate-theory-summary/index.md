@@ -6,7 +6,7 @@ title: AWS Certified Database 자격증 이론 정리
 
 아래의 정리된 내용을 바탕으로 부족한 내용 정리
 
-* [AWS Solutions Architecture Assosicate](../certificate-aws-solutions-architect-associate)
+* [AWS Solutions Architecture Associate](../certificate-aws-solutions-architect-associate)
 
 ## 2. The Basic
 
@@ -38,7 +38,7 @@ title: AWS Certified Database 자격증 이론 정리
 * 미리 정의된 Schema
 * ACID 특성 충족 및 Join 연산 지원
 * OLTP, OLAP 환경에서 이용
-* Ex) MySQL, PostreSQL, MariaDB, Oracle, Microsoft SQL Server
+* Ex) MySQL, PostgreSQL, MariaDB, Oracle, Microsoft SQL Server
 * Table Index 생성을 통해서 Query 성능 향상
   * Primary Index
   * Secondary Index
@@ -63,11 +63,11 @@ title: AWS Certified Database 자격증 이론 정리
 
 * Relational Database Service
 * VPC 내부에 Cluster 생성
-* EBS를 Volume Storage로 이용하며 Volume Size Auto-scailing 기능 제공
+* EBS를 Volume Storage로 이용하며 Volume Size Auto-scaling 기능 제공
 * Backup 기능 제공
-* Snapsho 기능 제공, Cross AZ 가능
+* Snapshot 기능 제공, Cross AZ 가능
 * CloudWatch를 통한 Monitoring 기능 제공
-* RDS Event를 통한 Event Notificate 제공
+* RDS Event를 통한 Event Notification 제공
 
 ### 3.1. 비용
 
@@ -79,7 +79,7 @@ title: AWS Certified Database 자격증 이론 정리
   * Backup 용량
   * Snapshot 용량
   * I/O Request 횟수
-* Data Transter
+* Data Transfer
   * Inter-AZ Traffic 비용
   * VPC Outbound Traffic 비용
 
@@ -89,16 +89,16 @@ title: AWS Certified Database 자격증 이론 정리
 * Default Parameter Group을 상속하여 Custom Parameter Group 생성 가능
 * 동일 Region의 DB Instance에 Parameter Group 적용 가능
 * Parameter Examples
-  * autocommit
-  * time_zone
-  * force_ssl
-  * default_storage_engine
-  * max_connections
+  * `autocommit`
+  * `time_zone`
+  * `force_ssl`
+  * `default_storage_engine`
+  * `max_connections`
 * Parameter 변경
   * Dynamic Parameter의 경우 변경시 곧바로 적용
   * Static Parameter의 경우 DB Reboot 필요
-    * Static Parameter의 경우 변경 시 DB Reboot 전에는 pending-reboot 상태를 유지
-    * 재부팅 이후에는 in-sync 상태로 변경
+    * Static Parameter의 경우 변경 시 DB Reboot 전에는 `pending-reboot` 상태를 유지
+    * 재부팅 이후에는 `in-sync` 상태로 변경
 
 ### 3.3. Option Group
 

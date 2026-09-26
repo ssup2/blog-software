@@ -28,9 +28,9 @@ title: CKA 자격증 시험 정리/후기
 
 ## 3. 시험전 확인
 
-* kubectl bash autocompletion 동작 확인
+* `kubectl` bash autocompletion 동작 확인
   * https://kubernetes.io/docs/reference/kubectl/cheatsheet/
-* tmux 동작 확인
+* `tmux` 동작 확인
   * https://linuxize.com/post/getting-started-with-tmux/
 
 ## 4. 시험중 알아야할 명렁어
@@ -39,9 +39,9 @@ title: CKA 자격증 시험 정리/후기
   * ctrl + insert
 * Windows Paste
   * shift + insert
-* kubectl
-  * Resoruce API Version 확인 : kubectl api-resources
-  * Resource Spec/Status 확인 : kubectl explain --recursive <resource>
+* `kubectl`
+  * Resoruce API Version 확인 : `kubectl api-resources`
+  * Resource Spec/Status 확인 : `kubectl explain --recursive <resource>`
 
 ## 5. 시험 후기
 

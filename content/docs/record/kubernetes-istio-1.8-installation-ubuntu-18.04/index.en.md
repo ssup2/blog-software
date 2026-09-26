@@ -23,7 +23,7 @@ Download istio.
 $ export PATH=$PWD/bin:$PATH
 ```
 
-Configure istioctl.
+Configure `istioctl`.
 
 ```shell
 $ istioctl install --set profile=demo -y

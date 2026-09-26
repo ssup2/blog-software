@@ -38,7 +38,7 @@ int main() {
 }
 ```
 
-[Code 1] is Code that applies seccomp strict mode using libseccomp and calls the `dup2()` System Call. Since `dup2()` System Call is not allowed in strict mode, [Code 1] terminates without printing the STRICT string.
+[Code 1] is Code that applies seccomp strict mode using `libseccomp` and calls the `dup2()` System Call. Since `dup2()` System Call is not allowed in strict mode, [Code 1] terminates without printing the `STRICT` string.
 
 ### 2.2. Filter Mode
 
@@ -46,7 +46,7 @@ Actions can be set for each System Call. The following 5 actions can be set for 
 
 * `SECCOMP-RET-KILL` : Does not perform the System Call and immediately terminates the Process. The termination value of the Process will be `SIGSYS`. (Not `SIGKILL`)
 * `SECCOMP-RET-TRAP` : Does not perform the System Call and sends a `SIGSYS` Signal to the Process. Processes that receive the `SIGSYS` Signal can Emulate System Calls.
-* `SECCOMP-RET-ERRNO` : Does not perform the System Call and sets the errno value of the Thread.
+* `SECCOMP-RET-ERRNO` : Does not perform the System Call and sets the `errno` value of the Thread.
 * `SECCOMP-RET-TRACE` : Delivers System Call events to tracer. If tracer does not exist, returns `-ENOSYS` and does not perform the System Call.
 * `SECCOMP-RET-ALLOW` : Performs the System Call.
 
@@ -86,7 +86,7 @@ int main() {
 }
 ```
 
-[Code 2] is Code that operates seccomp in Filter Mode using libseccomp. `SCMP-ACT-KILL` is seccomp's default policy, meaning that Processes calling unauthorized System Calls are killed. Since `dup2()` System Call is allowed, `dup2()` System Call is performed. Since `open()` System Call is not allowed, [Code 2] terminates at the `open()` System Call.
+[Code 2] is Code that operates seccomp in Filter Mode using `libseccomp`. `SCMP-ACT-KILL` is seccomp's default policy, meaning that Processes calling unauthorized System Calls are killed. Since `dup2()` System Call is allowed, `dup2()` System Call is performed. Since `open()` System Call is not allowed, [Code 2] terminates at the `open()` System Call.
 
 ## 3. References
 

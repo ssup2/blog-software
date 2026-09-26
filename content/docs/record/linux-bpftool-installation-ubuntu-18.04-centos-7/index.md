@@ -46,7 +46,7 @@ $ cd linux
 $ git checkout v4.20
 ```
 
-현재 Ubuntu, CentOS의 Package로 제공되지 않고 있기 때문에 Kernel Code를 받아 직접 bpftool Build 수행한다. bfptool의 net, perf Opiton 이용을 위해서 **v4.20 이상의 Kernel Version**이 필요하다.
+현재 Ubuntu, CentOS의 Package로 제공되지 않고 있기 때문에 Kernel Code를 받아 직접 bpftool Build 수행한다. bpftool의 `net`, `perf` Opiton 이용을 위해서 **v4.20 이상의 Kernel Version**이 필요하다.
 
 ```shell
 $ make -C tools/bpf/bpftool/
@@ -74,7 +74,7 @@ $ make -C tools/bpf/bpftool/
 ...
 ```
 
-linux/if.h와 net/if.h의 충돌로 인한 Compile Error 발생시 위와 같은 증상이 나타난다.
+`linux/if.h`와 `net/if.h`의 충돌로 인한 Compile Error 발생시 위와 같은 증상이 나타난다.
 
 ```c {caption="[File 1] tools/bpf/bpftool/net.c", linenos=table}
 ...
@@ -84,7 +84,7 @@ linux/if.h와 net/if.h의 충돌로 인한 Compile Error 발생시 위와 같은
 ...
 ```
 
-tools/bpf/bpftool/net.c 파일을 [File 1]과 같이 수정한다.
+`tools/bpf/bpftool/net.c` 파일을 [File 1]과 같이 수정한다.
 
 ## 4. 참조
 

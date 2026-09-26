@@ -32,7 +32,7 @@ ice1{color="red", size="medium"} 4
 ice1{color="green", size="big"} 6
 ```
 
-[Instant Vector 1] and [Instant Vector 2] show virtual Instant Vector Type Data candy1-count and ice1-count used to explain One-to-one Vector Matching.
+[Instant Vector 1] and [Instant Vector 2] show virtual Instant Vector Type Data `candy1` and `ice1` used to explain One-to-one Vector Matching.
 
 #### 1.1.1. All Label Matching
 
@@ -88,7 +88,7 @@ candy1{} + ignoring(size) ice1{}
 candy1{} / ignoring(size) ice1{}
 ```
 
-[SQL Syntax 3] shows the syntax and examples for explicitly excluding Labels from matching using the ignoring syntax.
+[SQL Syntax 3] shows the syntax and examples for explicitly excluding Labels from matching using the `ignoring` syntax.
 
 ```promql {caption="[Query 3] One-to-one, Partial Label Matching, ignoring"}
 #--- query --- 
@@ -115,7 +115,7 @@ candy1{} + on(size) ice1{}
 Error
 ```
 
-[Query 4] shows a case where matching fails by selecting the `size` Label for `candy1` and `ice1`. The reason an Error occurs when selecting the `size` Label is because one of the `size` Label values of `ice1`, "big", is duplicated. It violates the first Label selection rule.
+[Query 4] shows a case where matching fails by selecting the `size` Label for `candy1` and `ice1`. The reason an Error occurs when selecting the `size` Label is because one of the `size` Label values of `ice1`, `big`, is duplicated. It violates the first Label selection rule.
 
 The only Label that satisfies all Label selection rules for `candy1` and `ice1` is the `color` Label. If you want to perform Matching by selecting the `size` Label for `candy1` and `ice1`, you must use One-to-many Matching instead of One-to-one.
 
@@ -156,7 +156,7 @@ candy2{} * on(color) group-right ice2{}
 
 [SQL Syntax 4] shows the syntax of One-to-many Matching. You can see that only `group-left` and `group-right` are added to the One-to-one partial Label Matching syntax. For 1:N Matching, `group-left` is used when setting the left Instant Vector Type Data as "N" and the right Instant Vector Type Data as "1", and `group-right` is used when setting the right Instant Vector Type Data as "N" and the left Instant Vector Type Data as "1".
 
-Here, Instant Vector Type Data set as "1" must have **only one value selected** by Labels specified in the on, ignoring syntax, and Instant Vector Type Data set as "N" can have 0 or multiple values selected by Labels specified in the on, ignoring syntax.
+Here, Instant Vector Type Data set as "1" must have **only one value selected** by Labels specified in the `on`, `ignoring` syntax, and Instant Vector Type Data set as "N" can have 0 or multiple values selected by Labels specified in the `on`, `ignoring` syntax.
 
 ```promql {caption="[Query 5] One-to-many, group-left"}
 #--- query --- 
@@ -168,7 +168,7 @@ candy2{} * on(color) group-left ice2{}
 {color="green", size="big"} 30 (5*6)
 ```
 
-[Query 5] shows a One-to-many Query using group-left. Based on the color Label, `ice2` selects blue/1, green/1, red/1, i.e., only 1 Value each, so it qualifies to be "1", while `candy2` has blue/1, green/2, red/0 based on the color Label, so it cannot be "1" and can only be "N". Therefore, Matching must be performed so that `candy2` becomes "N" through group-left.
+[Query 5] shows a One-to-many Query using `group-left`. Based on the `color` Label, `ice2` selects `blue`/1, `green`/1, `red`/1, i.e., only 1 Value each, so it qualifies to be "1", while `candy2` has `blue`/1, `green`/2, `red`/0 based on the `color` Label, so it cannot be "1" and can only be "N". Therefore, Matching must be performed so that `candy2` becomes "N" through `group-left`.
 
 ```promql {caption="[SQL Syntax 5] One-to-many, Many-to-one Matching with Label"}
 <Instant Vector> <Op> on/ignoring(<label>, ...) group-left(<label>, ...) <Instant Vector>

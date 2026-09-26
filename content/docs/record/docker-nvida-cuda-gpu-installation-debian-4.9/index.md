@@ -56,7 +56,7 @@ $ curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.
 $ apt-get update && apt-get install -y nvidia-container-toolkit
 ```
 
-NVIDIA Container Toolkit Package를 설치하여 nvidia-container-runtime-hook, nvidia-container-toolkit, nvidia-container-cli를 설치한다.
+NVIDIA Container Toolkit Package를 설치하여 `nvidia-container-runtime-hook`, `nvidia-container-toolkit`, `nvidia-container-cli`를 설치한다.
 
 ```
 $ systemctl restart docker
@@ -96,7 +96,7 @@ Sat Dec 14 17:27:38 2019
 +-----------------------------------------------------------------------------+
 ```
 
-Container 안에서 nvidia-smi 명령어를 통해서 container에서 이용가능한 GPU 정보를 얻는다.
+Container 안에서 `nvidia-smi` 명령어를 통해서 container에서 이용가능한 GPU 정보를 얻는다.
 
 ## 6. 참조
 

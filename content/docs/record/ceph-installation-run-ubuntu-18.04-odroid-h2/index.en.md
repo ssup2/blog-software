@@ -27,7 +27,7 @@ title: Ceph Installation, Execution / Ubuntu 18.04, ODROID-H2 Cluster Environmen
 (Ceph)$ sudo apt install python
 ```
 
-Install ntp and python Packages.
+Install `ntp` and `python` Packages.
 
 ```shell
 (Ceph)$ sudo useradd -d /home/cephnode -m cephnode
@@ -40,9 +40,9 @@ passwd: password updated successfully
 (Ceph)$ sudo chmod 0440 /etc/sudoers.d/cephnode
 ```
 
-Create a cephnode User.
+Create a `cephnode` User.
 
-* **Password** : cephnode
+* **Password** : `cephnode`
 
 ### 2.2. Deploy Node
 
@@ -55,7 +55,7 @@ Create a cephnode User.
 ...
 ```
 
-Modify the /etc/hosts file as shown in [Text 1].
+Modify the `/etc/hosts` file as shown in [Text 1].
 
 ```shell
 (Deploy)$ wget -q -O- 'https://download.ceph.com/keys/release.asc' | sudo apt-key add -
@@ -64,7 +64,7 @@ Modify the /etc/hosts file as shown in [Text 1].
 (Deploy)$ sudo apt install ceph-deploy
 ```
 
-Install the ceph-deploy Package.
+Install the `ceph-deploy` Package.
 
 ```shell
 (Deploy)$ sudo useradd -d /home/cephdeploy -m cephdeploy
@@ -77,9 +77,9 @@ passwd: password updated successfully
 (Deploy)$ sudo chmod 0440 /etc/sudoers.d/cephdeploy
 ```
 
-Create a cephdeploy User.
+Create a `cephdeploy` User.
 
-* **Password** : cephdeploy
+* **Password** : `cephdeploy`
 
 ```shell
 (Deploy)$ login cephdeploy
@@ -111,7 +111,7 @@ Host node03
    User cephnode
 ```
 
-Modify the /home/cephdeploy/.ssh/config file as shown in [Text 2].
+Modify the `/home/cephdeploy/.ssh/config` file as shown in [Text 2].
 
 ## 3. Ceph Cluster Configuration
 

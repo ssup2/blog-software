@@ -35,7 +35,7 @@ $ kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.9/con
 $ kubectl label namespace default istio-injection=enabled
 ```
 
-[Shell 1] shows the script for setting up the Kubernetes and Istio environment. A Kubernetes Cluster is created using `kind`, and Istio is installed. Then Sidecar Injection is enabled for the default Namespace. Since the kind environment does not have a component that assigns External IPs to LoadBalancer type Services, MetalLB is also installed to assign an External IP to the istio-ingressgateway Service.
+[Shell 1] shows the script for setting up the Kubernetes and Istio environment. A Kubernetes Cluster is created using `kind`, and Istio is installed. Then Sidecar Injection is enabled for the `default` Namespace. Since the `kind` environment does not have a component that assigns External IPs to `LoadBalancer` type Services, MetalLB is also installed to assign an External IP to the `istio-ingressgateway` Service.
 
 ```yaml {caption="[File 1] MetalLB IPAddressPool, L2Advertisement Manifest", linenos=table}
 apiVersion: metallb.io/v1beta1
@@ -57,7 +57,7 @@ spec:
   - kind-pool
 ```
 
-[File 1] shows the IP Pool configuration of MetalLB. A part of the Docker Network range (`192.168.97.0/24`) to which the kind Nodes are connected is configured as the Pool, so that Hosts connected to the Docker Network can directly access the External IP. After configuration, the istio-ingressgateway Service is assigned the External IP `192.168.97.200`.
+[File 1] shows the IP Pool configuration of MetalLB. A part of the Docker Network range (`192.168.97.0/24`) to which the `kind` Nodes are connected is configured as the Pool, so that Hosts connected to the Docker Network can directly access the External IP. After configuration, the `istio-ingressgateway` Service is assigned the External IP `192.168.97.200`.
 
 ```shell {caption="[Shell 2] External Client Environment Setup"}
 # Preserve client ip by local external traffic policy
@@ -73,7 +73,7 @@ $ kubectl get svc -n istio-system istio-ingressgateway -o jsonpath='{.status.loa
 192.168.97.200
 ```
 
-[Shell 2] shows the script for setting up the External Client environment outside the Mesh. Access to the Ingress Gateway uses the External IP assigned by MetalLB, and requests are sent from a Host connected to the same Docker Network as the kind Nodes. Since the Host's address is a private IP, istio-ingressgateway would judge the request as an Internal request if accessed as is. Therefore, to reproduce a real External Client environment using a public IP, `externalTrafficPolicy: Local` is set on the istio-ingressgateway Service to preserve the Client's address, and SNAT is performed on the kind Nodes to translate the Host's address to a public range address (`203.0.113.9`).
+[Shell 2] shows the script for setting up the External Client environment outside the Mesh. Access to the Ingress Gateway uses the External IP assigned by MetalLB, and requests are sent from a Host connected to the same Docker Network as the `kind` Nodes. Since the Host's address is a private IP, istio-ingressgateway would judge the request as an Internal request if accessed as is. Therefore, to reproduce a real External Client environment using a public IP, `externalTrafficPolicy: Local` is set on the `istio-ingressgateway` Service to preserve the Client's address, and SNAT is performed on the `kind` Nodes to translate the Host's address to a public range address (`203.0.113.9`).
 
 #### 1.1.2. Workload Setup
 

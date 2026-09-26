@@ -67,7 +67,7 @@ EOF
 sysctl --system
 ```
 
-Set the sysctl parameters.
+Set the `sysctl` parameters.
 
 ```
 swapoff -a
@@ -141,7 +141,7 @@ Copy the kubectl config file.
 kubectl patch deployment coredns -n kube-system -p '{"spec":{"template":{"spec":{"nodeSelector":{"node-group.dp.ssup2":"master"}}}}}'
 ```
 
-Configure core-dns to run only on the master node.
+Configure `coredns` to run only on the master node.
 
 ```shell
 kubectl apply -f https://github.com/flannel-io/flannel/releases/download/v0.26.2/kube-flannel.yml

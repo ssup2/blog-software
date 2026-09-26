@@ -158,7 +158,7 @@ Nested Loop Join은 가장 기본적인 Join 알고리즘으로, Outer Table의 
 [Outer: Ssup (dept_id=NULL)]
 ```
 
-[Text 3]은 `Employees` Table이 Outer Table이고 `Departments` Table이 Inner Table이며, `dept_id` Column에 Index가 있는 경우 Nested Loop Join 수행 시 처리 과정을 나타내고 있다. Outer Table인 `Employees` Table의 각 행을 순회하면서, Inner Table인 `Departments` Table의 Index를 통해 조건에 맞는 Row만 직접 탐색하는 방식으로 동작하는 것을 확인할 수 있다. 이 경우 Row Scan은 [Text 2]와 같이 5번을 수행하지만 Index Lookup도 5번 (`10`, `10`, `20`, `30`, `20`) 수행이 필요하다. `Ssup`은 `dept_id`가 NULL이므로 Index Lookup을 수행하지 않고 즉시 조인 대상에서 제외된다.
+[Text 3]은 `Employees` Table이 Outer Table이고 `Departments` Table이 Inner Table이며, `dept_id` Column에 Index가 있는 경우 Nested Loop Join 수행 시 처리 과정을 나타내고 있다. Outer Table인 `Employees` Table의 각 행을 순회하면서, Inner Table인 `Departments` Table의 Index를 통해 조건에 맞는 Row만 직접 탐색하는 방식으로 동작하는 것을 확인할 수 있다. 이 경우 Row Scan은 [Text 2]와 같이 5번을 수행하지만 Index Lookup도 5번 (`10`, `10`, `20`, `30`, `20`) 수행이 필요하다. `Ssup`은 `dept_id`가 `NULL`이므로 Index Lookup을 수행하지 않고 즉시 조인 대상에서 제외된다.
 
 이 처럼 [Text 2]와 [Text 3]는 동일한 Join 연산이지만 어떤 Table을 Outer Table로 선택하느냐에 따라서 Index Lookup 횟수가 달라질 수 있으며, 이는 Join 알고리즘의 성능에 크게 영향을 미칠 수 있다. Index Lookup 횟수를 줄이기 위해서는 Outer Table의 Row 수가 Inner Table보다 적어야 하며, 따라서 DB Optimizer는 일반적으로 Row 수가 더 적은 Table을 Outer Table로 자동 선택한다.
 

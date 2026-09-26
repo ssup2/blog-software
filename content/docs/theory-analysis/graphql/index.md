@@ -44,7 +44,7 @@ query {
 }
 ```
 
-Query는 **Data 조회** Operation을 의미한다. [Query 1]은 countries를 조회하는 간단한 Query를 나타내고 있다. 가장 앞에는 **query 문자열**을 명시하여 Query Operation을 나타낸다. Query는 JSON과 매우 유사한 형태를 갖고 있으며, 얻고 싶은 **Field를 명시**하여 Data를 조회할 수 있다. Query의 결과는 **JSON 형태**로 출력되며, **data Key**에 실제 Data가 적재된다. [Query 1]에서는 countries Field의 name Field만 명시하고 있기 때문에 조회된 Data에도 name Field만 존재하는 것을 확인할 수 있다.
+Query는 **Data 조회** Operation을 의미한다. [Query 1]은 `countries`를 조회하는 간단한 Query를 나타내고 있다. 가장 앞에는 `query` 문자열을 명시하여 Query Operation을 나타낸다. Query는 JSON과 매우 유사한 형태를 갖고 있으며, 얻고 싶은 **Field를 명시**하여 Data를 조회할 수 있다. Query의 결과는 **JSON 형태**로 출력되며, `data` Key에 실제 Data가 적재된다. [Query 1]에서는 `countries` Field의 `name` Field만 명시하고 있기 때문에 조회된 Data에도 `name` Field만 존재하는 것을 확인할 수 있다.
 
 ```shell {caption="[Query 2] countries name, capital Query", linenos=table}
 # Query
@@ -76,7 +76,7 @@ query {
 }
 ```
 
-[Query 2]는 [Query 1]과 다르게 countries Field의 name Field 뿐만 아니라, capital Field도 가져오는 GraphQL Query를 나타내고 있다. 따라서 Query 결과를 보면 name Field뿐만 아니라 capital Field의 Data도 가져오는 것을 확인할 수 있다. 이처럼 SQL의 Select Query에서 원하는 Column Data만 가져올 수 있는것 처럼, GraphQL도 **원하는 Field만 명시**하여 Data를 얻을 수 있다는 장점을 가지고 있다.
+[Query 2]는 [Query 1]과 다르게 `countries` Field의 `name` Field 뿐만 아니라, `capital` Field도 가져오는 GraphQL Query를 나타내고 있다. 따라서 Query 결과를 보면 `name` Field뿐만 아니라 `capital` Field의 Data도 가져오는 것을 확인할 수 있다. 이처럼 SQL의 Select Query에서 원하는 Column Data만 가져올 수 있는것 처럼, GraphQL도 **원하는 Field만 명시**하여 Data를 얻을 수 있다는 장점을 가지고 있다.
 
 ```shell {caption="[Query 3] countries name, languages Query", linenos=table}
 # Query
@@ -136,7 +136,7 @@ query {
 }
 ```
 
-[Query 3]은 countries Field의 languages Field도 명시하여 countries의 languages 정보도 한번에 가져오는 GraphQL Query를 나타내고 있다. countries와 languages는 1:N 관계를 갖는것을 확인할 수 있다. SQL의 Join Query를 통해서 여러 DB Table에 존재하는 Data를 한번에 조회가 가능한것 처럼, GraphQL도 여러 DB Table에 존재하는 Data를 **한번에 조회**할 수 있다는 장점을 가지고 있다.
+[Query 3]은 `countries` Field의 `languages` Field도 명시하여 `countries`의 `languages` 정보도 한번에 가져오는 GraphQL Query를 나타내고 있다. `countries`와 `languages`는 1:N 관계를 갖는것을 확인할 수 있다. SQL의 Join Query를 통해서 여러 DB Table에 존재하는 Data를 한번에 조회가 가능한것 처럼, GraphQL도 여러 DB Table에 존재하는 Data를 **한번에 조회**할 수 있다는 장점을 가지고 있다.
 
 #### 1.1.2. Mutation
 
@@ -220,7 +220,7 @@ query {
 }
 ```
 
-Introspection은 GraphQL API Server가 지원하는 Schema를 확인하는 기능이다. **--schema* Field를 대상으로 Query를 통해서 Schema 확인이 가능하다. [graphiql](https://lucasconstantino.github.io/graphiql-online)과 같은 GraphQL Client가 GraphQL API Server제 제공하는 Schema를 확인할 수 있는 이유는 Instrospection 기능을 활용하여 Schema 정보를 얻어오기 때문이다. [Query 4]는 각 Operation Type에 따른 질의 가능한 Field를 나타내고 있다. Query Operation을 제외한 나머지 Mutation, Subscription Operation은 질의 가능한 Field가 없는것을 확인할 수 있다.
+Introspection은 GraphQL API Server가 지원하는 Schema를 확인하는 기능이다. `--schema` Field를 대상으로 Query를 통해서 Schema 확인이 가능하다. [graphiql](https://lucasconstantino.github.io/graphiql-online)과 같은 GraphQL Client가 GraphQL API Server제 제공하는 Schema를 확인할 수 있는 이유는 Instrospection 기능을 활용하여 Schema 정보를 얻어오기 때문이다. [Query 4]는 각 Operation Type에 따른 질의 가능한 Field를 나타내고 있다. Query Operation을 제외한 나머지 Mutation, Subscription Operation은 질의 가능한 Field가 없는것을 확인할 수 있다.
 
 ```shell {caption="[Query 5] Type Query", linenos=table}
 # Query
@@ -277,7 +277,7 @@ GraphQL 구현을 위해서는 GraphQL이 HTTP과 같이 동작하는 방식과 
 GET http://api.ssup2.com/graphql?query={hero{name}}
 ```
 
-GraphQL도 REST API와 동일하게 일반적으로 HTTP를 이용한다. [HTTP Request 1]은 HTTP Protocol을 활용하여 GraphQL Query를 전송하는 예제를 나타내고 있다. 일반적인 HTTP Protocol 기반 REST API의 경우에는 Resource당 별도의 URL (Endpoint)를 갖는 구조이지만, GraphQL을 이용하는 경우 **단일 URL**을 이용한다. [Request 1]의 경우에는 GraphQL URL로 "/graphql"을 이용하고 있다. GraphQL Query의 경우에는 HTTP GET Method와 함께 **Query String**을 이용하여 API Server에게 전달한다.
+GraphQL도 REST API와 동일하게 일반적으로 HTTP를 이용한다. [HTTP Request 1]은 HTTP Protocol을 활용하여 GraphQL Query를 전송하는 예제를 나타내고 있다. 일반적인 HTTP Protocol 기반 REST API의 경우에는 Resource당 별도의 URL (Endpoint)를 갖는 구조이지만, GraphQL을 이용하는 경우 **단일 URL**을 이용한다. [Request 1]의 경우에는 GraphQL URL로 `/graphql`을 이용하고 있다. GraphQL Query의 경우에는 HTTP GET Method와 함께 **Query String**을 이용하여 API Server에게 전달한다.
 
 ```shell {caption="[HTTP Request 2] POST Request with GraphQL"}
 POST http://api.ssup2.com/graphql
@@ -300,7 +300,7 @@ GraphQL은 REST API와 대비 Data 조회에 특화된 기술이다. REST API의
 
 Data 조회에 특화되었만 때문에 GraphSQL API Server는 Data Store 또는 Repository와 같은 Data 저장소 역할만을 수행하는 경우가 대부분이고, Business Logic은 GraphSQL API Server가 아니라 GraphSQL Client에서 수행된다. 따라서 Client의 Business Logic이 중요한 Service의 경우에는 GraphQL을 이용하는것이 유리하며, Server에서 Business Logic을 수행하는 경우에는 REST API를 이용하는것이 유리하다.
 
-NGINX와 같은 L7 Proxy Server는 URL기반 Caching 기법을 제공하는데, GraphQL의 경우에 "/graphql"과 같은 단일 URL을 이용하기 때문에 Resource별로 URL을 가지고 있는 REST API와 다르게 L7 Proxy Server의 Caching 기법을 이용하지 못한다는 단점도 존재한다.
+NGINX와 같은 L7 Proxy Server는 URL기반 Caching 기법을 제공하는데, GraphQL의 경우에 `/graphql`과 같은 단일 URL을 이용하기 때문에 Resource별로 URL을 가지고 있는 REST API와 다르게 L7 Proxy Server의 Caching 기법을 이용하지 못한다는 단점도 존재한다.
 
 ## 4. 참조
 

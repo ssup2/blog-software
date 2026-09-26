@@ -18,7 +18,7 @@ $ apt install -y openssh-server
 $ apt install -y pdsh
 ```
 
-Install sshd.
+Install `sshd`.
 
 ```text {caption="[File 1] /etc/ssh/sshd-config", linenos=table}
 ...
@@ -28,7 +28,7 @@ PermitRootLogin yes
 ...
 ```
 
-Modify the /etc/ssh/sshd-config file with the contents of [File 1].
+Modify the `/etc/ssh/sshd-config` file with the contents of [File 1].
 
 ```shell
 $ service sshd restart
@@ -42,7 +42,7 @@ $ ssh localhost
 Are you sure you want to continue connecting (yes/no)? yes
 ```
 
-Restart sshd and configure it so that a password is not required for ssh access.
+Restart `sshd` and configure it so that a password is not required for `ssh` access.
 
 ## 3. Java Installation
 
@@ -69,7 +69,7 @@ Download the Hadoop Binary.
 export JAVA-HOME=/usr/lib/jvm/java-1.8.0-openjdk-amd64
 ```
 
-Modify the ~/hadoop-3.0.3/etc/hadoop/hadoop-env.sh file as shown in [File 2].
+Modify the `~/hadoop-3.0.3/etc/hadoop/hadoop-env.sh` file as shown in [File 2].
 
 ```xml {caption="[File 3] ~/hadoop-3.0.3/etc/hadoop/core-site.xml", linenos=table}
 <configuration>
@@ -80,7 +80,7 @@ Modify the ~/hadoop-3.0.3/etc/hadoop/hadoop-env.sh file as shown in [File 2].
 </configuration>
 ```
 
-Modify the ~/hadoop-3.0.3/etc/hadoop/core-site.xml file as shown in [File 3].
+Modify the `~/hadoop-3.0.3/etc/hadoop/core-site.xml` file as shown in [File 3].
 
 ```xml {caption="[File 4] ~/hadoop-3.0.3/etc/hadoop/core-site.xml", linenos=table}
 <configuration>
@@ -91,7 +91,7 @@ Modify the ~/hadoop-3.0.3/etc/hadoop/core-site.xml file as shown in [File 3].
 </configuration>
 ```
 
-Modify the ~/hadoop-3.0.3/etc/hadoop/core-site.xml file as shown in [File 4].
+Modify the `~/hadoop-3.0.3/etc/hadoop/core-site.xml` file as shown in [File 4].
 
 ```text {caption="[File 5] ~/.bashrc", linenos=table}
 ...
@@ -110,7 +110,7 @@ export YARN-RESOURCEMANAGER-USER="root"
 export YARN-NODEMANAGER-USER="root"
 ```
 
-Add the contents of [File 5] to the ~/.bashrc file.
+Add the contents of [File 5] to the `~/.bashrc` file.
 
 ```shell
 $ hdfs namenode -format
@@ -119,7 +119,7 @@ $ start-dfs.sh
 
 Format HDFS and start HDFS, then verify HDFS operation.
 
-* Access http://localhost:9870 in a Web Browser.
+* Access `http://localhost:9870` in a Web Browser.
 
 ## 5. YARN Installation, Configuration
 
@@ -152,7 +152,7 @@ Create a root user folder.
 </configuration>
 ```
 
-Modify the ~/hadoop-3.0.3/etc/hadoop/mapred-site.xml file as shown in [File 6].
+Modify the `~/hadoop-3.0.3/etc/hadoop/mapred-site.xml` file as shown in [File 6].
 
 ```xml {caption="[File 7] ~/hadoop-3.0.3/etc/hadoop/yarn-site.xml", linenos=table}
 <configuration>
@@ -167,7 +167,7 @@ Modify the ~/hadoop-3.0.3/etc/hadoop/mapred-site.xml file as shown in [File 6].
 </configuration>
 ```
 
-Modify the ~/hadoop-3.0.3/etc/hadoop/yarn-site.xml file as shown in [File 7].
+Modify the `~/hadoop-3.0.3/etc/hadoop/yarn-site.xml` file as shown in [File 7].
 
 ```shell
 $ start-yarn.sh
@@ -175,7 +175,7 @@ $ start-yarn.sh
 
 Start YARN and verify YARN operation.
 
-* http://localhost:8088
+* `http://localhost:8088`
 
 ## 6. Operation Verification
 
@@ -210,7 +210,7 @@ $ start-dfs.sh
 $ start-yarn.sh
 ```
 
-If a "There are 0 datanode(s)" Error occurs, perform the above steps.
+If a `There are 0 datanode(s)` Error occurs, perform the above steps.
 
 ## 8. References
 

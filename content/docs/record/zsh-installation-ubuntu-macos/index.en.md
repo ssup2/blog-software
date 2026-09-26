@@ -13,7 +13,7 @@ $ chsh -s `which zsh`
 $ zsh
 ```
 
-Install zsh and oh-my-zsh and set the default shell to Zsh. Proceed from **Zsh** afterwards.
+Install `zsh` and `oh-my-zsh` and set the default shell to Zsh. Proceed from **Zsh** afterwards.
 
 ### 1.2. macOS
 
@@ -25,7 +25,7 @@ $ chsh -s `which zsh`
 $ zsh
 ```
 
-Install zsh, zsh-completions, and oh-my-zsh and set the default shell to Zsh. Proceed from **Zsh** afterwards.
+Install `zsh`, `zsh-completions`, and `oh-my-zsh` and set the default shell to Zsh. Proceed from **Zsh** afterwards.
 
 ## 2. Zsh Plugin Download
 
@@ -35,7 +35,7 @@ $ git clone https://github.com/zsh-users/zsh-autosuggestions $ZSH_CUSTOM/plugins
 $ git clone https://github.com/zsh-users/zsh-completions $ZSH_CUSTOM/plugins/zsh-completions
 ```
 
-Install zsh-syntax-highlighting, zsh-autosuggestions, and zsh-completions.
+Install `zsh-syntax-highlighting`, `zsh-autosuggestions`, and `zsh-completions`.
 
 ## 3. Zsh Plugin Configuration
 
@@ -59,7 +59,7 @@ ZSH_THEME_GIT_PROMPT_CLEAN="%{$fg[blue]%})"
 PROMPT+='%{$fg_bold[blue]%}k8s:(%{$fg[red]%}$(kubectx_prompt_info)%{$fg_bold[blue]%})%{$reset_color%} ' # k8s context
 ```
 
-Modify the ~/.zshrc file with the content from [File 1] to configure plugins.
+Modify the `~/.zshrc` file with the content from [File 1] to configure plugins.
 
 ## 4. References
 

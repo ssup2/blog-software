@@ -18,7 +18,7 @@ Hystrix is a Library that controls Service calls by inserting a **Circuit Breake
 
 {{< figure caption="[Figure 2] Spring Cloud Hystrix Operation Process" src="images/hystrix-flow.png" width="900px" >}}
 
-[Figure 2] shows the operation process of Hystrix. A HystrixCommand Instance is an Instance that **wraps Service call Logic**, and Service calls are controlled through the HystrixCommand Instance.
+[Figure 2] shows the operation process of Hystrix. A `HystrixCommand` Instance is an Instance that **wraps Service call Logic**, and Service calls are controlled through the `HystrixCommand` Instance.
 
 * 1 : Check if the Circuit is Open. If the Circuit is Open, the Service call is stopped and the Fallback Service is called.
 * 2 : Even if the Circuit is not Open, if there are no Threads in the Thread Pool required for Service calls or no remaining Semaphores, the Service call is stopped and the Fallback Service is called.
@@ -33,13 +33,13 @@ Hystrix uses two Thread policies: **Thread Pool** and **Semaphore**.
 
 #### 2.2.1. Thread Pool
 
-The Thread Pool policy is a method where HystrixCommand Instances call Services using available Thread Pools, as the name suggests. Since it uses Threads from Thread Pools assigned to each HystrixCommand Instance, **high Isolation** is a characteristic. This is because even if Threads assigned within a HystrixCommand Instance are wasted, it does not affect User Request Threads managed by WAS or Thread Pools used by other HystrixCommand Instances. On the other hand, the low performance compared to the Semaphore policy can be considered a disadvantage due to Thread Pool management Overhead and Thread Context Switching Overhead that occurs during Service calls.
+The Thread Pool policy is a method where `HystrixCommand` Instances call Services using available Thread Pools, as the name suggests. Since it uses Threads from Thread Pools assigned to each `HystrixCommand` Instance, **high Isolation** is a characteristic. This is because even if Threads assigned within a `HystrixCommand` Instance are wasted, it does not affect User Request Threads managed by WAS or Thread Pools used by other `HystrixCommand` Instances. On the other hand, the low performance compared to the Semaphore policy can be considered a disadvantage due to Thread Pool management Overhead and Thread Context Switching Overhead that occurs during Service calls.
 
-In the Thread Pool policy, the maximum number of Services that can be called simultaneously is determined by the number of Threads in the Thread Pool. Therefore, you must predict how many Services will be called simultaneously and assign an appropriate number of Threads to the Thread Pool. Multiple HystrixCommand Instances can also be configured to share and use one Thread Pool. Netflix recommends the Thread Pool policy for Service Isolation.
+In the Thread Pool policy, the maximum number of Services that can be called simultaneously is determined by the number of Threads in the Thread Pool. Therefore, you must predict how many Services will be called simultaneously and assign an appropriate number of Threads to the Thread Pool. Multiple `HystrixCommand` Instances can also be configured to share and use one Thread Pool. Netflix recommends the Thread Pool policy for Service Isolation.
 
 #### 2.2.2. Semaphore
 
-The Semaphore policy is a method that uses the Thread that requests Service calls through the HystrixCommand Instance as-is, rather than using a separate dedicated Thread for the HystrixCommand Instance. Therefore, since Thread Context Switching does not occur during Service calls, fast performance compared to the Thread Pool policy is an advantage. However, low Isolation is a disadvantage because Threads are shared.
+The Semaphore policy is a method that uses the Thread that requests Service calls through the `HystrixCommand` Instance as-is, rather than using a separate dedicated Thread for the `HystrixCommand` Instance. Therefore, since Thread Context Switching does not occur during Service calls, fast performance compared to the Thread Pool policy is an advantage. However, low Isolation is a disadvantage because Threads are shared.
 
 In the Semaphore policy, the maximum number of Services that can be called simultaneously is determined by the number of Semaphores. Therefore, you must predict how many Services will be called simultaneously and set an appropriate number of Semaphores. Netflix guides to use this for Non-network calls that cause enormous load, i.e., when calling Services or functions that do not go through the Network.
 
@@ -59,7 +59,7 @@ Rule refers to the Load Balancing algorithm used in Ribbon. Rules can use Rules 
 
 ### 3.2. Ping
 
-Ping is a component that determines the survival of Servers. Ping can use the DummyPing Class provided by Ribbon or a Ping Class defined by developers.
+Ping is a component that determines the survival of Servers. Ping can use the `DummyPing` Class provided by Ribbon or a Ping Class defined by developers.
 
 ### 3.3. ServerList
 

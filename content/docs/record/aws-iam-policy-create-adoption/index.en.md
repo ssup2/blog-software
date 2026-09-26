@@ -6,7 +6,7 @@ title: AWS IAM Policy Creation, Application / Using aws CLI / Ubuntu 18.04
 
 * Ubuntu 18.04 LTS 64bit, root user
 * aws CLI
-  * Region ap-northeast-2
+  * Region `ap-northeast-2`
   * Version 2.1.34
 
 ## 2. Policy Creation
@@ -59,13 +59,13 @@ $ aws iam create-user --user-name instance-describe-user
 }
 ```
 
-Create an instance-describe-user User and create a Secret.
+Create an `instance-describe-user` User and create a Secret.
 
 ```shell
 $ aws iam attach-user-policy --user-name instance-describe-user --policy-arn arn:aws:iam::278805249149:policy/instance-describe
 ```
 
-Attach the created instance-describe-policy Policy to the created instance-describe-user User.
+Attach the created `instance-describe-policy` Policy to the created `instance-describe-user` User.
 
 ## 4. Policy Operation Verification
 
@@ -77,7 +77,7 @@ Default region name [None]: ap-northeast-2
 Default output format [None]:
 ```
 
-Configure aws CLI with the created instance-describe-user User.
+Configure aws CLI with the created `instance-describe-user` User.
 
 ```shell
 $ aws ec2 describe-instances

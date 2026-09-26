@@ -19,7 +19,7 @@ tcp        0      0 10.0.0.19:9091          0.0.0.0:*               LISTEN      
 tcp        0      0 10.0.0.19:9093          0.0.0.0:*               LISTEN      3361/alertmanager
 ```
 
-netstat is a tool that outputs most network information held by the Linux kernel. [Shell 1] shows the output of `netstat -plnt` displaying server processes and ports currently in LISTEN state. netstat is also a tool that can be used when measuring network interface performance.
+`netstat` is a tool that outputs most network information held by the Linux kernel. [Shell 1] shows the output of `netstat -plnt` displaying server processes and ports currently in LISTEN state. `netstat` is also a tool that can be used when measuring network interface performance.
 
 ### 1.2. nmap
 
@@ -37,7 +37,7 @@ PORT      STATE SERVICE
 18080/tcp open  unknown
 ```
 
-nmap is a tool that performs network exploration on external hosts and outputs network status information of external hosts. [Shell 2] shows the output of `nmap -p 1-65535 localhost` performing TCP port scanning from port 1 to port 65536 on localhost. You can see that ports 22, 5000, 9094, and 18080 are in TCP LISTEN state.
+`nmap` is a tool that performs network exploration on external hosts and outputs network status information of external hosts. [Shell 2] shows the output of `nmap -p 1-65535 localhost` performing TCP port scanning from port 1 to port 65536 on `localhost`. You can see that ports 22, 5000, 9094, and 18080 are in TCP LISTEN state.
 
 ### 1.3. nc (netcat)
 
@@ -71,7 +71,7 @@ Commercial support is available at
 </html>
 ```
 
-nc (netcat) is a tool for sending and receiving data from network connections. It supports TCP and UDP. [shell 3] shows the output of `nc 10.0.0.10 80` connecting to nginx and receiving the / (root) page from nginx.
+`nc` (netcat) is a tool for sending and receiving data from network connections. It supports TCP and UDP. [shell 3] shows the output of `nc 10.0.0.10 80` connecting to nginx and receiving the `/` (root) page from nginx.
 
 ### 1.4. tcpdump
 
@@ -88,7 +88,7 @@ listening on eth0, link-type EN10MB (Ethernet), capture size 262144 bytes
 13:30:19.355673 IP node09.55226 > a184-28-153-161.deploy.static.akamaitechnologies.com.http: Flags [.], ack 301, win 237, options [nop,nop,TS val 2368590461 ecr 2709703644], length 0
 ```
 
-tcpdump is a tool that outputs inbound/outbound packet information of a specific network interface. [Shell 3] shows the output of `tcpdump -i eth0 tcp port 80` displaying inbound/outbound packet information with source/destination port 80 on eth0 interface.
+`tcpdump` is a tool that outputs inbound/outbound packet information of a specific network interface. [Shell 3] shows the output of `tcpdump -i eth0 tcp port 80` displaying inbound/outbound packet information with source/destination port 80 on `eth0` interface.
 
 ### 1.5. lsof
 
@@ -106,7 +106,7 @@ systemd       1 root  mem       REG                8,2    34872    2103003 /usr/
 systemd       1 root  mem       REG                8,2   432640   11534609 /lib/x86_64-linux-gnu/libdevmapper.so.1.02.1
 ```
 
-lsof is a tool that outputs lists of open files. [Shell 4] shows the output of `lsof -u root` displaying a list of files opened by root user. Filtering is possible not only by user but also by directory and binary. It is also possible to find processes using specific TCP or UDP ports using lsof.
+`lsof` is a tool that outputs lists of open files. [Shell 4] shows the output of `lsof -u root` displaying a list of files opened by `root` user. Filtering is possible not only by user but also by directory and binary. It is also possible to find processes using specific TCP or UDP ports using `lsof`.
 
 ### 1.6. sysdig
 
@@ -134,7 +134,7 @@ lsof is a tool that outputs lists of open files. [Shell 4] shows the output of `
 8484 01:23:53.859665937 1 sshd (30637) > switch next=3591(sysdig) pgft_maj=3 pgft_min=452 vm_size=72356 vm_rss=6396 vm_swap=0
 ```
 
-sysdig is a tool that shows various kernel operation states related to processes, CPU, disk, network, etc. [Shell 5] shows the output of `sysdig` displaying kernel operations. Kernel operation states can also be viewed per container. It is also possible to measure performance of CPU, memory, network, and disk based on operation state information.
+`sysdig` is a tool that shows various kernel operation states related to processes, CPU, disk, network, etc. [Shell 5] shows the output of `sysdig` displaying kernel operations. Kernel operation states can also be viewed per container. It is also possible to measure performance of CPU, memory, network, and disk based on operation state information.
 
 ## 2. References
 

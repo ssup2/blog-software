@@ -42,7 +42,7 @@ preStop Hook은 App Container가 `SIGTERM` Signal을 늦게 받기 위한 용도
 
 {{< figure caption="[Figure 3] Kubernetes Pod Termination without preStop Hook" src="images/kubernetes-pod-termination-without-sigterm-handler.png" width="1000px" >}}
 
-Linux 환경에서 `SIGTERM` Signal Handler가 설정되지 않는 Application (Process)는 `SIGTERM` Signal을 받는 순간 죽으며, App Container도 동일하다. [Figure 3]는 App Container가 SIGTERM Handler가 설정되지 않았을 때를 나타내고 있다. SIGTERM을 받자마자 App Container가 제거되기 때문에, 현재 처리중인 Request를 제대로 처리하지 못하고 종료될 수 있다. 따라서 App Container는 `SIGTERM` Signal을 받더라도 현재 처리중인 Request를 완료하고 죽도록 설정되어 있어야 한다.
+Linux 환경에서 `SIGTERM` Signal Handler가 설정되지 않는 Application (Process)는 `SIGTERM` Signal을 받는 순간 죽으며, App Container도 동일하다. [Figure 3]는 App Container가 `SIGTERM` Handler가 설정되지 않았을 때를 나타내고 있다. `SIGTERM`을 받자마자 App Container가 제거되기 때문에, 현재 처리중인 Request를 제대로 처리하지 못하고 종료될 수 있다. 따라서 App Container는 `SIGTERM` Signal을 받더라도 현재 처리중인 Request를 완료하고 죽도록 설정되어 있어야 한다.
 
 ```yaml {caption="[File 2] SpringBoot SIGTEM Handler Configuration", linenos=table}
 server:

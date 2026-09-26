@@ -12,7 +12,7 @@ title: Kubernetes 설치 / kubeadm 이용 / Ubuntu 18.04, Jetson Nano Cluster �
   * **Network Plugin** : calico or flannel or cilium 이용
   * **Dashboard Addon** : Dashboard 이용
 * kubeadm 1.18.14
-  * VM을 이용하여 Cluster 환경을 구축하는 경우 kubeadm을 이용하여 쉽게 Kubernetes를 설치 할 수 있다.
+  * VM을 이용하여 Cluster 환경을 구축하는 경우 `kubeadm`을 이용하여 쉽게 Kubernetes를 설치 할 수 있다.
 * CNI
   * flannel 0.13.0
 * Docker 19.03
@@ -46,7 +46,7 @@ GPU 이용을 위해서 Docker 19.03 Version을 설치한다.
 (All)$ apt-get install -y kubelet=1.18.14-00 kubeadm=1.18.14-00
 ```
 
-kubelet, kubeadm을 설치한다.
+`kubelet`, `kubeadm`을 설치한다.
 
 ```shell
 (All)$ swapoff -a
@@ -74,7 +74,7 @@ Master Node에서 Cluster를 초기화 한다.
 (Worker)$ kubeadm join 10.0.0.10:6443 --token x7tk20.4hp9x2x43g46ara5 --discovery-token-ca-cert-hash sha256:cab2cc0a4912164f45f502ad31f5d038974cf98ed10a6064d6632a07097fad79
 ```
 
-Worker Node에서 Master Node에서 출력 되었던 "kubeadm join" 명령어를 통해서 Worker를 Cluster에 추가한다.
+Worker Node에서 Master Node에서 출력 되었던 `kubeadm join` 명령어를 통해서 Worker를 Cluster에 추가한다.
 
 ### 2.4. 검증
 
@@ -87,7 +87,7 @@ jetson03   NotReady   <none>   62s    v1.18.14
 jetson04   NotReady   <none>   59s    v1.18.14
 ```
 
-Master Node에서 Cluster를 확인한다. 모든 Node가 List에서 보여야 한다. Network 설정이 안되어 있기 때문에 NotReady 상태로 유지된다. Network Plugin 설치후 Ready 상태를 확인 가능하다.
+Master Node에서 Cluster를 확인한다. 모든 Node가 List에서 보여야 한다. Network 설정이 안되어 있기 때문에 `NotReady` 상태로 유지된다. Network Plugin 설치후 `Ready` 상태를 확인 가능하다.
 
 ## 3. Flannel Network Plugin 설치
 
@@ -106,7 +106,7 @@ jetson03   Ready    <none>   12m   v1.18.14
 jetson04   Ready    <none>   12m   v1.18.14
 ```
 
-모든 Node가 Ready 상태인것을 확인할 수 있다.
+모든 Node가 `Ready` 상태인것을 확인할 수 있다.
 
 ## 4. 참조
 

@@ -54,7 +54,7 @@ Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
 172.17.0.0      0.0.0.0         255.255.0.0     U     0      0        0 eth0
 ```
 
-Let's look at Network Namespace, which is responsible for network isolation. [Shell 1,2] show the process of querying network interfaces and manipulating and querying routing tables inside each Netshoot Container. Netshoot is a container image that includes most network tools. You can see that netshoot-a Container and netshoot-b Container have different IPs. Also, you can see that while a routing rule related to IP "8.8.8.8" was added in netshoot-a Container, no related routing rule can be found in netshoot-b Container.
+Let's look at Network Namespace, which is responsible for network isolation. [Shell 1,2] show the process of querying network interfaces and manipulating and querying routing tables inside each Netshoot Container. Netshoot is a container image that includes most network tools. You can see that `netshoot-a` Container and `netshoot-b` Container have different IPs. Also, you can see that while a routing rule related to IP `8.8.8.8` was added in `netshoot-a` Container, no related routing rule can be found in `netshoot-b` Container.
 
 ```console {caption="[Shell 3] Host Network", linenos=table}
 # Check Host Interface
@@ -84,13 +84,13 @@ Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
 192.168.0.0     0.0.0.0         255.255.255.0   U     0      0        0 eth0
 ```
 
-[Shell 3] shows the process of creating netshoot-a and netshoot-b Containers and then querying network interfaces and routing tables visible from the Host. You can see that there is an eth0 interface with a completely different IP, and you can see that it has a completely different routing table from the Netshoot Containers. The reason why each container and host can have different network information is because of Network Namespace.
+[Shell 3] shows the process of creating `netshoot-a` and `netshoot-b` Containers and then querying network interfaces and routing tables visible from the Host. You can see that there is an `eth0` interface with a completely different IP, and you can see that it has a completely different routing table from the Netshoot Containers. The reason why each container and host can have different network information is because of Network Namespace.
 
 {{< figure caption="[Figure 1] Network Namespace" src="images/network-namespace.png" width="700px" >}}
 
-Network Namespace literally means a Namespace that isolates network-related settings and states. [Figure 1] shows three Network Namespaces: the Host Network Namespace used by the Host, the netshoot-a Network Namespace used by netshoot-a Container, and the netshoot-b Network Namespace used by netshoot-b Container.
+Network Namespace literally means a Namespace that isolates network-related settings and states. [Figure 1] shows three Network Namespaces: the Host Network Namespace used by the Host, the `netshoot-a` Network Namespace used by `netshoot-a` Container, and the `netshoot-b` Network Namespace used by `netshoot-b` Container.
 
-Each Network Namespace can independently have network-related settings such as routing tables, sockets, and netfilter. Therefore, each container and host can have separate routing tables as confirmed in [Shell 1~3]. Also, since sockets are isolated, servers using the same port can run simultaneously inside each container and host. Since netfilter is also isolated, iptables and IPVS settings that operate based on netfilter can also be set differently for each container.
+Each Network Namespace can independently have network-related settings such as routing tables, sockets, and netfilter. Therefore, each container and host can have separate routing tables as confirmed in [Shell 1~3]. Also, since sockets are isolated, servers using the same port can run simultaneously inside each container and host. Since netfilter is also isolated, `iptables` and IPVS settings that operate based on netfilter can also be set differently for each container.
 
 Network Namespaces are basically isolated from each other, but there are cases where communication between Network Namespaces is necessary. In such cases, Network Namespaces are connected using a Virtual Network Device called **veth** Device. In [Figure 1], you can see that the Host Network Namespace and Container Network Namespace are connected through veth Device. When creating a veth Device, two interfaces must be created, and each interface should be set to the Network Namespace to which it will be connected.
 
@@ -158,7 +158,7 @@ Network Namespaces are basically isolated from each other, but there are cases w
 
 {{< figure caption="[Figure 2] veth Device Setting" src="images/veth-device-setting.png" width="600px" >}}
 
-[Shell 4] shows the process of creating a veth Device using the ip command, connecting the Host Network Namespace and nginx Container Network Namespace using the created veth Device, and finally communicating directly from Host to Container through the connected veth. Through [Shell 3], the Host and nginx Container are connected to the 193.168.0.0/24 network and can communicate with each other. [Figure 2] shows the veth Device and routing table set up through [Shell 4].
+[Shell 4] shows the process of creating a veth Device using the `ip` command, connecting the Host Network Namespace and `nginx` Container Network Namespace using the created veth Device, and finally communicating directly from Host to Container through the connected veth. Through [Shell 3], the Host and `nginx` Container are connected to the `193.168.0.0/24` network and can communicate with each other. [Figure 2] shows the veth Device and routing table set up through [Shell 4].
 
 ## Network Namespace Sharing
 
@@ -199,4 +199,4 @@ Network Namespaces are basically isolated from each other, but there are cases w
 ...
 ```
 
-One Network Namespace can also be shared and used by multiple containers or containers and hosts. [Shell 5] shows how to set up a netshoot Container to use the Host Network Namespace. Since the netshoot Container uses the Host Network Namespace, you can see that the network interface information visible from the Host and the network interface information visible from the netshoot Container are identical. When a container uses the Host's Network Namespace instead of its own dedicated Network Namespace, container packets can be sent directly to the outside of the Host without passing through veth Device, so network performance benefits can be obtained.
+One Network Namespace can also be shared and used by multiple containers or containers and hosts. [Shell 5] shows how to set up a `netshoot` Container to use the Host Network Namespace. Since the `netshoot` Container uses the Host Network Namespace, you can see that the network interface information visible from the Host and the network interface information visible from the `netshoot` Container are identical. When a container uses the Host's Network Namespace instead of its own dedicated Network Namespace, container packets can be sent directly to the outside of the Host without passing through veth Device, so network performance benefits can be obtained.

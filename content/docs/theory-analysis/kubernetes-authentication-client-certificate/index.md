@@ -66,7 +66,7 @@ users:
     client-key-data: <CLIENT-KEY>
 ```
 
-kubeconfig 설정을 통해서 kubectl에서도 Client Certificate를 이용할 수 있다. [Text 3]은 Client Certificate를 이용하는 kubeconfig를 나타내고 있다. `client-certificate-data` 항목에 Client의 인증서 내용을 설정하고 `client-key-data` 항목에 Client Key를 설정한다.
+kubeconfig 설정을 통해서 `kubectl`에서도 Client Certificate를 이용할 수 있다. [Text 3]은 Client Certificate를 이용하는 kubeconfig를 나타내고 있다. `client-certificate-data` 항목에 Client의 인증서 내용을 설정하고 `client-key-data` 항목에 Client Key를 설정한다.
 
 ## 2. 참고
 

@@ -42,7 +42,7 @@ EKS Node에 SSH로 접근하기 위한 SSH Key를 생성한다.
 
 ## 4. IAM Role 생성
 
-EKS Control Plan에서 이용할 IAM과 EKS Node에서 이용할 IAM Role을 생성한다.
+EKS Control Plane에서 이용할 IAM과 EKS Node에서 이용할 IAM Role을 생성한다.
 
 ```shell
 $ cat > ssup2-eks-control-plan-role.json << EOL
@@ -84,7 +84,7 @@ $ aws iam create-role --role-name ssup2-eks-control-plan-role --assume-role-poli
 $ aws iam attach-role-policy --policy-arn arn:aws:iam::aws:policy/AmazonEKSClusterPolicy --role-name ssup2-eks-control-plan-role
 ```
 
-EKS Control Plan에서 이용할 IAM Role을 생성 및 설정한다.
+EKS Control Plane에서 이용할 IAM Role을 생성 및 설정한다.
 
 ```shell
 $ cat > ssup2-eks-node-role.json << EOL
@@ -316,7 +316,7 @@ $ aws eks create-cluster --name ssup2-eks-cluster --kubernetes-version 1.18 --ro
 }
 ```
 
-EKS Cluster를 생성한다. EKS Cluster 생성시 위에서 생성했던 Control Plan Role, Subnet 정보를 입력한다.
+EKS Cluster를 생성한다. EKS Cluster 생성시 위에서 생성했던 Control Plane Role, Subnet 정보를 입력한다.
 
 ```shell
 $ aws eks create-nodegroup --cluster-name ssup2-eks-cluster --nodegroup-name ssup2-eks-group --subnets subnet-0c932dea08c167b2c subnet-075c6fee87669a6cd --node-role arn:aws:iam::132099918825:role/ssup2-eks-node-role --remote-access ec2SshKey=ssup2-eks-ssh
@@ -368,7 +368,7 @@ $ aws eks update-kubeconfig --name ssup2-eks-cluster
 Updated context arn:aws:eks:ap-northeast-2:132099918825:cluster/ssup2-eks-cluster in /root/.kube/config
 ```
 
-생성한 EKS Cluster의 kubeconfig를 설정한다.
+생성한 EKS Cluster의 `kubeconfig`를 설정한다.
 
 ```shell
 $ kubectl version

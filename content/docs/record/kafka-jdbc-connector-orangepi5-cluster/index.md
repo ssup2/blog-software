@@ -13,16 +13,16 @@ Kafka JDBC Connector를 활용해서 PostgreSQL의 Table 복제를 수행한다.
 Spark를 통해서 MinIO에 저장되어 있는 데이터를 변환하는 환경은 [Figure 1]과 같다.
 
 * **PostgreSQL** : Data 저장소 역할을 수행한다.
-  * **kafka_connect_src Database, Users Table** : Data를 가져오기 위한 Source Table.
-  * **kafka_connect_dst Database, Users Table** : 가져온 Data를 저장하는 Destination Table.
+  * `kafka_connect_src` Database, `users` Table : Data를 가져오기 위한 Source Table.
+  * `kafka_connect_dst` Database, `users` Table : 가져온 Data를 저장하는 Destination Table.
 * **Kafka Connect** : Kafka와 PostgreSQL 사이에서 Data를 주고받는 역할을 수행한다.
-  * **postgresql-src-connector Source JDBC Connector** : Source Table의 Data를 Kafka로 보내는 JDBC Connector.
-  * **postgresql-dst-connector Destination JDBC Connector** : Kafka에서 가져온 Data를 Destination Table에 저장하는 JDBC Connector.
+  * `postgresql-src-connector` Source JDBC Connector : Source Table의 Data를 Kafka로 보내는 JDBC Connector.
+  * `postgresql-dst-connector` Destination JDBC Connector : Kafka에서 가져온 Data를 Destination Table에 저장하는 JDBC Connector.
 * **Kafka** : JDBC Connector를 통해서 Data를 주고받는 역할을 수행한다. 또한 Kafka Connect의 작업 상태를 저장하는 역할도 수행한다.
-  * **postgresql-users Topic** : 복제된 Data를 저장하는 Topic.
-  * **connect-cluster-configs** : Kafka Connect의 설정 정보를 저장하는 Topic.
-  * **connect-cluster-offsets** : Kafka Connect의 오프셋 정보를 저장하는 Topic.
-  * **connect-cluster-status** : Kafka Connect의 상태 정보를 저장하는 Topic.
+  * `postgresql-users` Topic : 복제된 Data를 저장하는 Topic.
+  * `connect-cluster-configs` : Kafka Connect의 설정 정보를 저장하는 Topic.
+  * `connect-cluster-offsets` : Kafka Connect의 오프셋 정보를 저장하는 Topic.
+  * `connect-cluster-status` : Kafka Connect의 상태 정보를 저장하는 Topic.
 * **Strimzi Kafka Operator** : Kafka와 Kafka Connect를 관리하는 Operator.
 
 전체 실습 환경 구성은 다음의 링크를 참조한다.

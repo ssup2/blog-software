@@ -24,13 +24,13 @@ $ aws iam create-group --group-name admins
 }
 ```
 
-admins 이름을 갖는 Admin Group을 생성한다.
+`admins` 이름을 갖는 Admin Group을 생성한다.
 
 ```shell
 $ aws iam attach-group-policy --group-name Admins --policy-arn arn:aws:iam::aws:policy/AdministratorAccess
 ```
 
-admins Group에 AdministratorAccess Policy를 붙여 admins Group에 소속된 user들이 Admin 권한을 갖도록 설정한다.
+`admins` Group에 `AdministratorAccess` Policy를 붙여 `admins` Group에 소속된 user들이 Admin 권한을 갖도록 설정한다.
 
 ## 3. Admin User 생성, 설정
 
@@ -47,13 +47,13 @@ $ aws iam create-user --user-name admin
 }
 ```
 
-admin User를 생성한다.
+`admin` User를 생성한다.
 
 ```shell
 $ aws iam add-user-to-group --group-name admins --user-name admin
 ```
 
-생성한 admin User를 admin Group에 추가한다.
+생성한 `admin` User를 `admins` Group에 추가한다.
 
 ```shell
 $ aws iam create-access-key --user-name admin
@@ -68,7 +68,7 @@ $ aws iam create-access-key --user-name admin
 }
 ```
 
-생성한 admin User의 Access Key를 생성한다.
+생성한 `admin` User의 Access Key를 생성한다.
 
 ## 4. 참조
 

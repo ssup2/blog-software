@@ -279,7 +279,7 @@ resources:
           socket_address: { address: 10.0.0.51, port_value: 9092 }   # TCP backend — its own port
 ```
 
-[Config 4]는 [Figure 1]의 Endpoint 부분에 해당하는 EDS 설정 예시를 나타내고 있다. 각 ClusterLoadAssignment의 `cluster_name`은 CDS에서 정의한 Cluster 이름과 일치해야 하며, 이를 통해 Cluster와 실제 인스턴스 목록이 연결된다. `reviews-v1` Cluster는 `10.0.0.11:80`과 `10.0.0.12:80` 두 개의 Endpoint로 요청이 분배되고, TCP Upstream인 `kafka` Cluster는 `10.0.0.51:9092` Endpoint를 가진다.
+[Config 4]는 [Figure 1]의 Endpoint 부분에 해당하는 EDS 설정 예시를 나타내고 있다. 각 `ClusterLoadAssignment`의 `cluster_name`은 CDS에서 정의한 Cluster 이름과 일치해야 하며, 이를 통해 Cluster와 실제 인스턴스 목록이 연결된다. `reviews-v1` Cluster는 `10.0.0.11:80`과 `10.0.0.12:80` 두 개의 Endpoint로 요청이 분배되고, TCP Upstream인 `kafka` Cluster는 `10.0.0.51:9092` Endpoint를 가진다.
 
 #### 1.1.5. SDS (Secret Discovery Service)
 
@@ -329,11 +329,11 @@ resources:
           local: { filename: "/etc/envoy/filter.wasm" }
 ```
 
-[Config 6]은 [Config 1]의 `internal-listener`가 `config_discovery`로 참조하고 있는 `internal-wasm`의 실제 설정을 전달하는 ECDS 예시를 나타내고 있다. Listener의 HTTP Filter 자리에는 설정 본문 대신 참조(이름과 type_url)만 두고, 실제 Filter 설정은 같은 이름의 TypedExtensionConfig Resource로 별도 전달받는다.
+[Config 6]은 [Config 1]의 `internal-listener`가 `config_discovery`로 참조하고 있는 `internal-wasm`의 실제 설정을 전달하는 ECDS 예시를 나타내고 있다. Listener의 HTTP Filter 자리에는 설정 본문 대신 참조(이름과 `type_url`)만 두고, 실제 Filter 설정은 같은 이름의 `TypedExtensionConfig` Resource로 별도 전달받는다.
 
 Filter 설정이 Listener 안에 Inline으로 들어 있으면 Filter 설정 변경도 Listener 변경이 된다. Envoy는 동작 중인 Listener의 설정을 직접 변경하지 못하므로, 변경된 설정으로 새 Listener를 만들어 교체한다. 이 과정에서 기존 Listener가 처리하던 연결들은 Drain을 거쳐 일정 시간 안에 모두 끊어진다. 즉 Filter 설정 한 줄을 바꿔도 해당 Port의 Long-lived 연결이 끊길 수 있다.
 
-반면 ECDS를 사용하면 Filter 설정이 Listener 밖의 독립된 Resource로 분리되어 있으므로, 설정 갱신 시 Listener는 그대로 유지되고 참조된 설정만 교체된다. 기존 연결은 영향을 받지 않으며, 갱신된 Filter 설정은 이후의 새 요청부터 적용된다. RDS가 Route를 Listener에서 분리하여 Route 변경이 Listener 교체를 유발하지 않게 만든 것처럼, ECDS는 같은 분리를 Filter 설정에 대해 수행하는 것이다. Wasm Filter처럼 설정이 크거나 자주 바뀌는 Extension에 주로 사용되며, Istio의 WasmPlugin CR이 이 방식으로 반영되는 대표적인 예이다.
+반면 ECDS를 사용하면 Filter 설정이 Listener 밖의 독립된 Resource로 분리되어 있으므로, 설정 갱신 시 Listener는 그대로 유지되고 참조된 설정만 교체된다. 기존 연결은 영향을 받지 않으며, 갱신된 Filter 설정은 이후의 새 요청부터 적용된다. RDS가 Route를 Listener에서 분리하여 Route 변경이 Listener 교체를 유발하지 않게 만든 것처럼, ECDS는 같은 분리를 Filter 설정에 대해 수행하는 것이다. Wasm Filter처럼 설정이 크거나 자주 바뀌는 Extension에 주로 사용되며, Istio의 `WasmPlugin` CR이 이 방식으로 반영되는 대표적인 예이다.
 
 #### 1.1.7. ADS (Aggregated Discovery Service)
 

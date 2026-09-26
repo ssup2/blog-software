@@ -8,9 +8,9 @@ The installation environment is as follows.
 
 * Ubuntu 16.04 LTS 64bit, root user
 * NFS Root: Refers to the absolute path of the root directory of the NFSv3 Server.
-  * Use /nfs-root as NFS Root.
+  * Use `/nfs-root` as NFS Root.
 * NFS share: Refers to the absolute path of the directory to be actually shared through the NFSv3 Server.
-  * Use /root/nfs-share as NFS share.
+  * Use `/root/nfs-share` as NFS share.
 
 ## 2. NFSv3 Server Configuration
 
@@ -38,7 +38,7 @@ Create shared folders and perform bind mount.
 /root/nfs-share /nfs-root none bind  0  0
 ```s
 
-Add the content from [File 1] to /etc/fstab to ensure bind mount after reboot.
+Add the content from [File 1] to `/etc/fstab` to ensure bind mount after reboot.
 
 ### 2.3. Configuration
 
@@ -46,7 +46,7 @@ Add the content from [File 1] to /etc/fstab to ensure bind mount after reboot.
 /nfs-root      *(rw,nohide,insecure,no-subtree-check,async,no-root-squash)
 ```
 
-Add the content from [File 2] to the /etc/exports file.
+Add the content from [File 2] to the `/etc/exports` file.
 
 ### 2.4. Restart
 

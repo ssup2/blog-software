@@ -26,9 +26,9 @@ title: CKAD Certificate Exam Review
 
 ## 3. Pre-Exam Checklist
 
-* Verify kubectl bash autocompletion
+* Verify `kubectl` bash autocompletion
   * https://kubernetes.io/docs/reference/kubectl/cheatsheet/
-* Verify tmux functionality
+* Verify `tmux` functionality
   * https://linuxize.com/post/getting-started-with-tmux/
 
 ## 4. Commands to Know During the Exam

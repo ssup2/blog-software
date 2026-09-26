@@ -6,7 +6,7 @@ title: AWS IAM Policy 생성, 적용 / aws CLI 이용 / Ubuntu 18.04
 
 * Ubuntu 18.04 LTS 64bit, root user
 * aws CLI
-  * Region ap-northeast-2
+  * Region `ap-northeast-2`
   * Version 2.1.34
 
 ## 2. Policy 생성
@@ -59,13 +59,13 @@ $ aws iam create-user --user-name instance-describe-user
 }
 ```
 
-instance-describe-user User를 생성하고 Secret을 생성한다.
+`instance-describe-user` User를 생성하고 Secret을 생성한다.
 
 ```shell
 $ aws iam attach-user-policy --user-name instance-describe-user --policy-arn arn:aws:iam::278805249149:policy/instance-describe
 ```
 
-생성한 instance-describe-user User에 생성한 instance-describe-policy/ Policy를 붙인다.
+생성한 `instance-describe-user` User에 생성한 `instance-describe-policy` Policy를 붙인다.
 
 ## 4. Policy 동작 확인
 
@@ -77,7 +77,7 @@ Default region name [None]: ap-northeast-2
 Default output format [None]:
 ```
 
-생성한 instance-describe-user User로 aws CLI를 설정한다.
+생성한 `instance-describe-user` User로 aws CLI를 설정한다.
 
 ```shell
 $ aws ec2 describe-instances

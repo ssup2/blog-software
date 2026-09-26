@@ -13,16 +13,16 @@ Perform PostgreSQL table replication using Kafka JDBC Connector.
 The environment for transforming data stored in MinIO through Spark is as shown in [Figure 1].
 
 * **PostgreSQL** : Performs the role of data storage.
-  * **kafka_connect_src Database, Users Table** : Source table for retrieving data.
-  * **kafka_connect_dst Database, Users Table** : Destination table for storing retrieved data.
+  * `kafka_connect_src` Database, `users` Table : Source table for retrieving data.
+  * `kafka_connect_dst` Database, `users` Table : Destination table for storing retrieved data.
 * **Kafka Connect** : Performs the role of exchanging data between Kafka and PostgreSQL.
-  * **postgresql-src-connector Source JDBC Connector** : JDBC connector that sends data from source table to Kafka.
-  * **postgresql-dst-connector Destination JDBC Connector** : JDBC connector that stores data retrieved from Kafka into destination table.
+  * `postgresql-src-connector` Source JDBC Connector : JDBC connector that sends data from source table to Kafka.
+  * `postgresql-dst-connector` Destination JDBC Connector : JDBC connector that stores data retrieved from Kafka into destination table.
 * **Kafka** : Performs the role of exchanging data through JDBC connectors. Also performs the role of storing Kafka Connect's work status.
-  * **postgresql-users Topic** : Topic for storing replicated data.
-  * **connect-cluster-configs** : Topic for storing Kafka Connect's configuration information.
-  * **connect-cluster-offsets** : Topic for storing Kafka Connect's offset information.
-  * **connect-cluster-status** : Topic for storing Kafka Connect's status information.
+  * `postgresql-users` Topic : Topic for storing replicated data.
+  * `connect-cluster-configs` : Topic for storing Kafka Connect's configuration information.
+  * `connect-cluster-offsets` : Topic for storing Kafka Connect's offset information.
+  * `connect-cluster-status` : Topic for storing Kafka Connect's status information.
 * **Strimzi Kafka Operator** : Operator for managing Kafka and Kafka Connect.
 
 Refer to the following links for the overall practice environment setup.

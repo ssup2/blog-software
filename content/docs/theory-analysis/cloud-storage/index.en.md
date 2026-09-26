@@ -10,7 +10,7 @@ Classify and analyze Storage used in Cloud environments into Block Storage, Obje
 
 Block Storage is Storage that provides **Block Device** like Hard Disk. Blocks in Block Storage all have the **same size**, and each Block is assigned a **Block Address**. Block Storage supports Block Read/Write operations based on Block Address. Block Storage only has Block-related Meta information such as the total number of Blocks. Block Storage shows the fastest I/O performance because it only performs simple Block-related functions.
 
-Kernel recognizes Block Storage as a general Block Device like Hard Disk. In Linux, you can see Block Storage allocated under the /dev folder. Apps that directly manage Blocks like DB can directly use Block Storage. Also, Block Storage can be formatted and mounted as a Filesystem like EXT4 so that general Apps can also use it.
+Kernel recognizes Block Storage as a general Block Device like Hard Disk. In Linux, you can see Block Storage allocated under the `/dev` folder. Apps that directly manage Blocks like DB can directly use Block Storage. Also, Block Storage can be formatted and mounted as a Filesystem like EXT4 so that general Apps can also use it.
 
 ## 2. Object Storage
 
@@ -26,7 +26,7 @@ Generally, Object Storage is operated in REST API format. When Object ID, which 
 
 {{< figure caption="[Figure 3] File Storage" src="images/file-storage.png" width="600px" >}}
 
-File Storage is **hierarchy-based Storage** using File System. It manages Files by freely creating hierarchies through Directories and placing Files in specific Directories. File Storage only stores Meta information defined by File System such as creation time and ownership for each File. File Storage can be connected through mount command. Once connected, it can be copied and modified using various Apps like Local Files. Due to these characteristics, it is used for File sharing between VMs and Containers.
+File Storage is **hierarchy-based Storage** using File System. It manages Files by freely creating hierarchies through Directories and placing Files in specific Directories. File Storage only stores Meta information defined by File System such as creation time and ownership for each File. File Storage can be connected through `mount` command. Once connected, it can be copied and modified using various Apps like Local Files. Due to these characteristics, it is used for File sharing between VMs and Containers.
 
 ## 4. References
 

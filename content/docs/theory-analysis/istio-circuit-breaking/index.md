@@ -73,9 +73,9 @@ Destination Rule은 다음과 같은 우선순위로 적용된다.
 
 1. Client Pod가 위치한 Namespace의 Destination Rule
 2. Server Pod가 위치한 Namespace의 Destination Rule
-3. Root Namespace (istio-system)의 Destination Rule
+3. Root Namespace (`istio-system`)의 Destination Rule
 
-Client Pod가 위치한 Namespace의 Destination Rule과 Server Pod가 위치한 Namespace의 Destination Rule은 모두 Namespace 내부에서만 적용된다. 반면에 Root Namespace (istio-system)의 Destination Rule은 우선순위가 가장 낮지만 모든 Namespace에 적용되는 특징을 갖는다. 따라서 **Root Namespace의 Destination Rule**을 이용하여 Global Circuit Breaking을 설정할 수 있다.
+Client Pod가 위치한 Namespace의 Destination Rule과 Server Pod가 위치한 Namespace의 Destination Rule은 모두 Namespace 내부에서만 적용된다. 반면에 Root Namespace (`istio-system`)의 Destination Rule은 우선순위가 가장 낮지만 모든 Namespace에 적용되는 특징을 갖는다. 따라서 **Root Namespace의 Destination Rule**을 이용하여 Global Circuit Breaking을 설정할 수 있다.
 
 ```yaml {caption="[File 2] Global Circuit Breaking Example"}
 apiVersion: networking.istio.io/v1

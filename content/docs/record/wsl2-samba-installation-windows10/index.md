@@ -4,7 +4,7 @@ title: WSL2 Samba 설치 / Windows 10 환경
 
 ## 1. 설치 배경
 
-WSL2 VM의 경우에는 Windows OS와 공유하는 /mnt 하위의 Directory의 I/O 성능이 나오지 않는 문제가 존재한다. 해당 문제를 우회하기 위해서 WSL2 VM 내부에 Samba Server를 설치하고 이용하는 방법을 정리한다.
+WSL2 VM의 경우에는 Windows OS와 공유하는 `/mnt` 하위의 Directory의 I/O 성능이 나오지 않는 문제가 존재한다. 해당 문제를 우회하기 위해서 WSL2 VM 내부에 Samba Server를 설치하고 이용하는 방법을 정리한다.
 
 ## 2. 설치 환경
 
@@ -36,7 +36,7 @@ WSL2 VM 내부에서 Samba Server를 설치하고, Samba Server를 위한 root U
 {% endhighlight %}
 ```
 
-/etc/samba/smb.conf 파일에 [File 1]의 내용을 추가한다.
+`/etc/samba/smb.conf` 파일에 [File 1]의 내용을 추가한다.
 
 ```shell
 (WSL2 Ubuntu)# service smbd restart
@@ -54,7 +54,7 @@ wsl -d ubuntu -u root ip addr add 192.168.10.100/24 broadcast 192.168.10.255 dev
 netsh interface ip add address "vEthernet (WSL)" 192.168.10.50 255.255.255.0
 ```
 
-[File 2]의 Script를 작성한다. Script는 192.168.10.100으로 접속시 Samba Server로 접속하게 만든다.
+[File 2]의 Script를 작성한다. Script는 `192.168.10.100`으로 접속시 Samba Server로 접속하게 만든다.
 
 ## 5. Script를 시작 Script로 등록
 
@@ -67,7 +67,7 @@ netsh interface ip add address "vEthernet (WSL)" 192.168.10.50 255.255.255.0
 
 Windows OS를 재부팅한 다음에 File Browser에서 다음의 주소로 접속한다.
 
-* \\\\192.168.10.100\root
+* `\\192.168.10.100\root`
 
 ## 7. 참고
 

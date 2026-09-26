@@ -12,7 +12,7 @@ When most Docker containers establish TCP connections with servers outside the D
 
 ## 2. Cause and Solution
 
-Linux provides the Masquerade technique, which is an SNAT technique that changes the Src IP of packets to the IP of the interface through which packets are sent when sending packets externally through the iptables command. At this time, the Src Port number is also changed to an arbitrary port number that is not being used on the host.
+Linux provides the Masquerade technique, which is an SNAT technique that changes the Src IP of packets to the IP of the interface through which packets are sent when sending packets externally through the `iptables` command. At this time, the Src Port number is also changed to an arbitrary port number that is not being used on the host.
 
 When multiple threads within one process simultaneously try to establish TCP connections to the same external server (same IP, port) through the Masquerade technique, multiple TCP SYN packets are SNATed through the Masquerade technique. At this time, **the Src Port number of each TCP SYN packet must be changed to a different port number**. This is because only then can we identify which TCP connection the response is for when a response comes from the external server.
 
@@ -20,9 +20,9 @@ However, **due to a kernel bug, when TCP SYN packets are sent simultaneously, th
 
 The kernel bug related to this issue has not been resolved yet. Therefore, currently, there is no other way than to set the Src Port number allocated by the Masquerade technique to minimize duplication. The default algorithm for allocating Src Port numbers through the Masquerade technique starts from the last allocated port number and increases one by one, checking if the port number is in use, and if not in use, allocates it. Therefore, the default method has a high probability of allocating duplicate Src Port numbers when Src Port number allocation requests come in simultaneously.
 
-The kernel has NF_NAT_RANGE_PROTO_RANDOM Algorithm and NF_NAT_RANGE_PROTO_RANDOM_FULLY Algorithm that allocate Src Port numbers randomly to solve this problem. The NF_NAT_RANGE_PROTO_RANDOM_FULLY Algorithm was created to improve the NF_NAT_RANGE_PROTO_RANDOM Algorithm. Therefore, **by allocating Src Port randomly through the NF_NAT_RANGE_PROTO_RANDOM_FULLY Algorithm, Src Port duplication can be prevented** to reduce the probability of TCP SYN packet drops. However, this is not a method that can solve this issue 100%.
+The kernel has `NF_NAT_RANGE_PROTO_RANDOM` Algorithm and `NF_NAT_RANGE_PROTO_RANDOM_FULLY` Algorithm that allocate Src Port numbers randomly to solve this problem. The `NF_NAT_RANGE_PROTO_RANDOM_FULLY` Algorithm was created to improve the `NF_NAT_RANGE_PROTO_RANDOM` Algorithm. Therefore, **by allocating Src Port randomly through the `NF_NAT_RANGE_PROTO_RANDOM_FULLY` Algorithm, Src Port duplication can be prevented** to reduce the probability of TCP SYN packet drops. However, this is not a method that can solve this issue 100%.
 
-To apply the NF_NAT_RANGE_PROTO_RANDOM_FULLY Algorithm to the Masquerade technique, you can add the `--random-fully` option when adding a Masquerade rule with the iptables command. The `--random-fully` option is supported from iptables v1.6.2 version.
+To apply the `NF_NAT_RANGE_PROTO_RANDOM_FULLY` Algorithm to the Masquerade technique, you can add the `--random-fully` option when adding a Masquerade rule with the `iptables` command. The `--random-fully` option is supported from `iptables` v1.6.2 version.
 
 ## 3. with Kubernetes
 
@@ -44,7 +44,7 @@ Chain KUBE-POSTROUTING (1 references)
 ...
 ```
 
-From Kubernetes v1.16.0 version, to solve this issue, if the iptables command supports the `--random-fully` option, the `--random-fully` option is applied to the Masquerade rule of the KUBE-POSTROUTING chain. [Shell 1] shows the KUBE-POSTROUTING chain without the `--random-fully` option applied, and [Shell 2] shows the chain with the `--random-fully` option applied. Also, some CNI plugins add Masquerade rules with the `--random-fully` option set to solve this issue. Flannel and Cilium CNI support the `--random-fully` option.
+From Kubernetes v1.16.0 version, to solve this issue, if the `iptables` command supports the `--random-fully` option, the `--random-fully` option is applied to the Masquerade rule of the `KUBE-POSTROUTING` chain. [Shell 1] shows the `KUBE-POSTROUTING` chain without the `--random-fully` option applied, and [Shell 2] shows the chain with the `--random-fully` option applied. Also, some CNI plugins add Masquerade rules with the `--random-fully` option set to solve this issue. Flannel and Cilium CNI support the `--random-fully` option.
 
 ## 4. References
 

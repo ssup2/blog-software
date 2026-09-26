@@ -8,7 +8,7 @@ Elasticsearch의 Data Structure를 분석한다.
 
 {{< figure caption="[Figure 1] Data Structure" src="images/elasticsearch-data-structure.png" width="700px" >}}
 
-[Figure 1]은 Elasticsearch의 Data Sturcture를 나타내고 있다. Elasticsearch의 Data는 **Index, Type, Document** 3단계로 구성되어 있다. Document는 Json 형태의 Tree 구조로 Data를 저장한다. Document의 집합을 Type이라고 명칭한다. Type의 집합을 Index라고 명칭한다. MySQL과 비교하면 Index는 Database, Type은 Table, Document는 Row/Column으로 Mapping된다.
+[Figure 1]은 Elasticsearch의 Data Structure를 나타내고 있다. Elasticsearch의 Data는 **Index, Type, Document** 3단계로 구성되어 있다. Document는 Json 형태의 Tree 구조로 Data를 저장한다. Document의 집합을 Type이라고 명칭한다. Type의 집합을 Index라고 명칭한다. MySQL과 비교하면 Index는 Database, Type은 Table, Document는 Row/Column으로 Mapping된다.
 
 ```json {caption="[Data 1] Document Info", linenos=table}
 {

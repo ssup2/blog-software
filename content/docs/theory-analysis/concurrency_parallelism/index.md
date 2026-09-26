@@ -2,7 +2,7 @@
 title: Concurrency, Parallelism
 ---
 
-유사 의미를 갖고 있는 Concurreny와 Parallelism을 비교한다. 
+유사 의미를 갖고 있는 Concurrency와 Parallelism을 비교한다. 
 
 ## 1. Concurrency (병행성)
 

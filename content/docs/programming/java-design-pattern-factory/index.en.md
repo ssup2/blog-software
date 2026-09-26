@@ -97,7 +97,7 @@ public class main {
 }
 ```
 
-Simple Factory Pattern means a Factory Pattern that can be implemented simply, as the name suggests. [Code 2] shows an example of Simple Factory Pattern through the `SimpleProductFactory` Class. You can see that the `getProduct()` Method of `SimpleProductFactory` creates different Product objects depending on the type. Simple implementation is the biggest advantage, but it has the disadvantage that the Code of the `SimpleProductFactory` Class must be changed each time a Product type is added.
+Simple Factory Pattern means a Factory Pattern that can be implemented simply, as the name suggests. [Code 2] shows an example of Simple Factory Pattern through the `SimpleProductFactory` Class. You can see that the `getProduct()` Method of `SimpleProductFactory` creates different `Product` objects depending on the `type`. Simple implementation is the biggest advantage, but it has the disadvantage that the Code of the `SimpleProductFactory` Class must be changed each time a `Product` type is added.
 
 ### 1.2. Factory Method Pattern
 
@@ -134,7 +134,7 @@ public class main {
 }
 ```
 
-Factory Method Pattern is a Pattern that compensates for the disadvantages of Simple Factory. It is a Pattern that creates dedicated Factories that create objects of a single Type by inheriting Factory Classes. [Code 3] shows the Factory Method Pattern. You can see a `BookFactory` Factory Class that creates only Book objects and a `PhoneFactory` Factory Class that creates only Phone objects by inheriting the `ProductFactory` Class. It has the advantage that existing Factory-related Code does not need to be modified even if Product types are added.
+Factory Method Pattern is a Pattern that compensates for the disadvantages of Simple Factory. It is a Pattern that creates dedicated Factories that create objects of a single Type by inheriting Factory Classes. [Code 3] shows the Factory Method Pattern. You can see a `BookFactory` Factory Class that creates only `Book` objects and a `PhoneFactory` Factory Class that creates only `Phone` objects by inheriting the `ProductFactory` Class. It has the advantage that existing Factory-related Code does not need to be modified even if `Product` types are added.
 
 ### 1.3. Abstract Factory Pattern
 
@@ -182,7 +182,7 @@ public class Main {
 }
 ```
 
-Abstract Factory Pattern is a Pattern that can create objects of various Types depending on the Factory object being injected. [Code 4] shows the Abstract Factory Pattern. You can see that various Types of Products can be created depending on the Factory Class injected into the `AbstractProductFactory` Class.
+Abstract Factory Pattern is a Pattern that can create objects of various Types depending on the Factory object being injected. [Code 4] shows the Abstract Factory Pattern. You can see that various Types of `Product` can be created depending on the Factory Class injected into the `AbstractProductFactory` Class.
 
 ## 2. References
 

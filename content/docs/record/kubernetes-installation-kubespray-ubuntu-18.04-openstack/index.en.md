@@ -67,7 +67,7 @@ Generate an SSH key on the Deploy Node. Enter a blank for passphrase (Password) 
 (Deploy)$ ssh-copy-id root@30.0.0.13
 ```
 
-Use the ssh-copy-id command from the Deploy Node to copy the generated SSH public key to the ~/.ssh/authorized-keys file of the remaining nodes.
+Use the `ssh-copy-id` command from the Deploy Node to copy the generated SSH public key to the `~/.ssh/authorized-keys` file of the remaining nodes.
 
 ## 4. kubespray Configuration and Execution
 
@@ -106,7 +106,7 @@ kube-master
 kube-node   
 ```
 
-Store information and roles for each VM in the inventory/mycluster/inventory.ini file on the Deploy Node.
+Store information and roles for each VM in the `inventory/mycluster/inventory.ini` file on the Deploy Node.
 
 ```text {caption="[File 2] Deploy Node - ~/kubespray/inventory/mycluster/group-vars/all/all.yml", linenos=table}
 ...
@@ -121,7 +121,7 @@ cloud-provider: openstack
 ...
 ```
 
-Set the Cloud Provider to OpenStack in the inventory/mycluster/group-vars/all/all.yml file on the Deploy Node.
+Set the Cloud Provider to OpenStack in the `inventory/mycluster/group-vars/all/all.yml` file on the Deploy Node.
 
 ```text {caption="[File 3] Deploy Node - ~/kubespray/inventory/mycluster/group-vars/all/openstack.yml", linenos=table}
 # # When OpenStack is used, if LBaaSv2 is available you can enable it with the following 2 variables.
@@ -139,7 +139,7 @@ openstack-lbaas-monitor-timeout: "30s"
 openstack-lbaas-monitor-max-retries: "3"     
 ```
 
-Configure the Octavia Load Balancer for Kubernetes LoadBalancer Service in the inventory/mycluster/group-vars/all/openstack.yml file on the Deploy Node. Check and set the External Network ID and External Network Subnet ID.
+Configure the Octavia Load Balancer for Kubernetes LoadBalancer Service in the `inventory/mycluster/group-vars/all/openstack.yml` file on the Deploy Node. Check and set the External Network ID and External Network Subnet ID.
 
 ```text {caption="[File 4] Deploy Node - ~/kubespray/inventory/mycluster/group-vars/k8s-cluster/k8s-cluster.yml", linenos=table}
 ...
@@ -149,7 +149,7 @@ persistent-volumes-enabled: true
 ...
 ```
 
-Configure the CNI plugin to use cilium and enable Persistent Volume in the inventory/mycluster/group-vars/k8s-cluster/k8s-cluster.yml file on the Deploy Node to configure Kubernetes to use OpenStack's Cinder.
+Configure the CNI plugin to use `cilium` and enable Persistent Volume in the `inventory/mycluster/group-vars/k8s-cluster/k8s-cluster.yml` file on the Deploy Node to configure Kubernetes to use OpenStack's Cinder.
 
 ```text {caption="[File 5] Deploy Node - ~/kubespray/roles/bootstrap-os/defaults/main.yml", linenos=table}
 ...
@@ -158,7 +158,7 @@ Configure the CNI plugin to use cilium and enable Persistent Volume in the inven
 override-system-hostname: false
 ```
 
-Configure the roles/bootstrap-os/defaults/main.yml file on the Deploy Node to not override the hostname where Kubernetes is installed.
+Configure the `roles/bootstrap-os/defaults/main.yml` file on the Deploy Node to not override the hostname where Kubernetes is installed.
 
 ```text {caption="[File 6] Deploy Node - ~/kubespray/openstack-rc", linenos=table}
 export OS-AUTH-URL=http://192.168.0.40:5000/v3
@@ -172,7 +172,7 @@ export OS-INTERFACE=public
 export OS-IDENTITY-API-VERSION=3
 ```
 
-Create the openstack-rc file based on the OpenStack RC file information.
+Create the `openstack-rc` file based on the OpenStack RC file information.
 
 ```shell
 (Deploy)$ source ~/kubespray/openstack-rc

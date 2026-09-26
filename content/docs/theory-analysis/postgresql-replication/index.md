@@ -2,7 +2,7 @@
 title: PostgreSQL Replication
 ---
 
-PostgreSQL의 HA(High Availabilty)를 위한 Replicaiton 기법을 분석한다.
+PostgreSQL의 HA(High Availability)를 위한 Replication 기법을 분석한다.
 
 ## 1. PostgreSQL Replication
 

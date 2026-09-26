@@ -127,7 +127,7 @@ Trace dump saved to: /tmp/trace2991957244
 2022/06/15 00:05:17 Opening browser. Trace viewer is listening on http://127.0.0.1:42519
 ```
 
-`github.com/google/gops` Package와 `gops` CLI를 통해서도 Server와 같이 계속 동작중인 App의 Tracing을 수행할 수 있다. [Code 4]는 `github.com/google/gops` Package의 사용법을 나타내고 있다. `gops` Agent를 구동시키는것을 확인할 수 있다. 이후에 [Shell 3]의 내용과 같이 `gops` 명령어를 통해서 PID를 조회한 다음 `gops trace` 명령어를 통해서 Trace 획득 및 pprof를 실행한다.
+`github.com/google/gops` Package와 `gops` CLI를 통해서도 Server와 같이 계속 동작중인 App의 Tracing을 수행할 수 있다. [Code 4]는 `github.com/google/gops` Package의 사용법을 나타내고 있다. `gops` Agent를 구동시키는것을 확인할 수 있다. 이후에 [Shell 3]의 내용과 같이 `gops` 명령어를 통해서 PID를 조회한 다음 `gops trace` 명령어를 통해서 Trace 획득 및 `pprof`를 실행한다.
 
 ## 2. trace CLI
 

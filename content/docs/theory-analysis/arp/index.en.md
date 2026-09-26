@@ -29,7 +29,7 @@ Address                  HWtype  HWaddress           Flags Mask            Iface
 192.168.0.4              ether   1c:23:2c:8c:6c:99   C                     eth0
 ```
 
-If addresses are discovered using ARP every time data is transmitted, numerous ARP packets will occur on the network and significant transmission overhead will also occur. Therefore, each Host caches and manages MAC addresses discovered through ARP. In Linux, you can view the ARP table managed by Linux through the arp command. [Shell 1] shows the process of checking the ARP table using the arp command. In the ARP table of [Shell 1], you can see that 192.168.0.1 is mapped to 90:9f:33:b2:ef:08, and 192.168.0.4 is mapped to 1c:23:2c:8c:6c:99.
+If addresses are discovered using ARP every time data is transmitted, numerous ARP packets will occur on the network and significant transmission overhead will also occur. Therefore, each Host caches and manages MAC addresses discovered through ARP. In Linux, you can view the ARP table managed by Linux through the `arp` command. [Shell 1] shows the process of checking the ARP table using the `arp` command. In the ARP table of [Shell 1], you can see that `192.168.0.1` is mapped to `90:9f:33:b2:ef:08`, and `192.168.0.4` is mapped to `1c:23:2c:8c:6c:99`.
 
 ## 2. References
 

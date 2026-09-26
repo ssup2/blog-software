@@ -6,15 +6,15 @@ title: OpenStack Terraform Practice / Kubernetes Environment Setup
 
 {{< figure caption="[Figure 1] OpenStack Terraform Practice and Setup Environment" src="images/environment.png" width="900px" >}}
 
-[Figure 1] shows the Kubernetes environment to be built on OpenStack using Terraform. This was performed in an environment where External Network, external-router, and Ubuntu 18.04 Image were pre-created.
+[Figure 1] shows the Kubernetes environment to be built on OpenStack using Terraform. This was performed in an environment where External Network, `external-router`, and Ubuntu 18.04 Image were pre-created.
 
 * Terraform: 0.12.5
 * Node: Ubuntu 18.04
 * OpenStack: Stein
-  * User, Tenant, Password: admin
+  * User, Tenant, Password: `admin`
   * Auth URL: 
 * Network:
-  * Internal Network: Kubernetes Network, 30.0.0.0/24
+  * Internal Network: Kubernetes Network, `30.0.0.0/24`
 * Flavor:
   * Standard: 4 vCPU, 4GB RAM, 30GB Disk
 

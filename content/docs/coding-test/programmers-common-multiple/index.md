@@ -31,4 +31,4 @@ class Solution {
   * 언제나 동일한 연산 수행
 * Space Complexity
   * O(1)
-  * 함수의 Paramater 및 지역 변수
+  * 함수의 Parameter 및 지역 변수

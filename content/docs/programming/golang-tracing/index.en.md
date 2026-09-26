@@ -127,7 +127,7 @@ Trace dump saved to: /tmp/trace2991957244
 2022/06/15 00:05:17 Opening browser. Trace viewer is listening on http://127.0.0.1:42519
 ```
 
-Tracing of Apps that continue to run like Servers can also be performed through the `github.com/google/gops` Package and `gops` CLI. [Code 4] shows how to use the `github.com/google/gops` Package. You can see that the `gops` Agent is started. Then, as shown in [Shell 3], query the PID through the `gops` command and then acquire Traces and run pprof through the `gops trace` command.
+Tracing of Apps that continue to run like Servers can also be performed through the `github.com/google/gops` Package and `gops` CLI. [Code 4] shows how to use the `github.com/google/gops` Package. You can see that the `gops` Agent is started. Then, as shown in [Shell 3], query the PID through the `gops` command and then acquire Traces and run `pprof` through the `gops trace` command.
 
 ## 2. trace CLI
 

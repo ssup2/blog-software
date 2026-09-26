@@ -40,7 +40,7 @@ Commercial support is available at
 </html>
 ```
 
-Establishes a connection with the given IP and Port, and sends/receives data through the established connection. [shell 1] shows the output of `netcat [IP] [Port]` connecting to nginx and receiving the / (root) page from nginx.
+Establishes a connection with the given IP and Port, and sends/receives data through the established connection. [shell 1] shows the output of `netcat [IP] [Port]` connecting to nginx and receiving the `/` (root) page from nginx.
 
 ### 1.2. nc -zv [IP] [Port]
 

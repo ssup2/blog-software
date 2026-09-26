@@ -9,7 +9,7 @@ Kubernetes 환경에서 Sidecar Container Pattern은 다양한 방법으로 활�
 * Sidecar Container와 App Container의 의존성 관계를 명시할 수 없었다. Sidecar Container가 먼저 시작되고 App Container 시작되게 만들거나, App Container가 먼저 죽고 Sidecar Container가 나중에 죽게 만들거나 하는 것이 불가능했다.
 * App Container가 정상 종료가 되어도 Sidecar Container가 종료되지 않으면 Pod가 종료되지 않는 문제가 있었다. 이러한 문제는 Job Workload를 수행하는 Job Pod에서 특히 문제가 되었다.
 
-이러한 Sidecar Container Pattern의 문제를 해결하기 위해서 Kubernetes는 **Sidecar Container** 기능을 출시했다. `1.28 Version`부터 이용이 가능하다. Kubernetes의 Sidecar Container 기능은 다음과 같은 특징을 갖는다.
+이러한 Sidecar Container Pattern의 문제를 해결하기 위해서 Kubernetes는 **Sidecar Container** 기능을 출시했다. 1.28 Version부터 이용이 가능하다. Kubernetes의 Sidecar Container 기능은 다음과 같은 특징을 갖는다.
 
 * App Container가 시작하기 전에 Sidecar Container가 먼저 시작된다. 다수의 Sidecar Container가 있을 경우에는 Manifest 순서에 따라서 하나씩 시작된다.
 * Pod가 종료되면 먼저 App Container가 종료되고, Sidecar Container가 생성된 순서의 역순으로 종료된다. 즉 Manifest의 역순으로 종료된다.
@@ -40,7 +40,7 @@ spec:
 
 [File 1]은 간단한 Sidecar Container의 예제를 나타낸다. Kubernetes에서는 Sidecar Container를 **특수한 Init Container**로 간주한다. 따라서 Pod 내부에서 Sidecar Container를 선언하기 `initContainers` 하위에 정의해야 하며, Init Container 중에서 `restartPolicy`가 `Always`로 설정되어 있으면 Sidecar Container로 간주된다. `restartPolicy`가 설정되어 있지 않거나 `Always`로 설정되어 있지 않은 경우에는 App Container 동작전 잠깐 동안 동작하는 일반적인 Init Container로 간주된다.
 
-Sidecar Container는 `restartPolicy`가 `Always`로 설정되어 있기 어떤한 이유로 종료되어도 계속해서 반복해서 실행되며, App Container와 별개로 동작한다. Sidecar Container는 일반 Init Container와 다르게 **Probe** 설정이 가능하다. Livness Probe 실패시 자동으로 재시작하며, Readiness Probe 실패시에는 Pod의 상태를 **Ready**가 아닌 상태로 변경하기 때문에, Readiness Probe 설정에는 주의가 필요하다.
+Sidecar Container는 `restartPolicy`가 `Always`로 설정되어 있기 어떤한 이유로 종료되어도 계속해서 반복해서 실행되며, App Container와 별개로 동작한다. Sidecar Container는 일반 Init Container와 다르게 **Probe** 설정이 가능하다. Livness Probe 실패시 자동으로 재시작하며, Readiness Probe 실패시에는 Pod의 상태를 `Ready`가 아닌 상태로 변경하기 때문에, Readiness Probe 설정에는 주의가 필요하다.
 
 ### 1.1. Sidecar Container 생성, 종료 순서 확인
 
@@ -98,7 +98,7 @@ LAST SEEN   TYPE     REASON      OBJECT                                MESSAGE
 
 [Shell 1]은 [File 2]에 정의된 Pod를 생성, 삭제를 수행하고 이벤트를 확인하는 예제를 나타낸다. `first-sidecar` Container가 `second-sidecar` Container보다 위에 정의되어 있기 때문에, `first-sidecar` Container가 먼저 생성되고 `second-sidecar` Container가 나중에 생성되고 이후에 `app` Container가 생성되는걸 이벤트를 통해서 확인할 수 있다.
 
-Pod가 종료될때는 Event에는 동시간에 각 Container에 대해서 Killing 이벤트가 발생하는걸 확인할 수 있으며, 실제 각 Container가 언제 종료되는지는 확인할 수 없다. 실제 각 Container가 종료되는 시간은 Container Log를 통해서 확인할 수 있다. [Log 1]은 각 Container의 Log를 나타낸다. 가장 먼저 `app` Container가 종료되고, 3초 이후에 `second-sidecar` Container가 종료되고, 3초 이후에 `first-sidecar` Container가 종료되는걸 확인할 수 있다. 생성과 종료 순서가 역순으로 발생하는걸 확인할 수 있다.
+Pod가 종료될때는 Event에는 동시간에 각 Container에 대해서 `Killing` 이벤트가 발생하는걸 확인할 수 있으며, 실제 각 Container가 언제 종료되는지는 확인할 수 없다. 실제 각 Container가 종료되는 시간은 Container Log를 통해서 확인할 수 있다. [Log 1]은 각 Container의 Log를 나타낸다. 가장 먼저 `app` Container가 종료되고, 3초 이후에 `second-sidecar` Container가 종료되고, 3초 이후에 `first-sidecar` Container가 종료되는걸 확인할 수 있다. 생성과 종료 순서가 역순으로 발생하는걸 확인할 수 있다.
 
 ### 1.2. App Container 종료 후 Sidecar Container 종료 확인
 
@@ -246,7 +246,7 @@ Events:
   Warning  Unhealthy  2s (x11 over 71s)  kubelet            Readiness probe failed:
 ```
 
-[File 5]는 Sidecar Container의 Readiness Probe가 실패하는 경우를 확인하기 위한 예제를 나타낸다. [Shell 4]는 [File 5]에 정의된 Pod를 생성하고 Pod의 상태와 이벤트를 확인하는 예제를 나타낸다. Sidecar의 Readiness Probe가 실패하면서 Pod의 상태가 **Ready**가 아닌 상태로 유지되는걸 확인할 수 있다.
+[File 5]는 Sidecar Container의 Readiness Probe가 실패하는 경우를 확인하기 위한 예제를 나타낸다. [Shell 4]는 [File 5]에 정의된 Pod를 생성하고 Pod의 상태와 이벤트를 확인하는 예제를 나타낸다. Sidecar의 Readiness Probe가 실패하면서 Pod의 상태가 `Ready`가 아닌 상태로 유지되는걸 확인할 수 있다.
 
 ## 2. 참조
 

@@ -30,7 +30,7 @@ func Append(n int) []int {
 }
 ```
 
-Golang's testing package provides not only functionality for unit tests but also benchmarking functionality. [Code 1] shows functions for benchmarking. In [Code 1], the `SumRange01()` and `SumRange02()` functions are functions that calculate the sum of numbers in a specific range. The `SumRange01()` function has O(n) time complexity and O(1) space complexity, and the `SumRange02()` function has O(1) time complexity and O(1) space complexity. The `Append()` function is a function that appends 1 to a slice. It has O(n) time complexity and O(1) space complexity.
+Golang's `testing` package provides not only functionality for unit tests but also benchmarking functionality. [Code 1] shows functions for benchmarking. In [Code 1], the `SumRange01()` and `SumRange02()` functions are functions that calculate the sum of numbers in a specific range. The `SumRange01()` function has O(n) time complexity and O(1) space complexity, and the `SumRange02()` function has O(1) time complexity and O(1) space complexity. The `Append()` function is a function that appends 1 to a slice. It has O(n) time complexity and O(1) space complexity.
 
 ```golang {caption="[Code 2] benchmarking_test.go", linenos=table}
 package benchmark
@@ -58,7 +58,7 @@ func BenchmarkAppend(b *testing.B) {
 }
 ```
 
-[Code 2] shows test code for benchmarking the functions in [Code 1]. Functions for benchmarking must start with the name "Benchmark". Functions that perform benchmarking must be written to run "b.N" times. "b.N" is not a fixed value, but a value that is dynamically assigned depending on options when performing benchmarking.
+[Code 2] shows test code for benchmarking the functions in [Code 1]. Functions for benchmarking must start with the name `Benchmark`. Functions that perform benchmarking must be written to run `b.N` times. `b.N` is not a fixed value, but a value that is dynamically assigned depending on options when performing benchmarking.
 
 ```shell {caption="[Shell 1] Benchmarking"}
 # go test -bench .
@@ -73,7 +73,7 @@ PASS
 ok      ssup2.com/test  3.081s
 ```
 
-[Shell 1] shows benchmarking being performed. Benchmarking is performed through the "-bench" option. The benchmarking function name appears with a "-12" number, which means the number of CPU cores used when performing benchmarking. This can be set through the GOMAXPROCS environment variable. The numbers without units in the middle (495760, 1000000000, 28550) mean the number of times each loop (function) was performed, and the numbers in ns/op units mean the time it takes for each loop to execute once. Since the `SumRange02()` function has lower time complexity than the `SumRange01()` function, you can see that it is faster in the benchmarking results as well.
+[Shell 1] shows benchmarking being performed. Benchmarking is performed through the `-bench` option. The benchmarking function name appears with a `-12` number, which means the number of CPU cores used when performing benchmarking. This can be set through the `GOMAXPROCS` environment variable. The numbers without units in the middle (495760, 1000000000, 28550) mean the number of times each loop (function) was performed, and the numbers in `ns/op` units mean the time it takes for each loop to execute once. Since the `SumRange02()` function has lower time complexity than the `SumRange01()` function, you can see that it is faster in the benchmarking results as well.
 
 ```shell {caption="[Shell 2] Benchmarking with benchmem Option"}
 # go test -bench . -benchmem
@@ -88,7 +88,7 @@ PASS
 ok      ssup2.com/test  3.129s
 ```
 
-[Shell 2] shows benchmarking being performed with the "-benchmem" option, which also shows memory-related benchmarking results. Compared to [Shell 1], you can see that numbers in B/op units and allocs/op units have been added. Numbers in B/op units mean the amount of memory allocated when performing the loop once, and numbers in allocs/op units mean the number of memory allocations when performing the loop once.
+[Shell 2] shows benchmarking being performed with the `-benchmem` option, which also shows memory-related benchmarking results. Compared to [Shell 1], you can see that numbers in `B/op` units and `allocs/op` units have been added. Numbers in `B/op` units mean the amount of memory allocated when performing the loop once, and numbers in `allocs/op` units mean the number of memory allocations when performing the loop once.
 
 ```shell {caption="[Shell 3] Benchmarking with count Option"}
 # go test -bench . -count 5 
@@ -115,7 +115,7 @@ PASS
 ok      ssup2.com/test  15.482s
 ```
 
-[Shell 3] shows the "-count" option being performed, which allows benchmarking functions to be run multiple times. Since the count value is 5, you can see that benchmarking functions are performed 5 times each.
+[Shell 3] shows the `-count` option being performed, which allows benchmarking functions to be run multiple times. Since the `count` value is 5, you can see that benchmarking functions are performed 5 times each.
 
 ```shell {caption="[Shell 4] Benchmarking with benchtime time Option"}
 # go test -bench . -benchtime 10s
@@ -143,7 +143,7 @@ PASS
 ok      ssup2.com/test  0.006s
 ```
 
-[Shell 4] shows setting how many seconds to perform benchmarking through the benchtime option. If it ends with "s", it means seconds, so [Shell 4] performs benchmarking for 10 seconds. [Shell 5] shows setting how many times to perform the loop through the benchtime option. If it ends with "x", it means benchmarking loops, so you can see that each benchmarking function in [Shell 5] performs the loop only 10 times.
+[Shell 4] shows setting how many seconds to perform benchmarking through the `benchtime` option. If it ends with `s`, it means seconds, so [Shell 4] performs benchmarking for 10 seconds. [Shell 5] shows setting how many times to perform the loop through the `benchtime` option. If it ends with `x`, it means benchmarking loops, so you can see that each benchmarking function in [Shell 5] performs the loop only 10 times.
 
 ## 2. References
 

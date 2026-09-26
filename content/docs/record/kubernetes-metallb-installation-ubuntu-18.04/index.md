@@ -42,7 +42,7 @@ configInline:
 ...
 ```
 
-MetalLB를 설정한다.MetalLB Chart의 value.yaml 파일을 [File 1]과 같이 수정한다. MetalLB를 ARP Mode로 설정하고, LoadBalancer Service IP의 범위를 설정한다.
+MetalLB를 설정한다.MetalLB Chart의 `values.yaml` 파일을 [File 1]과 같이 수정한다. MetalLB를 ARP Mode로 설정하고, LoadBalancer Service IP의 범위를 설정한다.
 
 ```shell
 $ helm install --name metallb --namespace metallb .

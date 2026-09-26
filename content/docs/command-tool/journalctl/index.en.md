@@ -2,7 +2,7 @@
 title: journalctl
 ---
 
-This document summarizes the usage of `journalctl` for controlling systemd-journald.
+This document summarizes the usage of `journalctl` for controlling `systemd-journald`.
 
 ## 1. journalctl
 
@@ -26,11 +26,11 @@ Jul 13 19:06:29 node09 systemd[1]: Started OpenBSD Secure Shell server.
 -- Support: http://www.ubuntu.com/support
 ```
 
-Outputs the first part of [Service] logs. After entering, use vim commands to navigate the logs. [Shell 1] shows the output of `journalctl -xu` displaying the beginning of ssh service logs.
+Outputs the first part of [Service] logs. After entering, use `vim` commands to navigate the logs. [Shell 1] shows the output of `journalctl -xu` displaying the beginning of `ssh` service logs.
 
 ### 1.2. journalctl -xeu [Service]
 
-Outputs the last part of [Service] logs. After entering, use vim commands to navigate the logs.
+Outputs the last part of [Service] logs. After entering, use `vim` commands to navigate the logs.
 
 ### 1.3. journalctl -fu [Service]
 
@@ -49,7 +49,7 @@ Sep 29 05:46:37 node09 sshd[28810]: Accepted password for root from 10.0.0.10 po
 Sep 30 05:48:50 node09 sshd[17667]: Accepted password for root from 10.0.0.10 port 2359 ssh2
 ```
 
-Outputs the last part of [Service] logs and continuously outputs new logs. [Shell 2] shows the output of `journalctl -fu` tracking ssh service logs.
+Outputs the last part of [Service] logs and continuously outputs new logs. [Shell 2] shows the output of `journalctl -fu` tracking `ssh` service logs.
 
 ### 1.4. journalctl -t kernel
 
@@ -65,5 +65,5 @@ Jul 13 18:32:30 localhost.localdomain kernel:   Centaur CentaurHauls
 Jul 13 18:32:30 localhost.localdomain kernel: x86/fpu: Supporting XSAVE feature 0x001: 'x87 floating point registers'
 ```
 
-Outputs kernel logs. After entering, use vim commands to navigate the logs. [Shell 3] shows the output of `journalctl -t kernel` displaying kernel logs.
+Outputs kernel logs. After entering, use `vim` commands to navigate the logs. [Shell 3] shows the output of `journalctl -t kernel` displaying kernel logs.
 

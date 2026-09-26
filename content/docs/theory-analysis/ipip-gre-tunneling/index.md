@@ -2,7 +2,7 @@
 title: IP-in-IP, GRE Tunneling
 ---
 
-Network Tunneling 기법인 IP-in-Ip 기법과 GRE 기법을 분석한다.
+Network Tunneling 기법인 IP-in-IP 기법과 GRE 기법을 분석한다.
 
 ## 1. IP-in-IP
 

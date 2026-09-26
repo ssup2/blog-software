@@ -365,7 +365,7 @@ Container Image는 동일하지만 내부의 Command와 환경 변수 등이 다
 
 Run Pod의 경우에는 `dagster api execute_run [config]` Command를 이용하고 있으며 `config`는 Dagster Instance의 정보과 Code Location Server로부터 받은 Workflow 정보를 기반으로 구성되어 있다. 환경 변수의 경우에는 Job의 이름과 PostgreSQL Password 정보들이 환경 변수에 설정되어 있다. 마지막으로 Op/Asset (Step) Pod의 경우에는 `dagster api execute_step [compressed config]` Command를 이용하고 있으며, 환경 변수에는 Job 이름과 Op/Asset 이름, PostgreSQL Password 정보들이 환경 변수에 설정되어 있다. `compressed config`는 base64 Decoding 및 Zlib Decoding을 통해서 원본 Config 값을 확인할 수 있으며 [Text 8]은 원본 Config 값의 예제를 나타내고 있다.
 
-Code Location Server에 설정된 Custom 환경변수도 Run Pod, Op/Asset (Step) Pod에도 모두 동일하게 설정된다. [Text 5] Code Location Server에 설정된  `User:ssup2` 환경 변수가 [Text 6~8] Run Pod, Op/Asset (Step)의 환경 변수에도 모두 동일하게 설정되어 있는것을 확인할 수 있다. 따라서 Workflow에서 이용할 환경변수는 Code Location Server에 설정하면 된다.
+Code Location Server에 설정된 Custom 환경변수도 Run Pod, Op/Asset (Step) Pod에도 모두 동일하게 설정된다. [Text 5] Code Location Server에 설정된  `USER:ssup2` 환경 변수가 [Text 6~8] Run Pod, Op/Asset (Step)의 환경 변수에도 모두 동일하게 설정되어 있는것을 확인할 수 있다. 따라서 Workflow에서 이용할 환경변수는 Code Location Server에 설정하면 된다.
 
 ## 3. High Availability
 

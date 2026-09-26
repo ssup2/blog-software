@@ -14,7 +14,7 @@ Analyze LSM (Linux Security Module), Linux's Security Framework.
 
 [Figure 2] briefly shows the actual operation of LSM. The Linux Kernel encounters LSM Hooks while processing various requests from Applications or Devices. The Linux Kernel executes Security Module Hook Functions while passing through Hooks. The execution result is received only as YES/No. If Yes is received, it continues processing the request, and if No is received, it stops processing the request.
 
-Security Modules that run on top of LSM are not Loadable Modules that can be checked with the lsmod command. Therefore, Security Modules must be compiled together during Kernel Compilation. Some Security Modules can be configured for use through Boot settings even if they are compiled together.
+Security Modules that run on top of LSM are not Loadable Modules that can be checked with the `lsmod` command. Therefore, Security Modules must be compiled together during Kernel Compilation. Some Security Modules can be configured for use through Boot settings even if they are compiled together.
 
 ### 1.1. LSM with System Call
 
@@ -30,7 +30,7 @@ Various Security Modules can be placed on LSM simultaneously. This technique is 
 
 {{< figure caption="[Figure 5] LSM security-hook-heads structure" src="images/linux-lsm-function-pointer.png" width="900px" >}}
 
-[Figure 5] shows how multiple Security Modules are actually placed on LSM. LSM has a Struct called **security-hook-heads**. `security-hook-heads` has Heads (Hook Heads) of Linked Lists connected to each Security Module's Hook Functions. The figure shows only a few Hook Heads such as `task-ptr`, `task-free`, and `ptrace-access-check`, but actually `security-hook-heads` has as many Hook Heads as the number of LSM Hooks.
+[Figure 5] shows how multiple Security Modules are actually placed on LSM. LSM has a Struct called `security-hook-heads`. `security-hook-heads` has Heads (Hook Heads) of Linked Lists connected to each Security Module's Hook Functions. The figure shows only a few Hook Heads such as `task-ptr`, `task-free`, and `ptrace-access-check`, but actually `security-hook-heads` has as many Hook Heads as the number of LSM Hooks.
 
 Security Module Hook Functions are connected to Hook Heads in the order that Security Modules are placed on LSM. Since Capability Module, Yama Module, and AppArmor Module were placed on LSM in that order, Capability's, Yama's, and AppArmor's `ptrace-access-check` Hook Functions are connected to the `ptrace-access-check` Hook Head in that order. Only Capability's and Yama's Hook Functions are connected to the `task-ptr` Hook Head because AppArmor did not implement the `task-ptr` Hook Function.
 

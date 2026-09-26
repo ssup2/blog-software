@@ -14,14 +14,14 @@ NAME            PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      A
 gp2 (default)   kubernetes.io/aws-ebs   Delete          WaitForFirstConsumer   false                  3d1h
 ```
 
-When configuring a Kubernetes Cluster with EKS, EBS's gp2 is set as the Default Storage Class. [Shell 1] shows the Storage Class with gp2 configured.
+When configuring a Kubernetes Cluster with EKS, EBS's `gp2` is set as the Default Storage Class. [Shell 1] shows the Storage Class with `gp2` configured.
 
 ```shell {caption="[Shell 2] AWS EKS kubelet"}
 # ps -ef | grep kubelet
 root      3801     1  1 Apr06 ?        06:09:14 /usr/bin/kubelet --node-ip=192.168.75.136 --node-labels=alpha.eksctl.io/cluster-name=ssup2-eks-cluster,alpha.eksctl.io/nodegroup-name=nodegroup-1,node-lifecycle=on-demand,alpha.eksctl.io/instance-id=i-0b923780d29147e03 --max-pods=17 --register-node=true --register-with-taints= --cloud-provider=aws --container-runtime=docker --network-plugin=cni --cni-bin-dir=/opt/cni/bin --cni-conf-dir=/etc/cni/net.d --pod-infra-container-image=602401143452.dkr.ecr.ap-northeast-2.amazonaws.com/eks/pause:3.3-eksbuild.1 --kubeconfig=/etc/eksctl/kubeconfig.yaml --config=/etc/eksctl/kubelet.yaml
 ```
 
-When accessing an EKS Node via SSH and checking kubelet's parameters, you can see that the cloud-provider option is configured. [Shell 2] shows kubelet's parameters. You can see that the Cloud Provider is set to "aws".
+When accessing an EKS Node via SSH and checking kubelet's parameters, you can see that the `cloud-provider` option is configured. [Shell 2] shows kubelet's parameters. You can see that the Cloud Provider is set to `aws`.
 
 ```shell {caption="[Shell 3] AWS EKS kubelet Volume Mount Log"}
 Apr 09 15:55:32 ip-192-168-75-136.ap-northeast-2.compute.internal kubelet[3801]: I0409 15:55:32.183634    3801 topology_manager.go:233] [topologymanager] Topology Admit Handler
@@ -44,7 +44,7 @@ Apr 09 15:55:37 ip-192-168-75-136.ap-northeast-2.compute.internal kubelet[3801]:
 Apr 09 15:55:38 ip-192-168-75-136.ap-northeast-2.compute.internal kubelet[3801]: W0409 15:55:38.128905    3801 pod_container_deletor.go:77] Container "d9165d9862d7d713871f40be45cf4f11224597a85edf68e893a6b3df36e313f9" not found in pod's containers
 ```
 
-When using the Default Storage Class, kubelet performs Volume Format and Mount. [Shell 3] shows kubelet logs of the process of detecting an EBS gp2 Volume attached to the VM, formatting it as ext4, and mounting it.
+When using the Default Storage Class, kubelet performs Volume Format and Mount. [Shell 3] shows kubelet logs of the process of detecting an EBS `gp2` Volume attached to the VM, formatting it as `ext4`, and mounting it.
 
 ```shell {caption="[Shell 4] EBS Mount"}
 # ls -l /dev/ | grep xvda
@@ -54,7 +54,7 @@ lrwxrwxrwx 1 root root          11 Apr  6 14:36 xvda128 -> nvme0n1p128
 lrwxrwxrwx 1 root root           7 Apr  9 15:55 xvdbw -> nvme1n1
 ```
 
-[Shell 4] shows how an EBS Volume attached to a Node appears inside the Node. xvd[*] represents EBS Block Storage.
+[Shell 4] shows how an EBS Volume attached to a Node appears inside the Node. `xvd[*]` represents EBS Block Storage.
 
 ### 1.2. CSI (Container Storage Interface) Storage Class
 

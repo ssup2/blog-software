@@ -106,7 +106,7 @@ UseTab:          Always
 ...
 ```
 
-Create a **.clang-format** file in the Project Root folder with the contents of [File 1].
+Create a `.clang-format` file in the Project Root folder with the contents of [File 1].
 
 ## 2. Style Application
 

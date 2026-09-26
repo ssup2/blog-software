@@ -15,10 +15,10 @@ title: Ceph 설치, 실행 / ceph-deploy 이용 / Ubuntu 18.04 환경
 
 VirtualBox를 이용하여 [Figure 1]과 같이 가상의 Node (VM)을 생성한다.
 
-* **Hostname** : Master Node - node01, Worker node01 - node02, Worker node02 - node03
-* **NAT** : Virtual Box에서 제공하는 "NAT 네트워크" 이용하여 10.0.0.0/24 Network를 구축한다.
-* **HDD** : 각 Node에 Ceph가 이용할 추가 HDD (/dev/sdb)를 생성하고 붙인다.
-* **Router** : 공유기를 이용하여 192.168.0.0/24 Network를 구축한다. (NAT)
+* **Hostname** : Master Node - `node01`, Worker node01 - `node02`, Worker node02 - `node03`
+* **NAT** : Virtual Box에서 제공하는 "NAT 네트워크" 이용하여 `10.0.0.0/24` Network를 구축한다.
+* **HDD** : 각 Node에 Ceph가 이용할 추가 HDD (`/dev/sdb`)를 생성하고 붙인다.
+* **Router** : 공유기를 이용하여 `192.168.0.0/24` Network를 구축한다. (NAT)
 
 ### 2.1. Ceph Node
 
@@ -39,7 +39,7 @@ network:
                 addresses: [8.8.8.8]
 ```
 
-Ceph Node 01의 /etc/netplan/50-cloud-init.yaml 파일을 [File 1]의 내용으로 생성한다.
+Ceph Node 01의 `/etc/netplan/50-cloud-init.yaml` 파일을 [File 1]의 내용으로 생성한다.
 
 ```yaml {caption="[File 2] Node 02 - /etc/netplan/50-cloud-init.yaml", linenos=table}
 network:
@@ -53,7 +53,7 @@ network:
                 addresses: [8.8.8.8]
 ```
 
-Ceph Node 02의 /etc/netplan/50-cloud-init.yaml 파일을 [File 2]의 내용으로 생성한다.
+Ceph Node 02의 `/etc/netplan/50-cloud-init.yaml` 파일을 [File 2]의 내용으로 생성한다.
 
 ```yaml {caption="[File 3] Node 03 - /etc/netplan/50-cloud-init.yaml", linenos=table}
 network:
@@ -67,7 +67,7 @@ network:
                 addresses: [8.8.8.8]
 ```
 
-Ceph Node 03의 /etc/netplan/50-cloud-init.yaml 파일을 [File 3]의 내용으로 생성한다.
+Ceph Node 03의 `/etc/netplan/50-cloud-init.yaml` 파일을 [File 3]의 내용으로 생성한다.
 
 ## 3. Package 설치
 
@@ -78,7 +78,7 @@ Ceph Node 03의 /etc/netplan/50-cloud-init.yaml 파일을 [File 3]의 내용으�
 (Ceph)# sudo apt install python
 ```
 
-ntp, python Package를 설치한다.
+`ntp`, `python` Package를 설치한다.
 
 ```shell
 (Ceph)# sudo useradd -d /home/cephnode -m cephnode
@@ -91,9 +91,9 @@ passwd: password updated successfully
 (Ceph)# sudo chmod 0440 /etc/sudoers.d/cephnode
 ```
 
-cephnode User를 생성한다.
+`cephnode` User를 생성한다.
 
-* **Password** : cephnode
+* **Password** : `cephnode`
 
 ### 3.2. Deploy Node
 
@@ -105,7 +105,7 @@ cephnode User를 생성한다.
 ...
 ```
 
-/etc/hosts 파일을 [File 4]의 내용처럼 수정한다.
+`/etc/hosts` 파일을 [File 4]의 내용처럼 수정한다.
 
 ```shell
 (Deploy)# wget -q -O- 'https://download.ceph.com/keys/release.asc' | sudo apt-key add -
@@ -114,7 +114,7 @@ cephnode User를 생성한다.
 (Deploy)# sudo apt install ceph-deploy
 ```
 
-ceph-deploy Package를 설치한다.
+`ceph-deploy` Package를 설치한다.
 
 ```shell
 (Deploy)# sudo useradd -d /home/cephdeploy -m cephdeploy
@@ -127,9 +127,9 @@ passwd: password updated successfully
 (Deploy)# sudo chmod 0440 /etc/sudoers.d/cephdeploy
 ```
 
-cephdeploy User를 생성한다.
+`cephdeploy` User를 생성한다.
 
-* **Password** : cephdeploy
+* **Password** : `cephdeploy`
 
 ```shell
 (Deploy)# login cephdeploy
@@ -161,7 +161,7 @@ Host node03
    User cephnode
 ```
 
-/home/cephdeploy/.ssh/config 파일을 [File 5]와 같이 수정한다.
+`/home/cephdeploy/.ssh/config` 파일을 [File 5]와 같이 수정한다.
 
 ## 4. Ceph Cluster 구성
 
@@ -198,7 +198,7 @@ Ceph Cluster를 초기화한다.
 (Deploy)$ ceph-deploy osd create --data /dev/sdb node03
 ```
 
-Ceph Cluster를 구축한다. MON (Monitor Daemon) 및 MGR (Manager Daemon)을 Ceph Node 01에 설치한다. 만약 다른 Node에도 MON와 MGR를 설치하고 싶으면 "ceph-deploy new" 명령어와 "ceph-deploy mgr create" 명령어 수행시 node01 뿐만 아니라 설치할 다른 Node 정보도 같이 넣는다.
+Ceph Cluster를 구축한다. MON (Monitor Daemon) 및 MGR (Manager Daemon)을 Ceph Node 01에 설치한다. 만약 다른 Node에도 MON와 MGR를 설치하고 싶으면 `ceph-deploy new` 명령어와 `ceph-deploy mgr create` 명령어 수행시 `node01` 뿐만 아니라 설치할 다른 Node 정보도 같이 넣는다.
 
 ```shell
 (Deploy)# login cephdeploy
@@ -206,7 +206,7 @@ Ceph Cluster를 구축한다. MON (Monitor Daemon) 및 MGR (Manager Daemon)을 C
 (Deploy)$ ceph-deploy mds create node01
 ```
 
-MDS (Meta Data Server)를 설치한다. MDS (Meta Data Server)는 Ceph Node 01에 설치한다. 만약 다른 Node에도 MDS를 설치하고 싶다면 "ceph-deploy mds create" 명령어 수행시 MDS를 설치할 다른 Node 정보도 같이 넣는다.
+MDS (Meta Data Server)를 설치한다. MDS (Meta Data Server)는 Ceph Node 01에 설치한다. 만약 다른 Node에도 MDS를 설치하고 싶다면 `ceph-deploy mds create` 명령어 수행시 MDS를 설치할 다른 Node 정보도 같이 넣는다.
 
 ```shell
 (Deploy)# login cephdeploy
@@ -282,7 +282,7 @@ admin Key를 확인한다.
 AQAk1SxcbTz/IBAAHCPTQ5x1SHFcA0fn2tTW7w==
 ```
 
-확인한 admin Key를 이용하여 [File 6]의 내용으로 /root/admin.secret 파일을 생성한다.
+확인한 admin Key를 이용하여 [File 6]의 내용으로 `/root/admin.secret` 파일을 생성한다.
 
 ```shell
 (Ceph)# mkdir mnt

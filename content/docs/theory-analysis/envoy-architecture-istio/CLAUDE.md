@@ -3,7 +3,7 @@
 문서 제목: "Envoy Architecture with Istio" (구 "Envoy with Istio", 폴더명도 envoy-istio에서 2026-08-09에 변경).
 
 Istio 환경에서 Envoy가 배치되는 구조를 다루는 문서.
-CR별 Envoy 설정 변화(실측 diff)는 2026-08-09에 **envoy-configuration-istio** 문서로 분리했다
+CR별 Envoy 설정 변화(실측 diff)는 2026-08-09에 `envoy-configuration-istio` 문서로 분리했다
 (../envoy-configuration-istio/ — 실험 환경, manifests/, envoy_configs/, 캡처 방법론도 함께 이동).
 
 ## 문서 구성 및 상태

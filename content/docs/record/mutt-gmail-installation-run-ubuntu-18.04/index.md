@@ -55,7 +55,7 @@ set charset = "utf-8"
 set record = ''
 ```
 
-~/.muttrc 파일을 [File 1]의 내용으로 생성한다.
+`~/.muttrc` 파일을 [File 1]의 내용으로 생성한다.
 
 ## 5. 사용법
 

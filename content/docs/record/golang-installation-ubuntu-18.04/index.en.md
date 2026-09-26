@@ -17,7 +17,7 @@ $ tar -xvf go1.12.2.linux-amd64.tar.gz
 $ mv go /usr/local
 ```
 
-Install golang. Install it in the /usr/local/go Directory.
+Install golang. Install it in the `/usr/local/go` Directory.
 
 ## 3. Environment Variable Setting
 
@@ -30,11 +30,11 @@ export PATH=$GOROOT/bin:$GOBIN:$PATH
 ...
 ```
 
-Set environment variables used by golang in the ~/.bashrc file so that golang can be used from any Directory.
+Set environment variables used by golang in the `~/.bashrc` file so that golang can be used from any Directory.
 
 * `GOROOT` : Directory where golang commands, Packages, Libraries, etc. are located.
 * `GOPATH` : Home Directory of golang Programs currently being developed.
-* `GOBIN` : Directory where compiled golang Binaries are copied when using the go install command.
+* `GOBIN` : Directory where compiled golang Binaries are copied when using the `go install` command.
 
 ## 4. References
 

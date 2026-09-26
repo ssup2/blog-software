@@ -28,7 +28,7 @@ func main() {
 }
 ```
 
-net/http/pprof Package는 Server와 같이 계속 동작중인 App의 Profiling을 위해서 이용되는 Package이다. pprof Package를 이용하면 App에 Profile을 얻을 수 있는 HTTP Endpoint를 간단하게 생성할 수 있다. [Code 1]은 net/http/pprof Package의 사용 방법을 나타내고 있다. net/http/pprof Package를 초기화 하고, http Package를 통해서 HTTP Server를 구동하면 된다.
+`net/http/pprof` Package는 Server와 같이 계속 동작중인 App의 Profiling을 위해서 이용되는 Package이다. `pprof` Package를 이용하면 App에 Profile을 얻을 수 있는 HTTP Endpoint를 간단하게 생성할 수 있다. [Code 1]은 `net/http/pprof` Package의 사용 방법을 나타내고 있다. `net/http/pprof` Package를 초기화 하고, `http` Package를 통해서 HTTP Server를 구동하면 된다.
 
 ```go {caption="[Code 2] net/http/pprof init() Function", linenos=table}
 func init() {
@@ -40,7 +40,7 @@ func init() {
 }
 ```
 
-[Code 2]는 net/http/pprof Package 초기화시 호출되는 `init()` 함수를 나타내고 있다. 5개의 HTTP Endpoint를 HTTP Server에 등록하는 것을 확인할 수 있다. [Code 2]에는 나타나지 않지만 Index Handler 하위에도 다양한 Profile을 얻을 수 있는 Endpoint들이 존재한다. 다음의 Endpoint들을 대상으로 "Get" 요청을 통해서 다음의 Profile들을 얻을 수 있다.
+[Code 2]는 `net/http/pprof` Package 초기화시 호출되는 `init()` 함수를 나타내고 있다. 5개의 HTTP Endpoint를 HTTP Server에 등록하는 것을 확인할 수 있다. [Code 2]에는 나타나지 않지만 `Index` Handler 하위에도 다양한 Profile을 얻을 수 있는 Endpoint들이 존재한다. 다음의 Endpoint들을 대상으로 `Get` 요청을 통해서 다음의 Profile들을 얻을 수 있다.
 
 * **CPU** : http://localhost:6060/debug/pprof/profile
 * **Memory Heap** : http://localhost:6060/debug/pprof/heap
@@ -49,7 +49,7 @@ func init() {
 * **Goroutine** : http://localhost:6060/debug/pprof/goroutine
 * **Mutex** : http://localhost:6060/debug/pprof/mutex
 
-모든 HTTP Endpoint에 **seconds** Query String를 이용하면 몇 초 동안 Profiling을 수행할지 설정할 수 있다.
+모든 HTTP Endpoint에 `seconds` Query String를 이용하면 몇 초 동안 Profiling을 수행할지 설정할 수 있다.
 
 * `seconds` : http://localhost:6060/debug/pprof/profile?seconds=30
 
@@ -110,7 +110,7 @@ func main() {
 }
 ```
 
-runtime/profile Package는 CLI (Command Line Interface)와 같이 한번 실행이되고 종료되는 App의 Profiling을 위해서 이용되는 Package이다. [Code 3]은 runtime/profile Package의 예제를 나타내고 있다. runtime/profile Package는 CPU와 Memory Heap Profile 두 가지 Profile만 얻을 수 있다. CPU Profile File은 cpuprofile Option을 통해서 지정한 경로에 생성되며, Memory Heap Profile은 memprofile Option을 통해서 지정한 경로에 생성된다.
+`runtime/pprof` Package는 CLI (Command Line Interface)와 같이 한번 실행이되고 종료되는 App의 Profiling을 위해서 이용되는 Package이다. [Code 3]은 `runtime/pprof` Package의 예제를 나타내고 있다. `runtime/pprof` Package는 CPU와 Memory Heap Profile 두 가지 Profile만 얻을 수 있다. CPU Profile File은 `cpuprofile` Option을 통해서 지정한 경로에 생성되며, Memory Heap Profile은 `memprofile` Option을 통해서 지정한 경로에 생성된다.
 
 CPU Profile을 얻기 위해서는 Profiling의 시작 부분에서 `StartCPUProfile()` 함수를 호출하고, Profiling의 끝 부분에서 `StopCPUProfile()` 함수를 호출하면 된다. Memory Profile을 얻기 위해서는 `GC()` 함수를 호출한 다음 `WriteHeapProfile()` 함수를 호출하면 된다.
 
@@ -170,18 +170,18 @@ Entering interactive mode (type "help" for commands, "o" for options)
 {% endhighlight %}
 ```
 
-github.com/google/gops Package와 gops CLI를 통해서도 Server와 같이 계속 동작중인 App의 Profiling을 수행할 수 있다. CPU와 Memory Heap Profile만 얻을 수 있다. [Code 4]는 github.com/google/gops Package의 사용법을 나타내고 있다. gops Agent를 구동시키면 된다. 이후에 [Shell 3]의 내용과 같이 gops 명령어를 통해서 PID를 조회한 다음 gops pprof-cpu, gops pprof-heap 명령어를 통해서 CPU, Memory Profile 획득 및 pprof를 실행한다.
+`github.com/google/gops` Package와 `gops` CLI를 통해서도 Server와 같이 계속 동작중인 App의 Profiling을 수행할 수 있다. CPU와 Memory Heap Profile만 얻을 수 있다. [Code 4]는 `github.com/google/gops` Package의 사용법을 나타내고 있다. `gops` Agent를 구동시키면 된다. 이후에 [Shell 3]의 내용과 같이 `gops` 명령어를 통해서 PID를 조회한 다음 `gops pprof-cpu`, `gops pprof-heap` 명령어를 통해서 CPU, Memory Profile 획득 및 pprof를 실행한다.
 
 ## 2. pprof
 
-얻은 Profile은 Golang 설치시 같이 설치되는 [pprof](https://github.com/google/pprof) 도구를 통해서 시각화가 가능하다. `-http [Port]` Option을 같이 설정하면 Web Browser를 통해서 "localhost:[Port]"에 접속하여 시각화된 Profile을 얻을 수 있다. Top, Graph, Flame Graph, Peek와 같은 형태로 시각화를 제공한다.
+얻은 Profile은 Golang 설치시 같이 설치되는 [pprof](https://github.com/google/pprof) 도구를 통해서 시각화가 가능하다. `-http [Port]` Option을 같이 설정하면 Web Browser를 통해서 `localhost:[Port]`에 접속하여 시각화된 Profile을 얻을 수 있다. Top, Graph, Flame Graph, Peek와 같은 형태로 시각화를 제공한다.
 
 ```shell {caption="[Shell 4] Run pprof with CPU profile"}
 $ go tool pprof -http :8080 [Profile File]
 $ go tool pprof -http :8080 [Profile HTTP Endpoint]
 ```
 
-[Shell 4]는 pprof 사용법을 나타내고 있다. `-http` Option과 함께 net/http/pprof Package를 통해서 설정되는 Profile HTTP Endpoint나 runtime/pprof Package 또는 Test를 통해서 얻은 Profile File을 지정하면 된다.
+[Shell 4]는 pprof 사용법을 나타내고 있다. `-http` Option과 함께 `net/http/pprof` Package를 통해서 설정되는 Profile HTTP Endpoint나 `runtime/pprof` Package 또는 Test를 통해서 얻은 Profile File을 지정하면 된다.
 
 ### 2.1. Flat, Cum
 
@@ -198,7 +198,7 @@ pprof를 통해서 시각회된 Profile을 이해하기 위해서는 **Flat**과
 
 ## 3. Profile 종류, 분석
 
-Profile 종류 및 분석은 아래의 예제 App을 통해서 진행한다. Profile은 net/http/pprof Package를 통해서 6060 Port를 통해서 노출되도록 설정되어 있으며, 부하를 주기 위한 다양한 함수들이 구동되도록 개발되어 있다.
+Profile 종류 및 분석은 아래의 예제 App을 통해서 진행한다. Profile은 `net/http/pprof` Package를 통해서 6060 Port를 통해서 노출되도록 설정되어 있으며, 부하를 주기 위한 다양한 함수들이 구동되도록 개발되어 있다.
 
 * **Example App** : [https://github.com/ssup2/golang-profiling-example](https://github.com/ssup2/golang-profiling-example)
 

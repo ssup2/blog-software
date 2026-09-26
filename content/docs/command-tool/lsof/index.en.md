@@ -18,7 +18,7 @@ cron        925                   root    1u     unix 0xffff8c5def961c00      0t
 sshd       1618                   root    3u     IPv4              23680      0t0        TCP *:ssh (LISTEN) 
 ```
 
-Displays all open file lists. [Shell 1] shows the output of `lsof` displaying all open file systems. You can check various file-related information such as process information that opened the file, file type, and file size. Since Unix sockets and IPv4 sockets are also considered files, you can check related information through lsof.
+Displays all open file lists. [Shell 1] shows the output of `lsof` displaying all open file systems. You can check various file-related information such as process information that opened the file, file type, and file size. Since Unix sockets and IPv4 sockets are also considered files, you can check related information through `lsof`.
 
 ### 1.2. lsof -u [User]
 

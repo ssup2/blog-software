@@ -12,9 +12,9 @@ Analyze Linux Log-related components and roles.
 
 ### 1.1. Kernel Log
 
-Kernel Log literally means Logs left by the Kernel. Ring Buffer is a Kernel Memory space that temporarily stores Kernel Logs. Since it is Memory, previous Kernel Log contents disappear when rebooting. Also, since it is a Ring Buffer, when Kernel Logs exceed the Ring Buffer capacity, older Kernel Logs are overwritten first. Ring Buffer can be accessed and controlled through the Kernel's `do-syslog()` function. The `printk()` function used in the Kernel to leave Kernel Logs actually performs the operation of writing Kernel Logs to the Ring Buffer through the `do-syslog()` function.
+Kernel Log literally means Logs left by the Kernel. Ring Buffer is a Kernel Memory space that temporarily stores Kernel Logs. Since it is Memory, previous Kernel Log contents disappear when rebooting. Also, since it is a Ring Buffer, when Kernel Logs exceed the Ring Buffer capacity, older Kernel Logs are overwritten first. Ring Buffer can be accessed and controlled through the Kernel's `do_syslog()` function. The `printk()` function used in the Kernel to leave Kernel Logs actually performs the operation of writing Kernel Logs to the Ring Buffer through the `do_syslog()` function.
 
-The `syslog(2)` function (System Call) or `/proc/kmsg` file used to obtain Kernel Logs at the User Level accesses the Ring Buffer through the `do-syslog()` function to obtain Kernel Logs. `dmesg` allows users to view Kernel Logs through the `syslog(2)` function. Also, `rsyslogd` or `systemd-journald` records Kernel Logs obtained through `syslog(2)` or `/proc/kmsg` as files in the `/var/log` folder for storage.
+The `syslog(2)` function (System Call) or `/proc/kmsg` file used to obtain Kernel Logs at the User Level accesses the Ring Buffer through the `do_syslog()` function to obtain Kernel Logs. `dmesg` allows users to view Kernel Logs through the `syslog(2)` function. Also, `rsyslogd` or `systemd-journald` records Kernel Logs obtained through `syslog(2)` or `/proc/kmsg` as files in the `/var/log` folder for storage.
 
 ### 1.2. User Log
 

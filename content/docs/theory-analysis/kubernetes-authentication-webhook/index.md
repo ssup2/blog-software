@@ -8,7 +8,7 @@ Webhook 기반 Kubernetes Authentication 기법을 분석한다.
 
 {{< figure caption="[Figure 1] Kubernetes Authentication Service Account" src="images/kubernetes-authentication-webhook.png" width="700px" >}}
 
-Kubernetes는 **Webhook 기반의 인증 기법**을 제공한다. Webhook 기반의 인증 기법은 다양한 형태의 외부 인증 서버와 연동할 수 있다는 장점을 갖고 있다. [Figure 1]은 Webhook 기반의 Kubernetes 인증 기법을 나타내고 있다. Kubernetes Client (kubectl)은 외부 인증 서버에게 인증과정을 통해서 Token을 얻어온다. Token을 얻은 Kubernetes Client는 Token을 **Authorization: Bearer $TOKEN** Header를 통해서 Kuberenetes API Server에 전달한다. Token을 전달받은 Kubernetes API Server는 외부의 인증 서버에게 Token 정보가 포함된 **TokenReview** Object를 전달하여 인증받는다.
+Kubernetes는 **Webhook 기반의 인증 기법**을 제공한다. Webhook 기반의 인증 기법은 다양한 형태의 외부 인증 서버와 연동할 수 있다는 장점을 갖고 있다. [Figure 1]은 Webhook 기반의 Kubernetes 인증 기법을 나타내고 있다. Kubernetes Client (`kubectl`)은 외부 인증 서버에게 인증과정을 통해서 Token을 얻어온다. Token을 얻은 Kubernetes Client는 Token을 `Authorization: Bearer $TOKEN` Header를 통해서 Kuberenetes API Server에 전달한다. Token을 전달받은 Kubernetes API Server는 외부의 인증 서버에게 Token 정보가 포함된 **TokenReview** Object를 전달하여 인증받는다.
 
 ```yaml {caption="[Text 1] Webhook Config", linenos=table}
 apiVersion: v1
@@ -35,7 +35,7 @@ contexts:
   name: webhook
 ```
 
-Kubernetes API Server에게 외부의 인증 서버를 설정하는 방법은 "--authentication-token-webhook-config-file" Option을 통해서 Webhook Config 파일을 전달하면 된다. Webhook Config 파일은 kubeconfig 파일 형태와 동일하지만 설정 내용은 다르다. [Text 1]은 Webhook Config를 나타내고 있다. Cluster 항목에는 외부의 인증 서버 관련 정보가 저장되고, User 항목에는 Kubernetes API Server가 외부 인증 서버와 통신할때 이용하는 인증서 정보가 저장되어 있다.
+Kubernetes API Server에게 외부의 인증 서버를 설정하는 방법은 `--authentication-token-webhook-config-file` Option을 통해서 Webhook Config 파일을 전달하면 된다. Webhook Config 파일은 kubeconfig 파일 형태와 동일하지만 설정 내용은 다르다. [Text 1]은 Webhook Config를 나타내고 있다. Cluster 항목에는 외부의 인증 서버 관련 정보가 저장되고, User 항목에는 Kubernetes API Server가 외부 인증 서버와 통신할때 이용하는 인증서 정보가 저장되어 있다.
 
 ```json {caption="[Text 2] TokenReview Spec", linenos=table}
 {

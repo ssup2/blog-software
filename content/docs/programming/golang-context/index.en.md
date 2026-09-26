@@ -28,7 +28,7 @@ func main() {
 }
 ```
 
-[Code 1] shows how to declare a Context object and pass it to a function. Context objects are obtained through the `context.Background()` function. The Context object obtained through Context.Background() is empty with no values. In Golang, it is recommended to pass Context objects as function parameters themselves, not by including them in structs.
+[Code 1] shows how to declare a Context object and pass it to a function. Context objects are obtained through the `context.Background()` function. The Context object obtained through `context.Background()` is empty with no values. In Golang, it is recommended to pass Context objects as function parameters themselves, not by including them in structs.
 
 ### 1.2. Value Storage
 
@@ -63,9 +63,9 @@ func main() {
 key:key, value:value
 ```
 
-Context objects provide space for storing Key-Value based values. [Code 2] is an example that stores Key and Value in Context and then outputs the stored Key and Value in a function. Once a Context object is created, the values in the object cannot be changed. You must create a new Context object based on the contents of the existing Context object and use it. Because of this characteristic, the context package provides `WithXXXX()` functions. `WithXXX()` functions receive a Context object and return a new Context object with the necessary values set.
+Context objects provide space for storing Key-Value based values. [Code 2] is an example that stores Key and Value in Context and then outputs the stored Key and Value in a function. Once a Context object is created, the values in the object cannot be changed. You must create a new Context object based on the contents of the existing Context object and use it. Because of this characteristic, the `context` package provides `WithXXXX()` functions. `WithXXX()` functions receive a Context object and return a new Context object with the necessary values set.
 
-In [Code 2], you can see that a new Context object with Key and Value set is created through the `WithValue()` function, and then passed as a parameter to the `function()` function. When [Code 2] is executed, it outputs the key and value strings as shown in [Shell 1].
+In [Code 2], you can see that a new Context object with Key and Value set is created through the `WithValue()` function, and then passed as a parameter to the `function()` function. When [Code 2] is executed, it outputs the `key` and `value` strings as shown in [Shell 1].
 
 ### 1.3. Cancellation Signal
 
@@ -128,7 +128,7 @@ err:context canceled
 
 You can send cancellation signals using Context objects. [Code 3] is an example of sending cancellation signals using Context objects. Through the `WithCancel()` function, you get a new Context object configured to receive cancellation signals and a `cancel()` function that sends cancellation signals to that Context object. You can get a channel through which cancellation signals are delivered through the `Done()` function of the obtained Context object. Here, a cancellation signal does not mean that some value is delivered through a channel, but rather that the channel is closed.
 
-[Shell 2] shows the output when [Code 3] is executed. In [Code 3], the Main function calls the `cancel()` function after 5 seconds. The Goroutine created by the `function()` function outputs variable n 5 times at 1-second intervals for 5 seconds and then terminates. The `Err()` function of the Context object returns an Error object that tells why the channel delivered through the `Done()` function was closed. In [Shell 2], you can see that it also outputs that the Context object was canceled (the `cancel()` function was called) and the channel was closed.
+[Shell 2] shows the output when [Code 3] is executed. In [Code 3], the `main()` function calls the `cancel()` function after 5 seconds. The Goroutine created by the `function()` function outputs variable `n` 5 times at 1-second intervals for 5 seconds and then terminates. The `Err()` function of the Context object returns an Error object that tells why the channel delivered through the `Done()` function was closed. In [Shell 2], you can see that it also outputs that the Context object was canceled (the `cancel()` function was called) and the channel was closed.
 
 ### 1.4. Deadline, Timeout
 
@@ -190,7 +190,7 @@ You can easily implement deadline functionality using Context objects. [Code 4] 
 
 You can get a channel through which deadline expiration signals or cancellation signals are delivered through the `Done()` function of the obtained Context object. Here, a deadline expiration signal or cancellation signal does not mean that some value is delivered through a channel, but rather that the channel is closed. When the deadline expires, the channel obtained through the `Done()` function is closed even if a separate `cancel()` function is not called. Or, even if the deadline is not imminent, you can close the channel obtained through the `Done()` function by calling the `cancel()` function.
 
-[Shell 3] shows the output when [Code 4] is executed. In [Code 4], the deadline is set to 5 seconds after the current time. Therefore, the Goroutine created by the `function()` function outputs variable n 5 times at 1-second intervals for 5 seconds and then terminates. The `cancel()` in the `main()` function does not need to be called, but Golang recommends calling the `cancel()` function at an appropriate time for various situations. You can also see that it outputs that the Context object's deadline expired and the channel was closed through the Context object's `Err()` function.
+[Shell 3] shows the output when [Code 4] is executed. In [Code 4], the deadline is set to 5 seconds after the current time. Therefore, the Goroutine created by the `function()` function outputs variable `n` 5 times at 1-second intervals for 5 seconds and then terminates. The `cancel()` in the `main()` function does not need to be called, but Golang recommends calling the `cancel()` function at an appropriate time for various situations. You can also see that it outputs that the Context object's deadline expired and the channel was closed through the Context object's `Err()` function.
 
 ```golang {caption="[Code 5] Timeout Example Using Context", linenos=table}
 package main
@@ -238,7 +238,7 @@ func main() {
 }
 ```
 
-Context also provides timeout functionality using deadline functionality. [Code 5] is an example of implementing a timeout using Context objects. Using the `WithTimeout()` function, you get a new Context object configured to receive timeout expiration signals and cancellation signals, and a cancel() function that sends cancellation signals to that Context object. `WithTimeout(ctx Context, timeout time.Duration)` is equivalent to `WithDeadline(ctx Context, time.Now().Add(timeout))`. Therefore, [Code 5] performs the same operation as [Code 4].
+Context also provides timeout functionality using deadline functionality. [Code 5] is an example of implementing a timeout using Context objects. Using the `WithTimeout()` function, you get a new Context object configured to receive timeout expiration signals and cancellation signals, and a `cancel()` function that sends cancellation signals to that Context object. `WithTimeout(ctx Context, timeout time.Duration)` is equivalent to `WithDeadline(ctx Context, time.Now().Add(timeout))`. Therefore, [Code 5] performs the same operation as [Code 4].
 
 ## 2. Context Example
 
@@ -276,9 +276,9 @@ func main() {
 }
 ```
 
-[Code 6] shows an example of an HTTP server using Context. Since Context objects are only used during the process of processing a single client's request, Context objects are generally declared and initialized at the very top of HTTP request handlers. The http.Request object returns a Context object that can receive cancellation signals through the `Context()` function. If the client closes the connection first, the Context object receives a cancellation signal.
+[Code 6] shows an example of an HTTP server using Context. Since Context objects are only used during the process of processing a single client's request, Context objects are generally declared and initialized at the very top of HTTP request handlers. The `http.Request` object returns a Context object that can receive cancellation signals through the `Context()` function. If the client closes the connection first, the Context object receives a cancellation signal.
 
-In [Code 6], you can see that the http.Request object receives a Context object through the `Context()` function at the first part of the HTTP handler `hello()` function, and then stores the value of the "X-Request-Id" HTTP header in the received Context object. The `hello()` function waits 5 seconds after receiving a client request and then returns the "hello" string. However, if the client closes the connection before 5 seconds, it logs an error and stops processing the request.
+In [Code 6], you can see that the `http.Request` object receives a Context object through the `Context()` function at the first part of the HTTP handler `hello()` function, and then stores the value of the `X-Request-Id` HTTP header in the received Context object. The `hello()` function waits 5 seconds after receiving a client request and then returns the `hello` string. However, if the client closes the connection before 5 seconds, it logs an error and stops processing the request.
 
 ## 3. References
 

@@ -18,27 +18,27 @@ AUFS (Advanced Multi Layered Unification Filesystem)은 리눅스 환경에서 U
 # mount -t aufs -o br=/layer-rw=rw:/layer-01=ro+wh:/layer-02=ro+wh:/layer-03=ro+wh none /mnt
 ```
 
-아래의 AUFS 설명들은 [Shell 1]과 같은 명령어와 Option을 통해 AUFS Mount를 했다고 가정하에 진행한다. AUFS는 **br** (Branch)에 Union Mount를 위한 폴더들을 나열한다. /layer-rw 폴더는 RW Branch가 되고 나머지 폴더들은 RO Branch가 되는것을 확인 할 수 있다. 또한 /layer-rw가 br 옵션의 가장 앞에 있기 때문에 /layer-rw는 Root Branch가 된다. /mnt 폴더에 Branch 폴더들이 Union Mount 된다.
+아래의 AUFS 설명들은 [Shell 1]과 같은 명령어와 Option을 통해 AUFS Mount를 했다고 가정하에 진행한다. AUFS는 `br` (Branch)에 Union Mount를 위한 폴더들을 나열한다. `/layer-rw` 폴더는 RW Branch가 되고 나머지 폴더들은 RO Branch가 되는것을 확인 할 수 있다. 또한 `/layer-rw`가 `br` 옵션의 가장 앞에 있기 때문에 `/layer-rw`는 Root Branch가 된다. `/mnt` 폴더에 Branch 폴더들이 Union Mount 된다.
 
-AUFS에서는 파일의 삭제를 나타내기 위해 **Whiteout** 파일을 이용한다. 기본적으로 AUFS는 Root Branch안에 있는 Whiteout 파일만 참조하지만 +wh 옵션을 주면 +wh 옵션이 있는 폴더의 Whiteout 파일도 참조한다.
+AUFS에서는 파일의 삭제를 나타내기 위해 **Whiteout** 파일을 이용한다. 기본적으로 AUFS는 Root Branch안에 있는 Whiteout 파일만 참조하지만 `+wh` 옵션을 주면 `+wh` 옵션이 있는 폴더의 Whiteout 파일도 참조한다.
 
 ### 2.1. Read, Write
 
 {{< figure caption="[Figure 2] AUFS에서 Read, Write 수행시 동작 과정" src="images/aufs-read-write.png" width="600px" >}}
 
-Branch 폴더들이 서로 다른 파일들을 갖고있는 경우 AUFS Mount를 통해 특정 폴더에 Brach 폴더의 파일들이 모여도 문제가 없다는걸 예측 할 수 있다. 동일한 경로에 동일한 파일 이름이 있는 경우, [Figure 2]처럼 AUFS Mount가 된 폴더내에서는 오직 Branch의 가장 마지막에 있는 폴더의 파일만 볼 수 있다. [Figure 2]에서 file-01 파일은 /layer-03 폴더와 /layer-01 폴더에 있지만 /mnt 폴더 내에서는 /layer-01의 file-01만 보이게 된다.
+Branch 폴더들이 서로 다른 파일들을 갖고있는 경우 AUFS Mount를 통해 특정 폴더에 Brach 폴더의 파일들이 모여도 문제가 없다는걸 예측 할 수 있다. 동일한 경로에 동일한 파일 이름이 있는 경우, [Figure 2]처럼 AUFS Mount가 된 폴더내에서는 오직 Branch의 가장 마지막에 있는 폴더의 파일만 볼 수 있다. [Figure 2]에서 `file-01` 파일은 `/layer-03` 폴더와 `/layer-01` 폴더에 있지만 `/mnt` 폴더 내에서는 `/layer-01`의 `file-01`만 보이게 된다.
 
-AUFS는 COW(Copy on Write)방식을 이용한다. /mnt 폴더에서 파일을 쓰는 경우, 써진 파일은 AUFS의 RW Branch 폴더에 그대로 저장된다. [Figure 2]는 file-02 파일이 변경될때를 나타내고 있다. /mnt 폴더 내에서 file-02를 변경하는 경우 AUFS는 변경된 일부분이 아니라 **변경된 파일** 전체를 /layer-rw 폴더에 복사한다. /mnt 폴더 내에서는 변경된 file-02만 보이지만 /layer-02 폴더안에 원본 파일도 그대로 유지되는 것을 알 수 있다.
+AUFS는 COW(Copy on Write)방식을 이용한다. `/mnt` 폴더에서 파일을 쓰는 경우, 써진 파일은 AUFS의 RW Branch 폴더에 그대로 저장된다. [Figure 2]는 `file-02` 파일이 변경될때를 나타내고 있다. `/mnt` 폴더 내에서 `file-02`를 변경하는 경우 AUFS는 변경된 일부분이 아니라 **변경된 파일** 전체를 `/layer-rw` 폴더에 복사한다. `/mnt` 폴더 내에서는 변경된 `file-02`만 보이지만 `/layer-02` 폴더안에 원본 파일도 그대로 유지되는 것을 알 수 있다.
 
 ### 2.2. Remove
 
 {{< figure caption="[Figure 3] AUFS에서 File, Directory 제거시 동작 과정" src="images/aufs-remove.png" width="600px" >}}
 
-파일이나 폴더를 지우는 경우 RW Branch 폴더에 .wh.<file-or-dir-name> Writeout 파일을 생성하여 AUFS Mount가 된 폴더 내에서는 파일이 안보이지만, 원본은 유지된다. [Figure 3]에서는 file-01 파일을 삭제할 경우를 나타내고 있다. 또한 RO Branch 폴더안에 있는 Whiteout 파일의 역할도 나타내고 있다. Mount시 RO Branch에 +wh 옵션을 주었기 때문에 RO Branch의 Whiteout 파일이 하위 Branch의 파일을 숨긴다.
+파일이나 폴더를 지우는 경우 RW Branch 폴더에 `.wh.<file-or-dir-name>` Writeout 파일을 생성하여 AUFS Mount가 된 폴더 내에서는 파일이 안보이지만, 원본은 유지된다. [Figure 3]에서는 `file-01` 파일을 삭제할 경우를 나타내고 있다. 또한 RO Branch 폴더안에 있는 Whiteout 파일의 역할도 나타내고 있다. Mount시 RO Branch에 `+wh` 옵션을 주었기 때문에 RO Branch의 Whiteout 파일이 하위 Branch의 파일을 숨긴다.
 
 {{< figure caption="[Figure 4] AUFS에서 Directory 제거 및 생성시 동작 과정" src="images/aufs-remove-opq.png" width="600px" >}}
 
-AUFS의 Whiteout 파일중 .wh..wh..opq라는 특수한 Whiteout 파일이 있다. Branch의 특정 폴더내에 .wh..wh..opq 파일이 있으면 하위 Branch들의 해당 폴더내의 모든 파일들은 AUFS Mount가 된 폴더내에서 볼 수 없다. [Figure 4]는 .wh..wh..opq 파일의 역할을 나타내고 있다. /layer-rw Branch의 /dir 폴더에 .wh..wh..opq 파일이 있기 때문에 하위 /layer-02 Branch의 /dir폴더 안에 있는 모든 파일들은 /mnt 폴더에서 보이지 않는다. /mnt 폴더에서 dir 폴더 자체를 삭제했다가 다시 dir 폴더를 생성하는 경우, AUFS는 [Figure 4]처럼 /layer-rw Branch의 /dir 폴더안에 .wh..wh..opq 파일 생성을 통해 처리한다.
+AUFS의 Whiteout 파일중 `.wh..wh..opq`라는 특수한 Whiteout 파일이 있다. Branch의 특정 폴더내에 `.wh..wh..opq` 파일이 있으면 하위 Branch들의 해당 폴더내의 모든 파일들은 AUFS Mount가 된 폴더내에서 볼 수 없다. [Figure 4]는 `.wh..wh..opq` 파일의 역할을 나타내고 있다. `/layer-rw` Branch의 `/dir` 폴더에 `.wh..wh..opq` 파일이 있기 때문에 하위 `/layer-02` Branch의 `/dir`폴더 안에 있는 모든 파일들은 `/mnt` 폴더에서 보이지 않는다. `/mnt` 폴더에서 `dir` 폴더 자체를 삭제했다가 다시 `dir` 폴더를 생성하는 경우, AUFS는 [Figure 4]처럼 `/layer-rw` Branch의 `/dir` 폴더안에 `.wh..wh..opq` 파일 생성을 통해 처리한다.
 
 ## 3. Docker Image Layer
 

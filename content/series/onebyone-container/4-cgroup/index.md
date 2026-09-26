@@ -15,4 +15,4 @@ title: 4. Cgroup
 
 {{< figure caption="[Figure 1] Host, Container Cgroup" src="images/cgroup.png" width="900px" >}}
 
-[Figure 1]은 Cgroup 관점에서의 Host와 Container의 Process들의 관계를 나타내고 있다. **각 Process는 반드시 모든 Cgroup의 Type에 소속되어야 한다.** 모든 Cgroup Type들의 Cgroup은 계층을 이루며, Host Process는 가장 높은 계층의 Cgroup을 이용한다. Cgroup 계층 관계는 Cgroup 제어과정을 설명할때 같이 설명할 예정이다. Cgroup Type 중에서 주로 이용되는 CPU, Memory 관련 Cgroup Type인 cpuset, cpu, cpuacct, memory Cgroup Type에 대해서만 뒤에서 설명할 예정이다.
+[Figure 1]은 Cgroup 관점에서의 Host와 Container의 Process들의 관계를 나타내고 있다. **각 Process는 반드시 모든 Cgroup의 Type에 소속되어야 한다.** 모든 Cgroup Type들의 Cgroup은 계층을 이루며, Host Process는 가장 높은 계층의 Cgroup을 이용한다. Cgroup 계층 관계는 Cgroup 제어과정을 설명할때 같이 설명할 예정이다. Cgroup Type 중에서 주로 이용되는 CPU, Memory 관련 Cgroup Type인 `cpuset`, `cpu`, `cpuacct`, `memory` Cgroup Type에 대해서만 뒤에서 설명할 예정이다.

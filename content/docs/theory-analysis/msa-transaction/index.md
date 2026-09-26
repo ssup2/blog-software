@@ -14,7 +14,7 @@ MSA는 다수의 DB를 이용하기 때문에 DB의 Transaction 기능을 제대
 
 {{< figure caption="[Figure 1] Two-Phase Commit" src="images/two-phase-commit.png" width="550px" >}}
 
-Two-Phase Commit은 분산 Transiaction 기법이다. 의미 그대로 **Prepare**, **Commit** 2단계로 나누어 Transaction을 진행한다. [Figure 1]은 MSA에 적용한 Two-Phase Commit을 나타내고 있다. Order Service가 Payment, Stock, Delivery Service와 함께 Transaction을 수행하고 싶다면, Order Service는 Payment, Stock, Delivery Service가 제공하는 Prepare API를 통해서 Transaction 준비를 요청한다.
+Two-Phase Commit은 분산 Transaction 기법이다. 의미 그대로 **Prepare**, **Commit** 2단계로 나누어 Transaction을 진행한다. [Figure 1]은 MSA에 적용한 Two-Phase Commit을 나타내고 있다. Order Service가 Payment, Stock, Delivery Service와 함께 Transaction을 수행하고 싶다면, Order Service는 Payment, Stock, Delivery Service가 제공하는 Prepare API를 통해서 Transaction 준비를 요청한다.
 
 이후에 Order Service가 Payment, Stock, Delivery Service에게 모두 준비가 완료되었다는 응답을 받으면 Payment, Stock, Delivery Service가 제공하는 Commit API를 통해서 실제 Transaction 수행을 요청한다. 이후에 Order Service가 Payment, Stock, Delivery Service에게 Commit 완료 응답을 받게되면 Transaction이 종료된다.
 
@@ -22,7 +22,7 @@ Two-Phase Commit은 분산 Transiaction 기법이다. 의미 그대로 **Prepare
 
 [Figure 2]는 Two-Phase Commit이 실패하는 경우를 나타내고 있다. Order Service가 Payment, Stock, Delivery Service의 Prepare API를 통해서 Prepare 요청을 전송하였지만, Delivery Service에게는 응답을 받지 못한 상황을 나타내고 있다. 이 경우 Order Service는 Payment, Stock Service가 제공하는 Abort Service를 통해서 Abort를 요청하여 Transaction을 중단한다.
 
-Prepare 단계가 완료가 되었어도, Commit 단계에서 실패가 발생할 수 있다. 이 경우는 Commit에 실패한 서비스가 성공할때 까지 반복해서 호출하거나, 서비스 관리자가 직접 완료되지 못한 Transaction을 처리해야 한다. 이러한 이유 때문에 Two-Phases Commit은 완전한 Transaction을 보장하지는 못한다.
+Prepare 단계가 완료가 되었어도, Commit 단계에서 실패가 발생할 수 있다. 이 경우는 Commit에 실패한 서비스가 성공할때 까지 반복해서 호출하거나, 서비스 관리자가 직접 완료되지 못한 Transaction을 처리해야 한다. 이러한 이유 때문에 Two-Phase Commit은 완전한 Transaction을 보장하지는 못한다.
 
 Two-Phase Commit을 구현하기 위해서는 DB가 제공하는 Two-Phase Commit 기능을 이용해야 한다. 문제는 하나의 Transaction으로 묶기는 Service들이 이용하는 모든 DB가 동일한 종류의 DB를 이용해야 하고, DB에서 Two-Phase Commit을 지원해야 한다. 일반적으로 RDBMS에서만 Two-Phase Commit을 지원하기 때문에 NoSQL DB를 이용하는 Service도 같이 하나의 Transaction에 묶여야 한다면 Two-Phase Commit을 적용할 수 없다.
 
@@ -54,7 +54,7 @@ Orchestration 방은 각 Service의 Local Transaction을 관리하는 Orchestrat
 
 SAGA Orchestration Pattern에서 중간 Service의 Local Transaction이 실패하는 경우 SAGA Orchestrator가 Local Transaction 실패 Event를 다른 Server에게 전송하여 Compensation Transaction이 발생하도록 만든다. [Figure 6]에서는 Stock Service에서 재고 물량 부족으로 Local Transaction이 실패할 경우를 나타내고 있다. Local Transaction 실패 Event를 SAGA Orchestrator에게 전달하면 SAGA Orchestrator가 다시 Local Transaction 실패 Event를 Order, Payment Service에게 전달하여 Compensation Transaction을 수행하도록 만든다.
 
-Orchestrator가 중앙에서 Transaction을 관리하는 구조기 때문에 Choreography 방식에 비해서 Transaction Tracking이 편리한 장점을 가지고 있다. 또한 Orchestrator를 제외한 나머지 Service는 Orchestator와 Event를 주고받기 위한 Event Channel만 Subscribe하면 되기 때문에 다른 Service 사이의 의존성 및 Business Logic의 의존성이 Choreography 방식보다 낮다. 단 Choreography 방식에 비해서 Transaction 과정중에 Message Queue를 더 많이 이용한다는 단점을 갖고 있다.
+Orchestrator가 중앙에서 Transaction을 관리하는 구조기 때문에 Choreography 방식에 비해서 Transaction Tracking이 편리한 장점을 가지고 있다. 또한 Orchestrator를 제외한 나머지 Service는 Orchestrator와 Event를 주고받기 위한 Event Channel만 Subscribe하면 되기 때문에 다른 Service 사이의 의존성 및 Business Logic의 의존성이 Choreography 방식보다 낮다. 단 Choreography 방식에 비해서 Transaction 과정중에 Message Queue를 더 많이 이용한다는 단점을 갖고 있다.
 
 #### 1.2.3. Outbox Pattern
 

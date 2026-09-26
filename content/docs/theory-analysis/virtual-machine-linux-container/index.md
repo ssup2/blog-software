@@ -8,7 +8,7 @@ title: Virtual Machine, Linux Container
 
 **가상 머신**은 실제 물리 자원이 아닌 **가상 자원**을 이용하는 머신을 의미한다. 가상 머신이 동작 할 수 있도록 가상 머신에게 가상 자원을 제공하고, 가상 머신을 관리하는 프로그램을 Hypervisor(Supervisor를 뛰어넘는) 또는 VMM(Virtual Machine Monitor)라고 부른다. 하이퍼바이저는 가상 머신에게 가상 CPU, 가상 Memory, 가상 Device라는 3가지의 종류의 가상 자원을 제공한다. 이렇게 가상 자원 위에서 동작하는 가상 머신은 특정 물리 머신에게 종속되지 않기 때문에 유연성을 갖는다. 이러한 유연성을 바탕으로 가상 머신은 IaaS의 기반 기술로 자리잡고 있다.
 
-대부분의 서버에 이용되고 있는 x86 Archituecture의 CPU는 Hypervisor가 구동될 수 있는 Architecture의 조건 (Formal Requirements for Virtualizable Third Generation Architectures 논문의 조건)을 만족하지 못한다. 이러한 문제를 해결하기 위해 Intel의 경우에는 Vt-x Extension 기능을 제공한다. Hypervisor는 Vt-x Extension을 이용하여 가상 CPU나 가상 Memory를 큰 Overhead없이 가상 머신에게 제공한다. ARM Architecture에서도 비슷한 문제를 해결하기 위해 ARM Hypervisor Extension 기능을 제공한다.
+대부분의 서버에 이용되고 있는 x86 Architecture의 CPU는 Hypervisor가 구동될 수 있는 Architecture의 조건 (Formal Requirements for Virtualizable Third Generation Architectures 논문의 조건)을 만족하지 못한다. 이러한 문제를 해결하기 위해 Intel의 경우에는 Vt-x Extension 기능을 제공한다. Hypervisor는 Vt-x Extension을 이용하여 가상 CPU나 가상 Memory를 큰 Overhead없이 가상 머신에게 제공한다. ARM Architecture에서도 비슷한 문제를 해결하기 위해 ARM Hypervisor Extension 기능을 제공한다.
 
 문제는 가상 Device이다. 일반적인 Device는 하나의 System에서 독점적으로 이용하도록 설계되어 있다. 따라서 Hypervisor는 실제 Device를 제어하고 가상 머신에게는 Hypervisor가 가상 Device를 Emulation하여 제공한다. Linux에서 이용하는 KVM + QEMU Hypervisor 조합에서 QEMU가 이러한 Device Emulation 부분을 담당한다. Device를 Emulation 해야하기 때문에 가상 머신의 I/O 성능은 물리 머신에 비해서 크게 저하 된다. 이러한 Device Emulation Overhead를 줄이기 위해서 Para-virtualized Device Driver(VirtIO/Xen Split Device Driver Model)와 IOMMU, SR-IOV 같은 기술들이 이용되고 있다.
 

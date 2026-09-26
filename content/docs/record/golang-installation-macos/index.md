@@ -28,11 +28,11 @@ export PATH=$GOROOT/bin:$GOBIN:$PATH
 ...
 ```
 
-~/.bash-profile 파일에 golang에 이용하는 환경변수를 설정하고, 어느 Directory에서든 golang을 이용할 수 있도록 한다.
+`~/.bash-profile` 파일에 golang에 이용하는 환경변수를 설정하고, 어느 Directory에서든 golang을 이용할 수 있도록 한다.
 
 * `GOROOT` : golang의 명령어, Package, Library 등이 있는 Directory이다.
 * `GOPATH` : 현재 개발하고 있는 golang Program의 Home Directory이다.
-* `GOBIN` : go install 명령어를 이용하여 컴파일된 golang Binary가 복사되는 Directory이다.
+* `GOBIN` : `go install` 명령어를 이용하여 컴파일된 golang Binary가 복사되는 Directory이다.
 
 ## 4. 참조
 

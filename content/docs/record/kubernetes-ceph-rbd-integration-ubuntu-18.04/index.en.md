@@ -8,8 +8,8 @@ The configuration environment is as follows.
 
 * Kubernetes 1.12
 * Ceph
-  * **Monitor IP** : 10.0.0.10:6789
-  * **Pool Name** : kube
+  * **Monitor IP** : `10.0.0.10:6789`
+  * **Pool Name** : `kube`
 
 ## 2. Ceph RDB Integration
 
@@ -34,7 +34,7 @@ $ git clone https://github.com/kubernetes-incubator/external-storage.git
 $ cd external-storage/ceph/rbd/deploy
 ```
 
-Download rbd-provisioner, role, and cluster role yaml files.
+Download `rbd-provisioner`, role, and cluster role yaml files.
 
 ```yaml {caption="[File 1] rbac/clusterrole.yaml", linenos=table}
 ...
@@ -43,7 +43,7 @@ Download rbd-provisioner, role, and cluster role yaml files.
     verbs: ["get", "create", "delete"]
 ```
 
-Add the contents of [File 1] to the rbac/clusterrole.yaml file. (Secret Role)
+Add the contents of [File 1] to the `rbac/clusterrole.yaml` file. (Secret Role)
 
 ```shell
 $ NAMESPACE=default
@@ -51,7 +51,7 @@ $ sed -r -i "s/namespace: [^ ]+/namespace: $NAMESPACE/g" ./rbac/clusterrolebindi
 $ kubectl -n $NAMESPACE apply -f ./rbac 
 ```
 
-Configure rbd-provisioner, role, and cluster role.
+Configure `rbd-provisioner`, role, and cluster role.
 
 ```yaml {caption="[File 2] storage-class.yaml", linenos=table}
 kind: StorageClass
@@ -74,7 +74,7 @@ parameters:
   imageFeatures: layering
 ```
 
-Create the storage-class.yaml file and save it with the contents of [File 2].
+Create the `storage-class.yaml` file and save it with the contents of [File 2].
 
 ```shell
 $ kubectl create -f ./storage-class.yaml

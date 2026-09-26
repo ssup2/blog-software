@@ -32,7 +32,7 @@ Custom Admission Controller는 Kubernetes API Server 외부에서 동작하는 K
 
 다수의 Custom Mutating Admission Controller가 존재할 경우, API 요청 정보를 전달하는 순서는 Custom Mutating Admission Controller 등록을 위한 `MutatingWebhookConfiguration` Object 이름의 알파벳 순서대로 차례대로 호출된다. 다만 이 순서는 Kubernetes 공식적으로 보장하는 순서는 아니며, 추후에 Kubernetes의 Version이 올라가면 달라질수 있다. 이런 이유로 Kubernetes 문서에는 Mutating Webhook 호출 순서는 언제든지 달라질 수 있다라고 가정하고 Custom Admission Controller를 개발해야 한다고 명시하고 있다.
 
-`ValidationAdmissionWebhook` Controller는 전달받은 API 요청 정보를 등록된 Custom Validating Admission Controller에 Webhook으로 전달하고 응답을 대기하는 역할을 수행한다. 다수의 Custom Validating Admission Controller가 존재할 경우, 전달받은 API 요청 정보를 동시에 병렬로 Custom Validating Admission Controller에게 전달하고 응답을 대기한다. 이후에 하나의 응답이라도 거절되면 해당 API 요청은 거절된다.
+`ValidatingAdmissionWebhook` Controller는 전달받은 API 요청 정보를 등록된 Custom Validating Admission Controller에 Webhook으로 전달하고 응답을 대기하는 역할을 수행한다. 다수의 Custom Validating Admission Controller가 존재할 경우, 전달받은 API 요청 정보를 동시에 병렬로 Custom Validating Admission Controller에게 전달하고 응답을 대기한다. 이후에 하나의 응답이라도 거절되면 해당 API 요청은 거절된다.
 
 Custom Admission Controller는 HA (High Availability)를 위해서 다수의 Pod에서 동작하며, Service를 통해서 묶여 있다. `MutatingAdmissionWebhook` Controller와 `ValidatingAdmissionWebhook` Controller은 Custom Admission Controller Pod의 Service를 통해서 API 요청 정보를 전달한다. API 요청 정보는 HTTP 형태로 Custom Admission Controller에게 전달된다.
 
@@ -94,7 +94,7 @@ Custom Admission Controller가 `MutatingAdmissionWebhook` Controller로부터 AP
 
 이와 유사하게 Custom Admission Controller가 `ValidatingAdmissionWebhook` Controller로부터 API 요청 정보를 전달받기 위해서는 Custom Admission Controller를 `ValidatingAdmissionWebhook` Controller에 등록해야 한다. `ValidatingWebhookConfiguration` 파일을 통해서 Custom Admission Controller를 `ValidatingAdmissionWebhook` Controller에게 등록할 수 있다. [File 2]는 `ValidatingWebhookConfiguration` 파일을 나타내고 있다.
 
-`MutatingWebhookConfiguration`와 `ValidatingWebhookConfiguration`은 동일한 형태로 구성되어 있는걸 확인할 수 있다. `webhooks` 항목을 통해서 다수의 Webhook을 한번에 등록할 수 있다. `clientConfig` 항목에는 Webhook에 접근하기 위해 필요한 Service 정보, Path 정보가 포함되어 있다. [File 1]에서 Webhook은 default Namespace의 `MutatingWebhook` Service의 `/Mutating` Path에 존재한다. `rules` 항목은 어떤 API 요청 정보를 Custom Admission Controller에게 전송할지 설정하는 부분이다. [File 1]에서는 v1 API Version의 Pod Create 관련 API 요청 정보만 Custom Admission Controller에게 전송된다.
+`MutatingWebhookConfiguration`와 `ValidatingWebhookConfiguration`은 동일한 형태로 구성되어 있는걸 확인할 수 있다. `webhooks` 항목을 통해서 다수의 Webhook을 한번에 등록할 수 있다. `clientConfig` 항목에는 Webhook에 접근하기 위해 필요한 Service 정보, Path 정보가 포함되어 있다. [File 1]에서 Webhook은 `default` Namespace의 `MutatingWebhook` Service의 `/Mutating` Path에 존재한다. `rules` 항목은 어떤 API 요청 정보를 Custom Admission Controller에게 전송할지 설정하는 부분이다. [File 1]에서는 `v1` API Version의 Pod Create 관련 API 요청 정보만 Custom Admission Controller에게 전송된다.
 
 ```yaml {caption="[Data 1] Custom Admission Controller에게 전송되는 API 요청 정보", linenos=table}
 {
@@ -132,7 +132,7 @@ Custom Admission Controller가 `MutatingAdmissionWebhook` Controller로부터 AP
 }
 ```
 
-[Data 1]은 `MutatingAdmissionWebhook` Controller또는 `ValidatingAdmissionWebhook` Controller가 Custom Admission Controller 전송하는 API 요청 정보를 나타내고 있다. name, namespace 항목을 통해서 어떤 Object를 위한 API 요청이었는지 파악할 수 있다. userInfo 항목에는 API 요청을 전송한 User의 정보가 저장되어 있다. oldObject 항목에는 API 요청전의 Object의 상태를 저장하고 있다. object 항목에는 API 요청으로 인해서 생성 또는 변경될 Object의 최종 상태를 저장하고 있다.
+[Data 1]은 `MutatingAdmissionWebhook` Controller또는 `ValidatingAdmissionWebhook` Controller가 Custom Admission Controller 전송하는 API 요청 정보를 나타내고 있다. `name`, `namespace` 항목을 통해서 어떤 Object를 위한 API 요청이었는지 파악할 수 있다. `userInfo` 항목에는 API 요청을 전송한 User의 정보가 저장되어 있다. `oldObject` 항목에는 API 요청전의 Object의 상태를 저장하고 있다. `object` 항목에는 API 요청으로 인해서 생성 또는 변경될 Object의 최종 상태를 저장하고 있다.
 
 ```yaml {caption="[Data 2] Custom Admission Controller의 응답", linenos=table}
 {

@@ -42,7 +42,7 @@ Docker를 설치한다.
 (All)$ apt-get install -y kubeadm=1.18.3-00 kubelet=1.18.3-00
 ```
 
-kubelet, kubeadm를 설치한다.
+`kubelet`, `kubeadm`를 설치한다.
 
 ```
 (ALL)$ sysctl -w net.ipv6.conf.all.forwarding=1
@@ -61,7 +61,7 @@ IPv6 Forwarding을 설정한다.
 kubeadm join 192.168.0.61:6443 --token 6gu1o3.dwhguhu651x137eq --discovery-token-ca-cert-hash sha256:2ab0fa9f6f8c3c49c263bc0a0edc19ddf973bf7fdf5e464c807df45e8bf49ab8
 ```
 
-kubeadm를 초기화 한다. --pod-network-cidr, --service-cidr 각각 IPv6 CIDR도 설정한다.
+`kubeadm`를 초기화 한다. `--pod-network-cidr`, `--service-cidr` 각각 IPv6 CIDR도 설정한다.
 
 ```shell
 (Master)$ mkdir -p $HOME/.kube 
@@ -77,7 +77,7 @@ kubernetes config 파일을 설정한다.
 (Worker)$ kubeadm join 192.168.0.61:6443 --token 6gu1o3.dwhguhu651x137eq --discovery-token-ca-cert-hash sha256:2ab0fa9f6f8c3c49c263bc0a0edc19ddf973bf7fdf5e464c807df45e8bf49ab8
 ```
 
-kubeadm init 결과로 나온 **kubeadm join ~~** 명령어를 모든 Worker Node에서 수행한다.
+`kubeadm init` 결과로 나온 **kubeadm join ~~** 명령어를 모든 Worker Node에서 수행한다.
 
 ## 4. Calico 설치
 

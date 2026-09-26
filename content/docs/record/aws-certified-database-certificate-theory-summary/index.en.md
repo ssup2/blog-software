@@ -6,7 +6,7 @@ title: AWS Certified Database Certificate Theory Summary
 
 Organize missing content based on the following organized content
 
-* [AWS Solutions Architecture Assosicate](../certificate-aws-solutions-architect-associate)
+* [AWS Solutions Architecture Associate](../certificate-aws-solutions-architect-associate)
 
 ## 2. The Basic
 
@@ -89,16 +89,16 @@ Organize missing content based on the following organized content
 * Can create Custom Parameter Group by inheriting Default Parameter Group
 * Can apply Parameter Group to DB instances in the same region
 * Parameter Examples
-  * autocommit
-  * time_zone
-  * force_ssl
-  * default_storage_engine
-  * max_connections
+  * `autocommit`
+  * `time_zone`
+  * `force_ssl`
+  * `default_storage_engine`
+  * `max_connections`
 * Parameter Changes
   * Dynamic Parameters are applied immediately upon change
   * Static Parameters require DB reboot
-    * Static Parameters maintain pending-reboot status before DB reboot
-    * Changes to in-sync status after reboot
+    * Static Parameters maintain `pending-reboot` status before DB reboot
+    * Changes to `in-sync` status after reboot
 
 ### 3.3. Option Group
 

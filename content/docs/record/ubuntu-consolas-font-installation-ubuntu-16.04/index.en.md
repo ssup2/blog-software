@@ -15,7 +15,7 @@ $ apt-get install font-manager
 $ apt-get install cabextract
 ```
 
-Install font-manager.
+Install `font-manager`.
 
 ## 3. Consolas Download Script Creation and Installation
 
@@ -49,11 +49,11 @@ Execute `consolas.sh`.
 $ font-manager
 ```
 
-Run font-manager.
+Run `font-manager`.
 
 {{< figure caption="[Figure 1] Font File Selection" src="images/ubuntu-font-manager.png" width="700px" >}}
 
-Click Install Fonts and select the font files in the temp folder.
+Click Install Fonts and select the font files in the `temp` folder.
 
 ## 5. File Deletion
 

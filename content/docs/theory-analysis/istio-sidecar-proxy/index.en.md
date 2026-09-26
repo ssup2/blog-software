@@ -301,7 +301,7 @@ Since the Init Container must set `iptables` Rules, you can see in [File 2] that
 
 ### 1.3. Traffic Load Balancing
 
-The Sidecar Proxy does not perform Load Balancing using iptables/IPVS Rules set by kube-proxy when sending Traffic to Services. The Sidecar Proxy receives information about Services and Pods (Endpoints) connected to Services through Istiod and directly performs L7 Level Load Balancing. Therefore, various Load Balancing techniques that cannot be used in kube-proxy, which performs L3/L4 Level Load Balancing, can be applied through Istio's Sidecar Proxy. Starting with basic Load Balancing techniques such as Round Robin, Least Connection, and Random, L7-based techniques such as Consistent Hash and Locality Base can also be used.
+The Sidecar Proxy does not perform Load Balancing using `iptables`/IPVS Rules set by kube-proxy when sending Traffic to Services. The Sidecar Proxy receives information about Services and Pods (Endpoints) connected to Services through Istiod and directly performs L7 Level Load Balancing. Therefore, various Load Balancing techniques that cannot be used in kube-proxy, which performs L3/L4 Level Load Balancing, can be applied through Istio's Sidecar Proxy. Starting with basic Load Balancing techniques such as Round Robin, Least Connection, and Random, L7-based techniques such as Consistent Hash and Locality Base can also be used.
 
 However, kube-proxy is still an essential element in Istio environments. Pods without Sidecar Proxy still use kube-proxy when sending Traffic to Services, and Sidecar Proxy also accesses Istiod through kube-proxy when communicating with Istiod.
 

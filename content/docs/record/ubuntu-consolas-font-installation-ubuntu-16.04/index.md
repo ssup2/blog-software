@@ -15,7 +15,7 @@ $ apt-get install font-manager
 $ apt-get install cabextract
 ```
 
-font-manager를 설치한다.
+`font-manager`를 설치한다.
 
 ## 3. Consolas Download Script 생성 및 설치
 
@@ -49,11 +49,11 @@ $ ./consolas.sh
 $ font-manager
 ```
 
-font-manager 실행한다.
+`font-manager` 실행한다.
 
 {{< figure caption="[Figure 1] Font 파일 선택" src="images/ubuntu-font-manager.png" width="700px" >}}
 
-Install Fonts를 눌러 temp 폴더 안에 있는 Font 파일들을 선택한다.
+Install Fonts를 눌러 `temp` 폴더 안에 있는 Font 파일들을 선택한다.
 
 ## 5. 파일 삭제
 

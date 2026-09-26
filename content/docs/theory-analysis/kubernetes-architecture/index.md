@@ -16,7 +16,7 @@ kubelet은 Systemd의 Service와 같은 Node의 Daemon으로 동작하며, Kuber
 
 * **kubelet** : kube-apiserver로부터 명령을 받아 OCI Runtime Spec을 준수하는 Container Runtime을 통해서 Pod을 제어하는 역할을 수행한다. 대표적인 Container Runtime으로 containerd가 있다. 또한 kubelet은 CNI Plugin을 통해서 생성한 Pod의 Network를 설정하는 역할도 수행한다. Master Node의 kubelet은 kube-apiserver, kube-controller-manager, kube-scheduler Pod을 관리하는 역할도 수행한다.
 * **kube-proxy** : Kubernetes의 Service를 Kubernetes Cluster 내부나 외부에 노출시킬 수 있도록 Proxy Server 역할을 수행하거나, Kubernetes의 Service에 따른 iptables 또는 IPVS를 제어하는 역할을 수행한다.
-* **Network Daemon** : kube-apiserver로부터 정보를 얻어와 Pod 사이에 통신이 가능하도록 Node (Host)의 Network를 설정한다. Network Daemon은 Host Network Namespace에서 동작하고 Network 설정을 변경할 수 있는 권한을 갖고 있기 때문에 Node의 Network 설정을 자유롭게 변경할 수 있다. 어떠한 CNI Plugin을 이용하냐에 따라서 Network Daemon이 결정된다. flannel의 flanneld, calico의 calio-felix, cilium의 cilium-agent가 Network Daemon이라고 볼수 있다.
+* **Network Daemon** : kube-apiserver로부터 정보를 얻어와 Pod 사이에 통신이 가능하도록 Node (Host)의 Network를 설정한다. Network Daemon은 Host Network Namespace에서 동작하고 Network 설정을 변경할 수 있는 권한을 갖고 있기 때문에 Node의 Network 설정을 자유롭게 변경할 수 있다. 어떠한 CNI Plugin을 이용하냐에 따라서 Network Daemon이 결정된다. flannel의 flanneld, calico의 calico-felix, cilium의 cilium-agent가 Network Daemon이라고 볼수 있다.
 
 ### 1.2. Master Node
 

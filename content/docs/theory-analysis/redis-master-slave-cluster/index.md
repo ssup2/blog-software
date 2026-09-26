@@ -24,7 +24,7 @@ Sentinel은 일반적으로 홀수개로 구성하여 Split-brain을 방지한�
 
 Redis Master-slave 구성시 Master는 RW Mode로 동작하고 Slave는 RO Mode로 동작하기 때문에 Client는 Master의 IP/Port, Slave의 IP/Port를 각각 알고, 필요에 따라 적절한 Master 또는 Slave에 붙어 동작을 수행해야 한다. 따라서 Master의 장애 발생시 Master가 교체되면 그에 따라 Client의 Redis 설정도 바뀌어야 한다. 하지만 Master가 교체될때 마다 Redis를 이용하는 모든 Client의 설정을 바꾸는 일은 쉬운일이 아니다. 이러한 문제를 해결하기 위해서 일반적으로 HAProxy를 이용한다.
 
-**Haproxy는 Client에게 Redis의 Master, Slave에 일정하게 접근 할 수 있는 End-point를 제공한다.** [Figure 1]에서 Port X는 Master에게 접근 할 수 있는 Port를 나타내고 Port Y는 Slave에게 접근 할 수 있는 Port를 나타낸다. HAProxy는 tcp-check를 이용하여 주기적으로 각 Redis가 Master로 동작하는지 또는 Slave 동작하는지 파악하고 그에따라 동적으로 Routing Rule을 설정한다. 따라서 Master가 교체되어도 Haproxy는 일정한 End-point를 Client에게 제공 할 수 있다. HAProxy를 하나만 구성하면 HAProxy로 HAProxy가 죽을경우 SPOF(Single Point of Failure)가 발생하여 Redis의 HA를 방해한다. 따라서 L4 Load Balancer 및 VRRP를 이용하여 다수의 HAProxy를 하나의 HAProxy 처럼 보이도록 Client에게 제공해야 한다.
+**Haproxy는 Client에게 Redis의 Master, Slave에 일정하게 접근 할 수 있는 End-point를 제공한다.** [Figure 1]에서 Port X는 Master에게 접근 할 수 있는 Port를 나타내고 Port Y는 Slave에게 접근 할 수 있는 Port를 나타낸다. HAProxy는 `tcp-check`를 이용하여 주기적으로 각 Redis가 Master로 동작하는지 또는 Slave 동작하는지 파악하고 그에따라 동적으로 Routing Rule을 설정한다. 따라서 Master가 교체되어도 Haproxy는 일정한 End-point를 Client에게 제공 할 수 있다. HAProxy를 하나만 구성하면 HAProxy로 HAProxy가 죽을경우 SPOF(Single Point of Failure)가 발생하여 Redis의 HA를 방해한다. 따라서 L4 Load Balancer 및 VRRP를 이용하여 다수의 HAProxy를 하나의 HAProxy 처럼 보이도록 Client에게 제공해야 한다.
 
 ## 2. Redis Cluster
 
@@ -42,9 +42,9 @@ Master Redis가 죽을경우 죽은 Master의 Slave Redis는 gossip Protocol을 
 
 Cluster Client는 Redis Cluster와 처음 Connection을 맺을시 Redis Cluster를 구성하는 각 Redis의 상태 정보를 얻어온다. 상태 정보에는 IP, Port, Master/Slave Mode, 할당된 Hash Slot 등이 포함되어 있다. **Cluster Client는 Redis Cluster로부터 얻은 상태 정보를 바탕으로 Redis Cluster를 구성하는 모든 Redis와 직접 Connection을 맺는다.** 그 후 Cluster Client는 Data의 Key를 바탕으로 Data가 Read/Write될 Hash Slot을 직접 계산한뒤, Hash Slot이 할당된 Redis에게 직접 Read/Wrtie를 수행한다.
 
-만약 Hashslot의 배치가 바뀌어 Cluster Client가 Read/Write 요청을 잘못된 Redis에게 전달하면, 요청을 받은 Redis는 요청을 처리할 수 있는 Redis의 접속 정보 및 **MOVED 명령어**를 전달하여 요청을 Redirection 한다. Cluster Client는 MOVED 명령어와 함께온 접속 정보를 바탕으로 요청을 처리할 수 있는 Redis에게 다시 요청을 전달한다. 예를들어 Slave Redis에게 Write 요청을 보내면 Slave Redis는 해당 요청을 처리 할 수 있는 Master Redis의 정보를 Cluster Client에게 넘겨준다. 일반적으로 Cluster Client는 MOVED 명령어를 받으면 Cluster로부터 Cluster 상태 정보를 다시 받아 Hashslot 및 Redis 접속 정보를 갱신한다. 이처럼 Cluster Client는 Redis Cluster로부터 얻은 상태 정보 및 MOVED 명령어를 처리 할 수 있어야하기 때문에, 기존의 Redis Master-slave Library를 그대로 이용하면 안되고 Redis Cluster를 위한 Library를 이용해야한다.
+만약 Hashslot의 배치가 바뀌어 Cluster Client가 Read/Write 요청을 잘못된 Redis에게 전달하면, 요청을 받은 Redis는 요청을 처리할 수 있는 Redis의 접속 정보 및 **`MOVED` 명령어**를 전달하여 요청을 Redirection 한다. Cluster Client는 `MOVED` 명령어와 함께온 접속 정보를 바탕으로 요청을 처리할 수 있는 Redis에게 다시 요청을 전달한다. 예를들어 Slave Redis에게 Write 요청을 보내면 Slave Redis는 해당 요청을 처리 할 수 있는 Master Redis의 정보를 Cluster Client에게 넘겨준다. 일반적으로 Cluster Client는 `MOVED` 명령어를 받으면 Cluster로부터 Cluster 상태 정보를 다시 받아 Hashslot 및 Redis 접속 정보를 갱신한다. 이처럼 Cluster Client는 Redis Cluster로부터 얻은 상태 정보 및 `MOVED` 명령어를 처리 할 수 있어야하기 때문에, 기존의 Redis Master-slave Library를 그대로 이용하면 안되고 Redis Cluster를 위한 Library를 이용해야한다.
 
-일반적으로 Redis Cluster의 Slave Redis는 자신이 처리 할 수 있는 Read 요청을 받아도 자신의 Master에게 해당 Read 요청을 Redirection 한다. 오직 **READONLY** 명령어를 통해서 Read Mode로 진입한 Client으로부터 오는 Read 요청만 Slave Redis에서 처리할 수 있다.
+일반적으로 Redis Cluster의 Slave Redis는 자신이 처리 할 수 있는 Read 요청을 받아도 자신의 Master에게 해당 Read 요청을 Redirection 한다. 오직 **`READONLY`** 명령어를 통해서 Read Mode로 진입한 Client으로부터 오는 Read 요청만 Slave Redis에서 처리할 수 있다.
 
 ### 2.2. Cluster Proxy
 

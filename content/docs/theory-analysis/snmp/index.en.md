@@ -16,19 +16,19 @@ title: SNMP
 
 MIB (Management Information Base) refers to a Database that manages data held by devices participating in Network. Data in MIB is managed in Tree form and OID (Object ID) is used as data identifier. Since OID uses Tree-form hierarchical structure, it is suitable as an identifier for MIB data that manages data in Tree form.
 
-[Figure 2] shows OID Tree to represent MIB. Through OID Tree, what data OID means can be understood. If OID starts with "1.3.6.1.2.1", following numbers from the front of OID from Root of OID Tree shows that it represents MIB-related data. Also, if OID is "1.3.6.1.2.1.4", it can be understood that it represents IP of MIB. If Manager wants to obtain IP information of a specific device through Agent, it requests OID "1.3.6.1.2.1.4" to obtain device's IP information.
+[Figure 2] shows OID Tree to represent MIB. Through OID Tree, what data OID means can be understood. If OID starts with `1.3.6.1.2.1`, following numbers from the front of OID from Root of OID Tree shows that it represents MIB-related data. Also, if OID is `1.3.6.1.2.1.4`, it can be understood that it represents IP of MIB. If Manager wants to obtain IP information of a specific device through Agent, it requests OID `1.3.6.1.2.1.4` to obtain device's IP information.
 
 ### 1.2. SNMP Message Type
 
 The following types exist in SNMP Protocol's Message Type. Message Type, SNMP Version where that Message Type was introduced, and direction where Message is transmitted are also shown.
 
-* GetRequest / v1 / Manager->Agent : Used for Manager to obtain specific data of MIB through Agent.
-* GetNextRequest / v1 / Manager->Agent : Used for Manager to traverse Tree structure data stored in MIB through Agent. Manager receives one data response each time it sends GetNextRequest request to Agent.
-* GetBulkRequest/ v2 / Manager->Agent : Bulk version of GetNextRequest. Used to receive all data of Subtree among Tree structure data stored in MIB.
-* SetRequest/ v1 / Manager->Agent : Used for Manager to set specific data in MIB through Agent.
-* GetResponse/ v1 / Agent->Manager : Used for responses to Manager's Get/Set-related requests.
-* Trap / v1 / Agent->Manager : Used when Agent sends MIB data to Manager first, not because of Manager's request.
-* InfoRequest / v2 / Manager->Agent : Used for Manager to verify if Trap Message received from Agent is correct.
+* `GetRequest` / v1 / Manager->Agent : Used for Manager to obtain specific data of MIB through Agent.
+* `GetNextRequest` / v1 / Manager->Agent : Used for Manager to traverse Tree structure data stored in MIB through Agent. Manager receives one data response each time it sends `GetNextRequest` request to Agent.
+* `GetBulkRequest`/ v2 / Manager->Agent : Bulk version of `GetNextRequest`. Used to receive all data of Subtree among Tree structure data stored in MIB.
+* `SetRequest`/ v1 / Manager->Agent : Used for Manager to set specific data in MIB through Agent.
+* `GetResponse`/ v1 / Agent->Manager : Used for responses to Manager's Get/Set-related requests.
+* `Trap` / v1 / Agent->Manager : Used when Agent sends MIB data to Manager first, not because of Manager's request.
+* `InfoRequest` / v2 / Manager->Agent : Used for Manager to verify if `Trap` Message received from Agent is correct.
 
 ## 2. References
 

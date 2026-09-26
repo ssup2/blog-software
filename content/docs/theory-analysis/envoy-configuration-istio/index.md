@@ -339,18 +339,18 @@ Istio CR을 하나도 적용하지 않은 상태에서도, istiod는 Kubernetes�
     ...
 ```
 
-[Figure 2]는 `client` Pod의 Envoy Configuration의 Outbound를 나타내고 있으며, [Config 2]는 이를 구성하는 Dump를 나타내고 있다. App Container가 보내는 모든 요청은 iptables에 의해 `15001` Port의 virtualOutbound Listener로 Redirect된다. [Config 2]에 있는 각 Listener의 역할은 다음과 같다.
+[Figure 2]는 `client` Pod의 Envoy Configuration의 Outbound를 나타내고 있으며, [Config 2]는 이를 구성하는 Dump를 나타내고 있다. App Container가 보내는 모든 요청은 iptables에 의해 `15001` Port의 `virtualOutbound` Listener로 Redirect된다. [Config 2]에 있는 각 Listener의 역할은 다음과 같다.
 
-* **virtualOutbound Listener** : 모든 Outbound 요청의 진입점이며, 요청을 직접 처리하지 않고 세 갈래로 분기한다. 기본 경로는 `use_original_dst` 설정에 따라 요청의 원래 목적지 Port와 일치하는 `0.0.0.0_<Port>` Listener로 넘기는 것이다. 원래 목적지가 `15001` Port 자체인 요청은 `virtualOutbound-blackhole` Network Filter Chain이 BlackHoleCluster로 보내 차단하고, 일치하는 Listener가 없는 요청은 `virtualOutbound-catchall-tcp` Network Filter Chain이 PassthroughCluster로 보낸다.
+* **`virtualOutbound` Listener** : 모든 Outbound 요청의 진입점이며, 요청을 직접 처리하지 않고 세 갈래로 분기한다. 기본 경로는 `use_original_dst` 설정에 따라 요청의 원래 목적지 Port와 일치하는 `0.0.0.0_<Port>` Listener로 넘기는 것이다. 원래 목적지가 `15001` Port 자체인 요청은 `virtualOutbound-blackhole` Network Filter Chain이 `BlackHoleCluster`로 보내 차단하고, 일치하는 Listener가 없는 요청은 `virtualOutbound-catchall-tcp` Network Filter Chain이 `PassthroughCluster`로 보낸다.
 * **`0.0.0.0_8080`, `0.0.0.0_9090` Listener** : Port별 Outbound Listener이다. 해당 Pod 자신이 여는 Port가 아니라 **Mesh에 존재하는 Service의 Port** 기준으로 생성되는데, istiod는 어떤 Pod가 어디로 요청을 보낼지 미리 알 수 없어 Mesh의 모든 Service Port마다 Outbound Listener를 만들어 모든 Sidecar에 배포하기 때문이다. 아무 Port도 열지 않는 `client` Pod에 이 Listener들이 존재하는 것도 `client` 자신과는 무관하게 `server-a`, `server-b` Service가 `8080` Port를, `server-c` Service가 `9090` Port를 노출하고 있기 때문이다. 같은 Port를 노출하는 Service가 몇 개든 Port당 Listener는 하나이다. 요청은 Listener Filter가 판별한 Protocol에 따라 두 갈래의 Network Filter Chain으로 나뉜다.
   * **HTTP 연결** : `filter_chain_match`에 매칭되어 HTTP Connection Manager가 처리한다. RDS로 받은 같은 이름의 Route Table(`"8080"`, `"9090"`)을 참조하여 라우팅된다.
-  * **HTTP가 아닌 연결** : 어느 Chain에도 매칭되지 않아 `default_filter_chain`으로 떨어진다. `istio.stats`로 TCP 수준 Metrics만 남기고, `tcp_proxy`가 PassthroughCluster를 통해 원래 목적지로 그대로 통과시킨다.
+  * **HTTP가 아닌 연결** : 어느 Chain에도 매칭되지 않아 `default_filter_chain`으로 떨어진다. `istio.stats`로 TCP 수준 Metrics만 남기고, `tcp_proxy`가 `PassthroughCluster`를 통해 원래 목적지로 그대로 통과시킨다.
 
-Outbound의 Network Filter 설정은 Chain이 달라도 대부분 같으며, Chain마다 다른 것은 주로 목적지를 지정하는 부분이다. TCP 계열 Chain(virtualOutbound의 Chain들과 Port별 Outbound Listener의 `default_filter_chain`)에서 `istio.stats`는 모든 Chain에서 설정까지 동일하고, `tcp_proxy`도 PassthroughCluster로 보내는 Chain들끼리는 동일하다. `virtualOutbound-blackhole` Chain의 `tcp_proxy`만 목적지 Cluster(BlackHoleCluster)와 Access Log 유무가 다르다. HTTP Connection Manager는 참조할 Route Table을 지정하는 `rds`의 `route_config_name`과 `stat_prefix`만 Port별 Outbound Listener마다 다르고, 내부의 HTTP Filter 구성을 포함한 나머지 설정은 모두 동일하다.
+Outbound의 Network Filter 설정은 Chain이 달라도 대부분 같으며, Chain마다 다른 것은 주로 목적지를 지정하는 부분이다. TCP 계열 Chain(`virtualOutbound`의 Chain들과 Port별 Outbound Listener의 `default_filter_chain`)에서 `istio.stats`는 모든 Chain에서 설정까지 동일하고, `tcp_proxy`도 `PassthroughCluster`로 보내는 Chain들끼리는 동일하다. `virtualOutbound-blackhole` Chain의 `tcp_proxy`만 목적지 Cluster(`BlackHoleCluster`)와 Access Log 유무가 다르다. HTTP Connection Manager는 참조할 Route Table을 지정하는 `rds`의 `route_config_name`과 `stat_prefix`만 Port별 Outbound Listener마다 다르고, 내부의 HTTP Filter 구성을 포함한 나머지 설정은 모두 동일하다.
 
 이처럼 설정이 동일한 것은 istiod가 같은 설정을 각 Chain에 복제해 배포하기 때문이며, Envoy가 Filter 인스턴스를 공유한다는 의미는 아니다. Filter 인스턴스는 연결마다(HTTP Filter는 요청마다) 새로 생성되어 상태를 공유하지 않으며, Filter가 이름으로 참조하는 Cluster와 Stats만 공유된다.
 
-Port별 Outbound Listener는 Network Filter Chain을 선택하기 전에 Listener Filter로 연결의 Protocol을 판별한다. virtualOutbound Listener는 요청을 Port별 Listener로 넘기기만 하므로 Listener Filter가 없다. [Config 2]에 있는 각 Listener Filter의 역할은 다음과 같다.
+Port별 Outbound Listener는 Network Filter Chain을 선택하기 전에 Listener Filter로 연결의 Protocol을 판별한다. `virtualOutbound` Listener는 요청을 Port별 Listener로 넘기기만 하므로 Listener Filter가 없다. [Config 2]에 있는 각 Listener Filter의 역할은 다음과 같다.
 
 * **`tls_inspector`** : 연결의 첫 Bytes를 검사하여 TLS 여부를 판별한다. 판별 결과는 Network Filter Chain 매칭의 `transport_protocol` 값(`tls`, `raw_buffer`)으로 사용된다.
 * **`http_inspector`** : Plaintext 연결에서 HTTP 여부와 버전을 판별한다. 판별 결과는 Network Filter Chain 매칭의 `application_protocols` 값(`http/1.1`, `h2c` 등)으로 사용된다.
@@ -369,14 +369,14 @@ Port별 Outbound Listener의 HTTP Connection Manager에는 기본 HTTP Filter들
 
 * **`"8080"` Route Table** : `server-a`, `server-b` 두 Service가 함께 `8080` Port를 노출하므로 Virtual Host가 두 개 있다. `0.0.0.0_8080` Listener는 목적지 Service가 무엇이든 `8080` Port로 향하는 요청을 모두 받으므로, 요청을 Service별로 구분하는 것은 Listener가 아니라 Route Table의 Domain 매칭이다. 각 Virtual Host의 `domains`에는 해당 Service의 모든 이름 축약형(`server-a`, `server-a.default`, `server-a.default.svc`, FQDN)과 Service의 ClusterIP가 나열되어 있어, App이 어떤 형태로 호출하든 요청의 Host Header가 해당 Service의 Virtual Host로 매칭된다. 그리고 각 Virtual Host에는 istiod가 만든 `default`라는 이름의 기본 Route가 하나 들어 있으며, 이 Route가 요청을 해당 Service의 Cluster(`outbound|8080||server-a...`, `outbound|8080||server-b...`)로 라우팅한다. 결국 같은 Listener로 들어온 요청이 Route Table에서 서로 다른 Service로 갈라진다.
 * **`"9090"` Route Table** : `server-c` Service의 Virtual Host 하나만 있으며, 같은 방식으로 `outbound|9090||server-c...` Cluster로 라우팅한다.
-* **`allow_any` Virtual Host** : 모든 Route Table의 마지막에 있는 Catch-all Virtual Host이며, 어느 Virtual Host에도 매칭되지 않는 요청을 PassthroughCluster로 전달한다.
+* **`allow_any` Virtual Host** : 모든 Route Table의 마지막에 있는 Catch-all Virtual Host이며, 어느 Virtual Host에도 매칭되지 않는 요청을 `PassthroughCluster`로 전달한다.
 * **`ignore_port_in_host_matching` 설정** : 모든 Route Table에 공통으로 설정되어 있으며, Domain 매칭 전에 Host Header에 붙어 있는 `server-a:8080` 같은 Port 표기를 제거한다. 덕분에 App이 Port를 붙여 호출하든 붙이지 않고 호출하든 같은 Virtual Host로 매칭된다.
 
 [Config 2]에 있는 각 Cluster의 역할은 다음과 같다.
 
 * **`outbound|8080||server-a...`, `outbound|8080||server-b...`, `outbound|9090||server-c...` Cluster** : Mesh의 Service Port마다 `outbound|<Port>||<Host>` 이름으로 생성되는 `EDS` Type Cluster이며, Endpoint 목록을 EDS로 전달받는다. 각 Route Table의 기본 Route(`name: default`)가 라우팅하는 대상이다. `0.0.0.0_8080` Listener와 `"8080"` Route Table을 공유하는 `server-a`, `server-b`도 Cluster는 각각 따로 가지는데, Listener나 Route Table과 달리 Cluster는 Port가 아니라 Service 단위이기 때문이다. EDS로 전달받는 Endpoint는 [Config 2]의 EDS 발췌처럼 해당 Service에 속한 Pod의 IP:Port이며, istiod가 Kubernetes의 Endpoint 정보를 지켜보다가 Pod가 생기거나 사라질 때마다 갱신하여 Push한다. Endpoint metadata의 `tlsMode: istio` 표식은 해당 Pod에 Sidecar가 주입되어 있음을 나타내며, Cluster의 `transport_socket_matches`와 매칭되어 이 Endpoint로의 연결에 mTLS transport socket이 선택된다.
-* **BlackHoleCluster** : Endpoint가 하나도 없는 `STATIC` Type Cluster라 연결 시도가 즉시 실패하며, virtualOutbound Listener가 원래 목적지가 `15001` Port 자체인 요청을 차단하는 데 쓰인다.
-* **PassthroughCluster** : `ORIGINAL_DST` Type Cluster라 별도의 Endpoint 없이 요청의 원래 목적지 IP:Port로 그대로 연결하며, virtualOutbound Listener의 `virtualOutbound-catchall-tcp` Network Filter Chain과 Route Table의 `allow_any` Virtual Host가 라우팅하는 대상이다.
+* **`BlackHoleCluster`** : Endpoint가 하나도 없는 `STATIC` Type Cluster라 연결 시도가 즉시 실패하며, `virtualOutbound` Listener가 원래 목적지가 `15001` Port 자체인 요청을 차단하는 데 쓰인다.
+* **`PassthroughCluster`** : `ORIGINAL_DST` Type Cluster라 별도의 Endpoint 없이 요청의 원래 목적지 IP:Port로 그대로 연결하며, `virtualOutbound` Listener의 `virtualOutbound-catchall-tcp` Network Filter Chain과 Route Table의 `allow_any` Virtual Host가 라우팅하는 대상이다.
 
 이 Outbound 설정은 특정 Pod에 종속되지 않으며, Mesh의 모든 Sidecar가 동일하게 전달받는다. 전달받는 설정의 범위는 Sidecar CR로 제한할 수 있다.
 
@@ -552,30 +552,30 @@ Port별 Outbound Listener의 HTTP Connection Manager에는 기본 HTTP Filter들
     type: STATIC
 ```
 
-[Config 3]은 `server-a` Pod의 Envoy Configuration의 Inbound 설정을 나타내고 있다. 다른 Pod로부터 들어오는 요청은 iptables에 의해 `15006` Port의 virtualInbound Listener로 Redirect된다. virtualInbound Listener는 모든 Inbound 요청의 진입점이며, Network Filter Chain을 선택하기 전에 Listener Filter로 요청의 정보를 얻는다. [Config 3]에 있는 각 Listener Filter의 역할은 다음과 같다.
+[Config 3]은 `server-a` Pod의 Envoy Configuration의 Inbound 설정을 나타내고 있다. 다른 Pod로부터 들어오는 요청은 iptables에 의해 `15006` Port의 `virtualInbound` Listener로 Redirect된다. `virtualInbound` Listener는 모든 Inbound 요청의 진입점이며, Network Filter Chain을 선택하기 전에 Listener Filter로 요청의 정보를 얻는다. [Config 3]에 있는 각 Listener Filter의 역할은 다음과 같다.
 
 * **`original_dst`** : iptables Redirect 전의 원래 목적지 주소(IP:Port)를 복원한다. 복원된 Port는 Network Filter Chain 매칭의 `destination_port` 값으로 사용된다.
 * **`tls_inspector`** : 연결의 첫 Bytes를 검사하여 TLS 여부를 판별하고, TLS 연결이면 Handshake에서 광고된 ALPN 값도 읽는다. 판별 결과는 Network Filter Chain 매칭의 `transport_protocol` 값과 `tls` Chain의 `application_protocols` 매칭에 사용된다.
 * **`http_inspector`** : Plaintext 연결에서 HTTP 여부와 버전을 판별한다.
 
-virtualInbound Listener는 차단용 Chain 1개와 Catch-all Chain 5개, 그리고 Service가 노출하는 Port마다 `destination_port`로 매칭되는 Chain 쌍을 가진다. [Config 3]에 있는 각 Network Filter Chain의 역할은 다음과 같다.
+`virtualInbound` Listener는 차단용 Chain 1개와 Catch-all Chain 5개, 그리고 Service가 노출하는 Port마다 `destination_port`로 매칭되는 Chain 쌍을 가진다. [Config 3]에 있는 각 Network Filter Chain의 역할은 다음과 같다.
 
-* **`virtualInbound-blackhole` Chain** : 원래 목적지가 `15006` Port 자체인 요청을 BlackHoleCluster로 보내 차단한다. virtualOutbound Listener의 `virtualOutbound-blackhole` Network Filter Chain과 같은 역할이다.
-* **`virtualInbound-catchall-http` Chain** : 어느 Service도 노출하지 않는 Port로 들어온 HTTP 요청을 처리하는 Fallback이다. HTTP Connection Manager를 거치므로 HTTP 수준의 Metrics와 Access Log를 남긴 뒤, Route를 통해 InboundPassthroughCluster로 전달한다.
+* **`virtualInbound-blackhole` Chain** : 원래 목적지가 `15006` Port 자체인 요청을 `BlackHoleCluster`로 보내 차단한다. `virtualOutbound` Listener의 `virtualOutbound-blackhole` Network Filter Chain과 같은 역할이다.
+* **`virtualInbound-catchall-http` Chain** : 어느 Service도 노출하지 않는 Port로 들어온 HTTP 요청을 처리하는 Fallback이다. HTTP Connection Manager를 거치므로 HTTP 수준의 Metrics와 Access Log를 남긴 뒤, Route를 통해 `InboundPassthroughCluster`로 전달한다.
   * **Sidecar mTLS용** : ALPN `istio-http/1.0`·`istio-http/1.1`·`istio-h2` Match로 Sidecar가 만든 mTLS 연결을 선별하며, TLS Termination을 수행한다.
   * **Plaintext용** : `http/1.1`·`h2c` Match로 Plaintext HTTP 연결을 선별한다.
-* **`virtualInbound` Chain** : HTTP Catch-all에도 걸리지 않은 나머지 연결 전부를 처리하는 최종 Fallback이다. `tcp_proxy`가 TCP 수준 기록만 남기고 InboundPassthroughCluster로 전달한다. Plaintext용과 그 외 TLS용 Chain은 Match 조건이 `transport_protocol`뿐이라 어떤 연결이든 반드시 걸리며, 덕분에 virtualInbound에는 Port별 Outbound Listener와 달리 `default_filter_chain`이 없다.
+* **`virtualInbound` Chain** : HTTP Catch-all에도 걸리지 않은 나머지 연결 전부를 처리하는 최종 Fallback이다. `tcp_proxy`가 TCP 수준 기록만 남기고 `InboundPassthroughCluster`로 전달한다. Plaintext용과 그 외 TLS용 Chain은 Match 조건이 `transport_protocol`뿐이라 어떤 연결이든 반드시 걸리며, 덕분에 `virtualInbound`에는 Port별 Outbound Listener와 달리 `default_filter_chain`이 없다.
   * **Sidecar mTLS용** : ALPN `istio-peer-exchange`·`istio` Match로 Sidecar가 만든 mTLS TCP 연결을 선별하며, TLS Termination을 수행한다.
   * **Plaintext용** : `transport_protocol: raw_buffer`만으로 매칭하여 나머지 Plaintext 연결 전부를 받는다.
   * **그 외 TLS용** : `transport_protocol: tls`만으로 매칭하며, App이 자체 처리하는 TLS처럼 Istio ALPN이 없는 TLS 연결을 Termination 없이 암호화된 채 그대로 통과시킨다.
 * **`tls` Chain** : `8080` Port로 들어온 Sidecar 간 mTLS 연결을 처리하는 Chain이며, Plaintext Chain과 함께 `0.0.0.0_8080`이라는 이름을 가진다. `transport_protocol: tls`와 `application_protocols` Match로 보내는 쪽 Sidecar가 만든 mTLS 연결을 선별한다. `application_protocols`에 나열된 값은 모두 Istio 전용 ALPN으로, `istio`는 Sidecar mTLS임을 알리는 기본 표식, `istio-peer-exchange`는 TCP 연결에서 Network Filter 버전 `istio.metadata_exchange`로 메타데이터를 교환할 수 있다는 표식, `istio-http/1.0`·`istio-http/1.1`·`istio-h2`는 mTLS 표식에 Tunnel 내부의 HTTP 버전을 함께 담은 값이다. App이 자체적으로 처리하는 TLS 연결은 표준 ALPN을 광고하므로 이 Chain에 매칭되지 않는다. 매칭된 연결은 `require_client_certificate` 설정에 따라 Client 인증서를 검증하며 TLS를 Termination한 뒤 요청을 처리한다.
 * **`raw_buffer` Chain** : Plaintext 연결을 처리하는 Chain이다. Istio의 mTLS Mode 기본값인 `PERMISSIVE`는 mTLS 연결과 Plaintext 연결을 모두 받아주는 Mode로, Sidecar가 없는 Pod처럼 mTLS를 사용할 수 없는 Client와의 통신도 끊기지 않도록 하기 위한 것이다. 그래서 `PERMISSIVE` Mode에서는 Port마다 mTLS용 `tls` Chain과 Plaintext용 `raw_buffer` Chain이 쌍으로 존재하며, mTLS 연결만 허용하는 `STRICT` Mode로 바꾸면 `raw_buffer` Chain이 제거된다.
 
-Catch-all Chain이 존재하는 이유는 Service에 선언되지 않은 Port로도 요청이 들어올 수 있기 때문이다. Service는 방화벽이 아니라서 Pod IP로는 App이 열어둔 어떤 Port로든 직접 접근할 수 있다. App이 열었지만 Service에 선언하지 않은 Port, Prometheus가 Pod IP로 직접 Scrape하는 Metrics Port, Headless Service를 통한 Pod 직접 통신 등이 그 예이다. Sidecar가 주입되어도 Kubernetes에서 가능하던 Pod 간 통신은 그대로 가능해야 하므로, istiod는 이런 요청을 차단하지 않고 App으로 통과시키는 Catch-all Chain을 만든다. Outbound에서 Mesh에 등록되지 않은 목적지로 향하는 요청을 PassthroughCluster로 통과시키는 것과 대칭 구조이다.
+Catch-all Chain이 존재하는 이유는 Service에 선언되지 않은 Port로도 요청이 들어올 수 있기 때문이다. Service는 방화벽이 아니라서 Pod IP로는 App이 열어둔 어떤 Port로든 직접 접근할 수 있다. App이 열었지만 Service에 선언하지 않은 Port, Prometheus가 Pod IP로 직접 Scrape하는 Metrics Port, Headless Service를 통한 Pod 직접 통신 등이 그 예이다. Sidecar가 주입되어도 Kubernetes에서 가능하던 Pod 간 통신은 그대로 가능해야 하므로, istiod는 이런 요청을 차단하지 않고 App으로 통과시키는 Catch-all Chain을 만든다. Outbound에서 Mesh에 등록되지 않은 목적지로 향하는 요청을 `PassthroughCluster`로 통과시키는 것과 대칭 구조이다.
 
-virtualInbound의 Network Filter 설정은 Chain이 달라도 대부분 같으며, Chain마다 다른 것은 주로 목적지를 지정하는 부분이다. `istio.metadata_exchange`는 모든 Chain에서, `istio.stats`는 모든 TCP 계열 Chain에서 설정까지 동일하다. `tcp_proxy`는 TCP Catch-all Chain들끼리 동일하고, `virtualInbound-blackhole` Chain만 목적지 Cluster(BlackHoleCluster)와 Access Log 유무가 다르다.
+`virtualInbound`의 Network Filter 설정은 Chain이 달라도 대부분 같으며, Chain마다 다른 것은 주로 목적지를 지정하는 부분이다. `istio.metadata_exchange`는 모든 Chain에서, `istio.stats`는 모든 TCP 계열 Chain에서 설정까지 동일하다. `tcp_proxy`는 TCP Catch-all Chain들끼리 동일하고, `virtualInbound-blackhole` Chain만 목적지 Cluster(`BlackHoleCluster`)와 Access Log 유무가 다르다.
 
-HTTP Connection Manager도 목적지를 지정하는 `route_config`(Catch-all Chain은 InboundPassthroughCluster, `0.0.0.0_8080` Chain은 `inbound|8080||`)와 `stat_prefix`를 제외한 나머지 설정이 HTTP Connection Manager를 가진 모든 Chain에서 동일하다. 따라서 그 내부의 HTTP Filter 구성도 모든 Chain에서 완전히 같으며, Istio CR로 인해 HTTP Filter가 삽입될 때에도 모든 Chain에 동일하게 반영된다. [Config 3]에는 그중 mTLS Chain의 것만 표시했다. Inbound의 Filter 구성은 Outbound의 것과도 대부분 같으며, 다음의 두 가지만 다르다.
+HTTP Connection Manager도 목적지를 지정하는 `route_config`(Catch-all Chain은 `InboundPassthroughCluster`, `0.0.0.0_8080` Chain은 `inbound|8080||`)와 `stat_prefix`를 제외한 나머지 설정이 HTTP Connection Manager를 가진 모든 Chain에서 동일하다. 따라서 그 내부의 HTTP Filter 구성도 모든 Chain에서 완전히 같으며, Istio CR로 인해 HTTP Filter가 삽입될 때에도 모든 Chain에 동일하게 반영된다. [Config 3]에는 그중 mTLS Chain의 것만 표시했다. Inbound의 Filter 구성은 Outbound의 것과도 대부분 같으며, 다음의 두 가지만 다르다.
 
 * **`istio.metadata_exchange` Network Filter 추가** : HTTP Filter 버전과 별개로 Chain 앞단에 추가로 있으며, HTTP Header를 쓸 수 없는 TCP 연결에서도 같은 방식의 메타데이터 교환을 수행한다.
 * **`istio.alpn` HTTP Filter 부재** : Inbound는 Upstream으로 요청을 보내는 쪽이 아니므로 ALPN을 광고할 필요가 없다.
@@ -584,8 +584,8 @@ HTTP Connection Manager도 목적지를 지정하는 `route_config`(Catch-all Ch
 
 * **`inbound|8080||` Route** : Outbound와 달리 RDS를 사용하지 않고 HTTP Connection Manager에 `route_config`로 Inline되어 있으며, 모든 요청을 `inbound|8080||` Cluster로 보내는 단순한 구조이다. Route가 항상 하나뿐이므로 동적으로 갱신할 필요가 없기 때문이다.
 * **`inbound|8080||` Cluster** : `ORIGINAL_DST` Type으로 요청의 원래 목적지인 App Container의 `8080` Port로 전달한다. 이때 `127.0.0.6`을 Source 주소로 사용하는데, iptables가 이 주소에서 나온 Traffic을 다시 Outbound로 Redirect하지 않도록 하는 Loop 방지 장치이다.
-* **InboundPassthroughCluster** : Catch-all Chain이 라우팅하는 대상이다. `inbound|8080||` Cluster와 같은 구조의 `ORIGINAL_DST` Type Cluster로, Service가 노출하지 않는 Port로 들어온 요청을 원래 목적지 Port 그대로 App Container에 전달한다.
-* **BlackHoleCluster** : `virtualInbound-blackhole` Chain이 라우팅하는 대상이다. Envoy에 BlackHoleCluster는 하나만 존재하며, Outbound의 `virtualOutbound-blackhole` Chain이 참조하는 [Config 2]의 Cluster와 같은 것이다.
+* **`InboundPassthroughCluster`** : Catch-all Chain이 라우팅하는 대상이다. `inbound|8080||` Cluster와 같은 구조의 `ORIGINAL_DST` Type Cluster로, Service가 노출하지 않는 Port로 들어온 요청을 원래 목적지 Port 그대로 App Container에 전달한다.
+* **`BlackHoleCluster`** : `virtualInbound-blackhole` Chain이 라우팅하는 대상이다. Envoy에 `BlackHoleCluster`는 하나만 존재하며, Outbound의 `virtualOutbound-blackhole` Chain이 참조하는 [Config 2]의 Cluster와 같은 것이다.
 
 ### 1.2. Envoy Configuration with Kubernetes Resources
 
@@ -660,7 +660,7 @@ spec:
        locality: {}
 ```
 
-[Config 4]는 기존 server-a Pod와 같은 `app: server-a` Label을 가진 두 번째 Pod의 Manifest를 나타내고 있다. 적용하면 `server-a` Service의 Endpoint에 새 Pod IP가 등록되고, istiod가 이를 감지하여 [Diff 4]와 같이 server-a Cluster의 EDS에 **Endpoint 하나가 추가될 뿐** Listener, Route Table, Cluster는 전혀 변하지 않는다 (EDS를 제외한 전체 Config Dump의 diff가 0줄임을 실측으로 확인했다). Endpoint의 `workload` 표식으로 어느 Pod에 해당하는지 구분할 수 있으며, Locality 수준의 `load_balancing_weight`도 Endpoint 수를 따라 `1`에서 `2`로 증가한다.
+[Config 4]는 기존 `server-a` Pod와 같은 `app: server-a` Label을 가진 두 번째 Pod의 Manifest를 나타내고 있다. 적용하면 `server-a` Service의 Endpoint에 새 Pod IP가 등록되고, istiod가 이를 감지하여 [Diff 4]와 같이 `server-a` Cluster의 EDS에 **Endpoint 하나가 추가될 뿐** Listener, Route Table, Cluster는 전혀 변하지 않는다 (EDS를 제외한 전체 Config Dump의 diff가 0줄임을 실측으로 확인했다). Endpoint의 `workload` 표식으로 어느 Pod에 해당하는지 구분할 수 있으며, Locality 수준의 `load_balancing_weight`도 Endpoint 수를 따라 `1`에서 `2`로 증가한다.
 
 Deployment의 Replica 증감이나 Rolling Update로 Pod가 교체되는 일상적인 변화는 모두 이 EDS 갱신만으로 처리된다. Listener나 Cluster의 재생성 없이 LB 대상 목록만 바뀌므로, Mesh에서 가장 빈번하게 일어나는 변화가 가장 저렴한 설정 갱신으로 흡수되는 구조이다.
 
@@ -790,7 +790,7 @@ spec:
 +            ...
 ```
 
-[Config 5]는 Mesh에 없던 `7070` Port를 노출하는 `server-d` Service와 대상 Pod의 Manifest를 나타내고 있으며, [Diff 5]는 적용 전후 `client` Pod의 proxy-config 변화를 나타내고 있다. Mesh에 새로운 Service Port가 등장했으므로 **Cluster, Listener, Route Table이 한꺼번에 생성**된다. Cluster는 Service 단위인 `outbound|7070||server-d...` 이름의 `EDS` Type으로 생성되고, Listener는 Port 단위인 `0.0.0.0_7070`에 생성되며 그 구조는 [Config 2]의 Port별 Outbound Listener와 동일하다. Route Table `"7070"`에는 server-d의 Virtual Host와 Catch-all인 `allow_any` Virtual Host가 들어 있다.
+[Config 5]는 Mesh에 없던 `7070` Port를 노출하는 `server-d` Service와 대상 Pod의 Manifest를 나타내고 있으며, [Diff 5]는 적용 전후 `client` Pod의 proxy-config 변화를 나타내고 있다. Mesh에 새로운 Service Port가 등장했으므로 **Cluster, Listener, Route Table이 한꺼번에 생성**된다. Cluster는 Service 단위인 `outbound|7070||server-d...` 이름의 `EDS` Type으로 생성되고, Listener는 Port 단위인 `0.0.0.0_7070`에 생성되며 그 구조는 [Config 2]의 Port별 Outbound Listener와 동일하다. Route Table `"7070"`에는 `server-d`의 Virtual Host와 Catch-all인 `allow_any` Virtual Host가 들어 있다.
 
 ```yaml {caption="[Config 6] server-d Cluster의 EDS Endpoint Dump", linenos=table}
 # EDS: Endpoints of the server-d Cluster - Pod IP with targetPort
@@ -813,7 +813,7 @@ spec:
             ...
 ```
 
-[Config 6]은 server-d Cluster가 EDS로 전달받은 Endpoint를 나타내고 있다. Listener 주소, Route Table 이름, Cluster 이름이 모두 Service의 `port` 값인 `7070` 기준인 반면, Endpoint는 Pod IP와 `targetPort` 값인 `8080`의 조합이다. 즉 Service의 `port`에서 `targetPort`로의 변환은 Envoy 설정에서 **Cluster와 Endpoint의 경계**에서 일어나며, Envoy가 kube-proxy의 도움 없이 직접 Pod IP와 targetPort로 연결한다.
+[Config 6]은 `server-d` Cluster가 EDS로 전달받은 Endpoint를 나타내고 있다. Listener 주소, Route Table 이름, Cluster 이름이 모두 Service의 `port` 값인 `7070` 기준인 반면, Endpoint는 Pod IP와 `targetPort` 값인 `8080`의 조합이다. 즉 Service의 `port`에서 `targetPort`로의 변환은 Envoy 설정에서 **Cluster와 Endpoint의 경계**에서 일어나며, Envoy가 kube-proxy의 도움 없이 직접 Pod IP와 `targetPort`로 연결한다.
 
 #### 1.2.3. Service Port Sharing
 
@@ -880,7 +880,7 @@ spec:
          name: allow_any
 ```
 
-[Config 7]과 같이 같은 server-d Pod를 이번에는 기존 `server-a`, `server-b`와 동일한 `8080` Port를 노출하는 Service로 등록하면 (Pod Manifest는 [Config 5]와 같아 생략), [Diff 7]과 같이 **Listener는 전혀 변하지 않는다**. `0.0.0.0_8080` Listener가 이미 존재하고 Port당 Listener는 하나이기 때문이다. 추가되는 것은 server-d의 Cluster와 `"8080"` Route Table의 server-d Virtual Host뿐이며, 같은 Listener로 들어온 요청이 Route Table의 Domain 매칭으로 Service별로 갈라진다는 1.1.1의 구조가 실측으로 확인된다.
+[Config 7]과 같이 같은 `server-d` Pod를 이번에는 기존 `server-a`, `server-b`와 동일한 `8080` Port를 노출하는 Service로 등록하면 (Pod Manifest는 [Config 5]와 같아 생략), [Diff 7]과 같이 **Listener는 전혀 변하지 않는다**. `0.0.0.0_8080` Listener가 이미 존재하고 Port당 Listener는 하나이기 때문이다. 추가되는 것은 `server-d`의 Cluster와 `"8080"` Route Table의 `server-d` Virtual Host뿐이며, 같은 Listener로 들어온 요청이 Route Table의 Domain 매칭으로 Service별로 갈라진다는 1.1.1의 구조가 실측으로 확인된다.
 
 #### 1.2.4. TCP Service
 
@@ -968,7 +968,7 @@ spec:
 
 Istio는 Service Port의 `name` Prefix(`http`, `grpc`, `tcp` 등)나 `appProtocol` 필드로 해당 Port의 Protocol을 판단하며, 이에 따라 생성하는 Listener의 구조가 달라진다. [Config 8]과 같이 [Config 5]의 Service에서 Port 이름만 `http`에서 `tcp`로 바꾸면, [Diff 8]과 같이 `0.0.0.0_7070` Listener가 **ClusterIP에 Bind되는 `10.96.121.134_7070` Listener로 교체**된다. TCP Traffic에는 Host Header가 없어 Route Table로 목적지 Service를 구분할 수 없으므로, 목적지 IP 자체로 Traffic을 구분해야 하기 때문이다.
 
-Listener 내부도 함께 단순해진다. HTTP Connection Manager 대신 tcp_proxy가 server-d Cluster로 직결되고, Route Table `"7070"`은 참조하는 곳이 없어져 통째로 제거되며, Protocol을 판별할 필요가 없으므로 Listener Filter도 사라진다. 반면 Cluster와 EDS Endpoint는 변하지 않는데, Protocol 선언은 요청을 Cluster까지 보내는 방법에만 영향을 주고 Cluster 단위의 Endpoint 관리와는 무관하기 때문이다.
+Listener 내부도 함께 단순해진다. HTTP Connection Manager 대신 `tcp_proxy`가 `server-d` Cluster로 직결되고, Route Table `"7070"`은 참조하는 곳이 없어져 통째로 제거되며, Protocol을 판별할 필요가 없으므로 Listener Filter도 사라진다. 반면 Cluster와 EDS Endpoint는 변하지 않는데, Protocol 선언은 요청을 Cluster까지 보내는 방법에만 영향을 주고 Cluster 단위의 Endpoint 관리와는 무관하기 때문이다.
 
 #### 1.2.5. Headless Service
 
@@ -1052,7 +1052,7 @@ spec:
 
 [Config 10]은 외부 Host를 가리키는 `ExternalName` Type Service의 Manifest를 나타내고 있다. Kubernetes에서 ExternalName Service는 외부 Host를 Service 이름으로 호출하기 위한 DNS 별칭으로 쓰이지만, 적용해도 **Envoy 설정에는 아무 변화가 없다** (전체 Config Dump의 diff가 0줄임을 실측으로 확인했다). istiod는 ExternalName Service를 별도의 Listener나 Cluster로 만들지 않고 대상 Host의 별칭으로만 취급하는데, `external.example.com`이 Mesh에 등록되어 있지 않아 별칭을 반영할 Virtual Host가 없기 때문이다.
 
-따라서 `server-external`로 보낸 요청은 DNS의 CNAME 해석을 거쳐 Catch-all 경로(PassthroughCluster)로 처리되며, 외부 Host를 Envoy 설정에 등록하려면 ServiceEntry를 사용해야 한다. 별칭 취급은 `externalName`이 Mesh에 등록된 Host를 가리키는 경우에만 드러나는데, 이때는 대상 Host의 Virtual Host `domains`에 server-external의 이름 축약형들이 추가되는 것을 실측으로 확인했다.
+따라서 `server-external`로 보낸 요청은 DNS의 CNAME 해석을 거쳐 Catch-all 경로(`PassthroughCluster`)로 처리되며, 외부 Host를 Envoy 설정에 등록하려면 ServiceEntry를 사용해야 한다. 별칭 취급은 `externalName`이 Mesh에 등록된 Host를 가리키는 경우에만 드러나는데, 이때는 대상 Host의 Virtual Host `domains`에 `server-external`의 이름 축약형들이 추가되는 것을 실측으로 확인했다.
 
 #### 1.2.7. ServiceAccount
 
@@ -1103,7 +1103,7 @@ spec:
                  ...
 ```
 
-[Config 11]은 [Config 5]의 상태 위에, 전용 ServiceAccount `server-d-sa`를 사용하는 두 번째 server-d Pod를 추가하는 Manifest를 나타내고 있다. 적용하면 [Diff 11]과 같이 server-d Cluster의 mTLS 검증 설정에 **`match_subject_alt_names` 항목 하나가 추가**되는 것이 유일한 변화이다. Istio에서 Workload의 Identity는 `spiffe://<trust-domain>/ns/<namespace>/sa/<serviceaccount>` 형태로 ServiceAccount로부터 만들어지며, 보내는 쪽 Envoy는 mTLS Handshake에서 상대 인증서의 SAN이 이 목록에 포함되는지 검증한다.
+[Config 11]은 [Config 5]의 상태 위에, 전용 ServiceAccount `server-d-sa`를 사용하는 두 번째 `server-d` Pod를 추가하는 Manifest를 나타내고 있다. 적용하면 [Diff 11]과 같이 `server-d` Cluster의 mTLS 검증 설정에 **`match_subject_alt_names` 항목 하나가 추가**되는 것이 유일한 변화이다. Istio에서 Workload의 Identity는 `spiffe://<trust-domain>/ns/<namespace>/sa/<serviceaccount>` 형태로 ServiceAccount로부터 만들어지며, 보내는 쪽 Envoy는 mTLS Handshake에서 상대 인증서의 SAN이 이 목록에 포함되는지 검증한다.
 
 그래서 istiod는 Service의 Endpoint들이 사용하는 ServiceAccount의 집합을 해당 Cluster의 SAN 목록으로 유지하며, 새로운 ServiceAccount를 사용하는 Pod가 Service에 추가되면 EDS뿐만 아니라 CDS 갱신도 함께 일어난다. 같은 ServiceAccount의 Pod 추가가 EDS만 갱신했던 1.2.1과 대비되는 지점이다.
 
@@ -1151,7 +1151,7 @@ metadata:
 +        zone: zone-a
 ```
 
-[Config 12]는 두 Worker Node에 부여한 Topology Label을 나타내고 있으며 (`region`은 공통, `zone`은 Node별로 상이), [Diff 12]는 Label 부여 후 server-a Pod를 재생성했을 때 server-a Cluster의 EDS 변화를 나타내고 있다. 비어 있던 Endpoint의 `locality`가 Pod가 위치한 kind-worker Node의 Label 값으로 채워지는데, istiod가 Endpoint를 등록할 때 Pod의 `nodeName`으로 Node를 찾아 Topology Label을 읽어 오기 때문이다. 이렇게 채워진 locality는 같은 Zone의 Endpoint를 우선하는 Locality Load Balancing과 Zone 간 Traffic 분배의 기반 값이 된다.
+[Config 12]는 두 Worker Node에 부여한 Topology Label을 나타내고 있으며 (`region`은 공통, `zone`은 Node별로 상이), [Diff 12]는 Label 부여 후 `server-a` Pod를 재생성했을 때 `server-a` Cluster의 EDS 변화를 나타내고 있다. 비어 있던 Endpoint의 `locality`가 Pod가 위치한 `kind-worker` Node의 Label 값으로 채워지는데, istiod가 Endpoint를 등록할 때 Pod의 `nodeName`으로 Node를 찾아 Topology Label을 읽어 오기 때문이다. 이렇게 채워진 locality는 같은 Zone의 Endpoint를 우선하는 Locality Load Balancing과 Zone 간 Traffic 분배의 기반 값이 된다.
 
 주의할 점은 Node에 Label만 붙여서는 **이미 등록된 Endpoint에 소급 반영되지 않는다**는 것이다 (Label 부여 후 EDS의 diff가 0줄임을 실측으로 확인했다). Pod가 삭제·재생성되어 Endpoint가 다시 등록될 때 비로소 반영되며, [Diff 12]에서 Pod IP가 함께 변해 있는 것도 재생성 때문이다. Cloud 환경에서는 Cloud Provider가 Node 생성 시점에 Topology Label을 미리 붙여 두므로, Endpoint의 locality는 처음부터 채워진 상태로 등록된다.
 
@@ -1167,11 +1167,11 @@ metadata:
 | DestinationRule | - | - | O | - | Subset마다 Cluster 추가 생성 |
 | ServiceEntry | - | O | O | - | 외부 Host의 Virtual Host와 Cluster 추가 |
 | Sidecar | O | O | O | - | 설정 추가가 아니라 전달받는 범위 제한 |
-| EnvoyFilter | O | - | - | - | applyTo에 따라 임의 위치 Patch 가능 (예시는 HTTP Filter) |
-| WorkloadEntry | - | - | O | O | ServiceEntry와 조합, address가 Endpoint로 등록 |
+| EnvoyFilter | O | - | - | - | `applyTo`에 따라 임의 위치 Patch 가능 (예시는 HTTP Filter) |
+| WorkloadEntry | - | - | O | O | ServiceEntry와 조합, `address`가 Endpoint로 등록 |
 | WorkloadGroup | - | - | - | - | WorkloadEntry의 Template이라 자체로는 무변화 |
 | ProxyConfig | - | - | - | - | Bootstrap 설정이라 Pod 재생성 시 반영 |
-| PeerAuthentication | O | - | - | - | virtualInbound Network Filter Chain 변경 |
+| PeerAuthentication | O | - | - | - | `virtualInbound` Network Filter Chain 변경 |
 | RequestAuthentication | O | - | - | - | jwt_authn HTTP Filter 추가 |
 | AuthorizationPolicy | O | - | - | - | rbac HTTP Filter 추가 |
 | Telemetry | O | - | - | - | Listener의 Access Logger 교체 |
@@ -1256,7 +1256,7 @@ spec:
    static_route_configs:
 ```
 
-Gateway는 Sidecar가 아닌 **selector로 선택된 Gateway Pod(istio-ingressgateway)의 Envoy에 반영**된다. Gateway CR에는 `80` Port를 선언했지만 Listener는 `0.0.0.0_8080`에 생성되는데, istiod가 istio-ingressgateway Service의 Port 매핑([Config 13]의 `80` Port → `8080` targetPort)을 따라 실제 Traffic을 받는 targetPort에 Listener를 생성하기 때문이다. Listener와 Route 이름(`http.8080`)은 실제 바인딩 포트 기준이고, Virtual Host 이름(`blackhole:80`)은 Gateway CR에 선언된 Server Port 기준이다. 아직 이 Gateway에 연결된 VirtualService가 없으므로 모든 요청은 `blackhole` Virtual Host에 의해 `404`로 처리된다.
+Gateway는 Sidecar가 아닌 **`selector`로 선택된 Gateway Pod(istio-ingressgateway)의 Envoy에 반영**된다. Gateway CR에는 `80` Port를 선언했지만 Listener는 `0.0.0.0_8080`에 생성되는데, istiod가 istio-ingressgateway Service의 Port 매핑([Config 13]의 `80` Port → `8080` `targetPort`)을 따라 실제 Traffic을 받는 `targetPort`에 Listener를 생성하기 때문이다. Listener와 Route 이름(`http.8080`)은 실제 바인딩 포트 기준이고, Virtual Host 이름(`blackhole:80`)은 Gateway CR에 선언된 Server Port 기준이다. 아직 이 Gateway에 연결된 VirtualService가 없으므로 모든 요청은 `blackhole` Virtual Host에 의해 `404`로 처리된다.
 
 #### 1.3.2. VirtualService
 
@@ -1579,7 +1579,7 @@ spec:
          name: allow_any
 ```
 
-Sidecar CR은 Envoy에 새로운 설정을 추가하는 것이 아니라 **Sidecar가 받는 설정의 범위를 제한**한다. 기본적으로 모든 Sidecar는 Mesh 전체 서비스의 Cluster, Listener, Route를 받는데, egress hosts를 `server-a`로 제한하면 `server-b`, `server-c`를 포함한 나머지 모든 서비스의 Outbound 설정이 제거된다. 이때 설정의 단위에 따라 제거되는 모습이 다르다. Cluster는 Service 단위라 `server-a`를 제외한 모든 Cluster가 제거되고, `server-c`만 노출하던 `9090` Port는 Listener 자체가 제거되며, `server-a`와 Port를 공유하던 `server-b`는 `0.0.0.0_8080` Listener는 남고 `"8080"` Route Table의 Virtual Host만 제거된다. egress만 제한하는 예시이므로 Inbound 설정(virtualInbound Listener)은 변하지 않는다. 대규모 Cluster에서 Sidecar의 Memory 사용량과 xDS Push 비용을 줄이는 핵심 수단이다.
+Sidecar CR은 Envoy에 새로운 설정을 추가하는 것이 아니라 **Sidecar가 받는 설정의 범위를 제한**한다. 기본적으로 모든 Sidecar는 Mesh 전체 서비스의 Cluster, Listener, Route를 받는데, egress hosts를 `server-a`로 제한하면 `server-b`, `server-c`를 포함한 나머지 모든 서비스의 Outbound 설정이 제거된다. 이때 설정의 단위에 따라 제거되는 모습이 다르다. Cluster는 Service 단위라 `server-a`를 제외한 모든 Cluster가 제거되고, `server-c`만 노출하던 `9090` Port는 Listener 자체가 제거되며, `server-a`와 Port를 공유하던 `server-b`는 `0.0.0.0_8080` Listener는 남고 `"8080"` Route Table의 Virtual Host만 제거된다. egress만 제한하는 예시이므로 Inbound 설정(`virtualInbound` Listener)은 변하지 않는다. 대규모 Cluster에서 Sidecar의 Memory 사용량과 xDS Push 비용을 줄이는 핵심 수단이다.
 
 #### 1.3.6. EnvoyFilter
 
@@ -1648,7 +1648,7 @@ spec:
 
 EnvoyFilter는 istiod가 생성한 Envoy 설정을 **직접 Patch하는 CR**로, 다른 CR이 추상화하지 않는 Envoy 기능에 접근할 수 있다. 예시는 `server-a` Sidecar의 Inbound HTTP Filter Chain에 Lua Filter를 삽입하여 응답 Header를 추가한다. `context: SIDECAR_INBOUND`는 Patch 대상을 Sidecar의 Inbound 설정으로 한정하며, Outbound 설정은 `SIDECAR_OUTBOUND`, Gateway Pod는 `GATEWAY`로 지정한다. `applyTo: HTTP_FILTER`는 HTTP Connection Manager의 `http_filters` 배열이 Patch 대상임을 의미한다.
 
-`operation: INSERT_BEFORE`는 match의 `subFilter`로 지정한 기준 Filter 앞에 새 Filter를 삽입하는 연산이다. [Diff 20]에서 Lua Filter가 기준 Filter인 `envoy.filters.http.router` 바로 앞에 추가된 것을 확인할 수 있으며, `subFilter`를 지정하지 않으면 배열의 맨 앞에 삽입된다. 이처럼 EnvoyFilter는 Envoy 내부 구현에 직접 의존하므로 Istio Upgrade 시 깨질 수 있어 주의가 필요하다.
+`operation: INSERT_BEFORE`는 `match`의 `subFilter`로 지정한 기준 Filter 앞에 새 Filter를 삽입하는 연산이다. [Diff 20]에서 Lua Filter가 기준 Filter인 `envoy.filters.http.router` 바로 앞에 추가된 것을 확인할 수 있으며, `subFilter`를 지정하지 않으면 배열의 맨 앞에 삽입된다. 이처럼 EnvoyFilter는 Envoy 내부 구현에 직접 의존하므로 Istio Upgrade 시 깨질 수 있어 주의가 필요하다.
 
 #### 1.3.7. WorkloadEntry
 
@@ -1711,7 +1711,7 @@ spec:
 +          load_balancing_weight: 1
 ```
 
-WorkloadEntry는 **Kubernetes Cluster 외부에서 동작하는 Workload를 Pod와 동일한 방식으로 Mesh에 등록**하는 CR이다. 대표적인 대상은 Cluster 밖의 VM에서 동작하는 Server Process이다. 단독으로는 효과가 없고, workloadSelector로 이를 선택하는 ServiceEntry와 함께 사용해야 한다. Label이 매칭되면 WorkloadEntry의 address가 해당 Outbound Cluster의 Endpoint(EDS)로 등록되어, Pod의 Endpoint와 동일한 방식으로 LB 대상이 된다.
+WorkloadEntry는 **Kubernetes Cluster 외부에서 동작하는 Workload를 Pod와 동일한 방식으로 Mesh에 등록**하는 CR이다. 대표적인 대상은 Cluster 밖의 VM에서 동작하는 Server Process이다. 단독으로는 효과가 없고, `workloadSelector`로 이를 선택하는 ServiceEntry와 함께 사용해야 한다. Label이 매칭되면 WorkloadEntry의 `address`가 해당 Outbound Cluster의 Endpoint(EDS)로 등록되어, Pod의 Endpoint와 동일한 방식으로 LB 대상이 된다.
 
 #### 1.3.8. WorkloadGroup
 
@@ -1732,7 +1732,7 @@ spec:
 
 WorkloadGroup은 적용해도 **Envoy 설정에 아무 변화가 없다**. WorkloadGroup은 그 자체로 Workload를 Mesh에 등록하는 리소스가 아니라, 이후 생성될 WorkloadEntry의 Template이기 때문이다.
 
-Kubernetes Cluster 외부에서 istio-agent를 실행하면 istio-agent가 istiod의 xDS Server에 접속하는데, 이때 자신이 속한 WorkloadGroup과 자신의 address를 함께 알린다. istiod는 해당 WorkloadGroup의 `template`(serviceAccount, network 등)에 전달받은 address를 채운 WorkloadEntry 오브젝트를 Kubernetes API Server에 생성하며, istio-agent와의 연결이 끊어진 뒤 유예 시간 동안 재연결이 없으면 자동으로 삭제한다. 이렇게 생성된 WorkloadEntry가 앞 절의 WorkloadEntry와 동일한 방식으로 Cluster의 Endpoint에 반영되므로, Envoy 설정의 변화는 이 시점에 비로소 나타난다.
+Kubernetes Cluster 외부에서 istio-agent를 실행하면 istio-agent가 istiod의 xDS Server에 접속하는데, 이때 자신이 속한 WorkloadGroup과 자신의 `address`를 함께 알린다. istiod는 해당 WorkloadGroup의 `template`(`serviceAccount`, `network` 등)에 전달받은 `address`를 채운 WorkloadEntry 오브젝트를 Kubernetes API Server에 생성하며, istio-agent와의 연결이 끊어진 뒤 유예 시간 동안 재연결이 없으면 자동으로 삭제한다. 이렇게 생성된 WorkloadEntry가 앞 절의 WorkloadEntry와 동일한 방식으로 Cluster의 Endpoint에 반영되므로, Envoy 설정의 변화는 이 시점에 비로소 나타난다.
 
 #### 1.3.9. ProxyConfig
 
@@ -1789,7 +1789,7 @@ spec:
 -          ... (inbound|8080|| Plaintext Chain 전체 제거)
 ```
 
-PeerAuthentication은 **selector로 선택된 Workload의 Inbound `virtualInbound` Listener의 Network Filter Chain에 반영**된다. 기본값인 `PERMISSIVE` Mode에서는 Port마다 mTLS용 `tls` Chain과 Plaintext용 `raw_buffer` Chain이 함께 존재하지만, `STRICT` Mode로 변경하면 `raw_buffer` Chain이 모두 제거되어 mTLS가 아닌 연결은 수립 자체가 불가능해진다.
+PeerAuthentication은 **`selector`로 선택된 Workload의 Inbound `virtualInbound` Listener의 Network Filter Chain에 반영**된다. 기본값인 `PERMISSIVE` Mode에서는 Port마다 mTLS용 `tls` Chain과 Plaintext용 `raw_buffer` Chain이 함께 존재하지만, `STRICT` Mode로 변경하면 `raw_buffer` Chain이 모두 제거되어 mTLS가 아닌 연결은 수립 자체가 불가능해진다.
 
 `tls` Chain의 `application_protocols` Match에 나열된 `istio`, `istio-peer-exchange`, `istio-http/1.1`, `istio-h2`는 Istio 전용 ALPN 값으로, 보내는 쪽 Sidecar가 mTLS Handshake 시 광고하여 Sidecar가 만든 mTLS 연결임을 알린다. `PERMISSIVE` Mode에서는 App이 자체적으로 TLS를 처리하는 연결도 같은 Port로 들어올 수 있으므로, 이 ALPN 조건으로 선별한 Sidecar mTLS 연결만 Envoy가 TLS Termination을 수행하여 복호화하고, 그 외의 TLS 연결은 암호화된 상태 그대로 App에 전달한다.
 
@@ -1912,7 +1912,7 @@ spec:
                    '@type': type.googleapis.com/envoy.extensions.filters.http.grpc_stats.v3.FilterConfig
 ```
 
-AuthorizationPolicy는 **Sidecar의 Inbound HTTP Filter Chain에 `rbac` Filter를 추가**한다. 예시는 `/admin` 경로 요청을 거부하는 DENY 정책으로, RBAC Filter의 Rule로 변환되어 매칭되는 요청은 403으로 거부된다. L7 속성(경로, Method 등)을 사용하는 정책이므로 HTTP Filter로 구현되며, TCP Port에는 별도 Network Filter가 사용된다.
+AuthorizationPolicy는 **Sidecar의 Inbound HTTP Filter Chain에 `rbac` Filter를 추가**한다. 예시는 `/admin` 경로 요청을 거부하는 `DENY` 정책으로, RBAC Filter의 Rule로 변환되어 매칭되는 요청은 403으로 거부된다. L7 속성(경로, Method 등)을 사용하는 정책이므로 HTTP Filter로 구현되며, TCP Port에는 별도 Network Filter가 사용된다.
 
 #### 1.3.13. Telemetry
 
@@ -1960,7 +1960,7 @@ spec:
 +                    transport_api_version: V3
 ```
 
-Telemetry는 **Inbound/Outbound 구분 없이 모든 Listener와 HTTP Connection Manager의 Access Logger, Tracing, Stats 설정에 반영**된다. 예시 환경은 meshConfig의 `accessLogFile`로 전역 File Logger(`/dev/stdout`)가 켜져 있는 상태인데, Telemetry로 `otel` Provider(meshConfig의 extensionProviders에 정의된 OpenTelemetry ALS)를 지정하면 selector로 선택된 `server-a` Workload의 File Logger가 모두 OpenTelemetry Logger로 교체된다. Provider가 가리키는 Service가 Cluster에 존재해야 반영된다는 점에 주의한다.
+Telemetry는 **Inbound/Outbound 구분 없이 모든 Listener와 HTTP Connection Manager의 Access Logger, Tracing, Stats 설정에 반영**된다. 예시 환경은 `meshConfig`의 `accessLogFile`로 전역 File Logger(`/dev/stdout`)가 켜져 있는 상태인데, Telemetry로 `otel` Provider(`meshConfig`의 `extensionProviders`에 정의된 OpenTelemetry ALS)를 지정하면 `selector`로 선택된 `server-a` Workload의 File Logger가 모두 OpenTelemetry Logger로 교체된다. Provider가 가리키는 Service가 Cluster에 존재해야 반영된다는 점에 주의한다.
 
 #### 1.3.14. WasmPlugin
 

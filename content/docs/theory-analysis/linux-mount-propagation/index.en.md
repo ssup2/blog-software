@@ -12,7 +12,7 @@ Analyze Linux Mount Propagation.
 
 {{< figure caption="[Figure 1] Mount Namespace Clone" src="images/mount-ns-clone.png" width="700px" >}}
 
-To understand Mount Propagation, you need to know the concept of Shared Subtree. Here, Subtree refers to a Filesystem that constitutes part of the Filesystem Tree. In [Figure 1], the left Filesystem Tree shows a Filesystem composed of 2 Subtrees: a Filesystem Mounted at Root and a Filesystem Mounted at /A Directory. When such Subtrees are Shared, they become Shared Subtrees.
+To understand Mount Propagation, you need to know the concept of Shared Subtree. Here, Subtree refers to a Filesystem that constitutes part of the Filesystem Tree. In [Figure 1], the left Filesystem Tree shows a Filesystem composed of 2 Subtrees: a Filesystem Mounted at Root and a Filesystem Mounted at `/A` Directory. When such Subtrees are Shared, they become Shared Subtrees.
 
 There are 2 methods to share Subtrees: cloning Mount NS and using Bind Mount. [Figure 1] shows a method of creating Shared Subtrees by cloning Mount NS. When Mount NS is cloned using the `clone()` System Call, Mount information stored in Mount NS is also cloned as is. Since Subtrees are also cloned as is, Subtrees are shared between Mount NS. In [Figure 1], since there are 2 Subtrees, 2 Subtrees are cloned as shown. The Subtree of the original Mount NS is called Master, and the Subtree of the cloned Mount NS is called Slave.
 
@@ -29,16 +29,16 @@ Mount Propagation literally means a technique that propagates changed Mount info
 [Figure 3] shows the process of Forward Propagation occurring in Shared Subtrees between Mount NS. The order is as follows:
 
 * The Subtree of the original Mount NS becomes shared through the `clone()` System Call.
-* The sdb Block Device was Mounted on the `/A` Directory of the Master Subtree.
-* Forward Propagation occurs and the sdb Block Device is also Mounted on the `/A` Directory of the Slave Subtree.
+* The `sdb` Block Device was Mounted on the `/A` Directory of the Master Subtree.
+* Forward Propagation occurs and the `sdb` Block Device is also Mounted on the `/A` Directory of the Slave Subtree.
 
 {{< figure caption="[Figure 4] Receive Propagation" src="images/receive-propagation.png" width="700px" >}}
 
 [Figure 4] shows the process of Receive Propagation occurring in Shared Subtrees between Mount NS. The order is as follows:
 
 * The Subtree of the original Mount NS becomes shared through the `clone()` System Call.
-* The sdb Block Device was Mounted on the `/A` Directory of the Slave Subtree.
-* Receive Propagation occurs and the sdb Block Device is also Mounted on the `/A` Directory of the Master Subtree.
+* The `sdb` Block Device was Mounted on the `/A` Directory of the Slave Subtree.
+* Receive Propagation occurs and the `sdb` Block Device is also Mounted on the `/A` Directory of the Master Subtree.
 
 ### 1.3. Mount Option
 

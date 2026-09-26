@@ -32,7 +32,7 @@ Install Ruby Gems and Jekyll required for running Jekyll.
 $ bundle exec jekyll serve
 ```
 
-Run the Jekyll Blog locally using the jekyll serve command from the Jekyll Blog's Root folder and verify operation.
+Run the Jekyll Blog locally using the `jekyll serve` command from the Jekyll Blog's Root folder and verify operation.
 
 *  http://127.0.0.1:4000
 

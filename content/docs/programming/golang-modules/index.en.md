@@ -6,7 +6,7 @@ This document analyzes and understands Module, a technique for managing Package 
 
 ## 1. Golang Module
 
-A **Module** is a collection of Packages. The functionality to manage such Modules has been included since **Golang 1.11**. Golang manages Package Dependencies using Module management functionality. With Golang Modules, Golang developers no longer need to place Golang Code in the $GOPATH/src Directory. Before Golang 1.11, separate tools like vgo and dep were used to manage Package Dependencies.
+A **Module** is a collection of Packages. The functionality to manage such Modules has been included since **Golang 1.11**. Golang manages Package Dependencies using Module management functionality. With Golang Modules, Golang developers no longer need to place Golang Code in the `$GOPATH/src` Directory. Before Golang 1.11, separate tools like `vgo` and `dep` were used to manage Package Dependencies.
 
 ### 1.1. Module Creation
 
@@ -113,9 +113,9 @@ func TestPrint() {
 }
 ```
 
-[Shell 1] shows the process of creating an example-golang-module-module Repository in the ssup2 account on Github and then creating a Module for testing. The `GO111MODULE` environment variable determines whether to use the Module management functionality supported by Golang. When the `GO111MODULE` environment variable has the value off, it means that the Module management functionality supported by Golang will not be used. When off, the go get command receives Golang Code in `$GOPATH/src`. When the `GO111MODULE` environment variable has the value on, it means that the Module management functionality supported by Golang will be used. When on, the go get command receives Golang Code in `$GOPATH/pkg/mod`. In [Shell 1], the `GO111MODULE` environment variable was temporarily set to off only when receiving Golang Code with go get.
+[Shell 1] shows the process of creating an `example-golang-module-module` Repository in the `ssup2` account on Github and then creating a Module for testing. The `GO111MODULE` environment variable determines whether to use the Module management functionality supported by Golang. When the `GO111MODULE` environment variable has the value `off`, it means that the Module management functionality supported by Golang will not be used. When `off`, the `go get` command receives Golang Code in `$GOPATH/src`. When the `GO111MODULE` environment variable has the value `on`, it means that the Module management functionality supported by Golang will be used. When `on`, the `go get` command receives Golang Code in `$GOPATH/pkg/mod`. In [Shell 1], the `GO111MODULE` environment variable was temporarily set to `off` only when receiving Golang Code with `go get`.
 
-Module Version must be in the format `v[Major].[Minor].[Patch]`. [Code 1 ~ 5] show the test.go files for each Module Version. [File 1 ~3] show the Module's go.mod files. **The go.mod file is an important file that stores Module-related information.** When the Module's Major Version is v0 or v1, the go.mod file does not need to specify the Major Version as in [File 1], but when the Major Version is v2 or higher, the go.mod file must specify the **Major Version** as in [File 2, 3].
+Module Version must be in the format `v[Major].[Minor].[Patch]`. [Code 1 ~ 5] show the `test.go` files for each Module Version. [File 1 ~3] show the Module's `go.mod` files. **The `go.mod` file is an important file that stores Module-related information.** When the Module's Major Version is v0 or v1, the `go.mod` file does not need to specify the Major Version as in [File 1], but when the Major Version is v2 or higher, the `go.mod` file must specify the **Major Version** as in [File 2, 3].
 
 Since Golang's Module management functionality uses **Git Tag** to manage Module Versions, it is good to create Git Tags with Module Versions if possible. In [Shell 1], only the v3.3.0 Version of the Module was not given a Git Tag for testing purposes, while the other Versions were given Git Tags. The Module created in [Shell 1] can be found at [https://github.com/ssup2/example-golang-module-module](https://github.com/ssup2/example-golang-module-module).
 
@@ -139,7 +139,7 @@ go 1.12
 require github.com/ssup2/example-golang-module-module v1.1.0 // indirect      
 ```
 
-[Shell 2] shows the process of creating a go.mod file using the `go mod init` command in an arbitrary Directory, and then fetching the v1.1.0 Version Module created in [Shell 1]. The go.mod file is created with the contents of [File 4]. You can see that the fetched Module and Version are specified. There is an `indirect` comment at the end because the Module was fetched through the go get command but is not actually being used.
+[Shell 2] shows the process of creating a `go.mod` file using the `go mod init` command in an arbitrary Directory, and then fetching the v1.1.0 Version Module created in [Shell 1]. The `go.mod` file is created with the contents of [File 4]. You can see that the fetched Module and Version are specified. There is an `indirect` comment at the end because the Module was fetched through the `go get` command but is not actually being used.
 
 ```shell {caption="[Shell 3] Module Cleanup"}
 $ export GO111MODULE=on
@@ -153,7 +153,7 @@ module module-main
 go 1.12
 ```
 
-The `go mod tidy` command removes Module information that is not being used from the go.mod file. Golang's Module management functionality automatically adds new Modules to the go.mod file when they are added, but does not automatically remove unused Modules from the go.mod file. Developers must manage unused Modules using the go mod tidy command. [Shell 3], [File 5] show the process of removing unused Module information from the go.mod file through the go mod tidy command.
+The `go mod tidy` command removes Module information that is not being used from the `go.mod` file. Golang's Module management functionality automatically adds new Modules to the `go.mod` file when they are added, but does not automatically remove unused Modules from the `go.mod` file. Developers must manage unused Modules using the `go mod tidy` command. [Shell 3], [File 5] show the process of removing unused Module information from the `go.mod` file through the `go mod tidy` command.
 
 #### 1.2.2. When using a Module with Version registered via Git Tag
 
@@ -185,7 +185,7 @@ go 1.12
 require github.com/ssup2/example-golang-module-module v1.1.5      
 ```
 
-[Shell 4] shows the process of creating and running a main() function that calls the created Module. You can see that main.go shown in [Code 6] calls the TestPrint() function of the created Module. After creating main.go, a go.mod file with the contents of [File 6] is created. You can see that [File 6] specifies that it uses the created v1.1.5 Version Module. Since [Code 6] does not specify a Module Version, the highest Version Module among Modules with Major Version v0 or v1 is selected, and since v1.1.5 Version is the highest v0, v1 Version, it is automatically set to use v1.1.5.
+[Shell 4] shows the process of creating and running a `main()` function that calls the created Module. You can see that `main.go` shown in [Code 6] calls the `TestPrint()` function of the created Module. After creating `main.go`, a `go.mod` file with the contents of [File 6] is created. You can see that [File 6] specifies that it uses the created v1.1.5 Version Module. Since [Code 6] does not specify a Module Version, the highest Version Module among Modules with Major Version v0 or v1 is selected, and since v1.1.5 Version is the highest v0, v1 Version, it is automatically set to use v1.1.5.
 
 ```shell {caption="[Shell 5] Main Creation and Execution - v2.2.7"}
 $ export GO111MODULE=on
@@ -218,7 +218,7 @@ require (
 )       
 ```
 
-[Shell 4] shows the process of changing main.go to use Module Version v2 as in [Code 7], and then running the main() function again. Since v2.2.7 Version is the highest Version among v2 Version Modules, it is automatically set to use v2.2.7. You can see that [File 7] has added content indicating that it uses the v2.2.7 Version Module. The v1.1.5 Version Module information remains but is not actually used. If you use the go mod tidy command, the v1.1.5 Version Module information will disappear.
+[Shell 4] shows the process of changing `main.go` to use Module Version v2 as in [Code 7], and then running the `main()` function again. Since v2.2.7 Version is the highest Version among v2 Version Modules, it is automatically set to use v2.2.7. You can see that [File 7] has added content indicating that it uses the v2.2.7 Version Module. The v1.1.5 Version Module information remains but is not actually used. If you use the `go mod tidy` command, the v1.1.5 Version Module information will disappear.
 
 ```shell {caption="[Shell 6] Main Creation and Execution - v2.2.0"}
 $ export GO111MODULE=on
@@ -241,7 +241,7 @@ require (
 )           
 ```
 
-[Shell 6] shows the process of setting up to use the v2.2.0 Version Module. You can modify go.mod through the go get command. You can see in [File 8] that the v2 Version has been changed to v2.2.0. You can also directly modify the go.mod file.
+[Shell 6] shows the process of setting up to use the v2.2.0 Version Module. You can modify `go.mod` through the `go get` command. You can see in [File 8] that the v2 Version has been changed to v2.2.0. You can also directly modify the `go.mod` file.
 
 #### 1.2.3. When using a Module without Version registered via Git Tag
 
@@ -278,19 +278,19 @@ require (
 )       
 ```
 
-[Shell 7] shows the process of setting up to use the v3.3.0 Version Module. Since the v3.3.0 Version was not given a Git Tag, it must be set up using the master Branch. In [File 9], you can also see that since the v3.3.0 Version has no Git Tag, v3 has an arbitrary Tag. The arbitrary Tag consists of the date and Commit ID of the last Commit on the master Branch. In [File 10], `20190622090929` means the Commit date and `c4fe1b48c3ad` means the Commit ID.
+[Shell 7] shows the process of setting up to use the v3.3.0 Version Module. Since the v3.3.0 Version was not given a Git Tag, it must be set up using the `master` Branch. In [File 9], you can also see that since the v3.3.0 Version has no Git Tag, v3 has an arbitrary Tag. The arbitrary Tag consists of the date and Commit ID of the last Commit on the `master` Branch. In [File 10], `20190622090929` means the Commit date and `c4fe1b48c3ad` means the Commit ID.
 
 ### 1.3. Module-related Commands
 
 Commands related to Golang Modules are as follows.
 
-* `go mod init` : Creates a go.mod file.
+* `go mod init` : Creates a `go.mod` file.
 * `go list -m all` : Checks the Versions of Modules used during Build.
 * `go list -u -m all` : Checks if Modules can be Patched.
 * `go get -u` : Patches (Updates) Modules.
-* `go mod tidy` : Removes unnecessary Modules from go.mod and adds necessary Modules.
-* `go mod vendor` : Creates a vendor Directory using Modules in go.mod.
-* `go clean --modcache` : Deletes the Module Cache ($GOPATH/pkg/mod).
+* `go mod tidy` : Removes unnecessary Modules from `go.mod` and adds necessary Modules.
+* `go mod vendor` : Creates a `vendor` Directory using Modules in `go.mod`.
+* `go clean --modcache` : Deletes the Module Cache (`$GOPATH/pkg/mod`).
 
 ## 2. References
 

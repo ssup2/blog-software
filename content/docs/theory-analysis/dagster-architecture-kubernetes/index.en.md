@@ -365,7 +365,7 @@ Although the Container Image is the same, each operates according to its role be
 
 For Run Pod, it uses the `dagster api execute_run [config]` Command, and `config` is composed based on information from Dagster Instance and Workflow information received from Code Location Server. For environment variables, Job name and PostgreSQL Password information are set in environment variables. Finally, for Op/Asset (Step) Pod, it uses the `dagster api execute_step [compressed config]` Command, and environment variables include Job name, Op/Asset name, and PostgreSQL Password information. `compressed config` can be checked for original Config values through base64 Decoding and Zlib Decoding, and [Text 8] shows an example of the original Config value.
 
-Custom environment variables set in Code Location Server are also set identically in Run Pod and Op/Asset (Step) Pod. You can see that the `User:ssup2` environment variable set in Code Location Server in [Text 5] is also set identically in the environment variables of Run Pod and Op/Asset (Step) in [Text 6~8]. Therefore, environment variables to be used in Workflows should be set in Code Location Server.
+Custom environment variables set in Code Location Server are also set identically in Run Pod and Op/Asset (Step) Pod. You can see that the `USER:ssup2` environment variable set in Code Location Server in [Text 5] is also set identically in the environment variables of Run Pod and Op/Asset (Step) in [Text 6~8]. Therefore, environment variables to be used in Workflows should be set in Code Location Server.
 
 ## 3. High Availability
 

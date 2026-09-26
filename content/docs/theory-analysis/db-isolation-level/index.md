@@ -28,7 +28,7 @@ DB가 Row Lock을 이용하여 Repeatable Read Level을 구현하는 경우 DB�
 
 ##### 1.2.2. Snapshot + Row Lock
 
-Row Lock과 함께 Snapshot을 이용하면 읽기(SELECT) 동작의 병렬성 확보 및 Phantom Read 현상을 제거할 수 있다. Row Lock만을 이용하는 경우 동시에 Row Lock이 Transaction이 종료되어야 풀리기 때문에 동시에 여러 Transaction에서 하나의 Row를 동시에 읽을 수 없다.
+Row Lock과 함께 Snapshot을 이용하면 읽기(`SELECT`) 동작의 병렬성 확보 및 Phantom Read 현상을 제거할 수 있다. Row Lock만을 이용하는 경우 동시에 Row Lock이 Transaction이 종료되어야 풀리기 때문에 동시에 여러 Transaction에서 하나의 Row를 동시에 읽을 수 없다.
 
 Snapshot을 이용하는 경우 Transaction 내부에서 읽기 동작 수행시 Transaction 전용 Snapshot을 생성하고, 이후 Transaction 내부의 읽기 동작은 생성한 Transaction 전용 Snapshot을 대상으로 수행된다. 따라서 각 Transaction에서 하나의 Row를 동시에 읽더라도 실제로는 각 Transaction 전용 Snapshot을 읽기 때문에 동시에 읽기 동작이 가능하며, Phantom Read 현상도 발생하지 않는다.
 
@@ -107,7 +107,7 @@ Non-repeatable Read는 Transaction에서 하나의 Row를 반복해서 읽을때
 | SELECT * FROM users WHERE age BETWEEN 10 AND 30; <br> COMMIT;| |
 {{< /table >}}
 
-Phantom Reae는 다른 Transaction에 의해서 새롭게 추가된 Row가 결과에 반영되는 현상이다. [Table  5]에서 T1은 첫번째 SELECT Query에서 Bob의 정보를 읽어오지 못하지만, 두번째 SELECT Query에서는 T2 Transaction에 의해서 Bob의 정보를 읽어오게 된다.
+Phantom Read는 다른 Transaction에 의해서 새롭게 추가된 Row가 결과에 반영되는 현상이다. [Table  5]에서 T1은 첫번째 `SELECT` Query에서 Bob의 정보를 읽어오지 못하지만, 두번째 `SELECT` Query에서는 T2 Transaction에 의해서 Bob의 정보를 읽어오게 된다.
 
 ## 3. RDBMS Isolation Level
 

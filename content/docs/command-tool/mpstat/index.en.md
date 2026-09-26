@@ -22,7 +22,7 @@ Displays average CPU core usage and per-core CPU usage. [Shell 1] shows the outp
 
 * `%usr` : CPU usage rate for running user code of processes without nice value applied. Represents usage rate of most user processes
 * `%nice` : CPU usage rate for running user code of processes with nice value applied
-* `%sys` : CPU usage rate for running kernel code, excluding usage/idle rates of id, wa, hi, si
+* `%sys` : CPU usage rate for running kernel code, excluding usage/idle rates of `id`, `wa`, `hi`, `si`
 * `%iowait` : CPU idle rate due to I/O Wait
 * `%irq` : CPU usage rate used for pure hardware interrupt processing. Represents CPU usage rate for processing the top halves part that only sets interrupt flags in the kernel
 * `%soft` : CPU usage rate of bottom halves that actually process interrupts according to interrupt flags set by top halves

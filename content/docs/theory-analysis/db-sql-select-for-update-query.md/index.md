@@ -6,7 +6,7 @@ SQL `SELECT FOR UPDATE` Query를 분석한다.
 
 ## 1. `SELECT FOR UPDATE` Query
 
-`SELECT FOR UPDATE` Query는 SELECT 수행 시 Exclusive (Write) Row Lock을 획득한 뒤 읽기 연산을 수행하는 Query로, 획득한 Lock은 Transaction이 종료될 때까지 유지된다. 이는 일반 `SELECT` Query가 Lock 없이 MVCC Snapshot을 읽는 것과 대비된다.
+`SELECT FOR UPDATE` Query는 `SELECT` 수행 시 Exclusive (Write) Row Lock을 획득한 뒤 읽기 연산을 수행하는 Query로, 획득한 Lock은 Transaction이 종료될 때까지 유지된다. 이는 일반 `SELECT` Query가 Lock 없이 MVCC Snapshot을 읽는 것과 대비된다.
 
 MySQL InnoDB와 같이 MVCC (Multi-Version Concurrency Control) 기반으로 동작하는 DB 환경에서, 일반 `SELECT` Query는 Lock을 획득하지 않고 Transaction 시작 시점의 Snapshot을 읽는 Consistent Read (Snapshot Read) 방식으로 동작한다. 따라서 다른 Transaction이 해당 Row에 대해 Exclusive Row Lock을 보유하고 있더라도 일반 `SELECT` Query는 대기 없이 Snapshot 데이터를 읽을 수 있다.
 

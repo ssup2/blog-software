@@ -56,7 +56,7 @@ $ curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.
 $ apt-get update && apt-get install -y nvidia-container-toolkit
 ```
 
-Install the NVIDIA Container Toolkit Package to install nvidia-container-runtime-hook, nvidia-container-toolkit, and nvidia-container-cli.
+Install the NVIDIA Container Toolkit Package to install `nvidia-container-runtime-hook`, `nvidia-container-toolkit`, and `nvidia-container-cli`.
 
 ```
 $ systemctl restart docker
@@ -96,7 +96,7 @@ Sat Dec 14 17:27:38 2019
 +-----------------------------------------------------------------------------+
 ```
 
-Obtain GPU information available in the container through the nvidia-smi command inside the Container.
+Obtain GPU information available in the container through the `nvidia-smi` command inside the Container.
 
 ## 6. References
 

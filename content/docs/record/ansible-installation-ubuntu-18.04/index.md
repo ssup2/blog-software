@@ -28,7 +28,7 @@ Control Node에 Ansible을 설치한다.
 172.35.0.102
 ```
 
-Control Node의 /etc/ansible/hosts 파일에 [File 1]과 같이 Managed Node의 IP 정보를 저장한다.
+Control Node의 `/etc/ansible/hosts` 파일에 [File 1]과 같이 Managed Node의 IP 정보를 저장한다.
 
 ## 4. SSH Key 생성 및 설정
 
@@ -56,14 +56,14 @@ The key's randomart image is:
 +----[SHA256]-----+
 ```
 
-Contorl Node에서 ssh key를 생성한다. passphrase (Password)는 공백을 입력하여 설정하지 않는다. 설정하게 되면 Control Node에서 Managed Node로 SSH를 통해서 접근 할때마다 passphrase를 입력해야 한다.
+Control Node에서 ssh key를 생성한다. passphrase (Password)는 공백을 입력하여 설정하지 않는다. 설정하게 되면 Control Node에서 Managed Node로 SSH를 통해서 접근 할때마다 passphrase를 입력해야 한다.
 
 ```shell
 (Control)$ ssh-copy-id root@172.35.0.101 
 (Control)$ ssh-copy-id root@172.35.0.102
 ```
 
-Control Node에서 ssh-copy-id 명령어를 이용하여 생성한 ssh Public Key를 모든 Managed Node의 ~/.ssh/authorized-keys 파일에 복사한다. 
+Control Node에서 `ssh-copy-id` 명령어를 이용하여 생성한 ssh Public Key를 모든 Managed Node의 `~/.ssh/authorized_keys` 파일에 복사한다. 
 
 ## 5. Ansible 구동
 
@@ -79,7 +79,7 @@ Control Node에서 ssh-copy-id 명령어를 이용하여 생성한 ssh Public Ke
 }
 ```
 
-Control Node에서 ansible all -m ping 명령어를 이용하여 Control Node에서 Managed Node로 ssh 접속이 가능한지 확인한다.
+Control Node에서 `ansible all -m ping` 명령어를 이용하여 Control Node에서 Managed Node로 ssh 접속이 가능한지 확인한다.
 
 ## 6. 참조
 

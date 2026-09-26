@@ -67,7 +67,7 @@ Deploy Node에서 ssh key를 생성한다. passphrase (Password)는 공백을 �
 (Deploy)$ ssh-copy-id root@30.0.0.13
 ```
 
-Deploy Node에서 ssh-copy-id 명령어를 이용하여 생성한 ssh Public Key를 나머지 Node의 ~/.ssh/authorized-keys 파일에 복사한다.
+Deploy Node에서 `ssh-copy-id` 명령어를 이용하여 생성한 ssh Public Key를 나머지 Node의 `~/.ssh/authorized-keys` 파일에 복사한다.
 
 ## 4. kubespray 설정, 구동
 
@@ -106,7 +106,7 @@ kube-master
 kube-node   
 ```
 
-Deploy Node의 inventory/mycluster/inventory.ini 파일에 각 VM의 정보 및 역할을 저장한다.
+Deploy Node의 `inventory/mycluster/inventory.ini` 파일에 각 VM의 정보 및 역할을 저장한다.
 
 ```text {caption="[File 2] Deploy Node - ~/kubespray/inventory/mycluster/group-vars/all/all.yml", linenos=table}
 ...
@@ -121,7 +121,7 @@ cloud-provider: openstack
 ...
 ```
 
-Deploy Node의 inventory/mycluster/group-vars/all/all.yml 파일에 Cloud Provider를 OpenStack으로 설정한다.
+Deploy Node의 `inventory/mycluster/group-vars/all/all.yml` 파일에 Cloud Provider를 OpenStack으로 설정한다.
 
 ```text {caption="[File 3] Deploy Node - ~/kubespray/inventory/mycluster/group-vars/all/openstack.yml", linenos=table}
 # # When OpenStack is used, if LBaaSv2 is available you can enable it with the following 2 variables.
@@ -139,7 +139,7 @@ openstack-lbaas-monitor-timeout: "30s"
 openstack-lbaas-monitor-max-retries: "3"     
 ```
 
-Deploy Node의 inventory/mycluster/group-vars/all/openstack.yml 파일에 Kubernetes LoadBalancer Service를 위하여 Octavia Load Balancer를 설정한다. External Network의 ID와 External Network의 Subnet ID를 확인하여 설정한다.
+Deploy Node의 `inventory/mycluster/group-vars/all/openstack.yml` 파일에 Kubernetes LoadBalancer Service를 위하여 Octavia Load Balancer를 설정한다. External Network의 ID와 External Network의 Subnet ID를 확인하여 설정한다.
 
 ```text {caption="[File 4] Deploy Node - ~/kubespray/inventory/mycluster/group-vars/k8s-cluster/k8s-cluster.yml", linenos=table}
 ...
@@ -149,7 +149,7 @@ persistent-volumes-enabled: true
 ...
 ```
 
-Deploy Node의 inventory/mycluster/group-vars/k8s-cluster/k8s-cluster.yml 파일에 CNI Plugin으로 cilium을 이용하도록 설정하고, Persistent Volume을 Enable 설정하여 Kubernetes가 OpenStack의 Cinder를 이용하도록 설정한다.
+Deploy Node의 `inventory/mycluster/group-vars/k8s-cluster/k8s-cluster.yml` 파일에 CNI Plugin으로 `cilium`을 이용하도록 설정하고, Persistent Volume을 Enable 설정하여 Kubernetes가 OpenStack의 Cinder를 이용하도록 설정한다.
 
 ```text {caption="[File 5] Deploy Node - ~/kubespray/roles/bootstrap-os/defaults/main.yml", linenos=table}
 ...
@@ -158,7 +158,7 @@ Deploy Node의 inventory/mycluster/group-vars/k8s-cluster/k8s-cluster.yml 파일
 override-system-hostname: false
 ```
 
-Deploy Node의 roles/bootstrap-os/defaults/main.yml 파일에 Kubernetes가 설치되는 Hostname을 Override하지 않도록 설정한다.
+Deploy Node의 `roles/bootstrap-os/defaults/main.yml` 파일에 Kubernetes가 설치되는 Hostname을 Override하지 않도록 설정한다.
 
 ```text {caption="[File 6] Deploy Node - ~/kubespray/openstack-rc", linenos=table}
 export OS-AUTH-URL=http://192.168.0.40:5000/v3
@@ -172,7 +172,7 @@ export OS-INTERFACE=public
 export OS-IDENTITY-API-VERSION=3
 ```
 
-OpenStack RC 파일의 정보를 바탕으로 openstack-rc 파일을 생성한다.
+OpenStack RC 파일의 정보를 바탕으로 `openstack-rc` 파일을 생성한다.
 
 ```shell
 (Deploy)$ source ~/kubespray/openstack-rc

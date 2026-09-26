@@ -2,7 +2,7 @@
 title: free
 ---
 
-Memory 사용량을 출력하는 free의 사용법을 정리한다.
+Memory 사용량을 출력하는 `free`의 사용법을 정리한다.
 
 ## 1. free
 

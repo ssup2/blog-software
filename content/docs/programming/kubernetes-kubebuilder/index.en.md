@@ -26,11 +26,11 @@ Due to Kubernetes Cache used by Kubernetes Client, when Reconciler reads Objects
 
 ### 1.2. Controller Manager HA
 
-Since Controller Manager is also a Pod (App) that runs on Kubernetes, it is good to run multiple identical Controller Managers simultaneously for HA of Controller Manager. When running multiple identical Controller Managers, only one Controller Manager actually operates and the remaining Controller Managers maintain a waiting state, operating in **Active-standby** form. You can use Controller Manager HA functionality by setting the 'enable-leader-election' option when running Controller Manager.
+Since Controller Manager is also a Pod (App) that runs on Kubernetes, it is good to run multiple identical Controller Managers simultaneously for HA of Controller Manager. When running multiple identical Controller Managers, only one Controller Manager actually operates and the remaining Controller Managers maintain a waiting state, operating in **Active-standby** form. You can use Controller Manager HA functionality by setting the `enable-leader-election` option when running Controller Manager.
 
 ### 1.3. Controller Metric, kube-rbac-proxy
 
-Controllers provide Controller Metric information, which is their own Metric information. Access rights to Controller Metric information are determined by kube-rbac-proxy, a Proxy Server that runs together inside Controller Pods. [Figure 1] shows the process of Controller Metric information being transmitted through kube-rbac-proxy.
+Controllers provide Controller Metric information, which is their own Metric information. Access rights to Controller Metric information are determined by **kube-rbac-proxy**, a Proxy Server that runs together inside Controller Pods. [Figure 1] shows the process of Controller Metric information being transmitted through kube-rbac-proxy.
 
 ## 2. Memcached Controller
 
@@ -65,7 +65,7 @@ $ ls
 Dockerfile  Makefile  PROJECT  config  go.mod  go.sum  hack  main.go
 ```
 
-Create a Memcached Operator Project through the `kubebuilder init` command. [Shell 2] shows the process of creating a Project using Kubebuilder. The domain that comes as an Option with `init` represents the Domain for API Group. The repo that comes as an Option with `init` means Git Repo. `Makefile` helps easily perform operations such as Controller Compile, Install, Image Build through make commands. `Dockerfile` is used when creating Controller Docker Images, and the `config` Directory performs the role of generating Kubernetes Manifests for running Controllers in Kubernetes using **kustomize**.
+Create a Memcached Operator Project through the `kubebuilder init` command. [Shell 2] shows the process of creating a Project using Kubebuilder. The `domain` that comes as an Option with `init` represents the Domain for API Group. The `repo` that comes as an Option with `init` means Git Repo. `Makefile` helps easily perform operations such as Controller Compile, Install, Image Build through `make` commands. `Dockerfile` is used when creating Controller Docker Images, and the `config` Directory performs the role of generating Kubernetes Manifests for running Controllers in Kubernetes using `kustomize`.
 
 ### 2.4. Memcached CR, Controller File Creation
 
@@ -319,7 +319,7 @@ Line 153 shows a function that stores Memcached CR information that owns that De
 
 Lines 16-29 belonging to the `Reconcile()` function are the part that obtains Memcached CRs using Kubernetes Client based on Name/Namespace information of Memcached CRs retrieved from Work Queue. The part to note here is lines 19-24. If Memcached CR information was attempted to be obtained but does not exist, it means that Memcached CR has been removed. Therefore, Logic to remove Deployment Objects owned by Memcached CRs should exist, but that Logic does not exist in Memcached Controller. This is because Kubernetes knows that the owner of Deployment Objects is the removed Memcached CR and automatically removes them through Object GC process.
 
-Lines 27-60 are the part that obtains Deployment Objects in current state based on Name/Namespace information of Memcached CRs retrieved from Work Queue. Lines 62-75 are the part that performs the operation of matching the number of Replicas of Deployment Objects to Replicas of Memcached CRs if Memcached CR's Replica (Size) differs from the Replica of Deployment Objects in current state. Lines 77-101 are the part that Updates Memcached CR's Status information.
+Lines 27-60 are the part that obtains Deployment Objects in current state based on Name/Namespace information of Memcached CRs retrieved from Work Queue. Lines 62-75 are the part that performs the operation of matching the number of Replicas of Deployment Objects to Replicas of Memcached CRs if Memcached CR's Replica (`Size`) differs from the Replica of Deployment Objects in current state. Lines 77-101 are the part that Updates Memcached CR's Status information.
 
 Like this, the `Reconcile()` function repeats the operation of obtaining changed Memcached CRs and controlling Deployment Objects based on the obtained Memcached CRs. You can find parts in the `Reconcile()` function that return with **Requeue** Option after changing Resources through Manager Client. Even if Resource changes are completed, actual reflection takes time, so Requeue Option is used to make the `Reconcile()` function execute again after a certain time passes.
 
@@ -337,7 +337,7 @@ go run ./main.go
 {% endhighlight %}
 ```
 
-You can run Controllers locally targeting Kubernetes Clusters set in kubeconfig files through the **make run** command. This is useful functionality when developing Controllers. [Shell 4] shows running Memcached Controller locally through the "make run" command.
+You can run Controllers locally targeting Kubernetes Clusters set in kubeconfig files through the `make run` command. This is useful functionality when developing Controllers. [Shell 4] shows running Memcached Controller locally through the `make run` command.
 
 ### 2.8. Memcached Controller Image Build and Push
 
@@ -353,7 +353,7 @@ $ make docker-build
 $ make docker-push
 ```
 
-After specifying the IMG name in Makefile as in [Code 4], you can Build Memcached Controller Images through the **make docker-build** command. Also, you can Push created Images to Docker Hub through the **make docker-push** command. [Shell 5] shows Building and Pushing Memcached Controller Images through "make docker build" and "make docker-push" commands.
+After specifying the `IMG` name in `Makefile` as in [Code 4], you can Build Memcached Controller Images through the `make docker-build` command. Also, you can Push created Images to Docker Hub through the `make docker-push` command. [Shell 5] shows Building and Pushing Memcached Controller Images through `make docker-build` and `make docker-push` commands.
 
 ### 2.9. Memcached Controller Deployment
 
@@ -364,7 +364,7 @@ NAME                                                         READY   STATUS    R
 example-k8s-kubebuilder-controller-manager-c6f85fb5d-zjjx7   2/2     Running   0          3d
 ```
 
-You can deploy Memcached Controller Images built through the **make deploy** command as Pods to Kubernetes Clusters set in kubeconfig files. At this time, Cluster Role and Cluster Role Binding settings necessary for Memcached Controller operation are also performed. [Shell 6] shows deploying Memcached Controller Images as Pods through the "make deploy" command.
+You can deploy Memcached Controller Images built through the `make deploy` command as Pods to Kubernetes Clusters set in kubeconfig files. At this time, Cluster Role and Cluster Role Binding settings necessary for Memcached Controller operation are also performed. [Shell 6] shows deploying Memcached Controller Images as Pods through the `make deploy` command.
 
 ### 2.10. Memcached Operation through Memcached CR Creation
 
@@ -386,7 +386,7 @@ memcached-sample-79ccbbbbcb-vrkmk   1/1     Running   0          3m15s
 memcached-sample-79ccbbbbcb-wpgzz   1/1     Running   0          3m15s
 ```
 
-Create Memcached CRs as in [Code 5] to run Memcached. Since Spec's Size is 3 in [Code 5], 3 Memcached Pods run as can be seen in [Shell 7].
+Create Memcached CRs as in [Code 5] to run Memcached. Since Spec's `Size` is 3 in [Code 5], 3 Memcached Pods run as can be seen in [Shell 7].
 
 ## 3. References
 

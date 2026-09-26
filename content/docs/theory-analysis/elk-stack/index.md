@@ -12,9 +12,9 @@ ELK (Elasticsearch, Logstash, Kibana)를 분석한다.
 
 ## 2. Elasticsearch
 
-Elasticsearch는 분산형 Data 검색 및 분석 엔진 역할을 수행한다. Elasticsearch는 JSON 형태와 같은 **Document** 형태로 Data를 저장한다. Elasticsearch는 Full-text Search시 **Inverted Index**를 이용하고, 숫자 및 위치 Data 처리시에는 **BKD Tree**를 이용하여 빠른 Data 검색이 가능하도록 설계되어 있다. Elasticsearch는 Master-elibigle, Data, Ingest, Coodinating 4개의 Node Type으로 구성되어 있다. Node Type이 4개이지만 하나의 Node에 4개의 Node Type을 모두 적용할 수도 있다.
+Elasticsearch는 분산형 Data 검색 및 분석 엔진 역할을 수행한다. Elasticsearch는 JSON 형태와 같은 **Document** 형태로 Data를 저장한다. Elasticsearch는 Full-text Search시 **Inverted Index**를 이용하고, 숫자 및 위치 Data 처리시에는 **BKD Tree**를 이용하여 빠른 Data 검색이 가능하도록 설계되어 있다. Elasticsearch는 Master-eligible, Data, Ingest, Coordinating 4개의 Node Type으로 구성되어 있다. Node Type이 4개이지만 하나의 Node에 4개의 Node Type을 모두 적용할 수도 있다.
 
-#### 2.1. Master-elibigle Node
+#### 2.1. Master-eligible Node
 
 ```cpp linenos {caption="[Text 1] Master Node 설정 Configuration", linenos=table}
 node.master: true 
@@ -22,7 +22,7 @@ node.data: false
 node.ingest: false
 ```
 
-Master-eligible Node는 Elasticsearch Cluster를 전반적으로 관리하는 Node이다. Cluster를 구성하는 Node들의 상태를 관리하고, Index를 관리하고, Data를 어느 Shard에 저장할지 결정한다. Cluster에서 다수의 Master-elibigle Node가 있는 경우 실제로 Master 역할을 수행하는 Node는 하나이며, 나머지 Master-elibigle Node는 Failover시 Master가 될 수 있는 예비 Node 역할을 수행한다. [Text 1]은 Master-elibigle Node를 설정하는 Configuration이다.
+Master-eligible Node는 Elasticsearch Cluster를 전반적으로 관리하는 Node이다. Cluster를 구성하는 Node들의 상태를 관리하고, Index를 관리하고, Data를 어느 Shard에 저장할지 결정한다. Cluster에서 다수의 Master-eligible Node가 있는 경우 실제로 Master 역할을 수행하는 Node는 하나이며, 나머지 Master-eligible Node는 Failover시 Master가 될 수 있는 예비 Node 역할을 수행한다. [Text 1]은 Master-eligible Node를 설정하는 Configuration이다.
 
 #### 2.2. Data Node
 
@@ -44,7 +44,7 @@ node.ingest: true
 
 Ingest Node는 Data Pre-processing Pipeline을 수행하는 Node이다. 따라서 Logstash가 수행하는 Data 전처리를 Ingest Node에서도 수행할 수 있다. [Text 3]은 Ingest Node를 설정하는 Configuration이다.
 
-#### 2.4. Coodinating (Client) Node
+#### 2.4. Coordinating (Client) Node
 
 ```cpp linenos {caption="[Text 4] Coodinating Node 설정", linenos=table}
 node.master: false
@@ -52,7 +52,7 @@ node.data: false
 node.ingest: false
 ```
 
-Coodinating Node는 외부의 (Logstash, Kibana) 요청에 따라서 Master Node, Data Node, Coodinating Node에 적절한 요청을 보내고, 요청 결과를 받아 다시 외부로 전달하는 Load Balaner 또는 Proxy 역할을 수행한다. [Text 4]는 Coodinating Node를 설정하는 Configuration이다.
+Coordinating Node는 외부의 (Logstash, Kibana) 요청에 따라서 Master Node, Data Node, Coordinating Node에 적절한 요청을 보내고, 요청 결과를 받아 다시 외부로 전달하는 Load Balancer 또는 Proxy 역할을 수행한다. [Text 4]는 Coordinating Node를 설정하는 Configuration이다.
 
 ## 3. Logstash
 
@@ -60,11 +60,11 @@ Logstash는 다양한 Data Source로부터 Data를 수집하고 가공하여 Ela
 
 #### 3.1. Beats
 
-beats는 Data 수집기이다. Beats는 다양한 Data 수집을 위하여 다양한 Plugin을 제공하고 있다.
+Beats는 Data 수집기이다. Beats는 다양한 Data 수집을 위하여 다양한 Plugin을 제공하고 있다.
 
 ## 4. Kibana
 
-Kibana는 Elastic Search를 통해서 분석한 Data를 시각화하는 Tool이다.
+Kibana는 Elasticsearch를 통해서 분석한 Data를 시각화하는 Tool이다.
 
 ## 5. 참조
 

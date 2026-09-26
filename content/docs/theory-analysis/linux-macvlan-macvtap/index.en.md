@@ -64,7 +64,7 @@ macvlan's Bridge Mode can replace Linux Bridge. Linux Bridge manages MAC Tables 
 
 ## 2. macvtap
 
-macvtap not only creates Child Interfaces based on macvlan but also creates Device files in the form of /dev/tap*. User Applications can directly receive or send Packets through /dev/tap* files.
+macvtap not only creates Child Interfaces based on macvlan but also creates Device files in the form of `/dev/tap*`. User Applications can directly receive or send Packets through `/dev/tap*` files.
 
 ```shell {caption="[Shell 2] Add macvtap"}
 # ip li add link <parent> <child> type macvtap mode <mode (private, vepa, bridge, passthru)>

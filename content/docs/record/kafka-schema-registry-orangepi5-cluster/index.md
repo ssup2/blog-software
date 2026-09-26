@@ -12,8 +12,8 @@ Kafka Schema Registry를 활용해서 Schema를 관리하는 실습을 수행한
 
 * **Kafka Schema Registry** : Kafka Message를 위한 Schema를 관리하는 역할을 수행한다.
 * **Kafka** : Producer와 Consumer 사이에서 Message를 전송하는 역할을 수행한다.
-  * **_schema_ Topic** : Schema Registry에 등록된 Schema를 저장하는 Topic.
-  * **user-events Topic** : Producer가 전송한 Message를 저장하는 Topic.
+  * **`_schemas` Topic** : Schema Registry에 등록된 Schema를 저장하는 Topic.
+  * **`user-events` Topic** : Producer가 전송한 Message를 저장하는 Topic.
 * **Producer** : Kafka Schema Registry에서 스키마를 가져와 Avro 형식으로 직렬화하여 Kafka Topic에 전송하는 역할을 수행한다.
 * **Consumer** : Kafka Topic에서 Avro 형식으로 직렬화된 Message를 수신하여 역직렬화하는 역할을 수행한다.
 

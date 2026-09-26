@@ -99,5 +99,5 @@ Create [File 2]. [File 2] configures Windows mouse wheel scroll key and side key
 
 {{< figure caption="[Figure 2] After Complex Modification Rules Configuration" src="images/karabiner-elements-complex-modification-rules-after-setting.png" width="900px" >}}
 
-Apply the Complex Modification Rules from [File 1] and [File 2] in Karabiner-Elements. Click the "Add rule" button in [Figure 1] to configure.
+Apply the Complex Modification Rules from [File 1] and [File 2] in Karabiner-Elements. Click the `Add rule` button in [Figure 1] to configure.
 

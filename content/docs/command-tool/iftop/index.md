@@ -2,7 +2,7 @@
 title: iftop
 ---
 
-특정 Interface의 Network Bandwidth 사용량을 Src IP/Dst IP로 분류한 다음, 샤용량이 높은 순서에 따라서 출력하는 **iftop**을 분석한다.
+특정 Interface의 Network Bandwidth 사용량을 Src IP/Dst IP로 분류한 다음, 샤용량이 높은 순서에 따라서 출력하는 `iftop`을 분석한다.
 
 ## 1. iftop
 
@@ -32,4 +32,4 @@ RX:                    23.8KB           67.5Kb                   672b   1.00Kb  
 TOTAL:                 35.0KB           86.6Kb                  1.31Kb  2.11Kb  6.48Kb 
 ```
 
-[Interface]의 Network Bandwidth 사용량을 Src IP/Dst IP로 분류한 다음, 샤용량이 높은 순서에 따라서 출력한다. [Shell 1]은 `iftop -i eth0`을 이용하여 eth0의 Network Bandwidth 사용량을 출력하는 Shell의 모습을 나타내고 있다. 각 열은 순서대로 Packet의 Src/Dest, Packet의 방향, Packet의 Src/Dest, 2초동안 이동한 Packet량, 10초동안 이동한 Packet량, 40초 동안 이동한 Packet량을 나타낸다.
+[Interface]의 Network Bandwidth 사용량을 Src IP/Dst IP로 분류한 다음, 샤용량이 높은 순서에 따라서 출력한다. [Shell 1]은 `iftop -i eth0`을 이용하여 `eth0`의 Network Bandwidth 사용량을 출력하는 Shell의 모습을 나타내고 있다. 각 열은 순서대로 Packet의 Src/Dest, Packet의 방향, Packet의 Src/Dest, 2초동안 이동한 Packet량, 10초동안 이동한 Packet량, 40초 동안 이동한 Packet량을 나타낸다.

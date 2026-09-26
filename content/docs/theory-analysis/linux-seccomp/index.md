@@ -38,7 +38,7 @@ int main() {
 }
 ```
 
-[Code 1]은 libseccomp을 이용하여 seccomp strick mode를 적용하고, `dup2()` System Call을 호출하는 Code이다. strick mode에서 `dup2()` System call은 허용되지 않기 때문에 [Code 1]은 STRICT 문자열을 출력하지 못하고 종료된다.
+[Code 1]은 `libseccomp`을 이용하여 seccomp strict mode를 적용하고, `dup2()` System Call을 호출하는 Code이다. strict mode에서 `dup2()` System call은 허용되지 않기 때문에 [Code 1]은 `STRICT` 문자열을 출력하지 못하고 종료된다.
 
 ### 2.2. Filter Mode
 
@@ -46,7 +46,7 @@ int main() {
 
 * `SECCOMP-RET-KILL` : System Call을 수행하지 않고 해당 Process를 즉시 종료 시킨다. 해당 Process의 종료 값은 `SIGSYS`을 갖게된다. (Not `SIGKILL`)
 * `SECCOMP-RET-TRAP` : System Call을 수행하지 않고 해당 Process에게 `SIGSYS` Signal을 전송한다. `SIGSYS` Singal을 받은 Process는 System Call을 Emulation 할 수 있다.
-* `SECCOMP-RET-ERRNO` : System Call을 수행하지 않고 해당 Thread의 errno 값을 설정한다.
+* `SECCOMP-RET-ERRNO` : System Call을 수행하지 않고 해당 Thread의 `errno` 값을 설정한다.
 * `SECCOMP-RET-TRACE` : tracer에게 System Call 이벤트를 전달한다. 만약 tracer가 존재하지 않으면 `-ENOSYS`를 Return하고 System Call을 수행하지 않는다.
 * `SECCOMP-RET-ALLOW` : System Call을 수행한다.
 
@@ -86,7 +86,7 @@ int main() {
 }
 ```
 
-[Code 2]는 libseccomp을 이용하여 seccomp을 Filter Mode로 동작시키는 Code이다. `SCMP-ACT-KILL`은 seccomp의 기본 정책으로써, 허용되지 않은 System Call을 호출하는 Process는 죽인다는 의미이다. `dup2()` System Call은 허용되었기 때문에 `dup2()` System Call을 수행된다. `open()` System Call은 허용되지 않았기 때문에 [Code 2]는 `open()` System Call에서 종료된다.
+[Code 2]는 `libseccomp`을 이용하여 seccomp을 Filter Mode로 동작시키는 Code이다. `SCMP-ACT-KILL`은 seccomp의 기본 정책으로써, 허용되지 않은 System Call을 호출하는 Process는 죽인다는 의미이다. `dup2()` System Call은 허용되었기 때문에 `dup2()` System Call을 수행된다. `open()` System Call은 허용되지 않았기 때문에 [Code 2]는 `open()` System Call에서 종료된다.
 
 ## 3. 참조
 

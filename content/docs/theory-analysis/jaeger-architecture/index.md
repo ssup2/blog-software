@@ -18,7 +18,7 @@ Jaeger Architecture를 분석한다.
 
 App이 처리하는 모든 Business Logic에 대해서 Span 및 Trace 정보를 생성하면 Host 또는 Container에게도 많은 부하가 발생한다. 이러한 문제를 최소화 하기 위해서 jaeger-client는 App이 처리하는 모든 Business Logic이 아닌 일부만을 Sampling하여 jaeger-agent에게 전송한다. jaeger-collector는 여러개가 동작할 수 있다. 다수의 jaeger-collector가 동작하는 경우 jaeger-client는 Parameter를 통해서 얻은 다수의 jaeger-collector의 IP/Port 정보를 바탕으로 Round Robin 방식으로 Trace 정보를 분산하여 전송한다. 또는 DNS와 같은 Infra Service를 이용하여 jaeger-collector가 Trace 정보를 다수의 jaeger-collector로 분산하도록 만들수도 있다.
 
-**Storage**는 jaeger-collector가 수집한 Metric 정보를 저장한다. 현재 Jeager가 지원하는 Storage의 Backend는 Cassandra, Elasticsearch, BadgerDB, Memory를 지원하며, Jaeger는 Cassandra 이용을 권장하고 있다. Storage에 저장된 Trace 정보는 **Spark Job**을 통해서 분석되며 분석된 Trace 정보를 다시 Storage에 저장한다. **jeager-ui**는 **jeager-query**를 통해서 Storage에 저장되어 있는 원래의 Trace 정보 또는 분석된 Trace 정보를 얻어와 Jeager 이용자에게 보여준다.
+**Storage**는 jaeger-collector가 수집한 Metric 정보를 저장한다. 현재 Jeager가 지원하는 Storage의 Backend는 Cassandra, Elasticsearch, BadgerDB, Memory를 지원하며, Jaeger는 Cassandra 이용을 권장하고 있다. Storage에 저장된 Trace 정보는 **Spark Job**을 통해서 분석되며 분석된 Trace 정보를 다시 Storage에 저장한다. **jaeger-ui**는 **jaeger-query**를 통해서 Storage에 저장되어 있는 원래의 Trace 정보 또는 분석된 Trace 정보를 얻어와 Jeager 이용자에게 보여준다.
 
 Jaeger는 **all-in-one** Binary를 제공하며 all-in-one Binary를 통해서 Jaeger를 동작시키는 경우 Jeager Backend에 포함되어 있는 jaeger-collector, Storage(BadgerDB, Memory), jaeger-query, jaeger-ui가 하나의 Process 안에서 동작하게 된다. Storage의 경우에는 BadgerDB, Memory만 지원하며, Spark Job은 포함되지 않는다.
 

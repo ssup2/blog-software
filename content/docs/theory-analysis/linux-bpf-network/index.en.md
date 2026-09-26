@@ -30,7 +30,7 @@ Generic XDP is a technique for XDP development and Debugging as mentioned above.
 
 ### 1.2. tc (Traffic Control)
 
-tc BPF Program Types are Types that operate in BPF existing in the tc Layer. All tc BPF Program Types receive Socket Buffer (\-\-sk-buff) as Input. Through Socket Buffer and Helper Functions utilizing Socket Buffer, more diverse Packet processing is possible compared to the `BPF-PROG-TYPE-XDP` Type. `BPF-PROG-TYPE-SCHED-ACT` and `BPF-PROG-TYPE-SCHED-CLS` Types exist.
+tc BPF Program Types are Types that operate in BPF existing in the tc Layer. All tc BPF Program Types receive Socket Buffer (`--sk-buff`) as Input. Through Socket Buffer and Helper Functions utilizing Socket Buffer, more diverse Packet processing is possible compared to the `BPF-PROG-TYPE-XDP` Type. `BPF-PROG-TYPE-SCHED-ACT` and `BPF-PROG-TYPE-SCHED-CLS` Types exist.
 
 #### 1.2.1. BPF-PROG-TYPE-SCHED-ACT
 
@@ -43,9 +43,9 @@ The `BPF-PROG-TYPE-SCHED-ACT` Type performs Packet processing roles such as Pack
 
 #### 1.2.2. BPF-PROG-TYPE-SCHED-CLS
 
-The `BPF-PROG-TYPE-SCHED-CLS` Type performs the role of setting classid on Packets. Therefore, it returns classid. Both Ingress/Egress processing is possible, and both eBPF/cBPF are supported. The `BPF-PROG-TYPE-SCHED-CLS` Type can use a technique called **direct-action**. When using the direct-action technique, the `BPF-PROG-TYPE-SCHED-CLS` Type can also process Packets like the `BPF-PROG-TYPE-SCHED-ACT` Type. That is, it can return values defined in the Linux Kernel starting with `TC-ACT-` like `BPF-PROG-TYPE-SCHED-ACT`.
+The `BPF-PROG-TYPE-SCHED-CLS` Type performs the role of setting `classid` on Packets. Therefore, it returns `classid`. Both Ingress/Egress processing is possible, and both eBPF/cBPF are supported. The `BPF-PROG-TYPE-SCHED-CLS` Type can use a technique called `direct-action`. When using the `direct-action` technique, the `BPF-PROG-TYPE-SCHED-CLS` Type can also process Packets like the `BPF-PROG-TYPE-SCHED-ACT` Type. That is, it can return values defined in the Linux Kernel starting with `TC-ACT-` like `BPF-PROG-TYPE-SCHED-ACT`.
 
-Since the `BPF-PROG-TYPE-SCHED-CLS` Type runs before the `BPF-PROG-TYPE-SCHED-ACT` Type, performing Packet processing in the `BPF-PROG-TYPE-SCHED-CLS` Type using the direct-action technique can provide performance benefits.
+Since the `BPF-PROG-TYPE-SCHED-CLS` Type runs before the `BPF-PROG-TYPE-SCHED-ACT` Type, performing Packet processing in the `BPF-PROG-TYPE-SCHED-CLS` Type using the `direct-action` technique can provide performance benefits.
 
 ### 1.3. cgroup
 

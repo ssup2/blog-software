@@ -18,7 +18,7 @@ HDFS는 Data Redundancy, Data Reliable을 보장하는 Distributed Filesystem이
 
 HDFS는 Data Redundancy, Data Reliable을 보장하는 Distributed Filesystem이다. HDFS는 Master/Slave Architecture를 가지고 있으며, Master 역할을 수행하는 **Name Node**와 Slave 역할을 수행하는 **Data Node**로 이루어져 있다. Name Node는 HDFS을 위한 Meta Data를 관리 및 Client에게 File Open, Close, Rename 같은 Namespace 기능을 제공한다. Data Node는 File 저장을 위한 Storage가 붙어 있는 모든 Node를 의미하며, Block 단위로 쪼개진 File들을 Storage에 저장하고 Client에게 제공하는 역할을 수행한다.
 
-Meta Data에는 Namespace 정보, File-Block Mapping 정보등을 저장하고 있다. Name Node는 Meta Data를 Memory에 유지하고 이용한다. 또한 Name Node는 Meta Data 내용 보존을 위해서 Name Node안에 fsimage File 및 EditLog File에 Meta Data 내용을 저장한다. NameNode는 주기적으로 Checkpoint 동작을 통해 Memory의 Meta Data를 fsimage File로 저장한다. 그리고 Checkpoint 동작 수행 후 Meta Data 변경 내역을 EditLog File에 저장한다. 따라서 fsimage File과 EditLog File을 통해서 Meta Data를 복구할 수 있게 된다. fsimage File과 EditLog File은 Name Node를 재시작하거나 Name Node 장애시 Meta Data 복구를 위해 이용된다.
+Meta Data에는 Namespace 정보, File-Block Mapping 정보등을 저장하고 있다. Name Node는 Meta Data를 Memory에 유지하고 이용한다. 또한 Name Node는 Meta Data 내용 보존을 위해서 Name Node안에 `fsimage` File 및 `EditLog` File에 Meta Data 내용을 저장한다. NameNode는 주기적으로 Checkpoint 동작을 통해 Memory의 Meta Data를 `fsimage` File로 저장한다. 그리고 Checkpoint 동작 수행 후 Meta Data 변경 내역을 `EditLog` File에 저장한다. 따라서 `fsimage` File과 `EditLog` File을 통해서 Meta Data를 복구할 수 있게 된다. `fsimage` File과 `EditLog` File은 Name Node를 재시작하거나 Name Node 장애시 Meta Data 복구를 위해 이용된다.
 
 #### 2.1. Read, Write
 
@@ -78,7 +78,7 @@ Hadoop 1.0에서는 MapReduce App만 Hadoop Cluster의 Compute Resource를 이�
 
 Hadoop은 Data를 처리할때 Data를 특정 Node로 옮겨 Data를 처리하는 방식이 아닌, Data가 있는 Node로 처리 Task를 전송하여 Data를 처리하는 방식이다. 대용량 Data를 옮기며 Data를 처리하는것 보다 처리 Task를 옯기는 방식이 더욱 빠르기 때문이다. 이러한 처리 방식을 Data Locality를 고려한 방식이라고 표현한다.
 
-AM은 App이 정의한 getSplits() Method를 통해 Task 수행에 필요한 File(Input Split)의 Node 위치를 알 수 있다. AM은 File이 위치한 Node 정보를 RM에게 전달하여 Task가 가능하면 해당 File이 있는 Node에서 구동되도록, Data Locality를 고려하여 Scheuling을 수행한다.
+AM은 App이 정의한 `getSplits()` Method를 통해 Task 수행에 필요한 File(Input Split)의 Node 위치를 알 수 있다. AM은 File이 위치한 Node 정보를 RM에게 전달하여 Task가 가능하면 해당 File이 있는 Node에서 구동되도록, Data Locality를 고려하여 Scheuling을 수행한다.
 
 ## 4. MapReduce Framework
 

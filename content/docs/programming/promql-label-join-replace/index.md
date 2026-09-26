@@ -37,7 +37,7 @@ node-memory-MemAvailable-bytes{container="node-exporter", dest="node-exporter+me
 node-memory-MemAvailable-bytes{container="node-exporter", dest="node-exporter+metrics+monitoring", endpoint="metrics", instance="192.168.0.33:9100", job="node-exporter", namespace="monitoring", pod="prometheus-prometheus-node-exporter-9lzmv", service="prometheus-prometheus-node-exporter"} 9297317888
 ```
 
-[Query 2]는 node-memory-MemAvailable-bytes를 이용한 Label Join의 예제를 나타내고 있다. `dest` Label이 추가된 것을 확인할 수 있고, `dest`의 값은 `job`, `endpoint`, `namespace` Label 값과 Seperator인 `+`으로 구성되어 있는것을 확인 할 수 있다.
+[Query 2]는 `node-memory-MemAvailable-bytes`를 이용한 Label Join의 예제를 나타내고 있다. `dest` Label이 추가된 것을 확인할 수 있고, `dest`의 값은 `job`, `endpoint`, `namespace` Label 값과 `Seperator`인 `+`으로 구성되어 있는것을 확인 할 수 있다.
 
 ## 2. PromQL Label Replace
 
@@ -60,7 +60,7 @@ node-memory-MemAvailable-bytes{container="node-exporter", dest="node-exporter-re
 node-memory-MemAvailable-bytes{container="node-exporter", dest="node-exporter-replace", endpoint="metrics", instance="192.168.0.33:9100", job="node-exporter", namespace="monitoring", pod="prometheus-prometheus-node-exporter-9lzmv", service="prometheus-prometheus-node-exporter"} 9297317888
 ```
 
-[Query 3]은 `node-memory-MemAvailable-bytes`를 이용한 Label Replace의 예제를 나타내고 있다. `dest` Label이 추가된 것을 확인 할 수 있고, `dest`의 값은 Regex 및 Replacement 문법에 따라서 `node-exporter` label의 값에 `-replace` 문자열이 더해진 값이 설정되는 것을 확인 할 수 있다.
+[Query 3]은 `node-memory-MemAvailable-bytes`를 이용한 Label Replace의 예제를 나타내고 있다. `dest` Label이 추가된 것을 확인 할 수 있고, `dest`의 값은 `Regex` 및 `Replacement` 문법에 따라서 `node-exporter` label의 값에 `-replace` 문자열이 더해진 값이 설정되는 것을 확인 할 수 있다.
 
 ## 3. 참조
 

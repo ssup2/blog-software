@@ -24,10 +24,10 @@ title: AWS SysOps Administrator Associate 자격증 시험 정리
     * Partition 장애시 다른 Partition에 영향을 주지 않음
     * 각 AZ당 7개의 Partition이 존재하며, 각 Partition당 최대 100개의 EC2 Instance 존재 가능
   * Luanch Exception
-    * InstanceLimitExcceded
+    * `InstanceLimitExceeded`
       * Region에서 이용가능한 vCPU 개수 초과
       * Service Quota로 증설 요청 가능
-    * InsufficientInstanceCapacity
+    * `InsufficientInstanceCapacity`
       * AZ에 이용가능한 Instance가 존재하지 않음
       * AWS의 Resource 부족 문제
       * 다른 Instance Type, 다른 AZ로 선택 생성하여 문제 우회 가능
@@ -38,7 +38,7 @@ title: AWS SysOps Administrator Associate 자격증 시험 정리
       * 5분 간격으로 Metric 수집, 1분 간격으로 Metric 수집 변경 가능 하지만 추가 비용 발생
       * CPU 사용률, Network I/O, Disk I/O Instance 상태 정보 수집 가능
     * with CloudWatch Agent
-      * Memory 사용륭, Disk 사용률, Process 상태 (procstat Plugin)
+      * Memory 사용륭, Disk 사용률, Process 상태 (`procstat` Plugin)
       * 수집 간격 설정 가능 (최소 간격 1초)
   * Status Check
     * System Status Check
@@ -54,7 +54,7 @@ title: AWS SysOps Administrator Associate 자격증 시험 정리
 
 * No Reboot Option과 함께 EC2 Instance 재시작 없이 AMI 생성 가능
 * EC2 Image Builder를 통한 Image 제작 가능
-* AMI Tag를 활용하여 Production 환경에서는 Production Tag가 붙어있는 AMI만 이용하도록 강제 가능
+* AMI Tag를 활용하여 Production 환경에서는 `Production` Tag가 붙어있는 AMI만 이용하도록 강제 가능
   * IAM Permission 활용 및 AWS Config 활용
 
 ## 4. Systems Manager
@@ -105,7 +105,7 @@ title: AWS SysOps Administrator Associate 자격증 시험 정리
 * Directory 형태로 계층을 이룸
 * Advanced Tier (유료)
   * Parameter Policy 지정 가능
-  * Expiration, ExpirationNotification, NoChangeNotification 지정 가능
+  * `Expiration`, `ExpirationNotification`, `NoChangeNotification` 지정 가능
 
 ### 4.5. SSM Inventory
 
@@ -135,7 +135,7 @@ title: AWS SysOps Administrator Associate 자격증 시험 정리
 * EC2 Instance, On-premise에 Shell 접근 기능 제공
 * SSH 방식 X, Bastion Host 불필요, SSH Key 불필요
 * Session Log는 S3, CloudWatch Log에 저장 가능
-* CloudTrail에 StartSession Event 기록이 남음
+* CloudTrail에 `StartSession` Event 기록이 남음
 
 ## 5. Cloud Formation
 
@@ -145,7 +145,7 @@ title: AWS SysOps Administrator Associate 자격증 시험 정리
   * `Mapping` : Static 변수
   * `Output` : Template 실행 결과
   * `Conditions` : Resource 생성 조건 설정
-  * MetaData
+  * `MetaData`
 * Stack Policy
   * Stack이 변경할 수 있는 Resource 제한
   * Stack Policy가 설정되면 기본적으로 All Deny

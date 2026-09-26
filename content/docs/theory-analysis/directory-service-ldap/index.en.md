@@ -16,14 +16,14 @@ Since Directory Service is often used to manage physical Resources where changes
 
 **LDAP** is literally a lightweight Protocol for Directory Service. LDAP Server manages Data in Tree form. [Figure 1] shows the Schema of LDAP in Tree form. You can see that each Node of the Tree stores one attribute. Available attributes can be checked at [this link](https://docs.bmc.com/docs/fpsc121/ldap-attributes-and-associated-fields-495323340.html). Commonly used attributes are as follows.
 
-* **uid** : User ID
-* **cn** : Common Name
-* **l** : Location
-* **ou** : Organisational Unit
-* **o** : Organisation
-* **dc** : Domain Component
-* **st** : State
-* **c** : Country
+* `uid` : User ID
+* `cn` : Common Name
+* `l` : Location
+* `ou` : Organisational Unit
+* `o` : Organisation
+* `dc` : Domain Component
+* `st` : State
+* `c` : Country
 
 LDAP does not support Transaction or Rollback. LDAP is specialized for Data Read rather than Data Write. Data held by LDAP Server is generally stored in Binary format, but can be converted to a human-readable format through LDIF (LDAP Data Interchange Format).
 

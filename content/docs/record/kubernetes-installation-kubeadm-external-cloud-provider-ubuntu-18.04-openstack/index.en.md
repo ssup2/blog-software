@@ -47,7 +47,7 @@ Install Docker.
 (All)$ apt-get install -y kubeadm=1.15.3-00 kubelet=1.15.3-00
 ```
 
-Install kubelet and kubeadm.
+Install `kubelet` and `kubeadm`.
 
 ## 3. Kubernetes Cluster Setup
 
@@ -60,7 +60,7 @@ Environment="KUBELET-KUBECONFIG-ARGS=--cloud-provider=external --bootstrap-kubec
 ...
 ```
 
-Modify the /etc/systemd/system/kubelet.service.d/10-kubeadm.conf file on all nodes as shown in [File 1] to configure kubelet to use the External Cloud Provider.
+Modify the `/etc/systemd/system/kubelet.service.d/10-kubeadm.conf` file on all nodes as shown in [File 1] to configure `kubelet` to use the External Cloud Provider.
 
 ### 3.2. Master Node
 
@@ -70,7 +70,7 @@ Modify the /etc/systemd/system/kubelet.service.d/10-kubeadm.conf file on all nod
 kubeadm join 30.0.0.11:6443 --token x7tk20.4hp9x2x43g46ara5 --discovery-token-ca-cert-hash sha256:cab2cc0a4912164f45f502ad31f5d038974cf98ed10a6064d6632a07097fad79
 ```
 
-Initialize kubeadm. The --pod-network-cidr just needs to not overlap with other networks. Here, --pod-network-cidr is set to 192.167.0.0/16.
+Initialize `kubeadm`. The `--pod-network-cidr` just needs to not overlap with other networks. Here, `--pod-network-cidr` is set to `192.167.0.0/16`.
 
 ```shell
 (Master)$ mkdir -p $HOME/.kube 
@@ -86,7 +86,7 @@ Configure the kubernetes config file.
 (Worker)$ kubeadm join 30.0.0.11:6443 --token v40peg.uyrgkkmiu1rl6dmn --discovery-token-ca-cert-hash sha256:1474a36cdae4b45da503fd48b4a516e72040ad35fa8f0456edfcacf9cd954522
 ```
 
-Execute the **kubeadm join ~~** command that appears as a result of kubeadm init on all worker nodes.
+Execute the `kubeadm join ~~` command that appears as a result of `kubeadm init` on all worker nodes.
 
 ## 4. Cilium Installation
 
@@ -97,7 +97,7 @@ Execute the **kubeadm join ~~** command that appears as a result of kubeadm init
 (All)$ echo "bpffs                      /sys/fs/bpf             bpf     defaults 0 0" >> /etc/fstab
 ```
 
-Configure bpffs to be mounted on all nodes.
+Configure `bpffs` to be mounted on all nodes.
 
 ### 4.2. Master Node
 
@@ -137,14 +137,14 @@ monitor-timeout=30s
 monitor-max-retries=3
 ```
 
-Create the /etc/kubernetes/cloud-config file on all master nodes with the content from [File 2]. The Global section of [File 2] contains User ID/PW, Tenant, Region information, etc. for Kubernetes VMs. The LoadBalancer section contains Load Balancer-related configuration information. subnet-id refers to the Subnet ID of the Kubernetes Network. floating-network-id refers to the External Network ID. lb-method refers to the Load Balancing algorithm. Monitor-related settings determine the Octavia Member VM Monitoring policy.
+Create the `/etc/kubernetes/cloud-config` file on all master nodes with the content from [File 2]. The `Global` section of [File 2] contains User ID/PW, Tenant, Region information, etc. for Kubernetes VMs. The `LoadBalancer` section contains Load Balancer-related configuration information. `subnet-id` refers to the Subnet ID of the Kubernetes Network. `floating-network-id` refers to the External Network ID. `lb-method` refers to the Load Balancing algorithm. Monitor-related settings determine the Octavia Member VM Monitoring policy.
 
 ```shell
 (Master)$ kubectl create secret -n kube-system generic cloud-config --from-literal=cloud.conf="$(cat /etc/kubernetes/cloud-config)" --dry-run -o yaml > cloud-config-secret.yaml
 (Master)$ kubectl -f cloud-config-secret.yaml apply
 ```
 
-Create the cloud-config secret for use by the OpenStack Cloud Controller Manager and Cinder CSI Plugin.
+Create the `cloud-config` secret for use by the OpenStack Cloud Controller Manager and Cinder CSI Plugin.
 
 ## 6. Kubernetes Cluster Configuration
 
@@ -165,7 +165,7 @@ Create the cloud-config secret for use by the OpenStack Cloud Controller Manager
 ...
 ```
 
-Modify the /etc/kubernetes/manifests/kube-controller-manager.yaml file on all master nodes as shown in [File 3] to configure the Kubernetes Controller Manager to use the cloud-config file. When the kube-controller-manager.yaml file is modified, Kubernetes automatically restarts the Kubernetes Controller Manager.
+Modify the `/etc/kubernetes/manifests/kube-controller-manager.yaml` file on all master nodes as shown in [File 3] to configure the Kubernetes Controller Manager to use the `cloud-config` file. When the `kube-controller-manager.yaml` file is modified, Kubernetes automatically restarts the Kubernetes Controller Manager.
 
 ```yaml {caption="[File 4] Master Node - /etc/kubernetes/manifests/kube-apiserver.yaml", linenos=table}
 ...
@@ -180,7 +180,7 @@ spec:
 ...
 ```
 
-Modify the /etc/kubernetes/manifests/kube-apiserver.yaml file on all master nodes as shown in [File 4] to configure the Kubernetes API Server to provide the Storage API. When the kube-apiserver.yaml file is modified, Kubernetes automatically restarts the Kubernetes API Server.
+Modify the `/etc/kubernetes/manifests/kube-apiserver.yaml` file on all master nodes as shown in [File 4] to configure the Kubernetes API Server to provide the Storage API. When the `kube-apiserver.yaml` file is modified, Kubernetes automatically restarts the Kubernetes API Server.
 
 ## 7. OpenStack CCM (Cloud Controller Manager) Installation
 
@@ -209,7 +209,7 @@ NAME                       CREATED AT
 cinder.csi.openstack.org   2019-10-16T15:36:27Z
 ```
 
-Since csi-secret is replaced by cloud-config-secret, delete the unnecessary csi-secret-cinderplugin.yaml and install the Cinder CSI Plugin. Cinder CSI Plugin v1.15.0 does not work, so change to v1.16.0 and install. If the Cinder CSI Plugin is properly installed, the "cinder.csi.openstack.org" object can be queried.
+Since `csi-secret` is replaced by `cloud-config-secret`, delete the unnecessary `csi-secret-cinderplugin.yaml` and install the Cinder CSI Plugin. Cinder CSI Plugin v1.15.0 does not work, so change to v1.16.0 and install. If the Cinder CSI Plugin is properly installed, the `cinder.csi.openstack.org` object can be queried.
 
 ```yaml {caption="[File 5] Master Node - ~/storageclass.yaml", linenos=table}
 apiVersion: storage.k8s.io/v1

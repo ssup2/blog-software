@@ -149,7 +149,7 @@ The `runOnAllThreads()` function receives a `cb` Callback function executed on M
 2. The `cb` Callback function is stored in the `cb_guard` Pointer. The `cb_guard` Pointer acts as a C++ STL `shared_ptr` that registers a Lambda as Deleter to post the `all_threads_complete_cb` Callback function to the Main Thread and remove the `cb` Callback function.
 3. A Lambda that executes the `cb` Callback function stored in the `cb_guard` Pointer is posted to all Worker Threads. At this time, because a Lambda is created and copied for each Worker Thread, the Reference Count of `cb_guard` also increases by the number of Worker Threads.
 4. A posted Worker Thread is woken by the Dispatcher and executes the Lambda that runs the `cb` Callback function stored in the `cb_guard` Pointer.
-5. When execution completes, the Lambda terminates and the Reference Count of the `cb_guard` Pointer decreases by 1. When the last Lambda terminates, the Reference Count of the `cb_guard` Pointer becomes 0.
+5. When execution completes, the Lambda terminates and the Reference Count of the `cb_guard` Pointer decreases by 1. When the last Lambda terminates, the Reference Count of the `cb_guard` Pointer becomes `0`.
 6. When the Reference Count becomes `0`, the Lambda registered as Deleter on the `cb_guard` Pointer runs and posts the `all_threads_complete_cb` Callback function to the Main Thread.
 7. The posted Main Thread executes the `all_threads_complete_cb` Callback function.
 
@@ -157,11 +157,11 @@ The `runOnAllThreads()` function receives a `cb` Callback function executed on M
 
 Envoy provides an **Access Log** feature that records processed requests and supports multiple output paths (files), including stdout/stderr. In Envoy, Access Log recording requests originate on the Worker Thread that actually handles Traffic. However, writing Access Logs directly on the Worker Thread causes Lock contention and I/O Blocking, which interferes with Traffic processing. Envoy introduces a Flush Thread to avoid this issue.
 
-The Flush Thread is a dedicated Thread for writing Access Logs. To minimize Lock sections during Access Log recording, Envoy uses various Buffers and Locks. According to Network Filter Chain configuration, when a Worker Thread records Access Logs, it calls the Write function of **Access Logger**, which is shared across all Worker Threads.
+The Flush Thread is a dedicated Thread for writing Access Logs. To minimize Lock sections during Access Log recording, Envoy uses various Buffers and Locks. According to Network Filter Chain configuration, when a Worker Thread records Access Logs, it calls the `Write` function of **Access Logger**, which is shared across all Worker Threads.
 
-The Write function does not write Access Logs directly to files; it only stores them in the **Flush Buffer** and returns. Because the Flush Buffer is shared between Worker Threads, it is protected by a **Write Lock**. The Flush Buffer is used so that slow Disk I/O in the Write function does not delay Worker Threads from processing Traffic.
+The `Write` function does not write Access Logs directly to files; it only stores them in the **Flush Buffer** and returns. Because the Flush Buffer is shared between Worker Threads, it is protected by a **Write Lock**. The Flush Buffer is used so that slow Disk I/O in the `Write` function does not delay Worker Threads from processing Traffic.
 
-Unlike Main/Worker Threads, the Flush Thread does not use a Dispatcher and wakes through a Condition Variable. The Main Thread periodically wakes the Flush Thread through the Dispatcher and Timer, or a Worker Thread wakes the Flush Thread when the Flush Buffer becomes full while recording Access Logs through the Write function.
+Unlike Main/Worker Threads, the Flush Thread does not use a Dispatcher and wakes through a Condition Variable. The Main Thread periodically wakes the Flush Thread through the Dispatcher and Timer, or a Worker Thread wakes the Flush Thread when the Flush Buffer becomes full while recording Access Logs through the `Write` function.
 
 When woken, the Flush Thread temporarily stores Access Logs in the Flush Buffer into the **About to write Buffer** through Access Logger instead of writing them immediately. This is because writing Access Logs directly from Access Logger would hold the Flush Buffer's Write Lock for a long time due to Disk I/O, causing Worker Threads to wait a long time to access the Flush Buffer. Because only the Flush Thread accesses the About to write Buffer, no separate Lock exists.
 
@@ -187,7 +187,7 @@ access_log:
       # Logger B (stdout)
 ```
 
-Each Access Logger has its own independent Flush Thread/Buffer/Lock set. In [Figure 1], because [File 1] configures two Access Loggers that output to File and stdout respectively, two Flush Thread/Buffer/Lock sets exist. This means Worker Threads call the Write function as many times as there are Access Loggers, so performance degradation can occur when too many Access Loggers are configured.
+Each Access Logger has its own independent Flush Thread/Buffer/Lock set. In [Figure 1], because [File 1] configures two Access Loggers that output to File and stdout respectively, two Flush Thread/Buffer/Lock sets exist. This means Worker Threads call the `Write` function as many times as there are Access Loggers, so performance degradation can occur when too many Access Loggers are configured.
 
 ## 2. References
 

@@ -155,7 +155,7 @@ transforms.insertValue.value.static.field=my-field
 transforms.insertValue.value.static.value=my-value
 ```
 
-[File 4] and [File 5] show examples of InsertField Transform configuration for Kafka Connect. [File 4] defines the `insertKey` Transform that adds a field named `my-field` with value `my-value` to the Record's Key, and similarly, [File 5] defines the `insertValue` Transform that adds a field named `my-field` with value `my-value` to the Record's Value.
+[File 4] and [File 5] show examples of `InsertField` Transform configuration for Kafka Connect. [File 4] defines the `insertKey` Transform that adds a field named `my-field` with value `my-value` to the Record's Key, and similarly, [File 5] defines the `insertValue` Transform that adds a field named `my-field` with value `my-value` to the Record's Value.
 
 ```properties {caption="[File 6] Kafka Connect Chaining Transform Properties Example" linenos=table}
 transforms=insertKey,insertValue
@@ -174,8 +174,8 @@ transforms.insertValue.value.static.value=my-value
 * Kafka Connect : [https://docs.confluent.io/platform/current/connect/index.html#](https://docs.confluent.io/platform/current/connect/index.html#)
 * Kafka Connect : [https://docs.lenses.io/latest/connectors/understanding-kafka-connect](https://docs.lenses.io/latest/connectors/understanding-kafka-connect)
 * Kafka Connect : [https://developer.confluent.io/courses/kafka-connect/how-connectors-work/](https://developer.confluent.io/courses/kafka-connect/how-connectors-work/)
-* Kakka Connect : [https://www.instaclustr.com/blog/apache-kafka-connect-architecture-overview/](https://www.instaclustr.com/blog/apache-kafka-connect-architecture-overview/)
-* Kakfa Connect : [https://kafka.apache.org/documentation.html#connect](https://kafka.apache.org/documentation.html#connect)
+* Kafka Connect : [https://www.instaclustr.com/blog/apache-kafka-connect-architecture-overview/](https://www.instaclustr.com/blog/apache-kafka-connect-architecture-overview/)
+* Kafka Connect : [https://kafka.apache.org/documentation.html#connect](https://kafka.apache.org/documentation.html#connect)
 * Kafka Connect : [https://cjw-awdsd.tistory.com/53](https://cjw-awdsd.tistory.com/53)
 * Kafka Connect REST API : [https://docs.confluent.io/platform/current/connect/references/restapi.html](https://docs.confluent.io/platform/current/connect/references/restapi.html)
 * Kafka Connect Rebalancing : [https://cwiki.apache.org/confluence/display/KAFKA/KIP-415:+Incremental+Cooperative+Rebalancing+in+Kafka+Connect](https://cwiki.apache.org/confluence/display/KAFKA/KIP-415:+Incremental+Cooperative+Rebalancing+in+Kafka+Connect)

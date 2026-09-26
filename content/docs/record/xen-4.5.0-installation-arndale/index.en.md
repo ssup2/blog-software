@@ -26,13 +26,13 @@ Install a cross compiler.
 PATH=$PATH:/usr/local/gcc-linaro-arm-linux-gnueabihf-4.8/bin
 ```
 
-Extract to the /usr/local directory and add the content from [File 1] to the ~/.bashrc file so that the compiler can be executed from any directory.
+Extract to the `/usr/local` directory and add the content from [File 1] to the `~/.bashrc` file so that the compiler can be executed from any directory.
 
 ## 3. uSD Card Partition Configuration
 
-* 0 ~ 2M, 2M, No Filesystem: Bootloader (bl1, spl, U-boot)
-* 2M ~ 18M, 16M, ext2, boot: xen-uImage, linux-zImage, exynos5250-arndale.dtb, load-xen-uSD.img
-* 18M ~ rest, ext3, root: Dom0 Root-Filesystem
+* `0 ~ 2M`, `2M`, No Filesystem: Bootloader (`bl1`, `spl`, U-boot)
+* `2M ~ 18M`, `16M`, `ext2`, `boot`: `xen-uImage`, `linux-zImage`, `exynos5250-arndale.dtb`, `load-xen-uSD.img`
+* `18M ~ rest`, `ext3`, `root`: Dom0 Root-Filesystem
 
 ## 4. U-boot Fusing
 
@@ -45,9 +45,9 @@ $ export ARCH=arm
 $ make arndale5250
 ```
 
-Download and build spl and u-boot.
+Download and build `spl` and `u-boot`.
 
-* Download bl1: http://releases.linaro.org/12.12/components/kernel/arndale-bl1/arndale-bl1.bin
+* Download `bl1`: http://releases.linaro.org/12.12/components/kernel/arndale-bl1/arndale-bl1.bin
 
 ```shell
 $ dd if=arndale-bl1.bin of=/dev/sdb bs=512 seek=1
@@ -55,7 +55,7 @@ $ dd if=spl/smdk5250-spl.bin of=/dev/sdb bs=512 seek=17
 $ dd if=u-boot.bin of=/dev/sdb bs=512 seek=49
 ```
 
-Fuse bl1, spl, and u-boot.
+Fuse `bl1`, `spl`, and `u-boot`.
 
 ## 5. Xen Build
 
@@ -141,7 +141,7 @@ Choose either PXE Boot or uSD Card Boot to perform.
 $ apt-get install xinetd tftp tftpd
 ```
 
-Install the tftp Ubuntu package.
+Install the `tftp` Ubuntu package.
 
 ``` {caption="[File 2] /etc/xinetd.d/tftp", linenos=table}
 service tftp
@@ -159,7 +159,7 @@ service tftp
 }
 ```
 
-Create the /etc/xinetd.d/tftp file with the content from [File 2].
+Create the `/etc/xinetd.d/tftp` file with the content from [File 2].
 
 ```shell
 $ mkdir /tftpboot
@@ -193,7 +193,7 @@ Create a tftp image file for booting.
 
 #### 8.1.4. tftp Image File Copy
 
-Copy the load-xen-tftp.img file to the ext2 partition of the uSD Card.
+Copy the `load-xen-tftp.img` file to the `ext2` partition of the uSD Card.
 
 #### 8.1.5. U-boot Configuration
 
@@ -215,8 +215,8 @@ Copy the load-xen-tftp.img file to the ext2 partition of the uSD Card.
 
 Configure U-boot.
 
-* board IP: 192.168.0.200
-* tftp Server (Host PC): 192.168.0.100
+* board IP: `192.168.0.200`
+* tftp Server (Host PC): `192.168.0.100`
 
 ### 8.2. uSD Card Boot
 
@@ -238,7 +238,7 @@ ext2load mmc 0:1 $dtb_addr_r /exynos5250-arndale.dtb
 ...
 ```
 
-Create the load-xen-uSD.scr.txt file from the load-xen-tftp.scr.txt file.
+Create the `load-xen-uSD.scr.txt` file from the `load-xen-tftp.scr.txt` file.
 
 ```shell
 # mkimage -T script -C none -d load-xen-uSD.scr.txt /tftpboot/load-xen-uSD.img
@@ -248,7 +248,7 @@ Create the image file.
 
 #### 8.2.2. Kernel Images, dtb, and uSD Card Image File Copy
 
-Copy linux-zImage, exynos5250-arndale.dtb, and load-xen-uSD.img files to the ext2 partition of the uSD Card.
+Copy `linux-zImage`, `exynos5250-arndale.dtb`, and `load-xen-uSD.img` files to the `ext2` partition of the uSD Card.
 
 #### 8.2.3. U-boot Configuration
 
@@ -275,7 +275,7 @@ $ apt-get install sbuild
 $ sbuild-adduser $USER
 ```
 
-Install sbuild and schroot.
+Install `sbuild` and `schroot`.
 
 ```shell
 $ sbuild-createchroot --components=main,universe trusty /srv/chroots/trusty-armhf-cross http://archive.ubuntu.com/ubuntu/
@@ -292,7 +292,7 @@ description=Debian trusty/armhf crossbuilder
 ...
 ```
 
-Modify the /etc/schroot/chroot.d/trusty-armhf-cross file as shown in [File 4].
+Modify the `/etc/schroot/chroot.d/trusty-armhf-cross` file as shown in [File 4].
 
 ```shell
 $ schroot -c trusty-armhf-cross
@@ -351,7 +351,7 @@ auto eth0
 iface eth0 inet dhcp
 ```
 
-Configure /etc/network/interfaces with the content from [File 5].
+Configure `/etc/network/interfaces` with the content from [File 5].
 
 ```shell
 (chroot)$ echo deb http://ports.ubuntu.com/ trusty main >> /etc/apt/sources.list
@@ -369,7 +369,7 @@ respawn
 exec exec /sbin/getty -8 115200 hvc0
 ```
 
-Create the /etc/init/xvc0.conf file with the content from [File 6] to configure getty.
+Create the `/etc/init/xvc0.conf` file with the content from [File 6] to configure `getty`.
 
 ```shell
 (chroot) $ echo 'xenfs   /proc/xen    xenfs    defaults   0   0' >> /etc/fstab
@@ -377,7 +377,7 @@ Create the /etc/init/xvc0.conf file with the content from [File 6] to configure 
 $ umount /mnt
 ```
 
-Configure fstab.
+Configure `fstab`.
 
 ## 11. Dom0 Root Filesystem Configuration
 
@@ -441,7 +441,7 @@ $ mknod xvdg b 202 96
 $ mknod xvdh b 202 112
 ```
 
-Create xvdX device nodes.
+Create `xvdX` device nodes.
 
 ```shell
 $ echo DomU01 > /mnt/etc/hostname
@@ -504,7 +504,7 @@ $ cp DomU_zImage /media/root/root/root (ext3 partition in uSD)
 $ umount /mnt
 ```
 
-Copy zImage and root filesystems to uSD.
+Copy `zImage` and root filesystems to uSD.
 
 ## 15. Ubuntu Package Installation on Dom0
 
@@ -532,7 +532,7 @@ vif = ['bridge=xenbr0']
 extra = "earlyprintk=xenboot console=hvc0 rw rootwait root=/dev/xvda"
 ```
 
-Create the DomU_01.cfg file with the content from [File 7].
+Create the `DomU_01.cfg` file with the content from [File 7].
 
 ```text {caption="[File 8] Basic Root Filesystem Image's DomU_02.cfg", linenos=table}
 kernel = "/root/Xen_Guest/DomU_zImage"
@@ -544,7 +544,7 @@ vif = ['bridge=xenbr0']
 extra = "earlyprintk=xenboot console=hvc0 rw rootwait root=/dev/xvda"
 ```
 
-Create the DomU_02.cfg file with the content from [File 8].
+Create the `DomU_02.cfg` file with the content from [File 8].
 
 ## 17. DomU Execution
 

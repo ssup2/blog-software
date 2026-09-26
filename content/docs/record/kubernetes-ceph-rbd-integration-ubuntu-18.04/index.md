@@ -8,8 +8,8 @@ title: Kubernetes Ceph RBD 연동 / Ubuntu 18.04 환경
 
 * Kubernetes 1.12
 * Ceph
-  * **Monitor IP** : 10.0.0.10:6789
-  * **Pool Name** : kube
+  * **Monitor IP** : `10.0.0.10:6789`
+  * **Pool Name** : `kube`
 
 ## 2. Ceph RDB 연동
 
@@ -34,7 +34,7 @@ $ git clone https://github.com/kubernetes-incubator/external-storage.git
 $ cd external-storage/ceph/rbd/deploy
 ```
 
-rbd-provisioner, role, cluster role yaml을 Download 한다.
+`rbd-provisioner`, role, cluster role yaml을 Download 한다.
 
 ```yaml {caption="[File 1] rbac/clusterrole.yaml", linenos=table}
 ...
@@ -43,7 +43,7 @@ rbd-provisioner, role, cluster role yaml을 Download 한다.
     verbs: ["get", "create", "delete"]
 ```
 
-rbac/clusterrole.yaml 파일에 [File 1]의 내용을 추가한다. (Secret Role)
+`rbac/clusterrole.yaml` 파일에 [File 1]의 내용을 추가한다. (Secret Role)
 
 ```shell
 $ NAMESPACE=default
@@ -51,7 +51,7 @@ $ sed -r -i "s/namespace: [^ ]+/namespace: $NAMESPACE/g" ./rbac/clusterrolebindi
 $ kubectl -n $NAMESPACE apply -f ./rbac 
 ```
 
-rbd-provisioner, role, cluster role을 설정한다.
+`rbd-provisioner`, role, cluster role을 설정한다.
 
 ```yaml {caption="[File 2] storage-class.yaml", linenos=table}
 kind: StorageClass
@@ -74,7 +74,7 @@ parameters:
   imageFeatures: layering
 ```
 
-storage-class.yaml 파일 생성 및 [File 2]의 내용으로 저장한다.
+`storage-class.yaml` 파일 생성 및 [File 2]의 내용으로 저장한다.
 
 ```shell
 $ kubectl create -f ./storage-class.yaml

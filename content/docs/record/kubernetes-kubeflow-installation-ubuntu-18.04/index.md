@@ -21,7 +21,7 @@ title: Kubernetes Kubeflow 설치 / Ubuntu 18.04 환경
 (Worker/Master)# apt-get install nfs-common
 ```
 
-Kubernetes Cluster에서 NFS Client Provisioner를 이용하기 위해서 Master, Worker Node에 nfs-common Packet를 설치한다.
+Kubernetes Cluster에서 NFS Client Provisioner를 이용하기 위해서 Master, Worker Node에 `nfs-common` Packet를 설치한다.
 
 ## 3. NFS Client Provisioner 설치
 
@@ -40,7 +40,7 @@ Helm을 이용하여 NFS Client Provisioner를 설치한다.
 (User)# kubectl patch storageclass nfs-client -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 ```
 
-nfs-client Storage Class를 Default Storage Class로 설정한다.
+`nfs-client` Storage Class를 Default Storage Class로 설정한다.
 
 ## 4. Kubernetes API Servr 설정
 
@@ -55,7 +55,7 @@ spec:
 ...
 ```
 
-Istio 설치를 위해서 Master Node의 /etc/kubernetes/manifests/kube-apiserver.yaml 파일에 [File 1]의 내용처럼 service-account-signing-key-file, service-account-issuer 설정을 추가한다.
+Istio 설치를 위해서 Master Node의 `/etc/kubernetes/manifests/kube-apiserver.yaml` 파일에 [File 1]의 내용처럼 `service-account-signing-key-file`, `service-account-issuer` 설정을 추가한다.
 
 ## 5. kfctl 설치
 
@@ -67,7 +67,7 @@ Istio 설치를 위해서 Master Node의 /etc/kubernetes/manifests/kube-apiserve
 (User)# rm kfctl-v1.2.0-0-gbc038f9-linux.tar.gz
 ```
 
-kubeflow 관리 도구인 kfctl을 설치한다.
+kubeflow 관리 도구인 `kfctl`을 설치한다.
 
 ## 6. Kubeflow 설치
 
@@ -79,7 +79,7 @@ export KF-DIR=${BASE-DIR}/${KF-NAME}
 export CONFIG-URI="https://raw.githubusercontent.com/kubeflow/manifests/v1.2-branch/kfdef/kfctl-k8s-istio.v1.2.0.yaml"
 ```
 
-[File 1]의 내용으로 kfctl을 위한 env 파일을 생성한다.
+[File 1]의 내용으로 `kfctl`을 위한 env 파일을 생성한다.
 
 ```shell
 (User)# . ~/kubeflow/kfctl-env
@@ -88,7 +88,7 @@ export CONFIG-URI="https://raw.githubusercontent.com/kubeflow/manifests/v1.2-bra
 (User)# kfctl apply -V -f ${CONFIG-URI}
 ```
 
-Kubeflow를 설치한다. 설치가 완료된 이후에 istio-system Namespace의 istio-ingressgateway Service의 NodePort를 이용하여 Kubeflow Dashboard에 접근한다.
+Kubeflow를 설치한다. 설치가 완료된 이후에 `istio-system` Namespace의 `istio-ingressgateway` Service의 NodePort를 이용하여 Kubeflow Dashboard에 접근한다.
   * http://192.168.0.61:31380/
 
 ## 7. 참조

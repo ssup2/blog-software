@@ -15,7 +15,7 @@ title: Kubernetes Kubeflow 설치 (Not Working) / Ubuntu 18.04, Jetson Nano Clus
 * Kubernetes 1.18.14
 * Helm 3.0.2
 * NFS Server
-  * 192.168.0.60:/nfs-root
+  * `192.168.0.60:/nfs-root`
 
 ## 2. kustomize 설치
 
@@ -24,7 +24,7 @@ $ curl -s "https://raw.githubusercontent.com/\
 kubernetes-sigs/kustomize/master/hack/install-kustomize.sh"  | bash
 ```
 
-kubectl 명령어에 포함된 kustomize는 resouces 문법을 지원하지 않기 때문에, 최신 kustomize를 설치하여 이용한다.
+kubectl 명령어에 포함된 kustomize는 `resources` 문법을 지원하지 않기 때문에, 최신 kustomize를 설치하여 이용한다.
 
 ## 3. kfctl 설치
 
@@ -55,7 +55,7 @@ Helm을 이용하여 NFS Client Provisioner를 설치한다.
 $ kubectl patch storageclass nfs-client -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 ```
 
-nfs-client Storage Class를 Default Storage Class로 설정한다.
+`nfs-client` Storage Class를 Default Storage Class로 설정한다.
 
 ## 5. Kubeflow 설치
 
@@ -92,7 +92,7 @@ Kubeflow를 kustomize 파일을 생성한다.
 # kustomize build --load-restrictor none ssup2-kubeflow/kustomize/cert-manager | kubectl apply -f -
 ```
 
-### 5.3. isito 설치
+### 5.3. istio 설치
 
 ## 6. 참조
 

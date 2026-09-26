@@ -15,7 +15,7 @@ title: Kubernetes Kubeflow Installation (Not Working) / Ubuntu 18.04, Jetson Nan
 * Kubernetes 1.18.14
 * Helm 3.0.2
 * NFS Server
-  * 192.168.0.60:/nfs-root
+  * `192.168.0.60:/nfs-root`
 
 ## 2. kustomize Installation
 
@@ -24,7 +24,7 @@ $ curl -s "https://raw.githubusercontent.com/\
 kubernetes-sigs/kustomize/master/hack/install-kustomize.sh"  | bash
 ```
 
-Install the latest kustomize and use it because the kustomize included in the kubectl command does not support the resources syntax.
+Install the latest kustomize and use it because the kustomize included in the kubectl command does not support the `resources` syntax.
 
 ## 3. kfctl Installation
 
@@ -55,7 +55,7 @@ Install the NFS Client Provisioner using Helm.
 $ kubectl patch storageclass nfs-client -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 ```
 
-Set the nfs-client Storage Class as the default Storage Class.
+Set the `nfs-client` Storage Class as the default Storage Class.
 
 ## 5. Kubeflow Installation
 

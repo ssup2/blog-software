@@ -23,7 +23,7 @@ istio를 Download한다.
 $ export PATH=$PWD/bin:$PATH
 ```
 
-istioctl을 설정한다.
+`istioctl`을 설정한다.
 
 ```shell
 $ istioctl install --set profile=demo -y
@@ -70,7 +70,7 @@ tracing                ClusterIP      10.101.35.46    <none>         80/TCP     
 zipkin                 ClusterIP      10.97.246.60    <none>         9411/TCP 
 ```
 
-istio Addon(jaeger, kiali, prometheus)들을 설치하고 동작을 확인한다. monitoringdashboard.monitoring.kiali CRD 때문에 "kubectl apply -f samples/addons" 명령어를 2번 실행하여야 정상 설치된다.
+istio Addon(jaeger, kiali, prometheus)들을 설치하고 동작을 확인한다. `monitoringdashboard.monitoring.kiali` CRD 때문에 `kubectl apply -f samples/addons` 명령어를 2번 실행하여야 정상 설치된다.
 
 ## 3. 참조
 

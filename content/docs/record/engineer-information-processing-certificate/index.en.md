@@ -8,28 +8,28 @@ title: Information Processing Engineer Certificate Theory Summary
 
 * DDL (Data Definition Language)
   * `CREATE` : Creates a Table.
-    * ex) CREATE TABLE Persons ( PersonID int, LastName varchar(255) );
+    * ex) `CREATE TABLE Persons ( PersonID int, LastName varchar(255) );`
   * `ALTER` : Modifies a Table.
-    * ex) ALTER TABLE Persons ADD Email varchar(255);
-    * ex) ALTER TABLE Persons DROP Email;
-    * ex) ALTER TABLE Persons MODIFY ( Email varchar(128) );
-    * ex) ALTER TABLE Persons RENAME Email TO Address;
+    * ex) `ALTER TABLE Persons ADD Email varchar(255);`
+    * ex) `ALTER TABLE Persons DROP Email;`
+    * ex) `ALTER TABLE Persons MODIFY ( Email varchar(128) );`
+    * ex) `ALTER TABLE Persons RENAME Email TO Address;`
   * `DROP` : Deletes a Table.
-    * ex) DROP TABLE Persons; 
+    * ex) `DROP TABLE Persons;` 
   * `TRUNCATE` : Deletes all contents of a Table.
-    * ex) TRUNCATE TABLE Persons;
+    * ex) `TRUNCATE TABLE Persons;`
 * DML (Data Manipulation Language)
   * `SELECT` : Reads Data from a Table.
-    * ex) SELECT PersonID, LastName FROM Persons WHERE PersonID = 1;
-    * ex) SELECT PersonID, LastName FROM Persons WHERE PersonID IN (1, 2);
-    * ex) SELECT PersonID, LastName FROM Persons BETWEEN 1 AND 10;
-    * ex) SELECT * FROM Persons;
+    * ex) `SELECT PersonID, LastName FROM Persons WHERE PersonID = 1;`
+    * ex) `SELECT PersonID, LastName FROM Persons WHERE PersonID IN (1, 2);`
+    * ex) `SELECT PersonID, LastName FROM Persons BETWEEN 1 AND 10;`
+    * ex) `SELECT * FROM Persons;`
   * `INSERT` : Inserts Data into a Table.
-    * ex) INSERT INTO Persons (PersonID, LastName) VALUES (1 , ssup2);
+    * ex) `INSERT INTO Persons (PersonID, LastName) VALUES (1 , ssup2);`
   * `UPDATE` : Modifies Data in a Table.
-    * ex) UPDATE Persons SET PersonID = 10 WHERE LastName = 'ssup2';
+    * ex) `UPDATE Persons SET PersonID = 10 WHERE LastName = 'ssup2';`
   * `DELETE` : Deletes Data from a Table.
-    * ex) DELETE FROM Persons WHERE PersonID = 1;
+    * ex) `DELETE FROM Persons WHERE PersonID = 1;`
 * DCL (Data Control Language)
   * `COMMIT` : Applies changes.
   * `ROLLBACK` : Reverts changes without applying them.

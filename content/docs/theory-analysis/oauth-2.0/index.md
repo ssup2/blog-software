@@ -20,7 +20,7 @@ OAuth 2.0을 이용하는 App들은 대부분 직접 User의 정보를 관리하
 
 {{< figure caption="[Figure 2] OAuth 2.0 Component" src="images/oauth-2.0-component.png" width="700px" >}}
 
-[Figure 2]는 Web 환경에서 OAuth 2.0를 이용하여 인가 기능을 구성했을때 구성 요소를 세분화하여 나타낸 그림이다. **User**는 App을 이용하는 이용자를 나타낸다. OAuth 2.0에서는 **Resource Owner**라고 명칭한다. 여기서 **Resource**는 Data 정도로 이해하면 된다. **User Agent**는 User의 입력을 받아 App이나 Authorization Server에게 전달하거나, App이나 Authorization Server에게 전달 받은 내용을 User에게 보여주는 역할을 수행한다. 일반적으로 Web 환경에서 User Agent는 Web Brower를 의미한다.
+[Figure 2]는 Web 환경에서 OAuth 2.0를 이용하여 인가 기능을 구성했을때 구성 요소를 세분화하여 나타낸 그림이다. **User**는 App을 이용하는 이용자를 나타낸다. OAuth 2.0에서는 **Resource Owner**라고 명칭한다. 여기서 **Resource**는 Data 정도로 이해하면 된다. **User Agent**는 User의 입력을 받아 App이나 Authorization Server에게 전달하거나, App이나 Authorization Server에게 전달 받은 내용을 User에게 보여주는 역할을 수행한다. 일반적으로 Web 환경에서 User Agent는 Web Browser를 의미한다.
 
 **App**은 Authorization Server로부터 Resource 접근 권한을 받으려는 App을 나타낸다. Web 환경이기 때문에 App은 Web Server나, WAS라고 생각할 수 있다. **Authorization Server**는 Access Token을 발급하고 관리하는 Server이다. API Server는 User의 Resource(Data)를 제공하는 Server를 의미한다. OAuth 2.0에서는 **Resource Server**라고 명칭한다. 일반적으로 Authorization Server와 Resource Server는 동일한 Service Provider가 제공한다.
 
@@ -39,7 +39,7 @@ App이 Authorization Server로부터 Access Token을 발급 받기 위해서는 
 * 1,2,3 : App 구동 중 특정 Resource 이용을 위해 User의 인가가 필요한 경우, App은 User Agent에게 Auth Server의 인가 URL로 Redirect 명령을 전달한다. Redirect 명령과 함께 Client ID, App에서 필요한 Scope 정보, 인가 완료 후 App으로 돌아오기 위한 App의 Callback URL도 같이 보낸다. Client ID, Scope, Callback URL 모두 인가 URL의 URL Query 형태로 전달된다.
 * 4,5,6 : Auth Server는 URL Query로 전달된 Client ID, Scope, Callback URL 정보를 바탕으로 User 인증 및 Resource 인가를 위한 적절한 UI를 User Agent에게 전달한다.
 * 7 : User는 UI를 통해서 User 인증 및 Resource 인가 작업을 진행한다. User 인증은 User의 ID/Password를 입력하여 진행하고, Resource 인가 작업은 App에서 요청한 Scope 정보를 보여주는 방식으로 진행된다.
-* 8,9 : User Agent는 인증, 인가 정보를 Auth Sever에게 전달하여 **Auth Code**와 App으로 돌아갈 App URL을 전달 받는다. Auth Code는 추후 Access/Refresh Token을 얻기 위한 임시 Token이다. Auth Code도 Callback URL의 URL Query 형태로 전달된다.
+* 8,9 : User Agent는 인증, 인가 정보를 Auth Server에게 전달하여 **Auth Code**와 App으로 돌아갈 App URL을 전달 받는다. Auth Code는 추후 Access/Refresh Token을 얻기 위한 임시 Token이다. Auth Code도 Callback URL의 URL Query 형태로 전달된다.
 * 10,11,12 : User Agent는 App의 Callback URL로 이동한다. App은 URL Query를 통해서 Auth Code를 얻은 다음, 얻은 Auth Code 그리고 Client ID, Client Secret을 통해 Resource에 접근 할 수 있는 Access Token과 Access Token을 새로 받을때 이용하는 Refresh Token을 발급 받는다.
 
 {{< figure caption="[Figure 4] Google OAuth 2.0 Authorization UI" src="images/auth-google-ui.png" width="600px" >}}
@@ -59,7 +59,7 @@ App이 Authorization Server로부터 Access Token을 발급 받기 위해서는 
 
 ### 1.4. Refresh Token
 
-Resource Token은 App이 이용하던 Access Token이 Timeout되어 Invaild 상태가 되었을경우 **새로운 Access Token**을 발급받기 위해 이용되는 Token이다. Authorization Server는 App에게 Access Token을 **처음** 발급 할 때만 Refresh Token을 같이 전달한다. 따라서 App은 Refresh Token을 저장하고 이용해야 한다. Authorization Server는 Refresh Token을 반드시 전송할 필요 없다. Refresh Token이 없는 App은 Access Token이 Invaild한 상태가 되면 User에게 요청하여 다시 Access Token을 발급 받아야 한다. Refresh Token은 **Bearer Token**이라고도 불린다. [Figure 6]은 App이 Refresh Token을 이용하는 과정을 나타낸다.
+Refresh Token은 App이 이용하던 Access Token이 Timeout되어 Invalid 상태가 되었을경우 **새로운 Access Token**을 발급받기 위해 이용되는 Token이다. Authorization Server는 App에게 Access Token을 **처음** 발급 할 때만 Refresh Token을 같이 전달한다. 따라서 App은 Refresh Token을 저장하고 이용해야 한다. Authorization Server는 Refresh Token을 반드시 전송할 필요 없다. Refresh Token이 없는 App은 Access Token이 Invalid한 상태가 되면 User에게 요청하여 다시 Access Token을 발급 받아야 한다. Refresh Token은 **Bearer Token**이라고도 불린다. [Figure 6]은 App이 Refresh Token을 이용하는 과정을 나타낸다.
 
 {{< figure caption="[Figure 6] Refresh Token 이용 과정" src="images/oauth-2.0-refresh-token-flow.png" width="900px" >}}
 
@@ -67,7 +67,7 @@ Resource Token은 App이 이용하던 Access Token이 Timeout되어 Invaild 상�
 
 * 1,2,3 : App은 User의 요청을 받아 Access Token을 이용하여 Resource Server에게 Resource를 요청한다.
 * 4,5 : Resource Server는 Authorization Server에게 Access Token이 유요한지 물어본다.
-* 6,7,8 : App이 Access Token이 Invaild 하다는 결과를 받으면 Authorization Server에게 Refresh Token을 이용하여 새로운 Access Token을 받는다.
+* 6,7,8 : App이 Access Token이 Invalid 하다는 결과를 받으면 Authorization Server에게 Refresh Token을 이용하여 새로운 Access Token을 받는다.
 * 9 ~ 14 : App은 새로 받은 Access Token과 Client ID, Client Secret을 이용하여 다시 Resource를 요청하고, 받은 Resource를 User Agent를 통해서 Agent에게 전달한다.
 
 ## 2. 참조

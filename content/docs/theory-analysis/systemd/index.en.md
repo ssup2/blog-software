@@ -16,18 +16,18 @@ SysVinit performed Services sequentially, but systemd executes and initializes m
 
 journald is a Daemon that stores and manages major Logs in Linux. journald leaves the following contents as Logs under the `/var/log/journal` folder.
 
-* Records Kernel Logs transmitted through /proc/kmsg.
-* Records Logs left by Apps through the syslog(3) function. Logs are transmitted to journald through the /dev/log (/run/systemd/journal/dev-log) Domain Socket.
-* Records Logs transmitted through APIs provided by journald such as the sd-journal-sendv() function. Logs are transmitted to journald through the /run/systemd/journal/socket Domain Socket.
-* Records stdout and stderr of systemd Services as Logs. Logs are transmitted to journald through /run/systemd/journal/stdout.
+* Records Kernel Logs transmitted through `/proc/kmsg`.
+* Records Logs left by Apps through the `syslog(3)` function. Logs are transmitted to journald through the `/dev/log` (`/run/systemd/journal/dev-log`) Domain Socket.
+* Records Logs transmitted through APIs provided by journald such as the `sd-journal-sendv()` function. Logs are transmitted to journald through the `/run/systemd/journal/socket` Domain Socket.
+* Records stdout and stderr of systemd Services as Logs. Logs are transmitted to journald through `/run/systemd/journal/stdout`.
 * Records Audit Logs.
 
-The /dev/log Domain Socket is a Domain Socket that was used when rsyslogd received logs and left Logs under the /var/log folder before journald appeared. Therefore, when rsyslogd operates together with journald, it can receive Logs through the following 2 methods:
+The `/dev/log` Domain Socket is a Domain Socket that was used when rsyslogd received logs and left Logs under the `/var/log` folder before journald appeared. Therefore, when rsyslogd operates together with journald, it can receive Logs through the following 2 methods:
 
-* Logs can be transmitted to rsyslogd through the /run/systemd/journal/syslog Domain Socket.
-* The imjournal Module transmits Logs recorded by journald to rsyslogd.
+* Logs can be transmitted to rsyslogd through the `/run/systemd/journal/syslog` Domain Socket.
+* The `imjournal` Module transmits Logs recorded by journald to rsyslogd.
 
-journald uses Structure instead of Plain Text like rsyslogd when recording Logs, storing not only Logs but also Meta information of Logs together. Through Structure, journald can quickly search or filter Logs. Since journald is a Structure structure, it is difficult to check Logs with Standard UNIX Tools like cat. Logs can be checked with the **journalctl** command provided by journald.
+journald uses Structure instead of Plain Text like rsyslogd when recording Logs, storing not only Logs but also Meta information of Logs together. Through Structure, journald can quickly search or filter Logs. Since journald is a Structure structure, it is difficult to check Logs with Standard UNIX Tools like `cat`. Logs can be checked with the `journalctl` command provided by journald.
 
 ## 2. References
 

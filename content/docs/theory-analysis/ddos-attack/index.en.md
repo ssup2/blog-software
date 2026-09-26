@@ -60,7 +60,7 @@ DNS Flood is an attack technique that sends excessive requests to a specific DNS
 
 DNS Amplification is an attack technique that exploits vulnerabilities in the DNS query protocol. The attacker uses spoofing to send DNS queries with the attack target server's IP as the source IP to many DNS servers. DNS servers that receive the DNS query send DNS replies to the attack target server based on the source IP set in the DNS query to the attack target server's IP. The attacker sends many DNS queries to DNS servers so that the attack target server receives many DNS replies from DNS servers and fails.
 
-When performing DNS Amplification, attackers generally send ANY-type DNS queries to DNS servers. ANY-type DNS queries cause the DNS server to return all records for a specific domain, so DNS replies are generally very large. Although the DNS query size is not large, DNS reply size becomes much larger when ANY type is used, which is why the name DNS Amplification is used.
+When performing DNS Amplification, attackers generally send `ANY`-type DNS queries to DNS servers. `ANY`-type DNS queries cause the DNS server to return all records for a specific domain, so DNS replies are generally very large. Although the DNS query size is not large, DNS reply size becomes much larger when `ANY` type is used, which is why the name DNS Amplification is used.
 
 When performing a DNS query, DNS does not perform a separate authentication or authorization process, so from the DNS server's perspective it is difficult to distinguish whether a received DNS query is legitimate or intended for an attack. Also, because DNS queries can be requested over UDP, IP spoofing is easy to perform.
 

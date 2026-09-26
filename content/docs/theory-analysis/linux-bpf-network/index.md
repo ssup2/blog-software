@@ -12,7 +12,7 @@ Network BPF Program Type의 BPF를 분석한다.
 
 ### 1.1. Device Driver, BPF-PROG-TYPE-XDP
 
-Device Driver 내부에서 동작하는 BPF Program Type은 BPF-PROG-TYPE-XDP Type만 존재한다. 일반적으로 **XDP** (Express Data Path)라고 명칭한다. Network BPF Program Type 중에서 가장 낮은 Level에서 실행되는 Type이다. 따라서 Ingress 기준 시간당 가장 많은 Packet을 처리하는 Type이다. eBPF만을 지원한다.
+Device Driver 내부에서 동작하는 BPF Program Type은 `BPF-PROG-TYPE-XDP` Type만 존재한다. 일반적으로 **XDP** (Express Data Path)라고 명칭한다. Network BPF Program Type 중에서 가장 낮은 Level에서 실행되는 Type이다. 따라서 Ingress 기준 시간당 가장 많은 Packet을 처리하는 Type이다. eBPF만을 지원한다.
 
 `BPF-PROG-TYPE-XDP` Type은 Socket Buffer를 할당하기 전에 수행되기 때문에, XDP eBPF Program의 Input Type은 들어온 Packet의 Data만을 알 수 있는 `xdp-md` 구조체를 이용한다. 사용할 수 있는 Kernel Helper Function도 제한적이다. XDP eBPF Program은 Packet을 가공하는 동작보다는 Packet Drop, Routing이 주요 목적인 eBPF Program이다. XDP eBPF Program의 실행결과는 다음과 같은 5가지만을 지원한다.
 
@@ -30,7 +30,7 @@ Generic XDP 기법은 위에서 언급한 것 처럼 XDP 개발 및 Debugging을
 
 ### 1.2. tc (Traffic Control)
 
-tc BPF Program Type은 tc Layer에 존재하는 BPF에서 동작하는 Type이다. 모든 tc BPF Program Type은 Input으로 Socket Buffer (\-\-sk-buff)를 받는다. Socket Buffer 및 Socket Buffer를 활용한 Helper Function을 통해서 `BPF-PROG-TYPE-XDP` Type보다는 다양한 Packet 처리가 가능하다. `BPF-PROG-TYPE-SCHED-ACT`, `BPF-PROG-TYPE-SCHED-CLS` Type이 존재한다.
+tc BPF Program Type은 tc Layer에 존재하는 BPF에서 동작하는 Type이다. 모든 tc BPF Program Type은 Input으로 Socket Buffer (`--sk-buff`)를 받는다. Socket Buffer 및 Socket Buffer를 활용한 Helper Function을 통해서 `BPF-PROG-TYPE-XDP` Type보다는 다양한 Packet 처리가 가능하다. `BPF-PROG-TYPE-SCHED-ACT`, `BPF-PROG-TYPE-SCHED-CLS` Type이 존재한다.
 
 #### 1.2.1. BPF-PROG-TYPE-SCHED-ACT
 
@@ -43,9 +43,9 @@ tc BPF Program Type은 tc Layer에 존재하는 BPF에서 동작하는 Type이�
 
 #### 1.2.2. BPF-PROG-TYPE-SCHED-CLS
 
-`BPF-PROG-TYPE-SCHED-CLS` Type은 Packet에 classid를 설정하는 역활을 수행한다. 따라서 classid를 반환한다. Ingress/Egress 둘다 처리가 가능하며, eBPF/cBPF 둘다 지원한다. `BPF-PROG-TYPE-SCHED-CLS` Type은 **direct-action** 이라고 불리는 기법을 이용할 수 있다. direct-action 기법을 이용하면 `BPF-PROG-TYPE-SCHED-CLS` Type도 `BPF-PROG-TYPE-SCHED-ACT` Type과 같이 Packet 처리가 가능하다. 즉 `BPF-PROG-TYPE-SCHED-ACT`과 같이 `TC-ACT-`으로 시작하는 Linux Kernel에 정의된 값을 반환할 수 있다.
+`BPF-PROG-TYPE-SCHED-CLS` Type은 Packet에 `classid`를 설정하는 역활을 수행한다. 따라서 `classid`를 반환한다. Ingress/Egress 둘다 처리가 가능하며, eBPF/cBPF 둘다 지원한다. `BPF-PROG-TYPE-SCHED-CLS` Type은 `direct-action` 이라고 불리는 기법을 이용할 수 있다. `direct-action` 기법을 이용하면 `BPF-PROG-TYPE-SCHED-CLS` Type도 `BPF-PROG-TYPE-SCHED-ACT` Type과 같이 Packet 처리가 가능하다. 즉 `BPF-PROG-TYPE-SCHED-ACT`과 같이 `TC-ACT-`으로 시작하는 Linux Kernel에 정의된 값을 반환할 수 있다.
 
-`BPF-PROG-TYPE-SCHED-CLS` Type은 `BPF-PROG-TYPE-SCHED-ACT` Type보다 먼저 실행되기 때문에 Packet 처리는 direct-action 기법을 이용하여 `BPF-PROG-TYPE-SCHED-CLS` Type에서 수행하는 것이 성능상 이점을 얻을 수 있다.
+`BPF-PROG-TYPE-SCHED-CLS` Type은 `BPF-PROG-TYPE-SCHED-ACT` Type보다 먼저 실행되기 때문에 Packet 처리는 `direct-action` 기법을 이용하여 `BPF-PROG-TYPE-SCHED-CLS` Type에서 수행하는 것이 성능상 이점을 얻을 수 있다.
 
 ### 1.3. cgroup
 
@@ -77,7 +77,7 @@ Socket BPF Program Type은 각 Socket마다 존재하는 eBPF에서 동작하는
 
 #### 1.4.2. BPF-PROG-TYPE-SOCK-OPS
 
-`BPF-PROG-TYPE-SOCKET-FILTER` Type은 Process가 Socket을 제어하는 과정중 여러번 호출되어 Socket을 제어하는 역활을 수행한다. eBPF만 지원한다.
+`BPF-PROG-TYPE-SOCK-OPS` Type은 Process가 Socket을 제어하는 과정중 여러번 호출되어 Socket을 제어하는 역활을 수행한다. eBPF만 지원한다.
 
 #### 1.4.3. BPF-PROG-TYPE-SK-SKB
 

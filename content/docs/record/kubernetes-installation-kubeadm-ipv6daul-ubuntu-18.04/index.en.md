@@ -42,7 +42,7 @@ Install Docker.
 (All)$ apt-get install -y kubeadm=1.18.3-00 kubelet=1.18.3-00
 ```
 
-Install kubelet and kubeadm.
+Install `kubelet` and `kubeadm`.
 
 ```
 (ALL)$ sysctl -w net.ipv6.conf.all.forwarding=1
@@ -61,7 +61,7 @@ Configure IPv6 forwarding.
 kubeadm join 192.168.0.61:6443 --token 6gu1o3.dwhguhu651x137eq --discovery-token-ca-cert-hash sha256:2ab0fa9f6f8c3c49c263bc0a0edc19ddf973bf7fdf5e464c807df45e8bf49ab8
 ```
 
-Initialize kubeadm. Set IPv6 CIDR for both --pod-network-cidr and --service-cidr.
+Initialize `kubeadm`. Set IPv6 CIDR for both `--pod-network-cidr` and `--service-cidr`.
 
 ```shell
 (Master)$ mkdir -p $HOME/.kube 
@@ -77,7 +77,7 @@ Configure the kubernetes config file.
 (Worker)$ kubeadm join 192.168.0.61:6443 --token 6gu1o3.dwhguhu651x137eq --discovery-token-ca-cert-hash sha256:2ab0fa9f6f8c3c49c263bc0a0edc19ddf973bf7fdf5e464c807df45e8bf49ab8
 ```
 
-Execute the **kubeadm join ~~** command that appears as a result of kubeadm init on all worker nodes.
+Execute the **kubeadm join ~~** command that appears as a result of `kubeadm init` on all worker nodes.
 
 ## 4. Calico Installation
 

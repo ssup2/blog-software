@@ -23,7 +23,7 @@ public class Singleton {
 }
 ```
 
-[Code 1] shows the classic Singleton Pattern. Since the constructor is declared Private, new Instances cannot be created through constructor calls. Instances can only be obtained through `getInstance()` function calls. The `getInstance()` function allocates and returns a new Instance only when no Instance exists, and returns the existing Instance when one exists. Therefore, all Instances obtained through `getIntance()` function calls are the same Instance.
+[Code 1] shows the classic Singleton Pattern. Since the constructor is declared Private, new Instances cannot be created through constructor calls. Instances can only be obtained through `getInstance()` function calls. The `getInstance()` function allocates and returns a new Instance only when no Instance exists, and returns the existing Instance when one exists. Therefore, all Instances obtained through `getInstance()` function calls are the same Instance.
 
 ```java {caption="[Code 2] Java Singleton Pattern Synchronized Version", linenos=table}
 public class Singleton { 
@@ -40,7 +40,7 @@ public class Singleton {
 }
 ```
 
-The `getInstance()` function in [Code 1] can cause problems due to Race Conditions during Instance allocation when multiple Threads call it simultaneously in a Multi-thread environment. The simplest way to solve this problem is to use "synchronized" to prevent the `getInstance()` function from being called simultaneously.
+The `getInstance()` function in [Code 1] can cause problems due to Race Conditions during Instance allocation when multiple Threads call it simultaneously in a Multi-thread environment. The simplest way to solve this problem is to use `synchronized` to prevent the `getInstance()` function from being called simultaneously.
 
 ```java {caption="[Code 3] Java Singleton Pattern Static Version", linenos=table}
 public class Singleton {

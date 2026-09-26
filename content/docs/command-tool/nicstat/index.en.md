@@ -25,7 +25,7 @@ Displays statistics for all NICs. [Shell 1] shows the output of `nicstat` displa
 * `rAvs` : Average size of received packets
 * `wAvs` : Average size of sent packets
 * `%Util` : Send/receive bandwidth utilization
-* `Sat` : Number of errors occurred per second. Can be checked in detail with -x option
+* `Sat` : Number of errors occurred per second. Can be checked in detail with `-x` option
 
 ### 1.2. nicstat -U
 

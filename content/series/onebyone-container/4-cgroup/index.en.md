@@ -15,4 +15,4 @@ title: 4. Cgroup
 
 {{< figure caption="[Figure 1] Host, Container Cgroup" src="images/cgroup.png" width="900px" >}}
 
-[Figure 1] shows the relationship between Host and Container processes from a Cgroup perspective. **Each process must belong to all Cgroup types.** All Cgroup types form a hierarchy, and Host processes use the highest level Cgroup. The Cgroup hierarchy relationship will be explained together when explaining the Cgroup control process. Among Cgroup types, only the cpuset, cpu, cpuacct, and memory Cgroup types, which are mainly used CPU and memory-related Cgroup types, will be explained later.
+[Figure 1] shows the relationship between Host and Container processes from a Cgroup perspective. **Each process must belong to all Cgroup types.** All Cgroup types form a hierarchy, and Host processes use the highest level Cgroup. The Cgroup hierarchy relationship will be explained together when explaining the Cgroup control process. Among Cgroup types, only the `cpuset`, `cpu`, `cpuacct`, and `memory` Cgroup types, which are mainly used CPU and memory-related Cgroup types, will be explained later.

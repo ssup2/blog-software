@@ -56,7 +56,7 @@ Cache-Control: <cache-directive>
 `Cache-Control` Header는 Cache 정책을 지시하기 위한 Header이다. 여기서 Cache는 Browser에 위치한 **Local Cache**와 CDN, Proxy Server에 위치한 **Shared Cache**를 의미한다. [Text 4]은 `Cache-Control` Header의 Format을 나타낸다. Client가 `Cache-Control` Header를 포함하여 요청을 보내는 경우 Shared Cache에 대한 정책 지시를 의미하며, 반대로 Server가 `Cache-Control` Header를 포함하여 응답을 보내는 경우 Local Cache에 대한 정책 지시를 의미한다. 따라서 Client와 Server가 이용하는 Cache Directive가 다르다.
 
 * Client의 `<cache-directive>` : Shared Cache에 대한 정책 지시를 의미한다.
-  * `max-age=<seconds>` : Shared Cache는 seconds 미만의 Caching된 데이터가 있을 경우에는 Caching된 데이터를 응답하고, seconds 이상의 Caching된 데이터가 있을 경우에는 Orgin Server로부터 새로운 Data를 다시 Caching후에 응답한다.
+  * `max-age=<seconds>` : Shared Cache는 `seconds` 미만의 Caching된 데이터가 있을 경우에는 Caching된 데이터를 응답하고, `seconds` 이상의 Caching된 데이터가 있을 경우에는 Orgin Server로부터 새로운 Data를 다시 Caching후에 응답한다.
   * `max-stale=<seconds>` : Shared Cache는 `데이터의 유효기간 + seconds` 미만의 Caching된 데이터가 있을 경우에는 Caching된 데이터를 응답하고, `데이터의 유효기간 + seconds` 이상의 Caching된 데이터가 있을 경우에는 Orgin Server로부터 새로운 Data를 다시 Caching후에 응답한다.
   * `min-fresh=<seconds>` : Shared Cache는 `데이터의 유효기간 - seconds` 미만의 Caching된 데이터가 있을 경우에는 Caching된 데이터를 응답하고, `데이터의 유효기간 - seconds` 이상의 Caching된 데이터가 있을 경우에는 Orgin Server로부터 새로운 Data를 다시 Caching후에 응답한다.
   * `no-cache` : Shared Cache는 반드시 Orgin Server로부터 원본 Data를 검증한 다음 응답한다. `If-Modified-Since`, `If-None-Match` Header와 같이 이용된다.
@@ -64,8 +64,8 @@ Cache-Control: <cache-directive>
   * `no-transform` : Shared Cache는 데이터를 변환하지 않는다.
   * `only-if-cached` : Shared Cache는 Caching된 데이터가 있는지 확인하고 있으면 해당 데이터를 응답하고, 없으면 응답하지 않는다.
 * Server의 `<cache-directive>` : Local Cache 또는 Shared Cache에 대한 정책 지시를 의미한다. 여러개의 Cache Directive를 사용될 수 있다.
-  * `max-age=<seconds>` : Local Cache는 seconds 미만의 Caching된 데이터가 있을 경우에는 Caching된 데이터를 응답하고, seconds 이상의 Caching된 데이터가 있을 경우에는 Orgin Server로부터 새로운 Data를 다시 Caching후에 응답한다.
-  * `s-maxage=<seconds>` : Shared Cache는 seconds 미만의 Caching된 데이터가 있을 경우에는 Caching된 데이터를 응답하고, seconds 이상의 Caching된 데이터가 있을 경우에는 Orgin Server로부터 새로운 Data를 다시 Caching후에 응답한다.
+  * `max-age=<seconds>` : Local Cache는 `seconds` 미만의 Caching된 데이터가 있을 경우에는 Caching된 데이터를 응답하고, `seconds` 이상의 Caching된 데이터가 있을 경우에는 Orgin Server로부터 새로운 Data를 다시 Caching후에 응답한다.
+  * `s-maxage=<seconds>` : Shared Cache는 `seconds` 미만의 Caching된 데이터가 있을 경우에는 Caching된 데이터를 응답하고, `seconds` 이상의 Caching된 데이터가 있을 경우에는 Orgin Server로부터 새로운 Data를 다시 Caching후에 응답한다.
   * `no-cache` : Local Cache는 반드시 Orgin Server로부터 원본 Data를 검증한 다음 응답한다.
   * `no-store` : Local Cache는 데이터를 Caching하지 않는다. Client는 항상 Orgin Server로부터 새로운 Data를 받는다.
   * `no-transform` : Local Cache는 데이터를 변환하지 않는다.
@@ -74,14 +74,14 @@ Cache-Control: <cache-directive>
   * `private` : Local Cache에만 데이터를 Caching한다.
   * `public` : Local Cache와 Shared Cache에 데이터를 Caching한다.
   * `immutable` : Orgin Server로부터 받은 데이터가 변경되지 않는 것을 의미한다.
-  * `stale-while-revalidate=<seconds>` : Local Cache는 데이터가 만료 되었을경우 seconds 시간 동안 Orgin Server로부터 원본 Data를 가져오며, Data를 가져오면서 캐시된 유요하지 않는 데이터로 임시 응답한다.
-  * `stale-if-error=<seconds>` : Local Cache는 Origin Server가 5XX 응답을 보내는 경우 seconds 시간 동안 Caching된 데이터로 응답한다.
+  * `stale-while-revalidate=<seconds>` : Local Cache는 데이터가 만료 되었을경우 `seconds` 시간 동안 Orgin Server로부터 원본 Data를 가져오며, Data를 가져오면서 캐시된 유요하지 않는 데이터로 임시 응답한다.
+  * `stale-if-error=<seconds>` : Local Cache는 Origin Server가 5XX 응답을 보내는 경우 `seconds` 시간 동안 Caching된 데이터로 응답한다.
 
 일반적으로 Client는 Request Header에서 `no-cache` 값을 사용하며, Server는 Response Header에서 `no-cache` 값을 사용한다.
 
 ### 1.2. Request Header
 
-`Request` Header는 요청에서 사용되는 Header를 의미한다.
+Request Header는 요청에서 사용되는 Header를 의미한다.
 
 #### 1.2.1. Host
 
@@ -135,7 +135,7 @@ User-Agent: curl/7.64.1
 User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36
 ```
 
-[Text 10]은 `User-Agent` Header의 몇가지 예시를 나타낸다. curl Client와 MacOS의 Chrome Browser의 예시를 나타낸다.
+[Text 10]은 `User-Agent` Header의 몇가지 예시를 나타낸다. `curl` Client와 MacOS의 Chrome Browser의 예시를 나타낸다.
 
 #### 1.2.4. If-Modified-Since
 
@@ -263,7 +263,7 @@ X-Forwarded-For: 203.0.113.45, 10.0.0.1, 192.168.10.2
 X-Forwarded-Host: <host>
 ```
 
-`X-Forwarded-Host` Header는 Client가 원래 요청한 Host 정보를 보존하기 위해 사용되는 Header이다. Host를 기반으로 요청을 라우팅하는 경우 Host Header가 변경될 수 있기 때문이다. [Text 23]은 `X-Forwarded-Host` Header의 Format을 나타낸다.
+`X-Forwarded-Host` Header는 Client가 원래 요청한 Host 정보를 보존하기 위해 사용되는 Header이다. Host를 기반으로 요청을 라우팅하는 경우 `Host` Header가 변경될 수 있기 때문이다. [Text 23]은 `X-Forwarded-Host` Header의 Format을 나타낸다.
 
 * `<host>` : Host 정보를 나타낸다.
 
