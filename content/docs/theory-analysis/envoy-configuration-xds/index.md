@@ -550,7 +550,7 @@ admin:
 
 [Config 10]은 Listener와 Cluster부터 모든 Resource를 xDS로 받아오는 **Dynamic Configuration 예시**를 나타내고 있다. `dynamic_resources`의 `lds_config`와 `cds_config`가 모두 `ads`로 지정되어 있어, LDS와 CDS 구독이 `ads_config`에 정의된 단일 gRPC Stream으로 전달되고, 응답에서 파생되는 RDS, EDS, SDS, ECDS 구독도 같은 Stream을 공유한다. 이 Stream 위에서 오가는 메시지 흐름이 [Config 7]이다. 
 
-`node`는 xDS Server가 어느 Envoy에게 어떤 설정을 내려줄지 구분하는 Identity이며, `set_node_on_first_message_only`는 Stream의 첫 메시지에만 `node`를 실어 이후 메시지의 크기를 줄인다. 결과적으로 Bootstrap 파일에는 xDS Server 접속 정보(`xds_cluster`)와 `admin`만 남고, 앞서 살펴본 [Config 1~6]의 모든 Resource가 이 연결을 통해 동적으로 전달된다.
+`node`는 xDS Server가 어느 Envoy에게 어떤 설정을 내려줄지 구분하는 Identity이며, `set_node_on_first_message_only`는 Stream의 첫 메시지에만 `node`를 실어 이후 메시지의 크기를 줄인다. 결과적으로 Bootstrap 파일에는 xDS Server 접속 정보(`xds_cluster`)와 `admin`만 남고, 앞서 살펴본 [Config 1-6]의 모든 Resource가 이 연결을 통해 동적으로 전달된다.
 
 ## 2. 참조
 

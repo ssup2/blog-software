@@ -8,11 +8,11 @@ title: "Envoy Traffic Processing"
 
 ### 1.1. Listener
 
-**Listener**는 커널이 TCP 3-way Handshake를 완료해 Accept Queue에 올려둔 Downstream 연결을 `accept()` 함수로 수락하여 새로운 Socket을 얻는다. 이후에 얻은 Socket을 Dispatcher에 등록하고, TCP Connection 관련 정보를 얻기위한 **Listener Filter Chain**을 Instance를 생성한다. 다수의 Listner가 등록되어 있는 경우에는 일반적으로 IP, Port를 통해서 어떤 Listener가 해당 Connection을 처리할지 결정하게 된다.
+**Listener**는 커널이 TCP 3-way Handshake를 완료해 Accept Queue에 올려둔 Downstream 연결을 `accept()` 함수로 수락하여 새로운 Socket을 얻는다. 이후에 얻은 Socket을 Dispatcher에 등록하고, TCP Connection 관련 정보를 얻기 위한 **Listener Filter Chain** Instance를 생성한다. 다수의 Listener가 등록되어 있는 경우에는 일반적으로 IP, Port를 통해서 어떤 Listener가 해당 Connection을 처리할지 결정하게 된다.
 
 ### 1.2. Listener Filter Chain
 
-**Listener Filter Chain**은 Downstream과 TCP 연결이 맺어진 뒤, 들어온 트래픽의 앞부분을 소비하지 않고 `recv(..., MSG_PEEK)`로 엿보아 필요한 연결 정보를 얻는 데 사용된다. 일부  Filter(`proxy_protocol`)는 앞쪽의 PROXY Protocol Header를 실제로 읽어 원래 클라이언트 주소를 복원하고 그 헤더를 소비(제거)하기도 한다. Listener는 새로운 연결마다 Listener Filter 인스턴스를 생성하므로, 각 TCP 연결별로 별도의 Listener Filter Chain이 존재한다. Envoy가 제공하는 대표적인 Listener Filter는 다음과 같다.
+**Listener Filter Chain**은 Downstream과 TCP 연결이 맺어진 뒤, 들어온 Traffic의 앞부분을 소비하지 않고 `recv(..., MSG_PEEK)`로 엿보아 필요한 연결 정보를 얻는 데 사용된다. 일부 Filter(`proxy_protocol`)는 앞쪽의 PROXY Protocol Header를 실제로 읽어 원래 클라이언트 주소를 복원하고 그 헤더를 소비(제거)하기도 한다. Listener는 새로운 연결마다 Listener Filter 인스턴스를 생성하므로, 각 TCP 연결별로 별도의 Listener Filter Chain이 존재한다. Envoy가 제공하는 대표적인 Listener Filter는 다음과 같다.
 
 * `envoy.filters.listener.original_dst` : iptables `REDIRECT` 등으로 가려진 원래 목적지 IP, Port를 `getsockopt(SO_ORIGINAL_DST)` System Call로 복원한다. Istio 같은 Mesh Network 환경에서 Envoy가 실제 목적지 정보를 얻기 위해 사용된다.
 * `envoy.filters.listener.original_src` : 원래 Downstream의 출발지 IP, Port를 `setsockopt(IP_TRANSPARENT)` System Call로 보존하여 Upstream으로 전송한다.
@@ -26,7 +26,7 @@ Listener Filter Chain은 Envoy Config에 따라서 자유롭게 구성할 수 �
 virtual FilterStatus onAccept(ListenerFilterCallbacks& cb) PURE;
 ```
 
-[Code 1]은 Listener Filter Chain이 구현해야하는 `onAccept()` Interface를 나타내고 있다. Parameter로 `onAccept()` 함수 내부에서 현재 TCP Connection을 제어할 수 있는 `ListenerFilterCallbacks` Callback 함수를 전달하며, 결과로 Listener Filter Chain을 계속 진행할지 또는 잠깐 중단할지를 결정하는 `FilterStatus`를 반환한다.
+[Code 1]은 Listener Filter Chain이 구현해야 하는 `onAccept()` Interface를 나타내고 있다. Parameter로 `onAccept()` 함수 내부에서 현재 TCP Connection을 제어할 수 있는 `ListenerFilterCallbacks` Callback 함수를 전달하며, 결과로 Listener Filter Chain을 계속 진행할지 또는 잠깐 중단할지를 결정하는 `FilterStatus`를 반환한다.
 
 ### 1.3. Filter Chain Manager
 
@@ -34,9 +34,9 @@ Listener Filter Chain의 `tls_inspector` Filter 또는 `http_inspector` Filter�
 
 ### 1.4. Downstream Transport Socket
 
-**Downstream Transport Socket** Downstream으로 부터 전달받은 Traffic을 Network Filter Chain으로 전달하기 위한 다리 역할을 수행한다. TLS가 적용된 경우 **TLS Transport Socket**을 통해서 Downstream으로 부터 전달받은 Traffic을 복호화하여 Network Filter Chain으로 전달하고, 반대로 Network Filter Chain으로 부터 전달받은 Traffic을 암호화하여 Downstream으로 전송한다. 따라서 Network Filter Chain은 암호화되지 않은 Plain Text를 처리하게 된다.
+**Downstream Transport Socket**은 Downstream으로부터 전달받은 Traffic을 Network Filter Chain으로 전달하기 위한 다리 역할을 수행한다. TLS가 적용된 경우 **TLS Transport Socket**을 통해서 Downstream으로부터 전달받은 Traffic을 복호화하여 Network Filter Chain으로 전달하고, 반대로 Network Filter Chain으로부터 전달받은 Traffic을 암호화하여 Downstream으로 전송한다. 따라서 Network Filter Chain은 암호화되지 않은 Plain Text를 처리하게 된다.
 
-TLS가 적용되지 않은 경우에는 **Raw Buffer Transport Socket**을 통해서 Downstream으로 부터 전달받은 Traffic을 변형 없이 그대로 Network Filter Chain으로 전달하거나, 반대로 Network Filter Chain으로 부터 전달받은 Traffic을 변형 없이 Downstream으로 전송하는 역할을 수행한다.
+TLS가 적용되지 않은 경우에는 **Raw Buffer Transport Socket**을 통해서 Downstream으로부터 전달받은 Traffic을 변형 없이 그대로 Network Filter Chain으로 전달하거나, 반대로 Network Filter Chain으로부터 전달받은 Traffic을 변형 없이 Downstream으로 전송하는 역할을 수행한다.
 
 ```cpp linenos {caption="[Code 2] Downstream Transport Socket Interface", linenos=table}
 virtual void onConnected() PURE;
@@ -45,16 +45,16 @@ virtual IoResult doWrite(Buffer::Instance& buffer, bool end_stream) PURE;
 virtual void closeSocket(Network::ConnectionEvent event) PURE;
 ```
 
-[Code 2]는 Downstream Transport Socket이 구현해야하는 `onConnected()`, `doRead()`, `doWrite()`, `closeSocket()` Interface를 나타내고 있으며, 역할은 다음과 같다.
+[Code 2]는 Downstream Transport Socket이 구현해야 하는 `onConnected()`, `doRead()`, `doWrite()`, `closeSocket()` Interface를 나타내고 있으며, 역할은 다음과 같다.
 
 * `onConnected()` : TCP Connection이 맺어진 이후 호출되며, TLS를 이용하는 경우 TLS Handshake를 개시한다.
-* `doRead()` : Downstream으로부터 전달받은 트래픽을 읽어 Network Filter Chain으로 전달한다. TLS를 이용하는 경우 복호화하여 Plain Text를 올린다.
-* `doWrite()` : Network Filter Chain으로부터 전달받은 트래픽을 Downstream으로 전송한다. TLS를 이용하는 경우 암호화하여 Cipher Text를 내보낸다.
+* `doRead()` : Downstream으로부터 전달받은 Traffic을 읽어 Network Filter Chain으로 전달한다. TLS를 이용하는 경우 복호화하여 Plain Text를 올린다.
+* `doWrite()` : Network Filter Chain으로부터 전달받은 Traffic을 Downstream으로 전송한다. TLS를 이용하는 경우 암호화하여 Cipher Text를 내보낸다.
 * `closeSocket()` : Socket이 닫히면 호출되며, TLS를 이용하는 경우 `close_notify` Alert을 전송하고 Session을 종료한다.
 
 ### 1.5. Network Filter Chain
 
-Network Filter Chain은 Downstream으로 부터 전달받은 Plain Text를 가공하여 Upstream HTTP Filter Chain으로 전달하는 역할을 수행한다. Envoy의 대부분의 핵심 기능은 Network Filter Chain에서 구현된다. Network Filter는 Chain 중간에 실행되는 **Non-terminal Filter**와 Chain의 마지막에 실행되는 **Terminal Filter**로 구분되며, Non-terminal Filter는 자유롭게 순서를 변경하여 구성할 수 있지만, Terminal Filter는 반드시 Network Filter Chain의 마지막에 위치해야 한다.
+Network Filter Chain은 Downstream으로부터 전달받은 Plain Text를 가공하여 Upstream HTTP Filter Chain으로 전달하는 역할을 수행한다. Envoy의 대부분의 핵심 기능은 Network Filter Chain에서 구현된다. Network Filter는 Chain 중간에 실행되는 **Non-terminal Filter**와 Chain의 마지막에 실행되는 **Terminal Filter**로 구분되며, Non-terminal Filter는 자유롭게 순서를 변경하여 구성할 수 있지만, Terminal Filter는 반드시 Network Filter Chain의 마지막에 위치해야 한다.
 
 Envoy에서 제공하는 주요 Non-terminal Filter는 다음과 같다.
 
@@ -81,7 +81,7 @@ virtual FilterStatus onData(Buffer::Instance& data, bool end_stream) PURE;
 virtual FilterStatus onWrite(Buffer::Instance& data, bool end_stream) PURE;
 ```
 
-[Code 3]는 Network Filter Chain이 구현해야하는 `onNewConnection()`, `onData()`, `onWrite()` Interface를 나타내고 있으며, 역할은 다음과 같다.
+[Code 3]는 Network Filter Chain이 구현해야 하는 `onNewConnection()`, `onData()`, `onWrite()` Interface를 나타내고 있으며, 역할은 다음과 같다.
 
 * `onNewConnection()` : 처음 TCP Connection이 맺어진 이후 한번 호출되며, TCP Connection의 속성만으로 초기 판단(동시 커넥션 수 제한, L4 접근 제어)을 하고, 결과로 `Continue` 또는 `StopIteration`을 반환한다.
 * `onData()` : Downstream에서 Upstream으로 요청 Traffic을 전송할 때마다 호출된다. 결과로 `Continue` 또는 `StopIteration`을 반환한다.
@@ -93,11 +93,11 @@ virtual FilterStatus onWrite(Buffer::Instance& data, bool end_stream) PURE;
 
 ##### 1.5.1.1. HTTP Codec
 
-**HTTP Codec**은 Downstream에서 Upstream으로 요청 Traffic을 전송하는 경우에는, HTTP Protocol Version에 관계없이 HTTP Filter가 일관된 형태로 처리할 수 있도록 Stream을 Decoding 하여 Header와 Body를 분리한다. 반대로 Upstream에서 Downstream으로 응답 Traffic을 전송하는 경우에는, Downstream에서 이용중인 HTTP Protocol Version에 맞춰서 Stream을 Encoding하여 전송하는 역할을 수행한다.
+**HTTP Codec**은 Downstream에서 Upstream으로 요청 Traffic을 전송하는 경우에는, HTTP Protocol Version에 관계없이 HTTP Filter가 일관된 형태로 처리할 수 있도록 Stream을 Decoding하여 Header와 Body를 분리한다. 반대로 Upstream에서 Downstream으로 응답 Traffic을 전송하는 경우에는, Downstream에서 이용중인 HTTP Protocol Version에 맞춰서 Stream을 Encoding하여 전송하는 역할을 수행한다.
 
 ##### 1.5.1.2. Downstream HTTP Filter
 
-**Downstream HTTP Filter**는 Router에 넘기기 전에 L7 기반으로 Traffic을 처리하는 역할을 수행한다. 인증/인가, Traffic 제한, Traffic 가공등의 다양한 기능을 수행할 수 있다. Downstream HTTP Filter도 자유롭게 순서를 변경하여 구성할 수 있지만, Router Filter는 반드시 마지막에 위치해야 한다.
+**Downstream HTTP Filter**는 Router에 넘기기 전에 L7 기반으로 Traffic을 처리하는 역할을 수행한다. 인증/인가, Traffic 제한, Traffic 가공 등의 다양한 기능을 수행할 수 있다. Downstream HTTP Filter도 자유롭게 순서를 변경하여 구성할 수 있지만, Router Filter는 반드시 마지막에 위치해야 한다.
 
 Envoy에서 제공하는 인증/인가 Filter는 다음과 같다. 일반적으로 Chain 앞쪽에 구성한다.
 
@@ -145,7 +145,7 @@ Router Filter는 다음과 같은 Load Balancing 정책을 제공한다.
 
 ### 1.6. Upstream HTTP Filter
 
-Upstream HTTP Filter는 Router Filter에 의해서 어느 Host로 Traffic을 전달할지 결정도니 이후에 실행되는 Filter이다. Upstresm Filter Instance는 매 재시도마다 Router Filter에 의해서 새로운 Instance가 생성되는 특징을 갖는다. Envoy에서 제공하는 Upstream HTTP Filter는 다음과 같다.
+Upstream HTTP Filter는 Router Filter에 의해서 어느 Host로 Traffic을 전달할지 결정된 이후에 실행되는 Filter이다. Upstream HTTP Filter Instance는 매 재시도마다 Router Filter에 의해서 새로운 Instance가 생성되는 특징을 갖는다. Envoy에서 제공하는 Upstream HTTP Filter는 다음과 같다.
 
 * `envoy.filters.http.header_mutation` : 선택된 Upstream Host를 기준으로 Header를 추가/삭제/수정. 어느 Host로 Traffic이 전달되는지 정해진 뒤에 헤더를 조작해야 할 때 이용.
 * `envoy.filters.http.lua` : Upstream Context에서 Lua Script로 Custom Logic 수행.
@@ -154,11 +154,11 @@ Upstream HTTP Filter는 Router Filter에 의해서 어느 Host로 Traffic을 전
 
 ### 1.7. Upstream Transport Socket
 
-**Upstream Transport Socket**은 Downstream Transport Socket과 대칭적으로 Upstream 방향의 Transport Socket을 제공한다. TLS가 적용된 경우, Upstream Codec Filter로부터 전달받은 요청 트래픽을 암호화하여 Upstream으로 전송하고, 반대로 Upstream으로부터 받은 응답 트래픽을 복호화하여 Upstream Codec Filter로 올린다. TLS가 적용되지 않은 경우에는 Downstream과 동일하게 Raw Buffer Transport Socket이 트래픽을 변형 없이 그대로 전달한다.
+**Upstream Transport Socket**은 Downstream Transport Socket과 대칭적으로 Upstream 방향의 Transport Socket을 제공한다. TLS가 적용된 경우, Upstream Codec Filter로부터 전달받은 요청 Traffic을 암호화하여 Upstream으로 전송하고, 반대로 Upstream으로부터 받은 응답 Traffic을 복호화하여 Upstream Codec Filter로 올린다. TLS가 적용되지 않은 경우에는 Downstream과 동일하게 Raw Buffer Transport Socket이 Traffic을 변형 없이 그대로 전달한다.
 
 ## 2. Envoy Configuration
 
-```yaml linenos {caption="[Text 1] Envoy Configuration", linenos=table}
+```yaml linenos {caption="[Config 1] Envoy Configuration Example", linenos=table}
 static_resources:
 
   listeners:
@@ -169,10 +169,10 @@ static_resources:
 
     # ── 2. Listener Filter Chain (names only) ───────────────────
     listener_filters:
-    - name: envoy.filters.listener.tls_inspector       # Peeks at ClientHello to extract SNI/ALPN
-    - name: envoy.filters.listener.http_inspector       # Detects HTTP version (h1/h2)
-    - name: envoy.filters.listener.proxy_protocol       # Parses the leading PROXY header
     - name: envoy.filters.listener.original_dst         # Restores original destination (iptables REDIRECT)
+    - name: envoy.filters.listener.proxy_protocol       # Parses the leading PROXY header
+    - name: envoy.filters.listener.tls_inspector        # Peeks at ClientHello to extract SNI/ALPN
+    - name: envoy.filters.listener.http_inspector       # Detects HTTP version (h1/h2)
 
     # ── 3. Filter Chain Manager ──────────────────────────────────
     # Selects one of the filter_chains below based on info extracted
@@ -263,9 +263,20 @@ static_resources:
       sni: httpbin.org
 ```
 
+[Config 1]은 1장에서 살펴본 구성 요소들이 실제 Envoy 설정의 어느 위치에 정의되는지 나타내는 예시이며, 주석의 번호는 [Figure 1]의 각 구성 요소에 대응한다. 분량상 각 Filter의 상세 설정(`typed_config`)은 생략하고 Filter 이름만 표기했다. Downstream 방향의 구성 요소(1-9)는 `listeners` 아래에, Upstream 방향의 구성 요소(10-11)는 `clusters` 아래에 정의된다는 것을 확인할 수 있다.
+
+`main_listener`는 `10000` Port에서 Downstream 연결을 수락하는 Listener이며 (1), `listener_filters`에는 1.2에서 설명한 권장 순서대로 Listener Filter Chain이 구성되어 있다 (2). Listener Filter가 추출한 SNI, ALPN 정보는 `filter_chains`에 정의된 각 Filter Chain의 `filter_chain_match` 조건과 비교되어 해당 연결을 처리할 Filter Chain 하나를 선택하는 데 사용되며, 이 선택이 Filter Chain Manager의 역할이다 (3). 예시에서는 (a) Chain이 SNI 기준으로, (b) Chain이 ALPN 기준으로 매칭된다.
+
+선택된 Filter Chain의 `transport_socket`은 Downstream Transport Socket에 해당하며, TLS Transport Socket이 인증서와 함께 지정되어 있어 TLS Termination을 수행한 뒤 Plain Text를 Network Filter Chain으로 올린다 (4). `filters`에는 Network Filter Chain이 구성되며 (5), `connection_limit`, `rbac`, `local_ratelimit` 세 Non-terminal Filter가 L4 수준에서 연결을 검사한 뒤 Terminal Filter인 HTTP Connection Manager가 HTTP 처리를 담당한다 (6). HTTP Connection Manager의 `codec_type`은 HTTP Codec을 지정하는 설정으로, `AUTO`로 설정되어 있어 Downstream이 이용하는 HTTP Version에 맞는 Codec이 자동으로 선택된다 (7).
+
+HTTP Connection Manager의 `http_filters`에는 Downstream HTTP Filter Chain이 구성되며 (8), 마지막에 위치하는 Router Filter가 `route_config`의 규칙에 따라 Target Cluster를 결정한다 (9). 예시의 `route_config`는 모든 Domain (`*`)의 모든 경로 (`/`) 요청을 `backend` Cluster로 라우팅하는 단순한 구성이며, `backend` Cluster의 `lb_policy`에 지정된 Load Balancing 정책에 따라 실제 Host가 선택된다.
+
+Upstream 방향의 구성 요소는 Router Filter가 선택하는 Cluster의 정의에 위치한다. Upstream HTTP Filter Chain은 Cluster의 `typed_extension_protocol_options` 아래에 `http_filters`로 구성되며, 마지막의 `upstream_codec` Terminal Filter가 Upstream 방향의 Encoding/Decoding을 담당한다 (10). Cluster의 `transport_socket`은 Upstream Transport Socket에 해당하며, TLS Transport Socket이 지정되어 있어 Upstream으로 나가는 Traffic을 암호화하는 TLS Origination을 수행한다 (11). 이처럼 Downstream 방향은 Listener의 Transport Socket이 TLS를 종료하고 Upstream 방향은 Cluster의 Transport Socket이 TLS를 새로 시작하므로, 두 Transport Socket 사이의 Filter Chain들은 항상 Plain Text를 처리한다.
+
 ## 3. 참조
 
 * Envoy Life of a Request : [https://www.envoyproxy.io/docs/envoy/latest/intro/life_of_a_request](https://www.envoyproxy.io/docs/envoy/latest/intro/life_of_a_request)
 * Envoy Listener Filters : [https://www.envoyproxy.io/docs/envoy/latest/configuration/listeners/listener_filters/listener_filters](https://www.envoyproxy.io/docs/envoy/latest/configuration/listeners/listener_filters/listener_filters)
 * Envoy Network Filters : [https://www.envoyproxy.io/docs/envoy/latest/configuration/listeners/network_filters/network_filters](https://www.envoyproxy.io/docs/envoy/latest/configuration/listeners/network_filters/network_filters)
+* Envoy Configuration with xDS : [https://ssup2.github.io/blog-software/docs/theory-analysis/envoy-configuration-xds/](https://ssup2.github.io/blog-software/docs/theory-analysis/envoy-configuration-xds/)
 

@@ -550,7 +550,7 @@ admin:
 
 [Config 10] shows a **Dynamic Configuration example** that receives every Resource, starting from the Listeners and Clusters, via xDS. Both `lds_config` and `cds_config` under `dynamic_resources` are set to `ads`, so the LDS and CDS subscriptions are delivered over the single gRPC Stream defined in `ads_config`, and the RDS, EDS, SDS, and ECDS subscriptions derived from the responses also share the same Stream. The message flow exchanged over this Stream is [Config 7].
 
-`node` is the Identity by which the xDS Server distinguishes which configuration to deliver to which Envoy, and `set_node_on_first_message_only` carries `node` only in the first message of the Stream to reduce the size of subsequent messages. As a result, only the xDS Server connection information (`xds_cluster`) and `admin` remain in the Bootstrap file, and all the Resources of [Config 1~6] examined earlier are delivered dynamically through this connection.
+`node` is the Identity by which the xDS Server distinguishes which configuration to deliver to which Envoy, and `set_node_on_first_message_only` carries `node` only in the first message of the Stream to reduce the size of subsequent messages. As a result, only the xDS Server connection information (`xds_cluster`) and `admin` remain in the Bootstrap file, and all the Resources of [Config 1-6] examined earlier are delivered dynamically through this connection.
 
 ## 2. References
 
