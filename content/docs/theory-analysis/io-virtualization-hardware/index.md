@@ -6,7 +6,7 @@ Hypervisor의 I/O 가상화 기법 중 Hardware I/O 가상화 기법을 분석�
 
 ## 1. Hardware I/O Virtualization
 
-Hardware I/O Virtualization 기법은 이름 그대로 Hardware 기능의 도움을 받아 가상 머신이 이용하는 I/O Device를 가상화 하는 기법이다. I/O Software 가상화 기법은 Device Emulation 과정과 I/O Data 전달 과정에 의한 Overhead 때문에 물리 머신에 비해 큰 I/O 성능 저하가 나타나게 된다. Hardware I/O Virtualization 기법은 Device Emulation과 I/O Data 전달을 Hardware의 기능을 이용하여 수행하기 때문에 가상 머신의 I/O 성능 감소가 거의 없다는 장점이 있다.
+**Hardware I/O Virtualization** 기법은 이름 그대로 Hardware 기능의 도움을 받아 가상 머신이 이용하는 I/O Device를 가상화 하는 기법이다. I/O Software 가상화 기법은 Device Emulation 과정과 I/O Data 전달 과정에 의한 Overhead 때문에 물리 머신에 비해 큰 I/O 성능 저하가 나타나게 된다. Hardware I/O Virtualization 기법은 Device Emulation과 I/O Data 전달을 Hardware의 기능을 이용하여 수행하기 때문에 가상 머신의 I/O 성능 감소가 거의 없다는 장점이 있다.
 
 I/O Data 전달은 CPU의 **IOMMU** 기능을 통해 수행한다. Device Emulation 과정은 I/O Device의 **SR-IOV (Single Root IO Virtualization)** 기능을 통해 수행한다. 현재 나오는 대부분의 CPU는 IOMMU기능이 포함되어 있다. 하지만 SR-IOV가 적용된 I/O Device의 가격은 일반 I/O Device에 비해서 현재 가격이 많이 높은 편이다.
 

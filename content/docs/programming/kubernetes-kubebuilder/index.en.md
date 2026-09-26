@@ -6,7 +6,7 @@ This document analyzes Kubebuilder and Controllers through a Memcached example.
 
 ## 1. Kubebuilder
 
-Kubebuilder is an SDK that helps develop Kubernetes Controllers. It helps easily define **Kubernetes CRs (Custom Resources)** desired by users and develop **Controllers** that manage the defined Kubernetes CRs. Kubebuilder automatically generates most files related to Kubernetes CRs. Since developers only need to modify the generated Kubernetes CR-related files, they can easily define and use Kubernetes CRs.
+**Kubebuilder** is an SDK that helps develop Kubernetes Controllers. It helps easily define **Kubernetes CRs (Custom Resources)** desired by users and develop **Controllers** that manage the defined Kubernetes CRs. Kubebuilder automatically generates most files related to Kubernetes CRs. Since developers only need to modify the generated Kubernetes CR-related files, they can easily define and use Kubernetes CRs.
 
 Also, Kubebuilder creates Controller Manager Projects that comply with Standard Golang Project Layout. Here, Controller Manager means a component that performs the role of managing multiple Controllers. That is, developers can easily develop Controller Managers containing multiple Controllers using Kubebuilder. Not only Controllers that manage Kubernetes CRs but also Controllers that control Resources (Objects) provided by default in Kubernetes can be developed.
 
@@ -41,6 +41,7 @@ Define a Memcached CR using Kubebuilder and develop a Memcached Controller that 
 ### 2.1. Development Environment
 
 The development environment is as follows.
+
 * Ubuntu 18.04 LTS, root user
 * Kubernetes 1.23.4
 * golang 1.17.6
@@ -310,15 +311,15 @@ func getPodNames(pods []corev1.Pod) []string {
 }
 ```
 
-[Code 3] shows the core part of the Memcached Controller. Lines 8~12 are Kubebuilder **Annotations** and represent Roles for Memcached CRs applied to Memcached Controller and Roles for Deployments and Pods necessary for Controller operation. Kubebuilder generates and applies Cluster Role and Cluster Role Binding Manifests necessary for Memcached Controller operation through that Annotation information.
+[Code 3] shows the core part of the Memcached Controller. Lines 8-12 are Kubebuilder **Annotations** and represent Roles for Memcached CRs applied to Memcached Controller and Roles for Deployments and Pods necessary for Controller operation. Kubebuilder generates and applies Cluster Role and Cluster Role Binding Manifests necessary for Memcached Controller operation through that Annotation information.
 
-Lines 106~112 are the part that Watches changes to Memcached CRs or Deployment Objects owned (used) by Memcached CRs. When Memcached CRs or Deployment Objects owned by Memcached CRs change, information about the changed Memcached CR is delivered to the `Reconcile()` function.
+Lines 106-112 are the part that Watches changes to Memcached CRs or Deployment Objects owned (used) by Memcached CRs. When Memcached CRs or Deployment Objects owned by Memcached CRs change, information about the changed Memcached CR is delivered to the `Reconcile()` function.
 
 Line 153 shows a function that stores Memcached CR information that owns that Deployment Object in the Deployment Object. If you check the Meta information of Deployment Objects owned by Memcached CRs, you can see that Memcached CR information that owns that Deployment Object is stored in the `ownerReferences` item. This Owner setting is functionality officially supported by Kubernetes and is necessary for Object GC (Garbage Collection).
 
-Lines 16~29 belonging to the `Reconcile()` function are the part that obtains Memcached CRs using Kubernetes Client based on Name/Namespace information of Memcached CRs retrieved from Work Queue. The part to note here is lines 19~24. If Memcached CR information was attempted to be obtained but does not exist, it means that Memcached CR has been removed. Therefore, Logic to remove Deployment Objects owned by Memcached CRs should exist, but that Logic does not exist in Memcached Controller. This is because Kubernetes knows that the owner of Deployment Objects is the removed Memcached CR and automatically removes them through Object GC process.
+Lines 16-29 belonging to the `Reconcile()` function are the part that obtains Memcached CRs using Kubernetes Client based on Name/Namespace information of Memcached CRs retrieved from Work Queue. The part to note here is lines 19-24. If Memcached CR information was attempted to be obtained but does not exist, it means that Memcached CR has been removed. Therefore, Logic to remove Deployment Objects owned by Memcached CRs should exist, but that Logic does not exist in Memcached Controller. This is because Kubernetes knows that the owner of Deployment Objects is the removed Memcached CR and automatically removes them through Object GC process.
 
-Lines 27~60 are the part that obtains Deployment Objects in current state based on Name/Namespace information of Memcached CRs retrieved from Work Queue. Lines 62~75 are the part that performs the operation of matching the number of Replicas of Deployment Objects to Replicas of Memcached CRs if Memcached CR's Replica (Size) differs from the Replica of Deployment Objects in current state. Lines 77~101 are the part that Updates Memcached CR's Status information.
+Lines 27-60 are the part that obtains Deployment Objects in current state based on Name/Namespace information of Memcached CRs retrieved from Work Queue. Lines 62-75 are the part that performs the operation of matching the number of Replicas of Deployment Objects to Replicas of Memcached CRs if Memcached CR's Replica (Size) differs from the Replica of Deployment Objects in current state. Lines 77-101 are the part that Updates Memcached CR's Status information.
 
 Like this, the `Reconcile()` function repeats the operation of obtaining changed Memcached CRs and controlling Deployment Objects based on the obtained Memcached CRs. You can find parts in the `Reconcile()` function that return with **Requeue** Option after changing Resources through Manager Client. Even if Resource changes are completed, actual reflection takes time, so Requeue Option is used to make the `Reconcile()` function execute again after a certain time passes.
 

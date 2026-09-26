@@ -6,7 +6,7 @@ TCP TIME-WAIT 관련 동작을 분석한다.
 
 ## 1. TCP TIME-WAIT
 
-TIME-WAIT 상태는 Connection을 먼저 종료하는 **Active Closer**가 Connection 종료 후 도달하는 상태이다. Connection이 종료되었지만 Network에 남아 있을 수 있는 종료된 Connection의 Packet이 완전히 제거 될때까지 대기하여, 이후에 생성되는 새로운 Connection에 영향을 미치지 않기 위하는 용도로 이용되는 상태이다. 이러한 이유로 TCP 표준에서는 2MSL(2 * Maximum Segment Lifetime)만큼 유지되야 한다고 정의하고 있으며, TIME-WAIT 상태가 끝나기 전까지 TIME-WAIT가 선점하고 있는 Local IP/Port를 이용하여 새로운 Conneciton을 맺을수 없다. Client, Server 모두 Active Closer가 될 수 있다. 따라서 Client, Server에서 모두 TIME-WAIT 상태가 발생할 수 있다.
+**TIME-WAIT** 상태는 Connection을 먼저 종료하는 **Active Closer**가 Connection 종료 후 도달하는 상태이다. Connection이 종료되었지만 Network에 남아 있을 수 있는 종료된 Connection의 Packet이 완전히 제거 될때까지 대기하여, 이후에 생성되는 새로운 Connection에 영향을 미치지 않기 위하는 용도로 이용되는 상태이다. 이러한 이유로 TCP 표준에서는 2MSL(2 * Maximum Segment Lifetime)만큼 유지되야 한다고 정의하고 있으며, TIME-WAIT 상태가 끝나기 전까지 TIME-WAIT가 선점하고 있는 Local IP/Port를 이용하여 새로운 Conneciton을 맺을수 없다. Client, Server 모두 Active Closer가 될 수 있다. 따라서 Client, Server에서 모두 TIME-WAIT 상태가 발생할 수 있다.
 
 ```console {caption="[Shell 1] TIME-WAIT State through curl(Client)", linenos=table}
 (client)$ echo 30000 30000 > /proc/sys/net/ipv4/ip-local-port-range

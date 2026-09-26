@@ -4,8 +4,8 @@ title: Docker NVIDIA CUDA GPU 설치 / Debian 9 환경
 
 ## 1. 설치 환경
 
-* GPU : GTX 1060 (Pascal Architecture)
-* OS : Debian 9, 4.9.0 Kernel, root User
+* **GPU** : GTX 1060 (Pascal Architecture)
+* **OS** : Debian 9, 4.9.0 Kernel, root User
 * Software
   * Docker 19.03
   * NVIDIA Drvier 440.44

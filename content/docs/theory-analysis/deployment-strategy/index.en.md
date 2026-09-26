@@ -6,7 +6,7 @@ Analyzes various Deployment Strategies.
 
 ## 1. Big-Bang Deployment
 
-Big Bang Deployment literally means a technique of deploying the entire App or most of the App at once. Since many changes occur at once, the App cannot be used during the deployment process. Also, since the App cannot be used during the Rollback process when problems occur in the deployed App, App problems greatly affect App Availability. Therefore, Big Bang Deployment is not suitable for Server-side Apps where App Availability is important.
+**Big Bang Deployment** literally means a technique of deploying the entire App or most of the App at once. Since many changes occur at once, the App cannot be used during the deployment process. Also, since the App cannot be used during the Rollback process when problems occur in the deployed App, App problems greatly affect App Availability. Therefore, Big Bang Deployment is not suitable for Server-side Apps where App Availability is important.
 
 For development environments where App Availability is not a problem, or Apps installed on Local PC that operate independently, Big Bang Deployment can be applied to easily deploy and use Apps.
 

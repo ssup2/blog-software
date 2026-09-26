@@ -8,7 +8,7 @@ title: OAuth 2.0
 
 {{< figure caption="[Figure 1] ID/Password Auth" src="images/id-password-auth.png" width="800px" >}}
 
-OAuth 2.0은 현재 대부분의 인가 서비스에서 이용하고 있는 **인가(Authorization)** Protocol이다. 기존의 User의 ID/Password를 통한 예전의 인증/인가 방식의 문제점을 개선하기 위해서 나온 Protocol이다. [Figure 1]은 예전에 App에서 접근하던 User의 ID/Password를 통한 인증/인가 방법을 나타내고 있다. App에서 Google, Facebook과 같은 Service Provider의 API를 접근해야 하는 경우, 예전에는 User가 App에게 입력한 ID/Password를 이용하여 Service Provider의 API Server에 요청을 전송하는 방식을 이용했다.
+**OAuth 2.0**은 현재 대부분의 인가 서비스에서 이용하고 있는 **인가(Authorization)** Protocol이다. 기존의 User의 ID/Password를 통한 예전의 인증/인가 방식의 문제점을 개선하기 위해서 나온 Protocol이다. [Figure 1]은 예전에 App에서 접근하던 User의 ID/Password를 통한 인증/인가 방법을 나타내고 있다. App에서 Google, Facebook과 같은 Service Provider의 API를 접근해야 하는 경우, 예전에는 User가 App에게 입력한 ID/Password를 이용하여 Service Provider의 API Server에 요청을 전송하는 방식을 이용했다.
 
 이와 같은 ID/Password 기반의 Auth 방식은 몇가지 문제점이 존재한다. 먼저 App이 User의 ID/Password를 이용하여 악의적 동작을 수행하더라도 User나 API Server에서는 App의 악의적 동작을 제한하거나 감지할 수 있는 방법이 존재하지 않는다. 또한 App도 입력받은 User의 ID/Password를 저장하고 있어야 하기 때문에 App의 보안에도 많은 신경을 써야한다.
 

@@ -5,6 +5,7 @@ title: NFSv3 Server and Client Installation / Ubuntu 16.04 Environment
 ## 1. Installation Environment
 
 The installation environment is as follows.
+
 * Ubuntu 16.04 LTS 64bit, root user
 * NFS Root: Refers to the absolute path of the root directory of the NFSv3 Server.
   * Use /nfs-root as NFS Root.

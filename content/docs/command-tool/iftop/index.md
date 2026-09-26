@@ -2,7 +2,7 @@
 title: iftop
 ---
 
-특정 Interface의 Network Bandwidth 사용량을 Src IP/Dst IP로 분류한 다음, 샤용량이 높은 순서에 따라서 출력하는 iftop을 분석한다.
+특정 Interface의 Network Bandwidth 사용량을 Src IP/Dst IP로 분류한 다음, 샤용량이 높은 순서에 따라서 출력하는 **iftop**을 분석한다.
 
 ## 1. iftop
 

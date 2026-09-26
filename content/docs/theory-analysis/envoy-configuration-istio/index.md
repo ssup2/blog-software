@@ -339,7 +339,7 @@ Istio CR을 하나도 적용하지 않은 상태에서도, istiod는 Kubernetes�
     ...
 ```
 
-[Figure 2]는 `client` Pod의 Envoy Configruation의 Outbound를 나타내고 있으며, [Config 2]는 이를 구성하는 Dump를 나타내고 있다. App Container가 보내는 모든 요청은 iptables에 의해 `15001` Port의 virtualOutbound Listener로 Redirect된다. [Config 2]에 있는 각 Listener의 역할은 다음과 같다.
+[Figure 2]는 `client` Pod의 Envoy Configuration의 Outbound를 나타내고 있으며, [Config 2]는 이를 구성하는 Dump를 나타내고 있다. App Container가 보내는 모든 요청은 iptables에 의해 `15001` Port의 virtualOutbound Listener로 Redirect된다. [Config 2]에 있는 각 Listener의 역할은 다음과 같다.
 
 * **virtualOutbound Listener** : 모든 Outbound 요청의 진입점이며, 요청을 직접 처리하지 않고 세 갈래로 분기한다. 기본 경로는 `use_original_dst` 설정에 따라 요청의 원래 목적지 Port와 일치하는 `0.0.0.0_<Port>` Listener로 넘기는 것이다. 원래 목적지가 `15001` Port 자체인 요청은 `virtualOutbound-blackhole` Network Filter Chain이 BlackHoleCluster로 보내 차단하고, 일치하는 Listener가 없는 요청은 `virtualOutbound-catchall-tcp` Network Filter Chain이 PassthroughCluster로 보낸다.
 * **`0.0.0.0_8080`, `0.0.0.0_9090` Listener** : Port별 Outbound Listener이다. 해당 Pod 자신이 여는 Port가 아니라 **Mesh에 존재하는 Service의 Port** 기준으로 생성되는데, istiod는 어떤 Pod가 어디로 요청을 보낼지 미리 알 수 없어 Mesh의 모든 Service Port마다 Outbound Listener를 만들어 모든 Sidecar에 배포하기 때문이다. 아무 Port도 열지 않는 `client` Pod에 이 Listener들이 존재하는 것도 `client` 자신과는 무관하게 `server-a`, `server-b` Service가 `8080` Port를, `server-c` Service가 `9090` Port를 노출하고 있기 때문이다. 같은 Port를 노출하는 Service가 몇 개든 Port당 Listener는 하나이다. 요청은 Listener Filter가 판별한 Protocol에 따라 두 갈래의 Network Filter Chain으로 나뉜다.

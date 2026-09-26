@@ -44,9 +44,9 @@ The second role of the NVIDIA Device Plugin is to perform GPU scheduling, which 
 
 The third role of the NVIDIA Device Plugin is to perform GPU Health Check, which checks GPU status. GPU Health Check is performed through NVIDIA's **NVML** (NVIDIA Management Library). NVIDIA's NVML provides various functions for checking GPU status and mainly monitors the following events to check GPU status:
 
-* EventTypeXidCriticalError : XID (eXtended ID) Error Events. XID is a code that indicates GPU errors.
-* EventTypeDoubleBitEccError : Double Bit ECC (Error Correcting Code) Error Events
-* EventTypeSingleBitEccError : Single Bit ECC (Error Correcting Code) Error Events
+* `EventTypeXidCriticalError` : XID (eXtended ID) Error Events. XID is a code that indicates GPU errors.
+* `EventTypeDoubleBitEccError` : Double Bit ECC (Error Correcting Code) Error Events
+* `EventTypeSingleBitEccError` : Single Bit ECC (Error Correcting Code) Error Events
 
 If an abnormal GPU occurs, the Node's Allocatable GPU count decreases by the number of abnormal GPUs. For example, if there are 4 GPUs on a node and one GPU becomes abnormal, the Node's Allocatable GPU count becomes a maximum of 3.
 

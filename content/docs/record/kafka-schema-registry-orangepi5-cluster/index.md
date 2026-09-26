@@ -17,7 +17,7 @@ Kafka Schema Registry를 활용해서 Schema를 관리하는 실습을 수행한
 * **Producer** : Kafka Schema Registry에서 스키마를 가져와 Avro 형식으로 직렬화하여 Kafka Topic에 전송하는 역할을 수행한다.
 * **Consumer** : Kafka Topic에서 Avro 형식으로 직렬화된 Message를 수신하여 역직렬화하는 역할을 수행한다.
 
-전체 실슴 환경 구성은 다음의 링크를 참조한다.
+전체 실습 환경 구성은 다음의 링크를 참조한다.
 
 * **Orange Pi 5 Max 기반 Kubernetes Cluster 구축** : [https://ssup2.github.io/blog-software/docs/record/orangepi5-cluster-build/](https://ssup2.github.io/blog-software/docs/record/orangepi5-cluster-build/)
 * **Orange Pi 5 Max 기반 Kubernetes Data Platform 구축** : [https://ssup2.github.io/blog-software/docs/record/kubernetes-data-platform-orangepi5-cluster/](https://ssup2.github.io/blog-software/docs/record/kubernetes-data-platform-orangepi5-cluster/)

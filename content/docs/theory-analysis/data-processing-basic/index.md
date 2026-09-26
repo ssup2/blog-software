@@ -21,10 +21,10 @@ draft: true
 
 Data Processing 과정은 일반적으로 **다수의 Task**로 쪼개져서 순차적으로 분산되어 처리되며, 이에 따라서 다수의 Task 사이에서는 Data 교환이 발생한다. Task 사이의 Data 교환 기법에는 Forward, Broadcast, Key-based, Random 4가지 전략이 존재하며, [Figure 2]는 각 전략을 시각화한 그림을 나타내고 있다.
 
-* Foward : 이전 Task와 다음 Task가 1:1로 Mapping되어 Data를 전달하는 기법이다. 이전 Task와 다음 Task가 동일한 Node에서 동작한다면 Data 전송을 위한 Network 통신이 발생하지 않는 장점을 갖는다.
-* Broadcast : 이전 Task의 Data를 일부 또는 모든 다음 Task를 대상으로 전달하는 기법이다. Data양이 급격하게 증가하고 이에 따라서 많은 Network 통신이 발생하기 때문에, 일반적으로는 이용되지 않는 기법이다.
-* Key-based : 동일한 Key를 갖는 Data가 동일한 Task에서 동작하는 기법이다.
-* Random : 이전 Task의 Data르 임의의 다음 Task에게 전달하는 기법이다.
+* **Forward** : 이전 Task와 다음 Task가 1:1로 Mapping되어 Data를 전달하는 기법이다. 이전 Task와 다음 Task가 동일한 Node에서 동작한다면 Data 전송을 위한 Network 통신이 발생하지 않는 장점을 갖는다.
+* **Broadcast** : 이전 Task의 Data를 일부 또는 모든 다음 Task를 대상으로 전달하는 기법이다. Data양이 급격하게 증가하고 이에 따라서 많은 Network 통신이 발생하기 때문에, 일반적으로는 이용되지 않는 기법이다.
+* **Key-based** : 동일한 Key를 갖는 Data가 동일한 Task에서 동작하는 기법이다.
+* **Random** : 이전 Task의 Data르 임의의 다음 Task에게 전달하는 기법이다.
 
 ## 4. Bounded Data, Unbounded Data
 

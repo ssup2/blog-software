@@ -30,8 +30,8 @@ host에서 일반적으로 많이 이용되는 1000개의 TCP Port들을 Scannin
 
 [Text 1]은 일반적으로 많이 이용되는 1000개의 TCP Port 목록을 나타내고 있다. Host는 하나의 Host가 아닌 다수의 Host를 지정할 수도 있다. 다수의 Host를 지정하는 방법은 다음과 같다.
 
-* IP Range : nmap 192.168.0.1-20 : 192.168.0.1 부터 192.168.0.20 까지의 Host를 Scanning한다.
-* Subnet : nmap 192.168.0.0/24 : 192.168.0.1 부터 192.168.0.255 까지의 Host를 Scanning한다.
+* **IP Range** : nmap 192.168.0.1-20 : 192.168.0.1 부터 192.168.0.20 까지의 Host를 Scanning한다.
+* **Subnet** : nmap 192.168.0.0/24 : 192.168.0.1 부터 192.168.0.255 까지의 Host를 Scanning한다.
 
 ### 1.2. nmap -sU [Host]
 

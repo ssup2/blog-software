@@ -8,7 +8,7 @@ This document analyzes DB indexing techniques.
 
 {{< figure caption="[Figure 1] DB Indexing" src="images/db-indexing.png" width="600px" >}}
 
-DB indexing is literally a technique that improves DB performance by creating an index. [Figure 1] briefly illustrates DB indexing. The table on the right represents a DB table, and the table on the left represents an index based on the State column. The index **sorts** record values in the State column and stores the **ID** of each record value.
+**DB indexing** is literally a technique that improves DB performance by creating an index. [Figure 1] briefly illustrates DB indexing. The table on the right represents a DB table, and the table on the left represents an index based on the State column. The index **sorts** record values in the State column and stores the **ID** of each record value.
 
 ```sql {caption="[Query 1] SELECT with single WHERE condition"}
 SELECT * FROM Fruit_Info WHERE State = 'NC'

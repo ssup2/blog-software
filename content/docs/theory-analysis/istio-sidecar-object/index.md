@@ -4,7 +4,7 @@ title: Istio Sidecar Object
 
 ## 1. Istio Sidecar Object
 
-Istio에서 제공하는 Sidecar Object는 Istio의 Sidecar Proxy의 Inbound, Outbound Traffic 관련 설정을 세세하게 제어할 때 이용한다. 일반적으로는 Sidecar Proxy가 관리하는 Endpoint를 제한하여 Outbound 통신을 제한하거나, Endpoint 개수를 줄여서 istiod의 부하를 줄이는 용도로 활용된다.
+Istio에서 제공하는 **Sidecar Object**는 Istio의 Sidecar Proxy의 Inbound, Outbound Traffic 관련 설정을 세세하게 제어할 때 이용한다. 일반적으로는 Sidecar Proxy가 관리하는 Endpoint를 제한하여 Outbound 통신을 제한하거나, Endpoint 개수를 줄여서 istiod의 부하를 줄이는 용도로 활용된다.
 
 ### 1.1. Sidecar Object Test 환경
 

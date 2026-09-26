@@ -6,7 +6,7 @@ Directory Service와 Directory Service에서 이용되는 LDAP (Lightweight Dire
 
 ## 1. Directory Service
 
-첫 Directory Service는 기업이 갖고 있는 물리적 Network Resource를 관리하기 위해서 Network Resource의 위치, 사양, 관리자 등의 정보를 보관하던 Data 저장소였다. 하지만 기업의 요구에 따라서 Network Resource 뿐만 아니라 기업이 관리해야하는 장비, 조직, 직원 등 다양한 물리적 Resource들을 관리하는 Data 저장소로 기능이 확장되었다. 직원의 인증 정보도 Service Directory에 저장하여 관리할 수 있기 때문에, Directory Service를 통해서 사내의 인증 서비스도 구축할 수 있다.
+첫 **Directory Service**는 기업이 갖고 있는 물리적 Network Resource를 관리하기 위해서 Network Resource의 위치, 사양, 관리자 등의 정보를 보관하던 Data 저장소였다. 하지만 기업의 요구에 따라서 Network Resource 뿐만 아니라 기업이 관리해야하는 장비, 조직, 직원 등 다양한 물리적 Resource들을 관리하는 Data 저장소로 기능이 확장되었다. 직원의 인증 정보도 Service Directory에 저장하여 관리할 수 있기 때문에, Directory Service를 통해서 사내의 인증 서비스도 구축할 수 있다.
 
 Directory Service는 거의 번화가 발생하지 않는 물리적 Resource를 관리하는 용도로 많이 이용되기 때문에 일반적으로 Data Write 보다는 Data Read에 중점을 두어 설계되어 있다. 또한 물리적 Resource의 다양한 특징을 저장하기 위해서 일반적으로 다양한 속성 (Attribute)를 저장할 수 있도록 설계되어 있다. Directory Service의 대표적인 구현체는 LDAP (Lightweight Directory Access Protocol)이 있다.
 
@@ -14,7 +14,7 @@ Directory Service는 거의 번화가 발생하지 않는 물리적 Resource를 
 
 {{< figure caption="[Figure 1] LDAP Schema" src="images/ldap-schema.png" width="450px" >}}
 
-LDAP은 의미 그대로 경량화된 Directory Service를 위한 Protocol이다. LDAP Server는 Tree 형태로 Data를 관리한다. [Figure 1]은 Tree 형태를 갖고 있는 LDAP의 Schema를 나타내고 있다. Tree의 각 Node에는 하나의 속성이 저장되어 있는것을 확인할 수 있다. 이용할 수 있는 속성은 [링크](https://docs.bmc.com/docs/fpsc121/ldap-attributes-and-associated-fields-495323340.html)에서 확인할 수 있다. 많이 이용되는 속성은 다음과 같다.
+**LDAP**은 의미 그대로 경량화된 Directory Service를 위한 Protocol이다. LDAP Server는 Tree 형태로 Data를 관리한다. [Figure 1]은 Tree 형태를 갖고 있는 LDAP의 Schema를 나타내고 있다. Tree의 각 Node에는 하나의 속성이 저장되어 있는것을 확인할 수 있다. 이용할 수 있는 속성은 [링크](https://docs.bmc.com/docs/fpsc121/ldap-attributes-and-associated-fields-495323340.html)에서 확인할 수 있다. 많이 이용되는 속성은 다음과 같다.
 
 * **uid** : User ID
 * **cn** : Common Name

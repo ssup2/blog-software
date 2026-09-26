@@ -8,7 +8,7 @@ Kubernetes Authentication 기법중 하나인 Service Account를 분석한다.
 
 {{< figure caption="[Figure 1] Kubernetes Authentication Service Account" src="images/kubernetes-authentication-service-account.png" width="800px" >}}
 
-Kubernetes의 Service Account는 Kubernetes Cluster 내부에서 Object로 관리되는 계정이다. Service Account는 Pod 안의 App 또는 Kubernetes Cluster의 User가 Kubernetes API Server에게 인증할 때 이용된다. [Figure 1]은 Service Account를 생성, Service Account를 Pod에 주입, Service Account를 이용하는 과정을 나타내고 있다.
+Kubernetes의 **Service Account**는 Kubernetes Cluster 내부에서 Object로 관리되는 계정이다. Service Account는 Pod 안의 App 또는 Kubernetes Cluster의 User가 Kubernetes API Server에게 인증할 때 이용된다. [Figure 1]은 Service Account를 생성, Service Account를 Pod에 주입, Service Account를 이용하는 과정을 나타내고 있다.
 
 ### 1.1. Service Account
 
@@ -29,7 +29,7 @@ Kubernetes의 Service Account는 Kubernetes Cluster 내부에서 Object로 관�
 
 각 Service Account는 token, ca.crt, namespace 3가지의 정보를 저장하고 있다. **token**은 Kubernetes API Server에 인증할때 이용하는 Token을 의미한다. **JWT** 형태로 되어 있으며 **만료기간이 없는** 특징을 갖고 있다. [Text 1]은 Kubernetes Cluster의 default Service Account의 token을 Decoding한 결과이다. default Service Account와 관련되 정보가 저장되어 있는것을 확인할 수 있다.
 
-**ca.crt**는 Kubernetes API Server가 이용하는 Private Root CA 인증서를 나타낸다. 따라서 대부분의 경우 모든 Service Account의 ca.crt는 동일하다. ca.crt는 Service Account를 이용하는 Client가 Kubernetes API Server에 접근할때 이용된다. **namespace**는 Service Account가 존재하는 Namespace를 나타낸다. Service Account는 각 Namespace마다 별도로 존재하는 Object이다.
+`ca.crt`는 Kubernetes API Server가 이용하는 Private Root CA 인증서를 나타낸다. 따라서 대부분의 경우 모든 Service Account의 ca.crt는 동일하다. ca.crt는 Service Account를 이용하는 Client가 Kubernetes API Server에 접근할때 이용된다. **namespace**는 Service Account가 존재하는 Namespace를 나타낸다. Service Account는 각 Namespace마다 별도로 존재하는 Object이다.
 
 #### 1.1.1. default Service Account
 

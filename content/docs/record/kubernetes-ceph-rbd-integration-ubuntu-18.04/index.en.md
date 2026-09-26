@@ -5,10 +5,11 @@ title: Kubernetes Ceph RBD Integration / Ubuntu 18.04 Environment
 ## 1. Configuration Environment
 
 The configuration environment is as follows.
+
 * Kubernetes 1.12
 * Ceph
-  * Monitor IP : 10.0.0.10:6789
-  * Pool Name : kube
+  * **Monitor IP** : 10.0.0.10:6789
+  * **Pool Name** : kube
 
 ## 2. Ceph RDB Integration
 

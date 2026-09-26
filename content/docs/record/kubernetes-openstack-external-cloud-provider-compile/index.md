@@ -5,9 +5,10 @@ title: Kubernetes OpenStack External Cloud Provider Compile / Ubuntu 18.04 환�
 ## 1. Compile 환경
 
 Compile 환경은 다음과 같다.
-* OpenStack External Cloud Provider : v1.15.0
-* OS : Ubuntu 18.04 LTS
-* Golang : v1.12.2
+
+* **OpenStack External Cloud Provider** : v1.15.0
+* **OS** : Ubuntu 18.04 LTS
+* **Golang** : v1.12.2
 
 ## 2. OpenStack External Cloud Provider Download
 

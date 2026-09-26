@@ -8,7 +8,7 @@ Analyzes B-Tree and B+ Tree, which are widely used in Filesystems or DBs that ma
 
 {{< figure caption="[Figure 1] B-tree" src="images/btree.png" width="1000px" >}}
 
-B-tree is a Tree that extends Binary Search Tree, where each Node can have multiple Keys and multiple Children. Also, all Leaf Nodes have the same Depth. [Figure 1] shows a 3 Order B-Tree. For N Order B-Tree, each Node can have N-1 Keys and up to N Children. Therefore, in 3 Order B-Tree, each Node can have up to 2 Keys and up to 3 Children.
+**B-tree** is a Tree that extends Binary Search Tree, where each Node can have multiple Keys and multiple Children. Also, all Leaf Nodes have the same Depth. [Figure 1] shows a 3 Order B-Tree. For N Order B-Tree, each Node can have N-1 Keys and up to N Children. Therefore, in 3 Order B-Tree, each Node can have up to 2 Keys and up to 3 Children.
 
 Each Node has multiple Keys and also has Data corresponding to each Key. Keys are sorted in a form similar to Binary Search and placed in each Node. In Binary Search, the Key of the right Child Node is smaller than itself and the Key of the left Child Node is larger than itself, and similar rules apply to each Key in B-Tree as well.
 

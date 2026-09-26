@@ -5,6 +5,7 @@ title: LXC Compile and Installation / Ubuntu 18.04 Environment
 ## 1. Compile and Installation Environment
 
 The compile and installation environment is as follows.
+
 * Ubuntu 16.04 LTS 64bit, root user
 * Install Path: /root/lxc-install
 

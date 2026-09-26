@@ -5,6 +5,7 @@ title: Ceph Installation, Execution / Using ceph-deploy / Ubuntu 18.04 Environme
 ## 1. Installation Environment
 
 The installation and execution environment is as follows.
+
 * Ubuntu 18.04 LTS 64bit, root user
 * Ceph Luminous Version
 
@@ -13,10 +14,11 @@ The installation and execution environment is as follows.
 {{< figure caption="[Figure 1] Node Configuration Diagram for Ceph Installation" src="images/node-setting.png" width="900px" >}}
 
 Create virtual Nodes (VMs) using VirtualBox as shown in [Figure 1].
-* Hostname : Master Node - node01, Worker node01 - node02, Worker node02 - node03
-* NAT : Build a 10.0.0.0/24 Network using the "NAT Network" provided by Virtual Box.
-* HDD : Create and attach an additional HDD (/dev/sdb) for Ceph to use on each Node.
-* Router : Build a 192.168.0.0/24 Network using a router. (NAT)
+
+* **Hostname** : Master Node - node01, Worker node01 - node02, Worker node02 - node03
+* **NAT** : Build a 10.0.0.0/24 Network using the "NAT Network" provided by Virtual Box.
+* **HDD** : Create and attach an additional HDD (/dev/sdb) for Ceph to use on each Node.
+* **Router** : Build a 192.168.0.0/24 Network using a router. (NAT)
 
 ### 2.1. Ceph Node
 
@@ -90,7 +92,8 @@ passwd: password updated successfully
 ```
 
 Create a cephnode User.
-* Password : cephnode
+
+* **Password** : cephnode
 
 ### 3.2. Deploy Node
 
@@ -125,7 +128,8 @@ passwd: password updated successfully
 ```
 
 Create a cephdeploy User.
-* Password : cephdeploy
+
+* **Password** : cephdeploy
 
 ```shell
 (Deploy)# login cephdeploy
@@ -142,6 +146,7 @@ Enter same passphrase again:
 ```
 
 Generate and copy SSH Keys.
+
 * Keep passphrases Empty.
 
 ```text {caption="[File 5] Deploy Node - /home/cephdeploy/.ssh/config", linenos=table}

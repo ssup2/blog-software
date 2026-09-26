@@ -123,12 +123,12 @@ That is, dependencies between Assets can be expressed through Asset parameters, 
 
 **External Resource** refers to various external resources supported by Dagster. Mainly I/O Managers, external data storage, and BI tools are defined and used as External Resources. Among External Resources, **I/O Manager** is an important External Resource because it handles data transfer between Ops or Assets. I/O Manager can use various backends, and the main supported backends are as follows.
 
-* FilesystemIOManager : Stores data in the local filesystem. If no I/O Manager is specified separately, it operates as the default I/O Manager.
-* InMemoryIOManager : Stores data in local memory.
-* s3.S3PickleIOManager : Stores data in Pickle format on AWS S3.
-* GCSPickleIOManager : Stores data in Pickle format on GCP GCS.
-* BigQueryPandasIOManager : Stores data in Pandas DataFrame format on BigQuery.
-* BigQueryPySparkIOManager : Stores data in PySpark DataFrame format on BigQuery.
+* `FilesystemIOManager` : Stores data in the local filesystem. If no I/O Manager is specified separately, it operates as the default I/O Manager.
+* `InMemoryIOManager` : Stores data in local memory.
+* `s3.S3PickleIOManager` : Stores data in Pickle format on AWS S3.
+* `GCSPickleIOManager` : Stores data in Pickle format on GCP GCS.
+* `BigQueryPandasIOManager` : Stores data in Pandas DataFrame format on BigQuery.
+* `BigQueryPySparkIOManager` : Stores data in PySpark DataFrame format on BigQuery.
 
 ```python {caption="[Code 3] External Resource (I/O Manager) Example", linenos=table}
 def get_io_manager():
@@ -323,9 +323,9 @@ telemetry:
 
 Database performs the roles of Run Storage, Event Storage, and Schedule Storage, and all Components of the Dagster Control Plane access and use it. Configuration information for Database and each Storage can be found in the Dagster Instance ([File 1]).
 
-* Run Storage : A single Run represents a single triggered workflow, and Run Storage is a storage that stores state information of such Runs. That is, it stores metadata of Runs such as the current state or execution results of workflows.
-* Event Storage : Event Storage is a storage that stores Events that occur during workflow execution.
-* Schedule Storage : Storage that stores workflow schedule information.
+* **Run Storage** : A single Run represents a single triggered workflow, and Run Storage is a storage that stores state information of such Runs. That is, it stores metadata of Runs such as the current state or execution results of workflows.
+* **Event Storage** : Event Storage is a storage that stores Events that occur during workflow execution.
+* **Schedule Storage** : Storage that stores workflow schedule information.
 
 ### 1.4. Dagster Workflow Trigger
 
@@ -348,24 +348,24 @@ A single Run represents a single triggered workflow, and when the workflow ends,
 
 The Run Launcher Types supported by Dagster are as follows.
 
-* K8sRunLauncher : Run is executed as a Kubernetes Job (Pod).
-* ecs.EcsRunLauncher : Run is executed as an AWS ECS Task.
-* DockerRunLauncher : Run is executed as a Docker Container.
-* CeleryK8sRunLauncher : Run is executed as a Kubernetes Job (Pod) using Celery.
+* `K8sRunLauncher` : Run is executed as a Kubernetes Job (Pod).
+* `ecs.EcsRunLauncher` : Run is executed as an AWS ECS Task.
+* `DockerRunLauncher` : Run is executed as a Docker Container.
+* `CeleryK8sRunLauncher` : Run is executed as a Kubernetes Job (Pod) using Celery.
 
 The main Executors supported by Dagster are as follows.
 
-* in_process_executor : Ops/Assets are executed sequentially within a single process.
-* multiprocess_executor : Ops/Assets are executed in parallel within multiple processes.
-* celery_executor : Ops/Assets are executed in parallel using Celery.
-* docker_executor : Ops/Assets are executed in parallel using Docker Containers.
-* k8s_job_executor : Ops/Assets are executed in parallel using Kubernetes Jobs.
-* celery_k8s_job_executor : Ops/Assets are executed in parallel using Celery and Kubernetes Jobs.
+* `in_process_executor` : Ops/Assets are executed sequentially within a single process.
+* `multiprocess_executor` : Ops/Assets are executed in parallel within multiple processes.
+* `celery_executor` : Ops/Assets are executed in parallel using Celery.
+* `docker_executor` : Ops/Assets are executed in parallel using Docker Containers.
+* `k8s_job_executor` : Ops/Assets are executed in parallel using Kubernetes Jobs.
+* `celery_k8s_job_executor` : Ops/Assets are executed in parallel using Celery and Kubernetes Jobs.
 
 Run Coordinator performs workflow scheduling and is configured in the Dagster Instance ([File 1]). The Run Coordinators supported by Dagster are as follows.
 
-* DefaultRunCoordinator : When a workflow creation request comes in, it immediately calls the Run Launcher to create a Run. Used in Dagster Web Server and Dagster CLI.
-* QueuedRunCoordinator : When a workflow creation request comes in, it stores the request in a queue and then retrieves it according to rules to create a Run. Used in Dagster Daemon. If configured to use QueuedRunCoordinator, Dagster Web Server does not directly process workflow creation requests but passes them to Dagster Daemon.
+* `DefaultRunCoordinator` : When a workflow creation request comes in, it immediately calls the Run Launcher to create a Run. Used in Dagster Web Server and Dagster CLI.
+* `QueuedRunCoordinator` : When a workflow creation request comes in, it stores the request in a queue and then retrieves it according to rules to create a Run. Used in Dagster Daemon. If configured to use QueuedRunCoordinator, Dagster Web Server does not directly process workflow creation requests but passes them to Dagster Daemon.
 
 Dagster Daemon is not an essential Component for Dagster operation. If Dagster Daemon is not present, Schedule Objects, Sensor Objects, and QueuedRunCoordinator cannot be used, but workflow execution is not affected.
 
@@ -373,11 +373,11 @@ Dagster Daemon is not an essential Component for Dagster operation. If Dagster D
 
 Compute Log performs the role of storing execution logs of Ops or Assets executed in Dagster. Compute Log is configured in the Dagster Instance ([File 1]). The Compute Logs supported by Dagster are as follows.
 
-* LocalComputeLogManager : Stores Compute Log in the local filesystem.
-* NoOpComputeLogManager : Does not store Compute Log.
-* S3ComputeLogManager : Stores Compute Log on AWS S3.
-* AzureComputeLogManager : Stores Compute Log on Azure Blob Storage.
-* GCSComputeLogManager : Stores Compute Log on Google Cloud Storage.
+* `LocalComputeLogManager` : Stores Compute Log in the local filesystem.
+* `NoOpComputeLogManager` : Does not store Compute Log.
+* `S3ComputeLogManager` : Stores Compute Log on AWS S3.
+* `AzureComputeLogManager` : Stores Compute Log on Azure Blob Storage.
+* `GCSComputeLogManager` : Stores Compute Log on Google Cloud Storage.
 
 ## 2. References
 

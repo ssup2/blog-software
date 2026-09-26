@@ -5,13 +5,14 @@ title: Kubernetes Node Addition / Using kubeadm / Ubuntu 18.04 Environment
 ## 1. Installation Environment
 
 The installation environment is as follows.
+
 * HyperV
-  * Master Node : Ubuntu Desktop 18.04.1 64bit : 1 node
-  * Worker Node : Ubuntu Server 18.04.1 64bit : 2 nodes
-* Docker : 19.03.1
+  * **Master Node** : Ubuntu Desktop 18.04.1 64bit : 1 node
+  * **Worker Node** : Ubuntu Server 18.04.1 64bit : 2 nodes
+* **Docker** : 19.03.1
 * Kubernetes 1.15.3
-  * Network Plugin : using calico or flannel or cilium
-  * Dashboard Addon : using Dashboard
+  * **Network Plugin** : using calico or flannel or cilium
+  * **Dashboard Addon** : using Dashboard
 * kubeadm 1.15.3
   * When building a Cluster environment using VMs, Kubernetes can be easily installed using kubeadm.
 * Password

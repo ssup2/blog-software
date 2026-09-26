@@ -5,6 +5,7 @@ title: Ubuntu Consolas Font Installation / Ubuntu 16.04 Environment
 ## 1. Installation Environment
 
 The installation environment is as follows.
+
 * Ubuntu 16.04 LTS 64bit, root user
 
 ## 2. Ubuntu Package Installation

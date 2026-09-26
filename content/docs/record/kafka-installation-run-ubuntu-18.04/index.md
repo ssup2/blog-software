@@ -5,6 +5,7 @@ title: Kafka 설치, 설정 / Ubuntu 18.04 환경
 ## 1. 설치, 실행 환경
 
 설치, 실행 환경은 다음과 같다.
+
 * Ubuntu 18.04 LTS 64bit, root user
 
 ## 2. Java, Zookeeper 설치
@@ -26,7 +27,8 @@ Retype new UNIX password: kafka
 ```
 
 kafka 계정을 생성한다.
-* Password : kafka
+
+* **Password** : kafka
 
 ```shell
 $ cd /opt
@@ -101,8 +103,9 @@ tcp6       0      0 :::2181                 :::*                    LISTEN      
 ```
 
 Zookeeper, Kafka 구동을 확인한다.
-* Zookeeper : 2181 Port
-* Kafka : 9092 Port
+
+* **Zookeeper** : 2181 Port
+* **Kafka** : 9092 Port
 
 ## 4. Kafka Test
 

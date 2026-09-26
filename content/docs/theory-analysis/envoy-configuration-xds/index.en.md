@@ -4,7 +4,7 @@ title: "Envoy Configuration with xDS"
 
 ## 1. Envoy Configuration
 
-Envoy Configuration consists of the combination of the **Bootstrap Configuration file**, which serves as the Root Configuration, and the xDS (eXtensible Discovery Services) Protocol, which is used to fetch configuration dynamically from the outside.
+**Envoy Configuration** consists of the combination of the **Bootstrap Configuration file**, which serves as the Root Configuration, and the xDS (eXtensible Discovery Services) Protocol, which is used to fetch configuration dynamically from the outside.
 
 ### 1.1. xDS (eXtensible Discovery Services) Protocol
 

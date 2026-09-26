@@ -6,7 +6,7 @@ Apache ZooKeeper를 분석한다.
 
 ## 1. ZooKeeper
 
-ZooKeeper는 분산 시스템 환경에서 Leader 선출, Node 상태, 분산 Lock 관리등 다양한 역할을 수행하는 **분산 Coordinator**이다. 안전성과 성능을 인정 받아 Hadoop, HBase, Storm, Kafka 등 다양한 Open Source Project에 이용되고 있다.
+**ZooKeeper**는 분산 시스템 환경에서 Leader 선출, Node 상태, 분산 Lock 관리등 다양한 역할을 수행하는 **분산 Coordinator**이다. 안전성과 성능을 인정 받아 Hadoop, HBase, Storm, Kafka 등 다양한 Open Source Project에 이용되고 있다.
 
 ### 1.1. Architecture
 

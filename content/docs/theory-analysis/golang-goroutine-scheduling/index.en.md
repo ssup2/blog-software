@@ -8,7 +8,7 @@ This document analyzes Golang Goroutine Scheduling.
 
 {{< figure caption="[Figure 1] Goroutine Scheduling" src="images/golang-goroutine-scheduling.png" width="700px" >}}
 
-Golang provides Goroutines, which are more lightweight threads than the threads provided by the OS. Goroutines are executed through **Golang Scheduler** included in the Golang Runtime, which performs Thread Scheduling. In other words, multiple Goroutines operate on a small number of Threads. [Figure 1] shows the Goroutine Scheduling process. **Goroutine is represented as G, Processor as P, and Thread as M**. Here, Processor refers to a virtual Processor (Virtual CPU Core), not the actual number of CPU Cores.
+Golang provides **Goroutines**, which are more lightweight threads than the threads provided by the OS. Goroutines are executed through **Golang Scheduler** included in the Golang Runtime, which performs Thread Scheduling. In other words, multiple Goroutines operate on a small number of Threads. [Figure 1] shows the Goroutine Scheduling process. **Goroutine is represented as G, Processor as P, and Thread as M**. Here, Processor refers to a virtual Processor (Virtual CPU Core), not the actual number of CPU Cores.
 
 [Figure 1] shows 4 **CPU Cores** and multiple Threads being scheduled and operated by the **OS Scheduler**. **Network Poller** refers to a separate independent Thread that handles Network. There are two types of Run Queues: **GRQ (Global Run Queue)** and **LRQ (Local Run Queue)**. GRQ performs the role of a global Goroutine Queue as its name suggests, and LRQ performs the role of a local Goroutine Queue as its name suggests.
 

@@ -88,9 +88,9 @@ The operation process is as follows.
 
 The line-by-line explanation of [Code 1] is as follows.
 
-* Line 3, 51 : The samlRequestPrinter() function is a Middleware that outputs requests coming to the ACS.
-* Line 12 : The echoSession() function is a function that returns Session information set by SAML.
-* Line 55 : The samlSP.RequireAccount() function is a Middleware that requests authentication from the Identity Provider when accessing the "/session" path.
+* **Line 3, 51** : The samlRequestPrinter() function is a Middleware that outputs requests coming to the ACS.
+* **Line 12** : The echoSession() function is a function that returns Session information set by SAML.
+* **Line 55** : The samlSP.RequireAccount() function is a Middleware that requests authentication from the Identity Provider when accessing the "/session" path.
 
 ## 3. Service Provider Metadata Extraction
 

@@ -2,7 +2,7 @@
 title: tcpdump
 ---
 
-Packet을 Dump하는 tcpdump의 사용법을 정리한다.
+Packet을 Dump하는 **tcpdump**의 사용법을 정리한다.
 
 ## 1. tcpdump
 

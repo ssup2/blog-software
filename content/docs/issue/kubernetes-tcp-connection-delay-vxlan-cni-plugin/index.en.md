@@ -74,7 +74,7 @@ The kernel versions with UDP checksum bug fixes are as follows.
   * 4.19.123+
   * 5.4.41+
 * Distro Linux Kernel
-  * Ubuntu : 4.15.0-107.108, 5.4.0-32.36+
+  * **Ubuntu** : 4.15.0-107.108, 5.4.0-32.36+
 
 ### 3.3. Checksum Offload Disable
 

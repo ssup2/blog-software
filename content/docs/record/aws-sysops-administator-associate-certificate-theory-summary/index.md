@@ -140,11 +140,11 @@ title: AWS SysOps Administrator Associate 자격증 시험 정리
 ## 5. Cloud Formation
 
 * Template Components
-  * Resources : AWS Resource 정의
-  * Parameters : Template Parameter 정의
-  * Mapping : Static 변수
-  * Output : Template 실행 결과
-  * Conditions : Resource 생성 조건 설정
+  * `Resources` : AWS Resource 정의
+  * `Parameters` : Template Parameter 정의
+  * `Mapping` : Static 변수
+  * `Output` : Template 실행 결과
+  * `Conditions` : Resource 생성 조건 설정
   * MetaData
 * Stack Policy
   * Stack이 변경할 수 있는 Resource 제한
@@ -152,10 +152,10 @@ title: AWS SysOps Administrator Associate 자격증 시험 정리
 * Resource Import
   * CloudFormation을 통해서가 아닌 외부에서 만들어진 Resource를 CloudFormation으로 다루어야하는 경우 이용
 * Helper Script
-  * cfn-init : 
-  * cfn-signal : 
-  * cfn-get-metadata :
-  * cfn-hup :
+  * `cfn-init` : 
+  * `cfn-signal` : 
+  * `cfn-get-metadata` :
+  * `cfn-hup` :
 
 ## 6. 참고
 

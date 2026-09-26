@@ -5,6 +5,7 @@ title: KVM, QEMU Installation and Execution / Arndale Environment
 ## 1. Installation and Execution Environment
 
 The installation and execution environment is as follows.
+
 * Arndale Board, 8GB uSD
 * PC: Ubuntu 14.04LTS 32bit, root User
 * VM on KVM: Ubuntu 14.04LTS 32bit, root User
@@ -12,12 +13,13 @@ The installation and execution environment is as follows.
 * Network 192.168.0.xxx (NAT)
   * HostOS: 192.168.0.150
   * br0: 192.168.0.200
-  * GeustOS-01: 192.168.0.160, GeustOS-02: 192.168.0.161
+  * GuestOS-01: 192.168.0.160, GuestOS-02: 192.168.0.161
   * tap0: 192.168.0.201, tap1: 192.168.0.202
 
 ## 2. Cross Compiler Installation
 
 Install a cross compiler for kernel building.
+
 * Download: https://releases.linaro.org/15.02/components/toolchain/binaries/arm-linux-gnueabihf/gcc-linaro-4.9-2015.02-3-x86-64-arm-linux-gnueabihf.tar.xz
 
 
@@ -40,6 +42,7 @@ Install Ubuntu packages required for kernel building.
 ## 4. Kernel Config Download
 
 Download the kernel config.
+
 * Login: http://www.virtualopensystems.com/
 * Guest Kernel Config: http://www.virtualopensystems.com/downloads/guides/kvm-virtualization-on-arndale/guest-config
 
@@ -234,6 +237,7 @@ Build QEMU.
 ## 13. uSD Card Partition Configuration
 
 Configure the uSD Card partitions as follows.
+
 * 0 ~ 2M, 2M, No Filesystem: Bootloader (bl1, spl, U-boot)
 * 2M ~ 18M, 16M, ext2, boot: uImage, exynos5250-arndale.dtb
 * 18M ~ rest, ext3, root: Root-Filesystem

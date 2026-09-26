@@ -6,7 +6,7 @@ title: systemd
 
 ## 1. systemd
 
-systemd는 Linux Kernel과의 협력을 통해 OS를 전반적으로 관리하는 System 및 Service Manager이다. 처음에는 기존에 Init Process로 많이 이용되던 SysVinit의 빈약한 Service(Daemon) 관리 기능을 대체하기 위해서 개발되었다. 시간이 지나면서 systemd에는 Service 관리 기능뿐만이 아니라 Log, User Session, Network, Device, Mount등의 System Resource를 관리하는 기능이 추가되었고, 현재는 전반적인 System을 관리하는 역할을 수행하고 있다.
+**systemd**는 Linux Kernel과의 협력을 통해 OS를 전반적으로 관리하는 System 및 Service Manager이다. 처음에는 기존에 Init Process로 많이 이용되던 SysVinit의 빈약한 Service(Daemon) 관리 기능을 대체하기 위해서 개발되었다. 시간이 지나면서 systemd에는 Service 관리 기능뿐만이 아니라 Log, User Session, Network, Device, Mount등의 System Resource를 관리하는 기능이 추가되었고, 현재는 전반적인 System을 관리하는 역할을 수행하고 있다.
 
 SysVinit은 System 관리자가 작성한 Service Script를 실행하고, Service Process를 관리하는 정도의 제한된 Service 기능만을 제공하였다. systemd는 Service Config 파일을 통해서 Service를 세밀하게 제어할 수 있고, Service Log 관리기능도 제공한다. 또한 Process 사이의 Message BUS인 D-BUS 제공을 통해 Service 사이의 통신도 쉽게 구현 할 수 있는 환경을 제공한다.
 
@@ -14,7 +14,7 @@ SysVinit은 순차적으로 Service를 수행하는 방식이었지만 systemd�
 
 ### 1.1. journald
 
-journald는 Linux의 주요 Log를 저장하고 관리하는 Daemon이다. journald는 **/var/log/journal** 폴더 아래 다음과 같은 내용을 Log로 남긴다.
+journald는 Linux의 주요 Log를 저장하고 관리하는 Daemon이다. journald는 `/var/log/journal` 폴더 아래 다음과 같은 내용을 Log로 남긴다.
 
 * /proc/kmsg를 통해 전달되는 Kernel Log를 기록한다.
 * App이 syslog(3) 함수를 통해서 남기는 Log를 기록한다. Log는 /dev/log (/run/systemd/journal/dev-log) Domain Socket을 통해서 journald에게 전달된다.
@@ -35,5 +35,5 @@ journald는 Log 기록시 rsyslogd처럼 Plain Text를 이용하지 않고 Struc
 * [https://www.maketecheasier.com/systemd-what-you-need-to-know-linux/](https://www.maketecheasier.com/systemd-what-you-need-to-know-linux/)
 * journald : [https://unix.stackexchange.com/questions/205883/understand-logging-in-linux/](https://unix.stackexchange.com/questions/205883/understand-logging-in-linux/)
 * journald : [https://askubuntu.com/questions/925440/relationship-of-rsyslog-and-journald-on-ubuntu-16-04](https://askubuntu.com/questions/925440/relationship-of-rsyslog-and-journald-on-ubuntu-16-04)
-* jorunald : [https://www.loggly.com/blog/why-journald/](https://www.loggly.com/blog/why-journald/)
+* journald : [https://www.loggly.com/blog/why-journald/](https://www.loggly.com/blog/why-journald/)
 

@@ -11,14 +11,14 @@ There is an issue where UDP packets are dropped due to a race condition in Linux
 ## 2. Background
 
 * Src 10.0.0.10:10, Dst 20.0.0.20:20
-  * Original Table : Src 10.0.0.10:10, Dst 20.0.0.20:20
-  * Reply Table : Src 20.0.0.20:20, Dst 10.0.0.10:10
+  * **Original Table** : Src 10.0.0.10:10, Dst 20.0.0.20:20
+  * **Reply Table** : Src 20.0.0.20:20, Dst 10.0.0.10:10
 
 Linux conntrack uses two tables, Original Table and Reply Table, when storing one connection information. The above example shows the contents of conntrack's Original Table and Reply Table according to the packet's Src and Dst IP/Port. The Original Table is filled with the same content as the packet's Src and Dst IP/Port. You can see that the Reply Table content is just the Src and Dst positions swapped from the Original Table.
 
 * Src 10.0.0.10:10, Dst 20.0.0.20:20, DNAT 20.0.0.20->30.0.0.30:30
-  * Original Table : Src 10.0.0.10:10, Dst 20.0.0.20:20
-  * Reply Table : Src 30.0.0.30:30, Dst 10.0.0.10:10
+  * **Original Table** : Src 10.0.0.10:10, Dst 20.0.0.20:20
+  * **Reply Table** : Src 30.0.0.30:30, Dst 10.0.0.10:10
 
 The above example is the same as the first example but shows the state when a DNAT rule is set for the Dst IP/Port. The Original Table is filled with the same content as the packet's Src and Dst IP/Port. You can see that the Reply Table's Src IP/Port is not the same as the Original Table's Dst IP/Port due to the influence of the DNAT rule. Like this, conntrack stores connection information reflecting NAT rules to perform fast reverse NAT.
 
@@ -45,7 +45,7 @@ The versions with the above two kernel patches applied are as follows.
 * Linux Longterm
   * 4.9.163+, 4.14.106+, 4.19.29+, 5.4+
 * Distro Linux Kernel
-  * Ubuntu : 4.15.0-56+
+  * **Ubuntu** : 4.15.0-56+
 
 The issue that occurs when UDP packets are DNATed and sent to different counterparts has not been completely resolved in the kernel yet. Therefore, you need to prevent conntrack race conditions by restricting apps from sending UDP packets simultaneously through one socket, or bypass this issue by setting the kernel's DNAT rule so that UDP packets are sent to the same counterpart even when DNATed in the state where the above kernel patch is applied. Alternatively, you can prevent conntrack race conditions by using iptables' mangle table to set packets sent to specific IPs and ports not to be managed through conntrack.
 

@@ -6,11 +6,11 @@ title: KVM, QEMU
 
 ## 1. KVM (Kernel-based Virtual Machine)
 
-Linux에서 제공하는 Type 1 Hypervisor이다. Linux가 설치되어 있고 Host PC(물리 PC)의 CPU가 하드웨어 가상화 기능을 지원하면 이용할 수 있다. 개인용 PC나 서버에서 이용되는 대부분의 x86 CPU들은 VT-x, VT-d같은 하드웨어 가상화 기능을 지원하기 때문에 리눅스만 설치되어 있다면 쉽게 KVM 설치 및 이용할 수 있다. 하지만 KVM만으로는 가상 머신을 구동 할 수 없다. KVM은 오직 가상 머신이 이용하는 **vCPU(Virtual CPU)**와 **Memory**만을 제공하기 때문이다. 가상 머신이 구동되기 위해서는 vCPU, Memory 뿐만 아니라 HDD, Monitor와 같은 주변 장치도 필요하고, 주변 장치와 CPU를 연결해주는 PCI BUS 등도 필요하다. 이러한 주변 장치와 PCI BUS를 VM에게 제공해주는 것이 QEMU이다.
+Linux에서 제공하는 Type 1 Hypervisor이다. Linux가 설치되어 있고 Host PC(물리 PC)의 CPU가 하드웨어 가상화 기능을 지원하면 이용할 수 있다. 개인용 PC나 서버에서 이용되는 대부분의 x86 CPU들은 VT-x, VT-d같은 하드웨어 가상화 기능을 지원하기 때문에 리눅스만 설치되어 있다면 쉽게 KVM 설치 및 이용할 수 있다. 하지만 KVM만으로는 가상 머신을 구동 할 수 없다. KVM은 오직 가상 머신이 이용하는 **vCPU** (Virtual CPU)와 **Memory**만을 제공하기 때문이다. 가상 머신이 구동되기 위해서는 vCPU, Memory 뿐만 아니라 HDD, Monitor와 같은 주변 장치도 필요하고, 주변 장치와 CPU를 연결해주는 PCI BUS 등도 필요하다. 이러한 주변 장치와 PCI BUS를 VM에게 제공해주는 것이 QEMU이다.
 
 ## 2. QEMU
 
-QEMU는 **Emulator**이다. QEMU는 vCPU부터 주변 장치까지 다양한 가상의 장치들을 Emulation하여 생성한다. KVM은 QEMU가 생성한 PCI Bus, 주변 장치등을 가상 머신에게 할당하여 가상 머신을 구동한다. Xen에서도 KVM과 동일하게 QEMU가 생성한 PCI Bus, 주변 장치등을 가상 머신에게 할당하여 가상 머신을 구동한다. QEMU는 vCPU도 Emulation 할 수 있기 때문에 KVM이나 XEN 없이도 가상 머신을 구동 할 수 있다. 하지만 vCPU Emulation Overhead와 QEMU Architecture의 특징 때문에, QEMU만을 이용하여 가상 머신을 구동하면 가상 머신의 성능이 매우 낮아진다. 따라서 KVM + QEMU의 조합으로 가상 머신을 구동하는것이 좋다.
+**QEMU**는 **Emulator**이다. QEMU는 vCPU부터 주변 장치까지 다양한 가상의 장치들을 Emulation하여 생성한다. KVM은 QEMU가 생성한 PCI Bus, 주변 장치등을 가상 머신에게 할당하여 가상 머신을 구동한다. Xen에서도 KVM과 동일하게 QEMU가 생성한 PCI Bus, 주변 장치등을 가상 머신에게 할당하여 가상 머신을 구동한다. QEMU는 vCPU도 Emulation 할 수 있기 때문에 KVM이나 XEN 없이도 가상 머신을 구동 할 수 있다. 하지만 vCPU Emulation Overhead와 QEMU Architecture의 특징 때문에, QEMU만을 이용하여 가상 머신을 구동하면 가상 머신의 성능이 매우 낮아진다. 따라서 KVM + QEMU의 조합으로 가상 머신을 구동하는것이 좋다.
 
 ### 2.1. QEMU Architecture
 

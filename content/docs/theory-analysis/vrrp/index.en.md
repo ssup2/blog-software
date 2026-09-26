@@ -6,7 +6,7 @@ title: VRRP
 
 {{< figure caption="[Figure 1] VRRP Application" src="images/problem.png" width="700px" >}}
 
-VRRP (Virtual Router Redundancy Protocol) is a technique to prevent Single Point of Failure of Gateway Router. The left figure in [Figure 1] shows when there is one Gateway Router. If Router stops operating, Host A and Host B are disconnected from External Network. An intuitive solution that comes to mind is to add a spare Router. However, simply adding a Router cannot solve the Single Point of Failure problem.
+**VRRP** (Virtual Router Redundancy Protocol) is a technique to prevent Single Point of Failure of Gateway Router. The left figure in [Figure 1] shows when there is one Gateway Router. If Router stops operating, Host A and Host B are disconnected from External Network. An intuitive solution that comes to mind is to add a spare Router. However, simply adding a Router cannot solve the Single Point of Failure problem.
 
 The right figure in [Figure 1] shows when Router B with IP 10.0.0.2 is simply added. Even though Router is added, since Default Gateway of Host A and Host B is set to 10.0.0.1, Packets from Host A and Host B going to External Network are not delivered to Router B. To solve this problem, VRRP must be introduced.
 

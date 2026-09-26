@@ -2,7 +2,7 @@
 title: OLTP, OLAP
 ---
 
-OLTP(Online Transactional Processing)과 OLAP(Online Analytical Processing)은 Data Processing의 특성에 따라 분류한 범주이다. OTLP과 OLAP을 분석한다.
+**OLTP**(Online Transactional Processing)과 **OLAP**(Online Analytical Processing)은 Data Processing의 특성에 따라 분류한 범주이다. OTLP과 OLAP을 분석한다.
 
 ## 1. OTLP (Online Transaction Processing)
 

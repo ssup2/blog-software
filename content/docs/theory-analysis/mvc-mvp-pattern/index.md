@@ -8,7 +8,7 @@ GUI 프로그래밍에 많이 이용되는 프로그래밍 모델인 MVC 패턴�
 
 {{< figure caption="[Figure 1] MVC 패턴" src="images/mvc-pattern.png" width="600px" >}}
 
-MVC 패턴은 Model, View, Controller 3가지로 구성된다. Model은 Application에서 이용하는 Data를 DB로부터 얻어오고, Data를 가공하는 부분(Business Logic)이다. View는 User가 이용하는 UI를 보여주는 부분이다. 마지막으로 Controller는 User의 요청을 받아 Model이나 View에게 전달하고, Model과 View사이의 조율 역할도 수행한다. JSP/Servlet에서 이용된다.
+**MVC 패턴**은 Model, View, Controller 3가지로 구성된다. Model은 Application에서 이용하는 Data를 DB로부터 얻어오고, Data를 가공하는 부분(Business Logic)이다. View는 User가 이용하는 UI를 보여주는 부분이다. 마지막으로 Controller는 User의 요청을 받아 Model이나 View에게 전달하고, Model과 View사이의 조율 역할도 수행한다. JSP/Servlet에서 이용된다.
 
 ### 1.1. JSP, Servlet
 

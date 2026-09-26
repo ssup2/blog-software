@@ -88,9 +88,9 @@ func main() {
 
 [Code 1]의 각 Line별 설명은 다음과 같다.
 
-* Line 3, 51 : samlRequestPrinter() 함수는 ACS로 들어오는 요청을 출력하는 Middleware이다.
-* Line 12 : echoSession() 함수는 SAML이 설정한 Session 정보를 반환하는 함수이다.
-* Line 55 : samlSP.RequireAccount() 함수는 "/session" 경로 접근시 Identity Provider에게 인증을 요청하는 Middleware이다.
+* **Line 3, 51** : samlRequestPrinter() 함수는 ACS로 들어오는 요청을 출력하는 Middleware이다.
+* **Line 12** : echoSession() 함수는 SAML이 설정한 Session 정보를 반환하는 함수이다.
+* **Line 55** : samlSP.RequireAccount() 함수는 "/session" 경로 접근시 Identity Provider에게 인증을 요청하는 Middleware이다.
 
 ## 3. Service Provider Metadata 추출
 

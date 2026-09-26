@@ -5,12 +5,14 @@ title: macOS Keyborad, Mouse Key 설정
 ## 1. 설치 환경
 
 설정 환경을 다음과 같다.
+
 * macOS 10.14.6 Mojave
 * Dell KM717 Keyborad, Mouse
 
 ## 2. Karabiner-Elements 설치
 
 Key 변경을 위해서 Karabiner-Elements을 설치한다.
+
 * https://karabiner-elements.pqrs.org/
 
 ## 3. Karabiner-Elements의 Complex Modification Rules 파일 생성

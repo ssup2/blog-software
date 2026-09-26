@@ -10,7 +10,7 @@ TCP Handshake를 분석한다.
 
 {{< figure caption="[Figure 1] TCP 3Way, 4Way Handshake" src="images/tcp-3way-4way-handshake.png" width="750px" >}}
 
-3Way Handshake는 TCP Connection을 생성하기 위한 Handshake이며, 4Way Handshake는 생성되어 있는 TCP Connection을 우아하게 종료하는 Handshake이다. [Figure 1]의 윗부분은 TCP 3Way Handshake를 나타내고 있고, [Figure 2]의 아랫부분은 4Way Handshake를 나타내고 있다.
+**3Way Handshake**는 TCP Connection을 생성하기 위한 Handshake이며, **4Way Handshake**는 생성되어 있는 TCP Connection을 우아하게 종료하는 Handshake이다. [Figure 1]의 윗부분은 TCP 3Way Handshake를 나타내고 있고, [Figure 2]의 아랫부분은 4Way Handshake를 나타내고 있다.
 
 ```console {caption="[Shell 1] TCP 3Way, 4Way Handshake", linenos=table}
 12:49:33.192719 IP 192.168.0.60.39002 > 192.168.0.61.80: Flags [S], seq 284972257, win 64240, options [mss 1460,sackOK,TS val 2670079469 ecr 0,nop,wscale 7], length 0

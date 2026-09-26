@@ -6,7 +6,7 @@ title: Consistent Hashing
 
 {{< figure caption="[Figure 1] Consistent Hashing" src="images/consistent-hashing.png" width="900px" >}}
 
-Consistent Hashing is one of the Hashing Algorithms. When using Hashing as a **distribution algorithm**, Consistent Hashing is generally used a lot. [Figure 1] compares Modular Hashing, which is generally the most used, with Consistent Hashing. In the case of Modular Hashing, when the number of Buckets changes, most Keys belonging to Buckets also move through the Rebalancing process. This movement of many Keys causes performance degradation.
+**Consistent Hashing** is one of the Hashing Algorithms. When using Hashing as a **distribution algorithm**, Consistent Hashing is generally used a lot. [Figure 1] compares Modular Hashing, which is generally the most used, with Consistent Hashing. In the case of Modular Hashing, when the number of Buckets changes, most Keys belonging to Buckets also move through the Rebalancing process. This movement of many Keys causes performance degradation.
 
 For example, if Data is Sharded and stored across multiple Disks based on Modular Hashing, a lot of Data movement occurs whenever Disks are added/removed. Consistent Hashing is a Hashing Algorithm created to minimize Key movement when Buckets are added/removed to solve this problem. Consistent Hashing moves an average of **(total number of Keys)/(total number of Buckets)** Keys when Buckets are added/removed.
 

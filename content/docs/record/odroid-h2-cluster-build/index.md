@@ -13,16 +13,16 @@ Ceph, Openstack 설치를 위한 ODROID-H2 Cluster를 구축한다.
 [Photo 1]은 ODROID-H2 Cluster의 실제 모습을 보여주고 있다. [Figure 1]은 ODROID-H2 Cluster를 나타내고 있다. 모든 ODROID-H2의 Spec은 동일하다. 모든 Node의 Default Gateway는 NAT Network로 설정되어 있다. Node 04는 VM이며 Montoring 및 Deploy 용도로 이용한다. ODROID-H2 Cluster의 주요 사양은 아래와 같다.
 
 * ODROID-H2 * 3
-  * CPU : 4Core, Intel Celeron J4105 Processor
-  * Memory : 8GB * 2, SAMSUNG DDR4 PC4-19200
-  * Root Storage : 64GB, eMMC
-  * Ceph Storage : 256GB, SAMSUNG PM981 M.2 2280 
+  * **CPU** : 4Core, Intel Celeron J4105 Processor
+  * **Memory** : 8GB * 2, SAMSUNG DDR4 PC4-19200
+  * **Root Storage** : 64GB, eMMC
+  * **Ceph Storage** : 256GB, SAMSUNG PM981 M.2 2280 
 * VM * 1
-  * CPU : 2Core
+  * **CPU** : 2Core
   * Memory: 8GB
 * Network
-  * NAT Network : 192.168.0.0/24
-  * Private Network : 10.0.0.0/24
+  * **NAT Network** : 192.168.0.0/24
+  * **Private Network** : 10.0.0.0/24
 
 ### 1.1. Ceph
 

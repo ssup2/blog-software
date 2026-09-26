@@ -8,7 +8,7 @@ This document analyzes JWT (JSON Web Token).
 
 {{< figure caption="[Figure 1] JWT" src="images/jwt.png" width="750px" >}}
 
-JWT, as the name suggests, refers to a JSON-based Web Token. [Figure 1] shows the structure of JWT and the process of creating JWT. JWT consists of three parts: Header, Payload, and Signature, and each part is connected through "." (period). Header and Payload are configured in JSON-based Key-value format, and Signature is generated based on Header and Payload.
+**JWT**, as the name suggests, refers to a JSON-based Web Token. [Figure 1] shows the structure of JWT and the process of creating JWT. JWT consists of three parts: Header, Payload, and Signature, and each part is connected through "." (period). Header and Payload are configured in JSON-based Key-value format, and Signature is generated based on Header and Payload.
 
 ### 1.1. Header
 

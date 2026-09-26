@@ -6,7 +6,7 @@ CORS (Cross-Origin Resource Sharing) 기법을 분석한다.
 
 ## 1. CORS (Cross-Origin Resource Sharing)
 
-일반적으로 Web Application은 **Origin** (Web Application이 존재하는 출처)의 Resource에는 자유롭게 접근 가능하지만 **Cross-Origin** (Web Application이 존재하지 않는 출처)의 Resource의 경우에는 Cross-Origin이 허용하는 Resource만 이용할 수 있다. CORS 기법은 Cross-Origin이 Web Application에게 이용 가능한 Resource를 알려주고, Resource 이용을 제한하는 기법이다. 여기서 Web Application은 일반적으로 Web Browser에서 실행되는 **JavaScript**를 의미한다.
+일반적으로 Web Application은 **Origin** (Web Application이 존재하는 출처)의 Resource에는 자유롭게 접근 가능하지만 **Cross-Origin** (Web Application이 존재하지 않는 출처)의 Resource의 경우에는 Cross-Origin이 허용하는 Resource만 이용할 수 있다. **CORS** 기법은 Cross-Origin이 Web Application에게 이용 가능한 Resource를 알려주고, Resource 이용을 제한하는 기법이다. 여기서 Web Application은 일반적으로 Web Browser에서 실행되는 **JavaScript**를 의미한다.
 
 User가 Web Browser를 통해서 "https://ssup2.com"에 접속하면 Web Browser는 "https://ssup2.com"으로부터 JavaScript를 받아 수행한다. 이때 받은 JavaScript 내부에서는 "https://ssup2.github.io"의 Resource를 받아오는 동작이 포함될 수 있다. 이 경우 Web Browser가 접속한 Origin (https://ssup2.com)이 아닌 Cross-Origin (https://ssup2.github.io)의 Resource를 이용해야하기 때문에, Web Browser는 CORS 기법을 이용해야 한다. Web Browser는 CORS를 통해서 "https://ssup2.github.io"으로 부터 Resource 사용허가를 먼저 받은 다음, "https://ssup2.github.io"의 Resource에 접근한다.
 

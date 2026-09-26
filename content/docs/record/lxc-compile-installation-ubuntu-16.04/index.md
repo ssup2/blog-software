@@ -5,8 +5,9 @@ title: LXC Compile, 설치 / Ubuntu 18.04 환경
 ## 1. Compile, 설치 환경
 
 Compile, 설치 환경은 다음과 같다.
+
 * Ubuntu 16.04 LTS 64bit, root user
-* Install Path : /root/lxc-install
+* **Install Path** : /root/lxc-install
 
 ## 2. Package 설치
 

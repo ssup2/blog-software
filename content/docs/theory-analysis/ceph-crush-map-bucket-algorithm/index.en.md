@@ -39,10 +39,10 @@ cbucket uniform(bucket, pg_id, replica) {
 }
 ```
 
-* cbucket : Represents the subordinate Bucket selected through Uniform algorithm.
-* bucket : Represents the parent Bucket.
-* pg_id : Represents the ID of PG that has the Object to place.
-* replica : Represents Replica. 0 represents Primary Replica.
+* `cbucket` : Represents the subordinate Bucket selected through Uniform algorithm.
+* `bucket` : Represents the parent Bucket.
+* `pg_id` : Represents the ID of PG that has the Object to place.
+* `replica` : Represents Replica. 0 represents Primary Replica.
 
 Uniform algorithm selects subordinate Buckets using **Consistency Hashing**. [Code 1] briefly shows the uniform() function that selects subordinate Buckets using Uniform algorithm. Since Hashing needs to be performed only once, subordinate Buckets can be found in O(1) time. However, even when using Consistency Hashing, when subordinate Buckets are added or removed, many PGs are relocated to other subordinate Buckets. Therefore, many Objects are Rebalanced. All subordinate Buckets of Uniform algorithm have the same Weight. That is, Uniform algorithm cannot apply different Weights to each subordinate Bucket. Even if Weight values are set, they are ignored. To apply different Weights to each subordinate Bucket, other Bucket algorithms must be used.
 
@@ -60,8 +60,8 @@ init_sum_weights(cbucket_weights, sum_weights) {
 }
 ```
 
-* cbucket_weights : Represents the Weight values of subordinate Buckets set in CRUSH Map.
-* sum_weights : Represents the sums of cbucket_weights according to List algorithm.
+* `cbucket_weights` : Represents the Weight values of subordinate Buckets set in CRUSH Map.
+* `sum_weights` : Represents the sums of cbucket_weights according to List algorithm.
 
 List algorithm manages subordinate Buckets using **Linked List**. To perform Link algorithm, a Linked List like [Figure 3] must be prepared based on Weight information of subordinate Buckets in CRUSH Map. [Code 2] briefly shows the init_sum_weights() function that initializes the sum_weights Linked List of [Figure 3].
 
@@ -78,10 +78,10 @@ cbucket list(bucket, pg_id, replica) {
 }
 ```
 
-* cbucket : Represents the subordinate Bucket selected through List algorithm.
-* bucket : Represents the parent Bucket.
-* pg_id : Represents the ID of PG that has the Object to place.
-* replica : Represents Replica. For Primary Replica, 0 is used.
+* `cbucket` : Represents the subordinate Bucket selected through List algorithm.
+* `bucket` : Represents the parent Bucket.
+* `pg_id` : Represents the ID of PG that has the Object to place.
+* `replica` : Represents Replica. For Primary Replica, 0 is used.
 
 [Code 3] shows the list() function that performs Link algorithm using initialized cbucket_weights Linked List and sum_weights Linked List. list() function moves from the end of Linked List to the beginning and allocates PG in proportion to subordinate Bucket's Weight. Since Hashing must be performed as many times as the length of Linked List, which is the number of subordinate Buckets, it takes O(N) time to find subordinate Buckets.
 
@@ -117,11 +117,11 @@ cbucket tree(bucket, pg_id, replica) {
 }
 ```
 
-* cbucket : Represents the subordinate Bucket selected through Tree algorithm.
-* bucket : Represents the parent Bucket.
-* array : Represents the array that stores subordinate Buckets as Binary Tree.
-* pg_id : Represents the ID of PG that has the Object to place.
-* replica : Represents Replica. For Primary Replica, 0 is used.
+* `cbucket` : Represents the subordinate Bucket selected through Tree algorithm.
+* `bucket` : Represents the parent Bucket.
+* `array` : Represents the array that stores subordinate Buckets as Binary Tree.
+* `pg_id` : Represents the ID of PG that has the Object to place.
+* `replica` : Represents Replica. For Primary Replica, 0 is used.
 
 [Code 4] shows the tree() function that performs Tree algorithm using initialized Binary Tree. It searches Binary Tree starting from Root Node and places PG in proportion to Weight. Since Hashing must be performed as many times as the height of Binary Tree, it takes O(log N) time to find subordinate Buckets.
 
@@ -148,10 +148,10 @@ cbucket straw2(bucket, pg_id, replica) {
 }
 ```
 
-* cbucket : Represents the subordinate Bucket selected through Tree algorithm.
-* bucket : Represents the parent Bucket.
-* pg_id : Represents the ID of PG that has the Object to place.
-* replica : Represents Replica. For Primary Replica, 0 is used.
+* `cbucket` : Represents the subordinate Bucket selected through Tree algorithm.
+* `bucket` : Represents the parent Bucket.
+* `pg_id` : Represents the ID of PG that has the Object to place.
+* `replica` : Represents Replica. For Primary Replica, 0 is used.
 
 straw2 algorithm calculates the value obtained by using **dist()** function on subordinate Bucket ID and multiplying it by subordinate Bucket's Weight for all subordinate Buckets. It allocates PG to the Bucket with the largest value among the calculated values. dist() function generates Random values like hash() function, but it is a function where the probability of generating larger Random values increases as Weight value increases. [Code 5] shows the straw2() function that performs Straw2 algorithm. Since Hashing must be performed as many times as the number of subordinate Buckets, it takes O(N) time to find subordinate Buckets.
 
@@ -179,10 +179,10 @@ cbucket straw(bucket, pg_id, replica) {
 }
 ```
 
-* cbucket : Represents the subordinate Bucket selected through Tree algorithm.
-* bucket : Represents the parent Bucket.
-* pg_id : Represents the ID of PG that has the Object to place.
-* replica : Represents Replica. For Primary Replica, 0 is used.
+* `cbucket` : Represents the subordinate Bucket selected through Tree algorithm.
+* `bucket` : Represents the parent Bucket.
+* `pg_id` : Represents the ID of PG that has the Object to place.
+* `replica` : Represents Replica. For Primary Replica, 0 is used.
 
 Straw algorithm calculates the value obtained by Hashing subordinate Bucket ID and multiplying it by subordinate Bucket's **Straw** for all subordinate Buckets. It allocates PG to the Bucket with the largest value among the calculated values. [Code 6] shows the straw() function that performs Straw algorithm. Straw value is calculated by sorting subordinate Buckets in ascending order by Weight, then using the Weight value of the subordinate Bucket for which Straw value is to be calculated and the Weight value of the immediately preceding subordinate Bucket. For example, when there are 3 subordinate Buckets A/1.0, B/3.0, C/2.5, they are sorted in A, C, B order according to Weight. Then, to calculate C Bucket's Straw value, C Bucket's Weight value and A Bucket's Weight value are used.
 

@@ -6,7 +6,7 @@ MQ(Message Queue) Protocol인 AMQP(Advanced Message Queuing Protocol)를 분석�
 
 ## 1. AMQP (Advanced Message Queuing Protocol)
 
-AMQP는 **표준 MQ Protocol**으로써 App사이의 Message를 전달할 때 Message를 어떻게 Queuing하고 Routing 할지 정의하고 있다. AMQP는 다양한 Message 전달 옵션을 정의하고 있기 때문에 많은 App들이 AMQP를 이용하여 Message 전달 규칙을 설계하고 이용하고 있다. RabbitMQ는 AMQP를 제공하는 대표적인 MOM(Message-Oriented Middleware)으로써 많은 곳에서 이용되고 있다.
+**AMQP**는 **표준 MQ Protocol**으로써 App사이의 Message를 전달할 때 Message를 어떻게 Queuing하고 Routing 할지 정의하고 있다. AMQP는 다양한 Message 전달 옵션을 정의하고 있기 때문에 많은 App들이 AMQP를 이용하여 Message 전달 규칙을 설계하고 이용하고 있다. RabbitMQ는 AMQP를 제공하는 대표적인 MOM(Message-Oriented Middleware)으로써 많은 곳에서 이용되고 있다.
 
 {{< figure caption="[Figure 1] AMQP Architecture" src="images/amqp-architecture.png" width="800px" >}}
 

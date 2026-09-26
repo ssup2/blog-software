@@ -5,8 +5,9 @@ title: KVM, QEMU 설치, 실행 / Ubuntu 14.04 환경
 ## 1. 설치, 실행 환경
 
 설치, 실행 환경은 다음과 같다.
-* Hardware : Intel i5-6500, DDR4 8GB
-* OS : Ubuntu 14.04.03 LTS 64bit, root user
+
+* **Hardware** : Intel i5-6500, DDR4 8GB
+* **OS** : Ubuntu 14.04.03 LTS 64bit, root user
 
 ## 2. Ubuntu Package 설치
 

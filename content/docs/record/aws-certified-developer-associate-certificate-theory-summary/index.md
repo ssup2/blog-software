@@ -26,10 +26,10 @@ title: AWS Certified Developer Associate 자격증 이론 정리
 ### 2.2. Credential Provider Chain
 
 * 다음의 순서대로 Credential을 찾아 적용
-  * CLI Option : "--region", "--output", "--profile"
-  * Env : AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN
-  * CLI Credential File : ~/.aws/credentials
-  * CLI Configuration File : ~/.aws/config
+  * **CLI Option** : "--region", "--output", "--profile"
+  * **Env** : AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN
+  * **CLI Credential File** : ~/.aws/credentials
+  * **CLI Configuration File** : ~/.aws/config
   * Container Credential
   * Instance Profile Credential
 
@@ -82,8 +82,8 @@ title: AWS Certified Developer Associate 자격증 이론 정리
   * TODO
 * Signer Type
   * Trusted Key Group (현재 권장 Recommand)
-    * Private Key : Application에서 URL Sign으로 이용
-    * Public Key : CloudFront에서 Sign한 URL 검증용으로 이용
+    * **Private Key** : Application에서 URL Sign으로 이용
+    * **Public Key** : CloudFront에서 Sign한 URL 검증용으로 이용
   * CloudFront Key Pair를 갖고 있는 계정 이용 (기본 방식, 권장 X)
 
 ## 4. ECS
@@ -115,8 +115,8 @@ title: AWS Certified Developer Associate 자격증 이론 정리
     * Hardcoding
     * SSM Parameter Store, Secret Manager의 값을 읽어서 환경 변수로 전달 가능
   * Task 내부의 Container 사이의 Data 공유를 위한 Volume 설정 가능 (Bind Mount)
-    * EC2 Launch Type : EC2 Instance에 Data가 저장되기 때문에 EC2 Lifecycle에 따라서 Data의 Lifecycle도 저장, Volume Size도 EC2 Instance Type에 따라 결정
-    * Fargate Launch Type : Volume Sie가 20GB가 Default이며 최대 200GB까지 이용 가능
+    * **EC2 Launch Type** : EC2 Instance에 Data가 저장되기 때문에 EC2 Lifecycle에 따라서 Data의 Lifecycle도 저장, Volume Size도 EC2 Instance Type에 따라 결정
+    * **Fargate Launch Type** : Volume Sie가 20GB가 Default이며 최대 200GB까지 이용 가능
 * Service
   * Task의 집합
   * AutoScaling 지원
@@ -132,9 +132,9 @@ title: AWS Certified Developer Associate 자격증 이론 정리
   * ECS Service에 소속되어 있는 Task의 평균 Memory 사용량
   * ECS Service에 소속되어 있는 Task당 ALB가 보내는 평균 요청량
 * 다음의 Algorithm 지원
-  * Target Tracking : CloudWatch Metric이 특정 값을 충족시키도록 Scale In/Out 수행
-  * Step Scailing : CloudWatch Alarm이 발생할때 마다 단계적으로 Scale In/Out 수행
-  * Scheduled Scaling : Data/Time에 맞추어 Scale In/Out 수행
+  * **Target Tracking** : CloudWatch Metric이 특정 값을 충족시키도록 Scale In/Out 수행
+  * **Step Scailing** : CloudWatch Alarm이 발생할때 마다 단계적으로 Scale In/Out 수행
+  * **Scheduled Scaling** : Data/Time에 맞추어 Scale In/Out 수행
 * EC2 Launch Type을 이용하는 경우 EC2 Instance도 Scaling 수행 필요
   * ASG를 활용하여 EC2 Instance Scaling 수행
     * ASG Group의 평균 CPU 사용률 기반
@@ -167,17 +167,17 @@ title: AWS Certified Developer Associate 자격증 이론 정리
 * 다양한 언어 지원 : Ex) Go, Java, Java with Tomcat, .Net Core, Node.js, PHP...
 * Tier
   * 배포 형상을 의미
-  * Web Server Tier : EC2 Instance가 ASG로 묶여 있고, ELB로부터 Traffic 수신하여 처리 
-  * Worker Tier : EC2 Instance가 ASG로 묶여 있고, SQS로부터 Job을 수신하여 처리
+  * **Web Server Tier** : EC2 Instance가 ASG로 묶여 있고, ELB로부터 Traffic 수신하여 처리 
+  * **Worker Tier** : EC2 Instance가 ASG로 묶여 있고, SQS로부터 Job을 수신하여 처리
 * CloudFormation을 기반으로 동작
 
 ### 5.1. Deployment Mode
 
-* All at once : 한번에 모든 New Version App 배포, 일시적 App 중단 발생
-* Rolling : 소수의 Old Version App을 New Version App으로 점차적으로 교체, 배포한 New Version App이 정상 상태가 되어야 다음 Old Version App이 배포 수행, Old Version App을 먼저 제거하고 제거한 만큼 New Version App을 구동하는 방식이기 때문에 New Version App 개수 + Old Version App의 개수는 변하지 않음
-* Rolling with Additional Batches : Rolling 방식과 유사하지만 New Version App을 먼저 생성하고 Old Version App을 제거하는 방식이기 때문에 일시적으로 New Version App 개수 + Old Version App의 개수 증가
-* Immutable : 새로운 AGS를 생성하고 생성한 ASG에 New Version App을 모두 구동한 이후 Swap 방식으로 한번에 교체
-* Blue/Green : Elastic Beanstalk에서 지원하는 방식은 아니지만 수동으로 Blue/Green 배포 수행 가능. 별도의 배포 환경을 생성하고 생성한 배포환경에 New Version App을 구동. 이후에 Route53을 이용하여 Traffic을 점차적으로 New Version App으로 넘김
+* **All at once** : 한번에 모든 New Version App 배포, 일시적 App 중단 발생
+* **Rolling** : 소수의 Old Version App을 New Version App으로 점차적으로 교체, 배포한 New Version App이 정상 상태가 되어야 다음 Old Version App이 배포 수행, Old Version App을 먼저 제거하고 제거한 만큼 New Version App을 구동하는 방식이기 때문에 New Version App 개수 + Old Version App의 개수는 변하지 않음
+* **Rolling with Additional Batches** : Rolling 방식과 유사하지만 New Version App을 먼저 생성하고 Old Version App을 제거하는 방식이기 때문에 일시적으로 New Version App 개수 + Old Version App의 개수 증가
+* **Immutable** : 새로운 AGS를 생성하고 생성한 ASG에 New Version App을 모두 구동한 이후 Swap 방식으로 한번에 교체
+* **Blue/Green** : Elastic Beanstalk에서 지원하는 방식은 아니지만 수동으로 Blue/Green 배포 수행 가능. 별도의 배포 환경을 생성하고 생성한 배포환경에 New Version App을 구동. 이후에 Route53을 이용하여 Traffic을 점차적으로 New Version App으로 넘김
 
 ### 5.2. Configuration
 
@@ -243,10 +243,10 @@ title: AWS Certified Developer Associate 자격증 이론 정리
 
 * Workflow Service
 * Stage Type
-  * Source : CodeCommit, EC#, S3, Bitbucket, Github
-  * Build : CodeBuild, Jenkins, CloudeBees, TeamCity
-  * Test : CodeBuild, AWS Device Farm
-  * Deploy : CodeDeploy, Elastic Beanstalk, CloudFormation, ECS, S3
+  * **Source** : CodeCommit, EC#, S3, Bitbucket, Github
+  * **Build** : CodeBuild, Jenkins, CloudeBees, TeamCity
+  * **Test** : CodeBuild, AWS Device Farm
+  * **Deploy** : CodeDeploy, Elastic Beanstalk, CloudFormation, ECS, S3
 * 각 Stage은 직렬 또는 병렬로 수행 가능
 * Manual Approval 기능도 제공
 * Artifacts
@@ -272,19 +272,19 @@ title: AWS Certified Developer Associate 자격증 이론 정리
 
 * Build 방법 정의
 * 경로
-  * Default : Code Root의 buildspec.yml
+  * **Default** : Code Root의 buildspec.yml
   * User의 설정을 통해서 특정 파일 지정도 가능
-* Env : 환경 변수
-  * variables : plaintext 이용
-  * parameter-store : SSM Parameter Store의 저장값 이용
-  * secrets-manager : Secret Manager의 저장값 이용
-* Phases : 명령어 정의
-  * install : Build Dependency 해결을 위한 명령어
-  * pre_build : Build 수행전 마지막 명령어
-  * Build : Build 수행을 위한 명령어
-  * post_build : Build 수행후 실행하는 명령어
-* Artifacts : S3에 Upload 되어야하는 파일
-* Cache : Build 성능 향상을 위해 Caching 되어야 하는 File
+* `Env` : 환경 변수
+  * `variables` : plaintext 이용
+  * `parameter-store` : SSM Parameter Store의 저장값 이용
+  * `secrets-manager` : Secret Manager의 저장값 이용
+* `Phases` : 명령어 정의
+  * `install` : Build Dependency 해결을 위한 명령어
+  * `pre_build` : Build 수행전 마지막 명령어
+  * `Build` : Build 수행을 위한 명령어
+  * `post_build` : Build 수행후 실행하는 명령어
+* `Artifacts` : S3에 Upload 되어야하는 파일
+* `Cache` : Build 성능 향상을 위해 Caching 되어야 하는 File
 
 ### 6.4. CodeDeploy
 
@@ -300,15 +300,15 @@ title: AWS Certified Developer Associate 자격증 이론 정리
 
 #### 6.4.2. appspec.yml
 
-* files : Source Code를 어디서 받을지 지정
-* hooks : 배포를 어떻게 진행할지 설정
+* `files` : Source Code를 어디서 받을지 지정
+* `hooks` : 배포를 어떻게 진행할지 설정
   * ApplicationStop
   * DownloadBundle
   * BeforeInstall
   * Install
   * AfterInstall
   * ApplicationStart
-  * ValidateService : 정상적으로 배포가 되었는지 확인, 반드시 설정 필요
+  * `ValidateService` : 정상적으로 배포가 되었는지 확인, 반드시 설정 필요
 
 ### 6.5. CodeStar
 
@@ -359,26 +359,26 @@ title: AWS Certified Developer Associate 자격증 이론 정리
 
 ### 8.1. X-Ray Concepts
 
-* Segments : Application, Service에서 X-Ray에게 전송하는 최소 정보
-* Subsegments : Segment에 좀더 자세한 정보를 붙여야할 경우 Segment 하위에 붙는 정보
-* Trace : Segment의 집합으로 구성되는 추적 정보
-* Sampling : X-Ray에게 정보를 전달하는 빈도수, X-Ray에게 많은 정보를 보낼수록 비용 증가
-* Annotation : Trace의 Indexing에 이용되는 Key-Value Pair, Filter를 이용하여 Indexing된 Trace 검색 가능
-* Metadata : Index되지 않는 Key-Value Pair, 검색에도 이용 불가능
+* **Segments** : Application, Service에서 X-Ray에게 전송하는 최소 정보
+* **Subsegments** : Segment에 좀더 자세한 정보를 붙여야할 경우 Segment 하위에 붙는 정보
+* **Trace** : Segment의 집합으로 구성되는 추적 정보
+* **Sampling** : X-Ray에게 정보를 전달하는 빈도수, X-Ray에게 많은 정보를 보낼수록 비용 증가
+* **Annotation** : Trace의 Indexing에 이용되는 Key-Value Pair, Filter를 이용하여 Indexing된 Trace 검색 가능
+* **Metadata** : Index되지 않는 Key-Value Pair, 검색에도 이용 불가능
 
 ### 8.2. Sampling Rules
 
 * X-Ray에게 더 많은 Trace를 전송할 수록 비용 증가
 * Sampling Rule 변경은 X-Ray 중앙에서 설정하며, App에서는 변경 불필요
-* Reservior : 초당 X-Ray로 전송되어야 Trace 정보
+* **Reservior** : 초당 X-Ray로 전송되어야 Trace 정보
   * Ex) reservior 5 : 초당 5개의 Trace를 전송
-* Rate : Reservior를 초과하는 Trace를 전송하는 비율
+* **Rate** : Reservior를 초과하는 Trace를 전송하는 비율
 
 ### 8.3. with ECS
 
 * X-Ray Daemon을 2가지 형태로 구성 가능
-* X-Ray Daemon Container : X-Ray Daemon을 모든 EC2 Instance에 하나씩 Container 형태로 구성
-* Sidecar : X-Ray Daemon을 App Container의 Sidecar로 구성, Fargate 이용시 Sidecar 형태로만 구성 지원
+* **X-Ray Daemon Container** : X-Ray Daemon을 모든 EC2 Instance에 하나씩 Container 형태로 구성
+* **Sidecar** : X-Ray Daemon을 App Container의 Sidecar로 구성, Fargate 이용시 Sidecar 형태로만 구성 지원
 
 ## 9. CloudTrail
 
@@ -403,7 +403,7 @@ title: AWS Certified Developer Associate 자격증 이론 정리
 * CloudTrail Insights Event
   * CloudTrail Insights에서 발생시키는 Event
 
-### 9.1. CloudTrail Insights
+### 9.2. CloudTrail Insights
 
 * CloudTrail의 활동 기록을 바탕으로 비정상 동작 탐지 수행
 * 비정상 동작 탐지시 CloudTrail Insights Event를 발생
@@ -430,10 +430,10 @@ title: AWS Certified Developer Associate 자격증 이론 정리
 * Lambda를 Edge Location에서 실행
 * 빠른 반응의 App 구현 가능
 * 다음의 4곳에 Lambda를 위치 시켜 CDN Contents 변경 가능
-  * Request : User -> CloudFront 사이
-  * Request : CloudFront -> Origin 사이
-  * Response : Origin -> CloudFront 사이
-  * Response : CloudFront -> User 사이
+  * **Request** : User -> CloudFront 사이
+  * **Request** : CloudFront -> Origin 사이
+  * **Response** : Origin -> CloudFront 사이
+  * **Response** : CloudFront -> User 사이
 
 ### 10.3. Async 호출
 
@@ -516,9 +516,9 @@ title: AWS Certified Developer Associate 자격증 이론 정리
 ### 10.11. Code Dependency
 
 * Lambda 함수 Build를 위한 Package도 같이 제공 필요
-  * Node.js : node_modules
-  * Python : pip --target
-  * Java : .jar
+  * **Node.js** : node_modules
+  * **Python** : pip --target
+  * **Java** : .jar
 * ZIP 파일을 통해 Lambda에 직접 Upload, 50MB 초과시 S3를 활용
 * Native Library는 ZIP 파일에 추가 필요, AWS SDK는 별도의 추가 필요 없음
 
@@ -556,13 +556,13 @@ title: AWS Certified Developer Associate 자격증 이론 정리
 
 ### 10.16. Limitation
 
-* Memory : 128MB ~ 10GB
-* Exeuction Time : 900seconds
-* Env : 4KB
-* Disk Capacity (/tmp) : 512MB
-* Concurreny Exeuction : 1000
+* **Memory** : 128MB ~ 10GB
+* **Exeuction Time** : 900seconds
+* **Env** : 4KB
+* **Disk Capacity (/tmp)** : 512MB
+* **Concurreny Exeuction** : 1000
 * Lambda 함수 Deployment Size : 50MB
-* Uncompressed Deployment : 250MB
+* **Uncompressed Deployment** : 250MB
 
 ## 11. DynamoDB
 
@@ -625,9 +625,9 @@ title: AWS Certified Developer Associate 자격증 이론 정리
 ### 11.3. Throttling
 
 * 원인
-  * Hot Keys : 하나의 Partition Key로만 요청이 몰릴 경우
-  * Hot Partitions : 하나의 Partition으로만 요청이 몰릴 경우
-  * Very Large Items : RCU, WCU를 초과하는 경우
+  * **Hot Keys** : 하나의 Partition Key로만 요청이 몰릴 경우
+  * **Hot Partitions** : 하나의 Partition으로만 요청이 몰릴 경우
+  * **Very Large Items** : RCU, WCU를 초과하는 경우
 * 해결 방안
   * Exponential Backkoff 수행
   * Parition Key 분배
@@ -663,8 +663,8 @@ title: AWS Certified Developer Associate 자격증 이론 정리
 * DAX Cluster는 별도의 Provisioning을 수행해야 하며 최대 10개의 Node까지 Cluster로 구성 가능
   * 고 가용성을 위해서 Multi-AZ 구성 권장
 * vs ElastiCache
-  * DAX : Item Caching 수행
-  * ElastiCache : 검사 결과를 Caching
+  * **DAX** : Item Caching 수행
+  * **ElastiCache** : 검사 결과를 Caching
 
 ### 11.7. DynamoDB Streams
 
@@ -714,7 +714,7 @@ title: AWS Certified Developer Associate 자격증 이론 정리
 
 * Lambda
 * HTTP
-  * Internal HTTP API, ALB : API Gateway의 Rate limiting, Caching, 인증/인가, API Key 기능을 활용하기 위해서
+  * **Internal HTTP API**, **ALB** : API Gateway의 Rate limiting, Caching, 인증/인가, API Key 기능을 활용하기 위해서
 * AWS Service
   * AWS Step Function 노출, SQS로 Message 전송
 
@@ -762,7 +762,7 @@ title: AWS Certified Developer Associate 자격증 이론 정리
 
 ### 12.4. Caching
 
-* TTL : 300 seconds (0 ~ 3600s)
+* **TTL** : 300 seconds (0 ~ 3600s)
 * Stage마다 설정 가능
 * Method마다 Overide하여 설정 가능
 * Caching 정보 암호화 기능 제공
@@ -782,13 +782,13 @@ title: AWS Certified Developer Associate 자격증 이론 정리
 
 ### 12.6. Monitoring
 
-* Logging : CloudWatch Logs를 통해서 Log 수집 가능
-* Tracing : X-Ray를 통해서 Tracing 정보 수집 가능
-* Metric : CloudWatch Metrics를 통해서 Metric 수집 가능
+* **Logging** : CloudWatch Logs를 통해서 Log 수집 가능
+* **Tracing** : X-Ray를 통해서 Tracing 정보 수집 가능
+* **Metric** : CloudWatch Metrics를 통해서 Metric 수집 가능
   * CacheHitCount & CacheMissCount
-  * Count: API 호출 횟수
-  * IntegrationLatency: API Gateway, Backend 사이의 요청, 수신 Latency 
-  * Latency : Client, Backend 사이의 요청, 수신 Latency
+  * `Count`: API 호출 횟수
+  * `IntegrationLatency`: API Gateway, Backend 사이의 요청, 수신 Latency 
+  * `Latency` : Client, Backend 사이의 요청, 수신 Latency
   * 4XXError & 5XXError
 
 ### 12.7. Throttling
@@ -860,7 +860,7 @@ title: AWS Certified Developer Associate 자격증 이론 정리
 * Password Reset
 * Email & Phone Number Verification
 * Multi-factor Authentication
-* Federated Identities : Facebook, Google, SAML, OIDC
+* **Federated Identities** : Facebook, Google, SAML, OIDC
 * JWT 기반 인증 가능
 * ALB를 통한 인증 연동 가능
 * 중간 중간 Lambda 함수를 호출하여 Custom 인증 과정 수행 가능
@@ -965,8 +965,8 @@ title: AWS Certified Developer Associate 자격증 이론 정리
   * 일정기간 동안 변경되지 않을경우 Event 전송 가능
 * TTL 설정 가능
 * Tier
-  * Free Tier : 최대 10000개, Max Size 4KB
-  * Advanced Tier : 최대 100000개, Max Size 8KB
+  * **Free Tier** : 최대 10000개, Max Size 4KB
+  * **Advanced Tier** : 최대 100000개, Max Size 8KB
 
 ### 20.3. Secrets Manager
 
@@ -981,6 +981,6 @@ title: AWS Certified Developer Associate 자격증 이론 정리
 * SSL/TLS 인증서 관리 Service
 * ALB 와의 연계 지원
 
-## 22. Reference
+## 21. Reference
 
 * [https://www.udemy.com/course/best-aws-certified-developer-associate/](https://www.udemy.com/course/best-aws-certified-developer-associate/)

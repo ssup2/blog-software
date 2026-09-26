@@ -6,7 +6,7 @@ Analyzes Kafka's Transaction technique.
 
 ## 1. Kafka Transaction
 
-Kafka Transaction, as the name suggests, refers to a **technique that bundles multiple Records sent by Producer to Kafka into one Transaction for processing**. Here, multiple Records can be bundled into one Transaction for processing even when delivered to multiple Topics and Partitions. On the other hand, Kafka Transaction does not support a technique where Consumer bundles multiple Records into one Transaction for processing. That is, Kafka Transaction is a Producer-centric Transaction technique.
+**Kafka Transaction**, as the name suggests, refers to a **technique that bundles multiple Records sent by Producer to Kafka into one Transaction for processing**. Here, multiple Records can be bundled into one Transaction for processing even when delivered to multiple Topics and Partitions. On the other hand, Kafka Transaction does not support a technique where Consumer bundles multiple Records into one Transaction for processing. That is, Kafka Transaction is a Producer-centric Transaction technique.
 
 Kafka Transaction is internally implemented using two-phase commit technique, and to use Kafka Transaction, **Idempotence functionality** (`enable.idempotence`) and **In-flight Request limiting functionality** (`max.in.flight.requests.per.connection`) must be set to `5` or less to prevent duplicate storage of identical Events/Data. Kafka Transaction is largely divided into two methods: **Produce-only Transaction** and **Consume-Produce Transaction**.
 

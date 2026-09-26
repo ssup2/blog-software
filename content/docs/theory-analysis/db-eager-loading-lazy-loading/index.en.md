@@ -27,7 +27,7 @@ public class Student{
 }
 ```
 
-Eager loading, as the name suggests, is a technique that **loads all related data at the moment data is loaded**. [Code 1] shows an example of eager loading in Java Spring Framework (JPA). You can see that the School class has a 1:N relationship with Student, and that it is configured with the eager approach. Therefore, when School data is loaded, related Student information is also loaded at the same time. Loading at the same time here does not guarantee that all data is obtained in a single SQL query. Multiple SQL queries may be executed. This varies by DB library and framework.
+**Eager loading**, as the name suggests, is a technique that **loads all related data at the moment data is loaded**. [Code 1] shows an example of eager loading in Java Spring Framework (JPA). You can see that the School class has a 1:N relationship with Student, and that it is configured with the eager approach. Therefore, when School data is loaded, related Student information is also loaded at the same time. Loading at the same time here does not guarantee that all data is obtained in a single SQL query. Multiple SQL queries may be executed. This varies by DB library and framework.
 
 Because related data is loaded at the same time, it has the advantage that application developers can easily predict when and which data will be loaded. On the other hand, it has the disadvantage of loading data that is not used by the application. One more point to note is that eager loading is not a fundamental technique for solving the "N+1 problem." As mentioned earlier, multiple SQL queries may be executed when loading related data.
 

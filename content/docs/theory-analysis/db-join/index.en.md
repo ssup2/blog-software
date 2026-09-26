@@ -6,7 +6,7 @@ title: DB Join
 
 {{< figure caption="[Figure 1] DB Join Dataset Example" src="images/db-join-dataset-example.png" width="700px" >}}
 
-Join is an RDB operation mainly used when querying related data spread across different tables together in a single query result. [Figure 1] shows an example dataset for explaining join operations. The `Departments` table and `Employees` table exist, and join is performed using the `id` column of the `Departments` table and the `dept_id` column of the `Employees` table as join keys.
+**Join** is an RDB operation mainly used when querying related data spread across different tables together in a single query result. [Figure 1] shows an example dataset for explaining join operations. The `Departments` table and `Employees` table exist, and join is performed using the `id` column of the `Departments` table and the `dept_id` column of the `Employees` table as join keys.
 
 ### 1.1. Join Type
 

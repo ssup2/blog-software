@@ -5,11 +5,12 @@ title: etcd Server Addition/Deletion
 ## 1. Execution Environment
 
 The execution environment is as follows.
+
 * etcd v3.4.0
 * Node
     * Ubuntu 18.04
-    * Node01 : 192.168.0.61
-    * Node02 : 192.168.0.62
+    * **Node01** : 192.168.0.61
+    * **Node02** : 192.168.0.62
 
 ## 2. Single etcd Server Configuration
 

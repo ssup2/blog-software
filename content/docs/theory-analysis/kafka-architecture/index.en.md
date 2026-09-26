@@ -6,7 +6,7 @@ Analyze the architecture of Kafka, a distributed message queue.
 
 ## 1. Kafka Architecture
 
-Kafka is a distributed message queue based on publish-subscribe. Kafka has the characteristic of storing received messages for a certain period and allowing reprocessing, so it is generally used as an **Event Bus** in Event Driven Architecture. It also has the characteristic of high message throughput, and based on this, it is also used as a **Data Stream Queue** for big data processing platforms like Storm.
+**Kafka** is a distributed message queue based on publish-subscribe. Kafka has the characteristic of storing received messages for a certain period and allowing reprocessing, so it is generally used as an **Event Bus** in Event Driven Architecture. It also has the characteristic of high message throughput, and based on this, it is also used as a **Data Stream Queue** for big data processing platforms like Storm.
 
 {{< figure caption="[Figure 1] Kafka Architecture" src="images/kafka-architecture.png" width="1000px" >}}
 

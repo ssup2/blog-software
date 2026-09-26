@@ -4,7 +4,7 @@ title: ZeroMQ
 
 ## 1. ZeroMQ
 
-ZeroMQ is a High-performance Async Messaging Library targeted at distributed and parallel Systems. It defines fundamental Message Patterns and helps easily implement the defined Message Patterns. It also has the advantage of supporting various languages.
+**ZeroMQ** is a High-performance Async Messaging Library targeted at distributed and parallel Systems. It defines fundamental Message Patterns and helps easily implement the defined Message Patterns. It also has the advantage of supporting various languages.
 
 ### 1.1. Messaging Pattern
 

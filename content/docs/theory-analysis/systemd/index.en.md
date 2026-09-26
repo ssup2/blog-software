@@ -6,7 +6,7 @@ This document analyzes systemd, which is used as the Init Process in most Linux 
 
 ## 1. systemd
 
-systemd is a System and Service Manager that manages the OS comprehensively through cooperation with the Linux Kernel. Initially, it was developed to replace the poor Service (Daemon) management functionality of SysVinit, which was commonly used as the Init Process. Over time, systemd has added functionality to manage System Resources such as Log, User Session, Network, Device, Mount, in addition to Service management functionality, and now performs the role of managing the overall System.
+**systemd** is a System and Service Manager that manages the OS comprehensively through cooperation with the Linux Kernel. Initially, it was developed to replace the poor Service (Daemon) management functionality of SysVinit, which was commonly used as the Init Process. Over time, systemd has added functionality to manage System Resources such as Log, User Session, Network, Device, Mount, in addition to Service management functionality, and now performs the role of managing the overall System.
 
 SysVinit provided only limited Service functionality such as executing Service Scripts written by System administrators and managing Service Processes. systemd can control Services in detail through Service Config files and also provides Service Log management functionality. It also provides an environment where communication between Services can be easily implemented through D-BUS, a Message BUS between Processes.
 
@@ -14,7 +14,7 @@ SysVinit performed Services sequentially, but systemd executes and initializes m
 
 ### 1.1. journald
 
-journald is a Daemon that stores and manages major Logs in Linux. journald leaves the following contents as Logs under the **/var/log/journal** folder.
+journald is a Daemon that stores and manages major Logs in Linux. journald leaves the following contents as Logs under the `/var/log/journal` folder.
 
 * Records Kernel Logs transmitted through /proc/kmsg.
 * Records Logs left by Apps through the syslog(3) function. Logs are transmitted to journald through the /dev/log (/run/systemd/journal/dev-log) Domain Socket.
@@ -35,6 +35,6 @@ journald uses Structure instead of Plain Text like rsyslogd when recording Logs,
 * [https://www.maketecheasier.com/systemd-what-you-need-to-know-linux/](https://www.maketecheasier.com/systemd-what-you-need-to-know-linux/)
 * journald : [https://unix.stackexchange.com/questions/205883/understand-logging-in-linux/](https://unix.stackexchange.com/questions/205883/understand-logging-in-linux/)
 * journald : [https://askubuntu.com/questions/925440/relationship-of-rsyslog-and-journald-on-ubuntu-16-04](https://askubuntu.com/questions/925440/relationship-of-rsyslog-and-journald-on-ubuntu-16-04)
-* jorunald : [https://www.loggly.com/blog/why-journald/](https://www.loggly.com/blog/why-journald/)
+* journald : [https://www.loggly.com/blog/why-journald/](https://www.loggly.com/blog/why-journald/)
 
 

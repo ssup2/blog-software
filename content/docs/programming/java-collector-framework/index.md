@@ -8,7 +8,7 @@ Java Collections Framework에서 제공하는 Interface와 Class를 분석한다
 
 {{< figure caption="[Figure 1] Java Collection Interface 관계도" src="images/collection-interface.png" width="1000px" >}}
 
-Collection Interface는 Object Group을 관리하는 Interface를 제공하는 뼈대 역할을 수행한다. [Figure 1]은 Collection Interface의 관계도를 나타내고 있다.
+**Collection Interface**는 Object Group을 관리하는 Interface를 제공하는 뼈대 역할을 수행한다. [Figure 1]은 Collection Interface의 관계도를 나타내고 있다.
 
 ### 1.1. Interface
 

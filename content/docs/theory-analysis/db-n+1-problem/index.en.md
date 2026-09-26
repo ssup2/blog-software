@@ -28,7 +28,7 @@ public class Student{
 }
 ```
 
-The N+1 problem refers to a situation where, when fetching N records (data), the application developer expects a single SQL query to run, but N+1 queries actually run and affect application performance. The N+1 problem generally occurs when the application uses abstraction techniques such as ORM (Object Relational Mapping) to abstract SQL queries, rather than using SQL directly in the application.
+The **N+1 problem** refers to a situation where, when fetching N records (data), the application developer expects a single SQL query to run, but N+1 queries actually run and affect application performance. The N+1 problem generally occurs when the application uses abstraction techniques such as ORM (Object Relational Mapping) to abstract SQL queries, rather than using SQL directly in the application.
 
 [Code 1] shows an entity example in Java Spring Framework (JPA) where the N+1 problem can occur. You can see that the School entity and Student entity have a 1:N relationship. If there are 2000 School records and `findAll()` is called on the School entity, one SELECT SQL query is executed to fetch all School records, and 2000 SELECT SQL queries are executed to fetch Students belonging to each School. You can see that a total of N+1 SQL queries are executed. The most representative way to solve this N+1 problem is to use **table join**. In Java Spring Framework, you can explicitly specify a join using JPQL.
 

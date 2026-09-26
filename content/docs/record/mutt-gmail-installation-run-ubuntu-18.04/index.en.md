@@ -5,6 +5,7 @@ title: mutt Gmail Installation and Usage / Ubuntu 18.04 Environment
 ## 1. Installation and Usage Environment
 
 The installation and usage environment is as follows.
+
 * Ubuntu 18.04 LTS 64bit, root user
 
 ## 2. mutt Installation
@@ -18,6 +19,7 @@ Install the mutt package.
 ## 3. Gmail Access Permission Configuration
 
 Configure Gmail access permissions through the links below.
+
 * Guide: [https://support.google.com/accounts/answer/6010255?hl=en](https://support.google.com/accounts/answer/6010255?hl=en)
 * Secure Apps: [https://myaccount.google.com/lesssecureapps](https://myaccount.google.com/lesssecureapps)
 
@@ -62,6 +64,7 @@ $ mutt
 ```
 
 Run mutt. Shortcuts are as follows.
+
 * m: Compose a new mail message.
 * G: Fetch new messages.
 

@@ -5,14 +5,16 @@ title: Android 설치 / ODROID-XU, ODROID-VU 환경
 ## 1. 설치, 실행 환경
 
 설치, 실행 환경은 다음과 같다.
-* PC : Windows 7 64bit
-* VM on PC : Ubuntu 12.04LTS 64bit
+
+* **PC** : Windows 7 64bit
+* **VM on PC** : Ubuntu 12.04LTS 64bit
 * ODROID-XU, 16GB emmc
 * Android 4.2.2 Alpha 2.5 Release
 
 ## 2. Windows에 ADB Driver 설치
 
 Windows의 Device Manager를 통해 ADB USB Driver를 설치한다.
+
 * http://com.odroid.com/sigong/nf-file-board/nfile-board-view.php?bid=22
 
 ## 3. Ubuntu Package 설치
@@ -59,7 +61,7 @@ $ tar zxvf arm-eabi-4.6.tar.gz
 
 Cross Compiler를 설치한다.
 
-* Download : http://dn.odroid.com/ODROID-XU/compiler/arm-eabi-4.6.tar.gz
+* **Download** : http://dn.odroid.com/ODROID-XU/compiler/arm-eabi-4.6.tar.gz
 
 ```shell {caption="[File 2] ~/.bashrc", linenos=table}
 ...
@@ -71,6 +73,7 @@ PATH=/usr/local/arm-eabi-4.6/bin:$PATH
 ## 7. Prebuilt Images와 Sources Download
 
 Prebuilt Image들을 아래의 URL을 통해서 Download 한다.
+
 * Prebuilt Image
   * http://dn.odroid.com/ODROID-XU/Firmware/01-10-2014/emmc-self-installer.img.zip
 * Android, Kernel

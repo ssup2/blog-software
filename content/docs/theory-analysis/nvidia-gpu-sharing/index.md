@@ -4,7 +4,7 @@ title: NVIDIA GPU Sharing
 
 ## 1. NVIDIA GPU Sharing
 
-GPU Sharing 기법은 다수의 Process가 하나의 GPU를 공유하여 사용하는 기법을 의미한다. 크게 **Time-Slicing**, **MPS**, **MIG** 3가지 기법이 존재한다.
+**GPU Sharing** 기법은 다수의 Process가 하나의 GPU를 공유하여 사용하는 기법을 의미한다. 크게 **Time-Slicing**, **MPS**, **MIG** 3가지 기법이 존재한다.
 
 {{< figure caption="[Figure 1] Example Applications" src="images/example-apps.png" width="900px" >}}
 

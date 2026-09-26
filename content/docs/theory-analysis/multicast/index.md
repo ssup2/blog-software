@@ -6,7 +6,7 @@ Network Multicast를 분석한다.
 
 ## 1. Multicast
 
-Network Packet 전송 방법은 크게 Unicast, Broadcast, Multicast 3가지 방식을 취한다. Unicast는 Packet을 하나의 Node에게 전달하는 방식이다. 일반적인 통신에서 가장 많이 이용하는 방식이다. Broadcast는 같은 네트워크 안에 있는 모든 Node에게 Packet을 전달하는 방식이다. ARP(Address Resolution Protocol)가 대표적인 예이다. 마지막으로 모든 Node가 아닌 특정 Group에 속해있는 Node들에게만 Packet을 전달하는 Multicast가 있다. 대용량의 Packet을 특정 Node들에게만 전송해야하는 Multimedia Streaming에서 이용되고 있다.
+Network Packet 전송 방법은 크게 Unicast, Broadcast, Multicast 3가지 방식을 취한다. Unicast는 Packet을 하나의 Node에게 전달하는 방식이다. 일반적인 통신에서 가장 많이 이용하는 방식이다. Broadcast는 같은 네트워크 안에 있는 모든 Node에게 Packet을 전달하는 방식이다. ARP(Address Resolution Protocol)가 대표적인 예이다. 마지막으로 모든 Node가 아닌 특정 Group에 속해있는 Node들에게만 Packet을 전달하는 **Multicast**가 있다. 대용량의 Packet을 특정 Node들에게만 전송해야하는 Multimedia Streaming에서 이용되고 있다.
 
 ### 1.1. Multicast Address
 

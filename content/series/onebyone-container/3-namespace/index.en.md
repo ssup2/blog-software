@@ -4,7 +4,7 @@ title: 3. Namespace
 
 ## Namespace
 
-Each container operates in an independent space without knowing the existence of other containers running on the same host, and this property is expressed as being **isolated**. This isolation characteristic of containers is implemented using the Namespace function of the Linux kernel. Namespace refers to the **isolated space** to which a process belongs.
+Each container operates in an independent space without knowing the existence of other containers running on the same host, and this property is expressed as being **isolated**. This isolation characteristic of containers is implemented using the Namespace function of the Linux kernel. **Namespace** refers to the **isolated space** to which a process belongs.
 
 ```console {caption="[Shell 1] Host", linenos=table}
 # Check Host Process
@@ -127,12 +127,12 @@ overlay on / type overlay (rw,relatime,lowerdir=/var/lib/docker/overlay2/l/BAAGB
 
 There are various types of Namespaces depending on what they isolate. Representative Namespace types are as follows:
 
-* PID Namespace : Isolates PID (Process ID).
-* Network Namespace : Isolates Network.
-* Mount Namespace : Isolates Mount information.
-* UTS Namespace : Isolates Hostname.
-* IPC Namespace : Isolates IPC (Interprocess Communication).
-* UID Namespace : Isolates UID (User ID).
+* **PID Namespace** : Isolates PID (Process ID).
+* **Network Namespace** : Isolates Network.
+* **Mount Namespace** : Isolates Mount information.
+* **UTS Namespace** : Isolates Hostname.
+* **IPC Namespace** : Isolates IPC (Interprocess Communication).
+* **UID Namespace** : Isolates UID (User ID).
 
 {{< figure caption="[Figure 1] Host, Container Namespace" src="images/namespace.png" width="900px" >}}
 

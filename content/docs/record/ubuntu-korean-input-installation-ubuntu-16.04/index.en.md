@@ -5,6 +5,7 @@ title: Ubuntu Korean Input Configuration / Ubuntu 16.04 Environment
 ## 1. Configuration Environment
 
 The configuration environment is as follows.
+
 * Ubuntu 16.04 LTS 64bit, root user
 
 ## 2. Korean Installation (IBus)
@@ -12,6 +13,7 @@ The configuration environment is as follows.
 {{< figure caption="[Figure 1] Ubuntu IBus Korean Package Installation" src="images/ubuntu-hangul-install.png" width="600px" >}}
 
 Install the Ubuntu IBus Korean Package.
+
 * System Settings -> Language Support -> Install / Remove Languages... 
 * Select Korean -> Apply
 * Reboot Ubuntu to apply IBus.

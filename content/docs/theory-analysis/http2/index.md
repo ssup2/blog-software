@@ -6,7 +6,7 @@ HTTP2를 분석한다.
 
 ## 1. HTTP2
 
-HTTP/2는 기존 HTTP/1의 느린 성능 개선을 목적으로 탄생하게된 Protocol이다. HTTP/2가 HTTP/1에 비해서 개선된 점들은 다음과 같다.
+**HTTP/2**는 기존 HTTP/1의 느린 성능 개선을 목적으로 탄생하게된 Protocol이다. HTTP/2가 HTTP/1에 비해서 개선된 점들은 다음과 같다.
 
 ### 1.1. Stream, Multiplexing
 
@@ -45,8 +45,8 @@ HTTP Message는 **Header Section, Body, Trailer Section**의 세 구간으로 �
 
 HTTP/2에서는 Header와 Trailer 모두 **HEADERS Frame**으로 전송된다. Trailer를 위한 별도의 Frame Type은 존재하지 않으며, Stream을 시작하는 첫 HEADERS Frame이 Header 역할을, Body (DATA Frame) 뒤에 전송되는 마지막 HEADERS Frame (END_STREAM Flag 포함)이 Trailer 역할을 수행한다.
 
-* Header : 요청 또는 응답의 Meta Data를 나타낸다. HTTP/2에서는 HTTP/1.1의 Request Line (`GET /home HTTP/1.1`)과 Status Line (`HTTP/1.1 200 OK`)도 별도의 라인이 아니라 `:method`, `:path`, `:scheme`, `:authority`, `:status`와 같이 `:` Prefix를 갖는 **Pseudo-Header**로 변환되어 일반 Header와 함께 HEADERS Frame에 전송된다.
-* Trailer : Body를 모두 전송한 이후에만 확정할 수 있는 정보를 나타낸다. 응답의 최종 처리 결과나 Body의 Checksum이 대표적이며, gRPC가 RPC의 최종 처리 결과인 `grpc-status` Header를 Trailer로 전송하는 것이 대표적인 활용 예시이다. Trailer는 Body를 모두 수신한 이후에 도착하기 때문에, `:status`와 같은 Pseudo-Header와 `content-length`처럼 Body 해석에 필요한 Field는 Trailer에 설정할 수 없다.
+* **Header** : 요청 또는 응답의 Meta Data를 나타낸다. HTTP/2에서는 HTTP/1.1의 Request Line (`GET /home HTTP/1.1`)과 Status Line (`HTTP/1.1 200 OK`)도 별도의 라인이 아니라 `:method`, `:path`, `:scheme`, `:authority`, `:status`와 같이 `:` Prefix를 갖는 **Pseudo-Header**로 변환되어 일반 Header와 함께 HEADERS Frame에 전송된다.
+* **Trailer** : Body를 모두 전송한 이후에만 확정할 수 있는 정보를 나타낸다. 응답의 최종 처리 결과나 Body의 Checksum이 대표적이며, gRPC가 RPC의 최종 처리 결과인 `grpc-status` Header를 Trailer로 전송하는 것이 대표적인 활용 예시이다. Trailer는 Body를 모두 수신한 이후에 도착하기 때문에, `:status`와 같은 Pseudo-Header와 `content-length`처럼 Body 해석에 필요한 Field는 Trailer에 설정할 수 없다.
 
 ### 1.4. Header 압축
 

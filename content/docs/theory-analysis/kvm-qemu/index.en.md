@@ -6,11 +6,11 @@ Overview of KVM and QEMU as hypervisors on Linux.
 
 ## 1. KVM (Kernel-based Virtual Machine)
 
-KVM is a Type 1 hypervisor provided by Linux. You can use it when Linux is installed on the host and the physical CPU supports hardware virtualization. Most x86 CPUs used in desktops and servers support features such as VT-x and VT-d, so with Linux installed you can install and use KVM easily. KVM alone cannot run a full virtual machine, because it only provides the guest’s **vCPU (virtual CPU)** and **memory**. A VM also needs peripherals such as disks and display output, and buses such as PCI to connect them to the CPU. **QEMU** is what supplies those virtual peripherals and PCI buses to the VM.
+**KVM** is a Type 1 hypervisor provided by Linux. You can use it when Linux is installed on the host and the physical CPU supports hardware virtualization. Most x86 CPUs used in desktops and servers support features such as VT-x and VT-d, so with Linux installed you can install and use KVM easily. KVM alone cannot run a full virtual machine, because it only provides the guest’s **vCPU (virtual CPU)** and **memory**. A VM also needs peripherals such as disks and display output, and buses such as PCI to connect them to the CPU. **QEMU** is what supplies those virtual peripherals and PCI buses to the VM.
 
 ## 2. QEMU
 
-QEMU is an **emulator**. It emulates devices from the vCPU through peripherals. **KVM** hands the PCI bus and devices that QEMU models to the VM so the guest can run. **Xen** does the same: it assigns QEMU’s PCI bus and devices to the VM. QEMU can emulate vCPUs as well, so it can run VMs without KVM or Xen. Because of vCPU emulation overhead and QEMU’s design, a QEMU-only VM is usually very slow. Running **KVM + QEMU** together is therefore preferable.
+**QEMU** is an **emulator**. It emulates devices from the vCPU through peripherals. **KVM** hands the PCI bus and devices that QEMU models to the VM so the guest can run. **Xen** does the same: it assigns QEMU’s PCI bus and devices to the VM. QEMU can emulate vCPUs as well, so it can run VMs without KVM or Xen. Because of vCPU emulation overhead and QEMU’s design, a QEMU-only VM is usually very slow. Running **KVM + QEMU** together is therefore preferable.
 
 ### 2.1. QEMU Architecture
 

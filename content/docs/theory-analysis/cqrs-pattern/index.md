@@ -8,7 +8,7 @@ CQRS (Command and Query Responsibility Segregation) Pattern을 분석한다.
 
 {{< figure caption="[Figure 1] CORS Pattern" src="images/cqrs-pattern.png" width="700px" >}}
 
-CQRS (Command and Query Responsibility Segregation) Pattern은 의미 그대로 Command Responsibility와 Query Responsibility을 분리하는 Pattern을 의미한다. 여기서 Responsibility는 Model을 의미한다. 즉 Command와 Query가 다른 **Model**을 이용하여 동작하는 방식을 의미한다. 
+**CQRS (Command and Query Responsibility Segregation) Pattern**은 의미 그대로 Command Responsibility와 Query Responsibility을 분리하는 Pattern을 의미한다. 여기서 Responsibility는 Model을 의미한다. 즉 Command와 Query가 다른 **Model**을 이용하여 동작하는 방식을 의미한다. 
 
 [Figure 1]은 CQRS Pattern을 나타내고 있다. **Command**는 **State, Report**를 변경하는 Create, Update, Delete 동작을 의미하고, **Query**는 State, Report를 Read하는 동작을 의미한다. Command와 Query는 서로 다른 Model로 동작하며, Command Model의 Command가 Query Model로 전파되어 Query Model의 State, Report를 변경한다. 다수의 Command Model의 Command들이 하나의 Query Model로 전파되어 Query Model의 State, Report를 변경할 수도 있다. 
 

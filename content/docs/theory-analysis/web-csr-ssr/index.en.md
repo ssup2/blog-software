@@ -8,7 +8,7 @@ Analyzes Web's Client Side Rendering technique and Server Side Rendering techniq
 
 {{< figure caption="[Figure 1] CSR" src="images/csr.png" width="700px" >}}
 
-CSR (Client Side Rendering) technique refers to a technique where all Web Page Rendering is performed in Web Browser, which is the Client. Here, performing Rendering means the process of executing JavaScript to construct incomplete HTML into complete HTML (DOM Tree). Web Browser must be able to obtain complete HTML of Web Page to display Web Page as UI. The Rendering process also includes fetching Data from external Servers as needed.
+**CSR** (Client Side Rendering) technique refers to a technique where all Web Page Rendering is performed in Web Browser, which is the Client. Here, performing Rendering means the process of executing JavaScript to construct incomplete HTML into complete HTML (DOM Tree). Web Browser must be able to obtain complete HTML of Web Page to display Web Page as UI. The Rendering process also includes fetching Data from external Servers as needed.
 
 [Figure 1] shows the CSR process. When User requests a specific Web Page to Server through Web Browser, Server delivers both the Web Page's HTML and JavaScript embedded in HTML to Web Browser. Thereafter, Web Browser performs Rendering to construct HTML and exposes Web Page's UI to User.
 

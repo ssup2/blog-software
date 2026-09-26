@@ -6,11 +6,12 @@ Linux LSM (Linux Security Module) Framework의 Security Module 중 하나인 App
 
 ## 1. AppArmor
 
-AppArmor는 Linux LSM Framework위에서 동작하는 MAC(Mandatory Access Control) 기반 Security Module이다. AppArmor는 **System Call** 제한을 통해 Program(Binary)의 동작을 제한한다. 각 프로그램의 동작 제한 사항은 **AppArmor Profile** 파일을 통해서 AppArmor에게 전달한다.
+**AppArmor**는 Linux LSM Framework위에서 동작하는 MAC(Mandatory Access Control) 기반 Security Module이다. AppArmor는 **System Call** 제한을 통해 Program(Binary)의 동작을 제한한다. 각 프로그램의 동작 제한 사항은 **AppArmor Profile** 파일을 통해서 AppArmor에게 전달한다.
 
 AppArmor는 Enforcement, Complain 2개의 Mode로 동작한다.
-* Enforcement : Program의 허용되지 않은 동작을 제한하고 Log에 남긴다. 실제 Program을 운영하면서 동작을 제한 할 때 이용하는 Mode이다.
-* Complain : Program의 허용되지 않은 동작을 제한하지는 않고 Log만 남긴다. 특정 Program의 AppArmor Profile을 작성할때 이용하는 Mode이다. Log를 통해서 AppArmor Profile 작성을 도움 받을 수 있다.
+
+* **Enforcement** : Program의 허용되지 않은 동작을 제한하고 Log에 남긴다. 실제 Program을 운영하면서 동작을 제한 할 때 이용하는 Mode이다.
+* **Complain** : Program의 허용되지 않은 동작을 제한하지는 않고 Log만 남긴다. 특정 Program의 AppArmor Profile을 작성할때 이용하는 Mode이다. Log를 통해서 AppArmor Profile 작성을 도움 받을 수 있다.
 
 ```shell {caption="[Shell 1] Apparmor 상태 확인"}
 $ aa-status
@@ -71,7 +72,7 @@ apparmor module is loaded.
 
 ### 1.1. AppArmor Profile
 
-AppArmor Profile의 이름은 /로 시작하는 이름과 /로 시작하지 않는 이름으로 구분할 수 있다. /으로 시작하는 Profile인 경우 Profile이 이름이 해당 Profile이 적용될 프로그램을 나타내고 있다. [Shell 1]에서 조회된 Profile 목록 중에서 /usr/sbin/tcpdump Profile을 확인할 수 있는데, /usr/sbin/tcpdump 프로그램이 실행되면 /usr/sbin/tcpdump Profile이 자동으로 적용되어 동작하게 된다. /으로 시작하지 않는 Profile은 특정 Program을 동작시킬때 aa-exec 명령을 통해 수동으로 Profile을 적용시켜야 한다. 물론 /으로 시작하는 Profile도 aa-exec 명령을 통해 특정 Program에 Profile을 적용시킬 수 있다. Profile들은 **/etc/apparmor.d**에 위치하고 있다.
+AppArmor Profile의 이름은 /로 시작하는 이름과 /로 시작하지 않는 이름으로 구분할 수 있다. /으로 시작하는 Profile인 경우 Profile이 이름이 해당 Profile이 적용될 프로그램을 나타내고 있다. [Shell 1]에서 조회된 Profile 목록 중에서 /usr/sbin/tcpdump Profile을 확인할 수 있는데, /usr/sbin/tcpdump 프로그램이 실행되면 /usr/sbin/tcpdump Profile이 자동으로 적용되어 동작하게 된다. /으로 시작하지 않는 Profile은 특정 Program을 동작시킬때 aa-exec 명령을 통해 수동으로 Profile을 적용시켜야 한다. 물론 /으로 시작하는 Profile도 aa-exec 명령을 통해 특정 Program에 Profile을 적용시킬 수 있다. Profile들은 `/etc/apparmor.d`에 위치하고 있다.
 
 ```text {caption="[File 1] /etc/apparmor.d/test/apparmor-example Apparmor Profile", linenos=table}
 #include <tunables/global>

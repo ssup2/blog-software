@@ -149,10 +149,10 @@ func main() {
 
 [Code 1]의 각 Line별 설명은 다음과 같다.
 
-* Line 16 : Scope는 ID Token 값에 포함되는 User의 정보 범위를 설정한다.
-* Line 21, 41 : State는 User의 CSRF 공격을 막기 위한 임시 문자열이다. 인증/인가전에 State를 생성 및 Cookie에 저장하며, Redirect 이후에 URL의 State와 Cookie의 State가 일치하는지 확인한다.
-* Line 26, 78 : Nonce는 ID Token이 유효한지 검증하는 용도로 이용되는 문자열이다. Nonce가 포함되도록 ID Token을 생성 및 Cookie에 저장하며, Redirect 이후에 얻은 ID Token의 Nonce와 Cookie의 Nonce가 일치하는지 확인한다.
-* Line 52 : Authorization Code는 URL의 "code" Query에 존재한다.
+* **Line 16** : Scope는 ID Token 값에 포함되는 User의 정보 범위를 설정한다.
+* **Line 21, 41** : State는 User의 CSRF 공격을 막기 위한 임시 문자열이다. 인증/인가전에 State를 생성 및 Cookie에 저장하며, Redirect 이후에 URL의 State와 Cookie의 State가 일치하는지 확인한다.
+* **Line 26, 78** : Nonce는 ID Token이 유효한지 검증하는 용도로 이용되는 문자열이다. Nonce가 포함되도록 ID Token을 생성 및 Cookie에 저장하며, Redirect 이후에 얻은 ID Token의 Nonce와 Cookie의 Nonce가 일치하는지 확인한다.
+* **Line 52** : Authorization Code는 URL의 "code" Query에 존재한다.
 
 ## 3. Google 인증/인가
 

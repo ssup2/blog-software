@@ -6,7 +6,7 @@ title: 3.1. PID Namespace
 
 {{< figure caption="[Figure 1] Linux의 Process Tree" src="images/linux-process-tree.png" width="400px" >}}
 
-PID Namespace는 Process의 격리를 담당하는 Namespace이다. PID Namespace를 완전히 이해하기 위해서는 Linux의 Process Tree를 이해할 필요가 있다. [Figure 1]은 Linux의 Process Tree를 나타내고 있다. 네모는 하나의 Process를 나타내며 각 Process에는 Process에는 이름과, PID (Process ID)가 기제되어 있다. Process Tree의 Root에 존재하는 Process는 반드시 PID 1번을 갖으며 **Init Process**라고 불린다.
+**PID Namespace**는 Process의 격리를 담당하는 Namespace이다. PID Namespace를 완전히 이해하기 위해서는 Linux의 Process Tree를 이해할 필요가 있다. [Figure 1]은 Linux의 Process Tree를 나타내고 있다. 네모는 하나의 Process를 나타내며 각 Process에는 Process에는 이름과, PID (Process ID)가 기제되어 있다. Process Tree의 Root에 존재하는 Process는 반드시 PID 1번을 갖으며 **Init Process**라고 불린다.
 
 Process는 fork() System Call을 호출하여 자식 Process를 생성할 수 있다. fork() System Call을 호출한 Process는 부모 Process가 된다. 예를들어 [Figure 1]에서 B Process는 fork() System Call을 2번 호출하여 통해서 C Process와 D Process를 생성하였다. B Process는 C Process와 D Process의 부모 Process가 되며, C Process와 D Process는 B Process의 자식 Process가 된다. 모든 Process는 fork() System Call을 통해서 자유롭게 자식 Process를 생성할 수 있다. 따라서 [Figure 1]처럼 Linux의 Process는 Init Process를 Root로하는 Tree를 구성하게 된다.
 

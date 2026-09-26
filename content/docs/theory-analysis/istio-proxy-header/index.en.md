@@ -166,12 +166,12 @@ All Headers are verified through the **Logs of istio-proxy (Envoy)**. By changin
 
 Therefore, the Headers of all segments can be checked through the istio-proxy Logs of the Client side (`shell`) and the Server side (`mock-server`) as follows.
 
-* Request Headers sent by the Client : `request headers complete` of `shell` istio-proxy
-* Request Headers between Sidecar Proxies : `router decoding headers` of `shell` istio-proxy or `request headers complete` of `mock-server` istio-proxy
-* Request Headers received by the Server : `router decoding headers` of `mock-server` istio-proxy
-* Response Headers sent by the Server : `upstream response headers` of `mock-server` istio-proxy
-* Response Headers between Sidecar Proxies : `encoding headers via codec` of `mock-server` istio-proxy
-* Response Headers received by the Client : `encoding headers via codec` of `shell` istio-proxy
+* **Request Headers sent by the Client** : `request headers complete` of `shell` istio-proxy
+* **Request Headers between Sidecar Proxies** : `router decoding headers` of `shell` istio-proxy or `request headers complete` of `mock-server` istio-proxy
+* **Request Headers received by the Server** : `router decoding headers` of `mock-server` istio-proxy
+* **Response Headers sent by the Server** : `upstream response headers` of `mock-server` istio-proxy
+* **Response Headers between Sidecar Proxies** : `encoding headers via codec` of `mock-server` istio-proxy
+* **Response Headers received by the Client** : `encoding headers via codec` of `shell` istio-proxy
 
 ```shell {caption="[Shell 3] Header Verification Method"}
 # Enable trace log for http, router loggers
@@ -194,11 +194,11 @@ $ kubectl logs -n istio-system deploy/istio-ingressgateway -f
 
 Before examining each Case, the general characteristics related to Header processing of the Istio Proxy (Sidecar Proxy, Ingress Gateway) in an Istio environment are as follows.
 
-* No Tracing Header Generation : Since Tracing is disabled by default from Istio version `1.22`, Tracing Headers such as `x-b3-traceid` and `x-b3-spanid` are not generated. They are set only when Tracing is enabled through the Mesh Config.
-* Removal of Istio Proxy Dedicated Headers : The `x-envoy-peer-metadata`, `x-envoy-peer-metadata-id`, and `x-envoy-decorator-operation` Headers are exchanged only between Istio Proxies, and are removed before being delivered to the Client and Server Containers.
-* Identical Processing of gRPC Requests : Since gRPC operates based on HTTP/2, the same Header processing as HTTP requests is applied to gRPC requests. The `grpc-timeout` Header, which is propagated when a gRPC Client sets a Deadline, is utilized by the Istio Proxy as the request Timeout, and is converted to the `x-envoy-expected-rq-timeout-ms` Header and propagated to the Upstream.
+* **No Tracing Header Generation** : Since Tracing is disabled by default from Istio version `1.22`, Tracing Headers such as `x-b3-traceid` and `x-b3-spanid` are not generated. They are set only when Tracing is enabled through the Mesh Config.
+* **Removal of Istio Proxy Dedicated Headers** : The `x-envoy-peer-metadata`, `x-envoy-peer-metadata-id`, and `x-envoy-decorator-operation` Headers are exchanged only between Istio Proxies, and are removed before being delivered to the Client and Server Containers.
+* **Identical Processing of gRPC Requests** : Since gRPC operates based on HTTP/2, the same Header processing as HTTP requests is applied to gRPC requests. The `grpc-timeout` Header, which is propagated when a gRPC Client sets a Deadline, is utilized by the Istio Proxy as the request Timeout, and is converted to the `x-envoy-expected-rq-timeout-ms` Header and propagated to the Upstream.
 * External Request Judgment (`x-envoy-internal: false`) : The Istio Proxy judges requests as External requests by default, operating in a state where the `x-envoy-internal` Header is `false`. The Sidecar Proxy judges requests as External requests because Envoy's `use_remote_address` setting is `false` and requests sent by the Client do not contain an XFF Header, and the Ingress Gateway judges requests as External requests because the address of the directly connected Client is in the public range.
-* Control Headers Not Working : Since requests are judged as External requests, control Headers with the `x-envoy-` Prefix such as `x-envoy-upstream-rq-timeout-ms` and `x-envoy-retry-on` that the Client sets in requests are removed by the Istio Proxy and do not work. Therefore, Timeout and Retry must be configured through the Virtual Service, not through control Headers.
+* **Control Headers Not Working** : Since requests are judged as External requests, control Headers with the `x-envoy-` Prefix such as `x-envoy-upstream-rq-timeout-ms` and `x-envoy-retry-on` that the Client sets in requests are removed by the Istio Proxy and do not work. Therefore, Timeout and Retry must be configured through the Virtual Service, not through control Headers.
 
 ### 1.3. Sidecar Proxy Cases
 

@@ -6,7 +6,7 @@ Kafka의 Idempotence 기능을 분석한다.
 
 ## 1. Kafka Idempotence 기능
 
-Kafka Idempotence는 이름에서도 유추할수 있는것 처럼 Kafka의 Producer가 전송한 Record가 Kafka에 중복으로 저장되는 것을 방지하기 위한 기능이다. Kafka를 단순히 Event Bus로 이용하는 경우에는 Kafka에 동일한 Record가 중복으로 저장되는 것이 일반적으로 문제되지 않지만, Kafka를 Event Bus를 넘어 Event Store로 활용하는 경우에는 동일한 Record가 중복으로 저장되는 것이 문제가 되며, 이러한 문제를 방지하기 위해서 Kafka Idempotence 기능 활용이 필수적이다.
+**Kafka Idempotence**는 이름에서도 유추할수 있는것 처럼 Kafka의 Producer가 전송한 Record가 Kafka에 중복으로 저장되는 것을 방지하기 위한 기능이다. Kafka를 단순히 Event Bus로 이용하는 경우에는 Kafka에 동일한 Record가 중복으로 저장되는 것이 일반적으로 문제되지 않지만, Kafka를 Event Bus를 넘어 Event Store로 활용하는 경우에는 동일한 Record가 중복으로 저장되는 것이 문제가 되며, 이러한 문제를 방지하기 위해서 Kafka Idempotence 기능 활용이 필수적이다.
 
 {{< figure caption="[Figure 1] Kafka Idempotence Architecture" src="images/kafka-idempotence-architecture.png" width="1000px" >}}
 

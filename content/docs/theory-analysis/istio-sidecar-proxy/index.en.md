@@ -8,7 +8,7 @@ Analyze Istio's Sidecar Proxy.
 
 {{< figure caption="[Figure 1] Istio Sidecar" src="images/istio-sidecar.png" width="600px" >}}
 
-Istio's Sidecar Proxy technique refers to a method of launching a dedicated Proxy Server for each Pod. [Figure 1] shows the Architecture of Istio Sidecar Proxy. The Sidecar Proxy receives all Inbound Packets destined for the Pod, processes them, and then forwards them to the App Container in the Pod. Additionally, the Sidecar Proxy receives all Packets sent from the App Container, processes them, and then forwards them outside the Pod.
+Istio's **Sidecar Proxy** technique refers to a method of launching a dedicated Proxy Server for each Pod. [Figure 1] shows the Architecture of Istio Sidecar Proxy. The Sidecar Proxy receives all Inbound Packets destined for the Pod, processes them, and then forwards them to the App Container in the Pod. Additionally, the Sidecar Proxy receives all Packets sent from the App Container, processes them, and then forwards them outside the Pod.
 
 The Sidecar Proxy must know all the information necessary for packet transmission. The Sidecar Proxy receives this information necessary for packet transmission from a central Controller called Istiod. The information that Istiod sends to the Sidecar Proxy includes Service information provided by the App running in the Pod, Policy information that determines whether packet transmission/reception is allowed, and certificate information for packet encryption. Here, Service refers to Kubernetes Service Objects or Istio Virtual Service Objects. Based on the information received from Istiod, the Sidecar Proxy performs various roles such as Packet Load Balancing, Packet Encap/Decap, Rate Limit, and Circuit Breaker.
 

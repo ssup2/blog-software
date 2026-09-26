@@ -8,7 +8,7 @@ NoSQL DB인 Column-oriented DB와 Column Family DB를 분석한다.
 
 {{< figure caption="[Figure 1] NoSQL Column-oriented-DB" src="images/column-oriented-db.png" width="900px" >}}
 
-Column-oriented는 Data Table을 Column 단위로 쪼개어 저장하는 DB를 의미한다. [Figure 1]은 일반적인 RDBMS에서 이용하는 Row-oriented 기법과 Column-oriented 기법을 비교하는 그림이다. Row-oriented는 하나의 Row가 하나의 Disk Block안에 저장되지만, Column-oriented 방식은 하나의 Column이 하나의 Disk Block안에 저장된다.
+**Column-oriented**는 Data Table을 Column 단위로 쪼개어 저장하는 DB를 의미한다. [Figure 1]은 일반적인 RDBMS에서 이용하는 Row-oriented 기법과 Column-oriented 기법을 비교하는 그림이다. Row-oriented는 하나의 Row가 하나의 Disk Block안에 저장되지만, Column-oriented 방식은 하나의 Column이 하나의 Disk Block안에 저장된다.
 
 [Figure 1]에서 Gender가 Male인 사람이 몇명인지 구하는 동작을 DB가 수행 할 경우, Row-oriented 방식은 4개의 Block을 읽고 안의 Gender값을 알아내어 Sum을 수행해야 한다. 반면 Column-oriented는 1개의 Block만 읽고 결과를 구할 수 있기 때문에 빠른 처리가 가능하다. 이처럼 Data를 분석하는 동작의 경우 Data Table에서 모든 Column이 필요한 것이 아니라 일부 Column이 필요한 경우가 대부분이다. 따라서 Column-oriented DB는 OLAP(Online Analytical Processing) 처리에 유리하다. 반대로 하나의 Row를 추가하거나 삭제하는 경우 Row-oriented DB는 1개의 Block만 이용하면 되지만 Column-oriented는 4개의 Block을 이용해야 하기 때문에, Column-oriented DB는 OTLP(Online transaction processing) 처리에 불리하다.
 

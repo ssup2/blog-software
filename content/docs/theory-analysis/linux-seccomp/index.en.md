@@ -8,7 +8,7 @@ Analyze seccomp, Linux's Process Sandboxing technique.
 
 {{< figure caption="[Figure 1] seccomp Hook" src="images/seccomp-hook.png" width="700px" >}}
 
-seccomp is a process sandboxing technique applied since Linux kernel 2.6.12. However, when actually analyzing seccomp, you can see that it is simply a **System Call Filtering** technique. [Figure 1] shows when seccomp is applied during System Call execution. seccomp filters System Calls in the Software Interrupt Handler before each system call function is actually executed. seccomp can be configured through `prctl()` System Call invocation, and after Linux Kernel version 3.17, it can also be configured using the `seccomp()` System Call.
+**seccomp** is a process sandboxing technique applied since Linux kernel 2.6.12. However, when actually analyzing seccomp, you can see that it is simply a **System Call Filtering** technique. [Figure 1] shows when seccomp is applied during System Call execution. seccomp filters System Calls in the Software Interrupt Handler before each system call function is actually executed. seccomp can be configured through `prctl()` System Call invocation, and after Linux Kernel version 3.17, it can also be configured using the `seccomp()` System Call.
 
 ## 2. seccomp Mode
 

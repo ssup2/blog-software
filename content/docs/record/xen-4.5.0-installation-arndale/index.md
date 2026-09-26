@@ -5,19 +5,21 @@ title: Xen 4.5.0 설치 / Arndale 환경
 ## 1. 설치 환경
 
 설치 환경은 다음과 같다.
-* PC : Ubuntu 14.04LTS 64bit, root user
-* VM on Xen : Xen 4.5.0, Dom0 & DomU kernel 3.18.3 in linux upstream, Ubuntu 14.04LTS 32bit
+
+* **PC** : Ubuntu 14.04LTS 64bit, root user
+* **VM on Xen** : Xen 4.5.0, Dom0 & DomU kernel 3.18.3 in linux upstream, Ubuntu 14.04LTS 32bit
 * Network
-  * Gateway : 192.168.0.1
-  * HostOS(xenbr0) : 192.168.0.150
-  * GeustOS_01 : 192.168.0.160, GeustOS_02 : 192.168.0.161
+  * **Gateway** : 192.168.0.1
+  * **HostOS(xenbr0)** : 192.168.0.150
+  * **GuestOS_01** : 192.168.0.160, **GuestOS_02** : 192.168.0.161
 * Boot
   * PXE Boot or uSD Card Boot
 
 ## 2. Cross Compiler 설치
 
 Cross Compiler를 설치한다.
-* Download : https://releases.linaro.org/15.02/components/toolchain/binaries/arm-linux-gnueabihf/gcc-linaro-4.9-2015.02-3-x86_64_arm-linux-gnueabihf.tar.xz
+
+* **Download** : https://releases.linaro.org/15.02/components/toolchain/binaries/arm-linux-gnueabihf/gcc-linaro-4.9-2015.02-3-x86_64_arm-linux-gnueabihf.tar.xz
 
 ```shell {caption="[File 1] ~/.bashrc"}
 ...
@@ -28,9 +30,9 @@ PATH=$PATH:/usr/local/gcc-linaro-arm-linux-gnueabihf-4.8/bin
 
 ## 3. uSD Card Partiton 구성
 
-* 0 ~ 2M, 2M, No Filesystem : Bootloader (bl1, spl, U-boot)
-* 2M ~ 18M, 16M, ext2, boot : xen-uImage, linux-zImage, exynos5250-arndale.dtb, load-xen-uSD.img
-* 18M ~ rest, ext3, root : Dom0 Root-Filesystem
+* `0 ~ 2M`, `2M`, **No Filesystem** : Bootloader (bl1, spl, U-boot)
+* `2M ~ 18M`, `16M`, `ext2`, `boot` : xen-uImage, linux-zImage, exynos5250-arndale.dtb, load-xen-uSD.img
+* `18M ~ rest`, `ext3`, `root` : Dom0 Root-Filesystem
 
 ## 4. U-boot Fusing
 
@@ -44,7 +46,8 @@ $ make arndale5250
 ```
 
 spl, u-boot Download 및 Build 한다.
-* Download bl1 : http://releases.linaro.org/12.12/components/kernel/arndale-bl1/arndale-bl1.bin
+
+* Download `bl1` : http://releases.linaro.org/12.12/components/kernel/arndale-bl1/arndale-bl1.bin
 
 ```shell
 $ dd if=arndale-bl1.bin of=/dev/sdb bs=512 seek=1
@@ -211,8 +214,9 @@ load-xen-tftp.img 파일을 uSD Card의 ext2 Partition에 복사한다.
 ```
 
 U-boot를 설정한다.
-* board IP : 192.168.0.200
-* tftp Server (Host PC) : 192.168.0.100
+
+* **board IP** : 192.168.0.200
+* **tftp Server (Host PC)** : 192.168.0.100
 
 ### 8.2. uSD Card Boot
 

@@ -83,10 +83,10 @@ KiB Swap:  8265724 total,        0 used,  8265724 free.   541164 cached Mem
 
 #### 1.1.4. 단축키
 
-* 1 : 각 CPU Core별 사용률을 출력한다.
-* SHIFT + M : Memory 사용률을 기준으로 정렬한다.
-* SHIFT + P : CPU 사용률을 기준으로 정렬한다.
-* SHIFT + T : 구동 시간을 기준으로 정렬한다.
+* `1` : 각 CPU Core별 사용률을 출력한다.
+* `SHIFT + M` : Memory 사용률을 기준으로 정렬한다.
+* `SHIFT + P` : CPU 사용률을 기준으로 정렬한다.
+* `SHIFT + T` : 구동 시간을 기준으로 정렬한다.
 
 ## 2. 참조
 

@@ -8,7 +8,7 @@ Container Network 설정시 이용되는 Container Network Interface (CNI)를 �
 
 {{< figure caption="[Figure 1] Consul Architecture" src="images/cni.png" width="800px" >}}
 
-Container Network Interface (CNI)는 **Linux Container의 Network Interface**를 설정할때 이용되는 Interface이다. Kubernetes, rkt, Openshift과 같은 많은 Container Platform 또는 Container Runtime들은 CNI를 준수하는 **Conf (Configuration) 파일**과 **Plugin**을 실행하여 Container의 Network Interface를 설정하고 있다. 여기서 Conf File은 Container안에 설정될 Network Interface와 연결될 Network 정보를 담고 있는 설정 파일을 의미하며, Plugin은 Shell에서 실행 가능한 Binary(Command)를 의미한다.
+**Container Network Interface** (CNI)는 **Linux Container의 Network Interface**를 설정할때 이용되는 Interface이다. Kubernetes, rkt, Openshift과 같은 많은 Container Platform 또는 Container Runtime들은 CNI를 준수하는 **Conf (Configuration) 파일**과 **Plugin**을 실행하여 Container의 Network Interface를 설정하고 있다. 여기서 Conf File은 Container안에 설정될 Network Interface와 연결될 Network 정보를 담고 있는 설정 파일을 의미하며, Plugin은 Shell에서 실행 가능한 Binary(Command)를 의미한다.
 
 ### 1.1 Conf (Configuration) 파일
 
@@ -36,10 +36,10 @@ Conf 파일은 Container에 설정될 Network Interface와 연결될 Network 정
 
 Plugin은 Conf 파일에 설정된 Network과 연결되어 있는 Network Interface를 Container에 설정하고, 설정된 Container의 Network Interface 정보를 반환하는 역할을 수행한다. Plugin은 Shell에서 실행 가능한 Binary(Command)형태로 존재한다. Plugin은 Conf 파일의 내용을 **stdin**으로 받고 CNI_COMMAND, CNI_CONTAINERID, CNI_NETNS, CNI_IFNAME 등의 환경변수를 Parameter로 이용한다. 아래는 중요 환경변수에 대한 설명이다.
 
-* CNI_COMMAND : Network Interface ADD(추가), DEL(삭제), GET(조회) 명령어
-* CNI_CONTAINERID : Network Interface를 조작할 Target Container의 ID
-* CNI_NETNS : Target Container의 Network Namespace File의 위치
-* CNI_IFNAME : Network Interface 이름
+* `CNI_COMMAND` : Network Interface ADD(추가), DEL(삭제), GET(조회) 명령어
+* `CNI_CONTAINERID` : Network Interface를 조작할 Target Container의 ID
+* `CNI_NETNS` : Target Container의 Network Namespace File의 위치
+* `CNI_IFNAME` : Network Interface 이름
 
 ```shell {caption="[Shell 1] mynet.conf 적용"}
 $ export CNI_COMMAND=ADD; export CNI_CONTAINERID=...

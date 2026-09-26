@@ -4,7 +4,7 @@ title: Bloom Filter
 
 ## 1. Bloom Filter
 
-Bloom Filter is an algorithm that checks whether given data is included in a data set using a small amount of memory. Generally, when checking whether given data is included in a data set, a Set data structure is used to construct the data set and then check if the given data is included. However, since the Set data structure increases memory usage in proportion to the number of data, if the number of data reaches hundreds of billions to trillions, that much memory must be used. Bloom Filter can check whether given data exists in a data set using a small amount of memory when the number of data is large or the available memory capacity is limited.
+**Bloom Filter** is an algorithm that checks whether given data is included in a data set using a small amount of memory. Generally, when checking whether given data is included in a data set, a Set data structure is used to construct the data set and then check if the given data is included. However, since the Set data structure increases memory usage in proportion to the number of data, if the number of data reaches hundreds of billions to trillions, that much memory must be used. Bloom Filter can check whether given data exists in a data set using a small amount of memory when the number of data is large or the available memory capacity is limited.
 
 {{< figure caption="[Figure 1] Creating Bloom Filter" src="images/creating-bloom-filter.png" width="800px" >}}
 

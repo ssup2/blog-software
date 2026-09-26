@@ -8,7 +8,7 @@ Analyze Linux Audit.
 
 {{< figure caption="[Figure 1] Linux Audit" src="images/linux-audit-architecture.png" width="900px" >}}
 
-Linux Audit is a Linux Framework that records various security-related Events occurring in the Linux Kernel as Logs and delivers them to User Apps. It can detect Events such as Binary execution, File Access, System Calls, and Network configuration manipulation. In Audit, these security-related Events are called **Audit Events**. Audit Events occur according to **Audit Rules** registered and managed by system administrators. [Figure 1] shows the Architecture of Audit. Audit components can be largely divided into Kernel Level and User Level.
+**Linux Audit** is a Linux Framework that records various security-related Events occurring in the Linux Kernel as Logs and delivers them to User Apps. It can detect Events such as Binary execution, File Access, System Calls, and Network configuration manipulation. In Audit, these security-related Events are called **Audit Events**. Audit Events occur according to **Audit Rules** registered and managed by system administrators. [Figure 1] shows the Architecture of Audit. Audit components can be largely divided into Kernel Level and User Level.
 
 ### 1.1. Kernel Level
 

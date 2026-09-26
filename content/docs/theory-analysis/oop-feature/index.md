@@ -4,7 +4,7 @@ title: OOP 특징
 
 ## 1. 추상화(Abstraction)
 
-객체를 **Class로 설계하는 과정**을 추상화라고 부른다. 객체는 실제 사물을 의미한다. 객체는 수많은 상태(State)와 행동(Behavior)으로 표현될 수 있다. 이러한 수많은 요소들은 추상화를 통해 프로그램에서 이용하는 Class로 설계된다. 사람 Class가 성을 기준으로 추상화 된다면 사람 Class는 남/여 라는 정보 및 그에 따른 Method를 갖게 된다. 사람 Class가 나이를 기준으로 추상화 된다면 유아/청소년/성인/노인 정보 및 그에 따른 Method를 갖게 된다.
+객체를 **Class로 설계하는 과정**을 **추상화**라고 부른다. 객체는 실제 사물을 의미한다. 객체는 수많은 상태(State)와 행동(Behavior)으로 표현될 수 있다. 이러한 수많은 요소들은 추상화를 통해 프로그램에서 이용하는 Class로 설계된다. 사람 Class가 성을 기준으로 추상화 된다면 사람 Class는 남/여 라는 정보 및 그에 따른 Method를 갖게 된다. 사람 Class가 나이를 기준으로 추상화 된다면 유아/청소년/성인/노인 정보 및 그에 따른 Method를 갖게 된다.
 
 ## 2. 캡슐화(Encapsulation)
 
@@ -47,4 +47,4 @@ Parent
 Child
 ```
 
-Instance에 따라서도 다른 Method가 호출 될 수 있다. [Code 1]은 Parent라는 부모 Class와 Child라는 자식 Class로 구성이 되어있다. 15줄에서는 iparent라는 Parent Class 변수에 Parent Instance를 할당하였고, 16줄에서는 ichild라는 Parent Class 변수에 Child Instance를 할당하였다. 두 Instance 모두 Parent Class 변수에 할당되었기 때문에 Code상으로는 Parent 문자열이 두 줄 출력되는것 처럼 보이지만, ichild 인스턴스는 Child 문자열을 출력한다. Parent Class의 변수에 실제 할당된 Instance가 다르기 때문이다. 이렇게 Instance에 따라서 호출되는 Method가 달라지는 과정을 **동적바인딩(Dynamic Dispatch)**라고 부른다.
+Instance에 따라서도 다른 Method가 호출 될 수 있다. [Code 1]은 Parent라는 부모 Class와 Child라는 자식 Class로 구성이 되어있다. 15줄에서는 iparent라는 Parent Class 변수에 Parent Instance를 할당하였고, 16줄에서는 ichild라는 Parent Class 변수에 Child Instance를 할당하였다. 두 Instance 모두 Parent Class 변수에 할당되었기 때문에 Code상으로는 Parent 문자열이 두 줄 출력되는것 처럼 보이지만, ichild 인스턴스는 Child 문자열을 출력한다. Parent Class의 변수에 실제 할당된 Instance가 다르기 때문이다. 이렇게 Instance에 따라서 호출되는 Method가 달라지는 과정을 **동적바인딩** (Dynamic Dispatch)라고 부른다.

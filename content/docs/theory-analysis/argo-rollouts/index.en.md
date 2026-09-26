@@ -6,7 +6,7 @@ title: Argo Rollouts
 
 {{< figure caption="[Figure 1] Argo Rollouts Architecture" src="images/argo-rollouts-architecture.png" width="1100px" >}}
 
-Argo Rollouts is an open-source project that supports Blue/Green, Canary, and Progressive Delivery deployments in Kubernetes environments. In addition to Blue/Green and Canary deployments, it provides various deployment-related features such as Traffic Routing required during deployment, automatic Promotion functionality based on Metrics, and Alerting functionality based on deployment status. [Figure 1] shows the Architecture of Argo Rollouts.
+**Argo Rollouts** is an open-source project that supports Blue/Green, Canary, and Progressive Delivery deployments in Kubernetes environments. In addition to Blue/Green and Canary deployments, it provides various deployment-related features such as Traffic Routing required during deployment, automatic Promotion functionality based on Metrics, and Alerting functionality based on deployment status. [Figure 1] shows the Architecture of Argo Rollouts.
 
 ### 1.1. Rollout Object, Rollout Controller
 

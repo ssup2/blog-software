@@ -8,7 +8,7 @@ Analyzes Local Storage, Session Storage, and Cookie used in Web Browser.
 
 {{< figure caption="[Figure 1] Chrome Local Storage" src="images/chrome-local-storage.png" width="700px" >}}
 
-Local Storage is a Key/Value-based storage space used by Web Browser. It is stored in Storage of the PC where Web Browser is installed and can only be used in Web Browser's JavaScript/HTML. Up to 5MB of storage space can be used per Domain. Data stored in Local Storage has the characteristic of no expiration.
+**Local Storage** is a Key/Value-based storage space used by Web Browser. It is stored in Storage of the PC where Web Browser is installed and can only be used in Web Browser's JavaScript/HTML. Up to 5MB of storage space can be used per Domain. Data stored in Local Storage has the characteristic of no expiration.
 
 ## 2. Session Storage
 

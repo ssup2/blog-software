@@ -6,7 +6,7 @@ Linux에서 Network Connection을 관리하는 역할을 수행하는 Netfilter 
 
 ## 1. Linux conntrack Module
 
-conntrack Module은 Linux Kernel에서 **Network Connection을 관리, 추적**하는 Netfilter Framework의 Stateful Module이다. iptables와 같이 Netfilter Filter Framework 기반 Application이 제공하는 Network Connection 관련 기능들은 모두 conntrack Module을 기반으로 하고 있다.
+**conntrack Module**은 Linux Kernel에서 **Network Connection을 관리, 추적**하는 Netfilter Framework의 Stateful Module이다. iptables와 같이 Netfilter Filter Framework 기반 Application이 제공하는 Network Connection 관련 기능들은 모두 conntrack Module을 기반으로 하고 있다.
 
 ### 1.1. Connection Status, conntrack Command
 

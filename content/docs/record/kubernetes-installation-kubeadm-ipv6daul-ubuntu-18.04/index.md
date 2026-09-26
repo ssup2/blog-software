@@ -8,15 +8,15 @@ title: Kubernetes 설치 / kubeadm, IPv6 DualStack 이용 / Ubuntu 18.04 환경
 
 [Figure 1]은 Kubernetes 설치를 위한 Node의 구성도를 나타내고 있다. 설치 환경은 다음과 같다.
 
-* VM : 4 vCPU, 4GB Memory
+* **VM** : 4 vCPU, 4GB Memory
   * Master Node * 1
   * Worker Node * 2
 * Network
-  * Node Network : 192.168.0.0/24, fdaa::/64
-  * Pod Network : 192.167.0.0/16, fdbb::/64
-  * Service Network : 10.96.0.0/12, fdcc::/112
-* Kubernetes : 1.18.3
-  * CNI : Calico 3.14 Plugin
+  * **Node Network** : 192.168.0.0/24, fdaa::/64
+  * **Pod Network** : 192.167.0.0/16, fdbb::/64
+  * **Service Network** : 10.96.0.0/12, fdcc::/112
+* **Kubernetes** : 1.18.3
+  * **CNI** : Calico 3.14 Plugin
 
 ## 2. Ubuntu Package 설치
 

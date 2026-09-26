@@ -5,8 +5,9 @@ title: Android 설치 / Arndale 환경
 ## 1. 설치, 실행 환경
 
 설치, 실행 환경은 다음과 같다.
-* PC : Windows 7 64bit
-* VM on PC : Ubuntu 12.04LTS 64bit
+
+* **PC** : Windows 7 64bit
+* **VM on PC** : Ubuntu 12.04LTS 64bit
 * Android JB mr1 provided from Insignal
 
 ## 2. Windows에 USB Driver 설치
@@ -76,7 +77,8 @@ $ mv fastboot ~/bin
 ```
 
 fastboot와 adb는 Build한 Android를 Device에 Flash할때 이용된다. fastboot와 adb를 설치한다.
-* fastboot, adb Download : http://forum.insignal.co.kr/download/file.php?id=90
+
+* `fastboot`, `adb` Download : http://forum.insignal.co.kr/download/file.php?id=90
 
 ## 6. Ubuntu에 Cross Compiler 설치
 
@@ -87,7 +89,8 @@ $ tar xvf arm-2009q3.tar
 ```
 
 Cross Compiler를 설치한다.
-* Cross Compiler Download : http://www.arndaleboard.org/wiki/downloads/supports/arm-2009q3.tar
+
+* **Cross Compiler Download** : http://www.arndaleboard.org/wiki/downloads/supports/arm-2009q3.tar
 
 ```shell {caption="[File 3] ~/.bashrc", linenos=table}
 ...
@@ -118,8 +121,9 @@ $ ./vendor-insignal-arndale-jb-mr1-20140526-0a0bc3f.run
 ```
 
 Booting을 위한 Proprietary를 받고 설치한다.
-* Exynos5250 Download : http://forum.insignal.co.kr/download/file.php?id=247	
-* Arndale Download : http://forum.insignal.co.kr/download/file.php?id=246
+
+* **Exynos5250 Download** : http://forum.insignal.co.kr/download/file.php?id=247	
+* **Arndale Download** : http://forum.insignal.co.kr/download/file.php?id=246
 
 ## 9. ccache 설정
 

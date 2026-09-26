@@ -9,6 +9,7 @@ WSL2 VM의 경우에는 Windows OS와 공유하는 /mnt 하위의 Directory의 I
 ## 2. 설치 환경
 
 설치, 설정 환경은 다음과 같다.
+
 * Windows 10 Pro 64bit
 * WSL2 Ubuntu 20.04, root User
 
@@ -65,6 +66,7 @@ netsh interface ip add address "vEthernet (WSL)" 192.168.10.50 255.255.255.0
 ## 6. Samba Server 접속
 
 Windows OS를 재부팅한 다음에 File Browser에서 다음의 주소로 접속한다.
+
 * \\\\192.168.10.100\root
 
 ## 7. 참고

@@ -5,10 +5,11 @@ title: NFSv4 Server, Client Installation / Ubuntu 16.04 Environment
 ## 1. Installation Environment
 
 The installation environment is as follows.
+
 * Ubuntu 16.04 LTS 64bit, root user
-* NFS Root : Refers to the absolute path of the Root Directory of the NFSv4 Server.
+* **NFS Root** : Refers to the absolute path of the Root Directory of the NFSv4 Server.
   * Use /export/nfs-root as the NFS Root.
-* NFS share : Refers to the absolute path of the Directory to be actually shared through the NFSv4 Server.
+* **NFS share** : Refers to the absolute path of the Directory to be actually shared through the NFSv4 Server.
   * Use /root/nfs-share as the NFS share.
 
 ## 2. NFSv4 Server Configuration

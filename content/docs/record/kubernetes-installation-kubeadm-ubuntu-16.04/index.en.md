@@ -5,6 +5,7 @@ title: Kubernetes Installation / Using kubeadm / Ubuntu 16.04 Environment
 ## 1. Installation Environment
 
 The installation environment is as follows.
+
 * VirtualBox 5.0.14r
   * Master Node: Ubuntu Desktop 16.04.2 64bit * 1
   * Worker Node: Ubuntu Server 16.04.2 64bit * 2
@@ -24,6 +25,7 @@ The installation environment is as follows.
 {{< figure caption="[Figure 1] Node Configuration Diagram for Kubernetes Installation" src="images/node-setting.png" width="900px" >}}
 
 Create virtual Master and Worker nodes (VMs) as shown in [Figure 1] using VirtualBox.
+
 * Hostname: Master Node - ubuntu01, Worker Node1 - ubuntu02, Worker Node2 - ubuntu03
 * NAT: Build a 10.0.0.0/24 network using the "NAT network" provided by VirtualBox.
 * Router: Build a 192.168.77.0/24 network using a router. (NAT)

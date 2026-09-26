@@ -60,8 +60,8 @@ init_sum_weights(cbucket_weights, sum_weights) {
 }
 ```
 
-* cbucket_weights : CRUSH Map에 설정된 하위 Bucket의 Weight 값들을 나타낸다.
-* sum_weights : List 알고리즘에 따라서 cbucket_weights의 합들을 나타낸다.
+* `cbucket_weights` : CRUSH Map에 설정된 하위 Bucket의 Weight 값들을 나타낸다.
+* `sum_weights` : List 알고리즘에 따라서 cbucket_weights의 합들을 나타낸다.
 
 List 알고리즘은 하위 Bucket들을 **Linked List**를 이용하여 관리한다. Link 알고리즘을 수행하기 위해서는 CRUSH Map에 있는 하위 Bucket의 Weight 정보를 바탕으로 [Figure 3]과 같은 Linked List를 준비해 두어야한다. [Code 2]는 [Figure 3]의 sum_weights Linked List를 초기화하는 init_sum_weights() 함수를 간략하게 나타내고 있다.
 
@@ -97,7 +97,7 @@ cbucket list(bucket, pg_id, replica) {
 
 {{< figure caption="[Figure 6] Tree 알고리즘에 이용되는 Binary Tree" src="images/crush-tree.png" width="800px" >}}
 
-Tree 알고리즘은 하위 Bucket을 Binary Tree 형태로 관리한다. [Figure 6]은 Tree 알고리즘에서 이용되는 Binary Tree를 나타내고 있다. 배열을 이용하여 Tree를 구성하지만 일반적인 Binary Search Tree처럼 구성되지는 않는다. 각 Tree의 Level의 Index는 **(Odd) * (2 ^ Level)**를 갖는다. Tree의 각 Leaf에는 하위 Bucket이 존재한다. 각 Tree의 Node는 자신의 모든 하위 Node에 존재하는 Weight의 합을 저장하고 있다.
+Tree 알고리즘은 하위 Bucket을 Binary Tree 형태로 관리한다. [Figure 6]은 Tree 알고리즘에서 이용되는 Binary Tree를 나타내고 있다. 배열을 이용하여 Tree를 구성하지만 일반적인 Binary Search Tree처럼 구성되지는 않는다. 각 Tree의 Level의 Index는 `(Odd) * (2 ^ Level)`를 갖는다. Tree의 각 Leaf에는 하위 Bucket이 존재한다. 각 Tree의 Node는 자신의 모든 하위 Node에 존재하는 Weight의 합을 저장하고 있다.
 
 ```cpp {caption="[Code 4] tree() 함수", linenos=table}
 cbucket tree(bucket, pg_id, replica) {

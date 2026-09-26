@@ -6,7 +6,7 @@ Spring Cloud를 분석한다.
 
 ## 1. Spring Cloud
 
-Spring Cloud는 Cloud같은 분산 환경에서 **Cloud-native App 구축 및 운영**을 도와주는 도구이다. Cloud-native App을 구성하는 Service들의 설정, 배포, Discovery, Routing, Load-balancing 등을 개발자가 쉽게 이용 할 수 있도록 도와준다. 이러한 동작을 가능하게 하는 핵심 모듈인 Hystrix, Eureka, Ribbon, Zuul은 Netflix의 OSS(Open Source Software)의 Project이다.
+**Spring Cloud**는 Cloud같은 분산 환경에서 **Cloud-native App 구축 및 운영**을 도와주는 도구이다. Cloud-native App을 구성하는 Service들의 설정, 배포, Discovery, Routing, Load-balancing 등을 개발자가 쉽게 이용 할 수 있도록 도와준다. 이러한 동작을 가능하게 하는 핵심 모듈인 Hystrix, Eureka, Ribbon, Zuul은 Netflix의 OSS(Open Source Software)의 Project이다.
 
 ## 2. Hystrix
 
@@ -53,9 +53,9 @@ Ribbon은 **Client-side Load Balancer**로써 의미그대로 Client에서 Serve
 
 Rule은 Ribbon에서 이용하는 Load Balancing 알고리즘을 의미한다. Rule은 Ribbon에서 제공하는 Rule을 이용하거나, 개발자가 직접 정의한 Rule을 이용 할 수 있다. 다음의 3가지 Rule은 Ribbon에서 제공해주는 Rule이다.
 
-* RoundRobinRule : Round Robin 알고리즘을 이용하는 방식이다.
-* AvailabilityFilteringRule : 동작하지 않는 Server를 건너뛰는 방식이다. Error가 특정횟수 이상 연속으로 발생한 Server는 일정 시간동안 Load Balancing 대상 Server에서 제외시킨다. Error 발생 횟수, Load Balancing 제외 시간은 개발자가 자유롭게 설정이 가능하다.
-* WeightedResponseTimeRule : Server의 평균응답시간에 반비례하계 Weight를 부여하는 방식이다.
+* `RoundRobinRule` : Round Robin 알고리즘을 이용하는 방식이다.
+* `AvailabilityFilteringRule` : 동작하지 않는 Server를 건너뛰는 방식이다. Error가 특정횟수 이상 연속으로 발생한 Server는 일정 시간동안 Load Balancing 대상 Server에서 제외시킨다. Error 발생 횟수, Load Balancing 제외 시간은 개발자가 자유롭게 설정이 가능하다.
+* `WeightedResponseTimeRule` : Server의 평균응답시간에 반비례하계 Weight를 부여하는 방식이다.
 
 ### 3.2. Ping
 
@@ -65,14 +65,14 @@ Ping은 Server의 생존 유뮤를 판단하는 구성요소이다. Ping은 Ribb
 
 Load Balancing이 수행가능한 Server List를 의미한다. Server List를 얻는 방식은 Ribbon에서 제공하는 이용하거나, 개발자가 직접 정의한 방식을 이용 할 수 있다. 다음의 3가지 방식은 Ribbon에서 제공해주는 방식이다.
 
-* Adhoc static server list : Ribbon을 설정하는 Code에 Server List를 직접넣는 방식이다.
-* ConfigurationBasedServerList : Ribbon을 설정하는 Config 파일에 Server List를 직접넣는 방식이다.
-* DiscoveryEnabledNIWSServerList : Eureka Client로 부터 Server List를 얻는 방식이다. 일반적으로 가장 많이 이용되는 방식이다.
+* **Adhoc static server list** : Ribbon을 설정하는 Code에 Server List를 직접넣는 방식이다.
+* `ConfigurationBasedServerList` : Ribbon을 설정하는 Config 파일에 Server List를 직접넣는 방식이다.
+* `DiscoveryEnabledNIWSServerList` : Eureka Client로 부터 Server List를 얻는 방식이다. 일반적으로 가장 많이 이용되는 방식이다.
 
 또한 Ribbon은 Server List를 Filtering 할 수 있는 기능도 제공한다. Server List Filtering 방식도 Ribbon에서 제공하는 방식을 이용하거나, 개발자가 정의한 방식을 이용 할 수 있다. 다음의 2가지 방식은 Ribbon에서 제공해주는 방식이다.
 
-* ZoneAffinityServerListFilter : Ribbon과 같은 Zone에 있는 Server List만 제공한다.
-* ServerListSubsetFilter : 개발자가 설정한 조건에 맞는 Server List만 제공한다.
+* `ZoneAffinityServerListFilter` : Ribbon과 같은 Zone에 있는 Server List만 제공한다.
+* `ServerListSubsetFilter` : 개발자가 설정한 조건에 맞는 Server List만 제공한다.
 
 ## 4. Eureka
 

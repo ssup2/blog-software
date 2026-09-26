@@ -8,22 +8,22 @@ title: Kubernetes 설치 / kubeadm, External Cloud Provider 이용 / Ubuntu 18.0
 
 [Figure 1]은 Kubernetes 설치 환경을 나타내고 있다. 설치 환경은 다음과 같다.
 
-* VM : Ubuntu 18.04 (Cloud Version), 4 vCPU, 4GB Memory
+* **VM** : Ubuntu 18.04 (Cloud Version), 4 vCPU, 4GB Memory
   * ETCD Node * 1
   * Master Node * 1
   * Slave Node * 3
 * Network
-  * NAT Network : 192.168.0.0/24
-  * Octavia Network : 20.0.0.0/24
-  * Tenant Network : 30.0.0.0/24
-* OpenStack : Stein
-  * API Server : 192.168.0.40:5000
+  * **NAT Network** : 192.168.0.0/24
+  * **Octavia Network** : 20.0.0.0/24
+  * **Tenant Network** : 30.0.0.0/24
+* **OpenStack** : Stein
+  * **API Server** : 192.168.0.40:5000
   * Octavia
-* Kubernetes : 1.15.3
-  * CNI : Cilium 1.5.6 Plugin
+* **Kubernetes** : 1.15.3
+  * **CNI** : Cilium 1.5.6 Plugin
 * External Cloud Provider
-  * OpenStack Cloud Controller Manager : v1.15.0
-  * CSI Plugin : v1.16.0
+  * **OpenStack Cloud Controller Manager** : v1.15.0
+  * **CSI Plugin** : v1.16.0
 
 ## 2. Ubuntu Package 설치
 

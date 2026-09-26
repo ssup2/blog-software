@@ -30,8 +30,8 @@ Scans 1000 commonly used TCP ports on the host and outputs TCP port information 
 
 [Text 1] shows a list of 1000 commonly used TCP ports. Host can specify multiple hosts, not just one. Methods for specifying multiple hosts are as follows:
 
-* IP Range : nmap 192.168.0.1-20 : Scans hosts from 192.168.0.1 to 192.168.0.20
-* Subnet : nmap 192.168.0.0/24 : Scans hosts from 192.168.0.1 to 192.168.0.255
+* **IP Range** : nmap 192.168.0.1-20 : Scans hosts from 192.168.0.1 to 192.168.0.20
+* **Subnet** : nmap 192.168.0.0/24 : Scans hosts from 192.168.0.1 to 192.168.0.255
 
 ### 1.2. nmap -sU [Host]
 

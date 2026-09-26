@@ -8,7 +8,7 @@ Analyze Container Storage Interface (CSI) used when setting up Container Storage
 
 {{< figure caption="[Figure 1] CSI" src="images/csi.png" width="400px" >}}
 
-Container Storage Interface (CSI) means the Interface between Container Orchestration System (CO) such as Kubernetes and Mesos and Plugin (Storage Controller) that controls Storage. [Figure 1] shows CSI. CSI defines the following three things.
+**Container Storage Interface** (CSI) means the Interface between Container Orchestration System (CO) such as Kubernetes and Mesos and Plugin (Storage Controller) that controls Storage. [Figure 1] shows CSI. CSI defines the following three things.
 
 * Plugin that controls Storage
 * Life Cycle of Storage (Volume)

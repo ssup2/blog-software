@@ -8,7 +8,7 @@ Analyzes ELK (Elasticsearch, Logstash, Kibana).
 
 {{< figure caption="[Figure 1] ELK Stack" src="images/elk-stack.png" width="700px" >}}
 
-ELK Stack refers to the combination of Elasticsearch, Logstash, and Kibana. Using ELK Stack, you can easily build a Platform for collecting and analyzing Data. [Figure 1] shows the ELK Stack.
+**ELK Stack** refers to the combination of Elasticsearch, Logstash, and Kibana. Using ELK Stack, you can easily build a Platform for collecting and analyzing Data. [Figure 1] shows the ELK Stack.
 
 ## 2. Elasticsearch
 

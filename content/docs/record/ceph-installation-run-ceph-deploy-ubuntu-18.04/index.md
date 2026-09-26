@@ -5,6 +5,7 @@ title: Ceph 설치, 실행 / ceph-deploy 이용 / Ubuntu 18.04 환경
 ## 1. 설치 환경
 
 설치, 실행 환경은 다음과 같다.
+
 * Ubuntu 18.04 LTS 64bit, root user
 * Ceph Luminous Version
 
@@ -13,10 +14,11 @@ title: Ceph 설치, 실행 / ceph-deploy 이용 / Ubuntu 18.04 환경
 {{< figure caption="[Figure 1] Ceph 설치를 위한 Node 구성도" src="images/node-setting.png" width="900px" >}}
 
 VirtualBox를 이용하여 [Figure 1]과 같이 가상의 Node (VM)을 생성한다.
-* Hostname : Master Node - node01, Worker node01 - node02, Worker node02 - node03
-* NAT : Virtual Box에서 제공하는 "NAT 네트워크" 이용하여 10.0.0.0/24 Network를 구축한다.
-* HDD : 각 Node에 Ceph가 이용할 추가 HDD (/dev/sdb)를 생성하고 붙인다.
-* Router : 공유기를 이용하여 192.168.0.0/24 Network를 구축한다. (NAT)
+
+* **Hostname** : Master Node - node01, Worker node01 - node02, Worker node02 - node03
+* **NAT** : Virtual Box에서 제공하는 "NAT 네트워크" 이용하여 10.0.0.0/24 Network를 구축한다.
+* **HDD** : 각 Node에 Ceph가 이용할 추가 HDD (/dev/sdb)를 생성하고 붙인다.
+* **Router** : 공유기를 이용하여 192.168.0.0/24 Network를 구축한다. (NAT)
 
 ### 2.1. Ceph Node
 
@@ -90,7 +92,8 @@ passwd: password updated successfully
 ```
 
 cephnode User를 생성한다.
-* Password : cephnode
+
+* **Password** : cephnode
 
 ### 3.2. Deploy Node
 
@@ -125,7 +128,8 @@ passwd: password updated successfully
 ```
 
 cephdeploy User를 생성한다.
-* Password : cephdeploy
+
+* **Password** : cephdeploy
 
 ```shell
 (Deploy)# login cephdeploy
@@ -142,6 +146,7 @@ Enter same passphrase again:
 ```
 
 SSH Key를 생성 및 복사한다.
+
 * passphrases는 Empty 상태로 유지한다.
 
 ```text {caption="[File 5] Deploy Node - /home/cephdeploy/.ssh/config", linenos=table}

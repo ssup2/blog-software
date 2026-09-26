@@ -2,7 +2,7 @@
 title: journalctl
 ---
 
-systemd-journald를 제어하는 journalctl의 사용법을 정리한다.
+systemd-journald를 제어하는 **journalctl**의 사용법을 정리한다.
 
 ## 1. journalctl
 

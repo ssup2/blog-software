@@ -5,6 +5,7 @@ title: Cassandra Installation, Execution / Ubuntu 18.04 Environment
 ## 1. Installation, Execution Environment
 
 The configuration and execution environment is as follows.
+
 * Ubuntu 18.04 LTS 64bit, root user
 
 ## 2. Java Installation

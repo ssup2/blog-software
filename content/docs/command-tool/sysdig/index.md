@@ -2,7 +2,7 @@
 title: sysdig
 ---
 
-Linux Kernel의 다양한 동작들을 출력하고, 성능 측정도 할 수 있는 sysdig의 사용법을 정리한다.
+Linux Kernel의 다양한 동작들을 출력하고, 성능 측정도 할 수 있는 **sysdig**의 사용법을 정리한다.
 
 ### 1. lsof
 

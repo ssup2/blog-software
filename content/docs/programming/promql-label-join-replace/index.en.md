@@ -13,7 +13,7 @@ label-join(<Instant Vector>, <Dest Label>, <Seperator>, <Src Label>, <Src Label>
 label-join(node-memory-MemAvailable-bytes, "dest-label", "+", "job", "endpoint", "namespace")
 ```
 
-Label Join is syntax that creates **new Labels** by combining values of existing Labels. [SQL Syntax 1] shows the syntax of Label Join. `Src Label` represents the Label from which to get values, and multiple `Src Labels` can be selected. `Seperator` means a separator inserted between retrieved Labels. It can also be set to an Empty String (`""`). `Dest Label` represents a new Label where values composed of `Src Label` and `Seperator` will be stored.
+**Label Join** is syntax that creates **new Labels** by combining values of existing Labels. [SQL Syntax 1] shows the syntax of Label Join. `Src Label` represents the Label from which to get values, and multiple `Src Labels` can be selected. `Seperator` means a separator inserted between retrieved Labels. It can also be set to an Empty String (`""`). `Dest Label` represents a new Label where values composed of `Src Label` and `Seperator` will be stored.
 
 ```promql {caption="[Query 1] node-memory-MemAvailable-bytes"}
 # --- query ---

@@ -2,7 +2,7 @@
 title: pidstat
 ---
 
-process별 Resource 사용량을 출력하는 pidstat의 사용법을 정리한다.
+process별 Resource 사용량을 출력하는 **pidstat**의 사용법을 정리한다.
 
 ## 1. pidstat
 
@@ -24,12 +24,12 @@ Linux 4.15.0-60-generic (node09)        10/02/19        _x86_64_        (2 CPU)
 
 Process별 CPU 사용량을 출력한다. [Shell 1]은 `pidstat`을 이용하여 Process별 사용량을 출력하는 Shell의 모습을 나타내고 있다. 각 열은 다음과 같은 의미를 나타낸다.
 
-* %usr : 해당 Process의 App Code를 구동하는데 이용한 CPU 사용률을 나타낸다.
-* %system : 해당 Process의 Kernel Code를 구동하는데 이용한 CPU 사용률을 나타낸다.
-* %guest : 해당 Process가 Hypervisor일 경우 vCPU를 구동하기 위한 CPU 사용률을 나타낸다.
-* %wait : 해당 Process를 구동하기 위한 CPU 대기률을 나타낸다.
-* %CPU : 해당 Process의 전체 CPU 사용률을 나타낸다.
-* CPU : 해당 Process가 동작하는 CPU Core를 나타낸다.
+* `%usr` : 해당 Process의 App Code를 구동하는데 이용한 CPU 사용률을 나타낸다.
+* `%system` : 해당 Process의 Kernel Code를 구동하는데 이용한 CPU 사용률을 나타낸다.
+* `%guest` : 해당 Process가 Hypervisor일 경우 vCPU를 구동하기 위한 CPU 사용률을 나타낸다.
+* `%wait` : 해당 Process를 구동하기 위한 CPU 대기률을 나타낸다.
+* `%CPU` : 해당 Process의 전체 CPU 사용률을 나타낸다.
+* `CPU` : 해당 Process가 동작하는 CPU Core를 나타낸다.
 
 ### 1.2. pidstat -t
 
@@ -79,10 +79,10 @@ Linux 4.15.0-60-generic (node09)        10/02/19        _x86_64_        (2 CPU)
 
 Process별 Disk I/O 사용량을 출력한다. [Shell 3]은 `pidstat -d`를 이용하여 Process별 Disk I/O 사용량을 출력하는 Shell의 모습을 나타내고 있다. 각 열은 다음과 같은 의미를 나타낸다.
 
-* kB_rd/s : 해당 Process의 초당 읽은 Data의 양을 KB로 나타낸다.
-* kB_wr/s : 해당 Process의 초당 쓴 Data의 양을 KB로 나타낸다.
-* kB_ccwr/s : 해당 Process의 Dirty Page Cache로 인해서 Write가 취소된 Data의 양을 KB로 나타낸다.
-* iodelay : 해당 Process의 Disk Delay를 나타낸다. Delay에는 Disk가 Sync가 되기까지의 시간도 포함하고 있다.
+* `kB_rd/s` : 해당 Process의 초당 읽은 Data의 양을 KB로 나타낸다.
+* `kB_wr/s` : 해당 Process의 초당 쓴 Data의 양을 KB로 나타낸다.
+* `kB_ccwr/s` : 해당 Process의 Dirty Page Cache로 인해서 Write가 취소된 Data의 양을 KB로 나타낸다.
+* `iodelay` : 해당 Process의 Disk Delay를 나타낸다. Delay에는 Disk가 Sync가 되기까지의 시간도 포함하고 있다.
 
 ### 1.6. pidstat -r
 
@@ -100,10 +100,10 @@ Linux 4.15.0-60-generic (node09)        10/02/19        _x86_64_        (2 CPU)
 
 Process별 Memory 사용량을 출력한다. [Shell 4]는 `pidstat -r`을 이용하여 Process별 Memory 사용량을 출력하는 Shell의 모습을 나타내고 있다. 각 열은 다음과 같은 의미를 나타낸다.
 
-* minflt/s : 해당 Process의 초당 Minor Fault 발생 횟수를 나타낸다.
-* majflt/s : 해당 Process의 초당 Major Fault 발생 횟수를 나타낸다.
-* VSZ : 해당 Process의 Virtual Memory 사용량을 나타낸다.
-* RSS : 해당 Process가 이용하는 Memory중에서 Swap되지 않은 Memory 사용량을 나타낸다.
+* `minflt/s` : 해당 Process의 초당 Minor Fault 발생 횟수를 나타낸다.
+* `majflt/s` : 해당 Process의 초당 Major Fault 발생 횟수를 나타낸다.
+* `VSZ` : 해당 Process의 Virtual Memory 사용량을 나타낸다.
+* `RSS` : 해당 Process가 이용하는 Memory중에서 Swap되지 않은 Memory 사용량을 나타낸다.
 
 ### 1.7. pidstat -s
 
@@ -121,8 +121,8 @@ Linux 4.15.0-60-generic (node09)        10/02/19        _x86_64_        (2 CPU)
 
 Process별 Stack 사용량을 출력한다. [Shell 5]는 `pidstat -s`를 이용하여 Process별 Stack 사용량을 출력하는 Shell의 모습을 나타내고 있다. 각 열은 다음과 같은 의미를 나타낸다.
 
-* StkSize : 해당 Process의 Stack으로 이용하기 위해 예약된 Memory의 크기를 나타낸다.
-* StkRef : 해당 Process의 Stack으로 이용되는 Memory의 크기를 나타낸다.
+* `StkSize` : 해당 Process의 Stack으로 이용하기 위해 예약된 Memory의 크기를 나타낸다.
+* `StkRef` : 해당 Process의 Stack으로 이용되는 Memory의 크기를 나타낸다.
 
 ### 1.8. pidstat -v
 
@@ -140,8 +140,8 @@ Linux 4.15.0-60-generic (node09)        10/02/19        _x86_64_        (2 CPU)
 
 Process별 Thread Count, FD (File Descriptor) Count 정보를 출력한다. [Shell 6]는 `pidstat -v`를 이용하여 Process별 Thread Count, FD Count 정보를 출력하는 Shell의 모습을 나타내고 있다. 각 열은 다음과 같은 의미를 나타낸다.
 
-* threads : 해당 Process의 Thread 개수를 나타낸다.
-* fd-nr : 해당 Process가 이용중인 FD (File Descriptor)의 개수를 나타낸다.
+* `threads` : 해당 Process의 Thread 개수를 나타낸다.
+* `fd-nr` : 해당 Process가 이용중인 FD (File Descriptor)의 개수를 나타낸다.
 
 ### 1.9. pidstat -w
 
@@ -159,5 +159,5 @@ Linux 4.15.0-60-generic (node09)        10/02/19        _x86_64_        (2 CPU)
 
 Process별 Context Switch 정보를 출력한다. [Shell 7]는 `pidstat -w`를 이용하여 Process별 Context Switch 정보를 출력하는 Shell의 모습을 나타내고 있다. 각 열은 다음과 같은 의미를 나타낸다.
 
-* cswch/s : 초당 발생한 자발적인 Context Switch의 횟수를 나타낸다.
-* nvcswch/s : 초당 발생한 비지발적인 Context Switch의 횟수를 나타낸다.
+* `cswch/s` : 초당 발생한 자발적인 Context Switch의 횟수를 나타낸다.
+* `nvcswch/s` : 초당 발생한 비지발적인 Context Switch의 횟수를 나타낸다.

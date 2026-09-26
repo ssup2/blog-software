@@ -8,7 +8,7 @@ Analyze LSM (Linux Security Module), Linux's Security Framework.
 
 {{< figure caption="[Figure 1] Linux LSM Framework" src="images/linux-lsm-framework.png" width="300px" >}}
 
-LSM is a Security Framework that provides a runtime environment for various Security Modules in Linux. Currently, techniques such as Capability, SELinux, AppArmor, and smack in Linux all use LSM. Linux Documentation describes LSM as a Framework, but actually LSM only performs the role of an **Interface** that places **Hooks** throughout Linux Kernel Code to enable the Linux Kernel to call Security Module functions. Therefore, LSM entirely depends on Security Modules for Security policies.
+**LSM** is a Security Framework that provides a runtime environment for various Security Modules in Linux. Currently, techniques such as Capability, SELinux, AppArmor, and smack in Linux all use LSM. Linux Documentation describes LSM as a Framework, but actually LSM only performs the role of an **Interface** that places **Hooks** throughout Linux Kernel Code to enable the Linux Kernel to call Security Module functions. Therefore, LSM entirely depends on Security Modules for Security policies.
 
 {{< figure caption="[Figure 2] Linux LSM Operation Process" src="images/linux-lsm-query.png" width="500px" >}}
 

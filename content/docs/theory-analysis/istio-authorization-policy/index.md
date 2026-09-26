@@ -19,11 +19,11 @@ spec:
 ...
 ```
 
-Istio의 Authorization Policy는 Pod의 Istio Sidecar가 주입된 Pod로 들어오는 요청을 거부/허용 할지를 결정하는 기능을 제공한다. [Text 1]은 Authorization Policy의 형식을 나타내고 있다. Authorization Policy는 크게 **Selector**, **Action**, **Rule** 3가지 요소로 구성되어 있다.
+Istio의 **Authorization Policy**는 Pod의 Istio Sidecar가 주입된 Pod로 들어오는 요청을 거부/허용 할지를 결정하는 기능을 제공한다. [Text 1]은 Authorization Policy의 형식을 나타내고 있다. Authorization Policy는 크게 **Selector**, **Action**, **Rule** 3가지 요소로 구성되어 있다.
 
-* Selector : Selector는 Authorization Policy가 적용될 Pod를 지정한다. 만약 Selector가 지정되지 않으면 Authorization Policy는 Authorization Policy가 존재하는 Namespace 내의 모든 Pod에 적용된다. 본 글에서는 Selector에 의해서 Authorization Policy가 적용될 Pod를 **Target Pod**라고 지칭한다. Worklaod Pod 뿐만 아니라 Istio의 Ingress Gateway와 Egress Gateway도 Target Pod가 될 수 있다.
-* Rule : Rule은 Target Pod로 들어오는 **요청의 조건**을 지정한다.
-* Action : Action은 Rule에 의해서 Target Pod로 들어오는 요청을 거부/허용 할지 결정한다. **ALLOW**, **DENY**, **CUSTOM**, **AUDIT** 4가지 중에 하나를 선택할 수 있으며, 의미 그대로 ALLOW는 허용, DENY는 거부, CUSTOM은 사용자 정의 규칙을 의미한다. 마지막으로 AUDIT은 실제 Inbound Traffic을 제어하지는 않고 관련 로그만 남기는 역할을 수행한다.
+* **Selector** : Selector는 Authorization Policy가 적용될 Pod를 지정한다. 만약 Selector가 지정되지 않으면 Authorization Policy는 Authorization Policy가 존재하는 Namespace 내의 모든 Pod에 적용된다. 본 글에서는 Selector에 의해서 Authorization Policy가 적용될 Pod를 **Target Pod**라고 지칭한다. Worklaod Pod 뿐만 아니라 Istio의 Ingress Gateway와 Egress Gateway도 Target Pod가 될 수 있다.
+* **Rule** : Rule은 Target Pod로 들어오는 **요청의 조건**을 지정한다.
+* **Action** : Action은 Rule에 의해서 Target Pod로 들어오는 요청을 거부/허용 할지 결정한다. **ALLOW**, **DENY**, **CUSTOM**, **AUDIT** 4가지 중에 하나를 선택할 수 있으며, 의미 그대로 ALLOW는 허용, DENY는 거부, CUSTOM은 사용자 정의 규칙을 의미한다. 마지막으로 AUDIT은 실제 Inbound Traffic을 제어하지는 않고 관련 로그만 남기는 역할을 수행한다.
 
 Authorization Policy는 Target Pod로 들어오는 요청을 거부/허용하는, 즉 **Ingress Traffic**을 제어하는 기법이며 Outbound Traffic을 제어하는 기능은 제공하지 않는다. 또한 Authorization Policy는 **Target Pod의 Sidecar로 동작중인 Envoy Proxy에서 동작**하기 때문에, 만약 Target Pod에 Sidecar가 주입되지 않은 경우에는 동작하지 않으며 모든 요청이 허용된다. 또한 **mTLS 설정이 필요한 Rule**을 이용할 경우에는 Target Pod의 Sidecar뿐만 아니라, 요청을 시작하는 Pod에도 Sidecar가 주입되어 있어야 mTLS가 동작하기 때문에 Target Pod와 요청을 시작하는 Pod에 모두 Sidecar가 주입되어 있어야 한다.
 
@@ -68,12 +68,12 @@ spec:
 
 [Text 2]는 **From** Rule의 예제를 나타내고 있다. From Rule은 Target Pod로 요청을 전달할 수 있는 **외부 주체**를 정의한다. From Rule에는 다수의 **Source**가 존재할 수 있으며, 하나의 Source에는 **namespace**, **ipBlocks**, **serviceAccounts**, **principals**, **requestPrincipals**, **remoteIpBlocks** 6가지의 조건과 **not** Prefix를 붙인 **notNamespace**, **notIpBlocks**, **notServiceAccounts**, **notPrincipals**, **notRequestPrincipals**, **notRemoteIpBlocks** 6가지의 조건 총 12가지의 조건을 이용할 수 있으며, not Prefix를 붙인 조건은 해당 조건을 만족하지 않는 경우를 의미한다.
 
-* namespaces : 요청 시작이 가능한 Pod의 Namespace를 지정한다. 동작하기 위해서는 mTLS 설정이 필요하다.
-* ipBlocks : 요청을 시작하는 주체의 IP를 지정한다. 여기서 IP는 IP Header의 Source IP를 의미한다. CIDR 또는 단일 IP 형태로 지정할 수 있다.
-* serviceAccounts : 요청 시작이 가능한 특정 Namespace의 Service Account를 이용하는 Pod를 지정한다. `[namespace]/[serviceaccount]` 형태로 Namespace와 Service Account를 지정한다. 예를 들어 `default/user`는 `default` Namespace에서 `user`라는 Service Account를 이용하는 Pod를 의미한다. 동작하기 위해서는 mTLS 설정이 필요하다.
-* principals : 요청 시작이 가능한 특정 Namespace의 Service Account를 이용하는 Pod를 지정한다. `cluster.local/ns/[namespace]/sa/[serviceaccount]` 형태로 Namespace와 Service Account를 지정한다. 예를 들어 `cluster.local/ns/default/sa/user`는 `default` Namespace에서 `user`라는 Service Account를 이용하는 Pod를 의미한다. 동작하기 위해서는 mTLS 설정이 필요하다.
-* requestPrincipals : 요청을 허용할 JWT Token의 정보를 지정한다. `"[ISS]/[SUB]"` 형태로 Issuer와 Subject를 지정한다. 예를 들어 `example.com/sub`는 Issuer가 `example.com`이고 Subject가 `sub`인 JWT Token을 의미한다.
-* remoteIpBlocks : 요청을 시작하는 주체의 IP를 지정한다. 여기서 IP는 `X-Forwarded-For` Header에 저장된 Source IP를 의미한다.
+* `namespaces` : 요청 시작이 가능한 Pod의 Namespace를 지정한다. 동작하기 위해서는 mTLS 설정이 필요하다.
+* `ipBlocks` : 요청을 시작하는 주체의 IP를 지정한다. 여기서 IP는 IP Header의 Source IP를 의미한다. CIDR 또는 단일 IP 형태로 지정할 수 있다.
+* `serviceAccounts` : 요청 시작이 가능한 특정 Namespace의 Service Account를 이용하는 Pod를 지정한다. `[namespace]/[serviceaccount]` 형태로 Namespace와 Service Account를 지정한다. 예를 들어 `default/user`는 `default` Namespace에서 `user`라는 Service Account를 이용하는 Pod를 의미한다. 동작하기 위해서는 mTLS 설정이 필요하다.
+* `principals` : 요청 시작이 가능한 특정 Namespace의 Service Account를 이용하는 Pod를 지정한다. `cluster.local/ns/[namespace]/sa/[serviceaccount]` 형태로 Namespace와 Service Account를 지정한다. 예를 들어 `cluster.local/ns/default/sa/user`는 `default` Namespace에서 `user`라는 Service Account를 이용하는 Pod를 의미한다. 동작하기 위해서는 mTLS 설정이 필요하다.
+* `requestPrincipals` : 요청을 허용할 JWT Token의 정보를 지정한다. `"[ISS]/[SUB]"` 형태로 Issuer와 Subject를 지정한다. 예를 들어 `example.com/sub`는 Issuer가 `example.com`이고 Subject가 `sub`인 JWT Token을 의미한다.
+* `remoteIpBlocks` : 요청을 시작하는 주체의 IP를 지정한다. 여기서 IP는 `X-Forwarded-For` Header에 저장된 Source IP를 의미한다.
 
 다수의 Source가 존재할 경우 하나의 Source만 만족하면 조건이 성립되는 **OR 조건**으로 동작하며, 하나의 Source안에 다수의 조건이 존재할 경우 모든 조건을 만족해야 조건이 성립되는 **AND 조건**으로 동작한다. 따라서 [Text 2]의 경우에는 Target Pod로 `test` Namespace에서 `user`라는 Service Account를 이용하는 Pod에서 `10.0.0.0/24`나 `20.0.0.20` IP로 연결을 시작하는 경우, 또는 `example.com/sub`라는 Subject를 가진 JWT Token을 이용하는 경우 요청을 허용한다.
 

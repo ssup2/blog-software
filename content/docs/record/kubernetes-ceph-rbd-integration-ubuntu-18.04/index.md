@@ -5,10 +5,11 @@ title: Kubernetes Ceph RBD 연동 / Ubuntu 18.04 환경
 ## 1. 설정 환경
 
 설정 환경은 다음과 같다.
+
 * Kubernetes 1.12
 * Ceph
-  * Monitor IP : 10.0.0.10:6789
-  * Pool Name : kube
+  * **Monitor IP** : 10.0.0.10:6789
+  * **Pool Name** : kube
 
 ## 2. Ceph RDB 연동
 

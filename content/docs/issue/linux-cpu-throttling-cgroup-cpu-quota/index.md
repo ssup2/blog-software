@@ -26,8 +26,8 @@ Patch가 적용된 Kernel Version은 다음과 같다.
 * Linux Longterm
   * 4.14.154+, 4.19.84+, 5.4+
 * Distro Linux Kernel
-  * Ubuntu : 4.15.0-67+
-  * Centos7 : 3.10.0-1062.8.1.el7+
+  * **Ubuntu** : 4.15.0-67+
+  * **Centos7** : 3.10.0-1062.8.1.el7+
 
 Kernel Upgrade가 힘들다면 CPU Quota 값을 원하는 값보다 높게 설정하거나 CPU Quota 기능을 이용하지 않는 방식으로 CPU Throttling Issue를 우회할 수 있다.
 

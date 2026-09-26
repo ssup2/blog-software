@@ -6,7 +6,7 @@ title: HMAC
 
 {{< figure caption="[Figure 1] HMAC" src="images/hmac.png" width="700px" >}}
 
-HMAC (Hash based Message Authentication Code) is a technique that guarantees the integrity of Data through Hashing techniques. [Figure 1] shows the HMAC process. Both the sender and receiver of the Message have the same MAC algorithm and Secret Key. Here, the MAC Algorithm refers to a Hashing function, and generally the `SHA-256` algorithm is widely used. The Secret Key is used as the Key for Hashing.
+**HMAC** (Hash based Message Authentication Code) is a technique that guarantees the integrity of Data through Hashing techniques. [Figure 1] shows the HMAC process. Both the sender and receiver of the Message have the same MAC algorithm and Secret Key. Here, the MAC Algorithm refers to a Hashing function, and generally the `SHA-256` algorithm is widely used. The Secret Key is used as the Key for Hashing.
 
 The sender generates a MAC using the MAC Algorithm and Secret Key, and then transmits the MAC together with the original Message. The receiver generates a MAC using the received Message with the same MAC Algorithm and Secret Key as the sender, and verifies the integrity of the Message by comparing it with the received MAC.
 

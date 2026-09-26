@@ -14,9 +14,9 @@ NVIDIA GPUs can be allocated to containers to enable containers to use NVIDIA GP
 
 Container A uses NVIDIA GPUs 0 and 1, Container B uses NVIDIA GPUs 0, 2, and 3, and Container C uses NVIDIA GPU 3. GPUs 0, 1, and 3 are used as shared GPUs, while GPU 2 is used as a dedicated GPU. Each container can be created using the following Docker commands. You can pass a single GPU number or multiple GPU numbers separated by `,` to the `--gpu` option.
 
-* Container A : `docker run --gpu 0,1 --name a nvidia/cuda:12.4-base-ubuntu22.04`
-* Container B : `docker run --gpu 0,2,3 --name b nvidia/cuda:12.4-base-ubuntu22.04`
-* Container C : `docker run --gpu 3 --name c nvidia/cuda:12.4-base-ubuntu22.04`
+* **Container A** : `docker run --gpu 0,1 --name a nvidia/cuda:12.4-base-ubuntu22.04`
+* **Container B** : `docker run --gpu 0,2,3 --name b nvidia/cuda:12.4-base-ubuntu22.04`
+* **Container C** : `docker run --gpu 3 --name c nvidia/cuda:12.4-base-ubuntu22.04`
 
 When `--gpu all` is configured, the container can use all NVIDIA GPUs. Shared GPUs utilize **Time-Slicing** or **MPS (Multi Process Service)** features provided by NVIDIA GPUs, allowing multiple containers to share and use a single NVIDIA GPU.
 

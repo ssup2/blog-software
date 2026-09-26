@@ -4,7 +4,7 @@ title: "Envoy Configuration with xDS"
 
 ## 1. Envoy Configuration
 
-Envoy Configuration은 Root Configuration 역할을 수행하는 **Bootstrap Configuration 파일**과, 외부에서 동적으로 설정을 가져오는 데 사용되는 xDS (eXtensible Discovery Services) Protocol의 조합으로 이루어진다.
+**Envoy Configuration**은 Root Configuration 역할을 수행하는 **Bootstrap Configuration 파일**과, 외부에서 동적으로 설정을 가져오는 데 사용되는 xDS (eXtensible Discovery Services) Protocol의 조합으로 이루어진다.
 
 ### 1.1. xDS (eXtensible Discovery Services) Protocol
 

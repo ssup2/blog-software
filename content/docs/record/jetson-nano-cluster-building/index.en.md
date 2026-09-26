@@ -13,11 +13,11 @@ Set up a Jetson Nano cluster for Kubernetes installation.
 [Photo 1] shows the actual appearance of the Jetson Nano cluster. [Figure 1] shows the Jetson Nano cluster configuration. All Jetson Nano devices have the same specifications. The main specifications of the Jetson Nano cluster are as follows.
 
 * Jetson Nano * 4
-  * CPU : 4Core ARM Cortex-A57
-  * Memory : 4GB * LPDDR4
-  * Root Storage : 64GB, MicroSD
+  * **CPU** : 4Core ARM Cortex-A57
+  * **Memory** : 4GB * LPDDR4
+  * **Root Storage** : 64GB, MicroSD
 * Network
-  * NAT Network : 192.168.0.0/24
+  * **NAT Network** : 192.168.0.0/24
 
 ### 1.1. Kubernetes
 

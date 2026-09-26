@@ -8,7 +8,7 @@ Web Browser에서 이용하는 Local Storage, Session Storage, Cookie를 분석�
 
 {{< figure caption="[Figure 1] Chrome Local Storage" src="images/chrome-local-storage.png" width="700px" >}}
 
-Local Storage는 Web Browser가 이용하는 Key/Value 기반 저장 공간이다. Web Brower가 설치된 PC의 Storage에 저장되며, Web Browser의 Java Script/HTML에서만 이용할 수 있다. 각 Domain당 최대 5MB의 저장 공간을 이용할 수 있다. Local Storage에 저장된 Data는 만료가 없다는 특징을 가지고 있다.
+**Local Storage**는 Web Browser가 이용하는 Key/Value 기반 저장 공간이다. Web Brower가 설치된 PC의 Storage에 저장되며, Web Browser의 Java Script/HTML에서만 이용할 수 있다. 각 Domain당 최대 5MB의 저장 공간을 이용할 수 있다. Local Storage에 저장된 Data는 만료가 없다는 특징을 가지고 있다.
 
 ## 2. Session Storage
 

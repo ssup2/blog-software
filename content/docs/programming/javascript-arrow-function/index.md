@@ -27,7 +27,7 @@ const adder = (x, y) => x + y; // Define, assign and call
 adder(10, 20)
 ```
 
-Arrow Function은 간략하게 익명함수를 정의하고 이용할 수 있는 문법이다. Javscript ES6에서 정의된 문법이다. Arrow Function을 이용하여 간단하게 Logic을 Javascript Object에 넣고 이용할 수 있다. [Code 1]은 Allow Function의 정의 및 호출하는 방법을 나타내고 있다.
+**Arrow Function**은 간략하게 익명함수를 정의하고 이용할 수 있는 문법이다. Javscript ES6에서 정의된 문법이다. Arrow Function을 이용하여 간단하게 Logic을 Javascript Object에 넣고 이용할 수 있다. [Code 1]은 Allow Function의 정의 및 호출하는 방법을 나타내고 있다.
 
 ### 1.1. this
 

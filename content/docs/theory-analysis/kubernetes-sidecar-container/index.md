@@ -9,7 +9,7 @@ Kubernetes 환경에서 Sidecar Container Pattern은 다양한 방법으로 활�
 * Sidecar Container와 App Container의 의존성 관계를 명시할 수 없었다. Sidecar Container가 먼저 시작되고 App Container 시작되게 만들거나, App Container가 먼저 죽고 Sidecar Container가 나중에 죽게 만들거나 하는 것이 불가능했다.
 * App Container가 정상 종료가 되어도 Sidecar Container가 종료되지 않으면 Pod가 종료되지 않는 문제가 있었다. 이러한 문제는 Job Workload를 수행하는 Job Pod에서 특히 문제가 되었다.
 
-이러한 Sidecar Container Pattern의 문제를 해결하기 위해서 Kubernetes는 Sidecar Container 기능을 출시했다. `1.28 Version`부터 이용이 가능하다. Kubernetes의 Sidecar Container 기능은 다음과 같은 특징을 갖는다.
+이러한 Sidecar Container Pattern의 문제를 해결하기 위해서 Kubernetes는 **Sidecar Container** 기능을 출시했다. `1.28 Version`부터 이용이 가능하다. Kubernetes의 Sidecar Container 기능은 다음과 같은 특징을 갖는다.
 
 * App Container가 시작하기 전에 Sidecar Container가 먼저 시작된다. 다수의 Sidecar Container가 있을 경우에는 Manifest 순서에 따라서 하나씩 시작된다.
 * Pod가 종료되면 먼저 App Container가 종료되고, Sidecar Container가 생성된 순서의 역순으로 종료된다. 즉 Manifest의 역순으로 종료된다.

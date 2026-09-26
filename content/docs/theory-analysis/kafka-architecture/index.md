@@ -6,7 +6,7 @@ title: Kafka Architecture
 
 ## 1. Kafka Architecture
 
-Kafka는 Publish-subscribe 기반의 분산 Message Queue이다. Kafka는 수신한 Message를 특정 기간동안 저장하고 재처리가 가능하다는 특징 때문에 일반적으로 Event Driven Architecture의 **Event Bus**로 많이 활용된다. 또한 높은 Message 처리량을 갖는 특징도 갖고 있으며, 이를 기반으로 Storm 같은 빅데이터 처리 Platform의 **Data Stream Queue**로도 많이 이용되고 있다.
+**Kafka**는 Publish-subscribe 기반의 분산 Message Queue이다. Kafka는 수신한 Message를 특정 기간동안 저장하고 재처리가 가능하다는 특징 때문에 일반적으로 Event Driven Architecture의 **Event Bus**로 많이 활용된다. 또한 높은 Message 처리량을 갖는 특징도 갖고 있으며, 이를 기반으로 Storm 같은 빅데이터 처리 Platform의 **Data Stream Queue**로도 많이 이용되고 있다.
 
 {{< figure caption="[Figure 1] Kafka Architecture" src="images/kafka-architecture.png" width="1000px" >}}
 
@@ -126,7 +126,7 @@ Producer Buffer는 Producer가 Record를 전송하기 전에 임시로 저장하
 
 Producer는 Request를 전송한 후 Kafka Broker로부터 해당 Request에 대한 ACK를 받기 전까지 **In-flight Request**로 관리한다. 최대 In-flight Request의 개수는 `max.in.flight.requests.per.connection` 설정을 통해서 제한할 수 있으며, 기본값은 **5개**이다. 즉 기본적으로 최대 5개까지의 Request를 In-flight 상태로 관리할 수 있다. In-flight Request는 필요에 따라 언제든지 재전송될 수 있기 때문에, Producer는 Request 재전송에 필요한 모든 정보를 저장하고 있다. In-flight Request는 ACK를 수신하면 더 이상 재전송이 필요 없으므로 제거된다.
 
-각 **Producer Request는 고유의 ID (Collector ID)**를 가지며, 다음과 같은 Batch 전송 관련 설정이 존재한다.
+각 **Producer Request는 고유의 ID** (Collector ID)를 가지며, 다음과 같은 Batch 전송 관련 설정이 존재한다.
 
 * `batch.size` : Producer가 한번에 전송할 수 있는 최대 Record 크기(Bytes)를 설정한다. 기본값은 `16384B` 이다.
 * `linger.ms` : Producer가 Batch 단위로 전송하기 위해서 대기할 수 있는 최대 시간(ms)을 설정한다. 기본값은 `0ms` 이며, 이는 Batch 기능을 사용하지 않는 것을 의미하지는 않으며, 최소한의 대기시간과 함께 Batch 기능을 사용하는 것을 의미한다.

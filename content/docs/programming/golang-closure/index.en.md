@@ -6,7 +6,7 @@ This document analyzes Golang closure techniques.
 
 ## 1. Golang Closure
 
-Golang also provides closure functionality, just like Javascript. Closure is a technique that **allows functions to have state by objectifying functions**.
+Golang also provides closure functionality, just like Javascript. **Closure** is a technique that **allows functions to have state by objectifying functions**.
 
 ```golang {caption="[Code 1] Golang Closure", linenos=table}
 package main

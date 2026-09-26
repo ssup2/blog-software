@@ -5,20 +5,22 @@ title: KVM, QEMU 설치, 실행 / Arndale 환경
 ## 1. 설치, 실행 환경
 
 설치, 실행 환경은 다음과 같다.
+
 * Arndale Board, 8GB uSD
-* PC : Ubuntu 14.04LTS 32bit, root User
-* VM on KVM : Ubuntu 14.04LTS 32bit, root User
-* Cross compiler : arm-linux-gnueabihf-4.9.3
+* **PC** : Ubuntu 14.04LTS 32bit, root User
+* **VM on KVM** : Ubuntu 14.04LTS 32bit, root User
+* **Cross compiler** : arm-linux-gnueabihf-4.9.3
 * Network 192.168.0.xxx (NAT)
-  * HostOS : 192.168.0.150
-  * br0 : 192.168.0.200
-  * GeustOS-01 : 192.168.0.160, GeustOS-02 : 192.168.0.161
-  * tap0 : 192.168.0.201, tap1 : 192.168.0.202
+  * **HostOS** : 192.168.0.150
+  * `br0` : 192.168.0.200
+  * **GuestOS-01** : 192.168.0.160, **GuestOS-02** : 192.168.0.161
+  * `tap0` : 192.168.0.201, `tap1` : 192.168.0.202
 
 ## 2. Cross Compiler 설치
 
 Kernel Build를 위한 Cross Compiler를 설치한다.
-* Download : https://releases.linaro.org/15.02/components/toolchain/binaries/arm-linux-gnueabihf/gcc-linaro-4.9-2015.02-3-x86-64-arm-linux-gnueabihf.tar.xz
+
+* **Download** : https://releases.linaro.org/15.02/components/toolchain/binaries/arm-linux-gnueabihf/gcc-linaro-4.9-2015.02-3-x86-64-arm-linux-gnueabihf.tar.xz
 
 
 ```text {caption="[File 1] ~/.bashrc", linenos=table}
@@ -40,8 +42,9 @@ Kernel Build에 필요한 Ubuntu Package를 설치한다.
 ## 4. Kernel Config Download
 
 Kernel Config를 Download 한다.
-* Login in : http://www.virtualopensystems.com/
-* Guest Kernel Config : http://www.virtualopensystems.com/downloads/guides/kvm-virtualization-on-arndale/guest-config
+
+* **Login in** : http://www.virtualopensystems.com/
+* **Guest Kernel Config** : http://www.virtualopensystems.com/downloads/guides/kvm-virtualization-on-arndale/guest-config
 
 ## 5. Host Kernel, Host dtb Build
 
@@ -234,9 +237,10 @@ QEMU를 Build 한다.
 ## 13. uSD Card Partiton 구성 
 
 uSD Card의 Partiton을 아래와 같이 구성한다. 
+
 * 0 ~ 2M, 2M, No Filesystem: Bootloader (bl1, spl, U-boot)
-* 2M ~ 18M, 16M, ext2, boot : uImage, exynos5250-arndale.dtb
-* 18M ~ rest, ext3, root : Root-Filesystem
+* `2M ~ 18M`, `16M`, `ext2`, `boot` : uImage, exynos5250-arndale.dtb
+* `18M ~ rest`, `ext3`, `root` : Root-Filesystem
 
 ## 14. uSD Card에 u-boot Fusing
 

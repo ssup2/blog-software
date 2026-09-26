@@ -8,7 +8,7 @@ This document analyzes Service Mesh Architecture.
 
 {{< figure caption="[Figure 1] Service Mesh Architecture" src="images/service-mesh-architecture.png" width="900px" >}}
 
-Service Mesh Architecture is an **Infra Level** Architecture designed to overcome the disadvantage that **centralized control** is not easy in MSA (Micro Service Architecture) that uses multiple services. Google's Istio is a representative implementation of Service Mesh Architecture. [Figure 1] shows Service Mesh Architecture.
+**Service Mesh Architecture** is an **Infra Level** Architecture designed to overcome the disadvantage that **centralized control** is not easy in MSA (Micro Service Architecture) that uses multiple services. Google's Istio is a representative implementation of Service Mesh Architecture. [Figure 1] shows Service Mesh Architecture.
 
 Service and Proxy have a 1:1 relationship, and Services perform most functions except Business Logic in Proxy mapped to Service, not in Service (Offloading). Such Proxy is called **Sidecar Proxy** with Sidecar Pattern applied. Since most functions of Services are Offloaded to Proxy, Services can be indirectly controlled through Proxy control. The core of Service Mesh Architecture is to conveniently control multiple services through Control Plane that centrally controls these Proxies.
 

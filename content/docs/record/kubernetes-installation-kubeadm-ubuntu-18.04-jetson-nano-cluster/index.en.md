@@ -9,8 +9,8 @@ title: Kubernetes Installation / Using kubeadm / Ubuntu 18.04, Jetson Nano Clust
 [Figure 1] shows the Kubernetes installation environment based on Jetson Nano Cluster. Detailed environment information is as follows.
 
 * Kubernetes 1.18.14
-  * Network Plugin : using calico or flannel or cilium
-  * Dashboard Addon : using Dashboard
+  * **Network Plugin** : using calico or flannel or cilium
+  * **Dashboard Addon** : using Dashboard
 * kubeadm 1.18.14
   * When building a Cluster environment using VMs, Kubernetes can be easily installed using kubeadm.
 * CNI
@@ -19,8 +19,8 @@ title: Kubernetes Installation / Using kubeadm / Ubuntu 18.04, Jetson Nano Clust
 * Node
   * Jetson Nano
     * r32.3.1 (Ubuntu 18.04)
-    * Node 01 : Master Node
-    * Node 02, 03, 04 : Worker Node
+    * **Node 01** : Master Node
+    * **Node 02, 03, 04** : Worker Node
 
 ## 2. Node Configuration
 

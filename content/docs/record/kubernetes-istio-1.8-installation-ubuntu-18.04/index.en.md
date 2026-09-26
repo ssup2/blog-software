@@ -5,8 +5,9 @@ title: Kubernetes istio 1.8 Installation / Ubuntu 18.04 Environment
 ## 1. Installation Environment
 
 The installation environment is as follows:
+
 * Kubernetes 1.18.3
-  * Network Addon : Using cilium
+  * **Network Addon** : Using cilium
 * istio 1.8.1
 
 ## 2. istio Installation

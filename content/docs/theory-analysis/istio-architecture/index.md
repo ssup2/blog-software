@@ -6,7 +6,7 @@ title: Istio Architecture
 
 {{< figure caption="[Figure 1] Istio Architecture" src="images/istio-architecture.png" width="600px" >}}
 
-[Figure 1]은 Istio Architecture를 나타내고 있다. istio는 istio를 제어하는 Control Plan과 App사이의 Data를 주고 받는 Data Plan으로 나눌수 있다. Control Plan은 **Pliot**, **Mixer**, **Citadel**, **Galley** 4가지로 구성되어 있고, Data Plan에는 Service를 제공하는 App Pod이 존재한다. 여기서 Service는 Kubernetes의 Service Object 또는 Istio의 Virtual Service Object를 의미한다. App Pod는 실제 App이 동작하는 **App Container**와 **Sidecar Container**로 구성되어 있다. 여기서 Sidecar는 App Pod 전용 Proxy Server를 의미한다. Sidecar Container는 실제 Sidecar 역할을 수행하는 **Envoy**와 Envoy를 Control Plan의 명령에 따라서 설정하는 **pilot-agent**로 구성되어 있다.
+[Figure 1]은 Istio Architecture를 나타내고 있다. **istio**는 istio를 제어하는 Control Plan과 App사이의 Data를 주고 받는 Data Plan으로 나눌수 있다. Control Plan은 **Pliot**, **Mixer**, **Citadel**, **Galley** 4가지로 구성되어 있고, Data Plan에는 Service를 제공하는 App Pod이 존재한다. 여기서 Service는 Kubernetes의 Service Object 또는 Istio의 Virtual Service Object를 의미한다. App Pod는 실제 App이 동작하는 **App Container**와 **Sidecar Container**로 구성되어 있다. 여기서 Sidecar는 App Pod 전용 Proxy Server를 의미한다. Sidecar Container는 실제 Sidecar 역할을 수행하는 **Envoy**와 Envoy를 Control Plan의 명령에 따라서 설정하는 **pilot-agent**로 구성되어 있다.
 
 Control Plain의 구성 요소들은 다음과 같다.
 

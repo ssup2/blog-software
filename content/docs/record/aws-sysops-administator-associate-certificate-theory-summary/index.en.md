@@ -140,11 +140,11 @@ Organize missing content based on the following organized content
 ## 5. Cloud Formation
 
 * Template Components
-  * Resources : Define AWS resources
-  * Parameters : Define template parameters
-  * Mapping : Static variables
-  * Output : Template execution results
-  * Conditions : Set resource creation conditions
+  * `Resources` : Define AWS resources
+  * `Parameters` : Define template parameters
+  * `Mapping` : Static variables
+  * `Output` : Template execution results
+  * `Conditions` : Set resource creation conditions
   * MetaData
 * Stack Policy
   * Limits resources that the stack can change
@@ -152,10 +152,10 @@ Organize missing content based on the following organized content
 * Resource Import
   * Used when resources created externally (not through CloudFormation) need to be managed through CloudFormation
 * Helper Script
-  * cfn-init : 
-  * cfn-signal : 
-  * cfn-get-metadata :
-  * cfn-hup :
+  * `cfn-init` : 
+  * `cfn-signal` : 
+  * `cfn-get-metadata` :
+  * `cfn-hup` :
 
 ## 6. References
 

@@ -418,13 +418,13 @@ Content-Type: <media-type>
 The `Content-Type` header indicates the media type of the response. [Text 41] shows the format of the `Content-Type` header.
 
 * `<media-type>` : Indicates the media type.
- * text/html : HTML document
- * text/plain : Text document
- * application/json : JSON document
- * image/png : PNG image
- * image/jpeg : JPEG image
- * image/gif : GIF image
- * image/webp : WebP image
+ * `text/html` : HTML document
+ * `text/plain` : Text document
+ * `application/json` : JSON document
+ * `image/png` : PNG image
+ * `image/jpeg` : JPEG image
+ * `image/gif` : GIF image
+ * `image/webp` : WebP image
 
 ``` {caption="[Text 42] Content-Type Header Example"}
 Content-Type: text/html

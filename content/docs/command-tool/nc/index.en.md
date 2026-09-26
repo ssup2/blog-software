@@ -6,7 +6,7 @@ This document summarizes the usage of `nc` (netcat) for sending and receiving da
 
 ## 1. nc
 
-nc (netcat) is a tool for sending and receiving data from network connections.
+**nc** (netcat) is a tool for sending and receiving data from network connections.
 
 ### 1.1. nc [IP] [Port]
 

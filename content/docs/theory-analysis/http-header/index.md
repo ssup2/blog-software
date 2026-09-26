@@ -416,13 +416,13 @@ Content-Type: <media-type>
 `Content-Type` Header는 응답의 미디어 타입을 나타낸다. [Text 35]는 `Content-Type` Header의 Format을 나타낸다.
 
 * `<media-type>` : 미디어 타입을 나타낸다.
- * text/html : HTML 문서
- * text/plain : 텍스트 문서
- * application/json : JSON 문서
- * image/png : PNG 이미지
- * image/jpeg : JPEG 이미지
- * image/gif : GIF 이미지
- * image/webp : WebP 이미지
+ * `text/html` : HTML 문서
+ * `text/plain` : 텍스트 문서
+ * `application/json` : JSON 문서
+ * `image/png` : PNG 이미지
+ * `image/jpeg` : JPEG 이미지
+ * `image/gif` : GIF 이미지
+ * `image/webp` : WebP 이미지
 
 ``` {caption="[Text 36] Content-Type Header Example"}
 Content-Type: text/html

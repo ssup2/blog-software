@@ -6,7 +6,7 @@ WebSocket을 분석한다.
 
 ## 1. WebSocket
 
-WebSocket은 Web Browser와 Server 사이의 **Full-duplex**를 구현가능하게 만드는 Protocol이다. Web Socket은 Handshaking시에는 HTTP Protocol을 이용하지만, Handshaking 이후에는 HTTP를 이용하지 않고 TCP/IP Stack 위에서 WebSocket 자체 Protocol을 이용하여 Web Browser와 Server가 Data를 주고 받는다. 즉 Web Client와 Server는 HTTP Protocol에서 WebSocket Protocol로 전환한다.
+**WebSocket**은 Web Browser와 Server 사이의 **Full-duplex**를 구현가능하게 만드는 Protocol이다. Web Socket은 Handshaking시에는 HTTP Protocol을 이용하지만, Handshaking 이후에는 HTTP를 이용하지 않고 TCP/IP Stack 위에서 WebSocket 자체 Protocol을 이용하여 Web Browser와 Server가 Data를 주고 받는다. 즉 Web Client와 Server는 HTTP Protocol에서 WebSocket Protocol로 전환한다.
 
 {{< figure caption="[Figure 1] Websocket Handshaking" src="images/websocket-handshaking.png" width="600px" >}}
 

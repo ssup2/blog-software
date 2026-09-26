@@ -5,12 +5,13 @@ title: Kubernetes 설치 / kubeadm 이용 / Ubuntu 16.04 환경
 ## 1. 설치 환경
 
 설치 환경은 다음과 같다.
+
 * VirtualBox 5.0.14r
-  * Master Node : Ubuntu Desktop 16.04.2 64bit 1대
-  * Worker Node : Ubuntu Server 16.04.2 64bit 2대
+  * **Master Node** : Ubuntu Desktop 16.04.2 64bit 1대
+  * **Worker Node** : Ubuntu Server 16.04.2 64bit 2대
 * Kubernetes 1.7.1
-  * Network Plugin : flannel 이용
-  * Dashboard Addon : Dashboard 이용
+  * **Network Plugin** : flannel 이용
+  * **Dashboard Addon** : Dashboard 이용
 * kubeadm
   * VM을 이용하여 Cluster 환경을 구축하는 경우 kubeadm을 이용하여 쉽게 Kubernetes를 설치 할 수 있다.
 * Docker 1.12.6
@@ -24,9 +25,10 @@ title: Kubernetes 설치 / kubeadm 이용 / Ubuntu 16.04 환경
 {{< figure caption="[Figure 1] Kubernetes 설치를 위한 Node 구성도" src="images/node-setting.png" width="900px" >}}
 
 VirtualBox를 이용하여 [Figure 1]과 같이 가상의 Master, Worker Node (VM)을 생성한다.
-* Hostname : Master Node - ubuntu01, Worker Node1 - ubuntu02, Worker Node2 - ubuntu03
-* NAT : Virtual Box에서 제공하는 "NAT 네트워크" 이용하여 10.0.0.0/24 Network를 구축한다.
-* Router : 공유기를 이용하여 192.168.77.0/24 Network를 구축한다. (NAT)
+
+* **Hostname** : Master Node - ubuntu01, Worker Node1 - ubuntu02, Worker Node2 - ubuntu03
+* **NAT** : Virtual Box에서 제공하는 "NAT 네트워크" 이용하여 10.0.0.0/24 Network를 구축한다.
+* **Router** : 공유기를 이용하여 192.168.77.0/24 Network를 구축한다. (NAT)
 
 ### 2.1. Master Node
 

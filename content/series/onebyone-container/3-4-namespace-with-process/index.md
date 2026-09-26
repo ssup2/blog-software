@@ -8,11 +8,9 @@ Namespace와 Process는 밀접한 관계를 가지고 있다. 먼져 Process와 
 
 아래는 Namespace과 관련된 System Call들 관련 설명이다. 새로운 Namespace를 생성하는 clone(), unshare() System Call은 Namespace를 생성할 뿐만 아니라, Process를 생성된 Namespace에 소속시키는 동작도 같이 수행하는것을 확인할 수 있다.
 
-* clone() : Process를 생성하는 fork() System Call의 확장판이다. CLONE-NEW* Option으로 Namespace 관련 설정을 진행하고 clone() System Call을 호출하면 (Child) Process뿐만 아니라 Process가 소속되는 새로운 Namespace도 같이 생성된다. Docker와 같은 Container Runtime은 새로운 Container를 생성할때 clone() System Call을 이용하여 Container가 이용하는 Namespace와 Container의 Init Process를 동시에 생성한다.
-
-* unshare() : unshare() System Call을 호출하면 새로운 Namespace가 생성되고, unshare() System Call을 호출한 Process는 새로 생성된 Namespace에 소속된다. unshare 명령어를 통해서 unshare() System Call을 이용할 수 있다.
-
-* setns() : setns() System Call을 호출하는 Process는 setns() System Call Parameter를 통해서 지정하는 다른 Namespace에 소속된다. Host에서 Docker Container 내부에서 명령어를 실행할때 이용하는 docker exec 명령어는, setns() System Call을 이용하여 Process를 Docker Container의 Namespace에서 동작시킨다. nsenter 명령어를 통해서도 setns() System Call을 이용할 수 있다.
+* `clone()` : Process를 생성하는 fork() System Call의 확장판이다. CLONE-NEW* Option으로 Namespace 관련 설정을 진행하고 clone() System Call을 호출하면 (Child) Process뿐만 아니라 Process가 소속되는 새로운 Namespace도 같이 생성된다. Docker와 같은 Container Runtime은 새로운 Container를 생성할때 clone() System Call을 이용하여 Container가 이용하는 Namespace와 Container의 Init Process를 동시에 생성한다.
+* `unshare()` : unshare() System Call을 호출하면 새로운 Namespace가 생성되고, unshare() System Call을 호출한 Process는 새로 생성된 Namespace에 소속된다. unshare 명령어를 통해서 unshare() System Call을 이용할 수 있다.
+* `setns()` : setns() System Call을 호출하는 Process는 setns() System Call Parameter를 통해서 지정하는 다른 Namespace에 소속된다. Host에서 Docker Container 내부에서 명령어를 실행할때 이용하는 docker exec 명령어는, setns() System Call을 이용하여 Process를 Docker Container의 Namespace에서 동작시킨다. nsenter 명령어를 통해서도 setns() System Call을 이용할 수 있다.
 
 ## Namespace와 관련된 Process의 특징
 

@@ -5,12 +5,14 @@ title: macOS Keyboard and Mouse Key Configuration
 ## 1. Installation Environment
 
 The configuration environment is as follows.
+
 * macOS 10.14.6 Mojave
 * Dell KM717 Keyboard, Mouse
 
 ## 2. Karabiner-Elements Installation
 
 Install Karabiner-Elements to change keys.
+
 * https://karabiner-elements.pqrs.org/
 
 ## 3. Karabiner-Elements Complex Modification Rules File Creation

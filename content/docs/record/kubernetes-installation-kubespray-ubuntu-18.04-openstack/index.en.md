@@ -7,6 +7,7 @@ title: Kubernetes Installation / Using kubespray / Ubuntu 18.04, OpenStack Envir
 {{< figure caption="[Figure 1] Kubernetes Installation Environment" src="images/environment.png" width="900px" >}}
 
 [Figure 1] shows the Kubernetes installation environment. The installation environment is as follows.
+
 * VM: Ubuntu 18.04, 4 vCPU, 4GB Memory
   * ETCD Node * 3
   * Master Node * 2

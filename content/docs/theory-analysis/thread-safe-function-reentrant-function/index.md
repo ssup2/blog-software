@@ -4,7 +4,7 @@ title: Thread-safe 함수, Reentrant 함수
 
 ## 1. Thread-safe 함수
 
-여러 Thread에서 동시에 실행해도 문제 없는 함수를 의미한다. 여러 Thread가 같은 함수를 동시에 실행할 경우 가장 큰 문제는 함수가 이용하는 Thread간 공유자원이다. 공유자원을 Lock같은 동기화 기법으로 보호하여 공유 자원의 무결성을 보장해야한다. 이렇게 공유 자원의 무결성을 보장하는 함수를 Thread-safe 함수라고 한다. Thread-safe 함수는 Thread간 공유자원을 이용할 수도 있기 때문에 각 Thread가 Thread-safe 함수를 호출하는 시간에 따라 호출 결과가 달라질 수 있다.
+여러 Thread에서 동시에 실행해도 문제 없는 함수를 의미한다. 여러 Thread가 같은 함수를 동시에 실행할 경우 가장 큰 문제는 함수가 이용하는 Thread간 공유자원이다. 공유자원을 Lock같은 동기화 기법으로 보호하여 공유 자원의 무결성을 보장해야한다. 이렇게 공유 자원의 무결성을 보장하는 함수를 **Thread-safe 함수**라고 한다. Thread-safe 함수는 Thread간 공유자원을 이용할 수도 있기 때문에 각 Thread가 Thread-safe 함수를 호출하는 시간에 따라 호출 결과가 달라질 수 있다.
 
 ```c {caption="[Code 1] Thread-safe 함수 예제", linenos=table}
 pthread-mutex-t mutex = PTHREAD-MUTEX-INITIALIZER;

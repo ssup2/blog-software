@@ -6,7 +6,7 @@ title: 3.1. PID Namespace
 
 {{< figure caption="[Figure 1] Linux Process Tree" src="images/linux-process-tree.png" width="400px" >}}
 
-PID Namespace is a Namespace responsible for process isolation. To fully understand PID Namespace, it is necessary to understand Linux's Process Tree. [Figure 1] shows Linux's Process Tree. The squares represent individual processes, and each process has a name and PID (Process ID) recorded. The process at the root of the Process Tree must have PID 1 and is called the **Init Process**.
+**PID Namespace** is a Namespace responsible for process isolation. To fully understand PID Namespace, it is necessary to understand Linux's Process Tree. [Figure 1] shows Linux's Process Tree. The squares represent individual processes, and each process has a name and PID (Process ID) recorded. The process at the root of the Process Tree must have PID 1 and is called the **Init Process**.
 
 Processes can create child processes by calling the fork() system call. The process that calls the fork() system call becomes the parent process. For example, in [Figure 1], Process B called the fork() system call twice to create Process C and Process D. Process B becomes the parent process of Process C and Process D, and Process C and Process D become child processes of Process B. All processes can freely create child processes through the fork() system call. Therefore, Linux processes form a tree with the Init Process as the root, as shown in [Figure 1].
 

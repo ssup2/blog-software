@@ -4,7 +4,7 @@ title: ZeroMQ
 
 ## 1. ZeroMQ
 
-ZeroMQ는 분산, 병렬 System을 Target으로한 High-performance Async Messaging Library이다. 기초가 된는 Message Pattern을 정의하고 정의한 Message Pattern을 쉽게 구현할 수 있도록 도와준다. 다양한 언어를 지원한다는 장점도 갖고 있다.
+**ZeroMQ**는 분산, 병렬 System을 Target으로한 High-performance Async Messaging Library이다. 기초가 된는 Message Pattern을 정의하고 정의한 Message Pattern을 쉽게 구현할 수 있도록 도와준다. 다양한 언어를 지원한다는 장점도 갖고 있다.
 
 ### 1.1. Messaging Pattern
 

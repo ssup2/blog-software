@@ -6,7 +6,7 @@ This document organizes SOLID, which presents five principles when designing Cla
 
 ## 1. SOLID
 
-SOLID is a term that presents five principles when designing Classes in object-oriented programming. The term SOLID was created by taking the initials of Single Responsibility, Open/closed, Liskov Substitution, Interface Segregation, and Dependency Inversion.
+**SOLID** is a term that presents five principles when designing Classes in object-oriented programming. The term SOLID was created by taking the initials of Single Responsibility, Open/closed, Liskov Substitution, Interface Segregation, and Dependency Inversion.
 
 ### 1.1. Single Responsibility
 

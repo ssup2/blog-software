@@ -26,8 +26,8 @@ The kernel versions with patches applied are as follows.
 * Linux Longterm
   * 4.14.154+, 4.19.84+, 5.4+
 * Distro Linux Kernel
-  * Ubuntu : 4.15.0-67+
-  * Centos7 : 3.10.0-1062.8.1.el7+
+  * **Ubuntu** : 4.15.0-67+
+  * **Centos7** : 3.10.0-1062.8.1.el7+
 
 If kernel upgrade is difficult, you can bypass the CPU throttling issue by setting the CPU Quota value higher than the desired value or not using the CPU Quota function.
 

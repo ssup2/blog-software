@@ -6,7 +6,7 @@ Analyze CORS (Cross-Origin Resource Sharing) technique.
 
 ## 1. CORS (Cross-Origin Resource Sharing)
 
-Generally, Web Applications can freely access Resources of **Origin** (source where Web Application exists), but for Resources of **Cross-Origin** (source where Web Application does not exist), only Resources allowed by Cross-Origin can be used. CORS technique is a technique that informs Web Applications of available Resources from Cross-Origin and restricts Resource usage. Here, Web Application generally means **JavaScript** executed in Web Browser.
+Generally, Web Applications can freely access Resources of **Origin** (source where Web Application exists), but for Resources of **Cross-Origin** (source where Web Application does not exist), only Resources allowed by Cross-Origin can be used. **CORS** technique is a technique that informs Web Applications of available Resources from Cross-Origin and restricts Resource usage. Here, Web Application generally means **JavaScript** executed in Web Browser.
 
 When User accesses "https://ssup2.com" through Web Browser, Web Browser receives and executes JavaScript from "https://ssup2.com". The received JavaScript may include operations to fetch Resources from "https://ssup2.github.io". In this case, since Resources of Cross-Origin (https://ssup2.github.io) rather than Origin (https://ssup2.com) that Web Browser accessed must be used, Web Browser must use CORS technique. Web Browser first receives Resource usage permission from "https://ssup2.github.io" through CORS, then accesses Resources of "https://ssup2.github.io".
 
@@ -28,9 +28,9 @@ Through CORS technique, Cross-Origin can prevent unverified arbitrary Web Applic
 
 [Figure 3] shows the processing procedure of **Simple Request** method of CORS. It is a method that requests Cross-Origin's Resources immediately with **Origin** Header without receiving Resource usage permission from Cross-Origin. To use Simple Request method, Simple Request's Method and Header have the following restrictions.
 
-* Method restrictions : Only HEAD, GET, POST Methods can be used
-* Header restrictions : Only Accept, Accept-Language, Content-Language, Content-Type Headers can be used
-  * Content-Type Header Value restrictions : Only application/x-www-form-urlencoded, multipart/form-data, text/plain Values can exist in Content-Type Header
+* **Method restrictions** : Only HEAD, GET, POST Methods can be used
+* **Header restrictions** : Only Accept, Accept-Language, Content-Language, Content-Type Headers can be used
+  * **Content-Type Header Value restrictions** : Only application/x-www-form-urlencoded, multipart/form-data, text/plain Values can exist in Content-Type Header
 
 ## 2. References
 

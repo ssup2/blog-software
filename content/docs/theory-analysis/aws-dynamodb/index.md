@@ -2,7 +2,7 @@
 title: AWS DynamoDB
 ---
 
-AWS의 DynamoDB Service를 분석한다. DynamoDB Service는 Managed Key-value Data 또는 Documented Data 저장을 지원하는 Managed NoSQL DB Service이다.
+AWS의 DynamoDB Service를 분석한다. **DynamoDB Service**는 Managed Key-value Data 또는 Documented Data 저장을 지원하는 Managed NoSQL DB Service이다.
 
 ## 1. Table
 
@@ -34,7 +34,7 @@ Sort Key는 이름 그대로 Disk 내부의 Partition에서 Column을 정렬하�
 
 Attribute는 Table의 **Column** 역할을 수행한다. 각 Item마다 다른 Attribute를 갖을 수 있다. [Figure 1]에서 첫번째 Item에서는 "Email Address", "Total Amount", "Phone"을 Attribute를 갖고 있고, 두번째 Item에서는 "Purchase Price", "Purchase Count"를 Attribute로 가지고 있다. 서로 다른 Attribute를 갖고 있는 것을 확인할 수 있다.
 
-일반적인 Attribute를 대상으로는 비교 연산자, 또는 범위 연산자를 이용할 수 없고, **LSI (Local Secondary Index)** 또는 **GSI (Global Secondary Index)**와 같은 Secondary Index를 생성하고 이용해야 한다.
+일반적인 Attribute를 대상으로는 비교 연산자, 또는 범위 연산자를 이용할 수 없고, **LSI (Local Secondary Index)** 또는 **GSI** (Global Secondary Index)와 같은 Secondary Index를 생성하고 이용해야 한다.
 
 ## 2. Secondary Index
 
@@ -66,9 +66,9 @@ TODO
 
 DynamoDB의 Data Type은 Scalar, Document, Set 3가지로 분류할 수 있다. 각 분류마다 아래의 Data Type들이 존재한다.
 
-* Scalar : String, Number, Binary, Boolean, Null
-* Document : List, Map
-* Set : String Set, Number Set, Binary Set
+* **Scalar** : String, Number, Binary, Boolean, Null
+* **Document** : List, Map
+* **Set** : String Set, Number Set, Binary Set
 
 ## 5. Consistency
 

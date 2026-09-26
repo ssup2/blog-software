@@ -8,7 +8,7 @@ CEPH에서 Object(Data)를 Storage Device에 분산하는 알고리즘으로 이
 
 ## 2. CRUSH
 
-CRUSH는 Object들을 각 Storage Device의 Weight에 비례하여 각 Storage Device에 분배하는 알고리즘이다. 여기서 Ojbect의 분배의 의미는 Object의 Replica도 포함한다. 만약 CEPH가 3개의 Replica를 유지해야 한다면 CRUSH를 통해 Object가 저장될 3개의 Storage Device가 정해진다. CRUSH는 **Cluster Map**이라는 논리적인 Storage Device의 계층을 표현하는 지도를 바탕으로 Object를 분산한다.
+**CRUSH**는 Object들을 각 Storage Device의 Weight에 비례하여 각 Storage Device에 분배하는 알고리즘이다. 여기서 Ojbect의 분배의 의미는 Object의 Replica도 포함한다. 만약 CEPH가 3개의 Replica를 유지해야 한다면 CRUSH를 통해 Object가 저장될 3개의 Storage Device가 정해진다. CRUSH는 **Cluster Map**이라는 논리적인 Storage Device의 계층을 표현하는 지도를 바탕으로 Object를 분산한다.
 
 ### 2.1. Cluster Map
 

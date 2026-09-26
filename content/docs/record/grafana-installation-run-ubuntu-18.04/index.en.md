@@ -5,8 +5,9 @@ title: Grafana Installation, Execution / Ubuntu 18.04 Environment
 ## 1. Installation, Execution Environment
 
 The installation and execution environment is as follows.
+
 * Ubuntu 18.04 LTS 64bit, root user
-* Node IP : 192.168.0.150
+* **Node IP** : 192.168.0.150
 
 ## 2. Grafana Installation
 
@@ -32,8 +33,9 @@ $ systemctl enable grafana-server.service
 ```
 
 Start Grafana and verify access.
+
 * http://192.168.0.150:3000/login
-* ID, PW : admin/admin
+* **ID**, **PW** : admin/admin
 
 ## 3. References
 

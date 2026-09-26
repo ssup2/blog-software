@@ -6,7 +6,7 @@ Linux안에 있는 Netfilter Framework를 분석하고 Netfilter를 이용하는
 
 ## 1. Netfilter
 
-Netfilter는 Linux를 위한 Network Packet Filtering Framework이다. Linux Application은 Netfilter를 통해서 Linux Kenel로 전달되는 Packet을 변환 및 조작할 수 있다.
+**Netfilter**는 Linux를 위한 Network Packet Filtering Framework이다. Linux Application은 Netfilter를 통해서 Linux Kenel로 전달되는 Packet을 변환 및 조작할 수 있다.
 
 ### 1.1. Hooks
 

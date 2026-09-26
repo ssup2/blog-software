@@ -4,7 +4,7 @@ title: SNMP
 
 ## 1. SNMP (Simple Network Management Protocol)
 
-SNMP (Simple Network Management Protocol)는 의미처럼 Network 관리를 위해서 탄생한 UDP 기반 Protocol이다. SNMP를 통해서 Network Topology를 그릴수 있고 각 Network Segment의 Network 성능, 상태 정보등을 파악할 수 있다. 또한 SNMP의 유연성을 이용하여 Network에 참여하고 있는 Device의 CPU, Memory, Storage 관련 Metric 정보도 수집이 가능하다. SNMP는 v1, v2c, v3 3가지 Version이 존재하며 v2c은 v1에 비해서 Agent에서 한번에 많은양의 Data를 가져오는 Bulk 관련 기능이 추가되었고, v3는 v2에 비해서 인증과 보안 관련 기능이 추가되었다.
+**SNMP** (Simple Network Management Protocol)는 의미처럼 Network 관리를 위해서 탄생한 UDP 기반 Protocol이다. SNMP를 통해서 Network Topology를 그릴수 있고 각 Network Segment의 Network 성능, 상태 정보등을 파악할 수 있다. 또한 SNMP의 유연성을 이용하여 Network에 참여하고 있는 Device의 CPU, Memory, Storage 관련 Metric 정보도 수집이 가능하다. SNMP는 v1, v2c, v3 3가지 Version이 존재하며 v2c은 v1에 비해서 Agent에서 한번에 많은양의 Data를 가져오는 Bulk 관련 기능이 추가되었고, v3는 v2에 비해서 인증과 보안 관련 기능이 추가되었다.
 
 {{< figure caption="[Figure 1] SNMP Architecture" src="images/snmp-architecture.png" width="500px" >}}
 

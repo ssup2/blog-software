@@ -27,7 +27,7 @@ public class Student{
 }
 ```
 
-Eager Loading은 의미 그대로 Data Loading하는 순간 **관련된 Data 모두를 Loading**을 수행하는 기법을 나타낸다. [Code 1]은 Java Spring Framework (JPA)에서의 Eager Loading 기법의 예제를 나타내고 있다. School Class에 Student가 1:N 관계로 연결되어 있는것을 확인할 수 있고, Eager 기법으로 설정되어 있는것도 확인할 수 있다. 따라서 School Data Loading시 School과 관련된 Student 정보들도 한 시점에 Loading하게 된다. 여기서 한 시점에 Loading 한다는 의미는 한번의 SQL Query 수행으로 모든 Data를 한번에 얻는다것을 보장한다는 의미는 아니다. 다수의 SQL Query가 수행될 수 있다. 이 부분은 DB Library, Framework 마다 다르다.
+**Eager Loading**은 의미 그대로 Data Loading하는 순간 **관련된 Data 모두를 Loading**을 수행하는 기법을 나타낸다. [Code 1]은 Java Spring Framework (JPA)에서의 Eager Loading 기법의 예제를 나타내고 있다. School Class에 Student가 1:N 관계로 연결되어 있는것을 확인할 수 있고, Eager 기법으로 설정되어 있는것도 확인할 수 있다. 따라서 School Data Loading시 School과 관련된 Student 정보들도 한 시점에 Loading하게 된다. 여기서 한 시점에 Loading 한다는 의미는 한번의 SQL Query 수행으로 모든 Data를 한번에 얻는다것을 보장한다는 의미는 아니다. 다수의 SQL Query가 수행될 수 있다. 이 부분은 DB Library, Framework 마다 다르다.
 
 관련 Data를 한 시점에 Loading하기 때문에 App 개발자가 언제, 어떤 Data가 Loading될지 쉽게 예측할 수 있다는 장점을 가지고 있다. 반면 App에서 이용되지 않는 Data도 Loading 한다는 단점을 가지고 있다. 한가지 더 유의해야하는 점은 Eager Loading 기법이 "N+1 문제"를 해결하는 근본적인 기법은 아니라는 점이다. 앞에서 언급한것 처럼 관련 Data Loading시 다수의 SQL Query가 수행될 수 있기 때문이다.
 

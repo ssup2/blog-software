@@ -6,9 +6,10 @@ draft: true
 ## 1. 설치 환경
 
 설치 환경은 다음과 같다.
+
 * Ubuntu 26.04 LTS 64bit, root user
 * Nvidia RTX 5060 Ti GPU 16GB
-  * GPU Driver : 610.10
+  * **GPU Driver** : 610.10
 
 ## 2. Nvidia Driver 설치
 

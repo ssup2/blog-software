@@ -6,7 +6,7 @@ title: gRPC
 
 {{< figure caption="[Figure 1] gRPC Architecture" src="images/grpc-architecture.png" width="500px" >}}
 
-gRPC is an RPC (Remote Procedure Call) Framework that can run in various environments. [Figure 1] shows the gRPC Architecture. The **gRPC Server** runs on the Service that processes requests, and the **gRPC Stub** runs on the Client. The Interface between the gRPC Server and the gRPC Stub is defined using **ProtoBuf**. The gRPC Server and the gRPC Stub communicate using **HTTP/2**. gRPC currently supports various languages such as Java, C++, Golang, Ruby, and Python.
+**gRPC** is an RPC (Remote Procedure Call) Framework that can run in various environments. [Figure 1] shows the gRPC Architecture. The **gRPC Server** runs on the Service that processes requests, and the **gRPC Stub** runs on the Client. The Interface between the gRPC Server and the gRPC Stub is defined using **ProtoBuf**. The gRPC Server and the gRPC Stub communicate using **HTTP/2**. gRPC currently supports various languages such as Java, C++, Golang, Ruby, and Python.
 
 ### 1.1. ProtoBuf
 
@@ -37,8 +37,8 @@ message Person {
 
 gRPC operates by leveraging the advantages of HTTP/2 over HTTP/1.1.
 
-* Multiplexing, Stream : In HTTP/1.1, only one request could be processed at a time on a single TCP Connection, but HTTP/2 supports Multiplexing, which allows multiple requests to be processed simultaneously on a single TCP Connection. Multiple Streams are created on a single TCP Connection, and the Client and Server process each request independently using the created Streams. gRPC uses HTTP/2 Streams to process multiple RPCs simultaneously on a single TCP Connection.
-* Header Compression : HTTP/1.1 had no feature to compress Headers transmitted in plaintext, but HTTP/2 provides Header Compression to reduce Header size. gRPC Headers also use HTTP/2's Header Compression feature to reduce their size.
+* **Multiplexing**, **Stream** : In HTTP/1.1, only one request could be processed at a time on a single TCP Connection, but HTTP/2 supports Multiplexing, which allows multiple requests to be processed simultaneously on a single TCP Connection. Multiple Streams are created on a single TCP Connection, and the Client and Server process each request independently using the created Streams. gRPC uses HTTP/2 Streams to process multiple RPCs simultaneously on a single TCP Connection.
+* **Header Compression** : HTTP/1.1 had no feature to compress Headers transmitted in plaintext, but HTTP/2 provides Header Compression to reduce Header size. gRPC Headers also use HTTP/2's Header Compression feature to reduce their size.
 
 #### 1.2.1. RPC and Stream
 

@@ -8,7 +8,7 @@ Two-Phase Commit (2PC)를 분석한다.
 
 {{< figure caption="[Figure 1] Two-Phase Commit" src="images/two-phase-commit.png" width="400px" >}}
 
-Two-Phase Commit은 분산 시스템 환경에서 여러 Node에서 수행해야하는 일을 하나의 Transaction으로 묶기 위해 사용하는 기법이다. [Figure 1]은 Two-Phase Commit 과정을 나타내고 있다. 일반 Commit 과정에 비해 **Prepare Phase**가 추가적으로 존재하기 때문에 Two-Phase라는 이름이 붙었다.
+**Two-Phase Commit**은 분산 시스템 환경에서 여러 Node에서 수행해야하는 일을 하나의 Transaction으로 묶기 위해 사용하는 기법이다. [Figure 1]은 Two-Phase Commit 과정을 나타내고 있다. 일반 Commit 과정에 비해 **Prepare Phase**가 추가적으로 존재하기 때문에 Two-Phase라는 이름이 붙었다.
 
 Transaction Coordinatior는 Transaction을 수행해야 하는 모든 Node()들에게 Prepare 명령을 전달한다. 여기서 Prepare의 의미는 Commit 요청이 오면 Commit을 수행할 수 있는 상태를 의미한다. Transaction Coordinator는 모든 Node에게 Prepared Ack를 받으면 다시 모든 Node에게 Commit 요청을 보내어 각 Node에서 Commit 동작을 수행하도록 한다. Transaction Coordinator는 모든 Node로 부터 Done Ack를 받으면 Transaction을 종료한다.
 

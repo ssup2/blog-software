@@ -6,7 +6,7 @@ Analyze the Netfilter Framework in Linux and the iptables tool that uses Netfilt
 
 ## 1. Netfilter
 
-Netfilter is a Network Packet Filtering Framework for Linux. Linux Applications can transform and manipulate Packets delivered to the Linux Kernel through Netfilter.
+**Netfilter** is a Network Packet Filtering Framework for Linux. Linux Applications can transform and manipulate Packets delivered to the Linux Kernel through Netfilter.
 
 ### 1.1. Hooks
 

@@ -5,14 +5,16 @@ title: Android Installation / ODROID-XU, ODROID-VU Environment
 ## 1. Installation, Execution Environment
 
 The installation and execution environment is as follows:
-* PC : Windows 7 64bit
-* VM on PC : Ubuntu 12.04LTS 64bit
+
+* **PC** : Windows 7 64bit
+* **VM on PC** : Ubuntu 12.04LTS 64bit
 * ODROID-XU, 16GB emmc
 * Android 4.2.2 Alpha 2.5 Release
 
 ## 2. ADB Driver Installation on Windows
 
 Install ADB USB Driver through Windows Device Manager.
+
 * http://com.odroid.com/sigong/nf-file-board/nfile-board-view.php?bid=22
 
 ## 3. Ubuntu Package Installation
@@ -59,7 +61,7 @@ $ tar zxvf arm-eabi-4.6.tar.gz
 
 Install Cross Compiler.
 
-* Download : http://dn.odroid.com/ODROID-XU/compiler/arm-eabi-4.6.tar.gz
+* **Download** : http://dn.odroid.com/ODROID-XU/compiler/arm-eabi-4.6.tar.gz
 
 ```shell {caption="[File 2] ~/.bashrc", linenos=table}
 ...
@@ -71,6 +73,7 @@ Add the content of [File 2] to `~/.bashrc` file to make the compiler available f
 ## 7. Download Prebuilt Images and Sources
 
 Download Prebuilt Images through the URLs below.
+
 * Prebuilt Image
   * http://dn.odroid.com/ODROID-XU/Firmware/01-10-2014/emmc-self-installer.img.zip
 * Android, Kernel

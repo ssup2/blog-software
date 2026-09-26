@@ -6,7 +6,7 @@ Analyzing HTTP/2.
 
 ## 1. HTTP/2
 
-HTTP/2 is a protocol created to improve the slow performance of the existing HTTP/1. The improvements of HTTP/2 compared to HTTP/1 are as follows.
+**HTTP/2** is a protocol created to improve the slow performance of the existing HTTP/1. The improvements of HTTP/2 compared to HTTP/1 are as follows.
 
 ### 1.1. Stream, Multiplexing
 
@@ -45,8 +45,8 @@ An HTTP Message consists of three sections: **Header Section, Body, and Trailer 
 
 In HTTP/2, both Headers and Trailers are transmitted as **HEADERS Frames**. There is no separate Frame Type for Trailers; the first HEADERS Frame that starts the Stream serves as the Header, and the last HEADERS Frame (with the END_STREAM Flag) sent after the Body (DATA Frames) serves as the Trailer.
 
-* Header : Represents the metadata of a request or response. In HTTP/2, the HTTP/1.1 Request Line (`GET /home HTTP/1.1`) and Status Line (`HTTP/1.1 200 OK`) are not separate lines but are converted into **Pseudo-Headers** with the `:` prefix, such as `:method`, `:path`, `:scheme`, `:authority`, and `:status`, and are transmitted in the HEADERS Frame together with regular Headers.
-* Trailer : Represents information that can only be determined after the entire Body has been transmitted. Typical examples are the final processing result of a response or the checksum of the Body, and a representative use case is gRPC sending the `grpc-status` Header, the final processing result of an RPC, as a Trailer. Since Trailers arrive after the entire Body has been received, Pseudo-Headers such as `:status` and Fields required to interpret the Body such as `content-length` cannot be set in Trailers.
+* **Header** : Represents the metadata of a request or response. In HTTP/2, the HTTP/1.1 Request Line (`GET /home HTTP/1.1`) and Status Line (`HTTP/1.1 200 OK`) are not separate lines but are converted into **Pseudo-Headers** with the `:` prefix, such as `:method`, `:path`, `:scheme`, `:authority`, and `:status`, and are transmitted in the HEADERS Frame together with regular Headers.
+* **Trailer** : Represents information that can only be determined after the entire Body has been transmitted. Typical examples are the final processing result of a response or the checksum of the Body, and a representative use case is gRPC sending the `grpc-status` Header, the final processing result of an RPC, as a Trailer. Since Trailers arrive after the entire Body has been received, Pseudo-Headers such as `:status` and Fields required to interpret the Body such as `content-length` cannot be set in Trailers.
 
 ### 1.4. Header Compression
 

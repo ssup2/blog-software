@@ -6,7 +6,7 @@ title: DB Join
 
 {{< figure caption="[Figure 1] DB Join Dataset Example" src="images/db-join-dataset-example.png" width="700px" >}}
 
-Join은 서로 다른 Table에 흩어진 관련 Data를 하나의 Query 결과로 함께 조회할 때 주로 이용하는 RDB 연산이다. [Figure 1]은 Join 연산을 설명하기 위한 예제 Dataset을 나타내고 있다. `Departments` Table과 `Employees` Table이 존재하며, `Departments` Table의 `id` Column과 `Employees` Table의 `dept_id` Column을 Join Key로 사용하여 Join을 수행한다.
+**Join**은 서로 다른 Table에 흩어진 관련 Data를 하나의 Query 결과로 함께 조회할 때 주로 이용하는 RDB 연산이다. [Figure 1]은 Join 연산을 설명하기 위한 예제 Dataset을 나타내고 있다. `Departments` Table과 `Employees` Table이 존재하며, `Departments` Table의 `id` Column과 `Employees` Table의 `dept_id` Column을 Join Key로 사용하여 Join을 수행한다.
 
 ### 1.1. Join Type
 
@@ -72,7 +72,7 @@ CROSS JOIN employees e;
 
 {{< figure caption="[Figure 6] Cross Join Result" src="images/db-join-type-cross.png" width="1000px" >}}
 
-Cross Join은 두 Table의 모든 Row를 조합하여 결과를 생성한다. 따라서 Cross Join으로 생성된 Row의 개수는 두 Table의 Row 개수를 곱한 값이 된다. 이러한 특징 때문에 **카디시안 곱(Cartesian Product)**이라고 부르기도 한다. [Query 5]는 Cross Join을 수행하는 SQL Query를 나타내고 있으며, [Figure 6]는 Cross Join 결과를 나타내고 있다. [Figure 6]에서 두 Table의 모든 Row를 조합하여 결과를 생성한 것을 확인할 수 있다.
+Cross Join은 두 Table의 모든 Row를 조합하여 결과를 생성한다. 따라서 Cross Join으로 생성된 Row의 개수는 두 Table의 Row 개수를 곱한 값이 된다. 이러한 특징 때문에 **카디시안 곱** (Cartesian Product)이라고 부르기도 한다. [Query 5]는 Cross Join을 수행하는 SQL Query를 나타내고 있으며, [Figure 6]는 Cross Join 결과를 나타내고 있다. [Figure 6]에서 두 Table의 모든 Row를 조합하여 결과를 생성한 것을 확인할 수 있다.
 
 ### 1.2. Join 알고리즘
 

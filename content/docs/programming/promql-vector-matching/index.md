@@ -6,7 +6,7 @@ PromQL의 Vector Matching 문법을 정리한다.
 
 ## 1. PromQL Vector Matching
 
-PromQL의 Vector Matching은 의미 그대로 두개의 Instant Vector Type의 Data를 Matching하여 연산시키는 문법이다. PromQL에서 가장 많이 이용되는 문법중 하나이다. Instant Vector Type에 존재하는 하나의 값을 어떻게 연산시키는지에 따라서 **One-to-one Matching**, **One-to-many/Many-to-one Matching**, **Many-to-many Matching**이 존재한다. 여기서 Matching은 값에 존재하는 **Label**을 기준으로 이루어진다.
+PromQL의 **Vector Matching**은 의미 그대로 두개의 Instant Vector Type의 Data를 Matching하여 연산시키는 문법이다. PromQL에서 가장 많이 이용되는 문법중 하나이다. Instant Vector Type에 존재하는 하나의 값을 어떻게 연산시키는지에 따라서 **One-to-one Matching**, **One-to-many/Many-to-one Matching**, **Many-to-many Matching**이 존재한다. 여기서 Matching은 값에 존재하는 **Label**을 기준으로 이루어진다.
 
 ### 1.1. One-to-one Vector Matching
 
@@ -103,6 +103,7 @@ candy1{} - ignoring(size) ice1{}
 [Query 3]은 `candy1`과 `ice1`를 대상으로 `ignoring` 문법을 이용하여 `size` Label을 제외한 나머지 Label만을 이용하여 Matching하는 경우를 나타내고 있다. `candy1`과 `ice1` 모두 `color`, `size` Label만 존재하는 상태에서 `size` Label만 Matching에서 제외하였기 때문에 `color` Label만을 이용하여 Matching을 수행한다. 따라서 [Query 2]의 결과와 [Query 3]의 결과는 동일하게 된다.
 
 One-to-one 일부 Label Matching시 선택할 수 있는 Label은 반드시 아래의 조건을 만족시켜야 한다. 아래의 조건을 만족시키지 못하면 Query Error가 발생한다.
+
 * 하나의 Instant Vector Type의 Data 내부에서 선택한 Label의 값은 중복되면 안된다.
 * 두 Instant Vector Type의 Data 사이에서 선택한 Label의 값은 반드시 1:1 Matching이 되어야 한다.
 

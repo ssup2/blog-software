@@ -17,12 +17,12 @@ Swap:          4095           0        4095
 
 Displays memory usage in MB. [Shell 1] shows the output of `free -m` displaying memory usage. In [Shell 1], `Mem:` represents physical memory usage, and `Swap:` represents swap usage. Each row has the following meaning:
 
-* total : Total capacity
-* used : Result of "total - free - buff/cache - cache"
-* free : Unused capacity
-* shared : Capacity used by tmpfs
-* buff/cache : Sum of Buffer and Cache capacity used by the kernel. Cache includes Page Cache, Slab, and tmpfs capacity in use
-* available : Memory capacity available for new processes or existing processes. Result of "free + Page Cache + reclaimable Slab"
+* `total` : Total capacity
+* `used` : Result of "total - free - buff/cache - cache"
+* `free` : Unused capacity
+* `shared` : Capacity used by tmpfs
+* `buff/cache` : Sum of Buffer and Cache capacity used by the kernel. Cache includes Page Cache, Slab, and tmpfs capacity in use
+* `available` : Memory capacity available for new processes or existing processes. Result of "free + Page Cache + reclaimable Slab"
 
 ## 2. References
 

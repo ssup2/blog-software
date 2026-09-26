@@ -6,7 +6,7 @@ Network Connection으로부터 Data를 송수신하는 nc (netcat)의 사용법�
 
 ## 1. nc
 
-nc (netcat)는 Network Connection으로부터 Data를 송수신하는 Tool이다.
+**nc** (netcat)는 Network Connection으로부터 Data를 송수신하는 Tool이다.
 
 ### 1.1. nc [IP] [Port]
 

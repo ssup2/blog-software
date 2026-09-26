@@ -277,7 +277,7 @@ TCP  10.103.1.234:80 rr
   -> 192.167.2.231:80             Masq    1      0          0         
 ```
 
-Service Proxy의 IPVS Mode는 Linue Kernel에서 제공하는 L4 Load Balacner인 IPVS가 Service Proxy 역할을 수행하는 Mode이다. Packet Load Balancing 수행시 IPVS가 iptables보다 높은 성능을 보이기 때문에 IPVS Mode는 iptables Mode보다 높은 성능을 보여준다. [Figure 5]는 IPVS Mode에서 Service로 전송되는 요청 Packet의 경로를 나타내고 있다. [NAT Table 13] ~ [NAT Table 15]는 [Figure 5]의 주요 NAT Table의 실제 내용을 보여주고 있다. [IPset List 1]는 IPVS Mode의 주요 IPset 목록을 보여주고 있다. [IPVS List 1]는 [Figure 5]의 IPVS의 실제 내용을 보여주고 있다. [Figure 5]의 NAT Table, IPset, IPVS는 Kubernetes Cluster를 구성하는 모든 Node에 동일하게 설정된다. 따라서 Kubernetes Cluster를 구성하는 어느 Node에서도 Service 요청 Packet을 전송할 수 있다.
+Service Proxy의 IPVS Mode는 Linue Kernel에서 제공하는 L4 Load Balancer인 IPVS가 Service Proxy 역할을 수행하는 Mode이다. Packet Load Balancing 수행시 IPVS가 iptables보다 높은 성능을 보이기 때문에 IPVS Mode는 iptables Mode보다 높은 성능을 보여준다. [Figure 5]는 IPVS Mode에서 Service로 전송되는 요청 Packet의 경로를 나타내고 있다. [NAT Table 13] ~ [NAT Table 15]는 [Figure 5]의 주요 NAT Table의 실제 내용을 보여주고 있다. [IPset List 1]는 IPVS Mode의 주요 IPset 목록을 보여주고 있다. [IPVS List 1]는 [Figure 5]의 IPVS의 실제 내용을 보여주고 있다. [Figure 5]의 NAT Table, IPset, IPVS는 Kubernetes Cluster를 구성하는 모든 Node에 동일하게 설정된다. 따라서 Kubernetes Cluster를 구성하는 어느 Node에서도 Service 요청 Packet을 전송할 수 있다.
 
 대부분의 Pod에서 전송된 요청 Packet은 Pod의 veth를 통해서 Host의 Network Namespace로 전달되기 때문에 요청 Packet은 `PREROUTING` Table에 의해서 `KUBE-SERVICES` Table로 전달된다. Host의 Network Namespace를 이용하는 Pod 또는 Host Process에서 전송한 요청 Packet은 OUTPUT Table에 의해서 `KUBE-SERVICES` Table로 전달된다. `KUBE-SERVICES` Table에서 요청 Packet의 Dest IP와 Dest Port가 ClusterIP Service의 IP와 Port와 일치한다면, 해당 요청 Packet은 IPVS로 전달된다. 
 

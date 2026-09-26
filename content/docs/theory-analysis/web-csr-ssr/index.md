@@ -8,7 +8,7 @@ Web의 Client Side Rendering 기법과 Server Side Rendering 기법을 분석한
 
 {{< figure caption="[Figure 1] CSR" src="images/csr.png" width="700px" >}}
 
-CSR (Client Side Rendering) 기법은 Web Page Rendering을 Client인 Web Browser에서 모두 수행하는 기법을 의미한다. 여기서 Rendering을 수행한다 의미는 JavaScript를 수행하여 불완전한 형태의 HTML을 형태를 갖춘 HTML(DOM Tree)로 구성하는 과정을 의미한다. Web Browser는 형태를 갖춘 Web Page의 HTML을 얻을 수 있어야 Web Page를 UI로 나타낼 수 있다. Rendering 과정에는 필요에 따라서 외부의 Server로부터 Data를 가져오는 과정도 포함된다.
+**CSR** (Client Side Rendering) 기법은 Web Page Rendering을 Client인 Web Browser에서 모두 수행하는 기법을 의미한다. 여기서 Rendering을 수행한다 의미는 JavaScript를 수행하여 불완전한 형태의 HTML을 형태를 갖춘 HTML(DOM Tree)로 구성하는 과정을 의미한다. Web Browser는 형태를 갖춘 Web Page의 HTML을 얻을 수 있어야 Web Page를 UI로 나타낼 수 있다. Rendering 과정에는 필요에 따라서 외부의 Server로부터 Data를 가져오는 과정도 포함된다.
 
 [Figure 1]은 CSR 과정을 나타내고 있다. User가 특정 Web Page를 Web Browser를 통해서 Server에게 요청하면, Server는 Web Page의 HTML과 HTML에 내장된 JavaScript를 모두 Web Browser에게 전달한다. 이후 Web Browser는 Rendering을 수행하여 HTML을 구성하고, Web Page의 UI를 User에게 노출시킨다.
 

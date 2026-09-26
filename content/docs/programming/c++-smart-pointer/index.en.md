@@ -38,7 +38,7 @@ int main()
 }
 ```
 
-Smart pointers are pointers that **automatically delete instances created with the `new` syntax without requiring explicit deletion using the `delete` syntax**, unlike regular pointers. [Code 1] shows a simple smart pointer. The actual pointer inside the smart pointer is initialized and allocated with the smart pointer's constructor, and released with the delete syntax in the destructor. Also, by overriding the `*` and `->` operators, developers can use smart pointers similarly to regular pointers.
+**Smart pointers** are pointers that **automatically delete instances created with the `new` syntax without requiring explicit deletion using the `delete` syntax**, unlike regular pointers. [Code 1] shows a simple smart pointer. The actual pointer inside the smart pointer is initialized and allocated with the smart pointer's constructor, and released with the delete syntax in the destructor. Also, by overriding the `*` and `->` operators, developers can use smart pointers similarly to regular pointers.
 
 Inside the `main()` function, the `ptr` smart pointer points to an instance allocated through `new int()`. Since `ptr` smart pointer is a local variable allocated on the stack, the destructor of `ptr` smart pointer is called when the main function ends. Since delete is called when the destructor is called, the allocated instance is released.
 

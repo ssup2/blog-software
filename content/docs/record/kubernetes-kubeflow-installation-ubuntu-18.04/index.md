@@ -7,6 +7,7 @@ title: Kubernetes Kubeflow 설치 / Ubuntu 18.04 환경
 {{< figure caption="[Figure 1] Kubeflow 설치를 위한 Node 구성도" src="images/node-setting.png" width="900px" >}}
 
 설치 환경은 다음과 같다.
+
 * Kubernetes 1.18.14
 * Kubeflow 1.2.0
 * Istio 1.3

@@ -14,7 +14,7 @@ OpenStack의 LBaaS (Load Balancer as a Service)인 Octavia와 같이 동작하�
 
 ### 1.1. Octavia 동작
 
-Octavia는 OpenStack의 LBaaS이다. Kubernetes는 Octavia를 통해서 Load Balancer Service를 OpenStack 외부에 제공할 수 있다. Octavia는 OpenStack Controller에서 동작하는 Octavia Service와 Packet을 Load Balancing하는 LB VM으로 구성되어 있다. LB VM은 실제 Packet을 Load Balancing하는 HAProxy와 Octavia Service와 통신을 담당하는 Agent (Amphora Agent)로 구성되어 있다. Octavia Network는 Octavia Service와 Agent가 통신에 이용되는 Network 이다.
+**Octavia**는 OpenStack의 LBaaS이다. Kubernetes는 Octavia를 통해서 Load Balancer Service를 OpenStack 외부에 제공할 수 있다. Octavia는 OpenStack Controller에서 동작하는 Octavia Service와 Packet을 Load Balancing하는 LB VM으로 구성되어 있다. LB VM은 실제 Packet을 Load Balancing하는 HAProxy와 Octavia Service와 통신을 담당하는 Agent (Amphora Agent)로 구성되어 있다. Octavia Network는 Octavia Service와 Agent가 통신에 이용되는 Network 이다.
 
 Agent는 Octavia Network를 통해서 HAProxy (LB VM)의 Health 정보를 Octavia Service에게 전송하고, Octavia Service로부터 HAProxy 설정 정보를 받아 HAProxy를 설정하는 역할을 수행한다. 또한 Agent는 Load Balancing을 통해서 Packet이 전달되는 VM인 Octavia Member VM의 Health 정보를 Octavia Service에게 전송하는 역할도 수행한다. Agent는 Octavia Member VM의 Health 정보를 HAProxy가 제공하는 stats Domain Socket을 통해서 얻는다. HAProxy는 Agent가 설정한 IP:Port들을 Health Check하고, Health가 정상이라면 해당 IP:Port로 Packet을 전송한다. Kubernetes 환경이라면 Agent는 Kubernetes Cluster의 Slave IP들과 Kubernetes Service의 NodePort를 Port를 이용하여 HAProxy를 설정한다.
 
@@ -47,7 +47,7 @@ monitor-timeout=30s
 monitor-max-retries=3
 ```
 
-Kubernetes Controller Manager가 Octavia Service에게 Load Balancer를 요청하기 위해서는 Octavia Service의 URL, Octavia Service를 위한 User ID/PW, Kubernetes VM이 소속된 OpenStack의 Tanant ID, Kubernetes Network의 Subnet ID, Load Balancer Option 등의 다양한 정보가 필요한데, 이러한 필요한 정보들은 모두 Kubernetes Master VM의 cloud_config 파일에 저장되어 있다. [Text 1]은 실제 cloud_config 파일을 나타내고 있다.
+Kubernetes Controller Manager가 Octavia Service에게 Load Balancer를 요청하기 위해서는 Octavia Service의 URL, Octavia Service를 위한 User ID/PW, Kubernetes VM이 소속된 OpenStack의 Tenant ID, Kubernetes Network의 Subnet ID, Load Balancer Option 등의 다양한 정보가 필요한데, 이러한 필요한 정보들은 모두 Kubernetes Master VM의 cloud_config 파일에 저장되어 있다. [Text 1]은 실제 cloud_config 파일을 나타내고 있다.
 
 [Text 1]의 Global 영역에는 Kubernetes VM의 User ID/PW, Tenant, Region 정보등이 저장되어 있다. Load Balancer 영역에는 Load Balancer 관련 설정 정보가 저장되어 있다. subnet-id는 Kubernetes Network의 Subnet ID를 의미한다. floating-network-id는 External Network ID를 의미한다. lb-method는 Load Balancing 알고리즘을 의미한다. monitor 관련 설정은 Octavia Member VM Monitoring 정책을 결정한다.
 

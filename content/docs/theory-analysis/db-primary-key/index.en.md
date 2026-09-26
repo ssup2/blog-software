@@ -6,7 +6,7 @@ This document analyzes DB primary keys.
 
 ## 1. Primary Key
 
-A primary key serves as the identifier for each record in a table. Therefore, primary key values must be unique within a single table. In general, when a duplicate primary key occurs during transaction processing, the DB cancels that transaction to guarantee uniqueness of the primary key. Records are sorted and stored on disk based on the primary key. Sorting uses a **B+ Tree**. Because this B+ Tree determines the disk location where records are stored, it is called a **clustered index**.
+A **primary key** serves as the identifier for each record in a table. Therefore, primary key values must be unique within a single table. In general, when a duplicate primary key occurs during transaction processing, the DB cancels that transaction to guarantee uniqueness of the primary key. Records are sorted and stored on disk based on the primary key. Sorting uses a **B+ Tree**. Because this B+ Tree determines the disk location where records are stored, it is called a **clustered index**.
 
 ### 1.1. Auto Increment vs Random
 

@@ -140,7 +140,7 @@ $ go tool trace trace.out
 
 Obtained Profiles can be visualized through the `trace` CLI installed along with Golang. [Shell 4] shows how to use the `trace` CLI. When you run the `trace` CLI, a Web URL is exposed. The App used for Trace extraction used the example Code below.
 
-* Example App : [https://github.com/ssup2/golang-tracing-example](https://github.com/ssup2/golang-tracing-example)
+* **Example App** : [https://github.com/ssup2/golang-tracing-example](https://github.com/ssup2/golang-tracing-example)
 
 {{< figure caption="[Figure 1] trace CLI Web Trace" src="images/trace-cli-web-trace.png" width="1000px" >}}
 

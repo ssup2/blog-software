@@ -9,6 +9,7 @@ WSL2 VMs have a problem where I/O performance does not appear for directories un
 ## 2. Installation Environment
 
 The installation and configuration environment is as follows.
+
 * Windows 10 Pro 64bit
 * WSL2 Ubuntu 20.04, root User
 
@@ -65,6 +66,7 @@ Create the script from [File 2]. The script makes connections to 192.168.10.100 
 ## 6. Samba Server Access
 
 After rebooting Windows OS, access the following address from File Browser.
+
 * \\\\192.168.10.100\root
 
 ## 7. References

@@ -4,14 +4,14 @@ title: 4. Cgroup
 
 ## Cgroup
 
-Cgroup은 Container의 Resource 사용을 **제한**하고 현재의 Resource 사용을 **Monitoring** 하는데는 이용되는 Linux Kernel의 기능이다. 여기서 Resource는 CPU, Memory, Network Device, Block Device를 의미한다. Cgroup은 여러 Type이 존재하며 각 Cgroup Type은 특정 Resource를 담당한다. 대표적인 Cgroup Type들은 다음과 같다.
+**Cgroup**은 Container의 Resource 사용을 **제한**하고 현재의 Resource 사용을 **Monitoring** 하는데는 이용되는 Linux Kernel의 기능이다. 여기서 Resource는 CPU, Memory, Network Device, Block Device를 의미한다. Cgroup은 여러 Type이 존재하며 각 Cgroup Type은 특정 Resource를 담당한다. 대표적인 Cgroup Type들은 다음과 같다.
 
-* cpuset : Container가 이용할 수 있는 CPU Core를 제한한다.
-* cpu, cpuacct : Container가 이용할 수 있는 CPU 사용률을 제한하고, Container의 CPU 사용률을 Monitoring 한다.
-* memory : Container가 이용할 수 있는 Memory 사용량을 제한하고, Container의 Memory 사용량을 Monitoring 한다.
-* net-cls, net-prio : Container가 이용할 수 있는 Network Device의 Bandwidth 사용률을 제한한다.
-* blkio : Container가 이용할 수 있는 Block Device의 Bandwidth 사용률을 제한하고, Container의 Block Device의 사용률을 Monitoring 한다.
-* device : Container가 이용할 수 있는 Device(Character, Block, GPU)를 제한한다.
+* `cpuset` : Container가 이용할 수 있는 CPU Core를 제한한다.
+* `cpu`, `cpuacct` : Container가 이용할 수 있는 CPU 사용률을 제한하고, Container의 CPU 사용률을 Monitoring 한다.
+* `memory` : Container가 이용할 수 있는 Memory 사용량을 제한하고, Container의 Memory 사용량을 Monitoring 한다.
+* `net-cls`, `net-prio` : Container가 이용할 수 있는 Network Device의 Bandwidth 사용률을 제한한다.
+* `blkio` : Container가 이용할 수 있는 Block Device의 Bandwidth 사용률을 제한하고, Container의 Block Device의 사용률을 Monitoring 한다.
+* `device` : Container가 이용할 수 있는 Device(Character, Block, GPU)를 제한한다.
 
 {{< figure caption="[Figure 1] Host, Container Cgroup" src="images/cgroup.png" width="900px" >}}
 

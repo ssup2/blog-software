@@ -10,29 +10,29 @@ title: AWS Certified Data Analytics 자격증 이론 정리
 
 ## 2. Collection
 
-* RealTime : 실시간 Data 수집
+* **RealTime** : 실시간 Data 수집
   * Kinesis data Streams (KDS)
   * Simple Queue Service (SQS)
   * Internet of Things (IoT)
 
-* Near-real Time : 준실시간 Data 수집
+* **Near-real Time** : 준실시간 Data 수집
   * Kinesis Data Firehose (KDF)
   * Database Migration Service (DMS)
 
-* Batch : 일괄 Data 수집
+* **Batch** : 일괄 Data 수집
   * Snowball
   * Data Pipeline
 
 ### 2.1. Kinesis Data Streams
 
 * 다수의 Shard로 구성
-* Retention : 1 ~ 365 Days
+* **Retention** : 1 ~ 365 Days
 * 저장된 Data는 지울수 없음
 * Producer
 * Record
   * Producer가 전송하는 Data
-  * Partition Key : Record가 어느 Shard로 전달될지 결정
-  * Data Blob : Data 저장소
+  * **Partition Key** : Record가 어느 Shard로 전달될지 결정
+  * **Data Blob** : Data 저장소
 * Consumer
 * Capacity Mode
   * Provisioned Mode
@@ -81,7 +81,7 @@ title: AWS Certified Data Analytics 자격증 이론 정리
 
 * Ex) Application, AWS Lambda, Kinesis Data Firehose, Kinesis Data Analytics
 * 성능
-  * Default : 2 MB/sec all Consumer
+  * **Default** : 2 MB/sec all Consumer
   * Enhanced Fan Out 이용시 : 2 MB/sec per Consumear
 * API
   * GetRecords
@@ -99,7 +99,7 @@ title: AWS Certified Data Analytics 자격증 이론 정리
 * Kinesis Connector Library
   * Data를 다른 AWS Servce로 전달
   * EC2 Instance에서 구동 필요
-  * Deprecated : Kinesis Firehorse로 대체
+  * **Deprecated** : Kinesis Firehorse로 대체
 * Lambda
   * De-aggreagte되어 Lamba 함수에게 전달
   * Batch 사이즈 지정 가능
@@ -124,8 +124,8 @@ title: AWS Certified Data Analytics 자격증 이론 정리
 ### 2.2. Kinesis Data Firehose
 
 * AWS Service, 3rd Party Application에 Data 적재
-* Fully Managed Service : Auto-scaling 지원
-* Near Real Time : 최소 60초 지연 발생
+* **Fully Managed Service** : Auto-scaling 지원
+* **Near Real Time** : 최소 60초 지연 발생
 * 압축 지원 : GZIP, ZIP, SNAPPY
 * Producer
   * SDK KPL, Kinesis Agent, Kinesis Data Streams, Amazon CloudWatch, AWS IoT
@@ -150,7 +150,7 @@ title: AWS Certified Data Analytics 자격증 이론 정리
   * 사용자의 입력 또는 Glue Crawler를 통해서 생성 가능
   * EMR Hive의 Metastore를 Glue Data Catalog로 변환 가능
   * EMR Hive에서 Hive의 Metastore로 제공 가능
-* Glue Studio : Glue Job을 Visual Interface를 통해서 처리
+* **Glue Studio** : Glue Job을 Visual Interface를 통해서 처리
 * Glue Data Quality
   * Data의 품질 평가 및 검사 서비스
   * DQDL (Data Quality Definition Language) 이용하여 규칙 정의
@@ -331,10 +331,10 @@ title: AWS Certified Data Analytics 자격증 이론 정리
 
 * 실시간 Data 처리 Service
 * 구성 요소
-  * Input Stream : Data가 인입되는 Stream
-  * Reference Table : Data 처리시 참조하는 Table, S3의 Data Join 수행 가능
-  * Output Stream : 처리된 Data를 내보내는 Stream
-  * Error Stream : Data 처리시 발생한 Data를 내보내는 Stream
+  * **Input Stream** : Data가 인입되는 Stream
+  * **Reference Table** : Data 처리시 참조하는 Table, S3의 Data Join 수행 가능
+  * **Output Stream** : 처리된 Data를 내보내는 Stream
+  * **Error Stream** : Data 처리시 발생한 Data를 내보내는 Stream
 * with Lambda
   * Lambda를 Data의 목적지로 지정 가능
   * Data를 변경하고 AWS Service에 전달
@@ -346,9 +346,9 @@ title: AWS Certified Data Analytics 자격증 이론 정리
     * KPU 단위로 비용 측정
     * 1 KPU = 1 vCPU, 4 Memory
   * 구성 요소
-    * Flink Source : MSK, Kinesis Data Streams
+    * **Flink Source** : MSK, Kinesis Data Streams
     * Flink Datastream API
-    * Flink Sink : S3, Kinesis Datastream, Kinesis Datafirehorse
+    * **Flink Sink** : S3, Kinesis Datastream, Kinesis Datafirehorse
   * RANDOM_CUT_FOREST
     * Abnormal Detection 수행 SQL 함수
 
@@ -364,13 +364,13 @@ title: AWS Certified Data Analytics 자격증 이론 정리
   * Security Analytics
   * Clickstream Analytics
 * Concept
-  * Document : 검색할 대상, Full-Text 뿐만 아니라 JSON 구조도 지원
-  * Types : Schema 정의, 현재는 잘 이용되고 있지 않음
+  * **Document** : 검색할 대상, Full-Text 뿐만 아니라 JSON 구조도 지원
+  * **Types** : Schema 정의, 현재는 잘 이용되고 있지 않음
   * Indices
     * Inverted Index로 구성
     * 다수의 Shard로 구성되며, 분산 처리 수행
-    * Primary Shard : Read/Write 수행
-    * Replica Shard : Read만 수행 가능하며 다수의 Replica 구성시 Load Balancing 수행
+    * **Primary Shard** : Read/Write 수행
+    * **Replica Shard** : Read만 수행 가능하며 다수의 Replica 구성시 Load Balancing 수행
 * Fully-managed (Not Serverless)
 * 다운 타임없이 Scale in/out 수행
 * 다양한 AWS Service와 연동
@@ -380,8 +380,8 @@ title: AWS Certified Data Analytics 자격증 이론 정리
   * CloudWatch, CloudTrail
   * Zone Awareness
 * Options
-  * Dedicated Master Node : Node의 개수 및 Spec
-  * Domains : Cluster 구동을 위한 모든 정보들을 의미 (설정 정보)
+  * **Dedicated Master Node** : Node의 개수 및 Spec
+  * **Domains** : Cluster 구동을 위한 모든 정보들을 의미 (설정 정보)
   * S3 기반 Snapshot 기능 제공
   * Zone Awareness
 * Security
@@ -491,8 +491,8 @@ title: AWS Certified Data Analytics 자격증 이론 정리
   * Compute Node
     * 최대 128개의 컴퓨트 노드 구성 가능
     * Type
-      * Dense Storage : HDD와 저비용 큰 용량의 Storage를 갖고 있는 Type
-      * Dense Compute : Compute 성능에 초점을 맞춘 Type
+      * **Dense Storage** : HDD와 저비용 큰 용량의 Storage를 갖고 있는 Type
+      * **Dense Compute** : Compute 성능에 초점을 맞춘 Type
 * Spectrum
   * S3에 있는 Data 직접 접근
   * Concurrney 제한
@@ -512,23 +512,23 @@ title: AWS Certified Data Analytics 자격증 이론 정리
   * Scailing 수행시 새로운 클러스터가 생성되어 Data가 넘어가는 형태 (일시적 Downtime 발생)
 * Data Distribution Style
   * Data를 Compute Node에 어떻게 분배할지 결정
-  * Auto : 자동으로 Data 크기에 따라서 Data 분배
-  * Even : Round-robin에 따라서 자동으로 Data 분배
-  * Key : Key, Hasing 기반으로 Data 분배
-  * All : Data를 모든 Compute Node에 복제
+  * `Auto` : 자동으로 Data 크기에 따라서 Data 분배
+  * `Even` : Round-robin에 따라서 자동으로 Data 분배
+  * `Key` : Key, Hasing 기반으로 Data 분배
+  * `All` : Data를 모든 Compute Node에 복제
 * Sort Key
   * Sort Key에 따라서 Disk에 정령되어 저장
-  * Compound : 다수의 Column을 조합하여 Sort Key로 이용
-  * Interleaved : ??
+  * `Compound` : 다수의 Column을 조합하여 Sort Key로 이용
+  * `Interleaved` : ??
 * Data 복제
   * COPY
     * S3, EMR, DynamoDB 원격 Host에서 Data 복제 수행
     * 병렬로 데이터 복제 수행
-  * UNLOAD : 처리된 결과를 S3에 복제 수행
-  * S3 Auto-copy : S3에 Data 변경시 Redshift에 자동으로 복제 수행
-  * Aurora zero-ETL Integration : Aurora에서 Redshift로 데이터 자동 복제
+  * `UNLOAD` : 처리된 결과를 S3에 복제 수행
+  * **S3 Auto-copy** : S3에 Data 변경시 Redshift에 자동으로 복제 수행
+  * **Aurora zero-ETL Integration** : Aurora에서 Redshift로 데이터 자동 복제
   * Redshift Injestion
-  * DBLINK : RDS와 연결하여 Data 복제 수행
+  * `DBLINK` : RDS와 연결하여 Data 복제 수행
 * AWS Service와 통합
   * S3, DMS, EMR, EC2, Data Pipeline
 * WLM (Workload Management)
@@ -546,10 +546,10 @@ title: AWS Certified Data Analytics 자격증 이론 정리
   * Read-only Query, CREATE TALBE AS Query에 적용
   * Short 기준 시간 설정 가능
 * VACUUM
-  * VACUUM FULL : 
-  * VACUUM DELETE ONLY :
-  * VACUUM SORT ONLY :
-  * VACUUM REINDEX :
+  * `VACUUM FULL` : 
+  * `VACUUM DELETE ONLY` :
+  * `VACUUM SORT ONLY` :
+  * `VACUUM REINDEX` :
 * Resize
   * Elastic Resize
     * 빠르게 Node 추가/제거 또는 Node Type 변경 (DS2 to RA3) 수행 가능
@@ -582,7 +582,7 @@ title: AWS Certified Data Analytics 자격증 이론 정리
 * Serverless
 * Data Source
   * Redshift, Aurora/RDS, Athena, OpenSearch, IoT Analytics, Files (Excel, CSV, TSV)
-* SPICE : QuickSight에서 이용하는 In-memory Engine
+* **SPICE** : QuickSight에서 이용하는 In-memory Engine
 * Ad-hoc Query에 특화
 * Security
   * Multi-factor Auth

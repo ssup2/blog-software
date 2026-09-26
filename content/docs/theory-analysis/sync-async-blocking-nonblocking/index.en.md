@@ -8,14 +8,14 @@ This document organizes the concepts of Sync/Async and Blocking/Non-blocking.
 
 ### 1.1. Sync/Async
 
-Sync and Async are determined by whether the request result can be obtained **at the point when the request is completed**.
+**Sync** and **Async** are determined by whether the request result can be obtained **at the point when the request is completed**.
 
 * Sync - The request result can be obtained at the point when the request is completed.
 * Async - The request result cannot be obtained at the point when the request is completed. The request result can be confirmed through a separate Action performed later or Event reception.
 
 ### 1.2. Blocking/Non-blocking
 
-Blocking and Non-blocking are determined by whether the subject that sent the request can do **other things** until it receives the request result.
+**Blocking** and **Non-blocking** are determined by whether the subject that sent the request can do **other things** until it receives the request result.
 
 * Blocking - The subject that sent the request cannot do other things until it receives the request result.
 * Non-blocking - Other things can be performed even without receiving the request result.

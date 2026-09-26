@@ -6,7 +6,7 @@ RabbitMQ의 DLX (Dead Letter Exchange)를 분석한다.
 
 ## 1. RabbitMQ DLX (Dead Letter Exchange)
 
-RabbitMQ DLX(Dead Letter Exchange)는 Dead Letter가 된 Massage를 지정된 Exchange에 전송하는 기능이다. Message가 Dead Letter가 되는 조건은 다음의 3가지가 존재한다.
+**RabbitMQ DLX** (Dead Letter Exchange)는 Dead Letter가 된 Massage를 지정된 Exchange에 전송하는 기능이다. Message가 Dead Letter가 되는 조건은 다음의 3가지가 존재한다.
 
 * Requeue False로 설정되어 있는 Consumer가 reject/nack 응답을 통해서 거절한 Message. 
   * Requeue True로 설정되어 있는 Consumer가 reject/nack 응답을 통해서 거절한 Message는 Message가 존재했던 Queue에 다시 Requeue되고 DLX 기능은 동작하지 않는다.
@@ -25,11 +25,11 @@ RabbitMQ DLX(Dead Letter Exchange)는 Dead Letter가 된 Massage를 지정된 Ex
 
 Dead Letter가 된 Message의 "x-death" Header에는 Message가 Dead Letter가 된 이유 및 관련 정보가 저장되어 있다. "x-death" Header에 저장되어 있는 주요 정보는 다음과 같다.
 
-* reason : Message가 Dead Letter가 된 이유.
-* time : Message가 Dead Letter가 시간.
-* count : 동일한 reason, 동일한 queue에서 Message가 Dead Letter가 된 횟수. 
-* queue : Message가 Dead Letter가 되기전에 존재했던 Queue.
-* exchange : Dead Letter가 된 Message를 마지막으로 처리한 Exchange. 여러번 DLX에 의해서 처리된 Message의 경우 DLX 정보가 저장되어 있을 수 있다.
+* `reason` : Message가 Dead Letter가 된 이유.
+* `time` : Message가 Dead Letter가 시간.
+* `count` : 동일한 reason, 동일한 queue에서 Message가 Dead Letter가 된 횟수. 
+* `queue` : Message가 Dead Letter가 되기전에 존재했던 Queue.
+* `exchange` : Dead Letter가 된 Message를 마지막으로 처리한 Exchange. 여러번 DLX에 의해서 처리된 Message의 경우 DLX 정보가 저장되어 있을 수 있다.
 
 ## 2. 참조
 

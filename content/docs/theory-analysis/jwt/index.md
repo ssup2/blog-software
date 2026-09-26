@@ -8,7 +8,7 @@ JWT (JSON Web Token)을 분석한다.
 
 {{< figure caption="[Figure 1] JWT" src="images/jwt.png" width="750px" >}}
 
-JWT는 이름 그대로 JSON 기반의 Web Token을 의미한다. [Figure 1]은 JWT의 구조 및 JWT의 생성 과정을 나타내고 있다. JWT는 Header, Payload, Signature 3부분으로 구성되어 있고, 각 부분은 "." (마침표)를 통해서 연결되어 있다. Header와 Payload는 JSON 기반의 Key-value 형태로 구성되어 있고, Signature는 Header와 Payload를 기반으로 생성된다.
+**JWT**는 이름 그대로 JSON 기반의 Web Token을 의미한다. [Figure 1]은 JWT의 구조 및 JWT의 생성 과정을 나타내고 있다. JWT는 Header, Payload, Signature 3부분으로 구성되어 있고, 각 부분은 "." (마침표)를 통해서 연결되어 있다. Header와 Payload는 JSON 기반의 Key-value 형태로 구성되어 있고, Signature는 Header와 Payload를 기반으로 생성된다.
 
 ### 1.1. Header
 

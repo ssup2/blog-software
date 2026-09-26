@@ -6,7 +6,7 @@ This document analyzes Golang Garbage Collection.
 
 ## 1. Golang Garbage Collection
 
-The Golang Runtime includes a Garbage Collector that manages Heap Memory. Golang's Garbage Collector performs Garbage Collection relatively simply using only the **CMS (Concurrent Mark and Sweep)** technique based on the **TCMalloc Memory Allocator**. It does not use Compaction techniques to prevent fragmentation of the Heap Memory area, or Generation techniques to minimize scanning of the Heap Memory area that occurs during Garbage Collection.
+The Golang Runtime includes a **Garbage Collector** that manages Heap Memory. Golang's Garbage Collector performs Garbage Collection relatively simply using only the **CMS (Concurrent Mark and Sweep)** technique based on the **TCMalloc Memory Allocator**. It does not use Compaction techniques to prevent fragmentation of the Heap Memory area, or Generation techniques to minimize scanning of the Heap Memory area that occurs during Garbage Collection.
 
 Fragmentation of the Heap Memory area can be minimized depending on how Heap Memory is allocated. In Golang, it is considered that the TCMalloc Memory Allocator minimizes fragmentation of the Heap Memory area and allocates Memory quickly. Therefore, Golang does not view Memory fragmentation as a major problem.
 

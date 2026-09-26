@@ -6,7 +6,7 @@ Memcached 예제를 통해서 Kubebuilder와 Controller를 분석한다.
 
 ## 1. Kubebuilder
 
-Kubebuilder는 Kubernetes Controller 개발을 도와주는 SDK이다. 사용자가 원하는 **Kubernetes CR (Custom Resource)**을 정의하고, 정의한 Kubernetes CR을 관리하는 **Controller** 개발을 쉽게 할 수 있도록 도와준다. Kubebuilder는 Kubernetes CR과 관련된 대부분의 파일을 자동으로 생성해준다. 개발자는 생성된 Kubernetes CR 관련 파일을 수정만 하면 되기 때문에 쉽게 Kubernetes CR을 정의하고 이용할 수 있다. 
+**Kubebuilder**는 Kubernetes Controller 개발을 도와주는 SDK이다. 사용자가 원하는 **Kubernetes CR** (Custom Resource)을 정의하고, 정의한 Kubernetes CR을 관리하는 **Controller** 개발을 쉽게 할 수 있도록 도와준다. Kubebuilder는 Kubernetes CR과 관련된 대부분의 파일을 자동으로 생성해준다. 개발자는 생성된 Kubernetes CR 관련 파일을 수정만 하면 되기 때문에 쉽게 Kubernetes CR을 정의하고 이용할 수 있다. 
 
 또한 Kubebuilder는 Standard Golang Project Layout을 준수하는 Controller Manager Project를 생성해준다. 여기서 Controller Manager는 다수의 Controller를 관리하는 역할을 수행하는 구성요소를 의미한다. 즉 개발자는 Kubebuilder를 이용하여 다수의 Controller를 포함하는 Controller Manaager를 쉽게 개발할 수 있게된다. Kubernetes CR을 관리하는 Controller뿐만 아니라 Kubernetes에서 Default로 제공하는 Resource (Object)를 제어하는 Controller도 개발할 수 있다.
 
@@ -41,6 +41,7 @@ Kubebuilder를 이용하여 Memcached CR을 정의하고, Memcached CR을 제어
 ### 2.1. 개발 환경
 
 개발 환경은 다음과 같다.
+
 * Ubuntu 18.04 LTS, root user
 * Kubernetes 1.23.4
 * golang 1.17.6
@@ -310,15 +311,15 @@ func getPodNames(pods []corev1.Pod) []string {
 }
 ```
 
-[Code 3]는 Memcached Controller의 핵심 부분을 나타내고 있다. 8~12번째 줄은 Kubebuilder **Annotation**이며 Memcached Controller에 적용되는 Memcached CR에 대한 Role과 Controller 동작에 필요한 Deployment, Pod에 대한 Role을 나타내고 있다. Kubebuilder는 해당 Annotation 정보를 통해서 Memcached Controller에 구동에 필요한 Cluster Role, Cluster Role Binding Manifest를 생성하고 적용한다.
+[Code 3]는 Memcached Controller의 핵심 부분을 나타내고 있다. 8-12번째 줄은 Kubebuilder **Annotation**이며 Memcached Controller에 적용되는 Memcached CR에 대한 Role과 Controller 동작에 필요한 Deployment, Pod에 대한 Role을 나타내고 있다. Kubebuilder는 해당 Annotation 정보를 통해서 Memcached Controller에 구동에 필요한 Cluster Role, Cluster Role Binding Manifest를 생성하고 적용한다.
 
-106~112번째 줄은 Memcached CR 또는 Memcached CR이 소유(이용)하고 있는 Deployment Object의 변경을 Watch하는 부분이다. Memcached CR 또는 Memcached CR이 소유하는 Deployment Object가 변경되는 경우, 변경된 Memcached CR의 정보가 `Reconcile()` 함수에게 전달된다.
+106-112번째 줄은 Memcached CR 또는 Memcached CR이 소유(이용)하고 있는 Deployment Object의 변경을 Watch하는 부분이다. Memcached CR 또는 Memcached CR이 소유하는 Deployment Object가 변경되는 경우, 변경된 Memcached CR의 정보가 `Reconcile()` 함수에게 전달된다.
 
 153번째 줄은 Deployment Object에 해당 Deployment Object를 소유하고 있는 Memcached CR 정보를 저장하는 함수를 나타내고 있다. Memcached CR이 소유하고 있는 Deployment Object의 Meta 정보를 확인해 보면 `ownerReferences` 항목에 해당 Deployment Object를 소유하는 Memcached CR 정보가 저장되어 있다. 이러한 소유(Owner) 설정은 Kubernetes에서 공식적으로 지원하는 기능이며 Object GC(Garbage Collection)를 위해서 필요하다.
 
-`Reconcile()` 함수에 소속된 16~29번째 줄은 Work Queue로부터 가져온 Memcached CR의 Name/Namespace 정보를 바탕으로 Kubernetes Client를 이용하여 Memcached CR을 얻는 부분이다. 여기서 주목 해야하는 부분은 19~24번째 줄이다. Memcached CR 정보를 얻으려고 했지만 존재하지 않을 경우에는 해당 Memcached CR이 제거되었다는 의미를 나타낸다. 따라서 Memcached CR이 소유하고 있는 Deployment Object를 제거하는 Logic이 있어야 하지만, Memcached Controller에서는 해당 Logic이 존재하지 않는다. Deployment Object의 소유자가 제거된 Memached CR인걸 알고 Kubernetes에서 Object GC 과정을 통해서 자동으로 제거해주기 때문이다.
+`Reconcile()` 함수에 소속된 16-29번째 줄은 Work Queue로부터 가져온 Memcached CR의 Name/Namespace 정보를 바탕으로 Kubernetes Client를 이용하여 Memcached CR을 얻는 부분이다. 여기서 주목 해야하는 부분은 19-24번째 줄이다. Memcached CR 정보를 얻으려고 했지만 존재하지 않을 경우에는 해당 Memcached CR이 제거되었다는 의미를 나타낸다. 따라서 Memcached CR이 소유하고 있는 Deployment Object를 제거하는 Logic이 있어야 하지만, Memcached Controller에서는 해당 Logic이 존재하지 않는다. Deployment Object의 소유자가 제거된 Memached CR인걸 알고 Kubernetes에서 Object GC 과정을 통해서 자동으로 제거해주기 때문이다.
 
-27~60번째 줄은 Work Queue로부터 가져온 Memcached CR의 Name/Namespace 정보를 바탕으로 현재 상태의 Deployment Object를 얻는 부분이다. 62~75번째 줄은 Memcached CR의 Replica (Size)와 현재 상태의 Deployment Object의 Replica가 다르다면 Deployment Object의 Replica 개수를 Memcached CR의 Replica에 맞추는 동작을 수행하는 부분이다. 77~101번째 줄은 Memcached CR의 Status 정보를 Update하는 부분이다.
+27-60번째 줄은 Work Queue로부터 가져온 Memcached CR의 Name/Namespace 정보를 바탕으로 현재 상태의 Deployment Object를 얻는 부분이다. 62-75번째 줄은 Memcached CR의 Replica (Size)와 현재 상태의 Deployment Object의 Replica가 다르다면 Deployment Object의 Replica 개수를 Memcached CR의 Replica에 맞추는 동작을 수행하는 부분이다. 77-101번째 줄은 Memcached CR의 Status 정보를 Update하는 부분이다.
 
 이처럼 `Reconcile()` 함수는 변경된 Memcached CR을 얻고, 얻은 Memcached CR을 바탕으로 Deployment Object를 제어하는 동작을 반복한다. `Reconcile()` 함수 곳곳에서 Manager Client를 통해서 Resource를 변경한뒤 **Requeue** Option과 함께 return하는 부분을 찾을 수 있다. Resource 변경이 완료되었어도 실제 반영에는 시간이 걸리기 때문에, Requeue Option을 이용하여 일정 시간이 지난후에 다시 `Reconcile()` 함수가 실행되도록 만들고 있다.
 

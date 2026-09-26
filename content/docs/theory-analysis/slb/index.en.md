@@ -8,14 +8,14 @@ This document analyzes SLB (Server Load Balancing) techniques.
 
 {{< figure caption="[Figure 1] SLB" src="images/slb.png" width="450px" >}}
 
-SLB means techniques for adjusting server load, as the name suggests. SLB consists of **LB (Load Balancer)** and **VIP (Virtual IP)**. LB receives client requests that should be delivered to servers and delivers them to appropriate servers. VIP (Virtual IP) is a single virtual IP that represents multiple servers that are targets of Load Balancing. Clients make requests to VIP (Virtual IP) that LB has, not to each server's IP. Therefore, clients do not know about the existence of multiple servers and think they are communicating with a single server.
+**SLB** means techniques for adjusting server load, as the name suggests. SLB consists of **LB (Load Balancer)** and **VIP (Virtual IP)**. LB receives client requests that should be delivered to servers and delivers them to appropriate servers. VIP (Virtual IP) is a single virtual IP that represents multiple servers that are targets of Load Balancing. Clients make requests to VIP (Virtual IP) that LB has, not to each server's IP. Therefore, clients do not know about the existence of multiple servers and think they are communicating with a single server.
 
 The core of SLB is the role of LB. LB must decide how to perform Load Balancing. Load Balancing techniques include the following:
 
-* Round Robin : Selects servers based on Round Robin algorithm.
-* Least Connection : Selects the server with the least number of current connections.
-* RTT : Selects the server with the smallest RTT (Round Trip Time).
-* Priority : Selects servers with higher priority. If a server with higher priority is in an abnormal state, the next highest priority server is selected.
+* **Round Robin** : Selects servers based on Round Robin algorithm.
+* **Least Connection** : Selects the server with the least number of current connections.
+* **RTT** : Selects the server with the smallest RTT (Round Trip Time).
+* **Priority** : Selects servers with higher priority. If a server with higher priority is in an abnormal state, the next highest priority server is selected.
 
 One important factor to consider during Load Balancing is Session. If multiple connections occurring under the same Session are delivered to different servers, the Session cannot be maintained. For LB to identify Sessions, it must be able to identify that received packets are sent from the same client. Generally, if Source IP Address and Source Port number of packets are the same, they are considered packets from the same client. Therefore, LB must recognize at least L4 Layer Stack. Finally, LB must periodically check the status of servers to prevent client requests from being delivered to servers in abnormal states during Load Balancing.
 

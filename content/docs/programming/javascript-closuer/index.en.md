@@ -6,7 +6,7 @@ This document analyzes JavaScript Closures.
 
 ## 1. JavaScript Closure
 
-Closure is a technique that makes functions have state by **objectifying functions**. It is called Closure because the space where function state is stored is a space that absolutely cannot be accessed from outside. Closure is generally a technique supported in functional languages, but JavaScript also supports Closure.
+**Closure** is a technique that makes functions have state by **objectifying functions**. It is called Closure because the space where function state is stored is a space that absolutely cannot be accessed from outside. Closure is generally a technique supported in functional languages, but JavaScript also supports Closure.
 
 ```javascript {caption="[Code 1] JavaScript Closure", linenos=table}
 function outerFunc(i) {

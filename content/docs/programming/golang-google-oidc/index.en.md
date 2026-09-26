@@ -149,10 +149,10 @@ The operation process is as follows:
 
 Line-by-line explanations of [Code 1] are as follows:
 
-* Line 16 : Scope sets the range of user information included in ID token values.
-* Lines 21, 41 : State is a temporary string to prevent CSRF attacks on users. State is generated and stored in cookies before authentication/authorization, and after redirect, it is checked whether the State in the URL matches the State in cookies.
-* Lines 26, 78 : Nonce is a string used to verify whether ID tokens are valid. ID tokens are generated to include nonce and stored in cookies, and after redirect, it is checked whether the nonce in the obtained ID token matches the nonce in cookies.
-* Line 52 : Authorization code exists in the "code" query of the URL.
+* **Line 16** : Scope sets the range of user information included in ID token values.
+* **Lines 21, 41** : State is a temporary string to prevent CSRF attacks on users. State is generated and stored in cookies before authentication/authorization, and after redirect, it is checked whether the State in the URL matches the State in cookies.
+* **Lines 26, 78** : Nonce is a string used to verify whether ID tokens are valid. ID tokens are generated to include nonce and stored in cookies, and after redirect, it is checked whether the nonce in the obtained ID token matches the nonce in cookies.
+* **Line 52** : Authorization code exists in the "code" query of the URL.
 
 ## 3. Google Authentication/Authorization
 

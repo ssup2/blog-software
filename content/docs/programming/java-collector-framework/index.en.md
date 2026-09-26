@@ -8,7 +8,7 @@ This document analyzes Interfaces and Classes provided by the Java Collections F
 
 {{< figure caption="[Figure 1] Java Collection Interface Relationship Diagram" src="images/collection-interface.png" width="1000px" >}}
 
-The Collection Interface performs the role of a framework that provides Interfaces for managing Object Groups. [Figure 1] shows the relationship diagram of the Collection Interface.
+The **Collection Interface** performs the role of a framework that provides Interfaces for managing Object Groups. [Figure 1] shows the relationship diagram of the Collection Interface.
 
 ### 1.1. Interface
 

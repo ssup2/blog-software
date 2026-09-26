@@ -7,6 +7,7 @@ title: Kubernetes Kubeflow Installation / Ubuntu 18.04 Environment
 {{< figure caption="[Figure 1] Node configuration diagram for Kubeflow installation" src="images/node-setting.png" width="900px" >}}
 
 The installation environment is as follows:
+
 * Kubernetes 1.18.14
 * Kubeflow 1.2.0
 * Istio 1.3

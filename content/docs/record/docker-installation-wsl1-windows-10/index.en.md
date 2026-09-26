@@ -5,12 +5,14 @@ title: Docker Installation and Setting / WSL1 Environment / Windows 10 Environme
 ## 1. Installation and Setting Environment
 
 The installation and setting environment is as follows.
+
 * Windows 10 Pro 64bit
   * Virtualization feature ON in Bios
 
 ## 2. Docker for Windows Installation
 
 Install Docker for Windows for using Docker in Visual Studio Code's Terminal.
+
 * [https://docs.docker.com/docker-for-windows](https://docs.docker.com/docker-for-windows)
 
 {{< figure caption="[Figure 1] Docker for Windows Installation" src="images/docker-install-01.png" width="700px" >}}

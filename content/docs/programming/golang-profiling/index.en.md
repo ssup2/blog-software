@@ -42,16 +42,16 @@ func init() {
 
 [Code 2] shows the `init()` function called when initializing the net/http/pprof Package. You can see that 5 HTTP Endpoints are registered with the HTTP Server. Although not shown in [Code 2], there are also various Endpoints under the Index Handler to obtain Profiles. You can obtain the following Profiles through "Get" requests to the following Endpoints.
 
-* CPU : http://localhost:6060/debug/pprof/profile
-* Memory Heap : http://localhost:6060/debug/pprof/heap
-* Block : http://localhost:6060/debug/pprof/block
-* Thread Create : http://localhost:6060/debug/pprof/threadcreate
-* Goroutine : http://localhost:6060/debug/pprof/goroutine
-* Mutex : http://localhost:6060/debug/pprof/mutex
+* **CPU** : http://localhost:6060/debug/pprof/profile
+* **Memory Heap** : http://localhost:6060/debug/pprof/heap
+* **Block** : http://localhost:6060/debug/pprof/block
+* **Thread Create** : http://localhost:6060/debug/pprof/threadcreate
+* **Goroutine** : http://localhost:6060/debug/pprof/goroutine
+* **Mutex** : http://localhost:6060/debug/pprof/mutex
 
 You can set how many seconds to perform Profiling using the **seconds** Query String on all HTTP Endpoints.
 
-* seconds : http://localhost:6060/debug/pprof/profile?seconds=30
+* `seconds` : http://localhost:6060/debug/pprof/profile?seconds=30
 
 ```shell {caption="[Shell 1] Get Profile File Example"}
 $ curl http://localhost:6060/debug/pprof/profile\?seconds\=30 --output cpu.prof
@@ -200,7 +200,7 @@ To understand Profiles visualized through pprof, you must know the concepts of *
 
 Profile types and analysis are conducted through the example App below. Profiles are set to be exposed through port 6060 through the net/http/pprof Package, and various functions have been developed to apply load.
 
-* Example App : [https://github.com/ssup2/golang-profiling-example](https://github.com/ssup2/golang-profiling-example)
+* **Example App** : [https://github.com/ssup2/golang-profiling-example](https://github.com/ssup2/golang-profiling-example)
 
 ### 3.1. CPU
 

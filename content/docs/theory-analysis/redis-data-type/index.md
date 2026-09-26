@@ -6,7 +6,7 @@ Redis의 Data Type을 분석한다.
 
 ## 1. Redis Data Type
 
-Redis는 기본적으로 Key-Value Store 역활을 수행하는 저장소 이지만, **Value**에 다양한 Data Type을 지원한다는 특징을 가지고 있다.
+**Redis**는 기본적으로 Key-Value Store 역활을 수행하는 저장소 이지만, **Value**에 다양한 Data Type을 지원한다는 특징을 가지고 있다.
 
 ### 1.1. Strings
 

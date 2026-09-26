@@ -9,7 +9,7 @@ The Sidecar Container Pattern is used in various ways in Kubernetes environments
 * It was not possible to specify dependency relationships between Sidecar Containers and App Containers. It was impossible to make Sidecar Containers start first and then App Containers start, or to make App Containers die first and Sidecar Containers die later.
 * There was a problem where Pods would not terminate even if App Containers terminated normally, as long as Sidecar Containers did not terminate. This was particularly problematic in Job Pods performing Job workloads.
 
-To solve these problems with the Sidecar Container Pattern, Kubernetes released the Sidecar Container feature. It is available from `version 1.28`. Kubernetes' Sidecar Container feature has the following characteristics:
+To solve these problems with the Sidecar Container Pattern, Kubernetes released the **Sidecar Container** feature. It is available from `version 1.28`. Kubernetes' Sidecar Container feature has the following characteristics:
 
 * Sidecar Containers start before App Containers start. When there are multiple Sidecar Containers, they start one by one according to the manifest order.
 * When a Pod terminates, App Containers terminate first, and Sidecar Containers terminate in reverse order of creation. That is, they terminate in reverse order of the manifest.

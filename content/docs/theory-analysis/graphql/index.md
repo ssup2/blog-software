@@ -6,15 +6,15 @@ GraphQL을 분석한다.
 
 ## 1. GraphQL
 
-GraphQL은 API Server를 위한 Query 언어이다. **Query 언어**이기 때문에 원하는 Data만 선택하여 얻을수 있다는 장점을 갖으며, 한번에 요청으로 다양한 Data를 얻을수도 있다는 장점도 갖는다. DB의 SQL과 매우 유사한 특징을 갖는다. 일반적으로 REST API의 단점 극복을 위한 용도로 선택되어 이용된다.
+**GraphQL**은 API Server를 위한 Query 언어이다. **Query 언어**이기 때문에 원하는 Data만 선택하여 얻을수 있다는 장점을 갖으며, 한번에 요청으로 다양한 Data를 얻을수도 있다는 장점도 갖는다. DB의 SQL과 매우 유사한 특징을 갖는다. 일반적으로 REST API의 단점 극복을 위한 용도로 선택되어 이용된다.
 
 #### 1.1. Operation Type
 
 GraphQL은 Query, Mutation, Subscription 3가지 Operation Type을 제공한다.
 
-* Query : Data를 조회한다.
-* Mutation : Data를 생성(Create), 갱신(Update), 삭제(Delete)하고 변경된 Data를 조회한다.
-* Subscription : Data의 변경을 구독하여 Data 변경시 변경된 Data를 수신한다.
+* **Query** : Data를 조회한다.
+* **Mutation** : Data를 생성(Create), 갱신(Update), 삭제(Delete)하고 변경된 Data를 조회한다.
+* **Subscription** : Data의 변경을 구독하여 Data 변경시 변경된 Data를 수신한다.
 
 #### 1.1.1. Query
 

@@ -5,10 +5,11 @@ title: NFSv3 Server, Client 설치 / Ubuntu 16.04 환경
 ## 1. 설치 환경
 
 설치 환경은 다음과 같다.
+
 * Ubuntu 16.04 LTS 64bit, root user
-* NFS Root : NFSv3 Server의 Root Directory 절대 경로를 의미한다.
+* **NFS Root** : NFSv3 Server의 Root Directory 절대 경로를 의미한다.
   * NFS Root로 /nfs-root를 이용한다.
-* NFS share : NFSv3 Server를 통해 실제 공유할 Directory의 절대 경로를 의미한다.
+* **NFS share** : NFSv3 Server를 통해 실제 공유할 Directory의 절대 경로를 의미한다.
   * NFS share로 /root/nfs-share를 이용한다.
 
 ## 2. NFSv3 Server 설정

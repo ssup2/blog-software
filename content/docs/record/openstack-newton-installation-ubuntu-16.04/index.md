@@ -7,11 +7,11 @@ title: OpenStack Newton 설치 / Ubuntu 16.04 환경
 설치 환경은 다음과 같다.
 
 * VirtualBox 5.0.14r
-  * Controller Node : Ubuntu Server 16.04.2 64bit 1대
-  * Compute Node : Ubuntu Server 16.04.2 64bit 1대
-  * Block Storage Node : Ubuntu Server 16.04.2 64bit 1대
+  * **Controller Node** : Ubuntu Server 16.04.2 64bit 1대
+  * **Compute Node** : Ubuntu Server 16.04.2 64bit 1대
+  * **Block Storage Node** : Ubuntu Server 16.04.2 64bit 1대
 * OpenStack Newton Version
-  * Network : Self-service
+  * **Network** : Self-service
 * Password
   * OpenStack 설치에 필요한 Password는 간편한 설치를 위해 **root**로 통일한다.
 * 모든 Node에서 root User로 설치를 진행한다.
@@ -21,8 +21,9 @@ title: OpenStack Newton 설치 / Ubuntu 16.04 환경
 {{< figure caption="[Figure 1] Openstack Newton 설치를 위한 Node 구성도" src="images/node-setting.png" width="1000px" >}}
 
 VirtualBox를 이용하여 [그림 1]과 같이 가상의 Controller, Compute, Storage Node (VM)을 생성한다.
-* NAT : Virtual Box에서 제공하는 "NAT 네트워크" 이용하여 10.0.0/24 Network를 구축한다.
-* Router : 공유기를 이용하여 192.168.77.0/24 Network를 구축한다. (NAT)
+
+* **NAT** : Virtual Box에서 제공하는 "NAT 네트워크" 이용하여 10.0.0/24 Network를 구축한다.
+* **Router** : 공유기를 이용하여 192.168.77.0/24 Network를 구축한다. (NAT)
 * Horizon 설치 후 PC Web Browser를 이용하여 192.168.77.170/horizon에 접속하면 Horizon을 이용할 수 있다.
 
 ### 2.1. 모든 Node
@@ -1010,8 +1011,9 @@ Horizon 시작
 ### 7.2. 검증
 
 Web Brower를 통해 Horizon에 접속한다.
+
 * http://192.168.77.170/horizon
-* Login : Domain - default, 사용자 이름 - admin, 암호 - root
+* **Login** : Domain - default, 사용자 이름 - admin, 암호 - root
 
 ## 8. Cinder 설치
 

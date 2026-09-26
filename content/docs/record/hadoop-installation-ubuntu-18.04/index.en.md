@@ -5,6 +5,7 @@ title: Hadoop Installation / Ubuntu 18.04 Environment
 ## 1. Installation Environment
 
 The installation and execution environment is as follows.
+
 * Ubuntu 18.04 LTS 64bit, root user
 * Java openjdk version "1.8.0-171"
 * Hadoop 3.0.3
@@ -117,6 +118,7 @@ $ start-dfs.sh
 ```
 
 Format HDFS and start HDFS, then verify HDFS operation.
+
 * Access http://localhost:9870 in a Web Browser.
 
 ## 5. YARN Installation, Configuration
@@ -172,6 +174,7 @@ $ start-yarn.sh
 ```
 
 Start YARN and verify YARN operation.
+
 * http://localhost:8088
 
 ## 6. Operation Verification

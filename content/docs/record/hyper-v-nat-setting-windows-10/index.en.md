@@ -5,13 +5,14 @@ title: Hyper-V NAT Configuration / Windows 10 Environment
 ## 1. Configuration Environment
 
 The configuration environment is as follows.
+
 * NAT Network
-  * Network : 172.35.0.0/24
-  * Gateway : 172.35.0.1
-  * Switch Name : NAT-Switch
-  * Network Name : NAT-Network
+  * **Network** : 172.35.0.0/24
+  * **Gateway** : 172.35.0.1
+  * **Switch Name** : NAT-Switch
+  * **Network Name** : NAT-Network
 * VM
-  * Address : 172.35.0.100
+  * **Address** : 172.35.0.100
 
 ## 2. Switch Creation and NAT Configuration
 

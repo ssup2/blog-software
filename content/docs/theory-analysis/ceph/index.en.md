@@ -8,7 +8,7 @@ Analyzes Ceph, which is widely used as distributed Storage.
 
 {{< figure caption="[Figure 1] Ceph Architecture" src="images/ceph-architecture.png" width="800px" >}}
 
-Ceph is a distributed Storage based on Object Storage. Although it is Object Storage, it also provides File Storage and Block Storage functionality. Therefore, Ceph is used in various environments. The biggest characteristic of Ceph is that it adopts an Architecture that considers the **Single Point of Failure** problem. That is, Ceph uses a distributed processing method rather than a centralized processing method, and is designed so that Ceph operation is not affected even if problems occur in specific Nodes.
+**Ceph** is a distributed Storage based on Object Storage. Although it is Object Storage, it also provides File Storage and Block Storage functionality. Therefore, Ceph is used in various environments. The biggest characteristic of Ceph is that it adopts an Architecture that considers the **Single Point of Failure** problem. That is, Ceph uses a distributed processing method rather than a centralized processing method, and is designed so that Ceph operation is not affected even if problems occur in specific Nodes.
 
 ### 1.1. Storage Type
 

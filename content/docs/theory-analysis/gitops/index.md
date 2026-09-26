@@ -8,7 +8,7 @@ GitOps를 분석한다.
 
 {{< figure caption="[Figure 1] GitOps Pipeline" src="images/gitops-pipeline.png" width="900px" >}}
 
-GitOps는 Git을 App 개발뿐만 아니라 App Delivery 즉 App 배포에도 활용하는 기법을 의미한다. [Figure 1]은 GitOps의 Pipeline을 나타내고 있다. App Code를 관리하는 Application Git Repo와 배포를 관리하는 Deployment Git Repo, 2가지의 Git Repo가 존재한다. 
+**GitOps**는 Git을 App 개발뿐만 아니라 App Delivery 즉 App 배포에도 활용하는 기법을 의미한다. [Figure 1]은 GitOps의 Pipeline을 나타내고 있다. App Code를 관리하는 Application Git Repo와 배포를 관리하는 Deployment Git Repo, 2가지의 Git Repo가 존재한다. 
 
 App 개발자가 Application Git Repo에 Code를 Commit하면, Application Git Repo는 Container Image Builer에게 Hook을 전송하여 Commit된 Code를 반영한 새로운 Container App Image를 생성하도록 한다. Container Image Builder는 Container App Image를 생성하고 Container Image Repo에 Container App Image를 Push한 다음, Config Updater에게 새로 생성된 Container App Image의 정보를 전달한다.
 

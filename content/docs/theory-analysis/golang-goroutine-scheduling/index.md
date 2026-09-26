@@ -8,9 +8,9 @@ Golang의 Goroutine Scheduling을 분석한다.
 
 {{< figure caption="[Figure 1] Goroutine Scheduling" src="images/golang-goroutine-scheduling.png" width="700px" >}}
 
-Golang에서는 OS에서 제공하는 Thread보다 더 경량화된 Thread인 Goroutine을 제공하고 있다. Goroutine은 Golang Runtime에 포함되어 있는 **Golang Scheduler**가 수행하는 Thread Scheduling을 통해서 실행된다. 즉 다수의 Goroutine들이 소수의 Thread위에서 동작하게 된다. [Figure 1]은 Goroutine Scheduling 과정을 나타내고 있다. **Goroutine은 G, Processor는 P, Thread는 M**으로 표현되었다. 여기서 Processor는 실제 CPU Core의 개수가 아닌 가상의 Processor (Virtual CPU Core)를 의미한다.
+Golang에서는 OS에서 제공하는 Thread보다 더 경량화된 Thread인 **Goroutine**을 제공하고 있다. Goroutine은 Golang Runtime에 포함되어 있는 **Golang Scheduler**가 수행하는 Thread Scheduling을 통해서 실행된다. 즉 다수의 Goroutine들이 소수의 Thread위에서 동작하게 된다. [Figure 1]은 Goroutine Scheduling 과정을 나타내고 있다. **Goroutine은 G, Processor는 P, Thread는 M**으로 표현되었다. 여기서 Processor는 실제 CPU Core의 개수가 아닌 가상의 Processor (Virtual CPU Core)를 의미한다.
 
-[Figure 1]에서는 4개의 **CPU Core**가 존재하고 있으며 **OS Scheduler**에 의해서 다수의 Thread가 Scheduling되어 동작하고 있는 모습을 나타내고 있다. **Network Poller**는 Network를 처리하는 별도의 독립된 Thread를 의미한다. Run Queue에는 **GRQ (Global Run Queue)**와 **LRQ (Local Run Queue)**가 2가지가 존재한다. GRQ는 의미 그대로 전역 Goroutine Queue 역활을 수행하며, LRQ는 의미 그대로 지역 Goroutine Queue 역활을 수행한다.
+[Figure 1]에서는 4개의 **CPU Core**가 존재하고 있으며 **OS Scheduler**에 의해서 다수의 Thread가 Scheduling되어 동작하고 있는 모습을 나타내고 있다. **Network Poller**는 Network를 처리하는 별도의 독립된 Thread를 의미한다. Run Queue에는 **GRQ** (Global Run Queue)와 **LRQ** (Local Run Queue)가 2가지가 존재한다. GRQ는 의미 그대로 전역 Goroutine Queue 역활을 수행하며, LRQ는 의미 그대로 지역 Goroutine Queue 역활을 수행한다.
 
 #### 1.1. Goroutine State
 

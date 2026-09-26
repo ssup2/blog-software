@@ -6,7 +6,7 @@ DB의 Primary Key를 분석한다.
 
 ## 1. Primary Key
 
-Primary Key는 Table에 존재하는 각 Record들의 식별자 역활을 수행한다. 따라서 하나의 Table 내부에서 Primary Key 값은 반드시 유일해야 한다. 일반적으로 DB는 Transaction 처리중 Primary Key가 중복되는 경우 해당 Transaction을 취소하여 Primary Key의 유일성을 보장해준다. Record는 Primary Key를 기준으로 정렬되며 Disk에 저장된다. 정렬은 **B+ Tree**를 이용한다. 이러한 B+ Tree는 Record가 저장되는 Disk의 위치를 결정하기 때문에 **Clustered Index**라고 명칭된다.
+**Primary Key**는 Table에 존재하는 각 Record들의 식별자 역활을 수행한다. 따라서 하나의 Table 내부에서 Primary Key 값은 반드시 유일해야 한다. 일반적으로 DB는 Transaction 처리중 Primary Key가 중복되는 경우 해당 Transaction을 취소하여 Primary Key의 유일성을 보장해준다. Record는 Primary Key를 기준으로 정렬되며 Disk에 저장된다. 정렬은 **B+ Tree**를 이용한다. 이러한 B+ Tree는 Record가 저장되는 Disk의 위치를 결정하기 때문에 **Clustered Index**라고 명칭된다.
 
 ### 1.1. Auto Increment vs Random
 

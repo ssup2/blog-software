@@ -16,8 +16,8 @@ Kubernetes Cluster 구성에 이용되는 OrangePi 5 Max 7대의 사양과, 설�
 
 [User Guide](documents/OrangePi_5_Max_RK3588_User%20Manual_v1.3.pdf)의 **2.6. Method for burning Linux images to SPIFlash+NVMeSSD** 부분을 따라서 OrangePi 5 Max에 OS를 설치한다.
 
-* Install Guide : [https://developer.nvidia.com/embedded/learn/get-started-jetson-nano-devkit#write](https://developer.nvidia.com/embedded/learn/get-started-jetson-nano-devkit#write)
-* Debian bookwoarm OS : [https://drive.google.com/drive/folders/1b6hqA6zdgiScWvohsUdopBrtmytF4-ma](https://drive.google.com/drive/folders/1b6hqA6zdgiScWvohsUdopBrtmytF4-ma)
+* **Install Guide** : [https://developer.nvidia.com/embedded/learn/get-started-jetson-nano-devkit#write](https://developer.nvidia.com/embedded/learn/get-started-jetson-nano-devkit#write)
+* **Debian bookworm OS** : [https://drive.google.com/drive/folders/1b6hqA6zdgiScWvohsUdopBrtmytF4-ma](https://drive.google.com/drive/folders/1b6hqA6zdgiScWvohsUdopBrtmytF4-ma)
 
 ## 3. Hostname, Network 설정
 

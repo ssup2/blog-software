@@ -5,6 +5,7 @@ title: Cassandra 설치, 실행 / Ubuntu 18.04 환경
 ## 1. 설치, 실행 환경
 
 설정, 실행 환경은 다음과 같다.
+
 * Ubuntu 18.04 LTS 64bit, root user
 
 ## 2. Java 설치

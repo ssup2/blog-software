@@ -6,7 +6,7 @@ Kafka의 Transaction 기법을 분석한다.
 
 ## 1. Kafka Transaction
 
-Kafka Transaction은 의미에서 유추할 수 있는것 처럼 **Producer가 Kafka로 보내는 다량의 Record를 하나의 Transaction으로 묶어서 처리하는 기법**을 의미한다. 여기서 다량의 Record들은 다수의 Topic, Partition에 전달되는 경우에도 하나의 Transaction으로 묶어서 처리될 수 있는 특징이 있다. 반면에 Kafka Transaction은 Consumer가 다수의 Record를 하나의 Transaction으로 묶어서 처리하는 기법은 Kafka에서 지원하지 않는다. 즉 Kafka Transaction은 Producer 중심의 Transaction 기법이다.
+**Kafka Transaction**은 의미에서 유추할 수 있는것 처럼 **Producer가 Kafka로 보내는 다량의 Record를 하나의 Transaction으로 묶어서 처리하는 기법**을 의미한다. 여기서 다량의 Record들은 다수의 Topic, Partition에 전달되는 경우에도 하나의 Transaction으로 묶어서 처리될 수 있는 특징이 있다. 반면에 Kafka Transaction은 Consumer가 다수의 Record를 하나의 Transaction으로 묶어서 처리하는 기법은 Kafka에서 지원하지 않는다. 즉 Kafka Transaction은 Producer 중심의 Transaction 기법이다.
 
 Kafka Transaction은 내부적으로 two-phase commit 기법을 이용하여 구현되어 있으며, Kafka Transaction을 이용하기 위해서는 반드시 **Idempotence 기능** (`enable.idempotence`)과 **In-flight Request 제한 기능** (`max.in.flight.requests.per.connection`)을 `5` 이하로 설정하여 동일한 Event/Data가 중복으로 저장되는 것을 방지해야 한다. Kafka Transaction은 크게 **Produce-only Transaction**과 **Consume-Produce Transaction** 2가지 방식으로 나누어진다.
 

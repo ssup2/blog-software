@@ -8,7 +8,7 @@ Kafka Connect에 대해서 분석한다.
 
 {{< figure caption="[Figure 1] Kafka Connect Architecture" src="images/kafka-connect-architecture.png" width="900px" >}}
 
-Kafka Connect는 Kafka를 기반으로 외부의 Data 저장소와 연동하여 Data Stream 구축을 도와주는 도구이다. [Figure 1]은 Kafka Connect의 Architecture를 나타내고 있으며 다음과 같은 구성요소로 이루어져 있다.
+**Kafka Connect**는 Kafka를 기반으로 외부의 Data 저장소와 연동하여 Data Stream 구축을 도와주는 도구이다. [Figure 1]은 Kafka Connect의 Architecture를 나타내고 있으며 다음과 같은 구성요소로 이루어져 있다.
 
 * **Data Source** : Data Stream의 출발점이 되는 Data 저장소.
 * **Data Destination** : Data Stream의 도착점이 되는 Data 저장소.

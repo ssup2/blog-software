@@ -6,11 +6,12 @@ Analyze AppArmor, one of the Security Modules of the Linux LSM (Linux Security M
 
 ## 1. AppArmor
 
-AppArmor is a MAC (Mandatory Access Control) based Security Module that operates on the Linux LSM Framework. AppArmor restricts the operation of programs (binaries) through **System Call** restrictions. The operation restrictions for each program are delivered to AppArmor through **AppArmor Profile** files.
+**AppArmor** is a MAC (Mandatory Access Control) based Security Module that operates on the Linux LSM Framework. AppArmor restricts the operation of programs (binaries) through **System Call** restrictions. The operation restrictions for each program are delivered to AppArmor through **AppArmor Profile** files.
 
 AppArmor operates in two modes: Enforcement and Complain.
-* Enforcement : Restricts unauthorized operations of programs and logs them. This mode is used when actually operating programs and restricting their operations.
-* Complain : Does not restrict unauthorized operations of programs but only logs them. This mode is used when writing AppArmor Profiles for specific programs. Logs can help with writing AppArmor Profiles.
+
+* **Enforcement** : Restricts unauthorized operations of programs and logs them. This mode is used when actually operating programs and restricting their operations.
+* **Complain** : Does not restrict unauthorized operations of programs but only logs them. This mode is used when writing AppArmor Profiles for specific programs. Logs can help with writing AppArmor Profiles.
 
 ```shell {caption="[Shell 1] Check AppArmor Status"}
 $ aa-status
@@ -71,7 +72,7 @@ apparmor module is loaded.
 
 ### 1.1. AppArmor Profile
 
-AppArmor Profile names can be classified into names starting with `/` and names that do not start with `/`. For Profiles starting with `/`, the Profile name represents the program to which the Profile will be applied. Among the Profile list queried in [Shell 1], you can see the /usr/sbin/tcpdump Profile, and when the /usr/sbin/tcpdump program is executed, the /usr/sbin/tcpdump Profile is automatically applied. For Profiles that do not start with `/`, the Profile must be manually applied using the aa-exec command when executing a specific program. Of course, Profiles starting with `/` can also be applied to specific programs using the aa-exec command. Profiles are located in **/etc/apparmor.d**.
+AppArmor Profile names can be classified into names starting with `/` and names that do not start with `/`. For Profiles starting with `/`, the Profile name represents the program to which the Profile will be applied. Among the Profile list queried in [Shell 1], you can see the /usr/sbin/tcpdump Profile, and when the /usr/sbin/tcpdump program is executed, the /usr/sbin/tcpdump Profile is automatically applied. For Profiles that do not start with `/`, the Profile must be manually applied using the aa-exec command when executing a specific program. Of course, Profiles starting with `/` can also be applied to specific programs using the aa-exec command. Profiles are located in `/etc/apparmor.d`.
 
 ```text {caption="[File 1] /etc/apparmor.d/test/apparmor-example AppArmor Profile", linenos=table}
 #include <tunables/global>

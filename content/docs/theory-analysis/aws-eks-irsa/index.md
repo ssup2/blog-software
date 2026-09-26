@@ -6,12 +6,12 @@ title: AWS EKS IRSA
 
 {{< figure caption="[Figure 1] AWS EKS IRSA" src="images/aws-eks-irsa.png" width="900px" >}}
 
-AWS EKS 1.14 Version 이상에서는 EKS (K8s) Cluster의 Service Account에 AWS IAM Role을 부여할 수 있는 IRSA (IAM Roles for Service Accounts) 기능을 제공하고 있다. IRSA 기능을 통해서 AWS IAM Role을 부여 받은 Service Account를 이용하는 Pod는 AWS Service를 이용할 수 있게 된다. [Figure 1]은 이러한 과정을 Service Account 생성, Pod 생성, Service Account Token 생성/교체, Service Account Token 이용 4단계로 나누어 나타내고 있다. [Figure 1]의 주요 구성 요소들은 다음과 같다.
+AWS EKS 1.14 Version 이상에서는 EKS (K8s) Cluster의 Service Account에 AWS IAM Role을 부여할 수 있는 **IRSA** (IAM Roles for Service Accounts) 기능을 제공하고 있다. IRSA 기능을 통해서 AWS IAM Role을 부여 받은 Service Account를 이용하는 Pod는 AWS Service를 이용할 수 있게 된다. [Figure 1]은 이러한 과정을 Service Account 생성, Pod 생성, Service Account Token 생성/교체, Service Account Token 이용 4단계로 나누어 나타내고 있다. [Figure 1]의 주요 구성 요소들은 다음과 같다.
 
-* AWS EKS OIDC Identity Provider : 각 EKS Cluster 마다 가지고 있는 전용 OIDC Identity Provider를 나타낸다. AWS IAM에게 신뢰하는 OIDC Identity Provider로 등록(Federate)되어 있다.
-* Private/Public Key : AWS EKS OIDC Identity Provider와 Kubernetes API 서버는 동일한 Private/Public Key를 공유하여 이용한다.
-* Pod Identity Webhook : Kubernetes API Server의 Mutating Webhook을 나타낸다. Pod가 AWS IAM Role을 부여 받은 Service Account를 이용하는 경우, Pod 내부에서 Service Account에 부여된 AWS IAm Role을 이용할 수 있도록 Pod의 Spec을 변경하는 역활을 수행한다.
-* Projected SA Token : AWS IAM Role이 부여된 Service Account의 Token을 나타낸다. Kubernetes에서 기본적으로 이용되는 기본 Service Account Token과는 별개의 Token이다. 기본 Service Account Token과 다르게 **만료시간**과 **Audience**가 설정되어 있으며, 주기적으로 Token이 교체된다는 특징을 갖는다. JWT Token 형태를 갖추고 있다.
+* **AWS EKS OIDC Identity Provider** : 각 EKS Cluster 마다 가지고 있는 전용 OIDC Identity Provider를 나타낸다. AWS IAM에게 신뢰하는 OIDC Identity Provider로 등록(Federate)되어 있다.
+* **Private/Public Key** : AWS EKS OIDC Identity Provider와 Kubernetes API 서버는 동일한 Private/Public Key를 공유하여 이용한다.
+* **Pod Identity Webhook** : Kubernetes API Server의 Mutating Webhook을 나타낸다. Pod가 AWS IAM Role을 부여 받은 Service Account를 이용하는 경우, Pod 내부에서 Service Account에 부여된 AWS IAm Role을 이용할 수 있도록 Pod의 Spec을 변경하는 역활을 수행한다.
+* **Projected SA Token** : AWS IAM Role이 부여된 Service Account의 Token을 나타낸다. Kubernetes에서 기본적으로 이용되는 기본 Service Account Token과는 별개의 Token이다. 기본 Service Account Token과 다르게 **만료시간**과 **Audience**가 설정되어 있으며, 주기적으로 Token이 교체된다는 특징을 갖는다. JWT Token 형태를 갖추고 있다.
 
 설명의 예제는 [AWS Load Balancer Controller](https://docs.aws.amazon.com/eks/latest/userguide/aws-load-balancer-controller.html)를 이용한다. AWS ELK Cluster에서 동작하는 AWS Load Balancer Controller도 NLB (Network Load Balancer), ALB (Application Load Balancer) AWS Service에 접근하여 Load Balancer를 제어해야 하기 때문에, AWS Load Balancer Controller가 이용하는 Service Account에도 본 기능을 이용하여 AWS IAM Role이 부여되어 있기 때문이다.
 
@@ -123,9 +123,9 @@ AssumeRoleWithWebIdentity 동작을 수행하기 위해서는 OIDC Identity Prov
 
 Kubernetes API Server에서는 다음의 Parameter들을 통해서 JWT Token 생성에 필요한 설정을 수행한다.
 
-* service-account-signing-key-file : Service Account Token을 Sign할 때 이용하는 Key 파일의 경로를 지정한다. EKS Cluster의 OIDC Identity Provider의 Private Key가 지정되어 있을것으로 예상된다.
-* service-account-key-file : Sign된 Service Account Token을 검증할때 이용하는 Key 파일의 경로를 지정한다. EKS Cluster의 OIDC Identity Provider의 Public Key가 지정되어 있을것으로 예상된다.
-* service-account-issuer : Service Account Token의 발급자인 OIDC Identity Provider의 URL을 설정한다. EKS의 Kubernetes API Server에는 EKS Cluster의 OIDC Identity Provider URL이 설정되어 있을것으로 예상된다.
+* `service-account-signing-key-file` : Service Account Token을 Sign할 때 이용하는 Key 파일의 경로를 지정한다. EKS Cluster의 OIDC Identity Provider의 Private Key가 지정되어 있을것으로 예상된다.
+* `service-account-key-file` : Sign된 Service Account Token을 검증할때 이용하는 Key 파일의 경로를 지정한다. EKS Cluster의 OIDC Identity Provider의 Public Key가 지정되어 있을것으로 예상된다.
+* `service-account-issuer` : Service Account Token의 발급자인 OIDC Identity Provider의 URL을 설정한다. EKS의 Kubernetes API Server에는 EKS Cluster의 OIDC Identity Provider URL이 설정되어 있을것으로 예상된다.
 
 ```json {caption="[Text 4] Projected SA Token", linenos=table}
 {

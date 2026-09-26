@@ -34,9 +34,9 @@ def create_prefix_sum(nums: List[int]) -> List[int]:
     return nums
 ```
 * Example
-  * Original Array : `[1, 2, 3, 4, 5]`
-  * Prefix Sum Array : `[1, 3, 6, 10, 15]`
-  * Sum of Subarray : `sum(i, j) = prefix_sum[j] - prefix_sum[i - 1]`
+  * **Original Array** : `[1, 2, 3, 4, 5]`
+  * **Prefix Sum Array** : `[1, 3, 6, 10, 15]`
+  * **Sum of Subarray** : `sum(i, j) = prefix_sum[j] - prefix_sum[i - 1]`
 * Example Problems
   * [LeetCode / Range Sum Query - Immutable](../../coding-test/leetcode-range-sum-query-immutable/)
 

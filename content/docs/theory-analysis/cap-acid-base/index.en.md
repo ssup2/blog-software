@@ -6,7 +6,7 @@ Organizes CAP, ACID, BASE theories.
 
 ## 1. CAP
 
-CAP theorem means the theory that distributed systems cannot satisfy all three properties: Consistency, Availability, and Partition-tolerance.
+**CAP theorem** means the theory that distributed systems cannot satisfy all three properties: Consistency, Availability, and Partition-tolerance.
 
 * **Consistency** : Refers to the property that the same response must be obtainable from multiple Nodes that make up a distributed system.
 * **Availability** : Refers to the property that a distributed system must operate even if a failure occurs in a specific Node that makes up the distributed system.

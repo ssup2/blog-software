@@ -5,11 +5,12 @@ title: Kubernetes MetalLB Installation / Ubuntu 18.04 Environment
 ## 1. Installation Environment
 
 The installation environment is as follows.
+
 * Kubernetes 1.12
-  * Network Addon : using cilium
+  * **Network Addon** : using cilium
 * Helm
-  * Client : v2.13.1
-  * Server : v2.13.1
+  * **Client** : v2.13.1
+  * **Server** : v2.13.1
 * MetalLB 0.7.3
 
 ## 2. Network Configuration
@@ -17,8 +18,9 @@ The installation environment is as follows.
 {{< figure caption="[Figure 1] Kubernetes Network" src="images/kubernetes-network.png" width="900px" >}}
 
 The Network is as follows.
-* Node Network : 10.0.0.0/24
-* LoadBalancer Service IP : 10.0.0.200 ~ 10.0.0.220
+
+* **Node Network** : 10.0.0.0/24
+* **LoadBalancer Service IP** : 10.0.0.200 ~ 10.0.0.220
 
 ## 3. MetalLB Installation
 

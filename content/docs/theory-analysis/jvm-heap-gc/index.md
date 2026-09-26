@@ -6,7 +6,7 @@ title: JVM Heap, GC (Garbage Collection)
 
 {{< figure caption="[Figure 1] JVM Heap" src="images/jvm-heap.png" width="500px" >}}
 
-JVM Heap은 주로 new 문법으로 할당된 Object(Instance)들이 위치하는 Memory 영역이다. JVM Heap은 그게 Young Generation, Old Generation, Permanment 3가지 영역으로 나누어진다. Young Generation은 생성된지 오래 되지 않은 Object들이 위치하는 영역이고, Old Generation은 생성된후 여러번의 GC 동작 후에도 살아남아 존재하는 Object들이 위치하는 영역이다. Permanent 영역은 Static Object, String Object, Class Meta, Method Meta, JIT Meta 정보 등이 저장되는 공간이다. Permanent 영역은 GC의 영역이 아니다. 또한 Java8 Version에서는 Permanent 영역이 존재하지 않기 때문에 본 글에서는 상세히 다루지 않는다.
+**JVM Heap**은 주로 new 문법으로 할당된 Object(Instance)들이 위치하는 Memory 영역이다. JVM Heap은 그게 Young Generation, Old Generation, Permanment 3가지 영역으로 나누어진다. Young Generation은 생성된지 오래 되지 않은 Object들이 위치하는 영역이고, Old Generation은 생성된후 여러번의 GC 동작 후에도 살아남아 존재하는 Object들이 위치하는 영역이다. Permanent 영역은 Static Object, String Object, Class Meta, Method Meta, JIT Meta 정보 등이 저장되는 공간이다. Permanent 영역은 GC의 영역이 아니다. 또한 Java8 Version에서는 Permanent 영역이 존재하지 않기 때문에 본 글에서는 상세히 다루지 않는다.
 
 {{< figure caption="[Figure 2] JVM Heap Option" src="images/jvm-heap-option.png" width="600px" >}}
 

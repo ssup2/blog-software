@@ -4,7 +4,7 @@ title: Istio Sidecar Object
 
 ## 1. Istio Sidecar Object
 
-The Sidecar Object provided by Istio is used to finely control Inbound and Outbound Traffic settings of Istio's Sidecar Proxy. Generally, it is used to limit Outbound communication by restricting endpoints managed by the Sidecar Proxy, or to reduce the load on istiod by reducing the number of endpoints.
+The **Sidecar Object** provided by Istio is used to finely control Inbound and Outbound Traffic settings of Istio's Sidecar Proxy. Generally, it is used to limit Outbound communication by restricting endpoints managed by the Sidecar Proxy, or to reduce the load on istiod by reducing the number of endpoints.
 
 ### 1.1. Sidecar Object Test Environment
 

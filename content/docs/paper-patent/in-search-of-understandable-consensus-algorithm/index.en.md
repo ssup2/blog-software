@@ -10,9 +10,9 @@ This paper explains the Raft Algorithm used to achieve data consensus in distrib
 
 Consensus algorithms generally operate based on Replicated State Machine Architecture. Replicated State Machine Architecture literally means an architecture composed of multiple servers including state machines with the same state. Each server in Replicated State Machine Architecture consists of the following components.
 
-* Consensus Module : Communicates with other servers' Consensus Modules to understand the state of other servers and achieve consensus. It also receives client commands (requests), records commands in logs, reflects them in state machines, and propagates them to other servers' Consensus Modules.
-* State Machine : Performs the role of a storage that stores the current state of the server.
-* Log : A space that records client commands applied by the Consensus Module to the State Machine in the order they were applied. In other words, the history of the State Machine can be understood through logs. The Consensus Module achieves consensus based on command information stored in logs. One command information is stored in one entry in the log.
+* **Consensus Module** : Communicates with other servers' Consensus Modules to understand the state of other servers and achieve consensus. It also receives client commands (requests), records commands in logs, reflects them in state machines, and propagates them to other servers' Consensus Modules.
+* **State Machine** : Performs the role of a storage that stores the current state of the server.
+* **Log** : A space that records client commands applied by the Consensus Module to the State Machine in the order they were applied. In other words, the history of the State Machine can be understood through logs. The Consensus Module achieves consensus based on command information stored in logs. One command information is stored in one entry in the log.
 
 ### 3. Consensus Algorithm Characteristics
 
@@ -26,19 +26,19 @@ Consensus algorithms must satisfy the following characteristics.
 
 The Raft Algorithm was born to solve the problems of the Paxos Algorithm, which is well-known as an existing consensus algorithm. The Raft Algorithm has characteristics that are simpler, more intuitive, and easier to implement than the Paxos Algorithm. The Raft Algorithm also operates based on Replicated State Machine Architecture and satisfies the characteristics of consensus algorithms. The Raft Algorithm guarantees to satisfy the following 5 characteristics.
 
-* Election Safety : Can safely elect one leader during one term.
-* Leader Append-Only : The leader never overwrites or deletes entries (commands) in the log. The leader only adds entries to the next index in the log.
-* Log Matching : If the index and term of the last entry of two logs are the same, the two logs are identical.
-* Leader Completeness : Committed entries exist in the changed leader even if the leader changes later.
-* State Machine Safety : If a specific index entry is reflected in the state machine on one server, it is reflected in the state machine only when other servers have the same entry at the same index. If entries with different contents exist at the same index, those entries are not reflected.
+* **Election Safety** : Can safely elect one leader during one term.
+* **Leader Append-Only** : The leader never overwrites or deletes entries (commands) in the log. The leader only adds entries to the next index in the log.
+* **Log Matching** : If the index and term of the last entry of two logs are the same, the two logs are identical.
+* **Leader Completeness** : Committed entries exist in the changed leader even if the leader changes later.
+* **State Machine Safety** : If a specific index entry is reflected in the state machine on one server, it is reflected in the state machine only when other servers have the same entry at the same index. If entries with different contents exist at the same index, those entries are not reflected.
 
 ### 4.1. Leader Election
 
 In the Raft Algorithm, each server has three states: Leader, Follower, and Candidate. The Raft Algorithm achieves consensus centered on the leader. Because of this leader-based approach, the Raft Algorithm has the advantage of being easier to understand and implement than other consensus algorithms. The explanation of the three states is as follows.
 
-* Leader : Performs a central role in achieving consensus between servers.
-* Follower : Stores entries in logs and states in state machines according to the leader's commands.
-* Candidate : Refers to the state of receiving votes from other servers to become a leader.
+* **Leader** : Performs a central role in achieving consensus between servers.
+* **Follower** : Stores entries in logs and states in state machines according to the leader's commands.
+* **Candidate** : Refers to the state of receiving votes from other servers to become a leader.
 
 All servers can become leaders, followers, or candidates depending on the situation. Therefore, the Raft Algorithm provides a method for electing leaders. The process of a follower becoming a leader is as follows.
 

@@ -62,9 +62,9 @@ Recently, Kubernetes recommends using CSI Controller, which performs the role of
 
 Accordingly, AWS EKS also provides CSI Controller. It provides EBS CSI Storage Class, and CSI Controller must be used to use EFS and FSx. From a Kubernetes perspective, the characteristics of EBS, EFS, and FSx Storage are as follows.
 
-* EBS : EBS operates in **ReadWriteOnce** Mode. EBS is attached to the EC2 Instance where the Pod is running, and the attached EBS is formatted and mounted inside the EC2 Instance by CSI Controller. The mounted EBS is exposed to the Pod through Bind Mount.
-* EFS : EFS operates in **ReadWriteMany** Mode. EFS is mounted to EC2 Instance through NFSv4 Protocol, and the mounted EFS is exposed to the Pod through Bind Mount.
-* FSx : FSx operates in **ReadWriteMany** Mode. FSx is characterized by higher performance compared to EFS.
+* **EBS** : EBS operates in **ReadWriteOnce** Mode. EBS is attached to the EC2 Instance where the Pod is running, and the attached EBS is formatted and mounted inside the EC2 Instance by CSI Controller. The mounted EBS is exposed to the Pod through Bind Mount.
+* **EFS** : EFS operates in **ReadWriteMany** Mode. EFS is mounted to EC2 Instance through NFSv4 Protocol, and the mounted EFS is exposed to the Pod through Bind Mount.
+* **FSx** : FSx operates in **ReadWriteMany** Mode. FSx is characterized by higher performance compared to EFS.
 
 ## 2. References
 

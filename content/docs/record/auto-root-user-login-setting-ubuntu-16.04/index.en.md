@@ -5,6 +5,7 @@ title: Auto Root User Login Setting / Ubuntu 16.04 Environment
 ## 1. Setting Environment
 
 The setting environment is as follows.
+
 * Ubuntu 16.04 LTS 64bit, root user
 
 ## 2. root Password Setting

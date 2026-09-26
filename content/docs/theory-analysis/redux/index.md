@@ -8,7 +8,7 @@ JavaScript에서 State 정보를 저장하는 용도로 이용되는 Redux를 �
 
 {{< figure caption="[Figure 1] Redux Architecture" src="images/redux-architecture.png" width="650px" >}}
 
-Redux는 JavaScript에서 State 정보를 저장하는 State 저장소 역할을 수행한다. Redux는 주로 React의 Component들의 State 정보를 저장하는 용도로 이용된다. [Figure 1]은 Redux의 Architecture를 나타내고 있다. Store는 Redux에서 State 정보를 저장하는 State 저장소를 나타내며 Redux의 핵심 구성요소이다. Store는 State, Reducer, Middleware로 구성되어 있다.
+**Redux**는 JavaScript에서 State 정보를 저장하는 State 저장소 역할을 수행한다. Redux는 주로 React의 Component들의 State 정보를 저장하는 용도로 이용된다. [Figure 1]은 Redux의 Architecture를 나타내고 있다. Store는 Redux에서 State 정보를 저장하는 State 저장소를 나타내며 Redux의 핵심 구성요소이다. Store는 State, Reducer, Middleware로 구성되어 있다.
 
 ```text {caption="[Text 1] State Example", linenos=table}
 {

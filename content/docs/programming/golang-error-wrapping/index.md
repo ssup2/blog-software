@@ -59,7 +59,7 @@ $ go run main.go
 error: outerError
 ```
 
-Golang의 Error Wrapping은 의미 그대로 Error를 다른 Error로 감싸는 기법이다. Error Wrapping을 통해서 내부 함수가 반환하는 Error를 외부 함수에서도 판별할 수 있게 된다. [Code 1]과 [shell 1]은 Golang에서 Error Wrapping 없이 Error를 처리하는 일반적인 방법을 나타내고 있다. `main()` 함수에서는 `outerFunc()` 함수를 호출하면 `outerFunc()`, `middleFunc()`, `innerFunc()` 함수 순서대로 호출이 발생하고, `innerFunc()` 함수에서 Error를 Return하기 때문에, `outerFunc()` 함수도 Error를 반환 한다.
+Golang의 **Error Wrapping**은 의미 그대로 Error를 다른 Error로 감싸는 기법이다. Error Wrapping을 통해서 내부 함수가 반환하는 Error를 외부 함수에서도 판별할 수 있게 된다. [Code 1]과 [shell 1]은 Golang에서 Error Wrapping 없이 Error를 처리하는 일반적인 방법을 나타내고 있다. `main()` 함수에서는 `outerFunc()` 함수를 호출하면 `outerFunc()`, `middleFunc()`, `innerFunc()` 함수 순서대로 호출이 발생하고, `innerFunc()` 함수에서 Error를 Return하기 때문에, `outerFunc()` 함수도 Error를 반환 한다.
 
 문제는 `main()` 함수에서는 `outerFunc()` 함수가 반환하는 "outerErr" Error만 확인이 가능할 뿐, `middleFunc()` 또는 `innerFunc()` 함수가 반환하는 Error의 내용을 확인할 수가 없다. 이와 같은 문제를 해결하기 위해서 가장 떠오르기 쉬운 방법은, 내부 함수가 반환하는 Error에 따라서 외부 함수의 Error도 달라지게 구현하는 방법이다. 문제는 이렇게 구현하면 외부 함수의 Error 처리 부분이 복잡해 진다. 이러한 문제는 Error Wrapping 기법을 통해서 쉽게 해결이 가능하다.
 

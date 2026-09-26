@@ -14,9 +14,9 @@ NVIDIA GPU을 Container에게 할당하여 Container가 NVIDIA GPU를 이용할 
 
 Container A는 0,1번째 NVIDIA GPU, Container B는 0,2,3번째 NVIDIA GPU, Container C는 3번째 NVIDIA GPU를 이용하고 있다. 0,1,3번째 GPU는 Shared GPU로 이용되고 있으며, 2번째 GPU는 Dedicated GPU로 이용되고 있다. 각 Container는 Docker 기준으로 다음의 명령어를 통해서 생성할 수 있다. 단일 GPU 번호 또는 다수의 GPU 번호를 `,`로 구분하여 `--gpu` Option에 전달하면 된다.
 
-* Container A : `docker run --gpu 0,1 --name a nvidia/cuda:12.4-base-ubuntu22.04`
-* Container B : `docker run --gpu 0,2,3 --name b nvidia/cuda:12.4-base-ubuntu22.04`
-* Container C : `docker run --gpu 3 --name c nvidia/cuda:12.4-base-ubuntu22.04`
+* **Container A** : `docker run --gpu 0,1 --name a nvidia/cuda:12.4-base-ubuntu22.04`
+* **Container B** : `docker run --gpu 0,2,3 --name b nvidia/cuda:12.4-base-ubuntu22.04`
+* **Container C** : `docker run --gpu 3 --name c nvidia/cuda:12.4-base-ubuntu22.04`
 
 `--gpu all` 설정을 수행하면 Container는 모든 NVIDIA GPU를 이용할 수 있다. Shared GPU는 NVIDIA GPU에서 제공하는 **Time-Slicing** 또는 **MPS (Multi Process Service)** 기능을 활용하여 다수의 Container가 하나의 NVIDIA GPU를 공유하여 이용하게 된다.
 
@@ -61,7 +61,7 @@ mode = "legacy | cdi | auto"
 spec-dirs = ["/etc/cdi", "/var/run/cdi"]
 ```
 
-`nvidia-container-runtime` CLI는 **OCI Runtime Spec의 Prestart Hook** 기능을 활용하는 Legacy Mode과 **CDI** (Container Device Interface)를 활용하는 두 가지 Mode가 존재한다. [File 1]은 Mode를 설정하기 위한 `nvidia-container-runtime`의 설정 파일을 나타내고 있다. `mode`에 `legacy`, `cdi`, `auto` 중 하나를 설정할 수 있다. `legacy`는 OCI Runtime Spec의 Prestart Hook 기능을 활용하는 기존의 방법이고, `cdi`는 **CDI (Container Device Interface)**를 활용하는 최신 방법이다. `auto`는 시스템 설정에 따라서 `legacy` 또는 `cdi` 중 하나를 자동으로 선택하는 방법이며, `spec-dirs`에는 CDI Spec 파일이 존재하면 CDI Mode를 사용하고, 존재하지 않으면 Legacy Mode를 사용한다.
+`nvidia-container-runtime` CLI는 **OCI Runtime Spec의 Prestart Hook** 기능을 활용하는 Legacy Mode과 **CDI** (Container Device Interface)를 활용하는 두 가지 Mode가 존재한다. [File 1]은 Mode를 설정하기 위한 `nvidia-container-runtime`의 설정 파일을 나타내고 있다. `mode`에 `legacy`, `cdi`, `auto` 중 하나를 설정할 수 있다. `legacy`는 OCI Runtime Spec의 Prestart Hook 기능을 활용하는 기존의 방법이고, `cdi`는 **CDI** (Container Device Interface)를 활용하는 최신 방법이다. `auto`는 시스템 설정에 따라서 `legacy` 또는 `cdi` 중 하나를 자동으로 선택하는 방법이며, `spec-dirs`에는 CDI Spec 파일이 존재하면 CDI Mode를 사용하고, 존재하지 않으면 Legacy Mode를 사용한다.
 
 #### 1.2.1. Legacy Mode의 GPU 할당 과정
 

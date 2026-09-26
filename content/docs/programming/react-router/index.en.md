@@ -52,7 +52,7 @@ const Blog = () => {
 // Blog
 ```
 
-React Router is a React Component that helps implement React Apps as SPA (Single Page Application). [Code 1-4] shows a simple React Router Example. When moving to the `/` Path, `Home.js` is Rendered, and when moving to the `/blog` Path, `Blog.js` is Rendered. Important React Components are the `BrowserRouter` Component and `Route` Component. The `BrowserRouter` Component is a React Component that actually performs Routing according to Path, and the `Route` Component performs the role of registering Paths and related React Components for Routing in BrowserRouter.
+**React Router** is a React Component that helps implement React Apps as SPA (Single Page Application). [Code 1-4] shows a simple React Router Example. When moving to the `/` Path, `Home.js` is Rendered, and when moving to the `/blog` Path, `Blog.js` is Rendered. Important React Components are the `BrowserRouter` Component and `Route` Component. The `BrowserRouter` Component is a React Component that actually performs Routing according to Path, and the `Route` Component performs the role of registering Paths and related React Components for Routing in BrowserRouter.
 
 In [Code 1], the `BrowserRouter` Component is declared. In [Code 2], Routing Paths and related React Components are registered through the `Route` Component. The Home Component is registered for the `/` Path, and the Blog Component is registered for the `/blog` Path. When registering the Home Component for the `/` Path, you can see the **exact** syntax, which means that the Home Component is Rendered (Routed) only when it exactly matches the `/` Path. If exact is not present, both the Home Component and Blog Component are Rendered when moving to the `/blog` Path.
 

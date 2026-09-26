@@ -6,11 +6,11 @@ Thread 사이의 동기화(Synchronization)를 위한 Monitor 기법을 정리�
 
 ## 1. Monitor
 
-Monitor는 Thread 사이의 동기화를 맞추기 위한 High Level 동기화 기법이다. Monitor는 **하나의 Lock**과 **여러개의 Condition Variable들**로 구성 되어있다. Monitor는 Lock을 이용하여 여러개의 쓰레드가 동시에 Critical Section에 접근하지 못하도록 제어역할을 수행한다. 또한 Condtion Variable들을 이용하여 대기하고 있는 Thread들을 깨워주는 역할도 수행한다.
+**Monitor**는 Thread 사이의 동기화를 맞추기 위한 High Level 동기화 기법이다. Monitor는 **하나의 Lock**과 **여러개의 Condition Variable들**로 구성 되어있다. Monitor는 Lock을 이용하여 여러개의 쓰레드가 동시에 Critical Section에 접근하지 못하도록 제어역할을 수행한다. 또한 Condtion Variable들을 이용하여 대기하고 있는 Thread들을 깨워주는 역할도 수행한다.
 
 ## 2. Java Monitor
 
-Java의 모든 Instance(Object)는 하나의 Monitor를 소유하고 있다. 각 Monitor는 **하나의 Lock과 하나의 Condition Variable (Wait Queue)**만을 이용한다. 따라서 Java의 모든 Instance들은 내부적으로 하나의 Lock과 하나의 Condition Variable을 갖게된다.
+Java의 모든 Instance(Object)는 하나의 Monitor를 소유하고 있다. 각 Monitor는 **하나의 Lock과 하나의 Condition Variable** (Wait Queue)만을 이용한다. 따라서 Java의 모든 Instance들은 내부적으로 하나의 Lock과 하나의 Condition Variable을 갖게된다.
 
 ### 2.1. synchronized
 

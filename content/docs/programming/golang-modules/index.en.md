@@ -6,7 +6,7 @@ This document analyzes and understands Module, a technique for managing Package 
 
 ## 1. Golang Module
 
-A Module is a collection of Packages. The functionality to manage such Modules has been included since **Golang 1.11**. Golang manages Package Dependencies using Module management functionality. With Golang Modules, Golang developers no longer need to place Golang Code in the $GOPATH/src Directory. Before Golang 1.11, separate tools like vgo and dep were used to manage Package Dependencies.
+A **Module** is a collection of Packages. The functionality to manage such Modules has been included since **Golang 1.11**. Golang manages Package Dependencies using Module management functionality. With Golang Modules, Golang developers no longer need to place Golang Code in the $GOPATH/src Directory. Before Golang 1.11, separate tools like vgo and dep were used to manage Package Dependencies.
 
 ### 1.1. Module Creation
 

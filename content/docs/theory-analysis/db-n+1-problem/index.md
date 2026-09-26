@@ -28,7 +28,7 @@ public class Student{
 }
 ```
 
-N+1 문제는 N개의 Record(Data) 조회시 App 개발자는 한번의 SQL Query가 발생할 것으로 예상하지만, 실제로는 N+1 Query가 발생하여 App 성능에 영향을 주는 문제를 의미한다. 일반적으로 App에서 직접 SQL을 이용하는 경우보다 App에서 ORM(Object Relational Mapping)과 같은 기법을 통해서 SQL Query을 추상화하여 이용하는 경우에 N+1 문제가 발생한다.
+**N+1 문제**는 N개의 Record(Data) 조회시 App 개발자는 한번의 SQL Query가 발생할 것으로 예상하지만, 실제로는 N+1 Query가 발생하여 App 성능에 영향을 주는 문제를 의미한다. 일반적으로 App에서 직접 SQL을 이용하는 경우보다 App에서 ORM(Object Relational Mapping)과 같은 기법을 통해서 SQL Query을 추상화하여 이용하는 경우에 N+1 문제가 발생한다.
 
 [Code 1]은 N+1 문제가 발생할 수 있는 Java Spring Framework (JPA)에서의 Entity 예제를 나타내고 있다. School Entity와 Student Entity가 1:N 관계를 갖고 있는것을 확인할 수 있다. 만약 School Record가 2000개인 상태에서 School Entity를 대상으로 `findAll()`을 호출하는 경우 모든 School Record 조회를 위한 SELECT SQL Query 한번과 각 School에 소속되어 있는 Student 조회를 위한 2000번의 SELECT SQL Query가 수행된다. 총 N+1번의 SQL Query가 수행되는 것을 확인 할 수 있다. 이러한 N+1 문제를 해결하는 가장 대표적인 방법은 **Table Join**을 이용하는 방법이 있다. Java Spring Framework에서는 JPQL을 이용하여 Join을 명시할 수 있다.
 

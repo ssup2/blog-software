@@ -8,7 +8,7 @@ Analyze Linux's Virtual Network Devices macvlan and macvtap.
 
 {{< figure caption="[Figure 1] macvlan Components" src="images/macvlan-component.png" width="400px" >}}
 
-macvlan is a Network Device Driver that allows one Network Interface to be separated into **multiple virtual Network Interfaces** for use. [Figure 1] briefly shows the components of macvlan. macvlan creates multiple Child Interfaces using a Parent Interface. Child Interfaces can each have separate **MAC Addresses** and **macvlan Modes**. Modes can be set when creating Child Interfaces, and Packet transmission policies of macvlan differ according to Mode. Communication between Child Interfaces is possible depending on Mode, but one of macvlan's characteristics is that Parent Interface and Child Interface absolutely cannot communicate with each other regardless of Mode.
+**macvlan** is a Network Device Driver that allows one Network Interface to be separated into **multiple virtual Network Interfaces** for use. [Figure 1] briefly shows the components of macvlan. macvlan creates multiple Child Interfaces using a Parent Interface. Child Interfaces can each have separate **MAC Addresses** and **macvlan Modes**. Modes can be set when creating Child Interfaces, and Packet transmission policies of macvlan differ according to Mode. Communication between Child Interfaces is possible depending on Mode, but one of macvlan's characteristics is that Parent Interface and Child Interface absolutely cannot communicate with each other regardless of Mode.
 
 {{< figure caption="[Figure 2] macvlan Example" src="images/macvlan-example.png" width="600px" >}}
 

@@ -8,7 +8,7 @@ Hadoop과 Hadoop을 구성하는 HDFS, YARN, MapReduce Framework를 분석한다
 
 {{< figure caption="[Figure 1] Hadoop" src="images/hadoop.png" width="400px" >}}
 
-Hadoop은 Compute Cluster에 분포된 대용량 Data를 동시에 쉽게 처리 할 수 있도록 도와주는 Framework이다. Hadoop V2에서는 [Figure 1]과 같이 HDFS, YARN, MapReduce 3개의 Layer로 분리되어 있다.
+**Hadoop**은 Compute Cluster에 분포된 대용량 Data를 동시에 쉽게 처리 할 수 있도록 도와주는 Framework이다. Hadoop V2에서는 [Figure 1]과 같이 HDFS, YARN, MapReduce 3개의 Layer로 분리되어 있다.
 
 HDFS는 Data Redundancy, Data Reliable을 보장하는 Distributed Filesystem이다. HDFS을 통해서 대용량 Data는 Cluster안에서 안전하게 저장된다. YARN은 MapReduce같은 App이 어느 Node에서 수행될지 결정하는 Job Scheduling 동작을 수행하고, Cluster를 구성하는 각 Node의 Computing Resource를 관리하는 Daemon이다. MapReduce는 HDFS, YARN 위에서 많은 Data를 쉽게 처리할 수 있도록 도와주는 App Framework이다.
 
@@ -52,7 +52,7 @@ HDFS은 현재 대부분의 Filesystem에서 이용하는 **Tree** 구조를 이
 
 {{< figure caption="[Figure 3] YARN Architecture" src="images/yarn-achitecture.png" width="600px" >}}
 
-YARN은 MapReduce같은 App이 어느 Node에서 수행될지 결정하는 Job Scheduling 동작을 수행하고, Cluster를 구성하는 각 Node의 Computing Resource를 관리하는 Daemon이다. YARN도 Master/Slave Architecture를 가지고 있으며, Master 역할을 수행하는 **RM (Resource Manager)**과 Slave 역할을 수행하는 **NM (Node Manager)**로 이루어져 있다. RM은 NM를 통해서 **Container**라고 명칭된 Compute Resource (JVM)을 각 Node에 할당한다. Container중 일부 Container는 MapReduce같은 App을 전반적으로 관리하는 **AM (Application Master)**를 수행한다.
+YARN은 MapReduce같은 App이 어느 Node에서 수행될지 결정하는 Job Scheduling 동작을 수행하고, Cluster를 구성하는 각 Node의 Computing Resource를 관리하는 Daemon이다. YARN도 Master/Slave Architecture를 가지고 있으며, Master 역할을 수행하는 **RM** (Resource Manager)과 Slave 역할을 수행하는 **NM** (Node Manager)로 이루어져 있다. RM은 NM를 통해서 **Container**라고 명칭된 Compute Resource (JVM)을 각 Node에 할당한다. Container중 일부 Container는 MapReduce같은 App을 전반적으로 관리하는 **AM** (Application Master)를 수행한다.
 
 RM은 Scehduler와 Application Manager로 구성되어 있다. Scheduler는 Client로부터 전달받은 App을 관리하는 AM을 실행할 Container를 Node에 할당하거나, AM이 요청한 Container를 할당한다. Application Manager는 Client로부터 전달받은 Job을 수락하거나 Scehduler를 도와 AM Container의 실행을 도와준다. 또한 AM Container를 Monitoring하며, AM Container가 죽었을 경우 AM Container를 다시 실행하는 역할을 수행한다. NM은 RM이 동작하는 Node를 제외한 나머지 Node에서 동작하며 Node들의 상태를 RM에게 주기적으로 보고한다. 또한 RM이나 AM의 요청에 의해서 Node에 Container를 생성하거나 삭제한다.
 

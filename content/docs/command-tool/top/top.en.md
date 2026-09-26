@@ -83,10 +83,10 @@ The lower part of [Shell 1] outputs process information. Each column has the fol
 
 #### 1.1.4. Shortcuts
 
-* 1 : Outputs usage per CPU core
-* SHIFT + M : Sorts by memory usage
-* SHIFT + P : Sorts by CPU usage
-* SHIFT + T : Sorts by runtime
+* `1` : Outputs usage per CPU core
+* `SHIFT + M` : Sorts by memory usage
+* `SHIFT + P` : Sorts by CPU usage
+* `SHIFT + T` : Sorts by runtime
 
 ## 2. References
 

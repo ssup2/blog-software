@@ -10,29 +10,29 @@ Organize missing content based on the following organized content
 
 ## 2. Collection
 
-* RealTime : Real-time data collection
+* **RealTime** : Real-time data collection
   * Kinesis Data Streams (KDS)
   * Simple Queue Service (SQS)
   * Internet of Things (IoT)
 
-* Near-real Time : Near-real-time data collection
+* **Near-real Time** : Near-real-time data collection
   * Kinesis Data Firehose (KDF)
   * Database Migration Service (DMS)
 
-* Batch : Batch data collection
+* **Batch** : Batch data collection
   * Snowball
   * Data Pipeline
 
 ### 2.1. Kinesis Data Streams
 
 * Composed of multiple shards
-* Retention : 1 ~ 365 Days
+* **Retention** : 1 ~ 365 Days
 * Stored data cannot be deleted
 * Producer
 * Record
   * Data sent by producer
-  * Partition Key : Determines which shard the record is delivered to
-  * Data Blob : Data storage
+  * **Partition Key** : Determines which shard the record is delivered to
+  * **Data Blob** : Data storage
 * Consumer
 * Capacity Mode
   * Provisioned Mode
@@ -40,7 +40,7 @@ Organize missing content based on the following organized content
     * Cost per shard
   * On-demand Mode
     * Automatically scales based on traffic volume
-    * Default performance : 4 MB/sec, 4000 msg/sec
+    * **Default performance** : 4 MB/sec, 4000 msg/sec
     * Cost based on shard count and traffic volume
 * Security
   * IAM-based authentication/authorization
@@ -58,8 +58,8 @@ Organize missing content based on the following organized content
     * Need to check if sending more data or if hot shard is occurring
     * Resolve by retrying with backoff, increasing shards, checking partition key
 * API
-  * Single : PutRecord
-  * Multiple : PutRecords
+  * **Single** : PutRecord
+  * **Multiple** : PutRecords
 * Kinesis Producer Library (KPL)
   * Supports C++/Java
   * Retry logic support
@@ -81,7 +81,7 @@ Organize missing content based on the following organized content
 
 * Ex) Application, AWS Lambda, Kinesis Data Firehose, Kinesis Data Analytics
 * Performance
-  * Default : 2 MB/sec for all consumers
+  * **Default** : 2 MB/sec for all consumers
   * With Enhanced Fan Out : 2 MB/sec per consumer
 * API
   * GetRecords
@@ -99,7 +99,7 @@ Organize missing content based on the following organized content
 * Kinesis Connector Library
   * Delivers data to other AWS services
   * Needs to run on EC2 instance
-  * Deprecated : Replaced by Kinesis Firehose
+  * **Deprecated** : Replaced by Kinesis Firehose
 * Lambda
   * De-aggregated and delivered to Lambda function
   * Can specify batch size
@@ -124,9 +124,9 @@ Organize missing content based on the following organized content
 ### 2.2. Kinesis Data Firehose
 
 * Loads data to AWS services and 3rd party applications
-* Fully Managed Service : Supports auto-scaling
-* Near Real Time : Minimum 60 second delay occurs
-* Compression support : GZIP, ZIP, SNAPPY
+* **Fully Managed Service** : Supports auto-scaling
+* **Near Real Time** : Minimum 60 second delay occurs
+* **Compression support** : GZIP, ZIP, SNAPPY
 * Producer
   * SDK KPL, Kinesis Agent, Kinesis Data Streams, Amazon CloudWatch, AWS IoT
   * Maximum 1MB per record
@@ -150,7 +150,7 @@ Organize missing content based on the following organized content
   * Can be created through user input or Glue Crawler
   * Can convert EMR Hive metastore to Glue Data Catalog
   * Can be provided as Hive metastore from EMR Hive
-* Glue Studio : Processes Glue jobs through visual interface
+* **Glue Studio** : Processes Glue jobs through visual interface
 * Glue Data Quality
   * Service for data quality evaluation and inspection
   * Defines rules using DQDL (Data Quality Definition Language)
@@ -331,10 +331,10 @@ Organize missing content based on the following organized content
 
 * Real-time data processing service
 * Components
-  * Input Stream : Stream where data enters
-  * Reference Table : Table referenced during data processing, can join with S3 data
-  * Output Stream : Stream that outputs processed data
-  * Error Stream : Stream that outputs data that occurred during data processing
+  * **Input Stream** : Stream where data enters
+  * **Reference Table** : Table referenced during data processing, can join with S3 data
+  * **Output Stream** : Stream that outputs processed data
+  * **Error Stream** : Stream that outputs data that occurred during data processing
 * with Lambda
   * Can specify Lambda as data destination
   * Modifies data and delivers to AWS services
@@ -346,9 +346,9 @@ Organize missing content based on the following organized content
     * Measures cost in KPU units
     * 1 KPU = 1 vCPU, 4 Memory
   * Components
-    * Flink Source : MSK, Kinesis Data Streams
+    * **Flink Source** : MSK, Kinesis Data Streams
     * Flink Datastream API
-    * Flink Sink : S3, Kinesis Datastream, Kinesis Data Firehose
+    * **Flink Sink** : S3, Kinesis Datastream, Kinesis Data Firehose
   * RANDOM_CUT_FOREST
     * SQL function that performs anomaly detection
 
@@ -364,13 +364,13 @@ Organize missing content based on the following organized content
   * Security analytics
   * Clickstream analytics
 * Concept
-  * Document : Search target, supports not only full-text but also JSON structure
-  * Types : Schema definition, not commonly used currently
+  * **Document** : Search target, supports not only full-text but also JSON structure
+  * **Types** : Schema definition, not commonly used currently
   * Indices
     * Composed of inverted index
     * Composed of multiple shards, performs distributed processing
-    * Primary Shard : Performs read/write
-    * Replica Shard : Can only perform reads, performs load balancing when multiple replicas are configured
+    * **Primary Shard** : Performs read/write
+    * **Replica Shard** : Can only perform reads, performs load balancing when multiple replicas are configured
 * Fully-managed (Not Serverless)
 * Performs scale in/out without downtime
 * Integration with various AWS services
@@ -380,8 +380,8 @@ Organize missing content based on the following organized content
   * CloudWatch, CloudTrail
   * Zone Awareness
 * Options
-  * Dedicated Master Node : Number and spec of nodes
-  * Domains : Means all information needed to run cluster (configuration information)
+  * **Dedicated Master Node** : Number and spec of nodes
+  * **Domains** : Means all information needed to run cluster (configuration information)
   * Provides S3-based snapshot functionality
   * Zone Awareness
 * Security
@@ -491,8 +491,8 @@ Organize missing content based on the following organized content
   * Compute Node
     * Can configure up to 128 compute nodes
     * Type
-      * Dense Storage : Type with HDD and low-cost large capacity storage
-      * Dense Compute : Type focused on compute performance
+      * **Dense Storage** : Type with HDD and low-cost large capacity storage
+      * **Dense Compute** : Type focused on compute performance
 * Spectrum
   * Directly accesses data in S3
   * Concurrency limit
@@ -512,23 +512,23 @@ Organize missing content based on the following organized content
   * New cluster is created and data is migrated when scaling (temporary downtime occurs)
 * Data Distribution Style
   * Determines how to distribute data to compute nodes
-  * Auto : Automatically distributes data based on data size
-  * Even : Automatically distributes data in round-robin fashion
-  * Key : Distributes data based on key and hashing
-  * All : Replicates data to all compute nodes
+  * `Auto` : Automatically distributes data based on data size
+  * `Even` : Automatically distributes data in round-robin fashion
+  * `Key` : Distributes data based on key and hashing
+  * `All` : Replicates data to all compute nodes
 * Sort Key
   * Stored sorted on disk according to sort key
-  * Compound : Combines multiple columns to use as sort key
-  * Interleaved : ??
+  * `Compound` : Combines multiple columns to use as sort key
+  * `Interleaved` : ??
 * Data Replication
   * COPY
     * Performs data replication from S3, EMR, DynamoDB remote hosts
     * Performs data replication in parallel
-  * UNLOAD : Performs replication of processed results to S3
-  * S3 Auto-copy : Automatically replicates to Redshift when data changes in S3
-  * Aurora zero-ETL Integration : Automatically replicates data from Aurora to Redshift
+  * `UNLOAD` : Performs replication of processed results to S3
+  * **S3 Auto-copy** : Automatically replicates to Redshift when data changes in S3
+  * **Aurora zero-ETL Integration** : Automatically replicates data from Aurora to Redshift
   * Redshift Ingestion
-  * DBLINK : Performs data replication by connecting to RDS
+  * `DBLINK` : Performs data replication by connecting to RDS
 * Integration with AWS Services
   * S3, DMS, EMR, EC2, Data Pipeline
 * WLM (Workload Management)
@@ -546,10 +546,10 @@ Organize missing content based on the following organized content
   * Applies to read-only queries and CREATE TABLE AS queries
   * Can set short criteria time
 * VACUUM
-  * VACUUM FULL :
-  * VACUUM DELETE ONLY :
-  * VACUUM SORT ONLY :
-  * VACUUM REINDEX :
+  * `VACUUM FULL` :
+  * `VACUUM DELETE ONLY` :
+  * `VACUUM SORT ONLY` :
+  * `VACUUM REINDEX` :
 * Resize
   * Elastic Resize
     * Can quickly add/remove nodes or change node type (DS2 to RA3)
@@ -582,7 +582,7 @@ Organize missing content based on the following organized content
 * Serverless
 * Data Source
   * Redshift, Aurora/RDS, Athena, OpenSearch, IoT Analytics, Files (Excel, CSV, TSV)
-* SPICE : In-memory engine used in QuickSight
+* **SPICE** : In-memory engine used in QuickSight
 * Specialized for ad-hoc queries
 * Security
   * Multi-factor auth

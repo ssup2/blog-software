@@ -8,15 +8,15 @@ title: Ceph Installation, Execution / Ubuntu 18.04, ODROID-H2 Cluster Environmen
 
 [Figure 1] shows the Ceph installation environment using ODROID-H2 Cluster. Since Ceph will not be used as File Storage and Object Storage, MDS (Meta Data Server) and radosgw are not installed. The main installation environment is as follows.
 
-* Node : Ubuntu 18.04
-  * ODROID-H2 : Node 01, 02, 03 - Monitor, OSD, Manager
-  * VM : Node 04 - Deploy
+* **Node** : Ubuntu 18.04
+  * **ODROID-H2** : Node 01, 02, 03 - Monitor, OSD, Manager
+  * **VM** : Node 04 - Deploy
 * Network
-  * NAT Network : 192.168.0.0/24
-  * Private Network : 10.0.0.0/24
+  * **NAT Network** : 192.168.0.0/24
+  * **Private Network** : 10.0.0.0/24
 * Storage
-  * /dev/mmcblk0 : Root Filesystem
-  * /dev/nvme0n1 : Ceph
+  * `/dev/mmcblk0` : Root Filesystem
+  * `/dev/nvme0n1` : Ceph
 
 ## 2. Package Installation
 
@@ -41,7 +41,8 @@ passwd: password updated successfully
 ```
 
 Create a cephnode User.
-* Password : cephnode
+
+* **Password** : cephnode
 
 ### 2.2. Deploy Node
 
@@ -77,7 +78,8 @@ passwd: password updated successfully
 ```
 
 Create a cephdeploy User.
-* Password : cephdeploy
+
+* **Password** : cephdeploy
 
 ```shell
 (Deploy)$ login cephdeploy
@@ -94,6 +96,7 @@ Enter same passphrase again:
 ```
 
 Generate and copy SSH Keys.
+
 * Keep passphrases Empty.
 
 ```text {caption="[Text 2] Deploy Node - /home/cephdeploy/.ssh/config", linenos=table}

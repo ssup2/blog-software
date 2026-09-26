@@ -6,7 +6,7 @@ Golang의 Closure 기법을 분석한다.
 
 ## 1. Golang Closure
 
-Golang에서도 Javascript와 동일하게 Closure 기능을 제공한다. Closure는 함수를 객체화하여 **함수가 상태를 갖게하는 기법**을 의미한다.
+Golang에서도 Javascript와 동일하게 Closure 기능을 제공한다. **Closure**는 함수를 객체화하여 **함수가 상태를 갖게하는 기법**을 의미한다.
 
 ```golang {caption="[Code 1] Golang Closure", linenos=table}
 package main

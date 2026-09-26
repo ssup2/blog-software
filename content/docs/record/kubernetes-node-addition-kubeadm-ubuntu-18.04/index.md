@@ -5,13 +5,14 @@ title: Kubernetes Node 추가 / kubeadm 이용 / Ubuntu 18.04 환경
 ## 1. 설치 환경
 
 설치 환경은 다음과 같다.
+
 * HyperV
-  * Master Node : Ubuntu Desktop 18.04.1 64bit : 1대
-  * Worker Node : Ubuntu Server 18.04.1 64bit : 2대
-* Docker : 19.03.1
+  * **Master Node** : Ubuntu Desktop 18.04.1 64bit : 1대
+  * **Worker Node** : Ubuntu Server 18.04.1 64bit : 2대
+* **Docker** : 19.03.1
 * Kubernetes 1.15.3
-  * Network Plugin : calico or flannel or cilium 이용
-  * Dashboard Addon : Dashboard 이용
+  * **Network Plugin** : calico or flannel or cilium 이용
+  * **Dashboard Addon** : Dashboard 이용
 * kubeadm 1.15.3
   * VM을 이용하여 Cluster 환경을 구축하는 경우 kubeadm을 이용하여 쉽게 Kubernetes를 설치 할 수 있다.
 * Password

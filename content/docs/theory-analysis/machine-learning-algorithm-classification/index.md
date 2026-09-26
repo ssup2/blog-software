@@ -6,7 +6,7 @@ Machine Learning Algorithm을 분류하고 정리한다.
 
 ## 1. Machine Learning Algorithm 분류
 
-Machine Learning Algorithm은 일반적으로 지도 학습, 비지도 학습, 준지도 학습, 강화 학습 4가지로 구분할 수 있다.
+**Machine Learning Algorithm**은 일반적으로 지도 학습, 비지도 학습, 준지도 학습, 강화 학습 4가지로 구분할 수 있다.
 
 ### 1.1. Supervised Learning, 지도 학습
 
@@ -14,7 +14,7 @@ Machine Learning Algorithm은 일반적으로 지도 학습, 비지도 학습, �
 
 #### 1.1.1. Classification, 분류
 
-분류 Algorithm은 **어떤 Class(Type)**인지를 판별(예측)하는 Algorithm을 의미한다. 고양이 사진과 강아지 사진이 존재하는 상황에서 입력 사진이 고양이인지 강아지인지 판별해야 한다면, 분류 Algorithm을 이용하면 된다. 고양이 사진, 강아지 사진 분류 Algorithm을 학습시키기 위해서는다미리 분류된 고양이 사진들과 강아지 사진들을 이용해야 한다.
+분류 Algorithm은 **어떤 Class** (Type)인지를 판별(예측)하는 Algorithm을 의미한다. 고양이 사진과 강아지 사진이 존재하는 상황에서 입력 사진이 고양이인지 강아지인지 판별해야 한다면, 분류 Algorithm을 이용하면 된다. 고양이 사진, 강아지 사진 분류 Algorithm을 학습시키기 위해서는다미리 분류된 고양이 사진들과 강아지 사진들을 이용해야 한다.
 
 #### 1.1.2. Regression, 회귀
 

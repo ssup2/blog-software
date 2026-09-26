@@ -13,11 +13,11 @@ Kubernetes 설치를 위한 Jetson Nano Cluster를 구축한다.
 [Photo 1]은 Jetson Nano Cluster의 실제 모습을 보여주고 있다. [Figure 1]은 Jetson Nano Cluster를 나타내고 있다. 모든 Jetson Nano의 Spec은 동일하다. Jetson Nano Cluster의 주요 사양은 아래와 같다.
 
 * Jetson Nano * 4
-  * CPU : 4Core ARM Cortex-A57
-  * Memory : 4GB * LPDDR4
-  * Root Storage : 64GB, MicroSD
+  * **CPU** : 4Core ARM Cortex-A57
+  * **Memory** : 4GB * LPDDR4
+  * **Root Storage** : 64GB, MicroSD
 * Network
-  * NAT Network : 192.168.0.0/24
+  * **NAT Network** : 192.168.0.0/24
 
 ### 1.1. Kubernetes
 

@@ -6,7 +6,7 @@ Analyzes Apache ZooKeeper.
 
 ## 1. ZooKeeper
 
-ZooKeeper is a **distributed Coordinator** that performs various roles such as Leader election, Node status, and distributed Lock management in distributed system environments. It is recognized for its safety and performance and is used in various Open Source Projects such as Hadoop, HBase, Storm, and Kafka.
+**ZooKeeper** is a **distributed Coordinator** that performs various roles such as Leader election, Node status, and distributed Lock management in distributed system environments. It is recognized for its safety and performance and is used in various Open Source Projects such as Hadoop, HBase, Storm, and Kafka.
 
 ### 1.1. Architecture
 

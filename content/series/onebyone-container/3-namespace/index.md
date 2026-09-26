@@ -4,7 +4,7 @@ title: 3. Namespace
 
 ## Namespace
 
-각 Container는 같은 Host에서 동작하는 다른 Container들의 존재를 알지 못하고 독립된 공간에서 동작하는데, 이러한 성질을 **격리**되었다 라고 표현한다. 이러한 Container의 격리 특성은 Linux Kernel의 Namespace 기능을 이용하여 구현한다. Namespace는 Process가 소속되는 **격리된 공간**을 의미한다.
+각 Container는 같은 Host에서 동작하는 다른 Container들의 존재를 알지 못하고 독립된 공간에서 동작하는데, 이러한 성질을 **격리**되었다 라고 표현한다. 이러한 Container의 격리 특성은 Linux Kernel의 Namespace 기능을 이용하여 구현한다. **Namespace**는 Process가 소속되는 **격리된 공간**을 의미한다.
 
 ```console {caption="[Shell 1] Host", linenos=table}
 # Host의 Process 확인
@@ -127,12 +127,12 @@ overlay on / type overlay (rw,relatime,lowerdir=/var/lib/docker/overlay2/l/BAAGB
 
 Namespace는 격리하는 대상에 따라 여러가지 Type이 존재한다. 대표적인 Namespace Type들은 다음과 같다.
 
-* PID Namespace : PID (Process ID)를 격리한다.
-* Network Namespace : Network를 격리한다.
-* Mount Namespace : Mount 정보를 격리한다.
-* UTS Namespace : Hostname을 격리한다.
-* IPC Namespace : IPC (Interprocess Communication)을 격리한다.
-* UID Namespace : UID (User ID)를 격리한다.
+* **PID Namespace** : PID (Process ID)를 격리한다.
+* **Network Namespace** : Network를 격리한다.
+* **Mount Namespace** : Mount 정보를 격리한다.
+* **UTS Namespace** : Hostname을 격리한다.
+* **IPC Namespace** : IPC (Interprocess Communication)을 격리한다.
+* **UID Namespace** : UID (User ID)를 격리한다.
 
 {{< figure caption="[Figure 1] Host, Container Namespace" src="images/namespace.png" width="900px" >}}
 

@@ -5,8 +5,9 @@ title: Grafana 설치, 실행 / Ubuntu 18.04 환경
 ## 1. 설치, 실행 환경
 
 설치, 실행 환경은 다음과 같다.
+
 * Ubuntu 18.04 LTS 64bit, root user
-* Node IP : 192.168.0.150
+* **Node IP** : 192.168.0.150
 
 ## 2. Grafana 설치
 
@@ -32,8 +33,9 @@ $ systemctl enable grafana-server.service
 ```
 
 Grafana를 실행하고 접속을 확인한다.
+
 * http://192.168.0.150:3000/login
-* ID, PW : admin/admin
+* **ID**, **PW** : admin/admin
 
 ## 3. 참조
 

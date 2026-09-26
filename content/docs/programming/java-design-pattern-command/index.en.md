@@ -6,11 +6,11 @@ This document summarizes the Command Pattern implemented in Java.
 
 ## 1. Java Command Pattern
 
-Command Pattern is a Pattern that encapsulates requests (Commands) so that requests can be performed even if the requester does not exactly understand the request. Command Pattern consists of Classes that perform the following roles.
+**Command Pattern** is a Pattern that encapsulates requests (Commands) so that requests can be performed even if the requester does not exactly understand the request. Command Pattern consists of Classes that perform the following roles.
 
-* Receiver : A Class that performs the role of receiving requests and actually processing requests.
-* Command : A Class that performs the role of delivering **specific requests** to the Receiver. Command Class must implement the Command Interface and contains a Receiver Instance.
-* Invoker : A collection Class of Concrete Instances. Requesters call Command objects through the Invoker to deliver requests to the Receiver.
+* **Receiver** : A Class that performs the role of receiving requests and actually processing requests.
+* **Command** : A Class that performs the role of delivering **specific requests** to the Receiver. Command Class must implement the Command Interface and contains a Receiver Instance.
+* **Invoker** : A collection Class of Concrete Instances. Requesters call Command objects through the Invoker to deliver requests to the Receiver.
 
 ```java {caption="[Code 1] Java Command Pattern", linenos=table}
 // receiver

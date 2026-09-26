@@ -8,7 +8,7 @@ This document analyzes DB partitioning and sharding.
 
 {{< figure caption="[Figure 1] DB Partitioning" src="images/db-partitioning.png" width="900px" >}}
 
-Partitioning is a technique that splits one table into multiple tables for performance, availability, and ease of maintenance. As the table is split, the table's data is also separated into distinct disk space. Partitioning includes **Vertical Partitioning** and **Horizontal Partitioning**. [Figure 1] shows Vertical Partitioning and Horizontal Partitioning.
+**Partitioning** is a technique that splits one table into multiple tables for performance, availability, and ease of maintenance. As the table is split, the table's data is also separated into distinct disk space. Partitioning includes **Vertical Partitioning** and **Horizontal Partitioning**. [Figure 1] shows Vertical Partitioning and Horizontal Partitioning.
 
 ### 1.1. Vertical Partitioning
 

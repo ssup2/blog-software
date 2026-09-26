@@ -6,7 +6,7 @@ This document analyzes Spring Cloud.
 
 ## 1. Spring Cloud
 
-Spring Cloud is a tool that helps with **building and operating Cloud-native Apps** in distributed environments like Cloud. It helps developers easily use configuration, deployment, Discovery, Routing, Load-balancing, etc. of Services that make up Cloud-native Apps. Core modules that enable these operations, such as Hystrix, Eureka, Ribbon, and Zuul, are Projects of Netflix's OSS (Open Source Software).
+**Spring Cloud** is a tool that helps with **building and operating Cloud-native Apps** in distributed environments like Cloud. It helps developers easily use configuration, deployment, Discovery, Routing, Load-balancing, etc. of Services that make up Cloud-native Apps. Core modules that enable these operations, such as Hystrix, Eureka, Ribbon, and Zuul, are Projects of Netflix's OSS (Open Source Software).
 
 ## 2. Hystrix
 
@@ -53,9 +53,9 @@ Ribbon is a **Client-side Load Balancer**, a Library that performs Server Load B
 
 Rule refers to the Load Balancing algorithm used in Ribbon. Rules can use Rules provided by Ribbon or Rules directly defined by developers. The following 3 Rules are Rules provided by Ribbon.
 
-* RoundRobinRule : A method that uses the Round Robin algorithm.
-* AvailabilityFilteringRule : A method that skips Servers that are not operating. Servers where Errors occur consecutively above a certain number of times are excluded from Load Balancing target Servers for a certain period of time. The number of Error occurrences and Load Balancing exclusion time can be freely set by developers.
-* WeightedResponseTimeRule : A method that assigns Weights inversely proportional to the average response time of Servers.
+* `RoundRobinRule` : A method that uses the Round Robin algorithm.
+* `AvailabilityFilteringRule` : A method that skips Servers that are not operating. Servers where Errors occur consecutively above a certain number of times are excluded from Load Balancing target Servers for a certain period of time. The number of Error occurrences and Load Balancing exclusion time can be freely set by developers.
+* `WeightedResponseTimeRule` : A method that assigns Weights inversely proportional to the average response time of Servers.
 
 ### 3.2. Ping
 
@@ -65,14 +65,14 @@ Ping is a component that determines the survival of Servers. Ping can use the Du
 
 It refers to a Server List that can perform Load Balancing. Methods to obtain Server Lists can use methods provided by Ribbon or methods directly defined by developers. The following 3 methods are methods provided by Ribbon.
 
-* Adhoc static server list : A method that directly puts the Server List in the Code that configures Ribbon.
-* ConfigurationBasedServerList : A method that directly puts the Server List in the Config file that configures Ribbon.
-* DiscoveryEnabledNIWSServerList : A method that obtains the Server List from the Eureka Client. This is generally the most commonly used method.
+* **Adhoc static server list** : A method that directly puts the Server List in the Code that configures Ribbon.
+* `ConfigurationBasedServerList` : A method that directly puts the Server List in the Config file that configures Ribbon.
+* `DiscoveryEnabledNIWSServerList` : A method that obtains the Server List from the Eureka Client. This is generally the most commonly used method.
 
 Ribbon also provides functionality to filter Server Lists. Server List Filtering methods can also use methods provided by Ribbon or methods defined by developers. The following 2 methods are methods provided by Ribbon.
 
-* ZoneAffinityServerListFilter : Provides only Server Lists in the same Zone as Ribbon.
-* ServerListSubsetFilter : Provides only Server Lists that meet conditions set by developers.
+* `ZoneAffinityServerListFilter` : Provides only Server Lists in the same Zone as Ribbon.
+* `ServerListSubsetFilter` : Provides only Server Lists that meet conditions set by developers.
 
 ## 4. Eureka
 

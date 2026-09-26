@@ -6,7 +6,7 @@ This document summarizes PromQL Vector Matching syntax.
 
 ## 1. PromQL Vector Matching
 
-PromQL Vector Matching is syntax that matches two Instant Vector Type Data and performs operations, as the name suggests. It is one of the most commonly used syntaxes in PromQL. Depending on how to operate one value existing in Instant Vector Type, there are **One-to-one Matching**, **One-to-many/Many-to-one Matching**, and **Many-to-many Matching**. Here, Matching is based on **Labels** that exist in values.
+PromQL **Vector Matching** is syntax that matches two Instant Vector Type Data and performs operations, as the name suggests. It is one of the most commonly used syntaxes in PromQL. Depending on how to operate one value existing in Instant Vector Type, there are **One-to-one Matching**, **One-to-many/Many-to-one Matching**, and **Many-to-many Matching**. Here, Matching is based on **Labels** that exist in values.
 
 ### 1.1. One-to-one Vector Matching
 
@@ -103,6 +103,7 @@ candy1{} - ignoring(size) ice1{}
 [Query 3] shows matching using only Labels other than `size` using the `ignoring` syntax for `candy1` and `ice1`. Since both `candy1` and `ice1` only have `color` and `size` Labels, and only `size` Label is excluded from matching, matching is performed using only the `color` Label. Therefore, the results of [Query 2] and [Query 3] are the same.
 
 When selecting Labels for One-to-one partial Label Matching, the selected Labels must satisfy the following conditions. If these conditions are not met, a Query Error occurs.
+
 * Values of selected Labels within one Instant Vector Type Data must not be duplicated.
 * Values of selected Labels between two Instant Vector Type Data must be matched 1:1.
 

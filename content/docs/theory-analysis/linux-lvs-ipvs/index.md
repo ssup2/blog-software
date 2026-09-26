@@ -8,13 +8,13 @@ Linux Kernel Level에서 Load Balancing을 수행하는 기법인 LVS (Linux Vir
 
 {{< figure caption="[Figure 1] Linux LVS" src="images/lvs.png" width="400px" >}}
 
-LVS는 Linux에서 제공하는 L4 Load Balancer 솔루션이다. [Figure 1]은 LVS 구성을 나타낸다. LVS는 크게 Packet Load Balacing을 수행하는 Load Balancer와 Packet의 실제 목적지인 Real Server로 구성되어 있다. Load Balancer는 SPOF (Single Pointer Of Failure) 방지를 위해 일반적으로 2대 이상의 Load Balancer를 VRRP로 묶어서 구성한다. VRRP로 묶는데는 Linux Kernel의 Network Stack에서 제공하는 Keepalived 기능을 이용한다. 각 Load Balancer에서는 아래에서 설명할 Linux Kenrel의 IPVS를 이용하여 Packet Load Balancing을 수행한다.
+**LVS**는 Linux에서 제공하는 L4 Load Balancer 솔루션이다. [Figure 1]은 LVS 구성을 나타낸다. LVS는 크게 Packet Load Balacing을 수행하는 Load Balancer와 Packet의 실제 목적지인 Real Server로 구성되어 있다. Load Balancer는 SPOF (Single Pointer Of Failure) 방지를 위해 일반적으로 2대 이상의 Load Balancer를 VRRP로 묶어서 구성한다. VRRP로 묶는데는 Linux Kernel의 Network Stack에서 제공하는 Keepalived 기능을 이용한다. 각 Load Balancer에서는 아래에서 설명할 Linux Kenrel의 IPVS를 이용하여 Packet Load Balancing을 수행한다.
 
 ## 2. IPVS (IP Virtual Server)
 
 IPVS는 Linux의 Netfilter 위에서 동작하는 L4 Load Balancer이다. Linux Kernel Level에서 동작하기 때문에 HAProxy같은 User Level Load Balancer보다 빠른 성능으로 동작한다. IPVS는 수신한 Packet에 대하여 DR (Direct Routing), NAT, IPIP Tunneling을 수행할 수 있다. IPVS는 `ipvsadm` 명령어를 통해 제어가 가능하다.
 
-IPVS 없이 iptables만으로도 충분히 L4 Load Balacner을 구현할 수 있지만, Packet을 Rule을 따라가면서 처리하는 Chain 방식으로 동작하는 netfilter의 성능에는 한계점이 존재한다. 또한 IPVS에서는 `rr` (Round Robin), `dh` (Destination Hash) 등 많이 이용되는 Load Balancing 알고리즘을 쉽게 이용 할 수 있도록 제공하고 있다. 따라서 Linux Kernel Level에서 L4 Load Balancing을 수행하는 경우 IPVS를 이용하는것이 유리하다.
+IPVS 없이 iptables만으로도 충분히 L4 Load Balancer을 구현할 수 있지만, Packet을 Rule을 따라가면서 처리하는 Chain 방식으로 동작하는 netfilter의 성능에는 한계점이 존재한다. 또한 IPVS에서는 `rr` (Round Robin), `dh` (Destination Hash) 등 많이 이용되는 Load Balancing 알고리즘을 쉽게 이용 할 수 있도록 제공하고 있다. 따라서 Linux Kernel Level에서 L4 Load Balancing을 수행하는 경우 IPVS를 이용하는것이 유리하다.
 
 ### 2.1. Netfilter Hook Function
 

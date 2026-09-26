@@ -8,39 +8,39 @@ title: OpenStack Stein 설치 / Kolla-Ansible 이용 / Ubuntu 18.04, ODROID-H2 C
 
 [Figure 1]은 ODROID-H2 Cluster 기반 OpenStack 설치 환경을 나타내고 있다. 상세한 환경 정보는 다음과 같다.
 
-* OpenStack : Stein
-* Kolla : 8.0.0
-* Kolla-Ansible : 8.0.0
-* Octiava : 4.0.1
-* Node : Ubuntu 18.04, root user
+* **OpenStack** : Stein
+* **Kolla** : 8.0.0
+* **Kolla-Ansible** : 8.0.0
+* **Octavia** : 4.0.1
+* **Node** : Ubuntu 18.04, root user
   * ODROID-H2
-    * Node 01 : Controller Node, Network Node, Ceph Node (MON, MGR, OSD)
-    * Node 02, 03 : Compute Node, Ceph Node (OSD)
+    * **Node 01** : Controller Node, Network Node, Ceph Node (MON, MGR, OSD)
+    * **Node 02, 03** : Compute Node, Ceph Node (OSD)
   * VM
-    * Node 09 : Monitoring Node, Registry Node, Deploy Node
+    * **Node 09** : Monitoring Node, Registry Node, Deploy Node
 * Network
-  * NAT Network : External Network (Provider Network), 192.168.0.0/24
-    * Floating IP Range : 192.168.0.200 ~ 224
-  * Private Network : Guest Network (Tanant Network), Management Network, 10.0.0.0/24
+  * **NAT Network** : External Network (Provider Network), 192.168.0.0/24
+    * **Floating IP Range** : 192.168.0.200 ~ 224
+  * **Private Network** : Guest Network (Tenant Network), Management Network, 10.0.0.0/24
     * Node Default Gateway
 * Storage
-  * /dev/mmcblk0 : Root Filesystem, 64GB
-  * /dev/nvme0n1 : Ceph, 256GB
+  * `/dev/mmcblk0` : Root Filesystem, 64GB
+  * `/dev/nvme0n1` : Ceph, 256GB
 
 ## 2. OpenStack 구성
 
 OpenStack의 구성요소 중에서 설치할 구성요소는 다음과 같다.
 
-* Nova : VM Service를 제공한다.
-* Neutron : Network Service를 제공한다.
-* Octavia : Load Balacner Service를 제공한다.
-* Keystone : Authentication, Authorization Service를 제공한다.
-* Glance : VM Image Service를 제공한다.
-* Cinder : VM Block Storage Service를 제공한다.
-* Horizon : Web Dashboard Service를 제공한다.
-* Prometheus : Metric 정보를 저장한다.
-* Grafana : Prometheus에 저장된 Metric 정보를 다양한 Graph로 시각화한다.
-* Ceph : Glance, Cinder의 Backend Storage 역할을 수행한다.
+* **Nova** : VM Service를 제공한다.
+* **Neutron** : Network Service를 제공한다.
+* **Octavia** : Load Balancer Service를 제공한다.
+* **Keystone** : Authentication, Authorization Service를 제공한다.
+* **Glance** : VM Image Service를 제공한다.
+* **Cinder** : VM Block Storage Service를 제공한다.
+* **Horizon** : Web Dashboard Service를 제공한다.
+* **Prometheus** : Metric 정보를 저장한다.
+* **Grafana** : Prometheus에 저장된 Metric 정보를 다양한 Graph로 시각화한다.
+* **Ceph** : Glance, Cinder의 Backend Storage 역할을 수행한다.
 
 ## 3. Network 설정
 
@@ -238,7 +238,7 @@ Deploy Node의 /etc/ansible/ansible.cfg 파일을 [Text 6]와 같이 수정한�
 (Deploy)$ cp -r /usr/local/share/kolla-ansible/etc_examples/kolla/* /etc/kolla
 ```
 
-Inventory 파일들을 복사한다. 또한 Config 파일인 **global.yaml** 파일과 Password 정보가 포함되어 있는 **passwords.yml** 파일을 복사한다.
+Inventory 파일들을 복사한다. 또한 Config 파일인 `global.yaml` 파일과 Password 정보가 포함되어 있는 `passwords.yml` 파일을 복사한다.
 
 ```text {caption="[Text 7] Deploy Node - ~/kolla-ansible/multinode", linenos=table}
 # These initial groups are the only groups required to be modified. The
@@ -830,11 +830,11 @@ Octavia만 배포한다.
 
 접속할 수 있는 Dashboard 정보는 아래와 같다. URL, ID, Password 순서로 나열하였다.
 
-* Horizon : http://10.0.0.20:80, admin, admin
-* RabbitMQ : http://10.0.0.20:15672, openstack, admin
-* Prometheus : http://10.0.0.20:9091
-* Grafana : http://10.0.0.20:3000, admin, admin
-* Alertmanager : http://10.0.0.20:9093, admin, admin
+* **Horizon** : http://10.0.0.20:80, admin, admin
+* **RabbitMQ** : http://10.0.0.20:15672, openstack, admin
+* **Prometheus** : http://10.0.0.20:9091
+* **Grafana** : http://10.0.0.20:3000, admin, admin
+* **Alertmanager** : http://10.0.0.20:9093, admin, admin
 
 ## 18. Debugging
 
@@ -843,7 +843,7 @@ Octavia만 배포한다.
 ansible.log  ceph  chrony  cinder  glance  horizon  keystone  mariadb  neutron  nova  octavia  openvswitch  prometheus  rabbitmq
 ```
 
-각 Node의 **/var/log/kolla** Directory에 OpenStack Service들의 Log가 저장된다.
+각 Node의 `/var/log/kolla` Directory에 OpenStack Service들의 Log가 저장된다.
 
 ## 19. 참조
 

@@ -4,7 +4,7 @@ title: NVIDIA GPU Sharing
 
 ## 1. NVIDIA GPU Sharing
 
-GPU Sharing is a technique that allows multiple processes to share a single GPU. There are three main techniques: **Time-Slicing**, **MPS**, and **MIG**.
+**GPU Sharing** is a technique that allows multiple processes to share a single GPU. There are three main techniques: **Time-Slicing**, **MPS**, and **MIG**.
 
 {{< figure caption="[Figure 1] Example Applications" src="images/example-apps.png" width="900px" >}}
 

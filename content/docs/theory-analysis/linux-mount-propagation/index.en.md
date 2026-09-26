@@ -6,7 +6,7 @@ Analyze Linux Mount Propagation.
 
 ## 1. Linux Mount Propagation
 
-Mount Propagation is a technique that emerged to solve the inconvenience of management caused by Linux Kernel's Mount NS (Namespace). Without using Mount Propagation, in a state where multiple Mount NS exist, to use Block Devices that are not Mounted by all Processes, Block Device Mount must be performed as many times as the number of Mount NS. However, by appropriately using Mount Propagation, Block Device Mount can be performed in all Mount NS with a single Block Device Mount.
+**Mount Propagation** is a technique that emerged to solve the inconvenience of management caused by Linux Kernel's Mount NS (Namespace). Without using Mount Propagation, in a state where multiple Mount NS exist, to use Block Devices that are not Mounted by all Processes, Block Device Mount must be performed as many times as the number of Mount NS. However, by appropriately using Mount Propagation, Block Device Mount can be performed in all Mount NS with a single Block Device Mount.
 
 ### 1.1. Shared Subtree
 

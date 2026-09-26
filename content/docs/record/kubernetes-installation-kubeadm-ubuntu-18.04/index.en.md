@@ -5,12 +5,13 @@ title: Kubernetes Installation / Using kubeadm / Ubuntu 18.04
 ## 1. Installation Environment
 
 The installation environment is as follows:
+
 * VirtualBox 5.0.14r
-  * Master Node : Ubuntu Desktop 18.04.1 64bit : 1 unit
-  * Worker Node : Ubuntu Server 18.04.1 64bit : 2 units
+  * **Master Node** : Ubuntu Desktop 18.04.1 64bit : 1 unit
+  * **Worker Node** : Ubuntu Server 18.04.1 64bit : 2 units
 * Kubernetes 1.12.3
-  * Network Plugin : Use calico or flannel or cilium
-  * Dashboard Addon : Use Dashboard
+  * **Network Plugin** : Use calico or flannel or cilium
+  * **Dashboard Addon** : Use Dashboard
 * kubeadm 1.12.3
   * When building a Cluster environment using VMs, Kubernetes can be easily installed using kubeadm.
 * Password
@@ -22,9 +23,10 @@ The installation environment is as follows:
 {{< figure caption="[Figure 1] Node configuration diagram for Kubernetes installation" src="images/node-setting.png" width="900px" >}}
 
 Create virtual Master and Worker Nodes (VMs) using VirtualBox as shown in [Figure 1].
-* Hostname : Master Node - node1, Worker Node1 - node2, Worker Node2 - node3
-* NAT : Build 10.0.0.0/24 Network using "NAT network" provided by Virtual Box.
-* Router : Build 192.168.0.0/24 Network using router. (NAT)
+
+* **Hostname** : Master Node - node1, Worker Node1 - node2, Worker Node2 - node3
+* **NAT** : Build 10.0.0.0/24 Network using "NAT network" provided by Virtual Box.
+* **Router** : Build 192.168.0.0/24 Network using router. (NAT)
 
 ### 2.1. Master Node
 
@@ -321,6 +323,7 @@ Create a config file for Web UI privilege permissions. Create ~/dashboard-admin.
 ```
 
 Apply privilege permissions to Web UI and access to verify. After accessing Web UI, click Skip.
+
 * http://192.168.0.150:8080/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/#!/login
 
 ## 8. References

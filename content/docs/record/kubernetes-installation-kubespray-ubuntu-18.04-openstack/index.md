@@ -7,21 +7,22 @@ title: Kubernetes 설치 / kubespray 이용 / Ubuntu 18.04, OpenStack 환경
 {{< figure caption="[Figure 1] Kubernetes 설치 환경" src="images/environment.png" width="900px" >}}
 
 [Figure 1]은 Kubernetes 설치 환경을 나타내고 있다. 설치 환경은 다음과 같다.
-* VM : Ubuntu 18.04, 4 vCPU, 4GB Memory
+
+* **VM** : Ubuntu 18.04, 4 vCPU, 4GB Memory
   * ETCD Node * 3
   * Master Node * 2
   * Slave Node * 3
   * Deploy Node * 1
 * Network
-  * NAT Network : 192.168.0.0/24
-  * Octavia Network : 20.0.0.0/24
-  * Tenant Network : 30.0.0.0/24
-* OpenStack : Stein
-  * API Server : 192.168.0.40:5000
+  * **NAT Network** : 192.168.0.0/24
+  * **Octavia Network** : 20.0.0.0/24
+  * **Tenant Network** : 30.0.0.0/24
+* **OpenStack** : Stein
+  * **API Server** : 192.168.0.40:5000
   * Octavia
 * Kubernetes
-  * CNI : Cilium Plugin
-* kubespray : 2.10.4
+  * **CNI** : Cilium Plugin
+* **kubespray** : 2.10.4
 
 ## 2. Ubuntu Package 설치
 

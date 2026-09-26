@@ -2,7 +2,7 @@
 title: AWS EFS
 ---
 
-AWS의 EFS (Elastic File System) Service를 정리힌다. EFS Service는 AWS에서 제공하는 Managed NFS Server Service이다.
+AWS의 EFS (Elastic File System) Service를 정리힌다. **EFS Service**는 AWS에서 제공하는 Managed NFS Server Service이다.
 
 ## 1. Storage Class
 

@@ -59,7 +59,7 @@ $ go run main.go
 error: outerError
 ```
 
-Golang's error wrapping is literally a technique of wrapping errors with other errors. Through error wrapping, errors returned by internal functions can also be identified in external functions. [Code 1] and [shell 1] show a common way of handling errors in Golang without error wrapping. When the `main()` function calls the `outerFunc()` function, `outerFunc()`, `middleFunc()`, and `innerFunc()` functions are called in order, and since the `innerFunc()` function returns an error, the `outerFunc()` function also returns an error.
+Golang's **error wrapping** is literally a technique of wrapping errors with other errors. Through error wrapping, errors returned by internal functions can also be identified in external functions. [Code 1] and [shell 1] show a common way of handling errors in Golang without error wrapping. When the `main()` function calls the `outerFunc()` function, `outerFunc()`, `middleFunc()`, and `innerFunc()` functions are called in order, and since the `innerFunc()` function returns an error, the `outerFunc()` function also returns an error.
 
 The problem is that the `main()` function can only check the "outerErr" error returned by the `outerFunc()` function, and cannot check the content of errors returned by the `middleFunc()` or `innerFunc()` functions. The most obvious way to solve this problem is to make the external function's error also differ depending on the error returned by the internal function. The problem is that implementing it this way makes the error handling part of the external function complex. This problem can be easily solved through error wrapping techniques.
 

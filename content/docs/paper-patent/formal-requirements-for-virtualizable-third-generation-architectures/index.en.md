@@ -10,15 +10,15 @@ This is the first paper that defines virtual machines (VM) and hypervisors (Hype
 
 Hypervisors basically operate in a **trap-and-emulation** method. When a virtual machine tries to perform operations related to specific resources, a trap occurs and the hypervisor is executed. The hypervisor identifies the cause of the trap and then makes the virtual machine feel as if it is running on an actual physical machine through appropriate emulation. Therefore, hypervisors can be divided into the following three modules.
 
-* Dispatcher : A module that runs when a hardware trap occurs. Executes Allocator or Interpreter.
-* Allocator : Performs the role of allocating/releasing resources according to virtual machine requests.
-* Interpreter : Emulates instructions that cause traps.
+* **Dispatcher** : A module that runs when a hardware trap occurs. Executes Allocator or Interpreter.
+* **Allocator** : Performs the role of allocating/releasing resources according to virtual machine requests.
+* **Interpreter** : Emulates instructions that cause traps.
 
 ## 3. Types of Instructions
 
-* Privileged Instruction : Instructions that cause traps when executed in User Mode and execute without traps when executed in System Mode.
-* Control Sensitive Instruction : Instructions that change resource settings.
-* Behavior Sensitive Instruction : Instructions that depend on resource settings.
+* **Privileged Instruction** : Instructions that cause traps when executed in User Mode and execute without traps when executed in System Mode.
+* **Control Sensitive Instruction** : Instructions that change resource settings.
+* **Behavior Sensitive Instruction** : Instructions that depend on resource settings.
 
 ## 4. Types of CPU Architecture Required to Run Hypervisors
 

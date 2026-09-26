@@ -88,9 +88,9 @@ my-nginx-ipv4   LoadBalancer   10.100.51.23   k8s-default-mynginxi-f9350243cc-a7
 
 [Shell 2]는 CLB와 Instance Target을 이용할 경우, [Shell 3]는 NLB와 Instance Target 이용할 경우, [Shell 4]는 NLB와 IP Target을 이용할 경우의 LoadBalancer Service를 나타내고 있다. LoadBalancer Service에 다음과 같은 Annotation 설정을 통해서 어떤 LB를 이용할지와 어떤 Target Type을 이용할지 설정할 수 있다.
 
-* CLB + Instance Type : "service.beta.kubernetes.io/aws-load-balancer-type: clb"
-* NLB + Instance Type : "service.beta.kubernetes.io/aws-load-balancer-type: nlb"
-* NLB + IP Type : "service.beta.kubernetes.io/aws-load-balancer-type: nlb-ip"
+* **CLB + Instance Type** : "service.beta.kubernetes.io/aws-load-balancer-type: clb"
+* **NLB + Instance Type** : "service.beta.kubernetes.io/aws-load-balancer-type: nlb"
+* **NLB + IP Type** : "service.beta.kubernetes.io/aws-load-balancer-type: nlb-ip"
 
 #### 2.2. ALB (Application Load Balancer)
 
@@ -108,8 +108,8 @@ my-nginx   <none>   *       k8s-default-mynginx-290ac4e9b9-1853125440.ap-northea
 
 * ALB Class 설정 (필수) : "kubernetes.io/ingress.class: alb"
 * ALB Public Network 연결 : "alb.ingress.kubernetes.io/scheme: internet-facing"
-* ALB Instance Target Type : "alb.ingress.kubernetes.io/target-type: instance"
-* ALB IP Target Type : "alb.ingress.kubernetes.io/target-type: ip"
+* **ALB Instance Target Type** : "alb.ingress.kubernetes.io/target-type: instance"
+* **ALB IP Target Type** : "alb.ingress.kubernetes.io/target-type: ip"
 
 ```shell {caption="[Shell 6] Ingress with Group"}
 $ kubectl get ingress

@@ -8,7 +8,7 @@ HTTP/1.1 Protocol, which is still the most widely used between Web Browser and S
 
 {{< figure caption="[Figure 1] Polling" src="images/polling.png" width="600px" >}}
 
-Polling is the simplest technique to deliver Data from Server to Web Browser. [Figure 1] shows the Polling technique. Web Browser periodically checks with Server whether Events have occurred. If no Event has occurred, the response does not include Event information. On the other hand, if an Event has occurred, Event information is also sent in the response.
+**Polling** is the simplest technique to deliver Data from Server to Web Browser. [Figure 1] shows the Polling technique. Web Browser periodically checks with Server whether Events have occurred. If no Event has occurred, the response does not include Event information. On the other hand, if an Event has occurred, Event information is also sent in the response.
 
 Since it is a method of periodically checking with Server whether Events have occurred from Web Browser, it has the disadvantage of poor real-time performance. Also, even if Events have not occurred, periodic request/response exchanges occur between Web Browser and Server, so it has the disadvantage of generating periodic Traffic.
 

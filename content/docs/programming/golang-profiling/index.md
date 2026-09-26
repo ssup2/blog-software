@@ -42,16 +42,16 @@ func init() {
 
 [Code 2]는 net/http/pprof Package 초기화시 호출되는 `init()` 함수를 나타내고 있다. 5개의 HTTP Endpoint를 HTTP Server에 등록하는 것을 확인할 수 있다. [Code 2]에는 나타나지 않지만 Index Handler 하위에도 다양한 Profile을 얻을 수 있는 Endpoint들이 존재한다. 다음의 Endpoint들을 대상으로 "Get" 요청을 통해서 다음의 Profile들을 얻을 수 있다.
 
-* CPU : http://localhost:6060/debug/pprof/profile
-* Memory Heap : http://localhost:6060/debug/pprof/heap
-* Block : http://localhost:6060/debug/pprof/block
-* Thread Create : http://localhost:6060/debug/pprof/threadcreate
-* Goroutine : http://localhost:6060/debug/pprof/goroutine
-* Mutex : http://localhost:6060/debug/pprof/mutex
+* **CPU** : http://localhost:6060/debug/pprof/profile
+* **Memory Heap** : http://localhost:6060/debug/pprof/heap
+* **Block** : http://localhost:6060/debug/pprof/block
+* **Thread Create** : http://localhost:6060/debug/pprof/threadcreate
+* **Goroutine** : http://localhost:6060/debug/pprof/goroutine
+* **Mutex** : http://localhost:6060/debug/pprof/mutex
 
 모든 HTTP Endpoint에 **seconds** Query String를 이용하면 몇 초 동안 Profiling을 수행할지 설정할 수 있다.
 
-* seconds : http://localhost:6060/debug/pprof/profile?seconds=30
+* `seconds` : http://localhost:6060/debug/pprof/profile?seconds=30
 
 ```shell {caption="[Shell 1] Get Profile File Example"}
 $ curl http://localhost:6060/debug/pprof/profile\?seconds\=30 --output cpu.prof
@@ -200,7 +200,7 @@ pprof를 통해서 시각회된 Profile을 이해하기 위해서는 **Flat**과
 
 Profile 종류 및 분석은 아래의 예제 App을 통해서 진행한다. Profile은 net/http/pprof Package를 통해서 6060 Port를 통해서 노출되도록 설정되어 있으며, 부하를 주기 위한 다양한 함수들이 구동되도록 개발되어 있다.
 
-* Example App : [https://github.com/ssup2/golang-profiling-example](https://github.com/ssup2/golang-profiling-example)
+* **Example App** : [https://github.com/ssup2/golang-profiling-example](https://github.com/ssup2/golang-profiling-example)
 
 ### 3.1. CPU
 

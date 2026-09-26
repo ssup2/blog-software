@@ -63,10 +63,10 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
   * <FamilyName><GenerationNum>.<Size>
     * t3.large / c5.xlarge / p3.2xlarge
 * Instance Type
-  * General Purpose : Starts with t
-  * Compute Optimized : Starts with c
-  * Memory Optimized : Starts with r, x, z
-  * Storage Optimized : Starts with i, d, h
+  * **General Purpose** : Starts with t
+  * **Compute Optimized** : Starts with c
+  * **Memory Optimized** : Starts with r, x, z
+  * **Storage Optimized** : Starts with i, d, h
 * Can scale up/down flavor
 * Higher generation provides better cost-performance
 
@@ -82,8 +82,8 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 * Can set inbound and outbound rules separately
 * Can set traffic allow/deny in rules based on protocol, destination IP, destination port, and security group
 * Default policy
-  * Inbound : Deny all
-  * Outbound : Allow all
+  * **Inbound** : Deny all
+  * **Outbound** : Allow all
 
 ### 3.4. Spot Instance
 
@@ -96,8 +96,8 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 * Up to 90% cost savings compared to on-demand instances
 * Suitable for processing batch jobs
 * Spot Request Type
-  * one-time : Runs spot instance and then does not intervene
-  * persistent : Runs spot instance and continues to check if spot instance is working properly, recreates spot instance if not working
+  * `one-time` : Runs spot instance and then does not intervene
+  * `persistent` : Runs spot instance and continues to check if spot instance is working properly, recreates spot instance if not working
     * If persistent type, need to remove spot request first then remove persistent type
 * Spot Fleets
   * Creates multiple spot instances based on instance type, OS, and AZ desired by user
@@ -116,9 +116,9 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 ### 3.6. Placement Group
 
 * Placement strategy for EC2 instances
-* Cluster : Placed in one rack (partition) within one availability zone for low latency
-* Spread : Distributed across multiple availability zones to ensure availability (high availability)
-* Partition : Distributed across multiple racks (partitions) in one availability zone
+* **Cluster** : Placed in one rack (partition) within one availability zone for low latency
+* **Spread** : Distributed across multiple availability zones to ensure availability (high availability)
+* **Partition** : Distributed across multiple racks (partitions) in one availability zone
 
 ### 3.7. ENI (Elastic Network Interface)
 
@@ -171,10 +171,10 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 
 #### 4.1.2. EBS Volume Type
 
-* gp2, gp3 : General Purpose SSD, can be used as boot volume
-* io1, io2 : Highest-performance SSD, can be used as boot volume, supports multi attach
-* st : Low cost HDD
-* sc : Lowest cost HDD
+* `gp2`, `gp3` : General Purpose SSD, can be used as boot volume
+* `io1`, `io2` : Highest-performance SSD, can be used as boot volume, supports multi attach
+* `st` : Low cost HDD
+* `sc` : Lowest cost HDD
 
 #### 4.1.3. EBS Encryption
 
@@ -212,8 +212,8 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 #### 4.4.1. EFS Storage Class
 
 * Storage Tiers
-  * Standard : Standard
-  * Infrequent Access : Low cost for data storage but cost occurs when using stored data
+  * **Standard** : Standard
+  * **Infrequent Access** : Low cost for data storage but cost occurs when using stored data
 
 ## 5. ELB (Elastic Load Balancer)
 
@@ -240,7 +240,7 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 
 * L7 load balancer
   * Supports HTTP/1.1, HTTP/2, WebSocket
-  * Less latency : 400ms
+  * **Less latency** : 400ms
 * Supports redirect
 * Routing policies
   * Based on path in URL
@@ -264,7 +264,7 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 
 * L4 load balancer
   * Supports TCP, UDP
-  * Less latency : 100ms
+  * **Less latency** : 100ms
 * NLB Target Groups
   * EC2 Instance
   * Private IP Address
@@ -530,8 +530,8 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 
 ### 8.1. Hosted Zones
 
-* Public Hosted Zone : Public network
-* Private Hosted Zone : VPC private network
+* **Public Hosted Zone** : Public network
+* **Private Hosted Zone** : VPC private network
 
 ### 8.2. CNAME vs Alias
 
@@ -587,9 +587,9 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 
 * Supports L4 and L7 health checks
 * Health Check Target
-  * Endpoint : Performs health check on app endpoint
-  * Other Health Check (Calculated Health Check) : Determines health check result by logically combining (AND, OR, NOT) health check results of multiple other endpoints
-  * CloudWatch : Route53 cannot perform health check on endpoints inside private VPC because Route53 exists in public network. In this case, configure CloudWatch monitoring endpoints inside private VPC, and Route53 performs health check on this CloudWatch
+  * **Endpoint** : Performs health check on app endpoint
+  * **Other Health Check (Calculated Health Check)** : Determines health check result by logically combining (AND, OR, NOT) health check results of multiple other endpoints
+  * **CloudWatch** : Route53 cannot perform health check on endpoints inside private VPC because Route53 exists in public network. In this case, configure CloudWatch monitoring endpoints inside private VPC, and Route53 performs health check on this CloudWatch
 
 ## 9. S3
 
@@ -616,8 +616,8 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 * Has one key and acts as full path
   * s3://<bucket-name>/<object-key>
   * Ex) s3://ssup2-bucket/root-folder/sub-folder/file.txt
-    * ssup2-bucket : Bucket name
-    * root-folder/sub-folder/file.txt : Object key
+    * `ssup2-bucket` : Bucket name
+    * `root-folder/sub-folder/file.txt` : Object key
 * One object is maximum 5TB
   * Can split and upload one file using multi-part upload functionality if file is 5TB or larger
 * Metadata
@@ -639,14 +639,14 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 ### 9.4. Encryption
 
 * Encryption methods
-  * SSE-S3 : Uses encryption key managed by AWS S3 service
+  * **SSE-S3** : Uses encryption key managed by AWS S3 service
     * Server-side encryption
     * AES-256 encryption
     * Set "x-amz-server-side-encryption":"AES256" in HTTP request header
-  * SSE-KMS : Uses encryption key managed by AWS KMS service
+  * **SSE-KMS** : Uses encryption key managed by AWS KMS service
     * Server-side encryption
     * Set "x-amz-server-side-encryption":"aws:kms" in HTTP request header
-  * SSE-C : Uses own encryption key
+  * **SSE-C** : Uses own encryption key
     * AWS does not manage encryption key
     * Uses HTTPS
     * Sets encryption key in all HTTP headers and sends
@@ -663,8 +663,8 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
   * Set using IAM policy
 * Resource Base
   * Commonly applied to multiple accounts
-  * Object Access Control List : Sets permissions per object
-  * Bucket Access Control List : Sets permissions per bucket
+  * **Object Access Control List** : Sets permissions per object
+  * **Bucket Access Control List** : Sets permissions per bucket
 * Must satisfy the following conditions to access S3 objects
   * (User IAM Role Allow OR Resource Policy Allow) AND explicit deny
 * Provides endpoint within VPC
@@ -672,8 +672,8 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
   * Because logging loop occurs if S3 access log is set to itself instead of different S3 bucket
   * Stored access logs can be analyzed through AWS Athena
 * Uses S3 as log storage for AWS CloudTrail
-* MFA Delete : Can force MFA usage when removing objects
-* Pre-Signed URL : Generates URL valid for a certain time
+* **MFA Delete** : Can force MFA usage when removing objects
+* **Pre-Signed URL** : Generates URL valid for a certain time
 
 ### 9.6. Websites
 
@@ -702,8 +702,8 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 ### 9.8. Pre-signed URL
 
 * Can generate temporary URL that allows temporary download and upload
-  * Download : Can generate through CLI and SDK
-  * Upload : Can only generate through SDK
+  * **Download** : Can generate through CLI and SDK
+  * **Upload** : Can only generate through SDK
 * Has 3600 seconds validity by default, can set validity time when generating pre-signed URL
 
 ### 9.9. Storage Class
@@ -717,7 +717,7 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 * Used when frequently accessing
 * Guarantees 99.99% availability
 * Low latency, high throughput
-* Usage Example : Big data analysis, content distribution
+* **Usage Example** : Big data analysis, content distribution
 
 #### 9.10.2. Infrequent Access
 
@@ -725,11 +725,11 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 * Lower cost than standard class
 * Standard Infrequent Access Class (Standard-IA)
   * 99.9% availability
-  * Usage Example : Disaster recovery, backup
+  * **Usage Example** : Disaster recovery, backup
 * One Zone Infrequent Access Class (S3 One Zone-IA)
   * 95.9% availability
   * Data loss occurs when AZ is lost because it stores in single AZ
-  * Usage Example : Temporary backup, reproducible data backup
+  * **Usage Example** : Temporary backup, reproducible data backup
 
 #### 9.10.3. Glacier Storage Class
 
@@ -744,16 +744,16 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 #### 9.10.5. Glacier Flexible Retrieval Class
 
 * Takes long time for data retrieval, retrieval time varies based on the following settings
-  * Expedited : 1~5 minutes, cost occurs
-  * Standard : 3~5 hours, cost occurs
-  * Bulk : 5~12 hours, free
+  * **Expedited** : 1~5 minutes, cost occurs
+  * **Standard** : 3~5 hours, cost occurs
+  * **Bulk** : 5~12 hours, free
 * Minimum 90-day storage cost is charged
 
 #### 9.10.6. Glacier Deep Archive
 
 * Takes longest time for data retrieval, retrieval time varies based on the following settings
-  * Standard : 12 hours
-  * Bulk : 48 hours
+  * **Standard** : 12 hours
+  * **Bulk** : 48 hours
 * Minimum 180-day storage cost is charged
 
 #### 9.10.7. Intelligent-Tiering
@@ -761,17 +761,17 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 * Automatically changes tier based on object usage
 * Free when tier changes
 * The following tiers exist
-  * Frequent Access Tier : Default tier, automatically set
-  * Infrequent Access Tier : Automatically set when object is not accessed for 30 days
-  * Archive Instant Access Tier : Automatically set when object is not accessed for 90 days
-  * Archive Access Tier : Optional when not accessed for 90 to 700 days or more
-  * Deep Archive Access Tier : Optional when not accessed for 180 to 700 days or more
+  * **Frequent Access Tier** : Default tier, automatically set
+  * **Infrequent Access Tier** : Automatically set when object is not accessed for 30 days
+  * **Archive Instant Access Tier** : Automatically set when object is not accessed for 90 days
+  * **Archive Access Tier** : Optional when not accessed for 90 to 700 days or more
+  * **Deep Archive Access Tier** : Optional when not accessed for 180 to 700 days or more
 
 #### 9.10.8. Storage Class Movement
 
-* Transition Action : Automatically changes storage class based on time elapsed since object creation
-* Expiration Action : Automatically deletes object after time elapsed since object creation
-* Action Target : Actions can be set based on object tags or object path prefix (s3://mybucket/music/*)
+* **Transition Action** : Automatically changes storage class based on time elapsed since object creation
+* **Expiration Action** : Automatically deletes object after time elapsed since object creation
+* **Action Target** : Actions can be set based on object tags or object path prefix (s3://mybucket/music/*)
 * Can analyze when to change from standard class to standard IA class through S3 analytics functionality
 
 ### 9.11. Performance
@@ -818,7 +818,7 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
   * Performs S3 object caching
   * Can also be used as S3 upload path
   * Accesses S3 objects using OAI (Origin Access ID)
-* Custom Origin : Can be used as origin if using HTTP protocol
+* **Custom Origin** : Can be used as origin if using HTTP protocol
   * ALB, EC2 Instance, S3 Website, HTTP Backend API
 * Provides origin group functionality
   * Can configure to use secondary origin when primary origin is not working
@@ -833,9 +833,9 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 * Price varies by edge location
 * Price Class
   * Can reduce cost by reducing number of edge locations performing caching
-  * Class ALL : Uses all edge locations, highest cost
-  * Class 200 : Includes all regions except the most expensive region
-  * Class 100 : Includes only the cheapest region
+  * **Class ALL** : Uses all edge locations, highest cost
+  * **Class 200** : Includes all regions except the most expensive region
+  * **Class 100** : Includes only the cheapest region
 
 ### 10.4. Global Accelerator
 
@@ -847,9 +847,9 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 
 * Performs data migration and edge computing using portable devices
 * Composed of the following equipment based on capacity functionality
-  * Snowcone : Supports data migration and edge computing
-  * Snowball : Supports data migration and edge computing
-  * Snowmobile : Supports data migration
+  * **Snowcone** : Supports data migration and edge computing
+  * **Snowball** : Supports data migration and edge computing
+  * **Snowmobile** : Supports data migration
 * Can easily manage equipment by installing OpsHub on laptop
 * Must first store data in S3 then convert to Glacier to proceed with data migration to Glacier
 
@@ -864,15 +864,15 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 * Acts as bridge to help access S3 in on-premise environment
 * Acts as bridge connecting on-premise files, volumes, and tapes with AWS EBS, S3, and Glacier
 * Storage Gateway Type
-  * VM-based : VMware, Hyper-V, Linux KVM, EC2
-  * Hardware-based : Can lease dedicated hardware
+  * **VM-based** : VMware, Hyper-V, Linux KVM, EC2
+  * **Hardware-based** : Can lease dedicated hardware
 * File Gateway
   * Can access S3 Standard, S3 Standard-IA, Glacier in on-premise environment through NFS and SMB protocols
 * Volume Gateway
   * Can access S3 in on-premise environment through iSCSI
   * Provides 2 types of volumes
-    * Cached Volume : Places only frequently accessed data in volume gateway and stores infrequently used data in S3
-    * Stored Volume : Places all data in volume gateway and performs backup by periodically creating EBS snapshots
+    * **Cached Volume** : Places only frequently accessed data in volume gateway and stores infrequently used data in S3
+    * **Stored Volume** : Places all data in volume gateway and performs backup by periodically creating EBS snapshots
 * Tape Gateway
   * Can access S3 and Glacier through iSCSI
 
@@ -916,8 +916,8 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 #### 12.1.2. Security
 
 * Encryption
-  * In-flight encryption : Uses HTTPS
-  * At-rest encryption : Uses KMS key
+  * **In-flight encryption** : Uses HTTPS
+  * **At-rest encryption** : Uses KMS key
   * Client can perform encryption/decryption itself
 * Access Control
   * IAM policy control
@@ -935,7 +935,7 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 
 * Message is sent to dead letter queue when number of requeues due to message visibility timeout exceeds MaximumReceives
 * Used for debugging and failure handling
-* Redrive : Functionality to send messages stored in dead letter queue back to original queue
+* **Redrive** : Functionality to send messages stored in dead letter queue back to original queue
 
 #### 12.1.5. FIFO Queue
 
@@ -964,10 +964,10 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 
 * Real-time streaming data collect, process, and analyze service
   * Application logs, metrics, IoT telemetry
-* Kinesis Data Stream : Composes data stream
-* Kinesis Data Firehose : Stores data stream in data store
-* Kinesis Data Analytics : Analyzes data stream using SQL and Apache Flink
-* Kinesis Video Streams : Composes video stream
+* **Kinesis Data Stream** : Composes data stream
+* **Kinesis Data Firehose** : Stores data stream in data store
+* **Kinesis Data Analytics** : Analyzes data stream using SQL and Apache Flink
+* **Kinesis Video Streams** : Composes video stream
 
 #### 12.3.1. Kinesis Data Stream
 
@@ -976,8 +976,8 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
   * One shard can receive 1MB/sec or 1000 msg/sec
   * One shard can send 2MB/sec
 * Record
-  * Input : Partition Key, Data Blob (maximum 1MB)
-  * Output : Composed of Partition Key, Sequence Number, Data Blob
+  * **Input** : Partition Key, Data Blob (maximum 1MB)
+  * **Output** : Composed of Partition Key, Sequence Number, Data Blob
 * Data retention period can be set from 1 day to 365 days
 * Can reprocess data
 * Cannot remove data once it enters Kinesis
@@ -998,8 +998,8 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
   * Minimum 60 second delay
   * Sends minimum 32MB at once
 * Store Target
-  * AWS : Redshift, S3, ElasticSearch
-  * 3rd Party : Splunk, MongoDB, DataDog, NewRelic
+  * **AWS** : Redshift, S3, ElasticSearch
+  * **3rd Party** : Splunk, MongoDB, DataDog, NewRelic
   * Can create custom HTTP endpoint
 * Supports various data formats, conversion, transformation, and compression
 * Can perform custom transformation using Lambda
@@ -1015,17 +1015,17 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
   * Requires EC2 instance provisioning and maintenance
   * ECS agent runs internally in EC2 instance
   * IAM Role
-    * EC2 Instance Profile : Role used by ECS agent, allows ECS service API calls/sending container logs to CloudWatch/allowing Docker image pull from ECR
-    * ECS Task Role : Role for ECS tasks, can assign separate role per task
+    * **EC2 Instance Profile** : Role used by ECS agent, allows ECS service API calls/sending container logs to CloudWatch/allowing Docker image pull from ECR
+    * **ECS Task Role** : Role for ECS tasks, can assign separate role per task
 * Fargate Launch Type
   * No need for infra provisioning (serverless)
   * Runs using Fargate for CPU/memory needed by task
 
 #### 13.1.2. Load Balancer
 
-* ALB : Can be applied to most services using L7 protocol
-* NLB : Used for high throughput, used to integrate with AWS Private Link
-* CLB : Not recommended, cannot integrate with Fargate
+* **ALB** : Can be applied to most services using L7 protocol
+* **NLB** : Used for high throughput, used to integrate with AWS Private Link
+* **CLB** : Not recommended, cannot integrate with Fargate
 
 #### 13.1.3. Volumes
 
@@ -1040,8 +1040,8 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
   * Functionality to automatically scale ECS tasks based on load
 * EC2 Auto Scaling
   * Functionality to automatically scale EC2 instances based on ECS task load
-  * ASG method : Performs scaling using auto scaling group
-  * Cluster Capacity Provider method : Performs scaling out of new EC2 instance when there are no available resources to create ECS tasks on EC2 instance
+  * **ASG method** : Performs scaling using auto scaling group
+  * **Cluster Capacity Provider method** : Performs scaling out of new EC2 instance when there are no available resources to create ECS tasks on EC2 instance
 
 #### 13.1.5. Rolling Update
 
@@ -1052,14 +1052,14 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 ### 13.2. ECR (Elastic Container Registry)
 
 * Container image storage
-* Private and public repository : https://gallery.ecr.aws/
+* **Private and public repository** : https://gallery.ecr.aws/
 * Uses S3 as backend storage
 
 ## 14. Serverless
 
 ### 14.1. Lambda
 
-* Virtual function : No need to manage servers
+* **Virtual function** : No need to manage servers
 * Execution time limit : Can only perform short executions
 * Can execute only when needed and charges based on execution time
 * Supports autoscaling
@@ -1075,28 +1075,28 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 ##### 14.1.1. Lambda Integration
 
 * Supports integration with various AWS services
-* API Gateway : Calls Lambda as upstream
-* Kinesis : Transforms data using Lambda
-* DynamoDB : Calls Lambda when event occurs in DynamoDB
-* S3 : Calls Lambda when event occurs in S3
-* CloudFront : Lambda Edge
-* EventBridge : Calls Lambda when event occurs in EventBridge
-* CloudWatch : TODO
-* SNS : Calls Lambda when event is sent in SNS
-* SQS : Calls Lambda when message is sent in SQS
-* Cognito : Calls Lambda when event occurs in Cognito
+* **API Gateway** : Calls Lambda as upstream
+* **Kinesis** : Transforms data using Lambda
+* **DynamoDB** : Calls Lambda when event occurs in DynamoDB
+* **S3** : Calls Lambda when event occurs in S3
+* **CloudFront** : Lambda Edge
+* **EventBridge** : Calls Lambda when event occurs in EventBridge
+* **CloudWatch** : TODO
+* **SNS** : Calls Lambda when event is sent in SNS
+* **SQS** : Calls Lambda when message is sent in SQS
+* **Cognito** : Calls Lambda when event occurs in Cognito
 
 #### 14.1.2. Lambda Limit
 
 * Execution
-  * Memory : 128MB ~ 10GB
-  * Maximum execution time : 15 minutes
-  * Maximum env : 4KB
-  * Disk capacity : tmp DIR : 512MB
-  * Concurrency executions : 1000
+  * **Memory** : 128MB ~ 10GB
+  * **Maximum execution time** : 15 minutes
+  * **Maximum env** : 4KB
+  * **Disk capacity** : tmp DIR : 512MB
+  * **Concurrency executions** : 1000
 * Deployment
   * Compressed deployment size (.zip): 50MB
-  * Uncompressed deployment size : 250MB
+  * **Uncompressed deployment size** : 250MB
 
 #### 14.1.3. Lambda Edge
 
@@ -1123,12 +1123,12 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
   * Attributes can be continuously added dynamically
 * Item size is maximum 400KB
 * Data Type
-  * Scalar : String, Number, Binary, Boolean, Null
-  * Document : List, Map
-  * Set : String Set, Number Set, Binary Set
+  * **Scalar** : String, Number, Binary, Boolean, Null
+  * **Document** : List, Map
+  * **Set** : String Set, Number Set, Binary Set
 * Table
-  * Partition Key : TODO
-  * Sort Key : TODO
+  * **Partition Key** : TODO
+  * **Sort Key** : TODO
 * Provides TTL (Time To Live) functionality
 * Index
   * Need to create index to query attributes other than partition key and sort key
@@ -1158,8 +1158,8 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 * Can be applied without modifying app logic
 * Default 5-minute TTL
 * vs ElasticCache
-  * DAX : Object-level caching, query & scan caching
-  * ElasticCache : Stores aggregation results
+  * **DAX** : Object-level caching, query & scan caching
+  * **ElasticCache** : Stores aggregation results
 
 #### 14.2.4. DynamoDB Streams
 
@@ -1237,12 +1237,12 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 
 ## 15. Database
 
-* RDBMS : RDS, Aurora
-* NoSQL : DynamoDB (JSON), ElasticCache (Key/Value), Neptune (Graphs)
-* Object Store : S3 / Glacier
-* Data Warehouse : Redshift, Athena
-* Search : ElasticSearch (JSON)
-* Graphs : Neptune
+* **RDBMS** : RDS, Aurora
+* **NoSQL** : DynamoDB (JSON), ElasticCache (Key/Value), Neptune (Graphs)
+* **Object Store** : S3 / Glacier
+* **Data Warehouse** : Redshift, Athena
+* **Search** : ElasticSearch (JSON)
+* **Graphs** : Neptune
 
 ### 15.1. Redshift
 
@@ -1255,10 +1255,10 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
   * Data loading using EC2 JDBC driver
 * Can use from 1 node to 128 nodes, maximum 128TB per node
 * Node Type
-  * Leader Node : Performs query plan and result aggregation
-  * Compute Node : Performs queries and sends results to leader node
-* Redshift Spectrum : Performs queries directly on S3 objects
-* VPC Routing : Can perform data copy and unload through VPC
+  * **Leader Node** : Performs query plan and result aggregation
+  * **Compute Node** : Performs queries and sends results to leader node
+* **Redshift Spectrum** : Performs queries directly on S3 objects
+* **VPC Routing** : Can perform data copy and unload through VPC
 
 #### 15.1.1. Snapshot & DR
 
@@ -1273,9 +1273,9 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
   * Load to Redshift
 * Serverless service
 * Glue Data Catalog
-  * Crawler : Collects metadata from data stores like S3, RDS, DynamoDB
-  * Glue Data Catalog : Stores metadata collected by crawler
-  * Metadata : Table information, data type, column information
+  * **Crawler** : Collects metadata from data stores like S3, RDS, DynamoDB
+  * **Glue Data Catalog** : Stores metadata collected by crawler
+  * **Metadata** : Table information, data type, column information
   * Stored metadata can be used in Athena, Redshift Spectrum, EMR
 
 ### 15.3. Neptune
@@ -1335,9 +1335,9 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 * Can trigger any metric as alarm
   * Logs can also be converted to metric indicators and can set alarms through converted metrics
 * Alarm Status
-  * OK : Alarm is not triggered
-  * INSUFFICIENT_DATA : Insufficient data to determine status
-  * ALARM : Alarm is triggered
+  * `OK` : Alarm is not triggered
+  * `INSUFFICIENT_DATA` : Insufficient data to determine status
+  * `ALARM` : Alarm is triggered
 * Period
   * Can set cycle for checking metrics
   * Can set at 10-second, 30-second, and 60-second cycles
@@ -1350,18 +1350,18 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 
 * Can receive events from AWS services
 * Event Source
-  * Compute : Lambda, Batch, ECS Task
-  * Integration : SQS, SNS, Kinesis Data Stream, Kinesis Data Firehose
-  * Orchestration : Step Functions, CodePipeline, CodeBuild
-  * Maintenance : SSM, EC2 Actions
+  * **Compute** : Lambda, Batch, ECS Task
+  * **Integration** : SQS, SNS, Kinesis Data Stream, Kinesis Data Firehose
+  * **Orchestration** : Step Functions, CodePipeline, CodeBuild
+  * **Maintenance** : SSM, EC2 Actions
 
 ### 16.5. EventBridge
 
 * Extended service of CloudWatch Events
 * Event Bus Type
-  * Default Event Bus : Event bus created by AWS services
-  * Partner Event Bus : Event bus from AWS-based SaaS services
-  * Custom Event Bus : User app's event bus
+  * **Default Event Bus** : Event bus created by AWS services
+  * **Partner Event Bus** : Event bus from AWS-based SaaS services
+  * **Custom Event Bus** : User app's event bus
 * Can use event bus from other AWS accounts through permission settings
 * Can archive events sent to event bus and replay archived events
 * Schema Registry
@@ -1380,8 +1380,8 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 * Can also store activity record logs in CloudWatch Logs or S3
 * Can record for all regions or single region
 * CloudTrail Event
-  * Management Event : Enabled by default
-  * Data Event : Disabled by default (because event recording requires much capacity)
+  * **Management Event** : Enabled by default
+  * **Data Event** : Disabled by default (because event recording requires much capacity)
 
 #### 16.6.1. CloudTrail Insight
 
@@ -1410,10 +1410,10 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
   * Symmetric (AES-256)
   * Asymmetric (RSA & ECC Key Pairs)
 * CMK (Customer Master Key) Type
-  * AWS Managed Service Default CMK : Free
-  * User Keys created in KMS : $1 per month
-  * User Keys imported : $1/month
-* Key Management Actions : Create, set rotation policy, disable/enable
+  * **AWS Managed Service Default CMK** : Free
+  * **User Keys created in KMS** : $1 per month
+  * **User Keys imported** : $1/month
+* **Key Management Actions** : Create, set rotation policy, disable/enable
 * Can monitor key usage through CloudTrail
 * Must assign key policy to user and also need IAM settings to access KMS
 * KMS keys are tied to specific region and cannot move between regions
@@ -1470,16 +1470,16 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
   * Free
 * Shield Advanced
   * Sophisticated DDoS attack protection for more diverse resources with additional cost
-  * Protection Targets : Amazon EC2, ELB, CloudFront, Global Accelerator, Route 53
+  * **Protection Targets** : Amazon EC2, ELB, CloudFront, Global Accelerator, Route 53
   * Can access DRP (DDoS Response Team)
   * Can receive refund for additional costs charged due to DDoS attacks
 
 ### 17.6. WAF (Web Application Firewall)
 
 * Layer 7 firewall
-* Targets : ALB, API Gateway, CloudFront
+* **Targets** : ALB, API Gateway, CloudFront
 * Provides Web ACL functionality
-  * ACL Rule : Includes IP address, HTTP header, HTTP body, URI
+  * **ACL Rule** : Includes IP address, HTTP header, HTTP body, URI
   * Prevents SQL injection and cross-site scripting attacks
   * Blocks specific countries
   * Can set rate-based rules
@@ -1521,8 +1521,8 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 * Default VPC exists per account
 * Can create up to 5 VPCs per account (soft limit)
 * CIDR
-  * Min CIDR : /28 (16 IP addresses)
-  * Max CIDR : /16 (65536 IP addresses)
+  * **Min CIDR** : /28 (16 IP addresses)
+  * **Max CIDR** : /16 (65536 IP addresses)
 * Only the following network ranges can be assigned because VPC is a private network
   * 10.0.0.0 ~ 10.255.255.255 (10.0.0.0/8)
   * 172.16.0.0 ~ 172.31.255.255 (172.16.0.0/12)
@@ -1535,10 +1535,10 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 * Subnet Reserved IP
   * 5 reserved IPs exist for every subnet
   * When subnet CIDR is 10.0.0.0/24
-  * 10.0.0.0 : Network address
-  * 10.0.0.1 : VPC router
-  * 10.0.0.3 : DNS server
-  * 10.0.0.255 : Broadcast address, not actually used because broadcast is not supported inside VPC
+  * `10.0.0.0` : Network address
+  * `10.0.0.1` : VPC router
+  * `10.0.0.3` : DNS server
+  * `10.0.0.255` : Broadcast address, not actually used because broadcast is not supported inside VPC
 
 ### 18.3. Internet Gateway
 
@@ -1600,8 +1600,8 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 ### 18.10. Site-to-Site VPN
 
 * VPN that connects AWS VPC and enterprise private network through public network
-* VGW (Virtual Private Gateway) : Gateway connected to VPN inside VPC
-* Customer Gateway : Software application or physical device connected to VPN inside enterprise
+* **VGW (Virtual Private Gateway)** : Gateway connected to VPN inside VPC
+* **Customer Gateway** : Software application or physical device connected to VPN inside enterprise
 * Must set route propagation option in VPC
 * Multiple enterprises can connect to one VPC
   * Enterprises can also communicate through VGW in this case
@@ -1609,12 +1609,12 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 ### 18.11. Direct Connect
 
 * Connects AWS VPC and enterprise private network through private network
-  * VGW (Virtual Private Gateway) : Gateway connecting VPC and direct connection location inside VPC
-  * Direct Connection Endpoint : Connects direct connection location and VPC at direct connection location
-  * Customer, Partner Router : Connects direct connection location and enterprise network at direct connection location
+  * **VGW (Virtual Private Gateway)** : Gateway connecting VPC and direct connection location inside VPC
+  * **Direct Connection Endpoint** : Connects direct connection location and VPC at direct connection location
+  * **Customer, Partner Router** : Connects direct connection location and enterprise network at direct connection location
   * When accessing public endpoints like S3, accesses from direct connection endpoint to public endpoint, not from direct connection endpoint to VGW path
   * Can configure high availability by placing two or more direct connection endpoints, customer, and partner routers at direct connection location
-* Direct Connect Gateway : Used when wanting to access other regions through Direct Connect
+* **Direct Connect Gateway** : Used when wanting to access other regions through Direct Connect
 * Connection Type
   * Dedicated Connection
     * 1Gbps, 10Gbps
@@ -1675,8 +1675,8 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 ### 19.2. Data Sync
 
 * Performs data synchronization between on-premises and AWS
-  * On-Premises Target : NFS, SMB
-  * AWS Target : S3, EFS, FSx
+  * **On-Premises Target** : NFS, SMB
+  * **AWS Target** : S3, EFS, FSx
   * Requires AWS DataSync agent installation on-premises
 * Can set synchronization cycle as hourly, daily, or weekly
 * Can also perform synchronization between AWS
@@ -1685,7 +1685,7 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 ### 19.3. Backup
 
 * Backs up storage services to S3
-  * Targets : EC2, EBS, S3, RDS, DynamoDB, DocumentDB, EFS, Aurora, Neptune, FSx, Storage Gateway
+  * **Targets** : EC2, EBS, S3, RDS, DynamoDB, DocumentDB, EFS, Aurora, Neptune, FSx, Storage Gateway
 * Supports cross-account
 * Supports cross-region
 * Supports backup vault lock
@@ -1694,18 +1694,18 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 
 ## 20. Machine Learning
 
-* Rekognition : Recognizes objects and people in photos or videos
-* Transcribe : Converts voice to text
-* Polly : Converts text to voice
-* Translate : Language translation
-* Lex : Provides Amazon Alexa functionality
-* Connect : Phone consultation
-* Comprehend : NLP (Natural Language Processing)
-* SageMaker : Provides development and operation environment for building and applying ML models
-* Forecast : Functionality to predict the future
-* Kendra : Document search functionality
-* Personalize : Personal recommendation functionality
-* Textract : Extracts text from scanned documents
+* **Rekognition** : Recognizes objects and people in photos or videos
+* **Transcribe** : Converts voice to text
+* **Polly** : Converts text to voice
+* **Translate** : Language translation
+* **Lex** : Provides Amazon Alexa functionality
+* **Connect** : Phone consultation
+* **Comprehend** : NLP (Natural Language Processing)
+* **SageMaker** : Provides development and operation environment for building and applying ML models
+* **Forecast** : Functionality to predict the future
+* **Kendra** : Document search functionality
+* **Personalize** : Personal recommendation functionality
+* **Textract** : Extracts text from scanned documents
 
 ## 21. Reference
 

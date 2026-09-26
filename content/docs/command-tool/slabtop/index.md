@@ -2,7 +2,7 @@
 title: slabtop
 ---
 
-Slab 사용량을 출력하는 slabtop의 사용법을 정리한다.
+Slab 사용량을 출력하는 **slabtop**의 사용법을 정리한다.
 
 ## 1. slabtop
 

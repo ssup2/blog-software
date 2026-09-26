@@ -6,7 +6,7 @@ This document summarizes DDoS (Distributed Denial-of-Service) attacks.
 
 ## 1. DDoS (Distributed Denial-of-Service) Attack
 
-A DDoS attack refers to any attack that sends abnormal traffic to a specific server or service to cause a failure of that server or service. Many DDoS attack techniques exist, and most share the characteristic that the attackers can be an unspecified large number of parties who can access the server or service. Therefore, servers or services exposed on a public network must be prepared for DDoS attacks.
+A **DDoS attack** refers to any attack that sends abnormal traffic to a specific server or service to cause a failure of that server or service. Many DDoS attack techniques exist, and most share the characteristic that the attackers can be an unspecified large number of parties who can access the server or service. Therefore, servers or services exposed on a public network must be prepared for DDoS attacks.
 
 ## 2. DDoS Attack Type
 

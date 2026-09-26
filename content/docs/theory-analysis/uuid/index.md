@@ -6,7 +6,7 @@ title: UUID
 
 {{< figure caption="[Figure 1] UUID Format" src="images/uuid-format.png" width="400px" >}}
 
-UUID는 의미 그대로 어느곳에서도 고유한 ID를 의미한다. [Figure 1]은 UUID의 Format을 나타내고 있다. 8,4,4,4,12 총 **32개의 문자**를 포함하고 있으며 각 문자는 16진수로 구성되며, Dash까지 포함한다면 36개의 문자로 구성된다. UUID를 Bit로 나타내면 **"32*4=128" 개수의 Bit**로 구성된다.
+**UUID**는 의미 그대로 어느곳에서도 고유한 ID를 의미한다. [Figure 1]은 UUID의 Format을 나타내고 있다. 8,4,4,4,12 총 **32개의 문자**를 포함하고 있으며 각 문자는 16진수로 구성되며, Dash까지 포함한다면 36개의 문자로 구성된다. UUID를 Bit로 나타내면 **"32*4=128" 개수의 Bit**로 구성된다.
 
 수많은 문자로 구성되어 있는 만큼 임의의 값으로 각 Server에서 UUID를 생성하더라도 생성된 UUID끼리 서로 충돌이 발생할 확률이 매우 낮다. 따라서 App이 UUID를 이용할 경우 APP은 UUID의 중복 검사를 진행하지 않고 이용하는 경우가 많다.
 
@@ -32,10 +32,10 @@ v4 UUID는 완전 Random을 기반으로 UUID를 생성한다. UUID의 Version, 
 
 v5 UUID는 **SHA-1** Hashing을 기반으로 UUID를 생성한다. v5 UUID를 생성하기 위해서는 **Namespace**와 **Name**값이 필요하다. Namespace와 Name값이 동일하다면 동일한 UUID가 생성된다. Namespace 값은 아래와 같이 정의되어 있으며, 정의된 값 말고 다른 값도 이용할 수 있다.
 
-* NAMESPACE-DNS : Name이 Domain 이름이다.
-* NAMESPACE-URL : Name이 URL이다.
-* NAMESPACE-OID : Name이 OID (Object Identitfier)이다.
-* NAMESPACE-X500 : Name이 LDAP Protocol의 Directory Name이다.
+* `NAMESPACE-DNS` : Name이 Domain 이름이다.
+* `NAMESPACE-URL` : Name이 URL이다.
+* `NAMESPACE-OID` : Name이 OID (Object Identitfier)이다.
+* `NAMESPACE-X500` : Name이 LDAP Protocol의 Directory Name이다.
 
 #### 1.4. v2
 

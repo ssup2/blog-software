@@ -6,7 +6,7 @@ Analyze conntrack, a Module of the Netfilter Framework that manages Network Conn
 
 ## 1. Linux conntrack Module
 
-The conntrack Module is a Stateful Module of the Netfilter Framework that **manages and tracks Network Connections** in the Linux Kernel. Network Connection-related functions provided by Netfilter Filter Framework-based Applications such as iptables are all based on the conntrack Module.
+The **conntrack Module** is a Stateful Module of the Netfilter Framework that **manages and tracks Network Connections** in the Linux Kernel. Network Connection-related functions provided by Netfilter Filter Framework-based Applications such as iptables are all based on the conntrack Module.
 
 ### 1.1. Connection Status, conntrack Command
 

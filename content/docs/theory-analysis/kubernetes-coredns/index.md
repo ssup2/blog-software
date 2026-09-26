@@ -8,11 +8,11 @@ Kubernetes에서 동작하는 CoreDNS를 분석한다.
 
 {{< figure caption="[Figure 1] Kubernetes CoreDNS Architecture" src="images/kubernetes-coredns-architecture.png" width="800px" >}}
 
-CoreDNS는 Kubernetes Cluster 내부에서 이용되는 DNS Server이다. 대부분의 Pod들은 기본적으로 CoreDNS로 DNS Record를 조회를 수행하며, CoreDNS는 Service 또는 Pod의 DNS Record 뿐만 아니라 외부 Domain의 DNS Record도 Caching하여 Pod에게 제공한다. [Figure 1]은 Kubernetes Cluster에서 동작하는 CoreDNS의 Architecture를 나타내고 있다.
+**CoreDNS**는 Kubernetes Cluster 내부에서 이용되는 DNS Server이다. 대부분의 Pod들은 기본적으로 CoreDNS로 DNS Record를 조회를 수행하며, CoreDNS는 Service 또는 Pod의 DNS Record 뿐만 아니라 외부 Domain의 DNS Record도 Caching하여 Pod에게 제공한다. [Figure 1]은 Kubernetes Cluster에서 동작하는 CoreDNS의 Architecture를 나타내고 있다.
 
 ### 1.1. Pod의 DNS Record 조회
 
-CoreDNS는 일반적으로 Worker Node에서 Deployment로 배포되어 **다수의 Pod**로 구동된다. 그리고 다수의 CoreDNS Pod들은 CoreDNS Service를 통해서 VIP (ClusterIP)로 묶이게 된다. Kubernetes Cluster의 Pod들은 CoreDNS Service의 VIP를 통해서 CoreDNS에 접근하게 된다. 다수의 CoreDNS Pod와 CoreDNS Service를 이용하는 이유는 **HA(High Availability)**를 확보하기 위해서다.
+CoreDNS는 일반적으로 Worker Node에서 Deployment로 배포되어 **다수의 Pod**로 구동된다. 그리고 다수의 CoreDNS Pod들은 CoreDNS Service를 통해서 VIP (ClusterIP)로 묶이게 된다. Kubernetes Cluster의 Pod들은 CoreDNS Service의 VIP를 통해서 CoreDNS에 접근하게 된다. 다수의 CoreDNS Pod와 CoreDNS Service를 이용하는 이유는 **HA** (High Availability)를 확보하기 위해서다.
 
 ```shell {caption="[Shell 1] CoreDNS Deployment, Pod"}
 $ kubectl -n kube-system get deployment coredns
@@ -63,7 +63,7 @@ CoreDNS의 설정파일에서 한가지 더 주목해야하는 설정은 `forwar
 
 ### 1.3. CoreDNS Auto-scaling
 
-일반적으로 Kubernetes Cluster의 크기가 증가할 수록 Pod의 개수가 증가하고, Pod의 개수가 증가할수록 CoreDNS의 부하도 같이 증가한다. 따라서 CoreDNS Auto-scaling을 통해서 각 CoreDNS Pod의 부하를 분산시키는 것이 중요하다. CoreDNS의 Auto-scaling은 일반인 Pod에 많이 활용되는 HPA (Horizontal Pod Autoscaler)보다는 **CPA (Cluster Proportional Autoscaler)**를 활용하여 수행한다. HPA는 CPU/Memory 사용량을 기준으로 필요에 따라서 Auto-scaling을 수행하지만, CPA는 Kubernetes Cluster 전체의 Node 또는 Pod의 개수에 비례하여 CoreDNS의 개수를 조정한다.
+일반적으로 Kubernetes Cluster의 크기가 증가할 수록 Pod의 개수가 증가하고, Pod의 개수가 증가할수록 CoreDNS의 부하도 같이 증가한다. 따라서 CoreDNS Auto-scaling을 통해서 각 CoreDNS Pod의 부하를 분산시키는 것이 중요하다. CoreDNS의 Auto-scaling은 일반인 Pod에 많이 활용되는 HPA (Horizontal Pod Autoscaler)보다는 **CPA** (Cluster Proportional Autoscaler)를 활용하여 수행한다. HPA는 CPU/Memory 사용량을 기준으로 필요에 따라서 Auto-scaling을 수행하지만, CPA는 Kubernetes Cluster 전체의 Node 또는 Pod의 개수에 비례하여 CoreDNS의 개수를 조정한다.
 
 CoreDNS는 일반적으로 CPU/Memory 사용량이 많지 않기 때문에 일반적으로 HPA를 활용하여 CoreDNS의 개수를 조정하는 것이 어렵다. 또한 CoreDNS 장애는 Kubernetes Cluster 내부의 모든 Pod의 DNS Record 조회 실패로 이어지고 큰 장애로 이어지기 때문에, HPA보다 보수적이며 실제 부하가 발생하기전에 Node/Pod 개수를 기반으로 좀더 앞서서 Auto-scaling을 수행하는 CPA를 일반적으로 좀더 활용한다.
 
@@ -101,36 +101,36 @@ CoreDNS는 일반적으로 CPU/Memory 사용량이 많지 않기 때문에 일�
 
 CoreDNS는 `log` 설정을 통해서 CoreDNS로 전달되는 모든 DNS Record 조회 요청을 Log로 남길 수 있다. [File 2]는 CoreDNS의 `log` 설정을 나타내고 있으며, [File 3]은 CoreDNS의 DNS Record 조회 Log의 예제 나타내고 있다. `log` 설정 시 기본적으로 `{remote}:{port} - {>id} "{type} {class} {name} {proto} {size} {>do} {>bufsize}" {rcode} {>rflags} {rsize} {duration}` 형태의 Log를 남긴다.
 
-* remote : 조회 요청에 사용된 **Pod의 IP**를 의미
-* port : 조회 요청에 사용된 **Pod의 Port**를 의미
-* id : **조회 요청의 ID**를 의미
-* type : **조회 요청의 Type**을 의미 (Query Type)
-  * A : IPv4 Address
-  * AAAA : IPv6 Address
-  * CNAME : Canonical Name
-* class : **조회 요청의 Class**를 의미 (Query Class)
-  * IN : Internet
-* name :  **조회 요청의 이름**을 의미 (Query Name)
-* proto : **조회 요청에 사용된 Protocol**을 의미
-  * udp : UDP
-  * tcp : TCP
-* size : **조회 요청의 크기**를 의미
-* do : 조회 요청에 **DNSSEC 이용 여부**를 의미 (DNSSEC OK)
-  * false : DNSSEC 이용하지 않음
-  * true : DNSSEC 이용함
-* bufsize : 조회 요청의 **EDNS0** 확장 프로토콜 대한 Buffer 크기를 의미
-* rcode : 조회 요청에 대한 **응답 Code**를 의미 (Response Code)
-  * NOERROR : 조회 요청에 대한 응답이 있음
-  * NXDOMAIN : 조회 요청에 대한 응답이 없음
-  * SERVFAIL : 조회 요청에 대한 응답이 있지만 오류가 발생함
-  * REFUSED : 조회 요청에 대한 응답이 거절됨
-* rflags : DNS Record 조회 요청에 대한 **응답 Flag**를 의미 (Response Flags)
-  * QR : Response Flag
-  * AA : Authoritative Answer Flag
-  * RD : Recursion Desired Flag
-  * TC : Truncated Flag
-* rsize : 조회 요청에 대한 **응답 크기**를 의미, 압축되지 않은 응답 크기를 의미하며 Pod는 압축된 응답 크기를 받음
-* duration : 조회 요청에 소요된 **응답 시간**을 의미
+* `remote` : 조회 요청에 사용된 **Pod의 IP**를 의미
+* `port` : 조회 요청에 사용된 **Pod의 Port**를 의미
+* `id` : **조회 요청의 ID**를 의미
+* `type` : **조회 요청의 Type**을 의미 (Query Type)
+  * `A` : IPv4 Address
+  * `AAAA` : IPv6 Address
+  * `CNAME` : Canonical Name
+* `class` : **조회 요청의 Class**를 의미 (Query Class)
+  * `IN` : Internet
+* `name` :  **조회 요청의 이름**을 의미 (Query Name)
+* `proto` : **조회 요청에 사용된 Protocol**을 의미
+  * `udp` : UDP
+  * `tcp` : TCP
+* `size` : **조회 요청의 크기**를 의미
+* `do` : 조회 요청에 **DNSSEC 이용 여부**를 의미 (DNSSEC OK)
+  * `false` : DNSSEC 이용하지 않음
+  * `true` : DNSSEC 이용함
+* `bufsize` : 조회 요청의 **EDNS0** 확장 프로토콜 대한 Buffer 크기를 의미
+* `rcode` : 조회 요청에 대한 **응답 Code**를 의미 (Response Code)
+  * `NOERROR` : 조회 요청에 대한 응답이 있음
+  * `NXDOMAIN` : 조회 요청에 대한 응답이 없음
+  * `SERVFAIL` : 조회 요청에 대한 응답이 있지만 오류가 발생함
+  * `REFUSED` : 조회 요청에 대한 응답이 거절됨
+* `rflags` : DNS Record 조회 요청에 대한 **응답 Flag**를 의미 (Response Flags)
+  * `QR` : Response Flag
+  * `AA` : Authoritative Answer Flag
+  * `RD` : Recursion Desired Flag
+  * `TC` : Truncated Flag
+* `rsize` : 조회 요청에 대한 **응답 크기**를 의미, 압축되지 않은 응답 크기를 의미하며 Pod는 압축된 응답 크기를 받음
+* `duration` : 조회 요청에 소요된 **응답 시간**을 의미
 
 ## 2. 참조
 

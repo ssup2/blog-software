@@ -62,9 +62,9 @@ lrwxrwxrwx 1 root root           7 Apr  9 15:55 xvdbw -> nvme1n1
 
 이에 맞추어 AWS EKS에서도 CSI Controller를 제공하고 있다. EBS CSI Storage Class를 제공하고 있으며 EFS, FSx를 이용하기 위해서는 반드시 CSI Controller를 이용해야 한다. Kubernetes 관점에서 EBS, EFS, FSx Stoage의 특징은 다음과 같다.
 
-* EBS : EBS는 **ReadWriteOnce** Mode로 동작한다. EBS는 Pod가 동작하는 EC2 Instance에 Attach되며, Attach된 EBS는 CSI Controller에 의해서 Format 및 EC2 Instance 내부로 Mount된다. Mount된 EBS는 Pod에게 Bind Mount를 통해서 노출시킨다.
-* EFS : EFS는 **ReadWriteMany** Mode로 동작한다. EFS는 NFSv4 Protocol을 통해서 EC2 Instance에 Mount되며, Mount된 EFS는 Pod에게 Bind Mount를 통해서 노출시킨다.
-* EFx : EFx는 **ReadWriteMany** Mode로 동작한다. EFx는 EFS에 비해서 높은 성능이 특징이다.
+* **EBS** : EBS는 **ReadWriteOnce** Mode로 동작한다. EBS는 Pod가 동작하는 EC2 Instance에 Attach되며, Attach된 EBS는 CSI Controller에 의해서 Format 및 EC2 Instance 내부로 Mount된다. Mount된 EBS는 Pod에게 Bind Mount를 통해서 노출시킨다.
+* **EFS** : EFS는 **ReadWriteMany** Mode로 동작한다. EFS는 NFSv4 Protocol을 통해서 EC2 Instance에 Mount되며, Mount된 EFS는 Pod에게 Bind Mount를 통해서 노출시킨다.
+* **FSx** : EFx는 **ReadWriteMany** Mode로 동작한다. EFx는 EFS에 비해서 높은 성능이 특징이다.
 
 ## 2. 참조
 

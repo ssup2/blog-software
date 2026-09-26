@@ -4,7 +4,7 @@ title: Consul
 
 ## 1. Consul
 
-Consul performs roles such as Service Discovery, Service Health Check, Service status/configuration information management, and Key-value Store that **Control Plane** performs in Service Mesh Architecture. These functions provided by Consul are based on Consul's **Key-value Store**. Consul's Key-value Store is composed of multiple Consul Clusters and focuses on High Availability using Raft Algorithm and gossip Protocol.
+**Consul** performs roles such as Service Discovery, Service Health Check, Service status/configuration information management, and Key-value Store that **Control Plane** performs in Service Mesh Architecture. These functions provided by Consul are based on Consul's **Key-value Store**. Consul's Key-value Store is composed of multiple Consul Clusters and focuses on High Availability using Raft Algorithm and gossip Protocol.
 
 Service registration is performed through Consul API, and registered Services can be discovered through DNS or HTTP Request. Service information includes Health Check methods for that Service, and Consul periodically checks the Health of that Service through Health Check methods of registered Services. If Consul discovers a Service that is not in normal state, that Service is excluded from Discovery targets so that Traffic is not delivered to Services that are not in normal state.
 

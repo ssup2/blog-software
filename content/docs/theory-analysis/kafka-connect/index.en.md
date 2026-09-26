@@ -8,7 +8,7 @@ Analyze Kafka Connect.
 
 {{< figure caption="[Figure 1] Kafka Connect Architecture" src="images/kafka-connect-architecture.png" width="900px" >}}
 
-Kafka Connect is a tool that helps build data streams by integrating with external data stores based on Kafka. [Figure 1] shows the architecture of Kafka Connect and consists of the following components.
+**Kafka Connect** is a tool that helps build data streams by integrating with external data stores based on Kafka. [Figure 1] shows the architecture of Kafka Connect and consists of the following components.
 
 * **Data Source** : Data store that serves as the starting point of the data stream.
 * **Data Destination** : Data store that serves as the destination point of the data stream.

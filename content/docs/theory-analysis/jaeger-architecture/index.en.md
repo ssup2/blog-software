@@ -6,7 +6,7 @@ This document analyzes Jaeger Architecture.
 
 ## 1. Jaeger Architecture
 
-Jaeger is a Distributed Tracing System that provides Profiling and Monitoring for MSA (Micro Service Architecture) Services (Apps). It follows the **OpenTracing** standard. Jaeger can be built in two ways: without using Kafka and using Kafka.
+**Jaeger** is a Distributed Tracing System that provides Profiling and Monitoring for MSA (Micro Service Architecture) Services (Apps). It follows the **OpenTracing** standard. Jaeger can be built in two ways: without using Kafka and using Kafka.
 
 ### 1.1 Without Kafka
 

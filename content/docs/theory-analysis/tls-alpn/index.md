@@ -6,7 +6,7 @@ TLS의 ALPN (Application Layer Protocol Negotiation)을 분석한다.
 
 ## 1. ALPN (Application Layer Protocol Negotiation)
 
-ALPN은 TLS의 Handshake 과정중 가장 처음에 이루어지는 Hello 과정에 이용되는 TLS의 확장 기법이다. 이름에서 알 수 있는것 처럼 Server와 Client 사이에 어떤 Protocol을 이용하여 통신을 수행할지를 결정하는 역할을 수행한다. 
+**ALPN**은 TLS의 Handshake 과정중 가장 처음에 이루어지는 Hello 과정에 이용되는 TLS의 확장 기법이다. 이름에서 알 수 있는것 처럼 Server와 Client 사이에 어떤 Protocol을 이용하여 통신을 수행할지를 결정하는 역할을 수행한다. 
 
 {{< figure caption="[Figure 1] ALPN을 이용한 TLS의 Handshake 과정" src="images/tls-alpn.png" width="600px" >}}
 

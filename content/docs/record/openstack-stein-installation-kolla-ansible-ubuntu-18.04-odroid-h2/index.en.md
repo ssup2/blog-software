@@ -8,39 +8,39 @@ title: OpenStack Stein Installation / Using Kolla-Ansible / Ubuntu 18.04, ODROID
 
 [Figure 1] shows the OpenStack installation environment based on an ODROID-H2 cluster. Detailed environment information is as follows:
 
-* OpenStack : Stein
-* Kolla : 8.0.0
-* Kolla-Ansible : 8.0.0
-* Octiava : 4.0.1
-* Node : Ubuntu 18.04, root user
+* **OpenStack** : Stein
+* **Kolla** : 8.0.0
+* **Kolla-Ansible** : 8.0.0
+* **Octavia** : 4.0.1
+* **Node** : Ubuntu 18.04, root user
   * ODROID-H2
-    * Node 01 : Controller Node, Network Node, Ceph Node (MON, MGR, OSD)
-    * Node 02, 03 : Compute Node, Ceph Node (OSD)
+    * **Node 01** : Controller Node, Network Node, Ceph Node (MON, MGR, OSD)
+    * **Node 02, 03** : Compute Node, Ceph Node (OSD)
   * VM
-    * Node 09 : Monitoring Node, Registry Node, Deploy Node
+    * **Node 09** : Monitoring Node, Registry Node, Deploy Node
 * Network
-  * NAT Network : External Network (Provider Network), 192.168.0.0/24
-    * Floating IP Range : 192.168.0.200 ~ 224
-  * Private Network : Guest Network (Tenant Network), Management Network, 10.0.0.0/24
+  * **NAT Network** : External Network (Provider Network), 192.168.0.0/24
+    * **Floating IP Range** : 192.168.0.200 ~ 224
+  * **Private Network** : Guest Network (Tenant Network), Management Network, 10.0.0.0/24
     * Node Default Gateway
 * Storage
-  * /dev/mmcblk0 : Root Filesystem, 64GB
-  * /dev/nvme0n1 : Ceph, 256GB
+  * `/dev/mmcblk0` : Root Filesystem, 64GB
+  * `/dev/nvme0n1` : Ceph, 256GB
 
 ## 2. OpenStack Components
 
 The components to be installed among OpenStack components are as follows:
 
-* Nova : Provides VM Service.
-* Neutron : Provides Network Service.
-* Octavia : Provides Load Balancer Service.
-* Keystone : Provides Authentication and Authorization Service.
-* Glance : Provides VM Image Service.
-* Cinder : Provides VM Block Storage Service.
-* Horizon : Provides Web Dashboard Service.
-* Prometheus : Stores metric information.
-* Grafana : Visualizes metric information stored in Prometheus in various graphs.
-* Ceph : Acts as backend storage for Glance and Cinder.
+* **Nova** : Provides VM Service.
+* **Neutron** : Provides Network Service.
+* **Octavia** : Provides Load Balancer Service.
+* **Keystone** : Provides Authentication and Authorization Service.
+* **Glance** : Provides VM Image Service.
+* **Cinder** : Provides VM Block Storage Service.
+* **Horizon** : Provides Web Dashboard Service.
+* **Prometheus** : Stores metric information.
+* **Grafana** : Visualizes metric information stored in Prometheus in various graphs.
+* **Ceph** : Acts as backend storage for Glance and Cinder.
 
 ## 3. Network Configuration
 
@@ -237,7 +237,7 @@ Modify the /etc/ansible/ansible.cfg file on the Deploy Node as shown in [Text 6]
 (Deploy)$ cp -r /usr/local/share/kolla-ansible/etc_examples/kolla/* /etc/kolla
 ```
 
-Copy inventory files. Also copy the **global.yaml** config file and the **passwords.yml** file containing password information.
+Copy inventory files. Also copy the `global.yaml` config file and the `passwords.yml` file containing password information.
 
 ```text {caption="[Text 7] Deploy Node - ~/kolla-ansible/multinode", linenos=table}
 # These initial groups are the only groups required to be modified. The
@@ -829,11 +829,11 @@ Initialize OSD blocks on all Ceph nodes.
 
 Accessible dashboard information is as follows. Listed in order of URL, ID, Password.
 
-* Horizon : http://10.0.0.20:80, admin, admin
-* RabbitMQ : http://10.0.0.20:15672, openstack, admin
-* Prometheus : http://10.0.0.20:9091
-* Grafana : http://10.0.0.20:3000, admin, admin
-* Alertmanager : http://10.0.0.20:9093, admin, admin
+* **Horizon** : http://10.0.0.20:80, admin, admin
+* **RabbitMQ** : http://10.0.0.20:15672, openstack, admin
+* **Prometheus** : http://10.0.0.20:9091
+* **Grafana** : http://10.0.0.20:3000, admin, admin
+* **Alertmanager** : http://10.0.0.20:9093, admin, admin
 
 ## 18. Debugging
 
@@ -842,7 +842,7 @@ Accessible dashboard information is as follows. Listed in order of URL, ID, Pass
 ansible.log  ceph  chrony  cinder  glance  horizon  keystone  mariadb  neutron  nova  octavia  openvswitch  prometheus  rabbitmq
 ```
 
-Logs for OpenStack services are stored in the **/var/log/kolla** directory on each node.
+Logs for OpenStack services are stored in the `/var/log/kolla` directory on each node.
 
 ## 19. References
 

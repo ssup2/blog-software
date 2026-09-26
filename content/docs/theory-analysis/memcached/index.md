@@ -6,7 +6,7 @@ title: Memcached
 
 ## 1. Memcached
 
-Memcached는 의미 그대로 다양한 Data의 **Caching을 위해 설계된 분산 Key-Value Storage**이다. Caching 
+**Memcached**는 의미 그대로 다양한 Data의 **Caching을 위해 설계된 분산 Key-Value Storage**이다. Caching 
 System의 핵심은 Data의 빠른 Read/Write 성능이다. 따라서 Memcached도 Data의 빠른 Read/Write 성능에 중점을 두고있다. Memcached는 Data 저장시 Disk를 이용하지 않고 오직 **Memory**만 이용하여 Data의 Read/Write 성능을 극대화 하고 있다. Memory에만 Data가 저장되어 있기 때문에 Data는 언제든지 유실 될 수 있지만, Caching System에서 Data 유실은 치명적이지 않기 때문에 크게 문제되지 않는다. Memcached는 Client와 통신시 **Text Protocol**과 **Binary Protocol** 둘다 지원하지만 성능을 위해서는 Binary Procotol을 이용하는 것이 좋다.
 
 ### 1.1. Cluster

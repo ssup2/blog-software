@@ -5,11 +5,12 @@ title: Kubernetes MetalLB 설치 / Ubuntu 18.04 환경
 ## 1. 설치 환경
 
 설치 환경은 다음과 같다.
+
 * Kubernetes 1.12
-  * Network Addon : cilium 이용
+  * **Network Addon** : cilium 이용
 * Helm
-  * Client : v2.13.1
-  * Server : v2.13.1
+  * **Client** : v2.13.1
+  * **Server** : v2.13.1
 * MetalLB 0.7.3
 
 ## 2. Network 설정
@@ -17,8 +18,9 @@ title: Kubernetes MetalLB 설치 / Ubuntu 18.04 환경
 {{< figure caption="[Figure 1] Kubernetes Network" src="images/kubernetes-network.png" width="900px" >}}
 
 Network는 다음과 같다.
-* Node Network : 10.0.0.0/24
-* LoadBalancer Service IP : 10.0.0.200 ~ 10.0.0.220
+
+* **Node Network** : 10.0.0.0/24
+* **LoadBalancer Service IP** : 10.0.0.200 ~ 10.0.0.220
 
 ## 3. MetalLB 설치
 

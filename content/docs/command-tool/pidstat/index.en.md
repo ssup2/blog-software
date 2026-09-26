@@ -24,12 +24,12 @@ Linux 4.15.0-60-generic (node09)        10/02/19        _x86_64_        (2 CPU)
 
 Displays CPU usage per process. [Shell 1] shows the output of `pidstat` displaying usage per process. Each column has the following meaning:
 
-* %usr : CPU usage rate for running application code of the process
-* %system : CPU usage rate for running kernel code of the process
-* %guest : CPU usage rate for running vCPU if the process is a hypervisor
-* %wait : CPU idle rate for running the process
-* %CPU : Total CPU usage rate of the process
-* CPU : CPU core on which the process runs
+* `%usr` : CPU usage rate for running application code of the process
+* `%system` : CPU usage rate for running kernel code of the process
+* `%guest` : CPU usage rate for running vCPU if the process is a hypervisor
+* `%wait` : CPU idle rate for running the process
+* `%CPU` : Total CPU usage rate of the process
+* `CPU` : CPU core on which the process runs
 
 ### 1.2. pidstat -t
 
@@ -79,10 +79,10 @@ Linux 4.15.0-60-generic (node09)        10/02/19        _x86_64_        (2 CPU)
 
 Displays disk I/O usage per process. [Shell 3] shows the output of `pidstat -d` displaying disk I/O usage per process. Each column has the following meaning:
 
-* kB_rd/s : Amount of data read per second by the process in KB
-* kB_wr/s : Amount of data written per second by the process in KB
-* kB_ccwr/s : Amount of data for which write was cancelled due to dirty page cache of the process in KB
-* iodelay : Disk delay of the process. Delay includes time until disk sync is completed
+* `kB_rd/s` : Amount of data read per second by the process in KB
+* `kB_wr/s` : Amount of data written per second by the process in KB
+* `kB_ccwr/s` : Amount of data for which write was cancelled due to dirty page cache of the process in KB
+* `iodelay` : Disk delay of the process. Delay includes time until disk sync is completed
 
 ### 1.6. pidstat -r
 
@@ -100,10 +100,10 @@ Linux 4.15.0-60-generic (node09)        10/02/19        _x86_64_        (2 CPU)
 
 Displays memory usage per process. [Shell 4] shows the output of `pidstat -r` displaying memory usage per process. Each column has the following meaning:
 
-* minflt/s : Number of minor faults occurred per second by the process
-* majflt/s : Number of major faults occurred per second by the process
-* VSZ : Virtual memory usage of the process
-* RSS : Non-swapped memory usage among memory used by the process
+* `minflt/s` : Number of minor faults occurred per second by the process
+* `majflt/s` : Number of major faults occurred per second by the process
+* `VSZ` : Virtual memory usage of the process
+* `RSS` : Non-swapped memory usage among memory used by the process
 
 ### 1.7. pidstat -s
 
@@ -121,8 +121,8 @@ Linux 4.15.0-60-generic (node09)        10/02/19        _x86_64_        (2 CPU)
 
 Displays stack usage per process. [Shell 5] shows the output of `pidstat -s` displaying stack usage per process. Each column has the following meaning:
 
-* StkSize : Size of memory reserved for use as stack by the process
-* StkRef : Size of memory used as stack by the process
+* `StkSize` : Size of memory reserved for use as stack by the process
+* `StkRef` : Size of memory used as stack by the process
 
 ### 1.8. pidstat -v
 
@@ -140,8 +140,8 @@ Linux 4.15.0-60-generic (node09)        10/02/19        _x86_64_        (2 CPU)
 
 Displays thread count and FD (File Descriptor) count information per process. [Shell 6] shows the output of `pidstat -v` displaying thread count and FD count information per process. Each column has the following meaning:
 
-* threads : Number of threads of the process
-* fd-nr : Number of FDs (File Descriptors) currently used by the process
+* `threads` : Number of threads of the process
+* `fd-nr` : Number of FDs (File Descriptors) currently used by the process
 
 ### 1.9. pidstat -w
 
@@ -159,6 +159,6 @@ Linux 4.15.0-60-generic (node09)        10/02/19        _x86_64_        (2 CPU)
 
 Displays context switch information per process. [Shell 7] shows the output of `pidstat -w` displaying context switch information per process. Each column has the following meaning:
 
-* cswch/s : Number of voluntary context switches occurred per second
-* nvcswch/s : Number of involuntary context switches occurred per second
+* `cswch/s` : Number of voluntary context switches occurred per second
+* `nvcswch/s` : Number of involuntary context switches occurred per second
 

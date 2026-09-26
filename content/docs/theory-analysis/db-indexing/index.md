@@ -8,7 +8,7 @@ DB의 Indexing 기법을 분석한다.
 
 {{< figure caption="[Figure 1] DB Indexing" src="images/db-indexing.png" width="600px" >}}
 
-DB Indexing 기법은 단어 그대로 Index(색인)를 생성하여 DB의 성능을 높이는 기법이다. [Figure 1]은 DB Indexing 기법을 간략하게 나타내고 있다. 오른쪽 표는 DB Table을 나타내고 있고, 왼쪽 표는 State Column을 기반으로 하는 Index를 나타내고 있다. Index는 State Column의 Record 값을 **정렬**한 후 해당 Record 값의 **ID**를 저장하고 있다.
+**DB Indexing** 기법은 단어 그대로 Index(색인)를 생성하여 DB의 성능을 높이는 기법이다. [Figure 1]은 DB Indexing 기법을 간략하게 나타내고 있다. 오른쪽 표는 DB Table을 나타내고 있고, 왼쪽 표는 State Column을 기반으로 하는 Index를 나타내고 있다. Index는 State Column의 Record 값을 **정렬**한 후 해당 Record 값의 **ID**를 저장하고 있다.
 
 ```sql {caption="[Query 1] Select, Where 단일 조건문"}
 SELECT * FROM Fruit_Info WHERE State = 'NC'

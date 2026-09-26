@@ -8,15 +8,15 @@ title: Ceph 설치, 실행 / Ubuntu 18.04, ODROID-H2 Cluster 환경
 
 [Figure 1]은 ODROID-H2 Cluster로 Ceph 설치 환경을 나타내고 있다. Ceph를 File Storage와 Object Storage로는 이용하지 않을 예정이기 때문에 MDS (Meta Data Server)와 radosgw는 설치하지 않는다. 주요 설치 환경은 아래와 같다.
 
-* Node : Ubuntu 18.04
-  * ODROID-H2 : Node 01, 02, 03 - Monitor, OSD, Manager
-  * VM : Node 04 - Deploy
+* **Node** : Ubuntu 18.04
+  * **ODROID-H2** : Node 01, 02, 03 - Monitor, OSD, Manager
+  * **VM** : Node 04 - Deploy
 * Network
-  * NAT Network : 192.168.0.0/24
-  * Private Network : 10.0.0.0/24
+  * **NAT Network** : 192.168.0.0/24
+  * **Private Network** : 10.0.0.0/24
 * Storage
-  * /dev/mmcblk0 : Root Filesystem
-  * /dev/nvme0n1 : Ceph
+  * `/dev/mmcblk0` : Root Filesystem
+  * `/dev/nvme0n1` : Ceph
 
 ## 2. Package 설치
 
@@ -41,7 +41,8 @@ passwd: password updated successfully
 ```
 
 cephnode User를 생성한다.
-* Password : cephnode
+
+* **Password** : cephnode
 
 ### 2.2. Deploy Node
 
@@ -77,7 +78,8 @@ passwd: password updated successfully
 ```
 
 cephdeploy User를 생성한다.
-* Password : cephdeploy
+
+* **Password** : cephdeploy
 
 ```shell
 (Deploy)$ login cephdeploy
@@ -94,6 +96,7 @@ Enter same passphrase again:
 ```
 
 SSH Key를 생성 및 복사한다.
+
 * passphrases는 Empty 상태로 유지한다.
 
 ```text {caption="[Text 2] Deploy Node - /home/cephdeploy/.ssh/config", linenos=table}

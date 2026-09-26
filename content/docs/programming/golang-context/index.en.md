@@ -6,7 +6,7 @@ This document analyzes Golang Context.
 
 ## 1. Golang Context Type
 
-Golang's Context is a variable used to store context that must be maintained while processing a single request passed from a client. It is used to store context that must be shared within a single request (Request-Scope), not context that must be maintained between requests. Through Context, you can obtain storage space for values that must be maintained during a request, and easily implement cancellation signal transmission and deadline functionality.
+Golang's **Context** is a variable used to store context that must be maintained while processing a single request passed from a client. It is used to store context that must be shared within a single request (Request-Scope), not context that must be maintained between requests. Through Context, you can obtain storage space for values that must be maintained during a request, and easily implement cancellation signal transmission and deadline functionality.
 
 ### 1.1. Declaration and Passing
 

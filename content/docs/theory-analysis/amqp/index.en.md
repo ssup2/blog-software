@@ -6,7 +6,7 @@ Analyze AMQP (Advanced Message Queuing Protocol), an MQ (Message Queue) protocol
 
 ## 1. AMQP (Advanced Message Queuing Protocol)
 
-AMQP is a **standard MQ protocol** that defines how to queue and route messages when transferring messages between applications. Because AMQP defines various message delivery options, many applications use AMQP to design and use message delivery rules. RabbitMQ is a representative MOM (Message-Oriented Middleware) that provides AMQP and is used in many places.
+**AMQP** is a **standard MQ protocol** that defines how to queue and route messages when transferring messages between applications. Because AMQP defines various message delivery options, many applications use AMQP to design and use message delivery rules. RabbitMQ is a representative MOM (Message-Oriented Middleware) that provides AMQP and is used in many places.
 
 {{< figure caption="[Figure 1] AMQP Architecture" src="images/amqp-architecture.png" width="800px" >}}
 

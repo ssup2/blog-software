@@ -15,7 +15,7 @@ Analyze Linux Signals and Signal Handlers.
 | SIGKILL | Term | Forcibly terminates Process that received SIGKILL. |
 {{< /table >}}
 
-In Linux, Signal is one of the representative techniques for delivering Events to Processes. [Table 1] describes some Signals supported in Linux. Processes that receive Signals handle them by ignoring received Signals through **Signal Mask**, performing **Default Actions** defined for each Signal, or performing **Signal Handlers** registered in Processes. However, **SIGKILL** Signal Handlers cannot be registered in Processes. This is because Processes that receive SIGKILL are forcibly killed immediately by the Linux Kernel. Default Actions exist in 4 types: Term, Stop, Core, and Ign as follows.
+In Linux, **Signal** is one of the representative techniques for delivering Events to Processes. [Table 1] describes some Signals supported in Linux. Processes that receive Signals handle them by ignoring received Signals through **Signal Mask**, performing **Default Actions** defined for each Signal, or performing **Signal Handlers** registered in Processes. However, **SIGKILL** Signal Handlers cannot be registered in Processes. This is because Processes that receive SIGKILL are forcibly killed immediately by the Linux Kernel. Default Actions exist in 4 types: Term, Stop, Core, and Ign as follows.
 
 * `Term` (Terminate) : Terminates Process.
 * `Stop` : Puts Process in Paused state.

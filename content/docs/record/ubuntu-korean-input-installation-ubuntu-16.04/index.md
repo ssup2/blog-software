@@ -5,6 +5,7 @@ title: Ubuntu 한글 입력 설정 / Ubuntu 16.04 환경
 ## 1. 설정 환경
 
 설정 환경은 다음과 같다.
+
 * Ubuntu 16.04 LTS 64bit, root user
 
 ## 2. 한글 설치 (IBus)
@@ -12,6 +13,7 @@ title: Ubuntu 한글 입력 설정 / Ubuntu 16.04 환경
 {{< figure caption="[Figure 1] Ubuntu IBus 한글 Package 설치" src="images/ubuntu-hangul-install.png" width="600px" >}}
 
 Ubuntu IBus 한글 Package를 설치한다.
+
 * System Settings -> Language Support -> Install / Remove Languages... 
 * Korean 선택 -> Apply
 * Ubuntu를 재부팅하여 IBus를 적용한다.

@@ -2,7 +2,7 @@
 title: mpstat
 ---
 
-CPU 사용량을 출력하는 mpstat의 사용법을 정리한다.
+CPU 사용량을 출력하는 **mpstat**의 사용법을 정리한다.
 
 ## 1. mpstat
 

@@ -5,8 +5,9 @@ title: Kubernetes istio 1.8 설치 / Ubuntu 18.04 환경
 ## 1. 설치 환경
 
 설치 환경은 다음과 같다.
+
 * Kubernetes 1.18.3
-  * Network Addon : cilium 이용
+  * **Network Addon** : cilium 이용
 * istio 1.8.1
 
 ## 2. istio 설치

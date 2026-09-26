@@ -43,10 +43,10 @@ Organize missing content based on the following organized content
   * Primary Index
   * Secondary Index
 * ACID
-  * Atomicity : All or Nothing
-  * Consistency : Data must match the schema after transactions
-  * Isolation : Distinguished from other transactions
-  * Durability : Must be recoverable in case of unexpected failures
+  * **Atomicity** : All or Nothing
+  * **Consistency** : Data must match the schema after transactions
+  * **Isolation** : Distinguished from other transactions
+  * **Durability** : Must be recoverable in case of unexpected failures
 
 ### 2.3. Non-relational Database
 

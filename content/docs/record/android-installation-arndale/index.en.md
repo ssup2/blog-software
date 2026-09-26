@@ -5,8 +5,9 @@ title: Android Installation / Arndale Environment
 ## 1. Installation, Execution Environment
 
 The installation and execution environment is as follows:
-* PC : Windows 7 64bit
-* VM on PC : Ubuntu 12.04LTS 64bit
+
+* **PC** : Windows 7 64bit
+* **VM on PC** : Ubuntu 12.04LTS 64bit
 * Android JB mr1 provided from Insignal
 
 ## 2. USB Driver Installation on Windows
@@ -76,7 +77,8 @@ $ mv fastboot ~/bin
 ```
 
 fastboot and adb are used when flashing built Android to device. Install fastboot and adb.
-* fastboot, adb Download : http://forum.insignal.co.kr/download/file.php?id=90
+
+* `fastboot`, `adb` Download : http://forum.insignal.co.kr/download/file.php?id=90
 
 ## 6. Cross Compiler Installation on Ubuntu
 
@@ -87,7 +89,8 @@ $ tar xvf arm-2009q3.tar
 ```
 
 Install Cross Compiler.
-* Cross Compiler Download : http://www.arndaleboard.org/wiki/downloads/supports/arm-2009q3.tar
+
+* **Cross Compiler Download** : http://www.arndaleboard.org/wiki/downloads/supports/arm-2009q3.tar
 
 ```shell {caption="[File 3] ~/.bashrc", linenos=table}
 ...
@@ -118,8 +121,9 @@ $ ./vendor-insignal-arndale-jb-mr1-20140526-0a0bc3f.run
 ```
 
 Download and install Proprietary for booting.
-* Exynos5250 Download : http://forum.insignal.co.kr/download/file.php?id=247	
-* Arndale Download : http://forum.insignal.co.kr/download/file.php?id=246
+
+* **Exynos5250 Download** : http://forum.insignal.co.kr/download/file.php?id=247	
+* **Arndale Download** : http://forum.insignal.co.kr/download/file.php?id=246
 
 ## 9. ccache Configuration
 

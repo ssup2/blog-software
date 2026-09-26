@@ -8,7 +8,7 @@ Analyze Linux FUSE.
 
 {{< figure caption="[Figure 1] Linux FUSE Architecture" src="images/linux-fuse-architecture.png" width="500px" >}}
 
-Linux FUSE is an abbreviation for Filesystem in Userspace, a Linux technique that helps easily create Filesystems at the User Level. [Figure 1] shows the overall Architecture of Linux FUSE. When an Application calls System Calls such as `read(2)` and `write(2)` targeting a folder mounted with FUSE, the System Calls pass through Linux's VFS (Virtual File System) and are delivered to the **FUSE Module** in the Linux Kernel. The FUSE Module delivers the System Calls to the corresponding FUSE Daemon Process based on the target folder of the received System Calls and FUSE Mount information.
+**Linux FUSE** is an abbreviation for Filesystem in Userspace, a Linux technique that helps easily create Filesystems at the User Level. [Figure 1] shows the overall Architecture of Linux FUSE. When an Application calls System Calls such as `read(2)` and `write(2)` targeting a folder mounted with FUSE, the System Calls pass through Linux's VFS (Virtual File System) and are delivered to the **FUSE Module** in the Linux Kernel. The FUSE Module delivers the System Calls to the corresponding FUSE Daemon Process based on the target folder of the received System Calls and FUSE Mount information.
 
 The FUSE Daemon Process processes the received System Calls and then delivers the processing results to the Application Process. Since 2 IPC operations occur for each System Call from the Application, FUSE's performance is inevitably much slower compared to general Filesystems.
 

@@ -13,6 +13,7 @@ The installation and configuration environment is as follows.
 ## 2. Configuration Plugin List
 
 The list of VIM plugins used is as follows.
+
 * vundle: Serves as a Vim Plugin Manager. By placing Vim plugins to install in .vimrc, you can easily install Vim plugins through vundle.
 * nerdtree: Serves as a file explorer.
 * tagbar: Shows a list of code tags.

@@ -8,7 +8,7 @@ Container Storage 설정시 이용되는 Container Storage Interface (CSI)를 �
 
 {{< figure caption="[Figure 1] CSI" src="images/csi.png" width="400px" >}}
 
-Container Storage Interface (CSI)는 Kubernetes, Mesos같은 Container Orchestration System (CO)와 Storage를 제어하는 Plugin (Storage Controller) 사이의 Interface를 의미한다. [Figure 1]은 CSI를 나타내고 있다. CSI는 다음과 같이 3가지를 정의한다.
+**Container Storage Interface** (CSI)는 Kubernetes, Mesos같은 Container Orchestration System (CO)와 Storage를 제어하는 Plugin (Storage Controller) 사이의 Interface를 의미한다. [Figure 1]은 CSI를 나타내고 있다. CSI는 다음과 같이 3가지를 정의한다.
 
 * Storage를 제어하는 Plugin
 * Storage(Volume)의 Life Cycle

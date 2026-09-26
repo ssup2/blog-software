@@ -6,7 +6,7 @@ React Hook을 간략하게 정리한다.
 
 ## 1. React Hook
 
-React Hook은 기존의 Component Class를 상속하여 React Component를 개발하는 대신, 순수 JavaScript 함수를 React Component로 이용할 수 있게 만드는 기능이다. 기존의 React Component를 상속하여 개발하는 방식은 Component 개발에 많은 Code가 필요하고, 불필요한 Code 중복도 발생하는 문제점을 갖고 있었다. React Hook은 순수 JavaScript 함수를 Component로 이용하는 방식이기 때문에, 적은량의 Code 작성 및 불필요한 Code 중복을 제거하여 빠르게 Component를 구현 할 수 있게 만든다. React Hook은 React 16.8에 추가되었다.
+**React Hook**은 기존의 Component Class를 상속하여 React Component를 개발하는 대신, 순수 JavaScript 함수를 React Component로 이용할 수 있게 만드는 기능이다. 기존의 React Component를 상속하여 개발하는 방식은 Component 개발에 많은 Code가 필요하고, 불필요한 Code 중복도 발생하는 문제점을 갖고 있었다. React Hook은 순수 JavaScript 함수를 Component로 이용하는 방식이기 때문에, 적은량의 Code 작성 및 불필요한 Code 중복을 제거하여 빠르게 Component를 구현 할 수 있게 만든다. React Hook은 React 16.8에 추가되었다.
 
 ### 1.1. useState()
 

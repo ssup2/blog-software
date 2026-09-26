@@ -6,7 +6,7 @@ This document summarizes the Monitor technique for synchronization between Threa
 
 ## 1. Monitor
 
-Monitor is a High Level synchronization technique for synchronizing between Threads. Monitor consists of **one Lock** and **multiple Condition Variables**. Monitor performs a control role to prevent multiple threads from accessing the Critical Section simultaneously using Lock. It also performs the role of waking up Threads waiting using Condition Variables.
+**Monitor** is a High Level synchronization technique for synchronizing between Threads. Monitor consists of **one Lock** and **multiple Condition Variables**. Monitor performs a control role to prevent multiple threads from accessing the Critical Section simultaneously using Lock. It also performs the role of waking up Threads waiting using Condition Variables.
 
 ## 2. Java Monitor
 

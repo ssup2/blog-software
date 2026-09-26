@@ -8,7 +8,7 @@ Disk를 주로 이용하는 Filesystem이나 DB에 많이 이용되는 B-Tree와
 
 {{< figure caption="[Figure 1] B-tree" src="images/btree.png" width="1000px" >}}
 
-B-tree는 Binary Search Tree를 확장한 Tree로 각 Node는 여러개의 Key를 가질 수 있고, 여러개의 Child를 가질 수 있다. 또한 모든 Leaf Node는 동일한 Depth를 갖고 있다. [Figure 1]은 3 Order B-Tree를 나타내고 있다. N Order B-Tree의 경우 각 Node는 N-1개의 Key를 가질 수 있고, 최대 N개의 Child를 가질 수 있다. 따라서 3 Order B-Tree에서 각 Node는 최대 2개의 Key를 가질 수 있고, 최대 3개의 Child를 가질 수 있다.
+**B-tree**는 Binary Search Tree를 확장한 Tree로 각 Node는 여러개의 Key를 가질 수 있고, 여러개의 Child를 가질 수 있다. 또한 모든 Leaf Node는 동일한 Depth를 갖고 있다. [Figure 1]은 3 Order B-Tree를 나타내고 있다. N Order B-Tree의 경우 각 Node는 N-1개의 Key를 가질 수 있고, 최대 N개의 Child를 가질 수 있다. 따라서 3 Order B-Tree에서 각 Node는 최대 2개의 Key를 가질 수 있고, 최대 3개의 Child를 가질 수 있다.
 
 각 Node에는 여러개의 Key를 갖고 있고 각 Key에 대응하는 Data도 함께 갖고 있다. Key는 Binary Search와 유사한 형태로 정렬되어 각 Node에 배치된다. Binary Search에서 오른쪽 Child Node의 Key는 자신보다 작고 왼쪽 Child Node의 Key는 자신보다 큰데, B-Tree에서도 각 Key에 대해서 유사한 규칙이 적용된다. 
 

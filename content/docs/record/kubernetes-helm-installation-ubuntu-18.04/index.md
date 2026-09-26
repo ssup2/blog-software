@@ -5,8 +5,9 @@ title: Kubernetes Helm 설치 / Ubuntu 18.04 환경
 ## 1. 설치 환경
 
 설치 환경은 다음과 같다.
+
 * Kubernetes 1.12
-  * Network Addon : cilium 이용
+  * **Network Addon** : cilium 이용
 
 ## 2. Helm 설치
 

@@ -5,12 +5,13 @@ title: Kubernetes 설치 / kubeadm 이용 / Ubuntu 18.04
 ## 1. 설치 환경
 
 설치 환경은 다음과 같다.
+
 * VirtualBox 5.0.14r
-  * Master Node : Ubuntu Desktop 18.04.1 64bit : 1대
-  * Worker Node : Ubuntu Server 18.04.1 64bit : 2대
+  * **Master Node** : Ubuntu Desktop 18.04.1 64bit : 1대
+  * **Worker Node** : Ubuntu Server 18.04.1 64bit : 2대
 * Kubernetes 1.12.3
-  * Network Plugin : calico or flannel or cilium 이용
-  * Dashboard Addon : Dashboard 이용
+  * **Network Plugin** : calico or flannel or cilium 이용
+  * **Dashboard Addon** : Dashboard 이용
 * kubeadm 1.12.3
   * VM을 이용하여 Cluster 환경을 구축하는 경우 kubeadm을 이용하여 쉽게 Kubernetes를 설치 할 수 있다.
 * Password
@@ -22,9 +23,10 @@ title: Kubernetes 설치 / kubeadm 이용 / Ubuntu 18.04
 {{< figure caption="[Figure 1] Kubernetes 설치를 위한 Node 구성도" src="images/node-setting.png" width="900px" >}}
 
 VirtualBox를 이용하여 [Figure 1]과 같이 가상의 Master, Worker Node (VM)을 생성한다.
-* Hostname : Master Node - node1, Worker Node1 - node2, Worker Node2 - node3
-* NAT : Virtual Box에서 제공하는 "NAT 네트워크" 이용하여 10.0.0.0/24 Network를 구축한다.
-* Router : 공유기를 이용하여 192.168.0.0/24 Network를 구축한다. (NAT)
+
+* **Hostname** : Master Node - node1, Worker Node1 - node2, Worker Node2 - node3
+* **NAT** : Virtual Box에서 제공하는 "NAT 네트워크" 이용하여 10.0.0.0/24 Network를 구축한다.
+* **Router** : 공유기를 이용하여 192.168.0.0/24 Network를 구축한다. (NAT)
 
 ### 2.1. Master Node
 
@@ -321,6 +323,7 @@ Web UI Privilege 권한을 위한 config 파일을 생성한다. [File 7]의 내
 ```
 
 Web UI에 Privilege 권한을 적용하고 접속하여 확인한다. Web UI 접속후 Skip을 누른다.
+
 * http://192.168.0.150:8080/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/#!/login
 
 ## 8. 참조

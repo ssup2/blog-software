@@ -8,7 +8,7 @@ OpenStack의 Octavia를 분석한다.
 
 {{< figure caption="[Figure 1] OpenStack Octavia Concept" src="images/octavia-concept.png" width="800px" >}}
 
-Octavia는 LBaaS (Load Balancer as a Service)를 제공하는 OpenStack의 Service이다. [Figure 1]은 Octavia의 Concept을 나타내고 있다. Load Balancer는 하나의 VIP (Virtual IP)를 의미한다. Listener는 하나의 Port를 의미한다. [Figure 1]에서는 Port A, Port B를 담당하는 Listener가 하나씩 존재하는걸 확인할 수 있다. Pool은 Packet의 목적지가 되는 Server를 의미하는 Member들의 집합을 의미하며, 각 Listener들은 특정 Pool과 Mapping된다. [Figure 1]에서는 Listener과 Pool은 1:1로 Mapping되어 있지만, 여러개의 Listener가 하나의 Pool을 공유할 수도 있다. Health Monitor는 Pool의 Member의 Health Check를 담당하며, Health Check에 실패한 Member로 Packet이 Load Balancing이 되지 않도록 하는 역할을 수행한다.
+**Octavia**는 LBaaS (Load Balancer as a Service)를 제공하는 OpenStack의 Service이다. [Figure 1]은 Octavia의 Concept을 나타내고 있다. Load Balancer는 하나의 VIP (Virtual IP)를 의미한다. Listener는 하나의 Port를 의미한다. [Figure 1]에서는 Port A, Port B를 담당하는 Listener가 하나씩 존재하는걸 확인할 수 있다. Pool은 Packet의 목적지가 되는 Server를 의미하는 Member들의 집합을 의미하며, 각 Listener들은 특정 Pool과 Mapping된다. [Figure 1]에서는 Listener과 Pool은 1:1로 Mapping되어 있지만, 여러개의 Listener가 하나의 Pool을 공유할 수도 있다. Health Monitor는 Pool의 Member의 Health Check를 담당하며, Health Check에 실패한 Member로 Packet이 Load Balancing이 되지 않도록 하는 역할을 수행한다.
 
 ```console {caption="[Shell 1] OpenStack Octavia Resource", linenos=table}
 # openstack loadbalancer show b13ce3b9-381f-4d33-9443-b7fc30619350

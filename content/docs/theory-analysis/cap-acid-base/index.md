@@ -6,7 +6,7 @@ CAP, ACID, BASE 이론을 정리한다.
 
 ## 1. CAP
 
-CAP 이론은 분산 시스템이 Consistency, Availability, Partition-tolerance 3가지 속성을 모두 충족시킬 수 없다는 이론을 의미한다.
+**CAP 이론**은 분산 시스템이 Consistency, Availability, Partition-tolerance 3가지 속성을 모두 충족시킬 수 없다는 이론을 의미한다.
 
 * **Consistency** : 분산 시스템을 이루는 다수의 Node로부터 동일한 응답을 얻을 수 있어야 하는 속성을 의미한다.
 * **Availability** : 분산 시스템을 이루는 특정 Node에 장애가 발생하더라도 분산 시스템이 동작해야하는 속성을 의미한다.

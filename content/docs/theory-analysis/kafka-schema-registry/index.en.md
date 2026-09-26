@@ -6,7 +6,7 @@ title: Kafka Schema Registry
 
 {{< figure caption="[Figure 1] Kafka Schema Registry Architecture" src="images/kafka-schema-registry-architecture.png" width="900px" >}}
 
-Kafka Schema Registry performs the role of managing the Schema of Kafka Messages between Kafka Producer and Kafka Consumer. [Figure 1] shows the Architecture of Kafka Schema Registry. Kafka Schema Registry uses Kafka's `_schemas` Topic instead of a separate Database to maintain state information.
+**Kafka Schema Registry** performs the role of managing the Schema of Kafka Messages between Kafka Producer and Kafka Consumer. [Figure 1] shows the Architecture of Kafka Schema Registry. Kafka Schema Registry uses Kafka's `_schemas` Topic instead of a separate Database to maintain state information.
 
 Since all Schema-related information is recorded in the `_schemas` Topic, Kafka Schema Registry has a Stateless characteristic and can easily perform Scale-out for load balancing. However, since Schema information stored in the Topic is also cached in Memory, the frequency of Kafka Schema Registry directly accessing the Topic is low, and generally accesses the Topic only when Schema is registered/changed/deleted or when Kafka Schema Registry is initialized.
 

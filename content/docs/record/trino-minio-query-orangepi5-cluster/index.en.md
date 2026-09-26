@@ -22,9 +22,9 @@ The practice environment for querying data stored in MinIO through Trino is as s
 
 Refer to the following links for the overall practice environment setup.
 
-* Orange Pi 5 Max based Kubernetes Cluster Construction : [https://ssup2.github.io/blog-software/docs/record/orangepi5-cluster-build/](https://ssup2.github.io/blog-software/docs/record/orangepi5-cluster-build/)
-* Orange Pi 5 Max based Kubernetes Data Platform Construction : [https://ssup2.github.io/blog-software/docs/record/kubernetes-data-platform-orangepi5-cluster/](https://ssup2.github.io/blog-software/docs/record/kubernetes-data-platform-orangepi5-cluster/)
-* Dagster Workflow Github : [https://github.com/ssup2-playground/k8s-data-platform_dagster-workflows](https://github.com/ssup2-playground/k8s-data-platform_dagster-workflows)
+* **Orange Pi 5 Max based Kubernetes Cluster Construction** : [https://ssup2.github.io/blog-software/docs/record/orangepi5-cluster-build/](https://ssup2.github.io/blog-software/docs/record/orangepi5-cluster-build/)
+* **Orange Pi 5 Max based Kubernetes Data Platform Construction** : [https://ssup2.github.io/blog-software/docs/record/kubernetes-data-platform-orangepi5-cluster/](https://ssup2.github.io/blog-software/docs/record/kubernetes-data-platform-orangepi5-cluster/)
+* **Dagster Workflow Github** : [https://github.com/ssup2-playground/k8s-data-platform_dagster-workflows](https://github.com/ssup2-playground/k8s-data-platform_dagster-workflows)
 
 ### 1.2. Hive Metastore Main Configuration
 

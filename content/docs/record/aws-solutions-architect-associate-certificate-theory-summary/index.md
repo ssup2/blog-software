@@ -63,10 +63,10 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
   * <FamilyName><GenerationNum>.<Size>
     * t3.large / c5.xlarge / p3.2xlarge
 * Instance Type
-  * General Purpose : t로 시작
-  * Compute Optimized : c로 시작
-  * Memory Optimized : r,x,z으로 시작
-  * Storage Optimized : i,d,h으로 시작
+  * **General Purpose** : t로 시작
+  * **Compute Optimized** : c로 시작
+  * **Memory Optimized** : r,x,z으로 시작
+  * **Storage Optimized** : i,d,h으로 시작
 * Flavor Scale Up/Down 가능
 * Genration이 높을수록 가성비가 좋아짐
 
@@ -82,8 +82,8 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 * Inbound, Outbound Rule 각각 설정 가능
 * Rule에는 Protocol, Dest IP, Dest Port, Security Group에 따라서 Traffic 허용/거부 설정 가능
 * Default 정책
-  * Inbound : 모두 거부
-  * Outbound : 모두 허용
+  * **Inbound** : 모두 거부
+  * **Outbound** : 모두 허용
 
 ### 3.4. Spot Instance
 
@@ -96,8 +96,8 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 * On-demand Instance에 따라서 최대 90% 비용 절감
 * Batch Job을 처리하는데 적합
 * Spot Request Type
-  * one-time : Spot Instnace를 구동하고 이후에는 관여 X
-  * persistance : Spot Instance를 구동하고 이후에도 Spot Instance가 잘 동작하고 있는지 확인, 만약에 동작하고 있지 않다면 Spot Instance를 다시 생성
+  * `one-time` : Spot Instnace를 구동하고 이후에는 관여 X
+  * `persistance` : Spot Instance를 구동하고 이후에도 Spot Instance가 잘 동작하고 있는지 확인, 만약에 동작하고 있지 않다면 Spot Instance를 다시 생성
     * persistance Type일 경우 Spot Request를 먼저 제거하고 persistance Type 제거 필요
 * Spot Fleets
   * 사용자가 원하는 Instance Type, OS, AZ에 따라서 다수의 Spot Instance를 생성
@@ -116,9 +116,9 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 ### 3.6. Placement Group
 
 * EC2 Instance의 배치 전략
-* Cluster : Low Latency를 위해서 하나의 Availability Zone안의 하나의 Rack(Partition)에 배치
-* Spread : 다수의 Availability Zone에 분산 배치하여 가용성(High Availability) 확보
-* Partition : 하나의 Availability Zone에서 다수의 Rack(Partition)에 분산
+* **Cluster** : Low Latency를 위해서 하나의 Availability Zone안의 하나의 Rack(Partition)에 배치
+* **Spread** : 다수의 Availability Zone에 분산 배치하여 가용성(High Availability) 확보
+* **Partition** : 하나의 Availability Zone에서 다수의 Rack(Partition)에 분산
 
 ### 3.7. ENI (Elastic Network Interface)
 
@@ -171,10 +171,10 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 
 #### 4.1.2. EBS Volume Type
 
-* gp2, gp3 : General Purpose SSD, Boot Volume으로 이용 가능
-* io1, io2 : Highest-performance SSD, Boot Volume으로 이용 가능, Multi Attach 가능
-* st : Low cost HDD
-* sc : Lowest cost HDD
+* `gp2`, `gp3` : General Purpose SSD, Boot Volume으로 이용 가능
+* `io1`, `io2` : Highest-performance SSD, Boot Volume으로 이용 가능, Multi Attach 가능
+* `st` : Low cost HDD
+* `sc` : Lowest cost HDD
 
 #### 4.1.3. EBS Encription
 
@@ -212,8 +212,8 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 #### 4.4.1. EFS Storage Class
 
 * Storage Tiers
-  * Standard : 표준
-  * Infrequent Access : Data 저장에는 적은 비용을 지불하지만, 저장된 Data 이용시 비용 발생
+  * **Standard** : 표준
+  * **Infrequent Access** : Data 저장에는 적은 비용을 지불하지만, 저장된 Data 이용시 비용 발생
 
 ## 5. ELB (Elastic Load Balancer)
 
@@ -240,7 +240,7 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 
 * L7 Load Balancer
   * HTTP/1.1, HTTP/2, WebSocket 지원
-  * Less Latency : 400ms
+  * **Less Latency** : 400ms
 * Redirect 지원
 * Routing 정책
   * URL에 존재하는 Path 기반
@@ -264,7 +264,7 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 
 * L4 Load Balancer
   * TCP, UDP 지원
-  * Less Latency : 100ms
+  * **Less Latency** : 100ms
 * NLB Target Groups
   * EC2 Instnace
   * Private IP Address
@@ -530,8 +530,8 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 
 ### 8.1. Hosted Zones
 
-* Public Hosted Zone : Public Network
-* Private Hosted Zone : VPC Private Network
+* **Public Hosted Zone** : Public Network
+* **Private Hosted Zone** : VPC Private Network
 
 ### 8.2. CNAME vs Alias
 
@@ -587,9 +587,9 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 
 * L4, L7 Health Check 지원
 * Health Check Target
-  * Endpoint : App의 Endpoint Health Check 수행
-  * Other Health Check (Calculated Health Check) : 다수의 다른 Endpoint의 Health Check 결과들을 논리 조합(AND, OR, NOT)하여 Health Check 결과를 판단
-  * CloudWatch : Route53은 Public Network에 존재하기 때문에 Private VPC 내부에 존재하는 Endpoint를 Health Check 수행 불가능. 이 경우 Private VPC 내부의 Endpoint를 감시하는 Cloud Watch를 설정하고, Route53은 이 Cloud Watch를 대상으로 Health Check를 수행
+  * **Endpoint** : App의 Endpoint Health Check 수행
+  * **Other Health Check (Calculated Health Check)** : 다수의 다른 Endpoint의 Health Check 결과들을 논리 조합(AND, OR, NOT)하여 Health Check 결과를 판단
+  * **CloudWatch** : Route53은 Public Network에 존재하기 때문에 Private VPC 내부에 존재하는 Endpoint를 Health Check 수행 불가능. 이 경우 Private VPC 내부의 Endpoint를 감시하는 Cloud Watch를 설정하고, Route53은 이 Cloud Watch를 대상으로 Health Check를 수행
 
 ## 9. S3
 
@@ -616,8 +616,8 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 * 하나의 Key를 가지며 Full Path 역할 수행
   * s3://<bucket-name>/<object-key>
   * Ex) s3://ssup2-bucket/root-folder/sub-folder/file.txt
-    * ssup2-bucket : Bucket 이름
-    * root-folder/sub-folder/file.txt : Object Key
+    * `ssup2-bucket` : Bucket 이름
+    * `root-folder/sub-folder/file.txt` : Object Key
 * 하나의 Object는 최대 5TB
   * 파일이 5TB 이상이면 Multi-Part Upload 기능을 활용하여 하나의 파일을 쪼개서 Upload 가능
 * Metadata
@@ -639,14 +639,14 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 ### 9.4. Encryption
 
 * 암호화 방법
-  * SSE-S3 : AWS S3 Service에서 관리하는 암호화 Key 이용
+  * **SSE-S3** : AWS S3 Service에서 관리하는 암호화 Key 이용
     * Server Side Encrpytion
     * AES-256 암호화
     * HTTP Request Header에 "x-amz-server-side-encryption":"AES256" 설정
-  * SSE-KMS : AWS KMS Service에서 관리하는 암호화 Key 이용
+  * **SSE-KMS** : AWS KMS Service에서 관리하는 암호화 Key 이용
     * Server Side Encrpytion
     * HTTP Request Header에 "x-amz-server-side-encryption":"aws:kms" 설정
-  * SSE-C : 자신만의 암호화 Key 이용
+  * **SSE-C** : 자신만의 암호화 Key 이용
     * AWS에서 암호화 Key 관리 X
     * HTTPS 이용
     * 모든 HTTP Header에 암호화 Key를 설정하여 전송
@@ -663,8 +663,8 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
   * IAM Policy를 이용하여 설정
 * Resource Base
   * 다수의 Account에 공통적으로 적용
-  * Object Access Control List : Object 단위로 권한 설정
-  * Bucket Access Control List : Bucket 단위로 권한 설정
+  * **Object Access Control List** : Object 단위로 권한 설정
+  * **Bucket Access Control List** : Bucket 단위로 권한 설정
 * S3 Object에 접근이 필요하기 위해서 다음과 같은 조건 만족 필요
   * (User IAM Role Allow OR Resource Policy Allow) AND 명시적 Deny
 * VPC 내부에서 Endpoint 제공
@@ -672,8 +672,8 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
   * S3 Access Log를 다른 S3 Bucket이 아니라 자기 자신으로 설정할 경우 Logging Loop가 발생하기 때문
   * 저장된 Access Log는 AWS Athena를 통해서 분석 가능
 * AWS CloudTrail의 Log 저장소로 S3를 이용
-* MFA Delete: Object 제거시 MFA를 이용하도록 강제 가능
-* Pre-Signed URL: 일정시간 동안 유효한 URL을 생성
+* **MFA Delete**: Object 제거시 MFA를 이용하도록 강제 가능
+* **Pre-Signed URL**: 일정시간 동안 유효한 URL을 생성
 
 ### 9.6. Websites
 
@@ -702,8 +702,8 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 ### 9.8. Pre-signed URL
 
 * 임시로 Download, Upload가 가능한 임시 URL 생성 가능
-  * Download : CLI, SDK를 통해서 생성 가능
-  * Upload : SDK를 통해서만 생성 가능
+  * **Download** : CLI, SDK를 통해서 생성 가능
+  * **Upload** : SDK를 통해서만 생성 가능
 * 기본적으로 3600초의 유효시간을 갖으며 Pre-signed URL 생성시 유효시간 설정 가능
 
 ### 9.9. Storage Class
@@ -717,7 +717,7 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 * 종종 접근하여 이용하는 경우 이용
 * 99.99% 가용성 보장
 * Low Latency, High Throughput
-* Usage Example : Big Data 분석, Content 배포
+* **Usage Example** : Big Data 분석, Content 배포
 
 #### 9.10.2. Infrequent Access
 
@@ -725,11 +725,11 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 * Standard Class보다 낮은 비용
 * Standard Infrequent Access Class (Standard-IA)
   * 99.9% 가용성
-  * Usage Example : Disaster Recovery, Backup
+  * **Usage Example** : Disaster Recovery, Backup
 * One Zone Infraquent Access Class (S3 One Zone-IA)
   * 95.9% 가용성
   * 단일 AZ에 저장하는 방식이라 AZ 손실시 Data 손실로 이어짐
-  * Usage Example : 임시 Backup, 재생성이 가능한 Data Backup
+  * **Usage Example** : 임시 Backup, 재생성이 가능한 Data Backup
 
 #### 9.10.3. Glacier Storage Class
 
@@ -744,16 +744,16 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 #### 9.10.5. Glacier Flexisble Retrieval Class
 
 * Data 검색에 오랜시간이 소모되며, 아래와 같은 설정에 따라서 필요 검색시간이 달라짐
-  * Expedited : 1~5분, 비용 발생
-  * Standard : 3~5시간, 비용 발생
-  * Bulk : 5~12시간, 무료
+  * **Expedited** : 1~5분, 비용 발생
+  * **Standard** : 3~5시간, 비용 발생
+  * **Bulk** : 5~12시간, 무료
 * 최소 90일 기간의 저장 비용 청구
 
 #### 9.10.6. Glacier Deep Archive
 
 * Data 검색에 가장 오랜시간 소모되며, 아래와 같은 설정에 따라서 필요 검색시간이 달라짐
-  * Standard : 12시간
-  * Bulk : 48시간
+  * **Standard** : 12시간
+  * **Bulk** : 48시간
 * 최소 180일 기간의 저장 비용 청구
 
 #### 9.10.7. Intelligent-Tiering
@@ -761,17 +761,17 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 * Object의 사용량에 따라서 자동으로 Tier를 변경
 * Tier 변경시 무료
 * 다음과 같은 Tier가 존재
-  * Frequent Access Tier : Default Tier, 자동 설정
-  * Infrequent Access Tier : 30일동안 Object에 접근이 없을시, 자동 설정
-  * Archive Instant Access Tier : 90일동안 Object에 접근이 없을시, 자동 설정
-  * Archive Access Tier : 90일에서 700일 이상 접근하지 않을시, Optional
-  * Deep Archive Access Tier : 180일에서 700일 이상 접근하지 않을시, Optional
+  * **Frequent Access Tier** : Default Tier, 자동 설정
+  * **Infrequent Access Tier** : 30일동안 Object에 접근이 없을시, 자동 설정
+  * **Archive Instant Access Tier** : 90일동안 Object에 접근이 없을시, 자동 설정
+  * **Archive Access Tier** : 90일에서 700일 이상 접근하지 않을시, Optional
+  * **Deep Archive Access Tier** : 180일에서 700일 이상 접근하지 않을시, Optional
 
 #### 9.10.8. Storage Class 이동
 
-* Transition Action : Object가 생성되고 경과된 시간에 따라서 자동으로 Storage Class를 변경
-* Expiration Action : Object가 생성되고 경과된 시간이 지나면 자동으로 Object 삭제
-* Action Target : Action은 Object Tag 또는 Object Path Prefix (s3://mybucket/music/*)에 따라서 설정 가능
+* **Transition Action** : Object가 생성되고 경과된 시간에 따라서 자동으로 Storage Class를 변경
+* **Expiration Action** : Object가 생성되고 경과된 시간이 지나면 자동으로 Object 삭제
+* **Action Target** : Action은 Object Tag 또는 Object Path Prefix (s3://mybucket/music/*)에 따라서 설정 가능
 * S3 Analysics 기능을 통해서 언제 Standard Class에서 Standard IA Class로 변경하면 좋을지 분석 가능
 
 ### 9.11. Performance
@@ -818,7 +818,7 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
   * S3 Object Caching 수행
   * S3의 Upload 경로로도 사용 가능
   * OAI (Origin Access ID)를 활용하여 S3의 Object에 접근
-* Custom Origin : HTTP Protocol을 이용하면 Origin으로 이용 가능
+* **Custom Origin** : HTTP Protocol을 이용하면 Origin으로 이용 가능
   * ALB, EC2 Instance, S3 Website, HTTP Backend API
 * Origin Group 기능 제공
   * Primary Origin이 동작하지 않을 경우 Secondary Origin을 이용하도록 설정 가능
@@ -833,9 +833,9 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 * Edge Location에 따라서 이용 가격이 다름
 * Price Class
   * Caching을 수행하는 Edge Location의 개수를 줄여 비용 절감 가능
-  * Class ALL : 모든 Edge Location을 이용하며, 가장 높은 비용
-  * Class 200 : 가장 비싼 Region을 제외한 나머지 Region들을 포함
-  * Class 100 : 제일 저렴한 Region만 포함
+  * **Class ALL** : 모든 Edge Location을 이용하며, 가장 높은 비용
+  * **Class 200** : 가장 비싼 Region을 제외한 나머지 Region들을 포함
+  * **Class 100** : 제일 저렴한 Region만 포함
 
 ### 10.4. Global Accelerator
 
@@ -847,9 +847,9 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 
 * Portable Device를 활용하여 Data Migration, Edge Computing 수행
 * 용량 기능에 따라서 다음의 장비들로 구성
-  * Snowcone : Data Migration, Edge Computing 지원
-  * Snowball : Data Migration, Edge Computing 지원 
-  * Snowmobile : Data Migration 지원
+  * **Snowcone** : Data Migration, Edge Computing 지원
+  * **Snowball** : Data Migration, Edge Computing 지원 
+  * **Snowmobile** : Data Migration 지원
 * OpsHub를 Labtop에 설치하여 장비를 손쉽게 관리 가능
 * Glacier로 Data Migration을 진행하기 위해서는 Data를 S3에 먼져 저장한 이후 Glacier로 전환
 
@@ -871,8 +871,8 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 * Volume Gateway 
   * S3를 On-Premise 환경에서 iSCSI로 접근 가능
   * 2가지 형태의 Volume 제공
-    * Cached Volume : 자주 접근하는 Data만 Volume Gateway에 위치시키고 자주 이용되지 않는 Data는 S3에 저장
-    * Stored Volume : 전체 Data를 Volume Gateway에 위치시키고 주기적으로 EBS Snapshot을 생성하여 Backup 수행
+    * **Cached Volume** : 자주 접근하는 Data만 Volume Gateway에 위치시키고 자주 이용되지 않는 Data는 S3에 저장
+    * **Stored Volume** : 전체 Data를 Volume Gateway에 위치시키고 주기적으로 EBS Snapshot을 생성하여 Backup 수행
 * Tape Gateway
   * S3, Glacier를 iSCSI로 접근 가능
 
@@ -916,8 +916,8 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 #### 12.1.2. Security
 
 * Encryption
-  * In-flight Encription : HTTPS 이용
-  * At-rest Encription : KMS Key 이용
+  * **In-flight Encription** : HTTPS 이용
+  * **At-rest Encription** : KMS Key 이용
   * Client가 자체적으로 Encryption/Decryption 수행 가능
 * Access Control
   * IAM Policy 제어
@@ -935,7 +935,7 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 
 * Message Visibility Timeout이 초과하여 Requeue되는 횟수가 MaximumRecevies를 초과하는 경우 Message는 Dead Letter Queue로 전송
 * Debugging, 장애 처리를 위해 이용
-* Redrive : Dead Letter Queue에 저장되어 있는 Message를 다시 원래의 Queue로 전송하는 기능
+* **Redrive** : Dead Letter Queue에 저장되어 있는 Message를 다시 원래의 Queue로 전송하는 기능
 
 #### 12.1.5. FIFO Queue
 
@@ -964,10 +964,10 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 
 * 실시간 Streaming Data Collect, Process, Analyze Service
   * Application Log, Metrics, IoT Telemetry
-* Kinesis Data Stream : Data Stream 구성
-* Kinesis Data Firehose : Data Stream을 Data Store에 저장 
-* Kinesis Data Analytics : Data Stream을 SQL, Apache Flink를 이용하여 분석
-* Kinesis Video Streams : Video Stream 구성
+* **Kinesis Data Stream** : Data Stream 구성
+* **Kinesis Data Firehose** : Data Stream을 Data Store에 저장 
+* **Kinesis Data Analytics** : Data Stream을 SQL, Apache Flink를 이용하여 분석
+* **Kinesis Video Streams** : Video Stream 구성
 
 #### 12.3.1. Kinesis Data Stream
 
@@ -976,8 +976,8 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
   * 하나의 Shard는 1MB/sec or 1000 Msg/sec 수신 가능
   * 하나의 Shard는 2MB/sec 송신 가능
 * Record
-  * Input : Partition Key, Data Blob (최대 1MB) 구를를
-  * Output : Partition Key, Sequence Number, Data Blob 구성
+  * **Input** : Partition Key, Data Blob (최대 1MB) 구를를
+  * **Output** : Partition Key, Sequence Number, Data Blob 구성
 * Data 보관 기간은 1일부터 365일 설정 가능
 * Data 재처리 가능
 * Data가 Kinesis에 들어가면 제거 불가능
@@ -998,8 +998,8 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
   * 최소 60초 딜레이
   * 최소 32MB를 한번에 전송
 * Store Target
-  * AWS : Redshift, S3, ElasticSearch
-  * 3rd Party : Splunk, MongoDB, DataDog, NewRelic
+  * **AWS** : Redshift, S3, ElasticSearch
+  * **3rd Party** : Splunk, MongoDB, DataDog, NewRelic
   * Custom HTTP Endpoint 생성 가능
 * 다양한 Data Format, Conversion, Transforamtion, Compress 지원
 * Lambda를 활용한 Custom Transformation 가능
@@ -1015,17 +1015,17 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
   * EC2 Instance Provisioning, 유지보수 필요
   * EC2 Instnace 내부적으로 ECS Agent를 구동중
   * IAM Role
-    * EC2 Instance Profile : ECS Agent가 이용하는 Role, ECS Service API 호출/Container Log CloudWatch로 전송/ECR으로부터 Docker Image Pull 허용
-    * ECS Task Role : ECS Task를 위한 Role, Task별 별도의 Role 할당 가능
+    * **EC2 Instance Profile** : ECS Agent가 이용하는 Role, ECS Service API 호출/Container Log CloudWatch로 전송/ECR으로부터 Docker Image Pull 허용
+    * **ECS Task Role** : ECS Task를 위한 Role, Task별 별도의 Role 할당 가능
 * Fargate Launch Type
   * Infra Provsioning 불필요 (Serverless)
   * Task에 필요한 CPU / Memory만큼 Fargate를 활용하여 구동
 
 #### 13.1.2. Load Balancer
 
-* ALB : L7 Protocol을 이용하는 대부분의 Service에 적용 가능
-* NLB : High Throughput을 위해서 이용, AWS Private Link와 연동하기 위해서 이용
-* CLB : 이용을 권장하지 않음, Fargate와 연동 불가능
+* **ALB** : L7 Protocol을 이용하는 대부분의 Service에 적용 가능
+* **NLB** : High Throughput을 위해서 이용, AWS Private Link와 연동하기 위해서 이용
+* **CLB** : 이용을 권장하지 않음, Fargate와 연동 불가능
 
 #### 13.1.3. Volumes
 
@@ -1052,14 +1052,14 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 ### 13.2. ECR (Elastic Container Registry)
 
 * Container Image 저장소
-* Private, Public Repository : https://gallery.ecr.aws/
+* **Private, Public Repository** : https://gallery.ecr.aws/
 * Backend Storage로 S3 이용
 
 ## 14. Serverless
 
 ### 14.1. Lambda
 
-* Virtual Function : Server 관리 불필요
+* **Virtual Function** : Server 관리 불필요
 * 실행시간 제한 : 짧은 실행만 수행 가능
 * 필요할때만 실행 가능하며, 실행한 시간만큼 비용 청구
 * Autoscaling 지원
@@ -1075,28 +1075,28 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 ##### 14.1.1. Lambda Integration
 
 * 다양한 AWS Service와의 연계 지원
-* API Gateway : Upstream으로 Lambda 호출
-* Kinesis : Lambda를 활용하여 Data 변환
-* DynamoDB : DynamoDB에서 Event 발생시 Lambda 호출
-* S3 : S3에서 Event 발싱시 Lambda 호출
-* CloudFront : Lambda Edge
-* EventBridge : EventBridge에서 Event 발생시 Lambda 호출
-* CloudWatch : TODO
-* SNS : SNS에서 Event 송신시 Lambda 호출
-* SQS : SQS에서 Message 송신시 Lambda 호출
-* Cognito : Congino에서 Event 발생시 Lambda 호출
+* **API Gateway** : Upstream으로 Lambda 호출
+* **Kinesis** : Lambda를 활용하여 Data 변환
+* **DynamoDB** : DynamoDB에서 Event 발생시 Lambda 호출
+* **S3** : S3에서 Event 발싱시 Lambda 호출
+* **CloudFront** : Lambda Edge
+* **EventBridge** : EventBridge에서 Event 발생시 Lambda 호출
+* **CloudWatch** : TODO
+* **SNS** : SNS에서 Event 송신시 Lambda 호출
+* **SQS** : SQS에서 Message 송신시 Lambda 호출
+* **Cognito** : Congino에서 Event 발생시 Lambda 호출
 
 #### 14.1.2. Lambda Limit
 
 * Execution
-  * Memory : 128MB ~ 10GB
-  * Maximum Execution Time : 15분
-  * Maximum Env : 4KB
-  * Disk Capacity : tmp DIR : 512MB
-  * Concurrency Executions : 1000
+  * **Memory** : 128MB ~ 10GB
+  * **Maximum Execution Time** : 15분
+  * **Maximum Env** : 4KB
+  * **Disk Capacity** : tmp DIR : 512MB
+  * **Concurrency Executions** : 1000
 * Deployment
   * Compressed Deployment Size (.zip): 50MB
-  * Uncompressed Deployment Size : 250MB
+  * **Uncompressed Deployment Size** : 250MB
 
 #### 14.1.3. Lambda Edge
 
@@ -1123,12 +1123,12 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
   * Attribute는 계속 동적으로 추가 가능
 * Item의 크기는 최대 400KB
 * Data Type
-  * Scalar : String, Number, Binary, Boolean, Null
-  * Document : List, Map
-  * Set : String Set, Number Set, Binary Set
+  * **Scalar** : String, Number, Binary, Boolean, Null
+  * **Document** : List, Map
+  * **Set** : String Set, Number Set, Binary Set
 * Table
-  * Partition Key : TODO
-  * Sork Key : TODO
+  * **Partition Key** : TODO
+  * **Sork Key** : TODO
 * TTL (Time To Live) 기능 제공
 * Index
   * Partition Key, Sort Key를 제외한 나머지 Attribute Query를 수행하기 위해서는 Index 생성 필요
@@ -1158,8 +1158,8 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 * App의 Logic 수정없이 적용 가능
 * Default 5분 TTL
 * vs ElasticCache
-  * DAX : Object 단위 Caching, Query & Scan Caching
-  * ElastiCache : Aggregation Result 저장
+  * **DAX** : Object 단위 Caching, Query & Scan Caching
+  * **ElastiCache** : Aggregation Result 저장
 
 #### 14.2.4. DynamoDB Streams
 
@@ -1237,12 +1237,12 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 
 ## 15. Database
 
-* RDBMS : RDS, Aurora
-* NoSQL : DynamoDB (JSON), ElasticCache (Key/Value), Neptune (Graphs)
-* Object Store : S3 / Glacier
-* Data Warehouse : Redshift, Athena
-* Search : ElasticSearch (JSON)
-* Graphs : Neptune
+* **RDBMS** : RDS, Aurora
+* **NoSQL** : DynamoDB (JSON), ElasticCache (Key/Value), Neptune (Graphs)
+* **Object Store** : S3 / Glacier
+* **Data Warehouse** : Redshift, Athena
+* **Search** : ElasticSearch (JSON)
+* **Graphs** : Neptune
 
 ### 15.1. Redshift
 
@@ -1255,10 +1255,10 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
   * EC2 In JDBC Driver를 활용하여 Data Loading
 * 1개의 Node부터 128개의 Node까지 이용가능, 노드당 최대 128TB 이용가능
 * Node Type
-  * Leader Node : Query Plan, Result Aggregation 수행
-  * Compute Node : Query 수행 및 결과를 Leader Node로 전송
-* Redshift Spectrum : S3의 Object를 대상으로 바로 Query를 수행
-* VPC Routing : VPC를 통해서 Data Copy, Unload 수행 가능
+  * **Leader Node** : Query Plan, Result Aggregation 수행
+  * **Compute Node** : Query 수행 및 결과를 Leader Node로 전송
+* **Redshift Spectrum** : S3의 Object를 대상으로 바로 Query를 수행
+* **VPC Routing** : VPC를 통해서 Data Copy, Unload 수행 가능
 
 #### 15.1.1. Snapshot & DR
 
@@ -1273,9 +1273,9 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
   * Redshift로 Load
 * Serverless Service
 * Glue Data Catalog
-  * Crawler : S3, RDS, DynamoDB와 같은 Data Store의 Meta Data 수집
-  * Glue Data Catalog : Crawler가 수집한 Meta Data를 저장
-  * Meta Data : Table 정보, Data Type, Column 정보
+  * **Crawler** : S3, RDS, DynamoDB와 같은 Data Store의 Meta Data 수집
+  * **Glue Data Catalog** : Crawler가 수집한 Meta Data를 저장
+  * **Meta Data** : Table 정보, Data Type, Column 정보
   * 저장된 Meta Data는 Athena, Redshift Spectrum, EMR에서 이용 가능
 
 ### 15.3. Neptune
@@ -1335,9 +1335,9 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 * 어떠한 Metric이든 Alarm으로 Trigger 가능
   * Log의 경우에도 Metric 지표로 변환이 가능하며, 변환된 Metric을 통해서 Alarm 설정 가능
 * Alarm 상태
-  * OK : Alarm이 Trigger되지 않음
-  * INSUFFICIENT_DATA : 상태를 결정할 Data가 부족
-  * ALARM : Alarm이 Trigger됨
+  * `OK` : Alarm이 Trigger되지 않음
+  * `INSUFFICIENT_DATA` : 상태를 결정할 Data가 부족
+  * `ALARM` : Alarm이 Trigger됨
 * Period
   * Metric을 Check하는 주기 설정 가능
   * 10초, 30초 그리고 60초 주기로 설정 가능
@@ -1350,18 +1350,18 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 
 * AWS Service로부터 Event 수신 가능
 * Event Source
-  * Compute : Lambda, Batch, ECS Task
-  * Integration : SQS, SNS, Kinesis Data Stream, Kinesis Data Firehose
-  * Orchestration : Step Functions, CodePipeline, CodeBuild
-  * Maintenance : SSM, EC2 Actions
+  * **Compute** : Lambda, Batch, ECS Task
+  * **Integration** : SQS, SNS, Kinesis Data Stream, Kinesis Data Firehose
+  * **Orchestration** : Step Functions, CodePipeline, CodeBuild
+  * **Maintenance** : SSM, EC2 Actions
 
 ### 16.5. EventBridge
 
 * Cloudwatch Event의 확장 Service
 * Event Bus Type
-  * Default Event Bus : AWS Service가 생성하는 Event Bus
-  * Partner Event Bus : AWS 기반의 SaaS Service로 부터 발생하는 Event Bus
-  * Custom Event Bus : 사용자 App의 Event Bus
+  * **Default Event Bus** : AWS Service가 생성하는 Event Bus
+  * **Partner Event Bus** : AWS 기반의 SaaS Service로 부터 발생하는 Event Bus
+  * **Custom Event Bus** : 사용자 App의 Event Bus
 * 다른 AWS 계정에서도 권한 설정을 통해서 Event Bus 이용 가능
 * Event Bus로 전송한 Event를 Archiving 할수 있으며, Archive된 Event를 다시 재생 가능
 * Schema Registry 
@@ -1380,8 +1380,8 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 * 활동 기록 Log를 CloudWatch Log나 S3에 저장도 가능
 * 모든 Region 또는 단일 Region을 대상으로 기록 가능
 * CloudTrail Event
-  * Management Event : 기본적으로 활성화 되어 있음
-  * Data Event : 기본적으로 비활성화 되어 있음 (Event 기록에 많은 용량이 필요하기 때문)
+  * **Management Event** : 기본적으로 활성화 되어 있음
+  * **Data Event** : 기본적으로 비활성화 되어 있음 (Event 기록에 많은 용량이 필요하기 때문)
 
 #### 16.6.1. CloudTrail Insight
 
@@ -1410,10 +1410,10 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
   * Symmetric (AES-256)
   * Asymmetric (RSA & ECC Key Pairs)
 * CMK (Custom Master Key) Type
-  * AWS Managed Service Default CMK : Free
-  * User Keys created in KMS : $1 month
-  * User Keys imported : $1/month
-* Key Management Action : Create, Rotation Policy 설정, Disable/Enable
+  * **AWS Managed Service Default CMK** : Free
+  * **User Keys created in KMS** : $1 month
+  * **User Keys imported** : $1/month
+* **Key Management Action** : Create, Rotation Policy 설정, Disable/Enable
 * Key 사용을 CloudTrail을 통해서 감시 가능
 * KMS에 접근하기 위해서는 User에게 Key Policy 할당이 필요하며 IAM 설정도 필요
 * KMS Key는 특정 Region에 종속되며, Region 사이의 이동 불가능
@@ -1477,9 +1477,9 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 ### 17.6. WAF (Web Application Firewall)
 
 * Layer7 Firewall
-* Target : ALB, API Gateway, CloudFront
+* **Target** : ALB, API Gateway, CloudFront
 * Web ACL 기능 제공
-  * ACL Rule : IP Address, HTTP Header, HTTP Body, URI 포함
+  * **ACL Rule** : IP Address, HTTP Header, HTTP Body, URI 포함
   * SQL Injection, Cross-Site Scripting 공격 방지
   * 특정 국가 Block
   * Rate-based Rule 설정 가능
@@ -1521,8 +1521,8 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 * 걔정마다 Default VPC 존재
 * 하나의 계정에 최대 5개의 VPC까지 생성 가능 (Softlimit)
 * CIDR
-  * Min CIDR : /28 (16 IP Address)
-  * Max CIDR : /16 (65536 IP Address)
+  * **Min CIDR** : /28 (16 IP Address)
+  * **Max CIDR** : /16 (65536 IP Address)
 * VPC는 Private Network이기 때문에 다음의 Network 영역만 할당 가능
   * 10.0.0.0 ~ 10.255.255.255 (10.0.0.0/8)
   * 172.16.0.0 ~ 172.31.255.255 (172.16.0.0/12)
@@ -1535,10 +1535,10 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 * Subnet Reserved IP
   * 모든 Subnet마다 5개의 예약된 IP가 존재
   * Subnet의 CIDR가 10.0.0.0/24일 경우
-  * 10.0.0.0 : Network Address
-  * 10.0.0.1 : VPC Router
-  * 10.0.0.3 : DNS Server
-  * 10.0.0.255 : Broadcast Address, VPC 내부에서는 Broadcast 미지원하기 때문에 실제 이용 X
+  * `10.0.0.0` : Network Address
+  * `10.0.0.1` : VPC Router
+  * `10.0.0.3` : DNS Server
+  * `10.0.0.255` : Broadcast Address, VPC 내부에서는 Broadcast 미지원하기 때문에 실제 이용 X
 
 ### 18.3. Internet Gateway
 
@@ -1600,8 +1600,8 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 ### 18.10. Site-to-Site VPN
 
 * AWS의 VPC와 기업의 Private Network를 Public Network를 통해서 연결하는 VPN
-* VGW (Virtual Private Gateway) : VPC 내부에서 VPN과 연결되는 Gateway
-* Customer Gateway : 기업 내부에서 VPN과 연결되는 Software Application 또는 물리 장치
+* **VGW (Virtual Private Gateway)** : VPC 내부에서 VPN과 연결되는 Gateway
+* **Customer Gateway** : 기업 내부에서 VPN과 연결되는 Software Application 또는 물리 장치
 * VPC에서 Route Propagation 옵션 반드시 설정 필요
 * 다수의 기업와 VPC 하나가 연결될 수 있음
   * 이 경우 기업사이에도 VGW를 통해서 통신 가능
@@ -1609,12 +1609,12 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 ### 18.11. Direct Connect
 
 * AWS의 VPC와 기업의 Private Network를 Private Network를 통해서 연결
-  * VGW (Virtual Private Gateway) : VPC 내부에서 VPC와 Direct Connection Location을 연결하는 Gateway
-  * Direct Connection Endpoint : Direct Connection Location에서 Direct Connection Location과 VPC를 연결
-  * Customer, Partner Router : Direct Connection Location에서 Direct Connection Location과 기업의 Network 연결
+  * **VGW (Virtual Private Gateway)** : VPC 내부에서 VPC와 Direct Connection Location을 연결하는 Gateway
+  * **Direct Connection Endpoint** : Direct Connection Location에서 Direct Connection Location과 VPC를 연결
+  * **Customer, Partner Router** : Direct Connection Location에서 Direct Connection Location과 기업의 Network 연결
   * S3와 같이 Public Endpoint를 접근하는 경우 Direct Connection Endpoint에서 VGW의 경로가 아닌 Direct Connection Endpoint에서 Public Endpoint로 접근
   * Direct Connection Location에 Direct Connection Endpoint, Customer, Partner Router를 두개 이상두어 고가용성 구성 가능
-* Direct Connect Gateway : Direct Connect을 통해서 다른 Region에 접근하고 싶은경우 이용
+* **Direct Connect Gateway** : Direct Connect을 통해서 다른 Region에 접근하고 싶은경우 이용
 * Connection Type
   * Dedicated Connection
     * 1Gpbs, 10Gpbs
@@ -1675,8 +1675,8 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 ### 19.2. Data Sync
 
 * On-Premises와 AWS 사이의 Data 동기화 수행
-  * On-Premises Target : NFS, SMB
-  * AWS Target : S3, EFS, FSx
+  * **On-Premises Target** : NFS, SMB
+  * **AWS Target** : S3, EFS, FSx
   * On-Premises에 AWS DataSync Agent 설치 필요
 * 동기화 주기는 시간, 일간, 주간으로 설정 가능
 * AWS 사이의 동기화도 수행 가능
@@ -1685,7 +1685,7 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 ### 19.3. Backup
 
 * Storage Service를 S3로 백업 진행
-  * Target : EC2, EBS, S3, RDS, DynamoDB, DocumentDB, EFS, Aurora, Neptune, FSx, Storage Gateway
+  * **Target** : EC2, EBS, S3, RDS, DynamoDB, DocumentDB, EFS, Aurora, Neptune, FSx, Storage Gateway
 * Cross Account 지원
 * Cross Region 지원
 * Backup Vault Lock 지원
@@ -1694,18 +1694,18 @@ title: AWS Solutions Architect Associate 자격증 이론 정리
 
 ## 20. Machine Learning
 
-* Rekognition : 사진이나 영상에서 사물과 사람을 인식
-* Transcibe : 목소리를 Text로 변환
-* Polly : Text를 목소리로 변환
-* Translate : 언어 변역
-* Lex : Amazon Alexa 기능 제공
-* Connect : 전화 상담
-* Comprehend : NPL (Natural Language Processing)
-* SageMaker : ML Model 구축을 적용을 위한 개발, 운영 환경 제공
-* Forecast : 미래를 예측하는 기능
-* Kendra : Document Search 기능
-* Personalize : 개인 추천 기능
-* Textract : Scan된 문서에서 Text 추출
+* **Rekognition** : 사진이나 영상에서 사물과 사람을 인식
+* **Transcribe** : 목소리를 Text로 변환
+* **Polly** : Text를 목소리로 변환
+* **Translate** : 언어 변역
+* **Lex** : Amazon Alexa 기능 제공
+* **Connect** : 전화 상담
+* **Comprehend** : NPL (Natural Language Processing)
+* **SageMaker** : ML Model 구축을 적용을 위한 개발, 운영 환경 제공
+* **Forecast** : 미래를 예측하는 기능
+* **Kendra** : Document Search 기능
+* **Personalize** : 개인 추천 기능
+* **Textract** : Scan된 문서에서 Text 추출
 
 ## 21. Reference
 

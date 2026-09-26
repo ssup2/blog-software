@@ -6,11 +6,11 @@ This document analyzes Servlet and Servlet Container.
 
 ## 1. Servlet
 
-Servlet is one of Java EE standards and refers to classes that operate on servers based on **javax.servlet Package**. Each Servlet must define three methods: init(), service(), and destroy().
+**Servlet** is one of Java EE standards and refers to classes that operate on servers based on **javax.servlet Package**. Each Servlet must define three methods: init(), service(), and destroy().
 
-* init() : init() is called when Servlet is created. A Parameter receives an Instance based on javax.servlet.ServletConfig Interface, and it performs operations to initialize Servlet and allocate resources used by Servlet.
-* service() : Called each time a request is delivered to Servlet. Performs actual Service Logic.
-* destroy() : Called when Servlet is deleted. Performs operations to release resources used by Servlet.
+* `init()` : init() is called when Servlet is created. A Parameter receives an Instance based on javax.servlet.ServletConfig Interface, and it performs operations to initialize Servlet and allocate resources used by Servlet.
+* `service()` : Called each time a request is delivered to Servlet. Performs actual Service Logic.
+* `destroy()` : Called when Servlet is deleted. Performs operations to release resources used by Servlet.
 
 ## 2. Servlet Container
 

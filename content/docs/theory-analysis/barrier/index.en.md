@@ -4,7 +4,7 @@ title: Barrier
 
 ### 1. Barrier
 
-It is one of the synchronization techniques in parallel programming. In a Process/Thread group, when any one Process/Thread reaches a specific Barrier, it blocks until all other Processes/Threads reach that Barrier. After all Processes/Threads reach that Barrier, the next command is executed. Barrier can be said to be a technique for controlling the flow of Processes/Threads.
+It is one of the synchronization techniques in parallel programming. In a Process/Thread group, when any one Process/Thread reaches a specific Barrier, it blocks until all other Processes/Threads reach that Barrier. After all Processes/Threads reach that Barrier, the next command is executed. **Barrier** can be said to be a technique for controlling the flow of Processes/Threads.
 
 Compilers sometimes change the order of commands while performing optimization, and Barrier can prevent such Reordering techniques of the Compiler.
 

@@ -8,7 +8,7 @@ PostgreSQL의 HA(High Availabilty)를 위한 Replicaiton 기법을 분석한다.
 
 {{< figure caption="[Figure 1] PostgreSQL Master-slave Replication" src="images/master-slave.png" width="600px" >}}
 
-PostgreSQL의 Replication은 기본적으로 Master-Slave Replication에 기반을 두고 있다. Master-Slave Replication은 하나의 Master DB와 다수의 Slave DB들을 통해 Replication을 수행하는 방식이다. [Figure 1]은 Master-Slave Replication을 나타내고 있다. Master는 Client로부터 받은 DB 변경 Query에 따라 DB를 변경하고, 변경 내용을 Slave DB에게 전달하여 Replication을 수행한다. 따라서 Master는 Read/Write Mode로 동작하고 Slave들은 Read Mode로 동작한다. Client는 Write 요청을 반드시 Master에게 전달해야 하고, Read 요청은 적절한 Master 또는 적절한 Slave에 전달하면 된다. 일반적으로 Slave앞에는 LB(Load Balancer)를 두어 Slave로 오는 Read 요청을 분산시키고, Read 성능을 높인다.
+PostgreSQL의 **Replication**은 기본적으로 Master-Slave Replication에 기반을 두고 있다. Master-Slave Replication은 하나의 Master DB와 다수의 Slave DB들을 통해 Replication을 수행하는 방식이다. [Figure 1]은 Master-Slave Replication을 나타내고 있다. Master는 Client로부터 받은 DB 변경 Query에 따라 DB를 변경하고, 변경 내용을 Slave DB에게 전달하여 Replication을 수행한다. 따라서 Master는 Read/Write Mode로 동작하고 Slave들은 Read Mode로 동작한다. Client는 Write 요청을 반드시 Master에게 전달해야 하고, Read 요청은 적절한 Master 또는 적절한 Slave에 전달하면 된다. 일반적으로 Slave앞에는 LB(Load Balancer)를 두어 Slave로 오는 Read 요청을 분산시키고, Read 성능을 높인다.
 
 ### 1.1. Replication
 

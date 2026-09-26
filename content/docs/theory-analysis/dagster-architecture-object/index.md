@@ -123,12 +123,12 @@ Asset과 Op의 문법적인 차이는 Parameter로 Asset을 받는다는 점이�
 
 **External Resource**는 Dagster에서 지원하는 다양한 외부 리소스를 의미한다. 주로 I/O Manager, 외부 데이터 저장소, BI 도구들을 External Resource로 정의하고 이용한다. External Resource 중에서 **I/O Manager**는 Op 또는 Asset 사이의 데이터를 주고 받는 역할을 수행하기 때문에 중요한 External Resource이다. I/O Manager는 다양한 Backend를 이용할 수 있으며, 지원되는 주요 Backend는 다음과 같다.
 
-* FilesystemIOManager : Local Filesystem에 데이터를 저장한다. 별도로 I/O Manager를 지정하지 않으면 Default I/O Manager로 동작한다.
-* InMemoryIOManager : Local Memory에 데이터를 저장한다.
-* s3.S3PickleIOManager : AWS S3에 Pickle 형태로 데이터를 저장한다.
-* GCSPickleIOManager : GCP GCS에 Pickle 형태로 데이터를 저장한다.
-* BigQueryPandasIOManager : BigQuery에 Pandas DataFrame 형태로 데이터를 저장한다.
-* BigQueryPySparkIOManager : BigQuery에 PySpark DataFrame 형태로 데이터를 저장한다.
+* `FilesystemIOManager` : Local Filesystem에 데이터를 저장한다. 별도로 I/O Manager를 지정하지 않으면 Default I/O Manager로 동작한다.
+* `InMemoryIOManager` : Local Memory에 데이터를 저장한다.
+* `s3.S3PickleIOManager` : AWS S3에 Pickle 형태로 데이터를 저장한다.
+* `GCSPickleIOManager` : GCP GCS에 Pickle 형태로 데이터를 저장한다.
+* `BigQueryPandasIOManager` : BigQuery에 Pandas DataFrame 형태로 데이터를 저장한다.
+* `BigQueryPySparkIOManager` : BigQuery에 PySpark DataFrame 형태로 데이터를 저장한다.
 
 ```python {caption="[Code 3] External Resource (I/O Manager) Example", linenos=table}
 def get_io_manager():
@@ -323,9 +323,9 @@ telemetry:
 
 Database는 Run Storage, Event Storage, Schedule Storage의 역할을 수행하며 Dagster Control Plane의 모든 Component가 접근하여 이용한다. Database 및 각 Storage의 설정정보는 Dagster Instance([File 1])에서 확인할 수 있다.
 
-* Run Storage : 하나의 Run은 하나의 Trigger된 Workflow를 의미하며, Run Storage는 이러한 Run의 상태 정보를 저장하는 저장소이다. 즉 Workflow의 현재 상태나 실행 결과 같은 Run의 메타 정보를 저장하는 역할을 수행한다.
-* Event Storage : Event Storage는 Workflow의 실행과정 중에 발생하는 Event를 저장하는 저장소이다.
-* Schedule Storage : Workflow Schedule 정보를 저장하는 저장소이다.
+* **Run Storage** : 하나의 Run은 하나의 Trigger된 Workflow를 의미하며, Run Storage는 이러한 Run의 상태 정보를 저장하는 저장소이다. 즉 Workflow의 현재 상태나 실행 결과 같은 Run의 메타 정보를 저장하는 역할을 수행한다.
+* **Event Storage** : Event Storage는 Workflow의 실행과정 중에 발생하는 Event를 저장하는 저장소이다.
+* **Schedule Storage** : Workflow Schedule 정보를 저장하는 저장소이다.
 
 ### 1.4. Dagster Workflow Trigger
 
@@ -348,24 +348,24 @@ process_numbers_asset_k8s = define_asset_job(
 
 Dagster가 지원하는 Run Launcher Type은 다음과 같다.
 
-* K8sRunLauncher : Run이 Kubernetes의 Job (Pod) 형태로 실행된다. 
-* ecs.EcsRunLauncher : Run이 AWS ECS의 Task 형태로 실행된다.
-* DockerRunLauncher : Run이 Docker Container 형태로 실행된다.
-* CeleryK8sRunLauncher : Run이 Celery를 이용하여 Kubernetes의 Job (Pod) 형태로 실행된다.
+* `K8sRunLauncher` : Run이 Kubernetes의 Job (Pod) 형태로 실행된다. 
+* `ecs.EcsRunLauncher` : Run이 AWS ECS의 Task 형태로 실행된다.
+* `DockerRunLauncher` : Run이 Docker Container 형태로 실행된다.
+* `CeleryK8sRunLauncher` : Run이 Celery를 이용하여 Kubernetes의 Job (Pod) 형태로 실행된다.
 
 Dagster가 지원하는 주요 Executor는 다음과 같다.
 
-* in_process_executor : Op/Asset이 하나의 Process 내부에서 순차적으로 실행된다.
-* multiprocess_executor : Op/Asset이 다수의 Process 내부에서 병렬로 실행된다.
-* celery_executor : Op/Asset이 Celery를 이용하여 병렬로 실행된다.
-* docker_executor : Op/Asset이 Docker Container를 이용하여 병렬로 실행된다.
-* k8s_job_executor : Op/Asset이 Kubernetes Job을 이용하여 병렬로 실행된다.
-* celery_k8s_job_executor : Op/Asset이 Celery와 Kubernetes Job을 이용하여 병렬로 실행된다.
+* `in_process_executor` : Op/Asset이 하나의 Process 내부에서 순차적으로 실행된다.
+* `multiprocess_executor` : Op/Asset이 다수의 Process 내부에서 병렬로 실행된다.
+* `celery_executor` : Op/Asset이 Celery를 이용하여 병렬로 실행된다.
+* `docker_executor` : Op/Asset이 Docker Container를 이용하여 병렬로 실행된다.
+* `k8s_job_executor` : Op/Asset이 Kubernetes Job을 이용하여 병렬로 실행된다.
+* `celery_k8s_job_executor` : Op/Asset이 Celery와 Kubernetes Job을 이용하여 병렬로 실행된다.
 
 Run Coordinator는 Workflow Scheduling을 수행하며 Dagster Instance([File 1])에 설정된다. Dagster에서 지원하는 Run Coordinator는 다음과 같다.
 
-* DefaultRunCoordinator : Workflow 생성 요청이 오면 즉시 Run Launcher를 호출하여 Run을 생성한다. Dagster Web Server와 Dagster CLI에서 이용된다.
-* QueuedRunCoordinator : Workflow 생성 요청이 오면 요청을 Queue에 저장한다음 규칙에 맞게 가져와 Run을 생성한다. Dagster Daemon에서 이용된다. QueuedRunCoordinator를 이용하도록 설정되어 있으면 Dagster Web Server는 Workflow 생성 요청을 직접 처리하지 않고 Dagster Daemon에게 전달한다.
+* `DefaultRunCoordinator` : Workflow 생성 요청이 오면 즉시 Run Launcher를 호출하여 Run을 생성한다. Dagster Web Server와 Dagster CLI에서 이용된다.
+* `QueuedRunCoordinator` : Workflow 생성 요청이 오면 요청을 Queue에 저장한다음 규칙에 맞게 가져와 Run을 생성한다. Dagster Daemon에서 이용된다. QueuedRunCoordinator를 이용하도록 설정되어 있으면 Dagster Web Server는 Workflow 생성 요청을 직접 처리하지 않고 Dagster Daemon에게 전달한다.
 
 Dagster Daemon은 Dagster 운영에 필수적인 Component는 아니며, Dagster Daemon이 없으면 Schedule Object, Sensor Object와 QueuedRunCoordinator를 이용하지 못하지만 Workflow 실행에는 문제가 없다.
 
@@ -373,11 +373,11 @@ Dagster Daemon은 Dagster 운영에 필수적인 Component는 아니며, Dagster
 
 Compute Log는 Dagster에서 실행되는 Op 또는 Asset의 실행 로그를 저장하는 역할을 수행한다. Compute Log는 Dagster Instance([File 1])에 설정된다. Dagster에서 지원하는 Compute Log는 다음과 같다.
 
-* LocalComputeLogManager : Local Filesystem에 Compute Log를 저장한다.
-* NoOpComputeLogManager : Compute Log를 저장하지 않는다.
-* S3ComputeLogManager : AWS S3에 Compute Log를 저장한다.
-* AzureComputeLogManager : Azure Blob Storage에 Compute Log를 저장한다.
-* GCSComputeLogManager : Google Cloud Storage에 Compute Log를 저장한다.
+* `LocalComputeLogManager` : Local Filesystem에 Compute Log를 저장한다.
+* `NoOpComputeLogManager` : Compute Log를 저장하지 않는다.
+* `S3ComputeLogManager` : AWS S3에 Compute Log를 저장한다.
+* `AzureComputeLogManager` : Azure Blob Storage에 Compute Log를 저장한다.
+* `GCSComputeLogManager` : Google Cloud Storage에 Compute Log를 저장한다.
 
 ## 2. 참조
 

@@ -6,7 +6,7 @@ MSA (Micro Service Architecture)를 분석한다.
 
 ## 1. MSA (Micro Service Architecture)
 
-MSA (Micro Service Architecture)는 **뚜렷한 경계**가 존재하는 **여러개의 작고, 독립적인 Service(기능)**들을 조합하여 구성하는 Architecture를 의미한다. 뚜렷한 경계 속의 작고, 독립적인 Service들은 MSA에게 유연성을 부여한다. 이러한 유연성은 개발 및 운영 과정에 많은 이점을 가져다준다.
+**MSA** (Micro Service Architecture)는 **뚜렷한 경계**가 존재하는 **여러개의 작고, 독립적인 Service** (기능)들을 조합하여 구성하는 Architecture를 의미한다. 뚜렷한 경계 속의 작고, 독립적인 Service들은 MSA에게 유연성을 부여한다. 이러한 유연성은 개발 및 운영 과정에 많은 이점을 가져다준다.
 
 ### 1.1. Monolithic Architecture vs MSA
 
@@ -36,9 +36,9 @@ MSA는 다수의 Service로 구성되는 만큼 유연하다는 장점을 가지
 
 위에서 언급한것 처럼 MSA는 Service 제공시 다수의 Service를 조합하여 새로운 Service를 제공하는 형태도 가능하다. Service의 역활 및 위치에 따라서 Service를 분류할 수 있다. [Figure 2]는 Service를 Core/Atomic Service, Composite/Integration Service, API/Edge Service Service Type으로 분류하고 Service Type별 관계도를 나타내고 있다. 각 Service Type은 아래와 같은 의미를 갖는다.
 
-* Core/Atomic Service : Core Business Logic이나 Atomic한 Business Logic을 수행하는 Service이다.
-* Composite/Integration Service : Core/Atomic Service를 조합하여 구성한 Service이다.
-* API/Edge Service : Core/Atomic Service, Composite/Integration Service를 조합하여 App에게 노출되는 Service이다. API Gateway에 부하가 높을경우 API Gateway의 일부 역할도 수행할 수 있다.
+* **Core/Atomic Service** : Core Business Logic이나 Atomic한 Business Logic을 수행하는 Service이다.
+* **Composite/Integration Service** : Core/Atomic Service를 조합하여 구성한 Service이다.
+* **API/Edge Service** : Core/Atomic Service, Composite/Integration Service를 조합하여 App에게 노출되는 Service이다. API Gateway에 부하가 높을경우 API Gateway의 일부 역할도 수행할 수 있다.
 
 ### 1.3. with API Gateway
 
@@ -52,7 +52,7 @@ MSA 도입시 같이 도입해야 할 Component로 API Gateway가 있다. API Ga
 
 {{< figure caption="[Figure 4] MSA with Message Queue" src="images/msa-architecture-mq.png" width="500px" >}}
 
-MSA 도입시 같이 도입을 검토 해볼만한 Component로 Message Queue가 있다. MSA에서 Message Queue는 Event Bus로 이용된다. Message Queue를 Event Bus로 이용하는 Architecture를 **EDA (Event Driven Architecture)**라고 명칭한다. 일반적으로 Kafka를 이용하여 Message Queue를 구축한다. [Figure 3]은 Message Queue를 도입한 MSA를 나타내고 있다. Service A는 Service B, Service C 호출시 직접 호출하지 않고 Message Queue에게 Event를 Publish한다. 이후에 생성된 Event를 Subscribe 하는 Service B, Service C는 Event를 수신한 다음 Business Logic을 처리한다.
+MSA 도입시 같이 도입을 검토 해볼만한 Component로 Message Queue가 있다. MSA에서 Message Queue는 Event Bus로 이용된다. Message Queue를 Event Bus로 이용하는 Architecture를 **EDA** (Event Driven Architecture)라고 명칭한다. 일반적으로 Kafka를 이용하여 Message Queue를 구축한다. [Figure 3]은 Message Queue를 도입한 MSA를 나타내고 있다. Service A는 Service B, Service C 호출시 직접 호출하지 않고 Message Queue에게 Event를 Publish한다. 이후에 생성된 Event를 Subscribe 하는 Service B, Service C는 Event를 수신한 다음 Business Logic을 처리한다.
 
 Message Queue가 도입되기 전에 Service A는 Service B, Service C의 존재를 알고 있어야 한다. 하지만 Message Queue를 도입하면서 Service A는 단순히 Event를 Message Queue에게 전달만 하면된다. Service A는 생성한 Event를 Service B, Service C가 이용한다는 정보를 알필요 없다. Service B, Service C 관점에서는 내가 필요한 Event가 생성되었을때 수신만 하면된다. 이처럼 Message Queue를 이용하면 Service 사이의 **의존성**을 낮출 수 있다.
 

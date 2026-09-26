@@ -6,7 +6,7 @@ Golang의 Context를 분석한다
 
 ## 1. Golang Context Type
 
-Golang의 Context는 Client으로부터 전달된 하나의 Request를 처리하면서 유지 되어야할 Context를 저장하는데 이용되는 변수이다. 각 Request 사이의 유지되어야 하는 Context가 아닌 하나의 Request 안에서 (Request-Scope) 공유되어야 하는 Context를 저장하는 용도로 이용된다. Context를 통해서 Request동안 유지되어야 하는 Value 저장 공간을 얻을 수 있고, 취소 Signal 전송 및 Deadline 기능을 쉽게 구현할 수 있다.
+Golang의 **Context**는 Client으로부터 전달된 하나의 Request를 처리하면서 유지 되어야할 Context를 저장하는데 이용되는 변수이다. 각 Request 사이의 유지되어야 하는 Context가 아닌 하나의 Request 안에서 (Request-Scope) 공유되어야 하는 Context를 저장하는 용도로 이용된다. Context를 통해서 Request동안 유지되어야 하는 Value 저장 공간을 얻을 수 있고, 취소 Signal 전송 및 Deadline 기능을 쉽게 구현할 수 있다.
 
 ### 1.1. 선언 및 전달
 

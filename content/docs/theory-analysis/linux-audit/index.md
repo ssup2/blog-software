@@ -8,7 +8,7 @@ Linux Audit을 분석한다.
 
 {{< figure caption="[Figure 1] Linux Audit" src="images/linux-audit-architecture.png" width="900px" >}}
 
-Linux Audit은 Linux Kernel에서 발생하는 다양한 보안 관련 Event를 Log로 기록하고 User App에 전달해주는 Linux Framework이다. Binary 수행, File Access, System Call, Network 설정 조작 Event들을 감지 할 수 있다. Audit에서는 이러한 보안 관련 Event를 **Audit Event**라고 명칭한다. Audit Event는 System의 관리자가 등록하고 관리하는 **Audit Rule**에 의해서 발생한다. [Figure 1]은 Audit의 Architecture를 나타내고 있다. Audit의 구성 요소는 크게 Kernel Level와 User Level로 나눌 수 있다.
+**Linux Audit**은 Linux Kernel에서 발생하는 다양한 보안 관련 Event를 Log로 기록하고 User App에 전달해주는 Linux Framework이다. Binary 수행, File Access, System Call, Network 설정 조작 Event들을 감지 할 수 있다. Audit에서는 이러한 보안 관련 Event를 **Audit Event**라고 명칭한다. Audit Event는 System의 관리자가 등록하고 관리하는 **Audit Rule**에 의해서 발생한다. [Figure 1]은 Audit의 Architecture를 나타내고 있다. Audit의 구성 요소는 크게 Kernel Level와 User Level로 나눌 수 있다.
 
 ### 1.1. Kernel Level
 

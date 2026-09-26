@@ -7,19 +7,19 @@ draft: true
 
 ## 1. USE Method
 
-USE Method는 **Utilization**, **Saturation**, **Errors** 3가지를 기반으로 모니터링을 수행하는 방법론을 의미하며, 일반적으로 **Hardware** 장애 탐지에 적합한 방법론이다.
+**USE Method**는 **Utilization**, **Saturation**, **Errors** 3가지를 기반으로 모니터링을 수행하는 방법론을 의미하며, 일반적으로 **Hardware** 장애 탐지에 적합한 방법론이다.
 
-* Utilization : 자원이 이용되는 평균 시간
-* Saturation : 자원이 포화되어 처리되지 못한 작업의 정도
-* Errors : 오류 또는 장애 횟수
+* **Utilization** : 자원이 이용되는 평균 시간
+* **Saturation** : 자원이 포화되어 처리되지 못한 작업의 정도
+* **Errors** : 오류 또는 장애 횟수
 
 ## 2. RED Method
 
 RED Method는 **Rate**, **Errors**, **Duration** 3가지를 기반으로 모니터링을 수행하는 방법론을 의미하며, 일반적으로 **Service (Application)** 관련 장애 탐지에 적합한 방법론이다.
 
-* Rate : 초당 요청 수
-* Errors : 요청 처리에 실패한 횟수
-* Duration : 요청 처리시간
+* **Rate** : 초당 요청 수
+* **Errors** : 요청 처리에 실패한 횟수
+* **Duration** : 요청 처리시간
 
 ## 3. 활용
 

@@ -8,7 +8,7 @@ Nginx의 Architecture를 분석한다.
 
 {{< figure caption="[Figure 1] Nginx Architecture" src="images/nginx-architecture.png" width="900px" >}}
 
-[Figure 1]은 Nginx의 Architecture를 나타내고 있다. Nginx는 Master Process, Worker Process, Cache Loader Process, Cache Manager Process와 Config 파일로 구성되어 있다.
+[Figure 1]은 Nginx의 Architecture를 나타내고 있다. **Nginx**는 Master Process, Worker Process, Cache Loader Process, Cache Manager Process와 Config 파일로 구성되어 있다.
 
 ### 1.1 Master Process
 

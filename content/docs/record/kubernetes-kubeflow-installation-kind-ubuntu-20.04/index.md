@@ -123,8 +123,8 @@ $ kubectl port-forward svc/istio-ingressgateway -n istio-system 8080:80
 kubectl port-forward를 실행하고 아래의 경로에 접근한다.
 
 * http://127.0.0.1:8080
-* ID : user@example.com
-* Password : 12341234
+* **ID** : user@example.com
+* **Password** : 12341234
 
 ## 7. 참고
 

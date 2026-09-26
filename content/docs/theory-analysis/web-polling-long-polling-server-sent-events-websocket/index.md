@@ -8,7 +8,7 @@ Web Browser와 Server 사이에서 여전하 가장 많잉 이용되는 HTTP/1.1
 
 {{< figure caption="[Figure 1] Polling" src="images/polling.png" width="600px" >}}
 
-Polling은 가장 간단하게 Server에서 Web Browser에게 Data를 전달할 수 있는 기법이다. [Figure 1]은 Polling 기법을 나타내고 있다. Web Browser는 주기적으로 Server에게 Event가 발생하였는지 확인한다. 만약 Event가 발생하지 않았다면 응답에도 Event 정보는 포함되지 않는다. 반면 Event가 발생하였다면 응답에 Event 정보도 같이 전송한다.
+**Polling**은 가장 간단하게 Server에서 Web Browser에게 Data를 전달할 수 있는 기법이다. [Figure 1]은 Polling 기법을 나타내고 있다. Web Browser는 주기적으로 Server에게 Event가 발생하였는지 확인한다. 만약 Event가 발생하지 않았다면 응답에도 Event 정보는 포함되지 않는다. 반면 Event가 발생하였다면 응답에 Event 정보도 같이 전송한다.
 
 Web Browser에서 주기적으로 Server에게 Event가 발생하였는지 확인하는 방식이기 때문에 실시간성이 떨어지는 단점을 가지고 있다. 또한 Event가 발생하지 않았더라도 Web Browser와 Server 사이의 주기적으로 요청/응답을 송수신 하기 때문에 주기적으로 Traffic이 발생한다는 단점도 가지고 있다. 
 

@@ -4,7 +4,7 @@ title: SNMP
 
 ## 1. SNMP (Simple Network Management Protocol)
 
-SNMP (Simple Network Management Protocol) is a UDP-based Protocol created for Network management, as the name suggests. Through SNMP, Network Topology can be drawn and Network performance and status information of each Network Segment can be understood. Also, using SNMP's flexibility, Metric information related to CPU, Memory, and Storage of devices participating in Network can also be collected. SNMP has three versions: v1, v2c, and v3. v2c added Bulk-related functionality to bring large amounts of data at once from Agent compared to v1, and v3 added authentication and security-related functionality compared to v2.
+**SNMP** (Simple Network Management Protocol) is a UDP-based Protocol created for Network management, as the name suggests. Through SNMP, Network Topology can be drawn and Network performance and status information of each Network Segment can be understood. Also, using SNMP's flexibility, Metric information related to CPU, Memory, and Storage of devices participating in Network can also be collected. SNMP has three versions: v1, v2c, and v3. v2c added Bulk-related functionality to bring large amounts of data at once from Agent compared to v1, and v3 added authentication and security-related functionality compared to v2.
 
 {{< figure caption="[Figure 1] SNMP Architecture" src="images/snmp-architecture.png" width="500px" >}}
 

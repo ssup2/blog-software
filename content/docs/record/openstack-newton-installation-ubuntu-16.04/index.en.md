@@ -7,11 +7,11 @@ title: OpenStack Newton Installation / Ubuntu 16.04 Environment
 The installation environment is as follows:
 
 * VirtualBox 5.0.14r
-  * Controller Node : Ubuntu Server 16.04.2 64bit x1
-  * Compute Node : Ubuntu Server 16.04.2 64bit x1
-  * Block Storage Node : Ubuntu Server 16.04.2 64bit x1
+  * **Controller Node** : Ubuntu Server 16.04.2 64bit x1
+  * **Compute Node** : Ubuntu Server 16.04.2 64bit x1
+  * **Block Storage Node** : Ubuntu Server 16.04.2 64bit x1
 * OpenStack Newton Version
-  * Network : Self-service
+  * **Network** : Self-service
 * Password
   * All passwords required for OpenStack installation are unified to **root** for simplified installation.
 * Installation is performed as root user on all nodes.
@@ -21,8 +21,9 @@ The installation environment is as follows:
 {{< figure caption="[Figure 1] Node Configuration Diagram for OpenStack Newton Installation" src="images/node-setting.png" width="1000px" >}}
 
 Create virtual Controller, Compute, and Storage Nodes (VMs) using VirtualBox as shown in [Figure 1].
-* NAT : Build a 10.0.0/24 network using VirtualBox's "NAT network".
-* Router : Build a 192.168.77.0/24 network using a router. (NAT)
+
+* **NAT** : Build a 10.0.0/24 network using VirtualBox's "NAT network".
+* **Router** : Build a 192.168.77.0/24 network using a router. (NAT)
 * After Horizon installation, access http://192.168.77.170/horizon from a PC web browser to use Horizon.
 
 ### 2.1. All Nodes
@@ -1010,8 +1011,9 @@ Start Horizon.
 ### 7.2. Verification
 
 Access Horizon through a web browser.
+
 * http://192.168.77.170/horizon
-* Login : Domain - default, Username - admin, Password - root
+* **Login** : Domain - default, Username - admin, Password - root
 
 ## 8. Cinder Installation
 

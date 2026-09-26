@@ -24,20 +24,20 @@ sdb               0.01         0.29         0.00      25400          0
 
 Displays Block Device I/O statistics and CPU statistics. [Shell 1] shows the output of `iostat` displaying Block Device I/O statistics and CPU statistics. The upper part shows CPU statistics. The output is as follows:
 
-* user : User level usage rate of processes without nice value applied
-* nice : User level usage rate of processes with nice value applied
-* system : Kernel level usage rate of processes
-* iowait : CPU idle rate due to I/O Wait
-* steal : CPU usage rate stolen by the hypervisor or other virtual machines when the kernel runs inside a virtual machine controlled by a hypervisor
-* idle : CPU idle rate excluding I/O Wait
+* `user` : User level usage rate of processes without nice value applied
+* `nice` : User level usage rate of processes with nice value applied
+* `system` : Kernel level usage rate of processes
+* `iowait` : CPU idle rate due to I/O Wait
+* `steal` : CPU usage rate stolen by the hypervisor or other virtual machines when the kernel runs inside a virtual machine controlled by a hypervisor
+* `idle` : CPU idle rate excluding I/O Wait
 
 The lower part shows Block Device I/O information. The output is as follows:
 
-* tps : Number of I/O requests per second
-* kB_read/s : Amount of data read per second in kB. Unit can be changed via options
-* kB_wrtn/s : Amount of data written per second in kB. Unit can be changed via options
-* kB_read : Number of blocks read per second
-* kB_wrtn : Number of blocks written per second
+* `tps` : Number of I/O requests per second
+* `kB_read/s` : Amount of data read per second in kB. Unit can be changed via options
+* `kB_wrtn/s` : Amount of data written per second in kB. Unit can be changed via options
+* `kB_read` : Number of blocks read per second
+* `kB_wrtn` : Number of blocks written per second
 
 ### 1.2. iostat -x
 
@@ -58,20 +58,20 @@ sdb              0.01    0.00      0.28      0.00     0.00     0.00   0.00   0.0
 
 Displays extended Block Device I/O statistics and CPU statistics. [Shell 2] shows the output of `iostat -x` displaying extended Block Device I/O statistics and CPU statistics. CPU statistics are the same as [Shell 1], and Block Device I/O statistics are as follows:
 
-* r/s : Number of completed read requests per second
-* w/s : Number of completed write requests per second
-* rkB/s : Amount of data read per second in kB. Unit can be changed via options
-* wkB/s : Amount of data written per second in kB. Unit can be changed via options
-* rrqm/s : Number of read requests merged in Block Device queue per second
-* wrqm/s : Number of write requests merged in Block Device queue per second
-* %rrqm : Percentage of read requests merged before being sent to Block Device
-* %wrqm : Percentage of write requests merged before being sent to Block Device
-* r_await : Average time from sending read request to Block Device until data is actually read from Block Device. Includes time waiting in queue
-* w_await : Average time from sending write request to Block Device until data is actually written to Block Device. Includes time waiting in queue
-* aqu-sz : Average queue length
-* rareq-sz : Average size of read requests
-* wareq-sz : Average size of write requests
-* %util : Block Device bandwidth utilization
+* `r/s` : Number of completed read requests per second
+* `w/s` : Number of completed write requests per second
+* `rkB/s` : Amount of data read per second in kB. Unit can be changed via options
+* `wkB/s` : Amount of data written per second in kB. Unit can be changed via options
+* `rrqm/s` : Number of read requests merged in Block Device queue per second
+* `wrqm/s` : Number of write requests merged in Block Device queue per second
+* `%rrqm` : Percentage of read requests merged before being sent to Block Device
+* `%wrqm` : Percentage of write requests merged before being sent to Block Device
+* `r_await` : Average time from sending read request to Block Device until data is actually read from Block Device. Includes time waiting in queue
+* `w_await` : Average time from sending write request to Block Device until data is actually written to Block Device. Includes time waiting in queue
+* `aqu-sz` : Average queue length
+* `rareq-sz` : Average size of read requests
+* `wareq-sz` : Average size of write requests
+* `%util` : Block Device bandwidth utilization
 
 ### 1.2. iostat [Interval] [Count]
 

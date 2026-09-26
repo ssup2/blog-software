@@ -8,7 +8,7 @@ Kubernetes에서 Nginx Ingress를 제어하는 Nginx Ingress Controller를 분�
 
 {{< figure caption="[Figure 1] Nginx Ingress Controller" src="images/nginx-ingress-controller.png" width="900px" >}}
 
-Nginx Ingress Controller는 Kubernetes의 Ingress 및 관련 Ojbect들에 따라서 Nginx를 제어하고, Nginx 관련 Metric 정보를 수집하여 외부로 전달하는 역할을 수행한다. [Figure 1]은 Nginx Ingress Controller를 나타내고 있다. Nginx Ingress Controller는 Nginx Ingress Controller Pod에 Nginx와 같이 존재한다. Nginx Ingress Controller는 Leader (Active)/Non-leader (Standby) 방식으로 동작하지만 Leader/Non-leader 둘다 자신과 같은 Pod안에서 구동중인 Nginx를 제어하고, 관련 Metric 정보를 수집하는 것은 동일하다.
+**Nginx Ingress Controller**는 Kubernetes의 Ingress 및 관련 Ojbect들에 따라서 Nginx를 제어하고, Nginx 관련 Metric 정보를 수집하여 외부로 전달하는 역할을 수행한다. [Figure 1]은 Nginx Ingress Controller를 나타내고 있다. Nginx Ingress Controller는 Nginx Ingress Controller Pod에 Nginx와 같이 존재한다. Nginx Ingress Controller는 Leader (Active)/Non-leader (Standby) 방식으로 동작하지만 Leader/Non-leader 둘다 자신과 같은 Pod안에서 구동중인 Nginx를 제어하고, 관련 Metric 정보를 수집하는 것은 동일하다.
 
 ```text linenos {caption="[File 1] Lua Module을 이용하는 Nginx의 nginx.conf", linenos=table}
 ...

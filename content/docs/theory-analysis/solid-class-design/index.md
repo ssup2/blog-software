@@ -6,7 +6,7 @@ Class 설계시 5가지의 원칙을 제시해주는 SOLID를 정리한다.
 
 ## 1. SOLID
 
-SOLID는 객체지향 프로그래밍에서 Class 설계시 5가지의 원칙을 제시해주는 용어를 의미한다. Single Responsibility, Open/closed, Liskov Substitution, Interface Segregation, Dependency Invsersion의 약자를 따서 SOLID라는 이름의 용어가 되었다.
+**SOLID**는 객체지향 프로그래밍에서 Class 설계시 5가지의 원칙을 제시해주는 용어를 의미한다. Single Responsibility, Open/closed, Liskov Substitution, Interface Segregation, Dependency Invsersion의 약자를 따서 SOLID라는 이름의 용어가 되었다.
 
 ### 1.1. Single Responsibility
 

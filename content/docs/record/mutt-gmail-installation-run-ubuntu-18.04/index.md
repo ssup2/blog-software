@@ -5,6 +5,7 @@ title: mutt Gmail 설치, 사용 / Ubuntu 18.04 환경
 ## 1. 설치, 사용 환경
 
 설치, 사용 환경은 다음과 같다.
+
 * Ubuntu 18.04 LTS 64bit, root user
 
 ## 2. mutt 설치
@@ -18,8 +19,9 @@ mutt Package를 설치한다.
 ## 3. Gmail Access 권한 설정
 
 아래의 링크를 통해서 Gmail Access 권한을 설정한다.
-* Guide : [https://support.google.com/accounts/answer/6010255?hl=en](https://support.google.com/accounts/answer/6010255?hl=en)
-* Secure Apps : [https://myaccount.google.com/lesssecureapps](https://myaccount.google.com/lesssecureapps)
+
+* **Guide** : [https://support.google.com/accounts/answer/6010255?hl=en](https://support.google.com/accounts/answer/6010255?hl=en)
+* **Secure Apps** : [https://myaccount.google.com/lesssecureapps](https://myaccount.google.com/lesssecureapps)
 
 ## 4. mutt 설정
 
@@ -62,8 +64,9 @@ $ mutt
 ```
 
 mutt을 실행한다. 단축키는 아래와 같다.
-* m : Compose a new mail message.
-* G : Fetch new messages.
+
+* `m` : Compose a new mail message.
+* `G` : Fetch new messages.
 
 ## 6. 참조
 

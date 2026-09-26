@@ -8,7 +8,7 @@ MySQL의 HA(High Availabilty)를 위한 Replicaiton 기법들을 분석한다.
 
 {{< figure caption="[Figure 1] MySQL Master-Slave Replication" src="images/master-slave-replication.png" width="600px" >}}
 
-Master-Slave Replication은 하나의 Master DB와 다수의 Slave DB들을 통해 Replication을 수행하는 방식이다. [Figure 1]은 Master-Slave Replication을 나타내고 있다. Master는 Client로부터 받은 DB 변경 Query에 따라 DB를 변경하고, 변경 내용을 Slave DB에게 전달하여 Replication을 수행한다. 따라서 Master는 Read/Write Mode로 동작하고 Slave들은 Read Mode로 동작한다. Client는 Write 요청을 반드시 Master에게 전달해야 하고, Read 요청은 적절한 Master 또는 적절한 Slave에 전달하면 된다. 일반적으로 Slave앞에는 LB(Load Balancer)를 두어 Slave로 오는 Read 요청을 분산시키고, Read 성능을 높인다.
+**Master-Slave Replication**은 하나의 Master DB와 다수의 Slave DB들을 통해 Replication을 수행하는 방식이다. [Figure 1]은 Master-Slave Replication을 나타내고 있다. Master는 Client로부터 받은 DB 변경 Query에 따라 DB를 변경하고, 변경 내용을 Slave DB에게 전달하여 Replication을 수행한다. 따라서 Master는 Read/Write Mode로 동작하고 Slave들은 Read Mode로 동작한다. Client는 Write 요청을 반드시 Master에게 전달해야 하고, Read 요청은 적절한 Master 또는 적절한 Slave에 전달하면 된다. 일반적으로 Slave앞에는 LB(Load Balancer)를 두어 Slave로 오는 Read 요청을 분산시키고, Read 성능을 높인다.
 
 Replication 방식에는 Async, Semi-sync 2가지 방식을 지원한다. 두 방식 모두 완전히 동기화가 되는 Sync 방식은 아니기 때문에 Slave DB는 짧은 순간 Master DB와 동기화되지 않는 상태일 수 있다. Slave DB의 개수가 늘어날수록 동시에 Read를 수행할 수 있는 DB도 증가하기 때문에 Read 성능을 높일 수 있다. 하지만 Slave DB의 개수가 늘어나도 DB 변경 Query는 Master DB에서부터 전파되는 방식이기 때문에 Write 성능은 개선되지 않는다.
 

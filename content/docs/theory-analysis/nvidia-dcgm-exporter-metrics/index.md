@@ -185,8 +185,8 @@ License 상태 Metric
 {{</ table >}}
 
 * Note
-  * K8s Pod Metric : K8s Pod에 할당된 GPU에 붙는 Label
-  * MIG Metric : MIG (Multi-Instance GPU) 기능을 이용하여 생성된 GPU Instance에만 붙는 Label
+  * **K8s Pod Metric** : K8s Pod에 할당된 GPU에 붙는 Label
+  * **MIG Metric** : MIG (Multi-Instance GPU) 기능을 이용하여 생성된 GPU Instance에만 붙는 Label
 
 ## 3. 참조
 

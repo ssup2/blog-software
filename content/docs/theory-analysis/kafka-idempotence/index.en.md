@@ -6,7 +6,7 @@ Analyzes Kafka's Idempotence functionality.
 
 ## 1. Kafka Idempotence Functionality
 
-Kafka Idempotence, as the name suggests, is a functionality to prevent duplicate storage of Records sent by Kafka's Producer in Kafka. When Kafka is simply used as an Event Bus, duplicate storage of identical Records in Kafka is generally not a problem, but when Kafka is utilized beyond an Event Bus as an Event Store, duplicate storage of identical Records becomes a problem, and utilizing Kafka Idempotence functionality is essential to prevent such problems.
+**Kafka Idempotence**, as the name suggests, is a functionality to prevent duplicate storage of Records sent by Kafka's Producer in Kafka. When Kafka is simply used as an Event Bus, duplicate storage of identical Records in Kafka is generally not a problem, but when Kafka is utilized beyond an Event Bus as an Event Store, duplicate storage of identical Records becomes a problem, and utilizing Kafka Idempotence functionality is essential to prevent such problems.
 
 {{< figure caption="[Figure 1] Kafka Idempotence Architecture" src="images/kafka-idempotence-architecture.png" width="1000px" >}}
 

@@ -8,7 +8,7 @@ This explains CRUSH, which is used as an algorithm for distributing objects (dat
 
 ## 2. CRUSH
 
-CRUSH is an algorithm that distributes objects to each storage device in proportion to the weight of each storage device. Here, the meaning of object distribution also includes object replicas. If CEPH needs to maintain 3 replicas, CRUSH determines 3 storage devices where objects will be stored. CRUSH distributes objects based on a map called **Cluster Map** that represents the hierarchy of logical storage devices.
+**CRUSH** is an algorithm that distributes objects to each storage device in proportion to the weight of each storage device. Here, the meaning of object distribution also includes object replicas. If CEPH needs to maintain 3 replicas, CRUSH determines 3 storage devices where objects will be stored. CRUSH distributes objects based on a map called **Cluster Map** that represents the hierarchy of logical storage devices.
 
 ### 2.1. Cluster Map
 

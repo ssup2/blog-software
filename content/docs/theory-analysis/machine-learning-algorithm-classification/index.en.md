@@ -6,7 +6,7 @@ Classification and overview of machine learning algorithms.
 
 ## 1. Machine Learning Algorithm Classification
 
-Machine learning algorithms are often grouped into four types: supervised learning, unsupervised learning, semi-supervised learning, and reinforcement learning.
+**Machine learning algorithms** are often grouped into four types: supervised learning, unsupervised learning, semi-supervised learning, and reinforcement learning.
 
 ### 1.1. Supervised learning
 

@@ -9,8 +9,8 @@ title: Kubernetes 설치 / kubeadm 이용 / Ubuntu 18.04, Jetson Nano Cluster �
 [Figure 1]은 Jetson Nano Cluster 기반 Kubernetes 설치 환경을 나타내고 있다. 상세한 환경 정보는 다음과 같다.
 
 * Kubernetes 1.18.14
-  * Network Plugin : calico or flannel or cilium 이용
-  * Dashboard Addon : Dashboard 이용
+  * **Network Plugin** : calico or flannel or cilium 이용
+  * **Dashboard Addon** : Dashboard 이용
 * kubeadm 1.18.14
   * VM을 이용하여 Cluster 환경을 구축하는 경우 kubeadm을 이용하여 쉽게 Kubernetes를 설치 할 수 있다.
 * CNI
@@ -19,8 +19,8 @@ title: Kubernetes 설치 / kubeadm 이용 / Ubuntu 18.04, Jetson Nano Cluster �
 * Node
   * Jetson Nano
     * r32.3.1 (Ubuntu 18.04)
-    * Node 01 : Master Node
-    * Node 02, 03, 04 : Worker Node
+    * **Node 01** : Master Node
+    * **Node 02, 03, 04** : Worker Node
 
 ## 2. Node 설정
 

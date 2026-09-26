@@ -2,7 +2,7 @@
 title: lsof
 ---
 
-Open File List를 출력하는 lsof의 사용법을 정리한다.
+Open File List를 출력하는 **lsof**의 사용법을 정리한다.
 
 ## 1. lsof
 

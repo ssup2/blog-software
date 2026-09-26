@@ -6,7 +6,7 @@ Kubernetes의 Pod Eviction 기법을 정리한다.
 
 ## 1. Kubernetes Pod Eviction
 
-Kubernetes는 Cluster의 Resource 부족시 우선순위가 낮은 Pod를 제거하여 Resource를 확보하는 Pod Eviction 기법을 제공한다. Pod Eviction 기법은 Kubernetes Scheduler가 수행하는 기법과 kubelet이 기법 2가지가 존재한다. Kubernetes Scheduler가 수행하는 Pod Eviction 기법은 Cluster Level의 기법이고, kubelet이 수행하는 Pod Eviction 기법은 Node Level의 기법이다.
+Kubernetes는 Cluster의 Resource 부족시 우선순위가 낮은 Pod를 제거하여 Resource를 확보하는 **Pod Eviction** 기법을 제공한다. Pod Eviction 기법은 Kubernetes Scheduler가 수행하는 기법과 kubelet이 기법 2가지가 존재한다. Kubernetes Scheduler가 수행하는 Pod Eviction 기법은 Cluster Level의 기법이고, kubelet이 수행하는 Pod Eviction 기법은 Node Level의 기법이다.
 
 ### 1.1. Kubernetes Scheduler의 Pod Eviction
 
@@ -46,8 +46,8 @@ Pod의 Priority는 Priority 정보를 저장하고 있는 Priority Class를 생�
 
 Priority Class의 값이 높을수록 높은 Priority를 갖으며 최대값은 "10억"이다. Priority Class의 globalDefault는 해당 Priority Class를 Default Priority Class로 이용할지 설정하는 값이다. Default Priority Class가 존재하지 않는 상태에서 Priority Class가 명시되어 있지 않는 Pod의 Priority는 "0"으로 설정된다. Kubernetes는 Cluster 구성에 필수적인 Pod들을 보호하기 위해서 다음과 높은 Priority를 갖는 다음과 같은 Priority Class를 기본적으로 제공한다.
 
-* system-cluster-critical : 2000000000 
-* system-node-critical : 2000001000
+* `system-cluster-critical` : 2000000000 
+* `system-node-critical` : 2000001000
 
 ### 1.2. kubelet의 Pod Eviction
 

@@ -8,7 +8,7 @@ Istio의 Sidecar Proxy를 분석한다.
 
 {{< figure caption="[Figure 1] Istio Sidecar" src="images/istio-sidecar.png" width="600px" >}}
 
-Istio의 Sidecar Proxy 기법은 각 Pod 마다 전용 Proxy Server를 띄우는 기법을 의미한다. [Figure 1]은 Istio Sidecar Proxy의 Architecture를 나타내고 있다. Sidecar Proxy는 Pod으로 전달되는 모든 Inbound Packet을 대신 수신한 다음, 처리 후 Pod의 App Container에게 대신 전송하는 역할을 수행한다. 또한 Sidecar Proxy는 App Container에서 밖으로 전송되는 모든 Packet을 대신 수신한 다음, 처리 후 Pod의 외부로 대신 전송하는 역할을 수행한다.
+Istio의 **Sidecar Proxy** 기법은 각 Pod 마다 전용 Proxy Server를 띄우는 기법을 의미한다. [Figure 1]은 Istio Sidecar Proxy의 Architecture를 나타내고 있다. Sidecar Proxy는 Pod으로 전달되는 모든 Inbound Packet을 대신 수신한 다음, 처리 후 Pod의 App Container에게 대신 전송하는 역할을 수행한다. 또한 Sidecar Proxy는 App Container에서 밖으로 전송되는 모든 Packet을 대신 수신한 다음, 처리 후 Pod의 외부로 대신 전송하는 역할을 수행한다.
 
 Sidecar Proxy는 Packet 전송에 필요한 모든 정보를 알고 있어야 한다. Sidecar Proxy는 이러한 Packet 전송에 필요한 정보를 Istiod라고 불리는 중앙 Controller로 부터 받는다. Istiod가 Sidecar Proxy에게 전송하는 정보에는 Pod에서 동작하는 App이 제공하는 Service 정보, Packet 송수신 허용 여부를 결정하는 Policy 정보, Packet 암호화를 위한 인증서 정보등이 포함되어 있다. 여기서 Service는 Kubernetes의 Service Object 또는 Istio의 Virtual Service Object를 의미한다. Sidecar Proxy는 Istiod로 부터 받은 정보들을 바탕으로 Packet Load Balancing, Packet Encap/Decap, Rate Limit, Circuit Breaker 등의 다양한 역할을 수행한다.
 

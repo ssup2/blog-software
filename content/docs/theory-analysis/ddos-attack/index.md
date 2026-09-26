@@ -6,7 +6,7 @@ DDoS (Distributed Denial-of-Service) Attack을 정리한다.
 
 ## 1. DDoS (Distributed Denial-of-Service) Attack
 
-DDoS Attack은 특정 Server/Service에 비정상적인 Traffic을 전송하여 Server/Service의 장애를 유발하는 모든 공격을 의미한다. 여러 기법의 DDoS Attack이 존재하며, 대부분의 DDoS Attack 기법의 공격자는 Server/Service에 접근 가능한 불특정 다수가 될수 있다는 특징을 가지고 있다. 따라서 Public Network로 노출되는 Server/Service의 경우에는 반드시 DDoS Attack에 대비해야 한다.
+**DDoS Attack**은 특정 Server/Service에 비정상적인 Traffic을 전송하여 Server/Service의 장애를 유발하는 모든 공격을 의미한다. 여러 기법의 DDoS Attack이 존재하며, 대부분의 DDoS Attack 기법의 공격자는 Server/Service에 접근 가능한 불특정 다수가 될수 있다는 특징을 가지고 있다. 따라서 Public Network로 노출되는 Server/Service의 경우에는 반드시 DDoS Attack에 대비해야 한다.
 
 ## 2. DDoS Attack Type
 

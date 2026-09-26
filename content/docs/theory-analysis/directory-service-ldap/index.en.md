@@ -6,7 +6,7 @@ Analyzes Directory Service and LDAP (Lightweight Directory Access Protocol) used
 
 ## 1. Directory Service
 
-The first Directory Service was a Data storage that stored information such as location, specifications, and administrators of Network Resources to manage physical Network Resources owned by enterprises. However, as enterprise requirements expanded, its functionality expanded to a Data storage that manages not only Network Resources but also various physical Resources that enterprises need to manage, such as equipment, organizations, and employees. Since employee authentication information can also be stored and managed in Directory Service, authentication services within the company can be built through Directory Service.
+The first **Directory Service** was a Data storage that stored information such as location, specifications, and administrators of Network Resources to manage physical Network Resources owned by enterprises. However, as enterprise requirements expanded, its functionality expanded to a Data storage that manages not only Network Resources but also various physical Resources that enterprises need to manage, such as equipment, organizations, and employees. Since employee authentication information can also be stored and managed in Directory Service, authentication services within the company can be built through Directory Service.
 
 Since Directory Service is often used to manage physical Resources where changes rarely occur, it is generally designed to focus on Data Read rather than Data Write. Also, to store various characteristics of physical Resources, it is generally designed to be able to store various Attributes. A representative implementation of Directory Service is LDAP (Lightweight Directory Access Protocol).
 
@@ -14,7 +14,7 @@ Since Directory Service is often used to manage physical Resources where changes
 
 {{< figure caption="[Figure 1] LDAP Schema" src="images/ldap-schema.png" width="450px" >}}
 
-LDAP is literally a lightweight Protocol for Directory Service. LDAP Server manages Data in Tree form. [Figure 1] shows the Schema of LDAP in Tree form. You can see that each Node of the Tree stores one attribute. Available attributes can be checked at [this link](https://docs.bmc.com/docs/fpsc121/ldap-attributes-and-associated-fields-495323340.html). Commonly used attributes are as follows.
+**LDAP** is literally a lightweight Protocol for Directory Service. LDAP Server manages Data in Tree form. [Figure 1] shows the Schema of LDAP in Tree form. You can see that each Node of the Tree stores one attribute. Available attributes can be checked at [this link](https://docs.bmc.com/docs/fpsc121/ldap-attributes-and-associated-fields-495323340.html). Commonly used attributes are as follows.
 
 * **uid** : User ID
 * **cn** : Common Name

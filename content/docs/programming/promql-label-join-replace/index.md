@@ -13,7 +13,7 @@ label-join(<Instant Vector>, <Dest Label>, <Seperator>, <Src Label>, <Src Label>
 label-join(node-memory-MemAvailable-bytes, "dest-label", "+", "job", "endpoint", "namespace")
 ```
 
-Label Join은 기존 Label들의 값을 조합하여 **새로운 Label**을 생성하는 문법이다. [SQL Syntax 1]은 Label Join의 문법을 나타내고 있다. `Src Label`은 값을 가져오려는 Label을 나타내며 다수의 `Src Label`이 선택될 수 있다. `Seperator`는 가져온 Label 사이에 삽입되는 분리자를 의미한다. Empty String (`""`)으로도 설정할 수 있다. `Dest Label`은 `Src Label`과 `Seperator`로 구성된 값의 저장될 새로운 Label을 나타낸다.
+**Label Join**은 기존 Label들의 값을 조합하여 **새로운 Label**을 생성하는 문법이다. [SQL Syntax 1]은 Label Join의 문법을 나타내고 있다. `Src Label`은 값을 가져오려는 Label을 나타내며 다수의 `Src Label`이 선택될 수 있다. `Seperator`는 가져온 Label 사이에 삽입되는 분리자를 의미한다. Empty String (`""`)으로도 설정할 수 있다. `Dest Label`은 `Src Label`과 `Seperator`로 구성된 값의 저장될 새로운 Label을 나타낸다.
 
 ```promql {caption="[Query 1] node-memory-MemAvailable-bytes"}
 # --- query ---

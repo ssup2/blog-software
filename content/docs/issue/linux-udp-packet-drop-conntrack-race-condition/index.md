@@ -11,14 +11,14 @@ Linux conntrack의 Race Condition에 의해서 UDP Packet이 Drop되는 Issue가
 ## 2. Background
 
 * Src 10.0.0.10:10, Dst 20.0.0.20:20
-  * Original Table : Src 10.0.0.10:10, Dst 20.0.0.20:20
-  * Reply Table : Src 20.0.0.20:20, Dst 10.0.0.10:10
+  * **Original Table** : Src 10.0.0.10:10, Dst 20.0.0.20:20
+  * **Reply Table** : Src 20.0.0.20:20, Dst 10.0.0.10:10
 
 Linux conntrack은 하나의 Connection 정보를 저장할때 Original Table, Reply Table 2가지 Table을 이용한다. 위의 예제는 Packet의 Src, Dst IP/Port에 따른 conntrack의 Original Table, Reply Table의 내용을 나타내고 있다. Original Table은 Packet의 Src, Dst IP/Port와 동일한 내용으로 채워진다. Reply Table의 내용은 Original Table에서 Src, Dst의 위치만 바뀐걸 알 수 있다.
 
 * Src 10.0.0.10:10, Dst 20.0.0.20:20, DNAT 20.0.0.20->30.0.0.30:30
-  * Original Table : Src 10.0.0.10:10, Dst 20.0.0.20:20
-  * Reply Table : Src 30.0.0.30:30, Dst 10.0.0.10:10
+  * **Original Table** : Src 10.0.0.10:10, Dst 20.0.0.20:20
+  * **Reply Table** : Src 30.0.0.30:30, Dst 10.0.0.10:10
 
 위의 예제는 첫번째 예제와 동일하지만 Dst IP/Port로 DNAT Rule이 설정 되어있을때의 상태를 나타낸다. Original Table은 Packet의 Src, Dst IP/Port와 동일한 내용으로 채워진다. Reply Table의 Src IP/Port는 DNAT Rule의 영향으로 Original Table의 Dst IP/Port과 동일하지 않을걸 확인 할 수 있다. 이처럼 conntrack은 빠른 Reverse NAT를 수행하기 위해서 NAT Rule을 반영한 Connection 정보를 저장한다.
 
@@ -45,7 +45,7 @@ DNAT를 수행하여 서로 다른 곳으로 Packet이 전송하는 경우 발�
 * Linux Longterm
   * 4.9.163+, 4.14.106+, 4.19.29+, 5.4+
 * Distro Linux Kernel
-  * Ubuntu : 4.15.0-56+
+  * **Ubuntu** : 4.15.0-56+
 
 UDP Packet이 DNAT 되어 서로 다른 상대에게 전송되는 경우에 발생하는 Issue는 아직 완전히 Kernel에서 해결하지 못한 상태이다. 따라서 App 내부에서 하나의 Socket을 통해서 동시에 UDP Packet을 전송하지 못하도록 제한하여 conntrack Race Condition을 방지하거나, 위의 Kernel Patch가 적용된 상태에서 UDP Packet이 DNAT 되어 전송되어도 서로 다른 상대가 아닌 동일한 상대한테 전송되도록 Kernel의 DNAT Rule을 설정하여 본 Issue를 우회해야 한다. 또는 iptables의 mangle Table을 활용하여 특정 IP, Port 대상으로 전송되는 Packet은 conntrack을 통해서 Connection 정보가 관리되지 않도록 설정하여 conntrack Race Condition을 방지할 수도 있다.
 

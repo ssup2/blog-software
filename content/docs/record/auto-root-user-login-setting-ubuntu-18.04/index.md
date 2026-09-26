@@ -5,6 +5,7 @@ title: 자동 Root User Login 설정 / Ubuntu 18.04 환경
 ## 1. 설정 환경
 
 설정 환경은 다음과 같다.
+
 * Ubuntu 18.04 LTS 64bit, root user
 
 ## 2. root Password 설정

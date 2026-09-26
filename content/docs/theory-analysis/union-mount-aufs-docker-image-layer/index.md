@@ -8,7 +8,7 @@ Union Mount를 간략하게 설명하고 리눅스에서 이용할 수 있는 Un
 
 {{< figure caption="[Figure 1] Union Mount" src="images/union-mount.png" width="600px" >}}
 
-Union이란 이름에서도 알 수 있듯이, 여러개의 폴더를 동시에 특정 폴더에 Mount하는 동작을 Union Mount라고 한다. 리눅스 환경에서 Union Mount를 이용하기 위해서는 AUFS를 이용하면 된다.
+Union이란 이름에서도 알 수 있듯이, 여러개의 폴더를 동시에 특정 폴더에 Mount하는 동작을 **Union Mount**라고 한다. 리눅스 환경에서 Union Mount를 이용하기 위해서는 AUFS를 이용하면 된다.
 
 ## 2. AUFS
 
@@ -18,7 +18,7 @@ AUFS (Advanced Multi Layered Unification Filesystem)은 리눅스 환경에서 U
 # mount -t aufs -o br=/layer-rw=rw:/layer-01=ro+wh:/layer-02=ro+wh:/layer-03=ro+wh none /mnt
 ```
 
-아래의 AUFS 설명들은 [Shell 1]과 같은 명령어와 Option을 통해 AUFS Mount를 했다고 가정하에 진행한다. AUFS는 **br(Branch)**에 Union Mount를 위한 폴더들을 나열한다. /layer-rw 폴더는 RW Branch가 되고 나머지 폴더들은 RO Branch가 되는것을 확인 할 수 있다. 또한 /layer-rw가 br 옵션의 가장 앞에 있기 때문에 /layer-rw는 Root Branch가 된다. /mnt 폴더에 Branch 폴더들이 Union Mount 된다.
+아래의 AUFS 설명들은 [Shell 1]과 같은 명령어와 Option을 통해 AUFS Mount를 했다고 가정하에 진행한다. AUFS는 **br** (Branch)에 Union Mount를 위한 폴더들을 나열한다. /layer-rw 폴더는 RW Branch가 되고 나머지 폴더들은 RO Branch가 되는것을 확인 할 수 있다. 또한 /layer-rw가 br 옵션의 가장 앞에 있기 때문에 /layer-rw는 Root Branch가 된다. /mnt 폴더에 Branch 폴더들이 Union Mount 된다.
 
 AUFS에서는 파일의 삭제를 나타내기 위해 **Whiteout** 파일을 이용한다. 기본적으로 AUFS는 Root Branch안에 있는 Whiteout 파일만 참조하지만 +wh 옵션을 주면 +wh 옵션이 있는 폴더의 Whiteout 파일도 참조한다.
 

@@ -38,7 +38,7 @@ int main()
 }
 ```
 
-Smart Pointer는 일반 Pointer와 다르게 `new` 문법으로 생성한 Instance를 **delete 문법을 통해 명시적으로 삭제하지 않아도 자동으로 삭제해주는 Pointer**이다. [Code 1]은 간단한 Smart Pointer를 나타내고 있다. Smart Pointer안의 실제 Pointer는 Smart Pointer의 생성자와 함께 초기화 및 할당되고, 소멸자 안에서 delete 문법과 함께 해제된다. 또한 `*` 연산자와 `->` 연산자를 Overriding하여 개발자가 Smart Pointer를 일반 Pointer와 유사하게 이용할 수 있다.
+**Smart Pointer**는 일반 Pointer와 다르게 `new` 문법으로 생성한 Instance를 **delete 문법을 통해 명시적으로 삭제하지 않아도 자동으로 삭제해주는 Pointer**이다. [Code 1]은 간단한 Smart Pointer를 나타내고 있다. Smart Pointer안의 실제 Pointer는 Smart Pointer의 생성자와 함께 초기화 및 할당되고, 소멸자 안에서 delete 문법과 함께 해제된다. 또한 `*` 연산자와 `->` 연산자를 Overriding하여 개발자가 Smart Pointer를 일반 Pointer와 유사하게 이용할 수 있다.
 
 `main()` 함수 안에서 `ptr` Smart Pointer는 `new int()`을 통해 할당된 Instance를 가리킨다. `ptr` Smart Pointer는 Stack에 할당된 지역변수이기 때문에 main 함수가 종료되면서 ptr Smart Pointer의 소멸자가 호출된다. 소멸자가 호출되면서 delete를 호출하기 때문에 할당된 Instance는 해지된다.
 

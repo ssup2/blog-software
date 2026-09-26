@@ -10,9 +10,9 @@ title: In Search of Understandable Consensus Algorithm
 
 Consensus Algorithm은 일반적으로 Replicated State Machine Architecture를 기반으로 동작한다. Replicated State Machine Architecture는 의미 그대로 동일한 상태를 갖는 State Machine들을 포함한 다수의 Server들로 구성된 Architecture를 의미한다. Replicated State Machine Architecture의 각 Server들은 다음과 같은 구성요소로 이루어져 있다.
 
-* Consensus Module : 다른 Server들의 Consensus Module들과 통신하면서 다른 Server들의 상태를 파악하고 Consensus를 맞추는 역할을 수행한다. 또한 Client의 Command(요청)를 받아 Command를 Log에 기록, State Machine에 반영, 다른 Server들의 Consensus Module에 전파하는 역할도 수행한다.
-* State Machine : Server의 현재의 상태를 저장하는 저장소 역할을 수행한다.
-* Log : Consensus Module이 State Machine에 적용한 Client의 Command를 적용 순서대로 기록하는 공간이다. 즉 Log를 통해서 State Machine의 History를 파악할 수 있다. Consensus Module은 Log에 저장된 Command 정보를 바탕으로 Consensus를 맞춘다. 하나의 Command 정보는 Log의 하나의 Entry에 저장된다.
+* **Consensus Module** : 다른 Server들의 Consensus Module들과 통신하면서 다른 Server들의 상태를 파악하고 Consensus를 맞추는 역할을 수행한다. 또한 Client의 Command(요청)를 받아 Command를 Log에 기록, State Machine에 반영, 다른 Server들의 Consensus Module에 전파하는 역할도 수행한다.
+* **State Machine** : Server의 현재의 상태를 저장하는 저장소 역할을 수행한다.
+* **Log** : Consensus Module이 State Machine에 적용한 Client의 Command를 적용 순서대로 기록하는 공간이다. 즉 Log를 통해서 State Machine의 History를 파악할 수 있다. Consensus Module은 Log에 저장된 Command 정보를 바탕으로 Consensus를 맞춘다. 하나의 Command 정보는 Log의 하나의 Entry에 저장된다.
 
 ### 3. Consensus Algorithm 특징
 
@@ -26,19 +26,19 @@ Consensus Algorithm은 다음과 같은 특징을 만족해야 한다.
 
 Raft Algorithm은 기존의 Consensus Algorithm으로 많이 알려진 Pasox Algorithm의 문제점을 해결하기 위해서 태어났다. Raft Algorithm은 Paxos Algorithm을 보다 간단하고 직관적이며, 실제로 구현하기 쉬운 특징을 갖고 있다. Raft Algorithm도 Replicated State Machine Architecture를 기반으로 동작하며, Consensus Algorithm의 특징을 만족시킨다. Raft Algorithm은 아래의 5가지의 특징을 만족시키는것을 보장한다.
 
-* Election Safety : 하나의 Term동안 안전하게 하나의 Leader를 선출할 수 있다.
-* Leader Append-Only : Leader는 절대로 Log안에 있는 Entry(Command)를 Overwrite하거나 삭제하지 않는다. Leader는 오직 Log안에 다음 Index에 Entry를 추가만 한다.
-* Log Matching : 두 Log의 마지막 Entry의 Index와 Term이 동일하다면, 두 Log는 동일한 Log이다.
-* Leader Completeness : Commit된 Entry는 추후 Leader가 변경되더라도 변경된 Leader에도 존재한다.
-* State Machine Safety : 하나의 Server에서 특정 Index의 Entry를 State Machine에 반영하였다면, 다른 Server에서 동일한 Index의 동일한 Entry를 갖을 경우에만 해당 State Machine에 반영한다. 만약 동일한 Index에 다른 내용의 Entry가 존재할 경우 해당 Entry는 반영되지 않는다.
+* **Election Safety** : 하나의 Term동안 안전하게 하나의 Leader를 선출할 수 있다.
+* **Leader Append-Only** : Leader는 절대로 Log안에 있는 Entry(Command)를 Overwrite하거나 삭제하지 않는다. Leader는 오직 Log안에 다음 Index에 Entry를 추가만 한다.
+* **Log Matching** : 두 Log의 마지막 Entry의 Index와 Term이 동일하다면, 두 Log는 동일한 Log이다.
+* **Leader Completeness** : Commit된 Entry는 추후 Leader가 변경되더라도 변경된 Leader에도 존재한다.
+* **State Machine Safety** : 하나의 Server에서 특정 Index의 Entry를 State Machine에 반영하였다면, 다른 Server에서 동일한 Index의 동일한 Entry를 갖을 경우에만 해당 State Machine에 반영한다. 만약 동일한 Index에 다른 내용의 Entry가 존재할 경우 해당 Entry는 반영되지 않는다.
 
 ### 4.1. Leader 선출
 
 Raft Algorithm에서 각 Server는 Leader, Follower, Candidate 3가지의 상태를 갖는다. Raft Algorithm은 Leader가 중심이 되어 Consensus를 맞춘다. 이러한 Leader 기반의 방식 때문에, Raft Algorithm은 다른 Consensus Algorithm에 비해서 이해하고, 구현하기 쉬운 장점을 갖게되었다. 3가자의 상태에 대한 설명은 아래와 같다.
 
-* Leader : Server 사이의 Consensus를 맞추는 중추적인 역할을 수행한다.
-* Follower : Leader의 명령에 따라서 Log에 Entry 및 State Machine에 상태를 저장한다.
-* Candidate : Leader가 되기 위해서 다른 Server들로부터 표를 받을 상태를 의미한다.
+* **Leader** : Server 사이의 Consensus를 맞추는 중추적인 역할을 수행한다.
+* **Follower** : Leader의 명령에 따라서 Log에 Entry 및 State Machine에 상태를 저장한다.
+* **Candidate** : Leader가 되기 위해서 다른 Server들로부터 표를 받을 상태를 의미한다.
 
 모든 Server는 상황에 따라서 Leader, Follower, Candidate가 될 수 있다. 따라서 Leader를 선출하는 방법을 Raft Algorithm에서 제공하고 있다. Follower가 Leader가 되는 과정은 다음과 같다.
 

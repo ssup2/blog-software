@@ -2,7 +2,7 @@
 title: nethogs
 ---
 
-Process들을 Network Bandwidth 사용량이 높은 순서대로 출력하는 nethogs의 사용법을 정리한다.
+Process들을 Network Bandwidth 사용량이 높은 순서대로 출력하는 **nethogs**의 사용법을 정리한다.
 
 ## 1. nethogs
 

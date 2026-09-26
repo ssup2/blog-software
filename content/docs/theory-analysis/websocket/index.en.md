@@ -6,7 +6,7 @@ Analyzes WebSocket.
 
 ## 1. WebSocket
 
-WebSocket is a Protocol that enables **Full-duplex** communication between Web Browser and Server. WebSocket uses HTTP Protocol during Handshaking, but after Handshaking, Web Browser and Server exchange Data using WebSocket's own Protocol over TCP/IP Stack without using HTTP. That is, Web Client and Server switch from HTTP Protocol to WebSocket Protocol.
+**WebSocket** is a Protocol that enables **Full-duplex** communication between Web Browser and Server. WebSocket uses HTTP Protocol during Handshaking, but after Handshaking, Web Browser and Server exchange Data using WebSocket's own Protocol over TCP/IP Stack without using HTTP. That is, Web Client and Server switch from HTTP Protocol to WebSocket Protocol.
 
 {{< figure caption="[Figure 1] Websocket Handshaking" src="images/websocket-handshaking.png" width="600px" >}}
 

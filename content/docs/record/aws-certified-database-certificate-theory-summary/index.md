@@ -43,10 +43,10 @@ title: AWS Certified Database 자격증 이론 정리
   * Primary Index
   * Secondary Index
 * ACID
-  * Atomicty : All or Nothing
-  * Consistency : Transaction 이후에도 Data는 Schema와 일치 필요
-  * Isolation : 다른 Transaction과 구별
-  * Durability : 예상하지 못한 장애 발생시 복구가 가능해야 함
+  * **Atomicity** : All or Nothing
+  * **Consistency** : Transaction 이후에도 Data는 Schema와 일치 필요
+  * **Isolation** : 다른 Transaction과 구별
+  * **Durability** : 예상하지 못한 장애 발생시 복구가 가능해야 함
 
 ### 2.3. Non-relational Database
 

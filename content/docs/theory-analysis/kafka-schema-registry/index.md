@@ -6,7 +6,7 @@ title: Kafka Schema Registry
 
 {{< figure caption="[Figure 1] Kafka Schema Registry Architecture" src="images/kafka-schema-registry-architecture.png" width="900px" >}}
 
-Kafka Schema Registry는 Kafka Producer와 Kafka Consumer 사이에서 Kafka Message의 Schema를 관리하는 역할을 수행한다. [Figure 1]은 Kafka Schema Registry의 Architecture를 나타내고 있다. Kafka Schema Registry는 상태 정보를 유지하기 위해서 별도의 Database를 이용하지 않고, Kafka의 `_schemas` Topic을 이용한다. 
+**Kafka Schema Registry**는 Kafka Producer와 Kafka Consumer 사이에서 Kafka Message의 Schema를 관리하는 역할을 수행한다. [Figure 1]은 Kafka Schema Registry의 Architecture를 나타내고 있다. Kafka Schema Registry는 상태 정보를 유지하기 위해서 별도의 Database를 이용하지 않고, Kafka의 `_schemas` Topic을 이용한다. 
 
 모든 Schema 관련 정보는 `_schemas` Topic에 기록되기 때문에 Kafka Schema Registry는 Stateless한 특징을 갖으며, 부하 분산을 위해서 손쉽게 Scale-out을 수행할 수 있다. 단 Topic에 저장된 Schema 정보는 Memory에도 Caching되어 있기 때문에 Kafka Schema Registry가 Topic에 직접 접근하는 빈도는 낮으며, 일반적으로 Schema가 등록/변경/삭제되거나 Kafka Schema Registry가 초기화 되는 경우에만 Topic에 접근한다.
 

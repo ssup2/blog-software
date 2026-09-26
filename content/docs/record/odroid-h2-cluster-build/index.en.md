@@ -13,16 +13,16 @@ Build an ODROID-H2 Cluster for Ceph and OpenStack installation.
 [Photo 1] shows the actual appearance of the ODROID-H2 Cluster. [Figure 1] represents the ODROID-H2 Cluster. All ODROID-H2 specifications are identical. The default gateway for all nodes is configured as a NAT network. Node 04 is a VM and is used for monitoring and deployment purposes. The main specifications of the ODROID-H2 Cluster are as follows.
 
 * ODROID-H2 * 3
-  * CPU : 4Core, Intel Celeron J4105 Processor
-  * Memory : 8GB * 2, SAMSUNG DDR4 PC4-19200
-  * Root Storage : 64GB, eMMC
-  * Ceph Storage : 256GB, SAMSUNG PM981 M.2 2280 
+  * **CPU** : 4Core, Intel Celeron J4105 Processor
+  * **Memory** : 8GB * 2, SAMSUNG DDR4 PC4-19200
+  * **Root Storage** : 64GB, eMMC
+  * **Ceph Storage** : 256GB, SAMSUNG PM981 M.2 2280 
 * VM * 1
-  * CPU : 2Core
+  * **CPU** : 2Core
   * Memory: 8GB
 * Network
-  * NAT Network : 192.168.0.0/24
-  * Private Network : 10.0.0.0/24
+  * **NAT Network** : 192.168.0.0/24
+  * **Private Network** : 10.0.0.0/24
 
 ### 1.1. Ceph
 

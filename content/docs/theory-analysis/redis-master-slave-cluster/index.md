@@ -8,7 +8,7 @@ Redis Master-slave 및 Redis Cluster를 분석한다.
 
 {{< figure caption="[Figure 1] Redis Master-slave" src="images/redis-master-slave.png" width="600px" >}}
 
-Redis Master-slave는 Redis에서 제공하는 가장 기본적인 Replication 기법이다. [Figure 1]은 Redis Master-slave 구성시 Architecture를 나타내고 있다. Redis의 Master-slave 기법은 MySQL의 Master-slave Replication 기법과 유사한점이 많다. 하나의 Master에 다수의 Slave가 붙을 수 있다. Master는 Read-Write Mode로 동작하고 Slave는 Read-Only Mode로 동작한다. Client는 필요에 따라서 Master에 붙어 Write 동작을 수행하거나, 적절한 Master 또는 Slave에 붙어 Read 동작을 수행 할 수 있다.
+**Redis Master-slave**는 Redis에서 제공하는 가장 기본적인 Replication 기법이다. [Figure 1]은 Redis Master-slave 구성시 Architecture를 나타내고 있다. Redis의 Master-slave 기법은 MySQL의 Master-slave Replication 기법과 유사한점이 많다. 하나의 Master에 다수의 Slave가 붙을 수 있다. Master는 Read-Write Mode로 동작하고 Slave는 Read-Only Mode로 동작한다. Client는 필요에 따라서 Master에 붙어 Write 동작을 수행하거나, 적절한 Master 또는 Slave에 붙어 Read 동작을 수행 할 수 있다.
 
 **Master-slave 사이의 Replication은 Async 방식**을 이용한다. Master는 Data 변경시 변경 내용을 backlog에 기록한다. Slave는 Master에 접속하여 backlog의 내용을 바탕으로 Replication을 수행한다. Async 방식이기 때문에 Master에 저장된 Data가 Slave에는 잠깐동안 저장되지 않을 수 있다. 따라서 Client (App)는 Slave에서 Data를 Read 할때 Async 특징을 반드시 고려해야한다.
 

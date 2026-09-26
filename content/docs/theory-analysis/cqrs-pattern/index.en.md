@@ -8,7 +8,7 @@ Analyze CQRS (Command and Query Responsibility Segregation) Pattern.
 
 {{< figure caption="[Figure 1] CORS Pattern" src="images/cqrs-pattern.png" width="700px" >}}
 
-CQRS (Command and Query Responsibility Segregation) Pattern means a Pattern that separates Command Responsibility and Query Responsibility as the name implies. Here, Responsibility means Model. That is, it means a method where Command and Query operate using different **Models**.
+**CQRS (Command and Query Responsibility Segregation) Pattern** means a Pattern that separates Command Responsibility and Query Responsibility as the name implies. Here, Responsibility means Model. That is, it means a method where Command and Query operate using different **Models**.
 
 [Figure 1] shows CQRS Pattern. **Command** means Create, Update, Delete operations that change **State, Report**, and **Query** means operations that Read State, Report. Command and Query operate with different Models, and Commands from Command Model propagate to Query Model to change Query Model's State, Report. Commands from multiple Command Models can propagate to one Query Model to change Query Model's State, Report.
 

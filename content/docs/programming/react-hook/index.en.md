@@ -6,7 +6,7 @@ This document briefly summarizes React Hooks.
 
 ## 1. React Hook
 
-React Hook is functionality that allows pure JavaScript functions to be used as React Components instead of developing React Components by inheriting existing Component Classes. The method of developing by inheriting existing React Components had problems requiring a lot of Code for Component development and causing unnecessary Code duplication. Since React Hook uses pure JavaScript functions as Components, it allows quick Component implementation with less Code writing and removal of unnecessary Code duplication. React Hook was added in React 16.8.
+**React Hook** is functionality that allows pure JavaScript functions to be used as React Components instead of developing React Components by inheriting existing Component Classes. The method of developing by inheriting existing React Components had problems requiring a lot of Code for Component development and causing unnecessary Code duplication. Since React Hook uses pure JavaScript functions as Components, it allows quick Component implementation with less Code writing and removal of unnecessary Code duplication. React Hook was added in React 16.8.
 
 ### 1.1. useState()
 

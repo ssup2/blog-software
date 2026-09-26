@@ -6,7 +6,7 @@ Organizes Envoy's Response Flag.
 
 ## 1. Envoy Response Flag
 
-Envoy Response Flag refers to flags used to represent related information in Access Log when **specific Events or Errors** occur during Envoy's request processing. **Long Name** and **Short Name** exist, and Short Name is recorded in Envoy Access Log. Response Flags are divided into flags that are **used with HTTP and TCP** and flags that are **only applied to HTTP**.
+**Envoy Response Flag** refers to flags used to represent related information in Access Log when **specific Events or Errors** occur during Envoy's request processing. **Long Name** and **Short Name** exist, and Short Name is recorded in Envoy Access Log. Response Flags are divided into flags that are **used with HTTP and TCP** and flags that are **only applied to HTTP**.
 
 ### 1.1. HTTP, TCP Flag
 

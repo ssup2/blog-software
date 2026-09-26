@@ -6,13 +6,13 @@ This document analyzes Spark Application operation in AWS EKS Cluster. There are
 
 ## 1. spark-submit CLI & Spark Operator
 
-In AWS EKS, Spark Applications can be run using spark-submit CLI and Spark Operator, just like in general Kubernetes Clusters. In this case, the Architecture and operation method are the same as using spark-submit CLI and Spark Operator in general Kubernetes Clusters, as described in the following [Link](https://ssup2.github.io/blog-software/docs/theory-analysis/spark-on-kubernetes/).
+In AWS EKS, Spark Applications can be run using spark-submit CLI and Spark Operator, just like in general Kubernetes Clusters. In this case, the Architecture and operation method are the same as using spark-submit CLI and Spark Operator in general Kubernetes Clusters.
 
 However, in AWS EKS, it is recommended to use **EMR on EKS Spark Container Image** as the Container Image for Driver and Executor Pods. EMR on EKS Spark Container Image contains Optimized Spark optimized for EKS environments, showing better performance compared to Open Source Spark, and includes AWS-related Libraries and Spark Connectors listed below.
 
 * EMRFS S3-optimized committer
-* Spark Connector for AWS Redshift : Used when accessing AWS Redshift from Spark Applications
-* Spark Library for AWS SageMaker : Data stored in Spark Application's DataFrame can be directly used for Training through AWS SageMaker
+* **Spark Connector for AWS Redshift** : Used when accessing AWS Redshift from Spark Applications
+* **Spark Library for AWS SageMaker** : Data stored in Spark Application's DataFrame can be directly used for Training through AWS SageMaker
 
 EMR on EKS Spark Container Image is publicly available at [Public AWS ECR](https://gallery.ecr.aws/emr-on-eks). When using unique Libraries and Spark Connectors in Spark Applications, Custom Container Images must be built, and in this case, it is also recommended to use EMR on EKS Spark Container Image as the Base Image.
 
@@ -748,6 +748,7 @@ spec:
 
 ## 3. References
 
+* Spark on Kubernetes : [https://ssup2.github.io/blog-software/en/docs/theory-analysis/spark-on-kubernetes/](https://ssup2.github.io/blog-software/en/docs/theory-analysis/spark-on-kubernetes/)
 * EMR on EKS Container Image : [https://gallery.ecr.aws/emr-on-eks](https://gallery.ecr.aws/emr-on-eks)
 * StartJobRun Parameter : [https://docs.aws.amazon.com/emr/latest/EMR-on-EKS-DevelopmentGuide/emr-eks-jobs-CLI.html#emr-eks-jobs-parameters](https://docs.aws.amazon.com/emr/latest/EMR-on-EKS-DevelopmentGuide/emr-eks-jobs-CLI.html#emr-eks-jobs-parameters)
 

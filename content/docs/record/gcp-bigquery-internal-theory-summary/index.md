@@ -79,8 +79,8 @@ title: GCP BigQuery 내부 이론 정리
 
 ### 2.2. Dataset Creation
 
-* Default Rounding Mode : 반올림 모드
-* Time Travel Window : 데이터 복구 가능한 시간 범위
+* **Default Rounding Mode** : 반올림 모드
+* **Time Travel Window** : 데이터 복구 가능한 시간 범위
 
 
 ## 3. Using BigQuery Dashboard Options
@@ -99,11 +99,11 @@ title: GCP BigQuery 내부 이론 정리
      * 저장 비용 발생
      * 동일한 DataSet의 Table에만 저장 가능
 
-* Allow Large Results : 10GB 이상의 결과를 저장 가능
+* **Allow Large Results** : 10GB 이상의 결과를 저장 가능
 
 * Job Priority
-  * Interactive : 즉시 쿼리 실행
-  * Batch : Idle Resource가 발생하는 시점에 실행, 일반적으로 1~2분 이내에 실행됨. 24시간 이내에 실행되지 않으면 Interactive로 변경되어 실행
+  * **Interactive** : 즉시 쿼리 실행
+  * **Batch** : Idle Resource가 발생하는 시점에 실행, 일반적으로 1~2분 이내에 실행됨. 24시간 이내에 실행되지 않으면 Interactive로 변경되어 실행
 
 ### 3.2. Caching Features & Limits
 
@@ -118,9 +118,9 @@ title: GCP BigQuery 내부 이론 정리
 ### 3.3. Wildcard Tables
 
 * 다수의 Table에서 한번에 데이터를 조회하고 싶을때 이용
-  * Example : SELECT * FROM `project_id.dataset_id.table_id_*`
+  * **Example** : SELECT * FROM `project_id.dataset_id.table_id_*`
 * `_TABLE_SUFFIX` : Wildcard Table 쿼리 이용시 Pseudo Column이며, 이를 활용하여 특정 Table만 조회 가능
-  * Example : SELECT * FROM `project_id.dataset_id.table_id_*` WHERE _TABLE_SUFFIX = '100' OR _TABLE_SUFFIX = '200'
+  * **Example** : SELECT * FROM `project_id.dataset_id.table_id_*` WHERE _TABLE_SUFFIX = '100' OR _TABLE_SUFFIX = '200'
 * Limitations
   * Support BigQuery storage only
   * Caching is not supported
@@ -157,22 +157,22 @@ title: GCP BigQuery 내부 이론 정리
   * BigQuery는 중간 데이터를 전용 **메모리 노드**에 저장하여 처리 속도를 획기적으로 향상시킴. 특히 데이터가 생성되는 즉시 다음 작업자가 소비할 수 있어 파이프라인 방식 실행이 가능
 
 * 주요 성능 지표
-  * Elapsed Time : 쿼리 시작부터 완료까지 실제 경과 시간
-  * Slot Time : 모든 슬롯이 작업한 시간의 합계
-  * Bytes Shuffled : 단계 간 전송된 데이터량 (낮을수록 좋음)
-  * Bytes Spilled to Disk : 메모리 초과로 디스크에 기록된 데이터량 (0이 이상적)
+  * **Elapsed Time** : 쿼리 시작부터 완료까지 실제 경과 시간
+  * **Slot Time** : 모든 슬롯이 작업한 시간의 합계
+  * **Bytes Shuffled** : 단계 간 전송된 데이터량 (낮을수록 좋음)
+  * **Bytes Spilled to Disk** : 메모리 초과로 디스크에 기록된 데이터량 (0이 이상적)
 
 ## 6. Execution Plan
 
 * Stage별 타이밍 지표
-  * Average Time : 해당 Stage의 모든 Worker 평균 시간
-  * Max Time : 가장 느린 Worker(Long Tail)의 시간
+  * **Average Time** : 해당 Stage의 모든 Worker 평균 시간
+  * **Max Time** : 가장 느린 Worker(Long Tail)의 시간
 
 * Worker의 4가지 상태
-  * Wait : 스케줄링 대기 또는 이전 Stage 완료 대기
-  * Read : 데이터 읽기 및 필터링
-  * Compute : 연산 처리 (수식 계산, SQL 함수, 집계 등)
-  * Write : 결과 출력 (메모리 또는 디스크에 저장)
+  * **Wait** : 스케줄링 대기 또는 이전 Stage 완료 대기
+  * **Read** : 데이터 읽기 및 필터링
+  * **Compute** : 연산 처리 (수식 계산, SQL 함수, 집계 등)
+  * **Write** : 결과 출력 (메모리 또는 디스크에 저장)
 
 ## 7. Partitioned Tables
 
@@ -220,9 +220,9 @@ title: GCP BigQuery 내부 이론 정리
 * 데이터 내 정수형 컬럼 값을 기준으로, 사용자가 지정한 시작값·끝값·간격에 따라 파티션을 나누는 방식
 
 * 파티션 범위 설정
-  * Start : 파티션 시작 값
-  * End : 파티션 끝 값
-  * Interval : 파티션 간격
+  * **Start** : 파티션 시작 값
+  * **End** : 파티션 끝 값
+  * **Interval** : 파티션 간격
 
 * 제약 사항
   * 테이블당 최대 파티션 수 : 4,000개
@@ -434,8 +434,8 @@ WHERE cluster_column = other_column
 
 ## 11. Materialized View
 
-* Data Refresh : 수동 갱신, Auto Refresh 활성화 → 주기적으로 자동 갱신
-* Smart Query Optimization : BigQuery가 일반 쿼리를 실행할 때 자동으로 구체화 뷰를 활용
+* **Data Refresh** : 수동 갱신, Auto Refresh 활성화 → 주기적으로 자동 갱신
+* **Smart Query Optimization** : BigQuery가 일반 쿼리를 실행할 때 자동으로 구체화 뷰를 활용
 * 최신의 데이터를 제공 기능 with streaming tables
 * Materialized View 유용한 경우
   * 반복적이고 예측 가능한 쿼리 : 미리 계산된 결과 재사용 가능
@@ -445,15 +445,15 @@ WHERE cluster_column = other_column
 ### 11.1. Alert Materialized View
 
 * 지원
-  * CREATE : Materialized View 생성
-  * DROP : Materialized View 삭제
-  * ALTER : Auto Refresh만 변경 가능
+  * `CREATE` : Materialized View 생성
+  * `DROP` : Materialized View 삭제
+  * `ALTER` : Auto Refresh만 변경 가능
 
 * 불가능
-  * COPY : Materialized View 복사 불가
-  * IMPORT/EXPORT : Materialized View로 가져오거나 내보내기 불가
-  * INSERT : Materialized View에 직접 쓰기 불가능
-  * BigQuery Storage API : API를 통한 직접 접근 불가
+  * `COPY` : Materialized View 복사 불가
+  * `IMPORT`/`EXPORT` : Materialized View로 가져오거나 내보내기 불가
+  * `INSERT` : Materialized View에 직접 쓰기 불가능
+  * **BigQuery Storage API** : API를 통한 직접 접근 불가
 
 * 기본 Table 삭제시
   * 기본 Table을 동일한 이름으로 재생성해도, Materialized View도 다시 생성 필요
@@ -469,7 +469,7 @@ WHERE cluster_column = other_column
 
 * 변경 유형
   * INSERT만 (append) : 변경된 델타 데이터만 읽어서 추가
-  * UPDATE/DELETE/MERGE : 영향받은 부분 무효화 후 재읽기
+  * `UPDATE`/`DELETE`/`MERGE` : 영향받은 부분 무효화 후 재읽기
 
 * 파티션 여부에 따른 차이
   * 파티션 MV : 영향받은 파티션만 무효화 + 재읽기
@@ -486,7 +486,7 @@ WHERE cluster_column = other_column
 
 * 갱신 사이 시간대의 데이터 처리
   * INSERT만 : MV 데이터 + 마지막 갱신 이후 델타 데이터 합산
-  * UPDATE/DELETE : MV 스캔 안 하고 기본 테이블 직접 조회
+  * `UPDATE`/`DELETE` : MV 스캔 안 하고 기본 테이블 직접 조회
 
 * BigQuery는 MV 갱신 여부와 관계없이 항상 최신 데이터를 보장합니다. 갱신 전이면 델타를 합산하거나 기본 테이블을 직접 조회하는 방식으로 일관성을 유지합니다.
 
@@ -506,13 +506,13 @@ WHERE cluster_column = other_column
 | SQL 방언 | Legacy/Standard | Standard SQL만 |
 
 * 불가능한 작업
-  * COPY : 소스/대상으로 복사 불가
-  * EXPORT : 데이터 내보내기 불가
-  * LOAD : 직접 데이터 적재 불가
-  * INSERT : 쿼리 결과 직접 쓰기 불가
-  * DML : UPDATE/DELETE/MERGE 불가
-  * UNNEST : 배열 펼치기 불가
-  * JOIN : 여러 테이블 조인 불가
+  * `COPY` : 소스/대상으로 복사 불가
+  * `EXPORT` : 데이터 내보내기 불가
+  * `LOAD` : 직접 데이터 적재 불가
+  * `INSERT` : 쿼리 결과 직접 쓰기 불가
+  * **DML** : UPDATE/DELETE/MERGE 불가
+  * `UNNEST` : 배열 펼치기 불가
+  * `JOIN` : 여러 테이블 조인 불가
   * MV 중첩 : MV 기반 MV 생성 불가
 
 ### 11.5. Materialized View Best Practices
@@ -624,10 +624,10 @@ GROUP BY customer_id, product_category
 
 * DML Query Cost
   * 데이터 스캔이 발생할 경우에만 과금. 과금 기준은 테이블 유형과 DML 작업 종류에 따라 다름.
-  * INSERT : 소스 테이블에서 SELECT로 참조된 모든 컬럼의 바이트 합계
-  * UPDATE : 참조된 컬럼의 바이트 합계 + 수정 대상 행의 모든 컬럼 바이트 합계
-  * DELETE : 참조된 컬럼의 바이트 합계 + 삭제 대상 행의 모든 컬럼 바이트 합계
-  * MERGE : 포함된 INSERT/UPDATE/DELETE 각각의 위 공식 적용
+  * `INSERT` : 소스 테이블에서 SELECT로 참조된 모든 컬럼의 바이트 합계
+  * `UPDATE` : 참조된 컬럼의 바이트 합계 + 수정 대상 행의 모든 컬럼 바이트 합계
+  * `DELETE` : 참조된 컬럼의 바이트 합계 + 삭제 대상 행의 모든 컬럼 바이트 합계
+  * `MERGE` : 포함된 INSERT/UPDATE/DELETE 각각의 위 공식 적용
 
 * BigQuery Storage API 요금
   * RPC 기반 프로토콜로 BigQuery 스토리지에 빠르게 접근하는 API.

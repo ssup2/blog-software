@@ -8,16 +8,16 @@ title: Kubernetes 설치 / ClusterAPI, External Cloud Provider 이용 / Ubuntu 1
 
 [Figure 1]은 Kubernetes 설치 환경을 나타내고 있다. 설치 환경은 다음과 같다.
 
-* Local Node : Ubuntu 18.04, KVM Enable, 4CPU, 4GB Memory
-* Master, Worker Node : Ubuntu 18.04, 4vCPU, 4GB Memory
+* **Local Node** : Ubuntu 18.04, KVM Enable, 4CPU, 4GB Memory
+* **Master, Worker Node** : Ubuntu 18.04, 4vCPU, 4GB Memory
 * Network
-  * External Network : 192.168.0.0/24
-  * Octavia Network : 20.0.0.0/24
-  * Tenant Network : 10.6.0.0/24
-* Kubernetes : 1.17.11
-  * CNI : Cilium 1.7.11 Plugin
+  * **External Network** : 192.168.0.0/24
+  * **Octavia Network** : 20.0.0.0/24
+  * **Tenant Network** : 10.6.0.0/24
+* **Kubernetes** : 1.17.11
+  * **CNI** : Cilium 1.7.11 Plugin
 * External Cloud Provider
-  * OpenStack Cloud Controller Manager : v1.17.0
+  * **OpenStack Cloud Controller Manager** : v1.17.0
 
 ## 2. OpenStack OpenRC 설정
 

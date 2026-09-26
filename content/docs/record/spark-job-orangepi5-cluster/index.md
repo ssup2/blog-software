@@ -22,7 +22,7 @@ Spark를 통해서 MinIO에 저장되어 있는 데이터를 변환하는 환경
 * **Dagster** : Data Pipeline을 실행하여 MinIO에 South Korea Weather Data의 저장 형태를 CSV에서 Parquet으로, Parquet에서 Iceberg로 변환한다.
 * **DBeaver** : Trino에 접속하고 Query를 수행하기 위한 Client 역할을 수행한다.
 
-전체 실슴 환경 구성은 다음의 링크를 참조한다.
+전체 실습 환경 구성은 다음의 링크를 참조한다.
 
 * **Orange Pi 5 Max 기반 Kubernetes Cluster 구축** : [https://ssup2.github.io/blog-software/docs/record/orangepi5-cluster-build/](https://ssup2.github.io/blog-software/docs/record/orangepi5-cluster-build/)
 * **Orange Pi 5 Max 기반 Kubernetes Data Platform 구축** : [https://ssup2.github.io/blog-software/docs/record/kubernetes-data-platform-orangepi5-cluster/](https://ssup2.github.io/blog-software/docs/record/kubernetes-data-platform-orangepi5-cluster/)

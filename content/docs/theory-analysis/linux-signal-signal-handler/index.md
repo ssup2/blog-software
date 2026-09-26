@@ -15,7 +15,7 @@ Linux의 Signal 및 Signal Handler를 분석한다.
 | SIGKILL | Term | SIGKILL을 받은 Process를 강제 종료한다. |
 {{< /table >}}
 
-Linux에서 Signal은 Process에게 Event를 전달하는 대표적인 기법중 하나이다. [Table 1]은 Linux에서 지원하는 몇가지 Signal들을 설명하고 있다. Signal을 전달받은 Process는 받은 Signal을 **Signal Mask**를 통해 무시하거나, 각 Signal마다 정의된 **Default Action**을 수행하여 Signal을 처리하거나, Process에 등록된 **Signal Handler**를 수행하여 Signal을 처리한다. 단 **SIGKILL**의 Signal Handler는 Process에 등록하지 못한다. SIGKILL을 받은 Process는 즉식 Linux Kernel에 의해서 강제로 죽기 때문이다. Default Action은 다음과 같이 Term, Stop, Core, Ign 4가지가 존재한다.
+Linux에서 **Signal**은 Process에게 Event를 전달하는 대표적인 기법중 하나이다. [Table 1]은 Linux에서 지원하는 몇가지 Signal들을 설명하고 있다. Signal을 전달받은 Process는 받은 Signal을 **Signal Mask**를 통해 무시하거나, 각 Signal마다 정의된 **Default Action**을 수행하여 Signal을 처리하거나, Process에 등록된 **Signal Handler**를 수행하여 Signal을 처리한다. 단 **SIGKILL**의 Signal Handler는 Process에 등록하지 못한다. SIGKILL을 받은 Process는 즉식 Linux Kernel에 의해서 강제로 죽기 때문이다. Default Action은 다음과 같이 Term, Stop, Core, Ign 4가지가 존재한다.
 
 * `Term` (Terminate) : Process를 종료한다.
 * `Stop` : Processs를 Paused 상태로 만든다.

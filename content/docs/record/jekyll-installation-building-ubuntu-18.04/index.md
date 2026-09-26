@@ -5,6 +5,7 @@ title: Jekyll 설치, Build / Ubuntu 18.04 환경
 ## 1. Build 환경
 
 Build 환경은 다음과 같다.
+
 * Ubuntu 18.04 LTS 64bit, root user
 
 ## 2. Ubuntu Package 설치
@@ -32,6 +33,7 @@ $ bundle exec jekyll serve
 ```
 
 Jekyll Blog의 Root 폴더에서 jekyll serve 명령어를 이용하여 Local에서 Jekyll Blog를 구동하고, 동작을 확인한다.
+
 *  http://127.0.0.1:4000
 
 ## 5. 참조

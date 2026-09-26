@@ -5,8 +5,9 @@ title: Kubernetes Helm Installation / Ubuntu 18.04 Environment
 ## 1. Installation Environment
 
 The installation environment is as follows:
+
 * Kubernetes 1.12
-  * Network Addon : Using cilium
+  * **Network Addon** : Using cilium
 
 ## 2. Helm Installation
 

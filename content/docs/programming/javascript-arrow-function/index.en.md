@@ -27,7 +27,7 @@ const adder = (x, y) => x + y; // Define, assign and call
 adder(10, 20)
 ```
 
-Arrow Function is syntax that allows you to define and use anonymous functions concisely. It is syntax defined in JavaScript ES6. You can easily put Logic into JavaScript Objects and use them with Arrow Functions. [Code 1] shows how to define and call Arrow Functions.
+**Arrow Function** is syntax that allows you to define and use anonymous functions concisely. It is syntax defined in JavaScript ES6. You can easily put Logic into JavaScript Objects and use them with Arrow Functions. [Code 1] shows how to define and call Arrow Functions.
 
 ### 1.1. this
 

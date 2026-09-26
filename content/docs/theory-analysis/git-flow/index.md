@@ -8,7 +8,7 @@ Git Flow를 분석한다.
 
 {{< figure caption="[Figure 1] Git Flow" src="images/git-flow.png" width="700px" >}}
 
-Git Flow는 Git으로 Project를 관리시 Branch를 어떻게 나누고 관리할지를 정하는 Branch 전략을 의미한다. [Figure 1]은 Git Flow에서 이용하는 Branch들을 나타내고 있다. Git Flow에서는 Master, Develop의 **Main Branch**와 나머지 Feature, Release, Hotfix의 **Supporting Branch**로 분류한다. Main Branch는 Project의 시작과 동시에 영원히 존재하는 Branch를 의미하고 Supporting Branch는 필요에 따라서 생성/소멸되는 Branch를 의미한다. [Figure 1]에서 수평 점선은 Supporting Branch가 생성되고 제거되는 시점을 나타낸다.
+**Git Flow**는 Git으로 Project를 관리시 Branch를 어떻게 나누고 관리할지를 정하는 Branch 전략을 의미한다. [Figure 1]은 Git Flow에서 이용하는 Branch들을 나타내고 있다. Git Flow에서는 Master, Develop의 **Main Branch**와 나머지 Feature, Release, Hotfix의 **Supporting Branch**로 분류한다. Main Branch는 Project의 시작과 동시에 영원히 존재하는 Branch를 의미하고 Supporting Branch는 필요에 따라서 생성/소멸되는 Branch를 의미한다. [Figure 1]에서 수평 점선은 Supporting Branch가 생성되고 제거되는 시점을 나타낸다.
 
 #### 1.1. Main Branch
 

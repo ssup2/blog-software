@@ -5,6 +5,7 @@ title: KVM, QEMU Installation and Execution / Ubuntu 14.04 Environment
 ## 1. Installation and Execution Environment
 
 The installation and execution environment is as follows.
+
 * Hardware: Intel i5-6500, DDR4 8GB
 * OS: Ubuntu 14.04.03 LTS 64bit, root user
 

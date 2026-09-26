@@ -5,6 +5,7 @@ title: Ubuntu Consolas Font 설치 / Ubuntu 16.04 환경
 ## 1. 설치 환경
 
 설치 환경은 다음과 같다.
+
 * Ubuntu 16.04 LTS 64bit, root user
 
 ## 2. Ubuntu Package 설치
