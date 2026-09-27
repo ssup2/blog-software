@@ -2,7 +2,7 @@
 title: AWS EFS
 ---
 
-AWS의 EFS (Elastic File System) Service를 정리힌다. **EFS Service**는 AWS에서 제공하는 Managed NFS Server Service이다.
+AWS의 EFS (Elastic File System) Service를 정리한다. **EFS Service**는 AWS에서 제공하는 Managed NFS Server Service이다.
 
 ## 1. Storage Class
 
@@ -44,7 +44,22 @@ EFS Storage 및 EFS VPC의 경우에는 AWS에서 완전히 관리하기 때문�
 
 ## 3. Performance
 
-TODO
+AWS EFS의 성능은 **Performance Mode**와 **Throughput Mode** 두 설정의 조합으로 결정된다. Performance Mode는 File 연산의 Latency와 IOPS 상한을 결정하고, Throughput Mode는 이용 가능한 Throughput의 크기와 과금 방식을 결정한다.
+
+### 3.1. Performance Mode
+
+Performance Mode는 아래의 두 Mode중 하나를 EFS 생성시에 지정하며, 생성 이후에는 변경이 불가능하다.
+
+* **General Purpose** : 기본 Mode이며 가장 낮은 File 연산 Latency를 제공하기 때문에 대부분의 Workload에 권장된다. One Zone, One Zone-IA Class 이용시에는 General Purpose Mode만 이용 가능하다.
+* **Max I/O** : General Purpose Mode에 비해서 더 높은 IOPS와 Throughput을 제공하지만 File 연산의 Latency가 상대적으로 높다. 수백대 이상의 EC2 Instance가 동시에 접근하는 고도의 병렬 Workload에 적합하다.
+
+### 3.2. Throughput Mode
+
+Throughput Mode는 아래의 세 Mode중 하나를 지정하며, EFS 생성 이후에도 변경 가능하지만 변경 이후 24시간 동안은 다시 변경할 수 없다.
+
+* **Bursting** : 저장된 Data의 크기에 비례하여 Throughput이 결정되는 Mode이다. 저장된 Data 1TiB당 50MiB/s의 Baseline Throughput이 제공되며, Baseline보다 낮은 Throughput으로 이용하는 동안 적립된 Burst Credit을 소모하여 일시적으로 Baseline보다 높은 Throughput까지 이용할 수 있다.
+* **Provisioned** : 저장된 Data의 크기와 무관하게 User가 지정한 고정 Throughput을 제공하는 Mode이다. Bursting Mode 기준의 Baseline Throughput을 초과하여 지정한 Throughput에 대해서는 추가 비용이 발생한다.
+* **Elastic** : Workload의 요구량에 따라서 Throughput이 자동으로 확장, 축소되는 Mode이다. 실제 Read/Write를 수행한 Data의 양에 비례하여 비용이 발생하기 때문에 트래픽 예측이 어려운 Workload에 권장된다. General Purpose Performance Mode에서만 이용 가능하다.
 
 ## 4. Replication
 
@@ -54,8 +69,12 @@ Cross-region Replication 설정을 제거한 이후에는 원본 EFS Server와 �
 
 ## 5. Backup
 
-TODO
+AWS EFS는 자체 Backup 기능을 제공하지 않으며 **AWS Backup Service**와의 연동을 통해서 Backup을 수행한다. AWS Backup의 Backup Plan에 Backup 주기와 보관 기간을 정의하면 Plan에 따라서 자동으로 Backup이 수행된다. EFS 생성시 Automatic Backup을 활성화하면 매일 한번 Backup을 수행하고 35일 동안 보관하는 기본 Backup Plan이 자동으로 적용된다.
+
+Backup은 Incremental 방식으로 동작하여 최초 Backup시에만 EFS의 전체 Data를 복사하고, 이후의 Backup에서는 직전 Backup 이후에 변경된 Data만 복사한다. 또한 Backup 수행은 Burst Credit을 소모하지 않고 General Purpose Performance Mode의 File 연산 제한에도 포함되지 않기 때문에, Backup이 수행되는 동안에도 EFS를 이용하는 App의 성능에 영향을 주지 않는다. 복원은 EFS 전체 또는 특정 File, Directory 단위로 수행할 수 있으며, 원본 EFS 내부의 별도 Directory 또는 새로운 EFS를 대상으로 복원할 수 있다.
 
 ## 6. 참고
 
 * How Amazon EFS works : [https://docs.aws.amazon.com/efs/latest/ug/how-it-works.html](https://docs.aws.amazon.com/efs/latest/ug/how-it-works.html)
+* Amazon EFS performance : [https://docs.aws.amazon.com/efs/latest/ug/performance.html](https://docs.aws.amazon.com/efs/latest/ug/performance.html)
+* Backing up Amazon EFS file systems : [https://docs.aws.amazon.com/efs/latest/ug/awsbackup.html](https://docs.aws.amazon.com/efs/latest/ug/awsbackup.html)
