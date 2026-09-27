@@ -38,7 +38,7 @@ menu:
     pageRef: /series
     weight: 2
   - name: Me
-    pageRef: /me
+    url: https://github.com/ssup2
     weight: 3
   - name: Search
     weight: 4
