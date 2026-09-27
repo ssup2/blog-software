@@ -27,6 +27,27 @@
     width: 18rem;
 }
 
+/* Divider lines between the sidebars and the content */
+@media (min-width: 768px) {
+    .hextra-sidebar-container {
+        border-right: 1px solid rgb(229 231 235);
+    }
+
+    .dark .hextra-sidebar-container {
+        border-right-color: rgb(38 38 38);
+    }
+}
+
+@media (min-width: 1280px) {
+    .hextra-toc {
+        border-left: 1px solid rgb(229 231 235);
+    }
+
+    .dark .hextra-toc {
+        border-left-color: rgb(38 38 38);
+    }
+}
+
 .content table {
     width: fit-content;
     max-width: 100%;
