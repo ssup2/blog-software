@@ -6,6 +6,13 @@
     --hextra-max-footer-width: 110rem;
 }
 
+/* Scale down the whole rem-based layout on laptop-width screens */
+@media (min-width: 768px) and (max-width: 1800px) {
+    html {
+        font-size: 14px;
+    }
+}
+
 .content {
     max-width: 68rem;
     margin-left: auto;
