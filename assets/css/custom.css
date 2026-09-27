@@ -27,26 +27,26 @@
     width: 18rem;
 }
 
-/* Divider lines between the sidebars and the content, fading out at both ends */
+/* Divider lines between the sidebars and the content, stopping short of both ends */
 @media (min-width: 768px) {
     .hextra-sidebar-container {
         border-right: 1px solid transparent;
-        border-image: linear-gradient(to bottom, transparent, rgb(229 231 235) 3rem, rgb(229 231 235) calc(100% - 3rem), transparent) 1;
+        border-image: linear-gradient(to bottom, transparent 1.5rem, rgb(229 231 235) 1.5rem, rgb(229 231 235) calc(100% - 1.5rem), transparent calc(100% - 1.5rem)) 1;
     }
 
     .dark .hextra-sidebar-container {
-        border-image: linear-gradient(to bottom, transparent, rgb(38 38 38) 3rem, rgb(38 38 38) calc(100% - 3rem), transparent) 1;
+        border-image: linear-gradient(to bottom, transparent 1.5rem, rgb(38 38 38) 1.5rem, rgb(38 38 38) calc(100% - 1.5rem), transparent calc(100% - 1.5rem)) 1;
     }
 }
 
 @media (min-width: 1280px) {
     .hextra-toc {
         border-left: 1px solid transparent;
-        border-image: linear-gradient(to bottom, transparent, rgb(229 231 235) 3rem, rgb(229 231 235) calc(100% - 3rem), transparent) 1;
+        border-image: linear-gradient(to bottom, transparent 1.5rem, rgb(229 231 235) 1.5rem, rgb(229 231 235) calc(100% - 1.5rem), transparent calc(100% - 1.5rem)) 1;
     }
 
     .dark .hextra-toc {
-        border-image: linear-gradient(to bottom, transparent, rgb(38 38 38) 3rem, rgb(38 38 38) calc(100% - 3rem), transparent) 1;
+        border-image: linear-gradient(to bottom, transparent 1.5rem, rgb(38 38 38) 1.5rem, rgb(38 38 38) calc(100% - 1.5rem), transparent calc(100% - 1.5rem)) 1;
     }
 }
 
