@@ -44,6 +44,6 @@ A RabbitMQ Cluster allows RabbitMQs to be added even while running. Through the 
 * Distributed RabbitMQ : [https://www.rabbitmq.com/distributed.html](https://www.rabbitmq.com/distributed.html)
 * Reliability Guide : [https://www.rabbitmq.com/reliability.html](https://www.rabbitmq.com/reliability.html)
 * Consumer Acknowledgements and Publisher Confirms : [https://www.rabbitmq.com/confirms.html](https://www.rabbitmq.com/confirms.html)
-* RabbitMQ로 메시지 손실 최소화 하는 법(1) : [https://m.blog.naver.com/tmondev/221051503100](https://m.blog.naver.com/tmondev/221051503100)
+* How to Minimize Message Loss with RabbitMQ (1) : [https://m.blog.naver.com/tmondev/221051503100](https://m.blog.naver.com/tmondev/221051503100)
 * RabbitMQ Fairly In-depth - SlideShare : [https://www.slideshare.net/visualdensity/rabbit-fairlyindepth](https://www.slideshare.net/visualdensity/rabbit-fairlyindepth)
 * rabbitmq-queue-master-balancer - GitHub : [https://github.com/Ayanda-D/rabbitmq-queue-master-balancer](https://github.com/Ayanda-D/rabbitmq-queue-master-balancer)

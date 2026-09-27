@@ -67,7 +67,7 @@ The LAST-ACK state is the state maintained after the Passive Closer in the CLOSE
 ## 2. References
 
 * TCP Connection Status (IBM Documentation) : [https://www.ibm.com/support/knowledgecenter/en/SSLTBW-2.1.0/com.ibm.zos.v2r1.halu101/constatus.htm](https://www.ibm.com/support/knowledgecenter/en/SSLTBW-2.1.0/com.ibm.zos.v2r1.halu101/constatus.htm)
-* TCP State Diagram (TCP 세션 연결 과정) : [https://m.blog.naver.com/PostView.nhn?blogId=jgenius&logNo=221124990186&categoryNo=0&proxyReferer=&proxyReferer=https:%2F%2Fwww.google.com%2F](https://m.blog.naver.com/PostView.nhn?blogId=jgenius&logNo=221124990186&categoryNo=0&proxyReferer=&proxyReferer=https:%2F%2Fwww.google.com%2F)
+* TCP State Diagram (TCP Session Connection Process) : [https://m.blog.naver.com/PostView.nhn?blogId=jgenius&logNo=221124990186&categoryNo=0&proxyReferer=&proxyReferer=https:%2F%2Fwww.google.com%2F](https://m.blog.naver.com/PostView.nhn?blogId=jgenius&logNo=221124990186&categoryNo=0&proxyReferer=&proxyReferer=https:%2F%2Fwww.google.com%2F)
 * TCP Transport - An Introduction to Computer Networks : [http://intronetworks.cs.luc.edu/1/html/tcp.html](http://intronetworks.cs.luc.edu/1/html/tcp.html)
 * TIME_WAIT (2MSL wait status) : [https://m.blog.naver.com/PostView.nhn?blogId=cmw1728&logNo=220448146710&proxyReferer=https:%2F%2Fwww.google.com%2F](https://m.blog.naver.com/PostView.nhn?blogId=cmw1728&logNo=220448146710&proxyReferer=https:%2F%2Fwww.google.com%2F)
 * Why TIME_WAIT state need to be 2MSL long : [https://stackoverflow.com/questions/25338862/why-time-wait-state-need-to-be-2msl-long](https://stackoverflow.com/questions/25338862/why-time-wait-state-need-to-be-2msl-long)

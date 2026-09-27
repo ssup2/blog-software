@@ -71,9 +71,9 @@ Kibana is a Tool for visualizing Data analyzed through Elasticsearch.
 * Elasticsearch Node Settings : [https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-node.html](https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-node.html)
 * Important Configuration Changes - Elasticsearch: The Definitive Guide : [https://www.elastic.co/guide/en/elasticsearch/guide/2.x/important-configuration-changes.html#-minimum-master-nodes](https://www.elastic.co/guide/en/elasticsearch/guide/2.x/important-configuration-changes.html#-minimum-master-nodes)
 * Writing Your Own Ingest Processor for Elasticsearch : [https://www.elastic.co/kr/blog/writing-your-own-ingest-processor-for-elasticsearch](https://www.elastic.co/kr/blog/writing-your-own-ingest-processor-for-elasticsearch)
-* ElasticSearch 발만 살짝 담궈볼까? : [https://blog.yeom.me/2018/03/24/get-started-elasticsearch/](https://blog.yeom.me/2018/03/24/get-started-elasticsearch/)
+* Shall We Dip a Toe into ElasticSearch? : [https://blog.yeom.me/2018/03/24/get-started-elasticsearch/](https://blog.yeom.me/2018/03/24/get-started-elasticsearch/)
 * Search and Analyze Your Data with Elasticsearch : [https://www.slideshare.net/AntonUdovychenko/search-and-analyze-your-data-with-elasticsearch-62204515](https://www.slideshare.net/AntonUdovychenko/search-and-analyze-your-data-with-elasticsearch-62204515)
-* [Elasticsearch] 클러스터(Cluster), 노드(Node) : [https://m.blog.naver.com/PostView.nhn?blogId=indy9052&logNo=220942459559&proxyReferer=https%3A%2F%2Fwww.google.com%2F](https://m.blog.naver.com/PostView.nhn?blogId=indy9052&logNo=220942459559&proxyReferer=https%3A%2F%2Fwww.google.com%2F)
-* 내가 본 Elasticsearch 5.0.0 신규 기능 몇 가지들 : [https://www.popit.kr/look-at-new-features-elasticsearch-5/](https://www.popit.kr/look-at-new-features-elasticsearch-5/)
+* [Elasticsearch] Cluster and Node : [https://m.blog.naver.com/PostView.nhn?blogId=indy9052&logNo=220942459559&proxyReferer=https%3A%2F%2Fwww.google.com%2F](https://m.blog.naver.com/PostView.nhn?blogId=indy9052&logNo=220942459559&proxyReferer=https%3A%2F%2Fwww.google.com%2F)
+* A Few New Features I Saw in Elasticsearch 5.0.0 : [https://www.popit.kr/look-at-new-features-elasticsearch-5/](https://www.popit.kr/look-at-new-features-elasticsearch-5/)
 * Node Types in Elasticsearch : [https://subscription.packtpub.com/book/big-data-and-business-intelligence/9781784391010/9/ch09lvl1sec50/node-types-in-elasticsearch](https://subscription.packtpub.com/book/big-data-and-business-intelligence/9781784391010/9/ch09lvl1sec50/node-types-in-elasticsearch)
 

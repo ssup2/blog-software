@@ -26,4 +26,4 @@ Generally, a Session Cookie does not include an expiration time, and a Cookie wi
 
 ## 3. References
 
-* HTTP 쿠키 : [https://developer.mozilla.org/ko/docs/Web/HTTP/Cookies](https://developer.mozilla.org/ko/docs/Web/HTTP/Cookies)
+* HTTP Cookies : [https://developer.mozilla.org/ko/docs/Web/HTTP/Cookies](https://developer.mozilla.org/ko/docs/Web/HTTP/Cookies)

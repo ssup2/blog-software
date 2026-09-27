@@ -194,7 +194,7 @@ Consumers may also send the Offset of Records that have been processed to Broker
 * Kafka : [https://www.quora.com/What-is-Apache-Kafka](https://www.quora.com/What-is-Apache-Kafka)
 * Kafka : [https://sookocheff.com/post/kafka/kafka-in-a-nutshell/](https://sookocheff.com/post/kafka/kafka-in-a-nutshell/)
 * Kafka ACK : [https://medium.freecodecamp.org/what-makes-apache-kafka-so-fast-a8d4f94ab145](https://medium.freecodecamp.org/what-makes-apache-kafka-so-fast-a8d4f94ab145)
-* Kafka 운영자가 말하는 Producer ACKS : [https://www.popit.kr/kafka-%EC%9A%B4%EC%98%81%EC%9E%90%EA%B0%80-%EB%A7%90%ED%95%98%EB%8A%94-producer-acks/](https://www.popit.kr/kafka-%EC%9A%B4%EC%98%81%EC%9E%90%EA%B0%80-%EB%A7%90%ED%95%98%EB%8A%94-producer-acks/)
+* Producer ACKS from a Kafka Operator's Perspective : [https://www.popit.kr/kafka-%EC%9A%B4%EC%98%81%EC%9E%90%EA%B0%80-%EB%A7%90%ED%95%98%EB%8A%94-producer-acks/](https://www.popit.kr/kafka-%EC%9A%B4%EC%98%81%EC%9E%90%EA%B0%80-%EB%A7%90%ED%95%98%EB%8A%94-producer-acks/)
 * Kafka Record : [https://lankydan.dev/intro-to-kafka-consumers](https://lankydan.dev/intro-to-kafka-consumers)
 * Kafka Record : [https://zzzzseong.tistory.com/107](https://zzzzseong.tistory.com/107)
 * Kafka Buffer, Batch : [https://stackoverflow.com/questions/49649241/apache-kafka-batch-size-vs-buffer-memory](https://stackoverflow.com/questions/49649241/apache-kafka-batch-size-vs-buffer-memory)

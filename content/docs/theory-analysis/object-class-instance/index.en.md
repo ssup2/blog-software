@@ -17,4 +17,4 @@ An Instance means an Object designed by a Class that has been **materialized** i
 ## 4. References
 
 * Class vs Object vs Instance : [https://alfredjava.wordpress.com/2008/07/08/class-vs-object-vs-instance](https://alfredjava.wordpress.com/2008/07/08/class-vs-object-vs-instance)
-* 객체와 인스턴스의 차이 : [http://cerulean85.tistory.com/149](http://cerulean85.tistory.com/149)
+* Difference between Object and Instance : [http://cerulean85.tistory.com/149](http://cerulean85.tistory.com/149)

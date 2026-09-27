@@ -81,4 +81,4 @@ If the Token is valid, the external authentication server that has received the 
 ## 2. References
 
 * Kubernetes Authenticating - Webhook Token Authentication : [https://kubernetes.io/docs/reference/access-authn-authz/authentication/#webhook-token-authentication](https://kubernetes.io/docs/reference/access-authn-authz/authentication/#webhook-token-authentication)
-* k8s 인증 완벽이해 #4 - Webhook 인증 : [https://coffeewhale.com/kubernetes/authentication/webhook/2020/05/05/auth04/](https://coffeewhale.com/kubernetes/authentication/webhook/2020/05/05/auth04/)
+* Complete Guide to k8s Authentication #4 - Webhook Authentication : [https://coffeewhale.com/kubernetes/authentication/webhook/2020/05/05/auth04/](https://coffeewhale.com/kubernetes/authentication/webhook/2020/05/05/auth04/)

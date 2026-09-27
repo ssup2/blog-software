@@ -73,7 +73,7 @@ The Refresh Token is a Token used to be issued a **new Access Token** when the A
 ## 2. References
 
 * OAuth2 Server : [http://jlabusch.github.io/oauth2-server/index.html](http://jlabusch.github.io/oauth2-server/index.html)
-* 구글 API를 통해서 배우는 인증 (oauth 2.0) : [https://opentutorials.org/course/2473/16571](https://opentutorials.org/course/2473/16571)
+* Learning Authentication through the Google API (oauth 2.0) : [https://opentutorials.org/course/2473/16571](https://opentutorials.org/course/2473/16571)
 * The Client ID and Secret - OAuth 2.0 Simplified : [https://www.oauth.com/oauth2-servers/client-registration/client-id-secret/](https://www.oauth.com/oauth2-servers/client-registration/client-id-secret/)
 * Google OAuth2 API Explained : [https://medium.com/@pumudu88/google-oauth2-api-explained-dbb84ff97079](https://medium.com/@pumudu88/google-oauth2-api-explained-dbb84ff97079)
 * OAuth 2.0 Authorization : [http://tutorials.jenkov.com/oauth2/authorization.html](http://tutorials.jenkov.com/oauth2/authorization.html)

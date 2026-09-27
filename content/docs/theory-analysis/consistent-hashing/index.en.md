@@ -40,6 +40,6 @@ Jump Consistent Hashing does not need to store all Jump processes of each Key, b
 * Ring Consistent Hashing : [https://dl.acm.org/doi/abs/10.1145/258533.258660](https://dl.acm.org/doi/abs/10.1145/258533.258660)
 * Consistent Hashing (Joinc) : [https://www.joinc.co.kr/w/man/12/hash/consistent](https://www.joinc.co.kr/w/man/12/hash/consistent)
 * Introducing Consistent Hashing : [https://itnext.io/introducing-consistent-hashing-9a289769052e](https://itnext.io/introducing-consistent-hashing-9a289769052e)
-* [입 개발] Consistent Hashing 에 대한 기초 : [https://www.popit.kr/consistent-hashing/](https://www.popit.kr/consistent-hashing/)
+* Basics of Consistent Hashing : [https://www.popit.kr/consistent-hashing/](https://www.popit.kr/consistent-hashing/)
 * Jump consistent hash : [https://www.popit.kr/jump-consistent-hash/](https://www.popit.kr/jump-consistent-hash/)
 

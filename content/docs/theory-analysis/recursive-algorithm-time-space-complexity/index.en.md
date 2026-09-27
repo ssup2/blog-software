@@ -39,5 +39,5 @@ f(n) = f(n - 1) + f(n - 2)
 
 ## 2. References
 
-* 재귀함수의 시간복잡도 구하기 : [https://m.blog.naver.com/PostView.naver?isHttpsRedirect=true&blogId=wns7756&logNo=221568348621](https://m.blog.naver.com/PostView.naver?isHttpsRedirect=true&blogId=wns7756&logNo=221568348621)
-* [시간복잡도] 재귀 알고리즘의 시간복잡도 : [https://justicehui.github.io/easy-algorithm/2018/03/11/TimeComplexity4/](https://justicehui.github.io/easy-algorithm/2018/03/11/TimeComplexity4/)
+* Calculating the Time Complexity of Recursive Functions : [https://m.blog.naver.com/PostView.naver?isHttpsRedirect=true&blogId=wns7756&logNo=221568348621](https://m.blog.naver.com/PostView.naver?isHttpsRedirect=true&blogId=wns7756&logNo=221568348621)
+* [Time Complexity] Time Complexity of Recursive Algorithms : [https://justicehui.github.io/easy-algorithm/2018/03/11/TimeComplexity4/](https://justicehui.github.io/easy-algorithm/2018/03/11/TimeComplexity4/)

@@ -71,5 +71,5 @@ After rebooting Windows OS, access the following address from File Browser.
 
 ## 7. References
 
-* wsl2 에서 파일처리 속도 느릴때 방법, 고정아이피 사용 대안방법 : [https://embeddedaroma.tistory.com/64](https://embeddedaroma.tistory.com/64)
+* Solutions for Slow File Processing in wsl2, Alternative Using Static IP : [https://embeddedaroma.tistory.com/64](https://embeddedaroma.tistory.com/64)
 

@@ -72,5 +72,5 @@ Outputs slab usage sorted by specific criteria. Criteria are as follows:
 ## 2. References
 
 * Slab Layer : [http://books.gigatux.nl/mirror/kerneldevelopment/0672327201/ch11lev1sec6.html](http://books.gigatux.nl/mirror/kerneldevelopment/0672327201/ch11lev1sec6.html)
-* Linux Memory Slab 관리 : [https://lascrea.tistory.com/66](https://lascrea.tistory.com/66)
+* Linux Memory Slab Management : [https://lascrea.tistory.com/66](https://lascrea.tistory.com/66)
 

@@ -54,7 +54,7 @@ A Cluster Proxy provides Proxy Clients with consistent End-points. Cluster Proxi
 
 ## 3. References
 
-* 레디스 클러스터, 센티넬 구성 및 동작 방식 : [https://www.letmecompile.com/redis-cluster-sentinel-overview/](https://www.letmecompile.com/redis-cluster-sentinel-overview/)
+* Redis Cluster and Sentinel Configuration and Operation : [https://www.letmecompile.com/redis-cluster-sentinel-overview/](https://www.letmecompile.com/redis-cluster-sentinel-overview/)
 * Master-slave : [https://redis.io/topics/replication](https://redis.io/topics/replication)
 * Sentinel : [https://redis.io/topics/sentinel](https://redis.io/topics/sentinel)
 * Cluster : [https://redis.io/topics/cluster-spec](https://redis.io/topics/cluster-spec)

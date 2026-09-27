@@ -31,6 +31,6 @@ Level 0 does not guarantee that the Message is delivered to the Subscriber. Leve
 ## 2. References
 
 * RabbitMQ Intro and Messaging Patterns - SlideShare : [https://www.slideshare.net/javierarilos/rabbitmq-intromsgingpatterns](https://www.slideshare.net/javierarilos/rabbitmq-intromsgingpatterns)
-* RabbitMQ - 이해하기 : [http://gjchoi.github.io/rabbit/rabbit-mq-%EC%9D%B4%ED%95%B4%ED%95%98%EA%B8%B0/](http://gjchoi.github.io/rabbit/rabbit-mq-%EC%9D%B4%ED%95%B4%ED%95%98%EA%B8%B0/)
+* Understanding RabbitMQ : [http://gjchoi.github.io/rabbit/rabbit-mq-%EC%9D%B4%ED%95%B4%ED%95%98%EA%B8%B0/](http://gjchoi.github.io/rabbit/rabbit-mq-%EC%9D%B4%ED%95%B4%ED%95%98%EA%B8%B0/)
 * MQTT Tutorial - Joinc : [https://www.joinc.co.kr/w/man/12/MQTT/Tutorial](https://www.joinc.co.kr/w/man/12/MQTT/Tutorial)
 * MQTT QoS(Quality of Service) : [http://dalkomit.tistory.com/111](http://dalkomit.tistory.com/111)

@@ -304,10 +304,10 @@ L7 Proxy Servers such as NGINX provide URL-based Caching techniques, but since G
 
 ## 4. References
 
-* GraphQL 개념잡기 : [https://tech.kakao.com/2019/08/01/graphql-basic/](https://tech.kakao.com/2019/08/01/graphql-basic/)
-* GraphQL 과 Rest API : [https://k0102575.github.io/articles/2020-08/graphql](https://k0102575.github.io/articles/2020-08/graphql)
-* GraphQL Mutation 설계하기 : [https://fe-developers.kakaoent.com/2022/220113-designing-graphql-mutation/](https://fe-developers.kakaoent.com/2022/220113-designing-graphql-mutation/)
-* GraphQL의 메서드 query, mutation, subscription : [https://kotlinworld.com/331](https://kotlinworld.com/331)
+* Understanding GraphQL Concepts : [https://tech.kakao.com/2019/08/01/graphql-basic/](https://tech.kakao.com/2019/08/01/graphql-basic/)
+* GraphQL and Rest API : [https://k0102575.github.io/articles/2020-08/graphql](https://k0102575.github.io/articles/2020-08/graphql)
+* Designing GraphQL Mutation : [https://fe-developers.kakaoent.com/2022/220113-designing-graphql-mutation/](https://fe-developers.kakaoent.com/2022/220113-designing-graphql-mutation/)
+* GraphQL Methods: query, mutation, subscription : [https://kotlinworld.com/331](https://kotlinworld.com/331)
 * Query, Mutation : [https://graphql-kr.github.io/learn/queries/](https://graphql-kr.github.io/learn/queries/)
 * Subscription : [https://www.daleseo.com/graphql-apollo-server-subscriptions/](https://www.daleseo.com/graphql-apollo-server-subscriptions/)
 * with HTTP : [https://graphql-kr.github.io/learn/serving-over-http/](https://graphql-kr.github.io/learn/serving-over-http/)

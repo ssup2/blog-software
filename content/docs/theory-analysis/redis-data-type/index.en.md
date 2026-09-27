@@ -32,5 +32,5 @@ The Hashes Type is a Type that stores Key-Values composed of strings. The `HSET`
 
 * Redis Data Types : [https://redis.io/topics/data-types](https://redis.io/topics/data-types)
 * Introduction to Redis Data Types : [https://redis.io/topics/data-types-intro](https://redis.io/topics/data-types-intro)
-* redis data type 종류 : [https://kimpaper.github.io/2016/07/27/redis-datatype/](https://kimpaper.github.io/2016/07/27/redis-datatype/)
+* Redis Data Type List : [https://kimpaper.github.io/2016/07/27/redis-datatype/](https://kimpaper.github.io/2016/07/27/redis-datatype/)
 * How does Redis claim O(1) time for key lookup : [https://stackoverflow.com/questions/15216897/how-does-redis-claim-o1-time-for-key-lookup](https://stackoverflow.com/questions/15216897/how-does-redis-claim-o1-time-for-key-lookup)

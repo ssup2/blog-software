@@ -38,7 +38,7 @@ The `bpf()` System Call not only loads eBPF Bytecode but also allows Apps to acc
 
 ## 2. References
 
-* 확장 BPF : [https://wariua.github.io/facility/extended-bpf.html](https://wariua.github.io/facility/extended-bpf.html)
+* Extended BPF : [https://wariua.github.io/facility/extended-bpf.html](https://wariua.github.io/facility/extended-bpf.html)
 * bcc/docs/kernel-versions.md : [https://github.com/iovisor/bcc/blob/master/docs/kernel-versions.md](https://github.com/iovisor/bcc/blob/master/docs/kernel-versions.md)
 * XDP and eBPF Maps : [https://www.slideshare.net/lcplcp1/xdp-and-ebpfmaps](https://www.slideshare.net/lcplcp1/xdp-and-ebpfmaps)
 * Introduction to eBPF and XDP : [https://www.slideshare.net/lcplcp1/introduction-to-ebpf-and-xdp](https://www.slideshare.net/lcplcp1/introduction-to-ebpf-and-xdp)

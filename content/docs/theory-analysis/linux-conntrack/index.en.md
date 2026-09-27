@@ -69,7 +69,7 @@ Since the conntrack Module stores Connection information in Kernel Memory, the n
 * conntrack(8) - Debian Manpages : [https://manpages.debian.org/testing/conntrack/conntrack.8.en.html](https://manpages.debian.org/testing/conntrack/conntrack.8.en.html)
 * Netfilter : [https://en.wikipedia.org/wiki/Netfilter](https://en.wikipedia.org/wiki/Netfilter)
 * Netfilter's Connection Tracking System : [http://people.netfilter.org/pablo/docs/login.pdf](http://people.netfilter.org/pablo/docs/login.pdf)
-* CLOSE_WAIT & TIME_WAIT 최종 분석 : [https://tech.kakao.com/2016/04/21/closewait-timewait/](https://tech.kakao.com/2016/04/21/closewait-timewait/)
+* Final Analysis of CLOSE_WAIT & TIME_WAIT : [https://tech.kakao.com/2016/04/21/closewait-timewait/](https://tech.kakao.com/2016/04/21/closewait-timewait/)
 * IPTables and Connection Tracking - Red Hat Security Guide : [https://access.redhat.com/documentation/en-us/red-hat-enterprise-linux/6/html/security-guide/sect-security-guide-firewalls-iptables-and-connection-tracking](https://access.redhat.com/documentation/en-us/red-hat-enterprise-linux/6/html/security-guide/sect-security-guide-firewalls-iptables-and-connection-tracking)
 * How to understand why the packet was considered invalid by the iptables : [https://unix.stackexchange.com/questions/57423/how-to-understand-why-the-packet-was-considered-invalid-by-the-iptables](https://unix.stackexchange.com/questions/57423/how-to-understand-why-the-packet-was-considered-invalid-by-the-iptables)
 

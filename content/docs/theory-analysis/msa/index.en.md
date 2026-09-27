@@ -64,5 +64,5 @@ In addition, when Service A directly calls Service B and Service C while the loa
 * Microservice Architecture (Joinc) : [https://www.joinc.co.kr/w/man/12/MicroserviceArchitecture](https://www.joinc.co.kr/w/man/12/MicroserviceArchitecture)
 * Building Micro Service Architecture (SlideShare) : [https://www.slideshare.net/saltynut/building-micro-service-architecture](https://www.slideshare.net/saltynut/building-micro-service-architecture)
 * The Scale Cube : [http://microservices.io/articles/scalecube.html](http://microservices.io/articles/scalecube.html)
-* 모놀리틱 시스템에서 MSA로 전환 : [http://cyberx.tistory.com/64](http://cyberx.tistory.com/64)
+* Transitioning from a Monolithic System to MSA : [http://cyberx.tistory.com/64](http://cyberx.tistory.com/64)
 * Microservice Architecture (MSA) and Integration Microservices (WSO2Con EU 2017) : [https://www.slideshare.net/wso2.org/wso2con-eu-2017-microservice-architecture-msa-and-integration-microservices-81654363](https://www.slideshare.net/wso2.org/wso2con-eu-2017-microservice-architecture-msa-and-integration-microservices-81654363)

@@ -30,6 +30,6 @@ The ID Token generally contains the following Claims.
 ## 2. References
 
 * ID Tokens (OAuth 2.0 Simplified) : [https://www.oauth.com/oauth2-servers/openid-connect/id-tokens/](https://www.oauth.com/oauth2-servers/openid-connect/id-tokens/)
-* k8s 인증 완벽이해 #3 - OpenID Connect : [https://coffeewhale.com/kubernetes/authentication/oidc/2020/05/04/auth03/](https://coffeewhale.com/kubernetes/authentication/oidc/2020/05/04/auth03/)
+* Complete Guide to k8s Authentication #3 - OpenID Connect : [https://coffeewhale.com/kubernetes/authentication/oidc/2020/05/04/auth03/](https://coffeewhale.com/kubernetes/authentication/oidc/2020/05/04/auth03/)
 * Understanding ID Token : [https://darutk.medium.com/understanding-id-token-5f83f50fa02e](https://darutk.medium.com/understanding-id-token-5f83f50fa02e)
 * OAuth 2.0 & OpenID Connect explained : [https://benohead.com/blog/2018/07/05/oauth-2-0-openid-connect-explained/](https://benohead.com/blog/2018/07/05/oauth-2-0-openid-connect-explained/)

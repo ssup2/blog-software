@@ -124,12 +124,12 @@ If the time passed along with the `SO-LINGER` Option is set to `0` on the Socket
 ## 3. References
 
 * Coping with the TCP TIME-WAIT state on busy Linux servers : [https://vincent.bernat.ch/en/blog/2014-tcp-time-wait-state-linux](https://vincent.bernat.ch/en/blog/2014-tcp-time-wait-state-linux)
-* 리눅스 서버의 TCP 네트워크 성능을 결정짓는 커널 파라미터 이야기 - 3편 : [https://meetup.toast.com/posts/55](https://meetup.toast.com/posts/55)
-* TIME_WAIT 소켓이 서비스에 미치는 영향 : [https://brunch.co.kr/@alden/3](https://brunch.co.kr/@alden/3)
+* The Story of Kernel Parameters That Determine TCP Network Performance of Linux Servers - Part 3 : [https://meetup.toast.com/posts/55](https://meetup.toast.com/posts/55)
+* The Impact of TIME_WAIT Sockets on Services : [https://brunch.co.kr/@alden/3](https://brunch.co.kr/@alden/3)
 * TCP TIME_WAIT - brunch @alden : [https://brunch.co.kr/@alden/19](https://brunch.co.kr/@alden/19)
 * Dropping of connections with tcp_tw_recycle : [https://stackoverflow.com/questions/8893888/dropping-of-connections-with-tcp-tw-recycle](https://stackoverflow.com/questions/8893888/dropping-of-connections-with-tcp-tw-recycle)
 * tcp(7) - Linux manual page : [https://man7.org/linux/man-pages/man7/tcp.7.html](https://man7.org/linux/man-pages/man7/tcp.7.html)
-* TCP의 TIME_WAIT를 없애는 법 : [https://sunyzero.tistory.com/198](https://sunyzero.tistory.com/198)
+* How to Eliminate TCP TIME_WAIT : [https://sunyzero.tistory.com/198](https://sunyzero.tistory.com/198)
 * Why Are Linux Kernel Protocol Stacks Dropping SYN Packets : [https://www.alibabacloud.com/blog/why-are-linux-kernel-protocol-stacks-dropping-syn-packets-595251](https://www.alibabacloud.com/blog/why-are-linux-kernel-protocol-stacks-dropping-syn-packets-595251)
-* CLOSE_WAIT & TIME_WAIT 최종 분석 : [https://tech.kakao.com/2016/04/21/closewait-timewait/](https://tech.kakao.com/2016/04/21/closewait-timewait/)
+* Final Analysis of CLOSE_WAIT & TIME_WAIT : [https://tech.kakao.com/2016/04/21/closewait-timewait/](https://tech.kakao.com/2016/04/21/closewait-timewait/)
 * tcp: randomize tcp timestamp offsets for each connection - Linux kernel commit : [https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=95a22caee396cef0bb2ca8fafdd82966a49367bb](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=95a22caee396cef0bb2ca8fafdd82966a49367bb)

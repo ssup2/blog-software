@@ -157,6 +157,6 @@ The `useReducer()` Hook is a Hook used to store Global State of React Apps. It w
 
 ## 2. References
 
-* Hook 개요 : [https://ko.reactjs.org/docs/hooks-overview.html](https://ko.reactjs.org/docs/hooks-overview.html)
-* 때늦은 React Hooks 시리즈 1탄 - 개요/useState : [https://gist.github.com/ninanung/25bdbf78a720846e4dc4c30ac1c9ec9b](https://gist.github.com/ninanung/25bdbf78a720846e4dc4c30ac1c9ec9b)
+* Hooks Overview : [https://ko.reactjs.org/docs/hooks-overview.html](https://ko.reactjs.org/docs/hooks-overview.html)
+* Belated React Hooks Series Part 1 - Overview/useState : [https://gist.github.com/ninanung/25bdbf78a720846e4dc4c30ac1c9ec9b](https://gist.github.com/ninanung/25bdbf78a720846e4dc4c30ac1c9ec9b)
 

@@ -38,6 +38,6 @@ Refers to the past system before a new system is introduced.
 
 ## 2. References
 
-* 금융권 IT시스템에 대한 이해 : [https://12bme.tistory.com/237](https://12bme.tistory.com/237)
-* 기간계, 정보계, ODS, EDW, Data Mart, OLAP : [https://spidyweb.tistory.com/218](https://spidyweb.tistory.com/218)
-* 기초적인 금융IT 시스템 구조와 용어 : [https://velog.io/@chokye/%EA%B8%88%EC%9C%B5IT-%EA%B8%B0%EC%B4%88%EC%A0%81%EC%9D%B8-%EC%8B%9C%EC%8A%A4%ED%85%9C-%EA%B5%AC%EC%A1%B0](https://velog.io/@chokye/%EA%B8%88%EC%9C%B5IT-%EA%B8%B0%EC%B4%88%EC%A0%81%EC%9D%B8-%EC%8B%9C%EC%8A%A4%ED%85%9C-%EA%B5%AC%EC%A1%B0)
+* Understanding IT Systems in the Financial Industry : [https://12bme.tistory.com/237](https://12bme.tistory.com/237)
+* Core Systems, Information Systems, ODS, EDW, Data Mart, OLAP : [https://spidyweb.tistory.com/218](https://spidyweb.tistory.com/218)
+* Basic Financial IT System Architecture and Terminology : [https://velog.io/@chokye/%EA%B8%88%EC%9C%B5IT-%EA%B8%B0%EC%B4%88%EC%A0%81%EC%9D%B8-%EC%8B%9C%EC%8A%A4%ED%85%9C-%EA%B5%AC%EC%A1%B0](https://velog.io/@chokye/%EA%B8%88%EC%9C%B5IT-%EA%B8%B0%EC%B4%88%EC%A0%81%EC%9D%B8-%EC%8B%9C%EC%8A%A4%ED%85%9C-%EA%B5%AC%EC%A1%B0)

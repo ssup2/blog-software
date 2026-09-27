@@ -349,10 +349,10 @@ In contrast, Istio uses the Metadata channel; it keeps the `EDS` Type Cluster an
 
 ## 2. References
 
-* Istio Gateway API Inference Extension 지원 : [https://istio.io/latest/blog/2025/inference-extension-support/](https://istio.io/latest/blog/2025/inference-extension-support/)
+* Istio Gateway API Inference Extension Support : [https://istio.io/latest/blog/2025/inference-extension-support/](https://istio.io/latest/blog/2025/inference-extension-support/)
 * Istio Gateway API Inference Extension Task : [https://istio.io/latest/docs/tasks/traffic-management/ingress/gateway-api-inference-extension/](https://istio.io/latest/docs/tasks/traffic-management/ingress/gateway-api-inference-extension/)
 * Gateway API Inference Extension : [https://gateway-api-inference-extension.sigs.k8s.io/](https://gateway-api-inference-extension.sigs.k8s.io/)
 * Gateway API Inference Extension Deep Dive : [https://www.cncf.io/blog/2025/04/21/deep-dive-into-the-gateway-api-inference-extension/](https://www.cncf.io/blog/2025/04/21/deep-dive-into-the-gateway-api-inference-extension/)
 * Endpoint Picker Protocol : [https://github.com/kubernetes-sigs/gateway-api-inference-extension/tree/main/docs/proposals/004-endpoint-picker-protocol](https://github.com/kubernetes-sigs/gateway-api-inference-extension/tree/main/docs/proposals/004-endpoint-picker-protocol)
 * Envoy Override Host Load Balancing Policy : [https://github.com/istio/istio/issues/56230](https://github.com/istio/istio/issues/56230)
-* Istio InferencePool 변환 : [https://github.com/istio/istio/issues/57638](https://github.com/istio/istio/issues/57638)
+* Istio InferencePool Conversion : [https://github.com/istio/istio/issues/57638](https://github.com/istio/istio/issues/57638)

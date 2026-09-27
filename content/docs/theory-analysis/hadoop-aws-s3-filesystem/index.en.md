@@ -28,11 +28,11 @@ On AWS EMR Clusters, S3 can be used as a store through EMRFS. When an App inside
 
 ## 3. References
 
-* S3, S3N, S3A 비교 : [https://www.quora.com/In-AWS-what-is-the-difference-between-S3N-S3A-and-S3](https://www.quora.com/In-AWS-what-is-the-difference-between-S3N-S3A-and-S3)
-* S3, S3N, S3A 비교 : [https://stackoverflow.com/questions/33356041/technically-what-is-the-difference-between-s3n-s3a-and-s3](https://stackoverflow.com/questions/33356041/technically-what-is-the-difference-between-s3n-s3a-and-s3)
-* S3, S3N, S3A 비교 : [https://vivani.net/2017/04/18/s3-vs-s3n-vs-s3a-vs-emrfs/](https://vivani.net/2017/04/18/s3-vs-s3n-vs-s3a-vs-emrfs/)
-* S3, S3N, S3A 비교 : [https://spidyweb.tistory.com/475](https://spidyweb.tistory.com/475)
+* Comparison of S3, S3N, and S3A : [https://www.quora.com/In-AWS-what-is-the-difference-between-S3N-S3A-and-S3](https://www.quora.com/In-AWS-what-is-the-difference-between-S3N-S3A-and-S3)
+* Comparison of S3, S3N, and S3A : [https://stackoverflow.com/questions/33356041/technically-what-is-the-difference-between-s3n-s3a-and-s3](https://stackoverflow.com/questions/33356041/technically-what-is-the-difference-between-s3n-s3a-and-s3)
+* Comparison of S3, S3N, and S3A : [https://vivani.net/2017/04/18/s3-vs-s3n-vs-s3a-vs-emrfs/](https://vivani.net/2017/04/18/s3-vs-s3n-vs-s3a-vs-emrfs/)
+* Comparison of S3, S3N, and S3A : [https://spidyweb.tistory.com/475](https://spidyweb.tistory.com/475)
 * S3A Contribution : [https://aws.amazon.com/ko/blogs/opensource/community-collaboration-the-s3a-story/](https://aws.amazon.com/ko/blogs/opensource/community-collaboration-the-s3a-story/)
-* S3N Bucket File Write 예제 : [https://blog.voidmainvoid.net/229](https://blog.voidmainvoid.net/229)
+* S3N Bucket File Write Example : [https://blog.voidmainvoid.net/229](https://blog.voidmainvoid.net/229)
 * S3A Committer : [https://hadoop.apache.org/docs/r3.1.1/hadoop-aws/tools/hadoop-aws/committers.html](https://hadoop.apache.org/docs/r3.1.1/hadoop-aws/tools/hadoop-aws/committers.html)
 * EMRFS S3-optimized Committer : [https://docs.aws.amazon.com/emr/latest/ReleaseGuide/emr-spark-s3-optimized-committer.html](https://docs.aws.amazon.com/emr/latest/ReleaseGuide/emr-spark-s3-optimized-committer.html)

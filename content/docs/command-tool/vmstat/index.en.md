@@ -131,6 +131,6 @@ btrfs_inode                   0      0   1144     14
 ## 2. References
 
 * Runnable Process Definition : [http://www.linfo.org/runnable_process.html](http://www.linfo.org/runnable_process.html)
-* [Linux] Uninterruptible sleep 프로세스 상태 D : [https://hotpotato.tistory.com/280](https://hotpotato.tistory.com/280)
+* [Linux] Uninterruptible Sleep Process State D : [https://hotpotato.tistory.com/280](https://hotpotato.tistory.com/280)
 * vmstat Explained : [https://medium.com/@damianmyerscough/vmstat-explained-83b3e87493b3](https://medium.com/@damianmyerscough/vmstat-explained-83b3e87493b3)
 

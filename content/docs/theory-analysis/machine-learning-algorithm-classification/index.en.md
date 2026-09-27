@@ -51,6 +51,6 @@ Reinforcement learning uses **inputs and a criterion for judging outcomes**. The
 
 ## 2. References
 
-* 머신러닝의 분류 : [https://opentutorials.org/module/4916/28934](https://opentutorials.org/module/4916/28934)
+* Classification of Machine Learning : [https://opentutorials.org/module/4916/28934](https://opentutorials.org/module/4916/28934)
 * Supervised learning : [https://aimb.tistory.com/149](https://aimb.tistory.com/149)
 * Dimensionality reduction : [https://docs.sangyunlee.com/ml/analysis/undefined-1](https://docs.sangyunlee.com/ml/analysis/undefined-1)

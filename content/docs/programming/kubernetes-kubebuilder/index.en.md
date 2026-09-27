@@ -395,6 +395,6 @@ Create Memcached CRs as in [Code 5] to run Memcached. Since Spec's `Size` is 3 i
 * Quick Start - The Kubebuilder Book : [https://book.kubebuilder.io/quick-start.html](https://book.kubebuilder.io/quick-start.html)
 * Tutorial: Building CronJob - The Kubebuilder Book : [https://book.kubebuilder.io/cronjob-tutorial/cronjob-tutorial.html](https://book.kubebuilder.io/cronjob-tutorial/cronjob-tutorial.html)
 * controller-runtime package - Go Packages : [https://pkg.go.dev/sigs.k8s.io/controller-runtime](https://pkg.go.dev/sigs.k8s.io/controller-runtime)
-* Kubernetes Controller 구현해보기 : [https://getoutsidedoor.com/2020/05/09/kubernetes-controller-%EA%B5%AC%ED%98%84%ED%95%B4%EB%B3%B4%EA%B8%B0/](https://getoutsidedoor.com/2020/05/09/kubernetes-controller-%EA%B5%AC%ED%98%84%ED%95%B4%EB%B3%B4%EA%B8%B0/)
+* Implementing a Kubernetes Controller : [https://getoutsidedoor.com/2020/05/09/kubernetes-controller-%EA%B5%AC%ED%98%84%ED%95%B4%EB%B3%B4%EA%B8%B0/](https://getoutsidedoor.com/2020/05/09/kubernetes-controller-%EA%B5%AC%ED%98%84%ED%95%B4%EB%B3%B4%EA%B8%B0/)
 * Using Event Filters with Kubebuilder - Part 2: Filtering Updates : [https://stuartleeks.com/posts/kubebuilder-event-filters-part-2-update/](https://stuartleeks.com/posts/kubebuilder-event-filters-part-2-update/)
 

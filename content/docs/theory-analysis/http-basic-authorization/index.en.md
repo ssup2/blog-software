@@ -19,4 +19,4 @@ HTTP Basic Authentication is used when the Client knows the ID and Password and 
 ## 2. References
 
 * HTTP Basic Authentication Scheme : [https://tools.ietf.org/html/rfc7617](https://tools.ietf.org/html/rfc7617)
-* [HTTP] 기본 인증 : [http://iloveulhj.github.io/posts/http/http-basic-auth.html](http://iloveulhj.github.io/posts/http/http-basic-auth.html)
+* [HTTP] Basic Authentication : [http://iloveulhj.github.io/posts/http/http-basic-auth.html](http://iloveulhj.github.io/posts/http/http-basic-auth.html)

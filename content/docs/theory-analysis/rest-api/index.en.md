@@ -68,7 +68,7 @@ Assume that an Apartment Resource stores the Data `color=white` and `floor=20`. 
 
 ## 2. References
 
-* REST API 제대로 알고 사용하기 : [http://meetup.toast.com/posts/92](http://meetup.toast.com/posts/92)
+* Understanding and Using REST API Properly : [http://meetup.toast.com/posts/92](http://meetup.toast.com/posts/92)
 * RESTful API Design - Methods : [http://restful-api-design.readthedocs.io/en/latest/methods.html](http://restful-api-design.readthedocs.io/en/latest/methods.html)
 * REST API URI Naming Conventions and Best Practices : [https://restfulapi.net/resource-naming/](https://restfulapi.net/resource-naming/)
 * Are Subqueries RESTful? : [https://lornajane.net/posts/2013/are-subqueries-restful](https://lornajane.net/posts/2013/are-subqueries-restful)

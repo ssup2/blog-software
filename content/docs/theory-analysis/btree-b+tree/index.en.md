@@ -30,5 +30,5 @@ B+ Tree's Inner Nodes are smaller in capacity compared to B-Tree's Inner Nodes b
 
 * Database Management System Chapter 12 : [https://www.slideshare.net/MahediMahfujAnik/database-management-system-chapter12](https://www.slideshare.net/MahediMahfujAnik/database-management-system-chapter12)
 * Differences between B trees and B+ trees : [https://stackoverflow.com/questions/870218/differences-between-b-trees-and-b-trees](https://stackoverflow.com/questions/870218/differences-between-b-trees-and-b-trees)
-* B-Tree(B트리), B+ 트리 : [http://potatoggg.tistory.com/174](http://potatoggg.tistory.com/174)
+* B-Tree, B+ Tree : [http://potatoggg.tistory.com/174](http://potatoggg.tistory.com/174)
 

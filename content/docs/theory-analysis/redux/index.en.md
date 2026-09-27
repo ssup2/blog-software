@@ -56,6 +56,6 @@ React does not recommend the method shown in [Figure 2] where a child Component 
 ## 2. References
 
 * Getting Started with Redux : [https://redux.js.org/introduction/getting-started](https://redux.js.org/introduction/getting-started)
-* Redux 를 통한 React 어플리케이션 상태 관리 :: 1장. 카운터 만들기 : [https://velopert.com/3346](https://velopert.com/3346)
+* Managing React Application State with Redux :: Chapter 1. Building a Counter : [https://velopert.com/3346](https://velopert.com/3346)
 * Docs need one or more diagrams · Issue #653 · reduxjs/redux : [https://github.com/reduxjs/redux/issues/653](https://github.com/reduxjs/redux/issues/653)
 * When and when not to use Redux : [https://blog.logrocket.com/](https://blog.logrocket.com/)

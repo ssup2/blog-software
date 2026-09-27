@@ -63,9 +63,9 @@ TODO
 ## 2. References
 
 * Patterns for distributed transactions within a microservices architecture : [https://developers.redhat.com/blog/2018/10/01/patterns-for-distributed-transactions-within-a-microservices-architecture#possible-solutions](https://developers.redhat.com/blog/2018/10/01/patterns-for-distributed-transactions-within-a-microservices-architecture#possible-solutions)
-* [MSA] 6. MSA의 트랜잭션 이야기 2 - Two-Phase commit과 Saga : [http://blog.neonkid.xyz/243](http://blog.neonkid.xyz/243)
+* [MSA] 6. The Story of Transactions in MSA 2 - Two-Phase Commit and Saga : [http://blog.neonkid.xyz/243](http://blog.neonkid.xyz/243)
 * Pattern: Saga : [https://microservices.io/patterns/data/saga.html](https://microservices.io/patterns/data/saga.html)
-* MSA 분산 트랜잭션 : [https://hyunsoori.tistory.com/9](https://hyunsoori.tistory.com/9)
-* REST 기반의 간단한 분산 트랜잭션 구현 - 1편 : [https://www.popit.kr/rest-%EA%B8%B0%EB%B0%98%EC%9D%98-%EA%B0%84%EB%8B%A8%ED%95%9C-%EB%B6%84%EC%82%B0-%ED%8A%B8%EB%9E%9C%EC%9E%AD%EC%85%98-%EA%B5%AC%ED%98%84-1%ED%8E%B8/](https://www.popit.kr/rest-%EA%B8%B0%EB%B0%98%EC%9D%98-%EA%B0%84%EB%8B%A8%ED%95%9C-%EB%B6%84%EC%82%B0-%ED%8A%B8%EB%9E%9C%EC%9E%AD%EC%85%98-%EA%B5%AC%ED%98%84-1%ED%8E%B8/)
+* MSA Distributed Transactions : [https://hyunsoori.tistory.com/9](https://hyunsoori.tistory.com/9)
+* Implementing a Simple REST-based Distributed Transaction - Part 1 : [https://www.popit.kr/rest-%EA%B8%B0%EB%B0%98%EC%9D%98-%EA%B0%84%EB%8B%A8%ED%95%9C-%EB%B6%84%EC%82%B0-%ED%8A%B8%EB%9E%9C%EC%9E%AD%EC%85%98-%EA%B5%AC%ED%98%84-1%ED%8E%B8/](https://www.popit.kr/rest-%EA%B8%B0%EB%B0%98%EC%9D%98-%EA%B0%84%EB%8B%A8%ED%95%9C-%EB%B6%84%EC%82%B0-%ED%8A%B8%EB%9E%9C%EC%9E%AD%EC%85%98-%EA%B5%AC%ED%98%84-1%ED%8E%B8/)
 * Outbox Pattern : [https://stackoverflow.com/questions/58476933/group-send-kafka-message-and-db-update-in-one-transaction-in-springboot](https://stackoverflow.com/questions/58476933/group-send-kafka-message-and-db-update-in-one-transaction-in-springboot)
 * Outbox Pattern : [https://debezium.io/blog/2019/02/19/reliable-microservices-data-exchange-with-the-outbox-pattern/](https://debezium.io/blog/2019/02/19/reliable-microservices-data-exchange-with-the-outbox-pattern/)

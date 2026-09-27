@@ -43,5 +43,5 @@ Therefore, columns for indexes should be selected with **high cardinality**, so 
 * Using Indexes : [https://www.progress.com/tutorials/odbc/using-indexes](https://www.progress.com/tutorials/odbc/using-indexes)
 * What is the difference between Clustered and Non-Clustered Indexes in SQL Server? : [https://www.sqlshack.com/what-is-the-difference-between-clustered-and-non-clustered-indexes-in-sql-server/](https://www.sqlshack.com/what-is-the-difference-between-clustered-and-non-clustered-indexes-in-sql-server/)
 * Clustered Index & Non-Clustered Index : [https://velog.io/@gillog/SQL-Clustered-Index-Non-Clustered-Index](https://velog.io/@gillog/SQL-Clustered-Index-Non-Clustered-Index)
-* MySQL - INDEX 정리 : [https://dev-navill.tistory.com/26](https://dev-navill.tistory.com/26)
-* DB 인덱스를 효과적으로 설정하는 방법 - 고려해야 할 4가지 : [https://yurimkoo.github.io/db/2020/03/14/db-index.html](https://yurimkoo.github.io/db/2020/03/14/db-index.html)
+* MySQL - INDEX Summary : [https://dev-navill.tistory.com/26](https://dev-navill.tistory.com/26)
+* How to Configure DB Indexes Effectively - 4 Things to Consider : [https://yurimkoo.github.io/db/2020/03/14/db-index.html](https://yurimkoo.github.io/db/2020/03/14/db-index.html)

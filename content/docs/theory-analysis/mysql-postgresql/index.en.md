@@ -36,5 +36,5 @@ On the other hand, since PostgreSQL uses the approach of creating a Process, the
 * PostgreSQL vs. MySQL: Differences in performance and uses : [https://www.fivetran.com/blog/postgresql-vs-mysql](https://www.fivetran.com/blog/postgresql-vs-mysql)
 * PostgreSQL vs MySQL : [https://www.sumologickorea.com/blog/postgresql-vs-mysql/](https://www.sumologickorea.com/blog/postgresql-vs-mysql/)
 * MySQL vs PostgreSQL in 2023 : [https://dbconvert.com/blog/mysql-vs-postgresql/](https://dbconvert.com/blog/mysql-vs-postgresql/)
-* [RDBMS] PostgreSQL vs MySQL 차이 (fear. 버전을 막론하고) : [https://uminoh.tistory.com/32](https://uminoh.tistory.com/32)
+* [RDBMS] Differences Between PostgreSQL and MySQL (Regardless of Version) : [https://uminoh.tistory.com/32](https://uminoh.tistory.com/32)
 * Why You Should Use Postgres Over MySQL For Analytics Purpose : [https://www.holistics.io/blog/why-you-should-use-postgres-over-mysql-for-analytics-purpose/?utm-campaign=pg-mysql&utm-source=medium](https://www.holistics.io/blog/why-you-should-use-postgres-over-mysql-for-analytics-purpose/?utm-campaign=pg-mysql&utm-source=medium)

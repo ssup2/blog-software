@@ -464,8 +464,8 @@ The deployed Waypoint is used by setting the `istio.io/use-waypoint` Label on Na
 ## 2. References
 
 * Istio Kubernetes Gateway API : [https://istio.io/latest/docs/tasks/traffic-management/ingress/gateway-api/](https://istio.io/latest/docs/tasks/traffic-management/ingress/gateway-api/)
-* Istio Gateway 배포 : [https://istio.io/latest/docs/setup/additional-setup/gateway/](https://istio.io/latest/docs/setup/additional-setup/gateway/)
+* Istio Gateway Deployment : [https://istio.io/latest/docs/setup/additional-setup/gateway/](https://istio.io/latest/docs/setup/additional-setup/gateway/)
 * Istio Waypoint : [https://istio.io/latest/docs/ambient/usage/waypoint/](https://istio.io/latest/docs/ambient/usage/waypoint/)
 * Gateway API : [https://gateway-api.sigs.k8s.io/](https://gateway-api.sigs.k8s.io/)
 * Gateway API GAMMA : [https://gateway-api.sigs.k8s.io/docs/mesh/mesh-overview/](https://gateway-api.sigs.k8s.io/docs/mesh/mesh-overview/)
-* Istio Gateway API 변환 : [https://deepwiki.com/istio/istio/3.5.1-gateway-api-integration-and-conversion](https://deepwiki.com/istio/istio/3.5.1-gateway-api-integration-and-conversion)
+* Istio Gateway API Conversion : [https://deepwiki.com/istio/istio/3.5.1-gateway-api-integration-and-conversion](https://deepwiki.com/istio/istio/3.5.1-gateway-api-integration-and-conversion)

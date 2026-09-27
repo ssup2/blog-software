@@ -62,8 +62,8 @@ The `innerFuncs` variable stores 5 functions objectified through the `outerFunc(
 
 ## 2. References
 
-* 클로저 - JavaScript : [https://developer.mozilla.org/ko/docs/Web/JavaScript/Guide/Closures](https://developer.mozilla.org/ko/docs/Web/JavaScript/Guide/Closures)
-* JavaScript 클로저(Closure) : [https://hyunseob.github.io/2016/08/30/javascript-closure/](https://hyunseob.github.io/2016/08/30/javascript-closure/)
+* Closures - JavaScript : [https://developer.mozilla.org/ko/docs/Web/JavaScript/Guide/Closures](https://developer.mozilla.org/ko/docs/Web/JavaScript/Guide/Closures)
+* JavaScript Closure : [https://hyunseob.github.io/2016/08/30/javascript-closure/](https://hyunseob.github.io/2016/08/30/javascript-closure/)
 * Closure : [https://poiemaweb.com/js-closure](https://poiemaweb.com/js-closure)
 * JavaScript Function Closures : [https://www.w3schools.com/js/js_function_closures.asp](https://www.w3schools.com/js/js_function_closures.asp)
 * JavaScript closure inside loops - simple practical example : [https://stackoverflow.com/questions/750486/javascript-closure-inside-loops-simple-practical-example](https://stackoverflow.com/questions/750486/javascript-closure-inside-loops-simple-practical-example)

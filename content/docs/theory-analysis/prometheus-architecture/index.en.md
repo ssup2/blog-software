@@ -25,4 +25,4 @@ The Notifier not only handles the Alerts from the Rule Manager but also detects 
 * The Prometheus monitoring system and time series database : [https://github.com/prometheus/prometheus](https://github.com/prometheus/prometheus)
 * Prometheus Internal Architecture : [https://github.com/prometheus/prometheus/blob/master/documentation/internal_architecture.md](https://github.com/prometheus/prometheus/blob/master/documentation/internal_architecture.md)
 * Prometheus Monitoring: The Definitive Guide in 2019 : [https://devconnected.com/the-definitive-guide-to-prometheus-in-2019/](https://devconnected.com/the-definitive-guide-to-prometheus-in-2019/)
-* Prometheus #1 - 아키텍쳐와 개념 : [https://badcandy.github.io/2018/12/25/prometheus-architecture/](https://badcandy.github.io/2018/12/25/prometheus-architecture/)
+* Prometheus #1 - Architecture and Concepts : [https://badcandy.github.io/2018/12/25/prometheus-architecture/](https://badcandy.github.io/2018/12/25/prometheus-architecture/)

@@ -44,4 +44,4 @@ Install and set up Docker and Docker Compose. Run WSL Ubuntu and install Docker 
 
 * Setting Up Docker for Windows and WSL to Work Flawlessly : [https://nickjanetakis.com/blog/setting-up-docker-for-windows-and-wsl-to-work-flawlessly](https://nickjanetakis.com/blog/setting-up-docker-for-windows-and-wsl-to-work-flawlessly)
 * Connecting to containers IP address - Docker Community Forums : [https://forums.docker.com/t/connecting-to-containers-ip-address/18817](https://forums.docker.com/t/connecting-to-containers-ip-address/18817)
-* 사용자계정과 권한 - WSL : [https://webdir.tistory.com/543](https://webdir.tistory.com/543)
+* User Accounts and Permissions - WSL : [https://webdir.tistory.com/543](https://webdir.tistory.com/543)

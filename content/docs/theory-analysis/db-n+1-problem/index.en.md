@@ -36,6 +36,6 @@ Another way to solve the N+1 problem is to use the **eager loading** technique. 
 
 ## 2. References
 
-* N+1 문제 : [https://incheol-jung.gitbook.io/docs/q-and-a/spring/n+1](https://incheol-jung.gitbook.io/docs/q-and-a/spring/n+1)
-* Spring JPA(ORM)의 N+1 쿼리 문제 해결 : [https://wwlee94.github.io/category/blog/spring-jpa-n+1-query/](https://wwlee94.github.io/category/blog/spring-jpa-n+1-query/)
+* N+1 Problem : [https://incheol-jung.gitbook.io/docs/q-and-a/spring/n+1](https://incheol-jung.gitbook.io/docs/q-and-a/spring/n+1)
+* Solving the N+1 Query Problem in Spring JPA (ORM) : [https://wwlee94.github.io/category/blog/spring-jpa-n+1-query/](https://wwlee94.github.io/category/blog/spring-jpa-n+1-query/)
 * Solving the N+1 problem in ORMs : [https://thecodingmachine.io/solving-n-plus-1-problem-in-orms](https://thecodingmachine.io/solving-n-plus-1-problem-in-orms)

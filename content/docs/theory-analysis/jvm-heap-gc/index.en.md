@@ -23,6 +23,6 @@ title: JVM Heap, GC (Garbage Collection)
 ## 4. References
 
 * Java Garbage Collection (NAVER D2) : [http://d2.naver.com/helloworld/1329](http://d2.naver.com/helloworld/1329)
-* Java Reference와 GC (NAVER D2) : [http://d2.naver.com/helloworld/329631](http://d2.naver.com/helloworld/329631)
+* Java Reference and GC (NAVER D2) : [http://d2.naver.com/helloworld/329631](http://d2.naver.com/helloworld/329631)
 * Java 8 Perm : [https://yckwon2nd.blogspot.kr/2015/03/java8-permanent.html](https://yckwon2nd.blogspot.kr/2015/03/java8-permanent.html)
 * G1 : [http://www.oracle.com/technetwork/tutorials/tutorials-1876574.html](http://www.oracle.com/technetwork/tutorials/tutorials-1876574.html)

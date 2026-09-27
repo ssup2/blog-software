@@ -48,7 +48,7 @@ urn:mpeg:mpeg7:schema:2001<br/>
 ## 4. References
 
 * URL, URI, URN: What's the Difference? : [https://auth0.com/blog/url-uri-urn-differences/](https://auth0.com/blog/url-uri-urn-differences/)
-* URI? URL? URN? 리소스 식별자 구분하기 : [https://blog.itcode.dev/posts/2021/05/29/uri-url-urn](https://blog.itcode.dev/posts/2021/05/29/uri-url-urn)
+* URI? URL? URN? Distinguishing Resource Identifiers : [https://blog.itcode.dev/posts/2021/05/29/uri-url-urn](https://blog.itcode.dev/posts/2021/05/29/uri-url-urn)
 * URI : [https://en.wikipedia.org/wiki/Uniform_Resource_Identifier](https://en.wikipedia.org/wiki/Uniform_Resource_Identifier)
 * URL : [https://raventools.com/marketing-glossary/root-domain/](https://raventools.com/marketing-glossary/root-domain/)
 * URN : [https://en.wikipedia.org/wiki/Uniform_Resource_Name](https://en.wikipedia.org/wiki/Uniform_Resource_Name)

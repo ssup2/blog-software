@@ -134,7 +134,7 @@ CoreDNS can log all DNS Record lookup requests delivered to CoreDNS through the 
 
 ## 2. References
 
-* Kubernetes의 DNS, CoreDNS를 알아보자 : [https://jonnung.dev/kubernetes/2020/05/11/kubernetes-dns-about-coredns/](https://jonnung.dev/kubernetes/2020/05/11/kubernetes-dns-about-coredns/)
+* Exploring CoreDNS, the DNS of Kubernetes : [https://jonnung.dev/kubernetes/2020/05/11/kubernetes-dns-about-coredns/](https://jonnung.dev/kubernetes/2020/05/11/kubernetes-dns-about-coredns/)
 * DNS for Services and Pods : [https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/)
 * Customizing DNS Service : [https://kubernetes.io/docs/tasks/administer-cluster/dns-custom-nameservers/](https://kubernetes.io/docs/tasks/administer-cluster/dns-custom-nameservers/)
 * CoreDNS kubernetes Plugin : [https://coredns.io/plugins/kubernetes/](https://coredns.io/plugins/kubernetes/)

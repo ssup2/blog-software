@@ -45,5 +45,5 @@ In general, **DB Sharding** means a technique that horizontally splits tables th
 * What is Database Sharding? : [https://hazelcast.com/glossary/sharding/](https://hazelcast.com/glossary/sharding/)
 * Understanding MySQL Sharding : [https://hevodata.com/learn/understanding-mysql-sharding-simplified/](https://hevodata.com/learn/understanding-mysql-sharding-simplified/)
 * Database Sharding : [https://devopedia.org/database-sharding](https://devopedia.org/database-sharding)
-* DB분산처리를 위한 sharding : [https://woowabros.github.io/experience/2020/07/06/db-sharding.html](https://woowabros.github.io/experience/2020/07/06/db-sharding.html)
-* DB 파티셔닝 (Partitioning) 개념 : [https://soye0n.tistory.com/267](https://soye0n.tistory.com/267)
+* Sharding for Distributed DB Processing : [https://woowabros.github.io/experience/2020/07/06/db-sharding.html](https://woowabros.github.io/experience/2020/07/06/db-sharding.html)
+* DB Partitioning Concepts : [https://soye0n.tistory.com/267](https://soye0n.tistory.com/267)

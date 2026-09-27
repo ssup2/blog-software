@@ -16,4 +16,4 @@ title: MapReduce
 ## 2. References
 
 * Hadoop InputFormat, Types of InputFormat in MapReduce : [https://data-flair.training/blogs/hadoop-inputformat/](https://data-flair.training/blogs/hadoop-inputformat/)
-* Hadoop 개념 - MapReduce의 흐름에 따른 정의 : [http://icecello.tistory.com/35](http://icecello.tistory.com/35)
+* Hadoop Concepts - Definitions Along the MapReduce Flow : [http://icecello.tistory.com/35](http://icecello.tistory.com/35)

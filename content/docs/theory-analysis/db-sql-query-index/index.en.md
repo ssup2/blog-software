@@ -47,4 +47,4 @@ During the execution of [Query 4], the DB repeatedly performs the operation of s
 ## 4. References
 
 * Using Indexes - Progress ODBC Tutorial : [https://www.progress.com/tutorials/odbc/using-indexes](https://www.progress.com/tutorials/odbc/using-indexes)
-* MySQL - 정상 수행되던 쿼리가 IN 절에서 Index Scan 을 하지 않을 경우 Table Full Scan : [https://hoing.io/archives/24493](https://hoing.io/archives/24493)
+* MySQL - Table Full Scan When a Query That Ran Normally Stops Doing an Index Scan on the IN Clause : [https://hoing.io/archives/24493](https://hoing.io/archives/24493)

@@ -42,7 +42,7 @@ JWT is mainly used as a Token for authentication/authorization of Services by pu
 
 ## 2. References
 
-* [JWT] JSON Web Token 소개 및 구조 : [https://velopert.com/2389](https://velopert.com/2389)
+* [JWT] Introduction and Structure of JSON Web Token : [https://velopert.com/2389](https://velopert.com/2389)
 * JSON Web Tokens : [https://jwt.io/](https://jwt.io/)
 * JWT (JSON Web Token) - Opennaru : [http://www.opennaru.com/opennaru-blog/jwt-json-web-token/](http://www.opennaru.com/opennaru-blog/jwt-json-web-token/)
 * JSON Web Token Claims - Auth0 : [https://auth0.com/docs/tokens/concepts/jwt-claims](https://auth0.com/docs/tokens/concepts/jwt-claims)

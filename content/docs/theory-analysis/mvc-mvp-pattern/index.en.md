@@ -28,6 +28,6 @@ The MVP Pattern consists of three components: Model, View, and Presenter. Unlike
 
 ## 3. References
 
-* [WPF] MVC, MVP, MVVM 차이점 : [http://hackersstudy.tistory.com/71](http://hackersstudy.tistory.com/71)
+* [WPF] Differences between MVC, MVP, MVVM : [http://hackersstudy.tistory.com/71](http://hackersstudy.tistory.com/71)
 * [Design Pattern] MVC Architecture : [https://gmlwjd9405.github.io/2018/11/05/mvc-architecture.html](https://gmlwjd9405.github.io/2018/11/05/mvc-architecture.html)
 * JSP MVC model2 : [https://programmers.tistory.com/entry/JSP-MVC-model2](https://programmers.tistory.com/entry/JSP-MVC-model2)

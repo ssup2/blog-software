@@ -24,5 +24,5 @@ If a Barrier is placed between command A and command B as above, all Processes/T
 
 ### 2. References
 
-* 커널 API - Barrier : [http://forum.falinux.com/zbxe/index.php?document_srl=534002&mid=Kernel_API](http://forum.falinux.com/zbxe/index.php?document_srl=534002&mid=Kernel_API)
+* Kernel API - Barrier : [http://forum.falinux.com/zbxe/index.php?document_srl=534002&mid=Kernel_API](http://forum.falinux.com/zbxe/index.php?document_srl=534002&mid=Kernel_API)
 

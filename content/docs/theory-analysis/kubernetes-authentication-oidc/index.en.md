@@ -38,6 +38,6 @@ Group information can also be included in the ID Token, similar to the user name
 ## 2. References
 
 * Authenticating : [https://kubernetes.io/docs/reference/access-authn-authz/authentication/#openid-connect-tokens](https://kubernetes.io/docs/reference/access-authn-authz/authentication/#openid-connect-tokens)
-* k8s 인증 완벽이해 #3 - OpenID Connect : [https://coffeewhale.com/kubernetes/authentication/oidc/2020/05/04/auth03/](https://coffeewhale.com/kubernetes/authentication/oidc/2020/05/04/auth03/)
+* Complete Guide to k8s Authentication #3 - OpenID Connect : [https://coffeewhale.com/kubernetes/authentication/oidc/2020/05/04/auth03/](https://coffeewhale.com/kubernetes/authentication/oidc/2020/05/04/auth03/)
 
 

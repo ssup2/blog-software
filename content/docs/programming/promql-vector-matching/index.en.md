@@ -199,5 +199,5 @@ TO-DO
 ## 2. References
 
 * Prometheus Cheat Sheet - How to Join Multiple Metrics (Vector Matching) : [https://iximiuz.com/en/posts/prometheus-vector-matching/](https://iximiuz.com/en/posts/prometheus-vector-matching/)
-* Prometheus Query(PromQL) 기본 이해하기 : [https://devthomas.tistory.com/15](https://devthomas.tistory.com/15)
+* Understanding the Basics of Prometheus Query (PromQL) : [https://devthomas.tistory.com/15](https://devthomas.tistory.com/15)
 

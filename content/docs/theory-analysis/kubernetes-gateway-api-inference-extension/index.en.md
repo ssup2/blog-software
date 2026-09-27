@@ -96,7 +96,7 @@ Since InferenceObjective is still an Alpha-stage Resource, it may change in the 
 
 * Gateway API Inference Extension : [https://gateway-api-inference-extension.sigs.k8s.io/](https://gateway-api-inference-extension.sigs.k8s.io/)
 * Gateway API Inference Extension GitHub : [https://github.com/kubernetes-sigs/gateway-api-inference-extension](https://github.com/kubernetes-sigs/gateway-api-inference-extension)
-* Gateway API Inference Extension 소개 : [https://kubernetes.io/blog/2025/06/05/introducing-gateway-api-inference-extension/](https://kubernetes.io/blog/2025/06/05/introducing-gateway-api-inference-extension/)
+* Introducing Gateway API Inference Extension : [https://kubernetes.io/blog/2025/06/05/introducing-gateway-api-inference-extension/](https://kubernetes.io/blog/2025/06/05/introducing-gateway-api-inference-extension/)
 * InferencePool : [https://gateway-api-inference-extension.sigs.k8s.io/api-types/inferencepool/](https://gateway-api-inference-extension.sigs.k8s.io/api-types/inferencepool/)
 * Inference Extension API Spec : [https://gateway-api-inference-extension.sigs.k8s.io/reference/spec/](https://gateway-api-inference-extension.sigs.k8s.io/reference/spec/)
 * llm-d : [https://llm-d.ai/](https://llm-d.ai/)

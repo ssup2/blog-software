@@ -574,6 +574,6 @@ Execute DomU.
 * Xen ARMv7 with Virtualization Extensions - Building Xen on ARM : [http://wiki.xenproject.org/wiki/Xen_ARMv7_with_Virtualization_Extensions#Building_Xen_on_ARM](http://wiki.xenproject.org/wiki/Xen_ARMv7_with_Virtualization_Extensions#Building_Xen_on_ARM)
 * Xen ARM with Virtualization Extensions - Cross Compiling : [http://wiki.xenproject.org/wiki/Xen_ARM_with_Virtualization_Extensions/CrossCompiling](http://wiki.xenproject.org/wiki/Xen_ARM_with_Virtualization_Extensions/CrossCompiling)
 * Xen ARM with Virtualization Extensions - Root Filesystem : [http://wiki.xenproject.org/wiki/Xen_ARM_with_Virtualization_Extensions/RootFilesystem](http://wiki.xenproject.org/wiki/Xen_ARM_with_Virtualization_Extensions/RootFilesystem)
-* [우분투] tftp 설치 및 설정 : [http://forum.falinux.com/zbxe/index.php?document_srl=518293&mid=lecture_tip](http://forum.falinux.com/zbxe/index.php?document_srl=518293&mid=lecture_tip)
+* [Ubuntu] Installing and Configuring tftp : [http://forum.falinux.com/zbxe/index.php?document_srl=518293&mid=lecture_tip](http://forum.falinux.com/zbxe/index.php?document_srl=518293&mid=lecture_tip)
 * Xen Project Mailing List : [http://lists.xen.org/archives/html/xen-users/2012-03/msg00325.html](http://lists.xen.org/archives/html/xen-users/2012-03/msg00325.html)
 

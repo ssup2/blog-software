@@ -14,4 +14,4 @@ This article analyzes TLS ALPN (Application Layer Protocol Negotiation).
 
 ## 2. References
 
-* 알아두면 쓸데없는 신비한 TLS : [https://luavis.me/server/tls-101](https://luavis.me/server/tls-101)
+* Useless but Fascinating TLS Knowledge : [https://luavis.me/server/tls-101](https://luavis.me/server/tls-101)

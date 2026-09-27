@@ -96,7 +96,7 @@ public class Main{
 * Why should I use the Command design pattern : [https://stackoverflow.com/questions/32597736/why-should-i-use-the-command-design-pattern-while-i-can-easily-call-required-met](https://stackoverflow.com/questions/32597736/why-should-i-use-the-command-design-pattern-while-i-can-easily-call-required-met)
 * Design Patterns - Command Pattern : [https://www.tutorialspoint.com/design_pattern/command_pattern.htm](https://www.tutorialspoint.com/design_pattern/command_pattern.htm)
 * Difference between Strategy pattern and Command pattern : [https://stackoverflow.com/questions/4834979/difference-between-strategy-pattern-and-command-pattern](https://stackoverflow.com/questions/4834979/difference-between-strategy-pattern-and-command-pattern)
-* 커맨드 패턴 - 위키백과 : [https://ko.wikipedia.org/wiki/%EC%BB%A4%EB%A7%A8%EB%93%9C_%ED%8C%A8%ED%84%B4](https://ko.wikipedia.org/wiki/%EC%BB%A4%EB%A7%A8%EB%93%9C_%ED%8C%A8%ED%84%B4)
-* 커맨드 패턴 (Command Pattern) : [https://gdtbgl93.tistory.com/23](https://gdtbgl93.tistory.com/23)
-* 메모. Command pattern : [https://blog.hexabrain.net/352](https://blog.hexabrain.net/352)
+* Command Pattern - Wikipedia : [https://ko.wikipedia.org/wiki/%EC%BB%A4%EB%A7%A8%EB%93%9C_%ED%8C%A8%ED%84%B4](https://ko.wikipedia.org/wiki/%EC%BB%A4%EB%A7%A8%EB%93%9C_%ED%8C%A8%ED%84%B4)
+* Command Pattern : [https://gdtbgl93.tistory.com/23](https://gdtbgl93.tistory.com/23)
+* Memo. Command Pattern : [https://blog.hexabrain.net/352](https://blog.hexabrain.net/352)
 

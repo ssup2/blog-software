@@ -65,5 +65,5 @@ node-memory-MemAvailable-bytes{container="node-exporter", dest="node-exporter-re
 ## 3. References
 
 * Prometheus Query Functions : [https://prometheus.io/docs/prometheus/latest/querying/functions/#label-join](https://prometheus.io/docs/prometheus/latest/querying/functions/#label-join)
-* Prometheus Query(PromQL) 기본 이해하기 : [https://devthomas.tistory.com/15](https://devthomas.tistory.com/15)
+* Understanding Prometheus Query (PromQL) Basics : [https://devthomas.tistory.com/15](https://devthomas.tistory.com/15)
 

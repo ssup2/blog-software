@@ -328,7 +328,7 @@ By attaching a few Annotations to Executor Pod in Prometheus, Prometheus can aut
 ## 2. References
 
 * Running Spark on Kubernetes : [https://spark.apache.org/docs/latest/running-on-kubernetes.html](https://spark.apache.org/docs/latest/running-on-kubernetes.html)
-* Spark on Kubernetes: 커스텀 스케줄러 (1) : [https://swalloow.github.io/spark-on-kubernetes-scheduler/](https://swalloow.github.io/spark-on-kubernetes-scheduler/)
+* Spark on Kubernetes: Custom Scheduler (1) : [https://swalloow.github.io/spark-on-kubernetes-scheduler/](https://swalloow.github.io/spark-on-kubernetes-scheduler/)
 * spark-submit : [https://spark.apache.org/docs/latest/submitting-applications.html](https://spark.apache.org/docs/latest/submitting-applications.html)
 * Spark Configuration : [https://spark.apache.org/docs/latest/configuration.html](https://spark.apache.org/docs/latest/configuration.html)
 * Spark Pod Template Example : [https://docs.aws.amazon.com/emr/latest/EMR-on-EKS-DevelopmentGuide/pod-templates.html](https://docs.aws.amazon.com/emr/latest/EMR-on-EKS-DevelopmentGuide/pod-templates.html)

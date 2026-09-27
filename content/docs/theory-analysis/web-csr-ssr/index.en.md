@@ -30,7 +30,7 @@ Server load is higher in SSR, which performs Rendering on Server, compared to CS
 
 ## 4. References
 
-* 웹에서 렌더링 (Rendering on the Web) : [https://developers.google.com/web/updates/2019/02/rendering-on-the-web?hl=ko](https://developers.google.com/web/updates/2019/02/rendering-on-the-web?hl=ko)
+* Rendering on the Web : [https://developers.google.com/web/updates/2019/02/rendering-on-the-web?hl=ko](https://developers.google.com/web/updates/2019/02/rendering-on-the-web?hl=ko)
 * The Benefits of Server Side Rendering Over Client Side Rendering : [https://medium.com/walmartglobaltech/the-benefits-of-server-side-rendering-over-client-side-rendering-5d07ff2cefe8](https://medium.com/walmartglobaltech/the-benefits-of-server-side-rendering-over-client-side-rendering-5d07ff2cefe8)
-* SSR과 CSR에 대해 알아보자! : [https://velog.io/@gkrba1234/SSR%EA%B3%BC-CSR%EC%97%90-%EB%8C%80%ED%95%B4-%EC%95%8C%EC%95%84%EB%B3%B4%EC%9E%90](https://velog.io/@gkrba1234/SSR%EA%B3%BC-CSR%EC%97%90-%EB%8C%80%ED%95%B4-%EC%95%8C%EC%95%84%EB%B3%B4%EC%9E%90)
+* Let's Learn About SSR and CSR! : [https://velog.io/@gkrba1234/SSR%EA%B3%BC-CSR%EC%97%90-%EB%8C%80%ED%95%B4-%EC%95%8C%EC%95%84%EB%B3%B4%EC%9E%90](https://velog.io/@gkrba1234/SSR%EA%B3%BC-CSR%EC%97%90-%EB%8C%80%ED%95%B4-%EC%95%8C%EC%95%84%EB%B3%B4%EC%9E%90)
 

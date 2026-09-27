@@ -321,7 +321,7 @@ When using standard packages for error wrapping in Golang, the disadvantage is t
 * Effective Error Handling in Golang : [https://earthly.dev/blog/golang-errors/](https://earthly.dev/blog/golang-errors/)
 * Handle errors in Go with errors.Is() and errors.As() : [https://gosamples.dev/check-error-type/](https://gosamples.dev/check-error-type/)
 * How to compare Go errors : [https://stackoverflow.com/questions/39121172/how-to-compare-go-errors](https://stackoverflow.com/questions/39121172/how-to-compare-go-errors)
-* Golang Error Stack Trace와 로깅 : [https://www.popit.kr/golang-error-stack-trace%EC%99%80-%EB%A1%9C%EA%B9%85/](https://www.popit.kr/golang-error-stack-trace%EC%99%80-%EB%A1%9C%EA%B9%85/)
-* [Golang] 에러 처리 : [https://dev-yakuza.posstree.com/ko/golang/error-handling/](https://dev-yakuza.posstree.com/ko/golang/error-handling/)
+* Golang Error Stack Trace and Logging : [https://www.popit.kr/golang-error-stack-trace%EC%99%80-%EB%A1%9C%EA%B9%85/](https://www.popit.kr/golang-error-stack-trace%EC%99%80-%EB%A1%9C%EA%B9%85/)
+* [Golang] Error Handling : [https://dev-yakuza.posstree.com/ko/golang/error-handling/](https://dev-yakuza.posstree.com/ko/golang/error-handling/)
 * Unwrap doesn't return the base error - pkg/errors Issue #223 : [https://github.com/pkg/errors/issues/223](https://github.com/pkg/errors/issues/223)
 

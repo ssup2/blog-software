@@ -75,5 +75,5 @@ title: CKS Certificate Exam Summary/Review
 ## 6. References
 
 * Important Instructions: CKS : [https://docs.linuxfoundation.org/tc-docs/certification/important-instructions-cks](https://docs.linuxfoundation.org/tc-docs/certification/important-instructions-cks)
-* [Kubernetes] CKS 준비과정 - CKS 준비과정을 준비하기 : [https://velog.io/@jay-side-project/Kubernetes-CKS-%EC%A4%80%EB%B9%84%EA%B3%BC%EC%A0%95-0-CKS-%EC%A4%80%EB%B9%84%EA%B3%BC%EC%A0%95%EC%9D%84-%EC%A4%80%EB%B9%84%ED%95%98%EA%B8%B0](https://velog.io/@jay-side-project/Kubernetes-CKS-%EC%A4%80%EB%B9%84%EA%B3%BC%EC%A0%95-0-CKS-%EC%A4%80%EB%B9%84%EA%B3%BC%EC%A0%95%EC%9D%84-%EC%A4%80%EB%B9%84%ED%95%98%EA%B8%B0)
+* [Kubernetes] CKS Preparation - Getting Ready for the CKS Preparation Process : [https://velog.io/@jay-side-project/Kubernetes-CKS-%EC%A4%80%EB%B9%84%EA%B3%BC%EC%A0%95-0-CKS-%EC%A4%80%EB%B9%84%EA%B3%BC%EC%A0%95%EC%9D%84-%EC%A4%80%EB%B9%84%ED%95%98%EA%B8%B0](https://velog.io/@jay-side-project/Kubernetes-CKS-%EC%A4%80%EB%B9%84%EA%B3%BC%EC%A0%95-0-CKS-%EC%A4%80%EB%B9%84%EA%B3%BC%EC%A0%95%EC%9D%84-%EC%A4%80%EB%B9%84%ED%95%98%EA%B8%B0)
 

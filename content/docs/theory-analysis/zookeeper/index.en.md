@@ -57,7 +57,7 @@ Distributed Locks can be implemented using the characteristic that Sequence Node
 
 ## 2. References
 
-* Zookeeper 소개 : [https://www.slideshare.net/madvirus/zookeeper-34888385](https://www.slideshare.net/madvirus/zookeeper-34888385)
+* Introduction to Zookeeper : [https://www.slideshare.net/madvirus/zookeeper-34888385](https://www.slideshare.net/madvirus/zookeeper-34888385)
 * Introduction to Apache ZooKeeper : [http://www.allprogrammingtutorials.com/tutorials/introduction-to-apache-zookeeper.php](http://www.allprogrammingtutorials.com/tutorials/introduction-to-apache-zookeeper.php)
 * ZooKeeper Overview Slides : [https://www.slideshare.net/javawork/zookeeper-24265680](https://www.slideshare.net/javawork/zookeeper-24265680)
 

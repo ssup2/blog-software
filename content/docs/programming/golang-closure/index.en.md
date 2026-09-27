@@ -64,7 +64,7 @@ func main() {
 
 ## 2. References
 
-* 예제로 배우는 Go 프로그래밍 - Go 클로저 : [http://golang.site/go/article/11-Go-%ED%81%B4%EB%A1%9C%EC%A0%80](http://golang.site/go/article/11-Go-%ED%81%B4%EB%A1%9C%EC%A0%80)
+* Go Programming by Example - Go Closure : [http://golang.site/go/article/11-Go-%ED%81%B4%EB%A1%9C%EC%A0%80](http://golang.site/go/article/11-Go-%ED%81%B4%EB%A1%9C%EC%A0%80)
 * Why Go's Closure Can Be Dangerous : [https://medium.com/code-zen/why-gos-closure-can-be-dangerous-f3e5ad0b9fce](https://medium.com/code-zen/why-gos-closure-can-be-dangerous-f3e5ad0b9fce)
-* Golang Closure(클로저)란? : [https://hwan-shell.tistory.com/339](https://hwan-shell.tistory.com/339)
+* What is Golang Closure? : [https://hwan-shell.tistory.com/339](https://hwan-shell.tistory.com/339)
 

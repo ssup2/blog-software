@@ -38,5 +38,5 @@ By Encoding the Password with MD5, the security weakness of Basic authentication
 * Supporting HTTP Authentication and Forms Authentication in a Single ASP.NET Web Site : [https://msdn.microsoft.com/en-us/library/aa479391.aspx](https://msdn.microsoft.com/en-us/library/aa479391.aspx)
 * Digest Authentication Technical Reference : [https://technet.microsoft.com/en-us/library/cc780170(v=ws.10).aspx](https://technet.microsoft.com/en-us/library/cc780170(v=ws.10).aspx)
 * Digest Authentication with ASP.NET Web API (Part 1) : [https://lbadri.wordpress.com/2012/08/10/digest-authentication-with-asp-net-web-api-part-1/](https://lbadri.wordpress.com/2012/08/10/digest-authentication-with-asp-net-web-api-part-1/)
-* [HTTP] 다이제스트 인증 : [http://iloveulhj.github.io/posts/http/http-digest-auth.html](http://iloveulhj.github.io/posts/http/http-digest-auth.html)
+* [HTTP] Digest Authentication : [http://iloveulhj.github.io/posts/http/http-digest-auth.html](http://iloveulhj.github.io/posts/http/http-digest-auth.html)
 * HTTP Digest Authentication : [http://flylib.com/books/en/1.2.1.123/1/](http://flylib.com/books/en/1.2.1.123/1/)

@@ -196,5 +196,5 @@ Configure aws CLI using the obtained `AccessKeyId`, `SecretAccessKey`, and `Sess
 
 ## 6. References
 
-* AWS CLI를 사용하여 IAM 역할 수임 : [https://aws.amazon.com/ko/premiumsupport/knowledge-center/iam-assume-role-cli/](https://aws.amazon.com/ko/premiumsupport/knowledge-center/iam-assume-role-cli/)
+* Assuming an IAM Role Using the AWS CLI : [https://aws.amazon.com/ko/premiumsupport/knowledge-center/iam-assume-role-cli/](https://aws.amazon.com/ko/premiumsupport/knowledge-center/iam-assume-role-cli/)
 

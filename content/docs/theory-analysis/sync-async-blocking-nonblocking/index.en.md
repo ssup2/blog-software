@@ -42,5 +42,5 @@ Linux I/O related functions can be classified into 4 types depending on whether 
 ## 2. References
 
 * Boost Application Performance Using Asynchronous I/O : [https://developer.ibm.com/articles/l-async/](https://developer.ibm.com/articles/l-async/)
-* Blocking, Non-blocking, Sync, Async의 차이 : [https://jh-7.tistory.com/25](https://jh-7.tistory.com/25)
+* Differences between Blocking, Non-blocking, Sync, Async : [https://jh-7.tistory.com/25](https://jh-7.tistory.com/25)
 
