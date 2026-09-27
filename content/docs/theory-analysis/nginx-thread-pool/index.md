@@ -22,4 +22,4 @@ Nginx는 Backend의 응답을 File로 Caching하기 때문에 File Read/Write �
 
 ## 2. 참조
 
-* [https://www.nginx.com/blog/thread-pools-boost-performance-9x/](https://www.nginx.com/blog/thread-pools-boost-performance-9x/)
+* Thread Pools in NGINX Boost Performance 9x : [https://www.nginx.com/blog/thread-pools-boost-performance-9x/](https://www.nginx.com/blog/thread-pools-boost-performance-9x/)

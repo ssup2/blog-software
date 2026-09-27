@@ -46,9 +46,9 @@ Spark Runtime Architecture는 **Client Mode**와 **Cluster Mode** 2가지 Mode�
 
 ## 3. 참조
 
-* [https://www.interviewbit.com/blog/apache-spark-architecture/](https://www.interviewbit.com/blog/apache-spark-architecture/)
-* [https://spark.apache.org/docs/latest/cluster-overview.html](https://spark.apache.org/docs/latest/cluster-overview.html)
-* [https://datastrophic.io/core-concepts-architecture-and-internals-of-apache-spark/](https://datastrophic.io/core-concepts-architecture-and-internals-of-apache-spark/)
-* [https://0x0fff.com/spark-architecture/](https://0x0fff.com/spark-architecture/)
-* [https://www.alluxio.io/learn/spark/architecture/](https://www.alluxio.io/learn/spark/architecture/)
-* [https://dwgeek.com/apache-spark-architecture-design-and-overview.html/](https://dwgeek.com/apache-spark-architecture-design-and-overview.html/)
+* Apache Spark Architecture - Detailed Explanation : [https://www.interviewbit.com/blog/apache-spark-architecture/](https://www.interviewbit.com/blog/apache-spark-architecture/)
+* Cluster Mode Overview : [https://spark.apache.org/docs/latest/cluster-overview.html](https://spark.apache.org/docs/latest/cluster-overview.html)
+* Apache Spark: core concepts, architecture and internals : [https://datastrophic.io/core-concepts-architecture-and-internals-of-apache-spark/](https://datastrophic.io/core-concepts-architecture-and-internals-of-apache-spark/)
+* Spark Architecture : [https://0x0fff.com/spark-architecture/](https://0x0fff.com/spark-architecture/)
+* Spark Architecture (Alluxio) : [https://www.alluxio.io/learn/spark/architecture/](https://www.alluxio.io/learn/spark/architecture/)
+* Apache Spark Architecture, Design and Overview : [https://dwgeek.com/apache-spark-architecture-design-and-overview.html/](https://dwgeek.com/apache-spark-architecture-design-and-overview.html/)

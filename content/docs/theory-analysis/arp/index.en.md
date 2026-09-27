@@ -33,5 +33,5 @@ If addresses are discovered using ARP every time data is transmitted, numerous A
 
 ## 2. References
 
-* [https://www.slideshare.net/naveenarvinth/arp-36193303](https://www.slideshare.net/naveenarvinth/arp-36193303)
+* ARP Overview Slides : [https://www.slideshare.net/naveenarvinth/arp-36193303](https://www.slideshare.net/naveenarvinth/arp-36193303)
 

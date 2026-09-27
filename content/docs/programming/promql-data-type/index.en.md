@@ -59,8 +59,8 @@ Since 2 values with the same Label exist during 1 minute, you can see that 2 val
 
 ## 2. References
 
-* [https://prometheus.io/docs/prometheus/latest/querying/basics/#expression-language-data-types](https://prometheus.io/docs/prometheus/latest/querying/basics/#expression-language-data-types)
-* [https://devthomas.tistory.com/15](https://devthomas.tistory.com/15)
-* [https://gurumee92.tistory.com/244](https://gurumee92.tistory.com/244)
-* [https://www.robustperception.io/cardinality-is-key](https://www.robustperception.io/cardinality-is-key)
+* Querying basics : [https://prometheus.io/docs/prometheus/latest/querying/basics/#expression-language-data-types](https://prometheus.io/docs/prometheus/latest/querying/basics/#expression-language-data-types)
+* Prometheus Query(PromQL) 기본 이해하기 : [https://devthomas.tistory.com/15](https://devthomas.tistory.com/15)
+* Prometheus Query (1) PromQL 기본 : [https://gurumee92.tistory.com/244](https://gurumee92.tistory.com/244)
+* Cardinality is key : [https://www.robustperception.io/cardinality-is-key](https://www.robustperception.io/cardinality-is-key)
 

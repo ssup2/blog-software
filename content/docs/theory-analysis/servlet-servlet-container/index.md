@@ -38,6 +38,6 @@ HTTP 요청 처리 과정을 보면 Servlet Instance는 HTTP 요청이 올때마
 
 ## 3. 참조
 
-*  [https://dzone.com/articles/what-servlet-container](https://dzone.com/articles/what-servlet-container)
-* [http://ecomputernotes.com/servlet/intro/servlet-container](http://ecomputernotes.com/servlet/intro/servlet-container)
-* [https://stackoverflow.com/questions/2183974/difference-between-each-instance-of-servlet-and-each-thread-of-servlet-in-servle](https://stackoverflow.com/questions/2183974/difference-between-each-instance-of-servlet-and-each-thread-of-servlet-in-servle)
+* What is a Servlet Container? : [https://dzone.com/articles/what-servlet-container](https://dzone.com/articles/what-servlet-container)
+* Servlet Container - Computer Notes : [http://ecomputernotes.com/servlet/intro/servlet-container](http://ecomputernotes.com/servlet/intro/servlet-container)
+* Difference between each instance of servlet and each thread of servlet - Stack Overflow : [https://stackoverflow.com/questions/2183974/difference-between-each-instance-of-servlet-and-each-thread-of-servlet-in-servle](https://stackoverflow.com/questions/2183974/difference-between-each-instance-of-servlet-and-each-thread-of-servlet-in-servle)

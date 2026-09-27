@@ -36,8 +36,8 @@ Worker Node is a node where applications deployed by Kubernetes users run.
 
 ## 2. References
 
-* [https://www.aquasec.com/wiki/display/containers/Kubernetes+Architecture+101](https://www.aquasec.com/wiki/display/containers/Kubernetes+Architecture+101)
-* [https://www.slideshare.net/harryzhang735/kubernetes-beyond-a-black-box-part-1](https://www.slideshare.net/harryzhang735/kubernetes-beyond-a-black-box-part-1)
-* [https://www.slideshare.net/harryzhang735/kubernetes-beyond-a-black-box-part-2](https://www.slideshare.net/harryzhang735/kubernetes-beyond-a-black-box-part-2)
+* Kubernetes Architecture 101 : [https://www.aquasec.com/wiki/display/containers/Kubernetes+Architecture+101](https://www.aquasec.com/wiki/display/containers/Kubernetes+Architecture+101)
+* Kubernetes: Beyond a Black Box - Part 1 : [https://www.slideshare.net/harryzhang735/kubernetes-beyond-a-black-box-part-1](https://www.slideshare.net/harryzhang735/kubernetes-beyond-a-black-box-part-1)
+* Kubernetes: Beyond a Black Box - Part 2 : [https://www.slideshare.net/harryzhang735/kubernetes-beyond-a-black-box-part-2](https://www.slideshare.net/harryzhang735/kubernetes-beyond-a-black-box-part-2)
 
 

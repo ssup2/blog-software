@@ -102,10 +102,10 @@ $ Cgroup Out of Memory
 
 ## 2. References
 
-* [https://man7.org/linux/man-pages/man5/proc.5.html](https://man7.org/linux/man-pages/man5/proc.5.html)
-* [https://www.kernel.org/doc/Documentation/cgroup-v1/memory.txt](https://www.kernel.org/doc/Documentation/cgroup-v1/memory.txt)
-* [https://lwn.net/Articles/761118/](https://lwn.net/Articles/761118/)
-* [https://lwn.net/Articles/317814/](https://lwn.net/Articles/317814/)
-* [https://dev.to/rrampage/surviving-the-linux-oom-killer-2ki9](https://dev.to/rrampage/surviving-the-linux-oom-killer-2ki9)
-* [https://www.scrivano.org/posts/2020-08-14-oom-group/](https://www.scrivano.org/posts/2020-08-14-oom-group/)
+* proc(5) - Linux manual page : [https://man7.org/linux/man-pages/man5/proc.5.html](https://man7.org/linux/man-pages/man5/proc.5.html)
+* Linux cgroup v1 Memory Documentation : [https://www.kernel.org/doc/Documentation/cgroup-v1/memory.txt](https://www.kernel.org/doc/Documentation/cgroup-v1/memory.txt)
+* Teaching the OOM killer about control groups : [https://lwn.net/Articles/761118/](https://lwn.net/Articles/761118/)
+* Taming the OOM killer : [https://lwn.net/Articles/317814/](https://lwn.net/Articles/317814/)
+* Surviving the Linux OOM Killer : [https://dev.to/rrampage/surviving-the-linux-oom-killer-2ki9](https://dev.to/rrampage/surviving-the-linux-oom-killer-2ki9)
+* Cgroup v2 OOM group : [https://www.scrivano.org/posts/2020-08-14-oom-group/](https://www.scrivano.org/posts/2020-08-14-oom-group/)
 

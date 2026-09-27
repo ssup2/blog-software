@@ -216,6 +216,6 @@ String Literals are located in the **Constant String Pool**. The Constant String
 
 ## 2. References
 
-* [https://velog.io/@new_wisdom/Java-String-vs-StringBuffer-vs-StringBuilder](https://velog.io/@new_wisdom/Java-String-vs-StringBuffer-vs-StringBuilder)
-* [https://velog.io/@ditt/Java-String-literal-vs-new-String](https://velog.io/@ditt/Java-String-literal-vs-new-String)
+* [Java] String vs StringBuffer vs StringBuilder : [https://velog.io/@new_wisdom/Java-String-vs-StringBuffer-vs-StringBuilder](https://velog.io/@new_wisdom/Java-String-vs-StringBuffer-vs-StringBuilder)
+* [Java] String literal vs new String : [https://velog.io/@ditt/Java-String-literal-vs-new-String](https://velog.io/@ditt/Java-String-literal-vs-new-String)
 

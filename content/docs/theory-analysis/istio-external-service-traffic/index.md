@@ -13,5 +13,5 @@ draft: true
 
 ## 2. 참조
 
-* [https://istio.io/latest/docs/reference/config/networking/service-entry/](https://istio.io/latest/docs/reference/config/networking/service-entry/)
-* [https://umi0410.github.io/blog/devops/istio-service-entry-https/](https://umi0410.github.io/blog/devops/istio-service-entry-https/)
+* Istio Service Entry : [https://istio.io/latest/docs/reference/config/networking/service-entry/](https://istio.io/latest/docs/reference/config/networking/service-entry/)
+* Istio Service Entry: 외부 서비스로의 HTTPS 요청에 대한 가시성 확보하기 : [https://umi0410.github.io/blog/devops/istio-service-entry-https/](https://umi0410.github.io/blog/devops/istio-service-entry-https/)

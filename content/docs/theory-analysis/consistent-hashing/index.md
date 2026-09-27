@@ -39,10 +39,7 @@ Jump Consistent Hashing은 각 Key의 모든 Jump 과정을 저장할 필요 없
 ## 2. 참조
 
 * Ring Consistent Hashing : [https://dl.acm.org/doi/abs/10.1145/258533.258660](https://dl.acm.org/doi/abs/10.1145/258533.258660)
-* Ring Consistent Hashing : [https://www.secmem.org/blog/2021/01/24/consistent-hashing/](https://www.secmem.org/blog/2021/01/24/consistent-hashing/)
-* Jump Consistent Hashing : [https://arxiv.org/ftp/arxiv/papers/1406/1406.2294.pdf](https://arxiv.org/ftp/arxiv/papers/1406/1406.2294.pdf)
-* [https://www.joinc.co.kr/w/man/12/hash/consistent](https://www.joinc.co.kr/w/man/12/hash/consistent)
-* [https://itnext.io/introducing-consistent-hashing-9a289769052e](https://itnext.io/introducing-consistent-hashing-9a289769052e)
-* [https://www.popit.kr/consistent-hashing/](https://www.popit.kr/consistent-hashing/)
-* [https://www.secmem.org/blog/2021/01/24/consistent-hashing/](https://www.secmem.org/blog/2021/01/24/consistent-hashing/)
-* [https://www.popit.kr/jump-consistent-hash/](https://www.popit.kr/jump-consistent-hash/)
+* Consistent Hashing (Joinc) : [https://www.joinc.co.kr/w/man/12/hash/consistent](https://www.joinc.co.kr/w/man/12/hash/consistent)
+* Introducing Consistent Hashing : [https://itnext.io/introducing-consistent-hashing-9a289769052e](https://itnext.io/introducing-consistent-hashing-9a289769052e)
+* [입 개발] Consistent Hashing 에 대한 기초 : [https://www.popit.kr/consistent-hashing/](https://www.popit.kr/consistent-hashing/)
+* Jump consistent hash : [https://www.popit.kr/jump-consistent-hash/](https://www.popit.kr/jump-consistent-hash/)

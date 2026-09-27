@@ -191,6 +191,6 @@ Create and map Block Storage.
 
 ## 5. References
 
-* [http://docs.ceph.com/docs/master/start/](http://docs.ceph.com/docs/master/start/)
-* [https://kubernetes.io/docs/concepts/storage/storage-classes/#ceph-rbd](https://kubernetes.io/docs/concepts/storage/storage-classes/#ceph-rbd)
+* Intro to Ceph : [http://docs.ceph.com/docs/master/start/](http://docs.ceph.com/docs/master/start/)
+* Kubernetes Storage Classes : [https://kubernetes.io/docs/concepts/storage/storage-classes/#ceph-rbd](https://kubernetes.io/docs/concepts/storage/storage-classes/#ceph-rbd)
 

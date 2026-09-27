@@ -38,7 +38,7 @@ Looking at the HTTP request processing process, Servlet Instances do not create 
 
 ## 3. References
 
-*  [https://dzone.com/articles/what-servlet-container](https://dzone.com/articles/what-servlet-container)
-* [http://ecomputernotes.com/servlet/intro/servlet-container](http://ecomputernotes.com/servlet/intro/servlet-container)
-* [https://stackoverflow.com/questions/2183974/difference-between-each-instance-of-servlet-and-each-thread-of-servlet-in-servle](https://stackoverflow.com/questions/2183974/difference-between-each-instance-of-servlet-and-each-thread-of-servlet-in-servle)
+* What is a Servlet Container? : [https://dzone.com/articles/what-servlet-container](https://dzone.com/articles/what-servlet-container)
+* Servlet Container - Computer Notes : [http://ecomputernotes.com/servlet/intro/servlet-container](http://ecomputernotes.com/servlet/intro/servlet-container)
+* Difference between each instance of servlet and each thread of servlet - Stack Overflow : [https://stackoverflow.com/questions/2183974/difference-between-each-instance-of-servlet-and-each-thread-of-servlet-in-servle](https://stackoverflow.com/questions/2183974/difference-between-each-instance-of-servlet-and-each-thread-of-servlet-in-servle)
 

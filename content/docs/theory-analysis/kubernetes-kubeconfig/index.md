@@ -63,5 +63,4 @@ subjects:
 
 ## 2. 참조
 
-* [https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/)
-* [https://jamesdefabia.github.io/docs/user-guide/kubectl/kubectl-config-set-cluster/](https://jamesdefabia.github.io/docs/user-guide/kubectl/kubectl-config-set-cluster/)
+* Organizing Cluster Access Using kubeconfig Files : [https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/](https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/)

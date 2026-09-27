@@ -186,9 +186,7 @@ Abstract Factory Pattern is a Pattern that can create objects of various Types d
 
 ## 2. References
 
-* [https://medium.com/bitmountn/factory-vs-factory-method-vs-abstract-factory-c3adaeb5ac9a](https://medium.com/bitmountn/factory-vs-factory-method-vs-abstract-factory-c3adaeb5ac9a)
-* [https://www.codeproject.com/Articles/716413/Factory-Method-Pattern-vs-Abstract-Factory-Pattern](https://www.codeproject.com/Articles/716413/Factory-Method-Pattern-vs-Abstract-Factory-Pattern)
-* [https://stackoverflow.com/questions/5739611/what-are-the-differences-between-abstract-factory-and-factory-design-patterns](https://stackoverflow.com/questions/5739611/what-are-the-differences-between-abstract-factory-and-factory-design-patterns)
-* [https://blog.seotory.com/post/2016/08/java-abstract-factory-pattern](https://blog.seotory.com/post/2016/08/java-abstract-factory-pattern)
-* [https://blog.seotory.com/post/2016/08/java-factory-pattern](https://blog.seotory.com/post/2016/08/java-factory-pattern)
+* Factory vs Factory Method vs Abstract Factory : [https://medium.com/bitmountn/factory-vs-factory-method-vs-abstract-factory-c3adaeb5ac9a](https://medium.com/bitmountn/factory-vs-factory-method-vs-abstract-factory-c3adaeb5ac9a)
+* Factory Method Pattern vs Abstract Factory Pattern : [https://www.codeproject.com/Articles/716413/Factory-Method-Pattern-vs-Abstract-Factory-Pattern](https://www.codeproject.com/Articles/716413/Factory-Method-Pattern-vs-Abstract-Factory-Pattern)
+* What are the differences between Abstract Factory and Factory design patterns : [https://stackoverflow.com/questions/5739611/what-are-the-differences-between-abstract-factory-and-factory-design-patterns](https://stackoverflow.com/questions/5739611/what-are-the-differences-between-abstract-factory-and-factory-design-patterns)
 

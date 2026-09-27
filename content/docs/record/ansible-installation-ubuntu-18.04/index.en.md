@@ -80,7 +80,3 @@ Copy the generated ssh Public Key to the `~/.ssh/authorized_keys` file of all Ma
 ```
 
 Check if ssh connection from Control Node to Managed Nodes is possible using the `ansible all -m ping` command from the Control Node.
-
-## 6. References
-
-* [https://docs.ansible.com/ansible/latest/installation-guide/index.html](https://docs.ansible.com/ansible/latest/installation-guide/index.html)

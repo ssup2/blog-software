@@ -76,4 +76,4 @@ e822ea854922        kindest/node:v1.20.2   "/usr/local/bin/entr…"   8 minutes 
 
 ## 5. 참조
 
-* [https://kind.sigs.k8s.io/docs/user/quick-start/](https://kind.sigs.k8s.io/docs/user/quick-start/)
+* kind - Quick Start : [https://kind.sigs.k8s.io/docs/user/quick-start/](https://kind.sigs.k8s.io/docs/user/quick-start/)

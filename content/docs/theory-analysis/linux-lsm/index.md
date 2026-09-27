@@ -73,6 +73,3 @@ int --init security-init(void)
 ## 2. 참조
 
 * Linux Document : [https://www.kernel.org/doc/Documentation/security/LSM.txt](https://www.kernel.org/doc/Documentation/security/LSM.txt)
-* Linux Security Module Framework : [http://www.kroah.com/linux/talks/ols-2002-lsm-paper/lsm.pdf](http://www.kroah.com/linux/talks/ols-2002-lsm-paper/lsm.pdf)
-* Linux Security Modules:
-General Security Support for the Linux Kernel : [http://www.kroah.com/linux/talks/usenix-security-2002-lsm-paper/lsm.pdf](http://www.kroah.com/linux/talks/usenix-security-2002-lsm-paper/lsm.pdf)

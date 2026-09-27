@@ -282,7 +282,7 @@ func main() {
 
 ## 3. 참조
 
-* [https://golang.org/pkg/context/](https://golang.org/pkg/context/)
-* [https://www.popit.kr/go%EC%96%B8%EC%96%B4%EC%97%90%EC%84%9C-context-%EC%82%AC%EC%9A%A9%ED%95%98%EA%B8%B0/](https://www.popit.kr/go%EC%96%B8%EC%96%B4%EC%97%90%EC%84%9C-context-%EC%82%AC%EC%9A%A9%ED%95%98%EA%B8%B0/)
-* [https://devjin-blog.com/golang-context/](https://devjin-blog.com/golang-context/)
-* [https://gobyexample.com/context](https://gobyexample.com/context)
+* Go context Package : [https://golang.org/pkg/context/](https://golang.org/pkg/context/)
+* Go언어에서 Context 사용하기 : [https://www.popit.kr/go%EC%96%B8%EC%96%B4%EC%97%90%EC%84%9C-context-%EC%82%AC%EC%9A%A9%ED%95%98%EA%B8%B0/](https://www.popit.kr/go%EC%96%B8%EC%96%B4%EC%97%90%EC%84%9C-context-%EC%82%AC%EC%9A%A9%ED%95%98%EA%B8%B0/)
+* Understanding Golang Context : [https://devjin-blog.com/golang-context/](https://devjin-blog.com/golang-context/)
+* Go by Example: Context : [https://gobyexample.com/context](https://gobyexample.com/context)

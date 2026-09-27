@@ -65,7 +65,7 @@ Container Platform or Container Runtime performs operations of setting up Contai
 
 ## 2. References
 
-* [https://github.com/containernetworking/cni/blob/master/SPEC.md](https://github.com/containernetworking/cni/blob/master/SPEC.md)
-* [https://kubernetes-csi.github.io/docs/](https://kubernetes-csi.github.io/docs/)
-* [https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/](https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/)
+* Container Network Interface (CNI) Specification : [https://github.com/containernetworking/cni/blob/master/SPEC.md](https://github.com/containernetworking/cni/blob/master/SPEC.md)
+* Kubernetes CSI Developer Documentation : [https://kubernetes-csi.github.io/docs/](https://kubernetes-csi.github.io/docs/)
+* Kubernetes Network Plugins : [https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/](https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/)
 

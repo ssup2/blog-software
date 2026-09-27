@@ -63,5 +63,5 @@ Modify the `~/.zshrc` file with the content from [File 1] to configure plugins.
 
 ## 4. References
 
-* [https://gist.github.com/ganapativs/e571d9287cb74121d41bfe75a0c864d7](https://gist.github.com/ganapativs/e571d9287cb74121d41bfe75a0c864d7)
+* iTerm2 + oh-my-zsh + Pure theme + zsh plugins setup : [https://gist.github.com/ganapativs/e571d9287cb74121d41bfe75a0c864d7](https://gist.github.com/ganapativs/e571d9287cb74121d41bfe75a0c864d7)
 

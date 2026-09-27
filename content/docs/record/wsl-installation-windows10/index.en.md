@@ -81,5 +81,5 @@ Modify the `%APPDATA%\wsltty\config` file with the content from [File 2].
 
 ## 5. References
 
-* [https://github.com/mintty/wsltty](https://github.com/mintty/wsltty)
+* mintty/wsltty: Mintty as a Terminal for WSL : [https://github.com/mintty/wsltty](https://github.com/mintty/wsltty)
 

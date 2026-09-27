@@ -39,4 +39,4 @@ Grafana를 실행하고 접속을 확인한다.
 
 ## 3. 참조
 
-* [http://docs.grafana.org/installation/debian/](http://docs.grafana.org/installation/debian/)
+* Install Grafana on Debian or Ubuntu : [http://docs.grafana.org/installation/debian/](http://docs.grafana.org/installation/debian/)

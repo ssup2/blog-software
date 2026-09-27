@@ -66,6 +66,5 @@ Delete font files and the `consolas.sh` file.
 
 ## 6. References
 
-* [http://www.rushis.com/2013/03/consolas-font-on-ubuntu/](http://www.rushis.com/2013/03/consolas-font-on-ubuntu/)
-* [http://askubuntu.com/questions/191778/how-to-install-fonts-fast-and-easy](http://askubuntu.com/questions/191778/how-to-install-fonts-fast-and-easy)
+* How to install fonts fast and easy : [http://askubuntu.com/questions/191778/how-to-install-fonts-fast-and-easy](http://askubuntu.com/questions/191778/how-to-install-fonts-fast-and-easy)
 

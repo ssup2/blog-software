@@ -726,4 +726,4 @@ GROUP BY customer_id, product_category
 
 ## 15. 참고
 
-* [https://www.udemy.com/course/bigquery/](https://www.udemy.com/course/bigquery/)
+* Google BigQuery Udemy Course : [https://www.udemy.com/course/bigquery/](https://www.udemy.com/course/bigquery/)

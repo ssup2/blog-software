@@ -190,7 +190,7 @@ Straw 알고리즘은 모든 하위 Bucket을 대상으로 하위 Bucket ID를 H
 
 ## 3. 참조
 
-* [http://www.nminoru.jp/~nminoru/unix/ceph/rados-overview.html#mapping](http://www.nminoru.jp/~nminoru/unix/ceph/rados-overview.html#mapping)
-* [https://github.com/ceph/ceph/blob/master/src/crush/mapper.c](https://github.com/ceph/ceph/blob/master/src/crush/mapper.c)
-* [https://github.com/ceph/ceph/blob/master/src/crush/builder.c](https://github.com/ceph/ceph/blob/master/src/crush/builder.c)
-* [https://my.oschina.net/linuxhunter/blog/639016](https://my.oschina.net/linuxhunter/blog/639016)
+* RADOS Overview (RADOS, CRUSH and Placement Group) : [http://www.nminoru.jp/~nminoru/unix/ceph/rados-overview.html#mapping](http://www.nminoru.jp/~nminoru/unix/ceph/rados-overview.html#mapping)
+* ceph/src/crush/mapper.c : [https://github.com/ceph/ceph/blob/master/src/crush/mapper.c](https://github.com/ceph/ceph/blob/master/src/crush/mapper.c)
+* ceph/src/crush/builder.c : [https://github.com/ceph/ceph/blob/master/src/crush/builder.c](https://github.com/ceph/ceph/blob/master/src/crush/builder.c)
+* Ceph CRUSH Algorithm Analysis : [https://my.oschina.net/linuxhunter/blog/639016](https://my.oschina.net/linuxhunter/blog/639016)

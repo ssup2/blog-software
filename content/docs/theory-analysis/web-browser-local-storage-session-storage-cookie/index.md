@@ -28,5 +28,5 @@ Web Server에서 Cookie가 필요하는 이유는 Web Server가 Web Browser를 �
 
 ## 4. 참조
 
-* [http://www.gwtproject.org/doc/latest/DevGuideHtml5Storage.html](http://www.gwtproject.org/doc/latest/DevGuideHtml5Storage.html)
-* [https://krishankantsinghal.medium.com/local-storage-vs-session-storage-vs-cookie-22655ff75a8](https://krishankantsinghal.medium.com/local-storage-vs-session-storage-vs-cookie-22655ff75a8)
+* GWT Dev Guide - HTML5 Storage : [http://www.gwtproject.org/doc/latest/DevGuideHtml5Storage.html](http://www.gwtproject.org/doc/latest/DevGuideHtml5Storage.html)
+* Local Storage vs Session Storage vs Cookie : [https://krishankantsinghal.medium.com/local-storage-vs-session-storage-vs-cookie-22655ff75a8](https://krishankantsinghal.medium.com/local-storage-vs-session-storage-vs-cookie-22655ff75a8)

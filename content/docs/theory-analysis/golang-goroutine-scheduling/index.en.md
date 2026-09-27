@@ -78,13 +78,10 @@ One of the important elements in Goroutine Scheduling is that all Goroutines mus
 
 ## 2. References
 
-* [https://developpaper.com/deep-decryption-of-the-scheduler-of-go-language/](https://developpaper.com/deep-decryption-of-the-scheduler-of-go-language/)
-* [https://www.ardanlabs.com/blog/2018/08/scheduling-in-go-part2.html](https://www.ardanlabs.com/blog/2018/08/scheduling-in-go-part2.html)
-* [https://www.youtube.com/watch?v=-K11rY57K7k](https://www.youtube.com/watch?v=-K11rY57K7k)
-* [https://morsmachine.dk/netpoller](https://morsmachine.dk/netpoller)
-* [https://www.timqi.com/2020/05/15/how-does-gmp-scheduler-work/](https://www.timqi.com/2020/05/15/how-does-gmp-scheduler-work/)
-* [https://rakyll.org/scheduler/](https://rakyll.org/scheduler/)
-* [https://www.programmersought.com/article/42797781960/](https://www.programmersought.com/article/42797781960/)
-* [https://livebook.manning.com/book/go-in-action/chapter-6/11](https://livebook.manning.com/book/go-in-action/chapter-6/11)
-* [https://blog.puppyloper.com/menus/Golang/articles/Goroutine%EA%B3%BC%20Go%20scheduler](https://blog.puppyloper.com/menus/Golang/articles/Goroutine%EA%B3%BC%20Go%20scheduler)
-* [https://rokrokss.com/post/2020/01/01/go-scheduler.html](https://rokrokss.com/post/2020/01/01/go-scheduler.html)
+* Deep Decryption of the Go Language Scheduler : [https://developpaper.com/deep-decryption-of-the-scheduler-of-go-language/](https://developpaper.com/deep-decryption-of-the-scheduler-of-go-language/)
+* Scheduling In Go : Part II - Go Scheduler : [https://www.ardanlabs.com/blog/2018/08/scheduling-in-go-part2.html](https://www.ardanlabs.com/blog/2018/08/scheduling-in-go-part2.html)
+* Dmitry Vyukov - Go scheduler: Implementing language with lightweight concurrency (YouTube) : [https://www.youtube.com/watch?v=-K11rY57K7k](https://www.youtube.com/watch?v=-K11rY57K7k)
+* The Go netpoller : [https://morsmachine.dk/netpoller](https://morsmachine.dk/netpoller)
+* Go's work-stealing scheduler : [https://rakyll.org/scheduler/](https://rakyll.org/scheduler/)
+* Go in Action: Chapter 6. Concurrency : [https://livebook.manning.com/book/go-in-action/chapter-6/11](https://livebook.manning.com/book/go-in-action/chapter-6/11)
+* Go Scheduler : [https://rokrokss.com/post/2020/01/01/go-scheduler.html](https://rokrokss.com/post/2020/01/01/go-scheduler.html)

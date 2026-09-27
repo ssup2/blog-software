@@ -32,4 +32,4 @@ Linux에서 Network를 제어하고 조회하는 `ip`의 사용법을 정리한�
 
 ## 2. 참조
 
-* [https://access.redhat.com/sites/default/files/attachments/rh_ip_command_cheatsheet_1214_jcs_print.pdf](https://access.redhat.com/sites/default/files/attachments/rh_ip_command_cheatsheet_1214_jcs_print.pdf)
+* Red Hat ip Command Cheat Sheet : [https://access.redhat.com/sites/default/files/attachments/rh_ip_command_cheatsheet_1214_jcs_print.pdf](https://access.redhat.com/sites/default/files/attachments/rh_ip_command_cheatsheet_1214_jcs_print.pdf)

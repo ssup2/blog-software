@@ -35,7 +35,7 @@ Database Transaction의 4가지 속성을 나타내는 용어이다. CAP 이론�
 
 ## 4. 참조
 
-* [http://blog.thislongrun.com/2015/04/the-unclear-cp-vs-ca-case-in-cap.html](http://blog.thislongrun.com/2015/04/the-unclear-cp-vs-ca-case-in-cap.html)
-* [https://bravenewgeek.com/cap-and-the-illusion-of-choice/](https://bravenewgeek.com/cap-and-the-illusion-of-choice/)
-* [https://dba.stackexchange.com/questions/18435/cap-theorem-vs-base-nosql](https://dba.stackexchange.com/questions/18435/cap-theorem-vs-base-nosql)
-* [https://stackoverflow.com/questions/4851242/what-does-soft-state-in-base-mean](https://stackoverflow.com/questions/4851242/what-does-soft-state-in-base-mean)
+* The unclear CP vs. CA case in CAP : [http://blog.thislongrun.com/2015/04/the-unclear-cp-vs-ca-case-in-cap.html](http://blog.thislongrun.com/2015/04/the-unclear-cp-vs-ca-case-in-cap.html)
+* CAP and the Illusion of Choice : [https://bravenewgeek.com/cap-and-the-illusion-of-choice/](https://bravenewgeek.com/cap-and-the-illusion-of-choice/)
+* CAP Theorem vs BASE (NoSQL) : [https://dba.stackexchange.com/questions/18435/cap-theorem-vs-base-nosql](https://dba.stackexchange.com/questions/18435/cap-theorem-vs-base-nosql)
+* What does soft state in BASE mean? : [https://stackoverflow.com/questions/4851242/what-does-soft-state-in-base-mean](https://stackoverflow.com/questions/4851242/what-does-soft-state-in-base-mean)

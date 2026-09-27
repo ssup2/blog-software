@@ -82,10 +82,10 @@ NIC에서 TCP/UDP Checksum을 수행하지 않도록 TCP/UDP Checksum Offload를
 
 ## 4. 참조
 
-* [https://github.com/kubernetes/kubernetes/pull/92035](https://github.com/kubernetes/kubernetes/pull/92035)
-* [https://github.com/kubernetes/kubernetes/issues/88986#issuecomment-640929804](https://github.com/kubernetes/kubernetes/issues/88986#issuecomment-640929804)
-* [https://github.com/kubernetes/kubernetes/issues/90854](https://github.com/kubernetes/kubernetes/issues/90854)
-* [https://github.com/kubernetes/kubernetes/pull/78547](https://github.com/kubernetes/kubernetes/pull/78547)
-* [https://tech.xing.com/a-reason-for-unexplained-connection-timeouts-on-kubernetes-docker-abd041cf7e02](https://tech.xing.com/a-reason-for-unexplained-connection-timeouts-on-kubernetes-docker-abd041cf7e02)
-* [https://www.spinics.net/lists/netdev/msg648256.html](https://www.spinics.net/lists/netdev/msg648256.html)
-* [https://github.com/kubernetes/kubernetes/tree/master/CHANGELOG](https://github.com/kubernetes/kubernetes/tree/master/CHANGELOG)
+* kubelet, kube-proxy: unmark packets before masquerading them : [https://github.com/kubernetes/kubernetes/pull/92035](https://github.com/kubernetes/kubernetes/pull/92035)
+* Bare Metal K8S 63 Second Service Routing Delay : [https://github.com/kubernetes/kubernetes/issues/88986#issuecomment-640929804](https://github.com/kubernetes/kubernetes/issues/88986#issuecomment-640929804)
+* Additional 1s latency in host -> service IP -> pod when upgrading to 1.18.1 on RHEL 8.1 : [https://github.com/kubernetes/kubernetes/issues/90854](https://github.com/kubernetes/kubernetes/issues/90854)
+* Make iptables and ipvs modes of kube-proxy MASQUERADE --random-fully if possible : [https://github.com/kubernetes/kubernetes/pull/78547](https://github.com/kubernetes/kubernetes/pull/78547)
+* A reason for unexplained connection timeouts on Kubernetes/Docker : [https://tech.xing.com/a-reason-for-unexplained-connection-timeouts-on-kubernetes-docker-abd041cf7e02](https://tech.xing.com/a-reason-for-unexplained-connection-timeouts-on-kubernetes-docker-abd041cf7e02)
+* netdev mailing list post : [https://www.spinics.net/lists/netdev/msg648256.html](https://www.spinics.net/lists/netdev/msg648256.html)
+* Kubernetes CHANGELOG : [https://github.com/kubernetes/kubernetes/tree/master/CHANGELOG](https://github.com/kubernetes/kubernetes/tree/master/CHANGELOG)

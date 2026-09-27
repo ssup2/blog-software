@@ -62,8 +62,7 @@ Lazy Loading은 의미 그대로 Data가 **실제 이용되는 순간 Data Loadi
 
 ## 3. 참조
 
-* [https://www.imperva.com/learn/performance/lazy-loading/](https://www.imperva.com/learn/performance/lazy-loading/)
-* [https://stackoverflow.com/questions/31366236/lazy-loading-vs-eager-loading](https://stackoverflow.com/questions/31366236/lazy-loading-vs-eager-loading)
-* [https://velog.io/@bread-dd/JPA%EB%8A%94-%EC%99%9C-%EC%A7%80%EC%97%B0-%EB%A1%9C%EB%94%A9%EC%9D%84-%EC%82%AC%EC%9A%A9%ED%95%A0%EA%B9%8C](https://velog.io/@bread-dd/JPA%EB%8A%94-%EC%99%9C-%EC%A7%80%EC%97%B0-%EB%A1%9C%EB%94%A9%EC%9D%84-%EC%82%AC%EC%9A%A9%ED%95%A0%EA%B9%8C)
-* [https://stackoverflow.com/questions/2990799/difference-between-fetchtype-lazy-and-eager-in-java-persistence-api](https://stackoverflow.com/questions/2990799/difference-between-fetchtype-lazy-and-eager-in-java-persistence-api)
-* [https://www.baeldung.com/hibernate-lazy-eager-loading](https://www.baeldung.com/hibernate-lazy-eager-loading)
+* What is Lazy Loading - Lazy vs. Eager Loading : [https://www.imperva.com/learn/performance/lazy-loading/](https://www.imperva.com/learn/performance/lazy-loading/)
+* Lazy loading vs eager loading (Stack Overflow) : [https://stackoverflow.com/questions/31366236/lazy-loading-vs-eager-loading](https://stackoverflow.com/questions/31366236/lazy-loading-vs-eager-loading)
+* Difference between FetchType LAZY and EAGER in Java Persistence API (Stack Overflow) : [https://stackoverflow.com/questions/2990799/difference-between-fetchtype-lazy-and-eager-in-java-persistence-api](https://stackoverflow.com/questions/2990799/difference-between-fetchtype-lazy-and-eager-in-java-persistence-api)
+* Eager/Lazy Loading in Hibernate : [https://www.baeldung.com/hibernate-lazy-eager-loading](https://www.baeldung.com/hibernate-lazy-eager-loading)

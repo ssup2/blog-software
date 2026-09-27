@@ -87,6 +87,6 @@ Create and verify the Storage Class.
 
 ## 3. References
 
-* [https://github.com/kubernetes-incubator/external-storage/tree/master/ceph/rbd](https://github.com/kubernetes-incubator/external-storage/tree/master/ceph/rbd)
-* [http://blog.51cto.com/ygqygq2/2163656](http://blog.51cto.com/ygqygq2/2163656)
+* Kubernetes external-storage Ceph RBD Provisioner : [https://github.com/kubernetes-incubator/external-storage/tree/master/ceph/rbd](https://github.com/kubernetes-incubator/external-storage/tree/master/ceph/rbd)
+* Kubernetes Ceph RBD StorageClass Guide : [http://blog.51cto.com/ygqygq2/2163656](http://blog.51cto.com/ygqygq2/2163656)
 

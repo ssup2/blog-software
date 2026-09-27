@@ -46,6 +46,6 @@ TLS, SSL 인증서를 분석한다.
 
 ## 2. 참조
 
-* [https://eunhyee.tistory.com/228](https://eunhyee.tistory.com/228)
-* [https://knowledge.digicert.com/solution/SO9440.html](https://knowledge.digicert.com/solution/SO9440.html)
-* [https://www.digicert.com/blog/how-to-choose-the-right-type-of-tls-ssl-certificate](https://www.digicert.com/blog/how-to-choose-the-right-type-of-tls-ssl-certificate)
+* Types of SSL/TLS Certificates : [https://eunhyee.tistory.com/228](https://eunhyee.tistory.com/228)
+* What is a Multi-Domain (SAN) Certificate? : [https://knowledge.digicert.com/solution/SO9440.html](https://knowledge.digicert.com/solution/SO9440.html)
+* How to Choose the Right Type of TLS/SSL Certificate : [https://www.digicert.com/blog/how-to-choose-the-right-type-of-tls-ssl-certificate](https://www.digicert.com/blog/how-to-choose-the-right-type-of-tls-ssl-certificate)

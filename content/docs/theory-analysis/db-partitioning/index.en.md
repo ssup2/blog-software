@@ -40,10 +40,10 @@ In general, **DB Sharding** means a technique that horizontally splits tables th
 
 ## 2. References
 
-* [https://www.digitalocean.com/community/tutorials/understanding-database-sharding](https://www.digitalocean.com/community/tutorials/understanding-database-sharding)
-* [https://blog.yugabyte.com/how-data-sharding-works-in-a-distributed-sql-database/](https://blog.yugabyte.com/how-data-sharding-works-in-a-distributed-sql-database/)
-* [https://hazelcast.com/glossary/sharding/](https://hazelcast.com/glossary/sharding/)
-* [https://hevodata.com/learn/understanding-mysql-sharding-simplified/](https://hevodata.com/learn/understanding-mysql-sharding-simplified/)
-* [https://devopedia.org/database-sharding](https://devopedia.org/database-sharding)
-* [https://woowabros.github.io/experience/2020/07/06/db-sharding.html](https://woowabros.github.io/experience/2020/07/06/db-sharding.html)
-* [https://soye0n.tistory.com/267](https://soye0n.tistory.com/267)
+* Understanding Database Sharding : [https://www.digitalocean.com/community/tutorials/understanding-database-sharding](https://www.digitalocean.com/community/tutorials/understanding-database-sharding)
+* How Data Sharding Works in a Distributed SQL Database : [https://blog.yugabyte.com/how-data-sharding-works-in-a-distributed-sql-database/](https://blog.yugabyte.com/how-data-sharding-works-in-a-distributed-sql-database/)
+* What is Database Sharding? : [https://hazelcast.com/glossary/sharding/](https://hazelcast.com/glossary/sharding/)
+* Understanding MySQL Sharding : [https://hevodata.com/learn/understanding-mysql-sharding-simplified/](https://hevodata.com/learn/understanding-mysql-sharding-simplified/)
+* Database Sharding : [https://devopedia.org/database-sharding](https://devopedia.org/database-sharding)
+* DB분산처리를 위한 sharding : [https://woowabros.github.io/experience/2020/07/06/db-sharding.html](https://woowabros.github.io/experience/2020/07/06/db-sharding.html)
+* DB 파티셔닝 (Partitioning) 개념 : [https://soye0n.tistory.com/267](https://soye0n.tistory.com/267)

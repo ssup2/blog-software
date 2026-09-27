@@ -58,6 +58,4 @@ Even if items are added, removed, or item weights are changed in Straw, only sub
 
 ## 3. References
 
-* [https://ceph.com/wp-content/uploads/2016/08/weil-crush-sc06.pdf](https://ceph.com/wp-content/uploads/2016/08/weil-crush-sc06.pdf)
-* [http://docs.ceph.com/docs/jewel/rados/operations/crush-map/](http://docs.ceph.com/docs/jewel/rados/operations/crush-map/)
-* [http://www.lamsade.dauphine.fr/~litwin/cours98/Doc-cours-clouds/ceph-2009-02%5B1%5D.pdf](http://www.lamsade.dauphine.fr/~litwin/cours98/Doc-cours-clouds/ceph-2009-02%5B1%5D.pdf)
+* Ceph Presentation Slides : [http://www.lamsade.dauphine.fr/~litwin/cours98/Doc-cours-clouds/ceph-2009-02%5B1%5D.pdf](http://www.lamsade.dauphine.fr/~litwin/cours98/Doc-cours-clouds/ceph-2009-02%5B1%5D.pdf)

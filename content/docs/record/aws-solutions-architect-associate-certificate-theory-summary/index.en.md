@@ -1703,7 +1703,7 @@ title: AWS Solutions Architect Associate Certificate Theory Summary
 
 ## 21. Reference
 
-* [https://www.udemy.com/course/best-aws-certified-solutions-architect-associate](https://www.udemy.com/course/best-aws-certified-solutions-architect-associate)
+* AWS Certified Solutions Architect Associate Course (Udemy) : [https://www.udemy.com/course/best-aws-certified-solutions-architect-associate](https://www.udemy.com/course/best-aws-certified-solutions-architect-associate)
 * EC2 Instance vs AMI : [https://cloudguardians.medium.com/ec2-ami-%EC%99%80-snapshot-%EC%9D%98-%EC%B0%A8%EC%9D%B4%EC%A0%90-db8dc5682eac](https://cloudguardians.medium.com/ec2-ami-%EC%99%80-snapshot-%EC%9D%98-%EC%B0%A8%EC%9D%B4%EC%A0%90-db8dc5682eac)
 * Route53 Alias : [https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/resource-record-sets-choosing-alias-non-alias.html](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/resource-record-sets-choosing-alias-non-alias.html)
 * Route53 Alias : [https://serverfault.com/questions/906615/what-is-an-amazon-route53-alias-dns-record](https://serverfault.com/questions/906615/what-is-an-amazon-route53-alias-dns-record)

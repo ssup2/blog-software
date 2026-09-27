@@ -42,6 +42,6 @@ Docker, Docker Compose 설치 및 설정한다. WSL Ubuntu를 실행하여 Docke
 
 ## 4. 참조
 
-* [https://nickjanetakis.com/blog/setting-up-docker-for-windows-and-wsl-to-work-flawlessly](https://nickjanetakis.com/blog/setting-up-docker-for-windows-and-wsl-to-work-flawlessly)
-* [https://forums.docker.com/t/connecting-to-containers-ip-address/18817](https://forums.docker.com/t/connecting-to-containers-ip-address/18817)
-* [https://webdir.tistory.com/543](https://webdir.tistory.com/543)
+* Setting Up Docker for Windows and WSL to Work Flawlessly : [https://nickjanetakis.com/blog/setting-up-docker-for-windows-and-wsl-to-work-flawlessly](https://nickjanetakis.com/blog/setting-up-docker-for-windows-and-wsl-to-work-flawlessly)
+* Connecting to containers IP address - Docker Community Forums : [https://forums.docker.com/t/connecting-to-containers-ip-address/18817](https://forums.docker.com/t/connecting-to-containers-ip-address/18817)
+* 사용자계정과 권한 - WSL : [https://webdir.tistory.com/543](https://webdir.tistory.com/543)

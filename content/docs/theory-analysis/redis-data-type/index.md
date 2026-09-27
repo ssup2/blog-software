@@ -30,7 +30,7 @@ Hashes Type은 문자열로 구성된 Key-Value를 저장하는 Type이다. `HSE
 
 ## 2. 참조
 
-* [https://redis.io/topics/data-types](https://redis.io/topics/data-types)
-* [https://redis.io/topics/data-types-intro](https://redis.io/topics/data-types-intro)
-* [https://kimpaper.github.io/2016/07/27/redis-datatype/](https://kimpaper.github.io/2016/07/27/redis-datatype/)
-* [https://stackoverflow.com/questions/15216897/how-does-redis-claim-o1-time-for-key-lookup](https://stackoverflow.com/questions/15216897/how-does-redis-claim-o1-time-for-key-lookup)
+* Redis Data Types : [https://redis.io/topics/data-types](https://redis.io/topics/data-types)
+* Introduction to Redis Data Types : [https://redis.io/topics/data-types-intro](https://redis.io/topics/data-types-intro)
+* redis data type 종류 : [https://kimpaper.github.io/2016/07/27/redis-datatype/](https://kimpaper.github.io/2016/07/27/redis-datatype/)
+* How does Redis claim O(1) time for key lookup : [https://stackoverflow.com/questions/15216897/how-does-redis-claim-o1-time-for-key-lookup](https://stackoverflow.com/questions/15216897/how-does-redis-claim-o1-time-for-key-lookup)

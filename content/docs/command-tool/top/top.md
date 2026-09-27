@@ -90,6 +90,6 @@ KiB Swap:  8265724 total,        0 used,  8265724 free.   541164 cached Mem
 
 ## 2. 참조
 
-* [https://kldp.org/node/65018](https://kldp.org/node/65018)
-* [http://serverfault.com/questions/230495/what-does-st-mean-in-top](http://serverfault.com/questions/230495/what-does-st-mean-in-top)
-* [https://www.tecmint.com/set-linux-process-priority-using-nice-and-renice-commands/](https://www.tecmint.com/set-linux-process-priority-using-nice-and-renice-commands/)
+* top 에서 ni, hi, si, wa 필드의 의미가? : [https://kldp.org/node/65018](https://kldp.org/node/65018)
+* What does 'st' mean in top? : [http://serverfault.com/questions/230495/what-does-st-mean-in-top](http://serverfault.com/questions/230495/what-does-st-mean-in-top)
+* How to Change Priority of a Running Process in Linux : [https://www.tecmint.com/set-linux-process-priority-using-nice-and-renice-commands/](https://www.tecmint.com/set-linux-process-priority-using-nice-and-renice-commands/)

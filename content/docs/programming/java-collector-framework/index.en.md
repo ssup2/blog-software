@@ -110,9 +110,8 @@ A Class that implements the SortedMap Interface using a **Red-Black Tree** based
 
 ## 3. References
 
-* Java Collection Cheat Sheet : [http://pierrchen.blogspot.kr/2014/03/java-collections-framework-cheat-sheet.html](http://pierrchen.blogspot.kr/2014/03/java-collections-framework-cheat-sheet.html)
-* [http://java-latte.blogspot.kr/2013/09/java-collection-arraylistvectorlinkedli.html](http://java-latte.blogspot.kr/2013/09/java-collection-arraylistvectorlinkedli.html)
-* [https://docs.oracle.com/javase/tutorial/collections/interfaces/index.html](https://docs.oracle.com/javase/tutorial/collections/interfaces/index.html)
-* [https://stackoverflow.com/questions/12646404/concurrenthashmap-and-hashtable-in-java](https://stackoverflow.com/questions/12646404/concurrenthashmap-and-hashtable-in-java)
-* [http://www.programering.com/a/MDMyMzMwATQ.html](http://www.programering.com/a/MDMyMzMwATQ.html)
+* Java Collection: ArrayList, Vector, LinkedList, HashSet, LinkedHashSet, TreeSet, HashMap, Hashtable : [http://java-latte.blogspot.kr/2013/09/java-collection-arraylistvectorlinkedli.html](http://java-latte.blogspot.kr/2013/09/java-collection-arraylistvectorlinkedli.html)
+* Lesson: Interfaces (The Java Tutorials) : [https://docs.oracle.com/javase/tutorial/collections/interfaces/index.html](https://docs.oracle.com/javase/tutorial/collections/interfaces/index.html)
+* ConcurrentHashMap and Hashtable in Java : [https://stackoverflow.com/questions/12646404/concurrenthashmap-and-hashtable-in-java](https://stackoverflow.com/questions/12646404/concurrenthashmap-and-hashtable-in-java)
+* Java Collections Framework : [http://www.programering.com/a/MDMyMzMwATQ.html](http://www.programering.com/a/MDMyMzMwATQ.html)
 

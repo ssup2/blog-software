@@ -38,13 +38,12 @@ RabbitMQ Cluster는 동작중에도 RabbitMQ를 추가할 수 있다. RabbitMQ�
 
 ## 4. 참조
 
-* [https://www.rabbitmq.com/clustering.html](https://www.rabbitmq.com/clustering.html)
-* [https://www.rabbitmq.com/ha.html](https://www.rabbitmq.com/ha.html)
-* [https://www.rabbitmq.com/cluster-formation.html](https://www.rabbitmq.com/cluster-formation.html)
-* [https://www.rabbitmq.com/distributed.html](https://www.rabbitmq.com/distributed.html)
-* [https://www.rabbitmq.com/reliability.html](https://www.rabbitmq.com/reliability.html)
-* [https://www.rabbitmq.com/confirms.html](https://www.rabbitmq.com/confirms.html)
-* [https://m.blog.naver.com/tmondev/221051503100](https://m.blog.naver.com/tmondev/221051503100)
-* [https://www.slideshare.net/visualdensity/rabbit-fairlyindepth](https://www.slideshare.net/visualdensity/rabbit-fairlyindepth)
-* [https://tech.labs.oliverwyman.com/blog/2015/12/18/the-end-to-end-principle-and-rabbitmq-queue-mirroring/](https://tech.labs.oliverwyman.com/blog/2015/12/18/the-end-to-end-principle-and-rabbitmq-queue-mirroring/)
-* [https://github.com/Ayanda-D/rabbitmq-queue-master-balancer](https://github.com/Ayanda-D/rabbitmq-queue-master-balancer)
+* Clustering Guide : [https://www.rabbitmq.com/clustering.html](https://www.rabbitmq.com/clustering.html)
+* Classic Queue Mirroring : [https://www.rabbitmq.com/ha.html](https://www.rabbitmq.com/ha.html)
+* Cluster Formation and Peer Discovery : [https://www.rabbitmq.com/cluster-formation.html](https://www.rabbitmq.com/cluster-formation.html)
+* Distributed RabbitMQ : [https://www.rabbitmq.com/distributed.html](https://www.rabbitmq.com/distributed.html)
+* Reliability Guide : [https://www.rabbitmq.com/reliability.html](https://www.rabbitmq.com/reliability.html)
+* Consumer Acknowledgements and Publisher Confirms : [https://www.rabbitmq.com/confirms.html](https://www.rabbitmq.com/confirms.html)
+* RabbitMQ로 메시지 손실 최소화 하는 법(1) : [https://m.blog.naver.com/tmondev/221051503100](https://m.blog.naver.com/tmondev/221051503100)
+* RabbitMQ Fairly In-depth - SlideShare : [https://www.slideshare.net/visualdensity/rabbit-fairlyindepth](https://www.slideshare.net/visualdensity/rabbit-fairlyindepth)
+* rabbitmq-queue-master-balancer - GitHub : [https://github.com/Ayanda-D/rabbitmq-queue-master-balancer](https://github.com/Ayanda-D/rabbitmq-queue-master-balancer)

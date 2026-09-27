@@ -17,4 +17,4 @@ title: C RELOC_HIDE() Macro 함수
 
 ## 2. 참조
 
-* [http://studyfoss.egloos.com/viewer/5374731](http://studyfoss.egloos.com/viewer/5374731)
+* RELOC_HIDE() Macro : [http://studyfoss.egloos.com/viewer/5374731](http://studyfoss.egloos.com/viewer/5374731)

@@ -304,17 +304,14 @@ NGINX와 같은 L7 Proxy Server는 URL기반 Caching 기법을 제공하는데, 
 
 ## 4. 참조
 
-* [https://tech.kakao.com/2019/08/01/graphql-basic/](https://tech.kakao.com/2019/08/01/graphql-basic/)
-* [https://hwasurr.io/api/rest-graphql-differences/](https://hwasurr.io/api/rest-graphql-differences/)
-* [https://k0102575.github.io/articles/2020-08/graphql](https://k0102575.github.io/articles/2020-08/graphql)
-* [https://www.holaxprogramming.com/2018/01/20/graphql-vs-restful-api/](https://www.holaxprogramming.com/2018/01/20/graphql-vs-restful-api/)
-* [https://fe-developers.kakaoent.com/2022/220113-designing-graphql-mutation/](https://fe-developers.kakaoent.com/2022/220113-designing-graphql-mutation/)
-* [https://kotlinworld.com/331](https://kotlinworld.com/331)
+* GraphQL 개념잡기 : [https://tech.kakao.com/2019/08/01/graphql-basic/](https://tech.kakao.com/2019/08/01/graphql-basic/)
+* GraphQL 과 Rest API : [https://k0102575.github.io/articles/2020-08/graphql](https://k0102575.github.io/articles/2020-08/graphql)
+* GraphQL Mutation 설계하기 : [https://fe-developers.kakaoent.com/2022/220113-designing-graphql-mutation/](https://fe-developers.kakaoent.com/2022/220113-designing-graphql-mutation/)
+* GraphQL의 메서드 query, mutation, subscription : [https://kotlinworld.com/331](https://kotlinworld.com/331)
 * Query, Mutation : [https://graphql-kr.github.io/learn/queries/](https://graphql-kr.github.io/learn/queries/)
 * Subscription : [https://www.daleseo.com/graphql-apollo-server-subscriptions/](https://www.daleseo.com/graphql-apollo-server-subscriptions/)
 * with HTTP : [https://graphql-kr.github.io/learn/serving-over-http/](https://graphql-kr.github.io/learn/serving-over-http/)
 * Introspection : [https://graphql-kr.github.io/learn/introspection/](https://graphql-kr.github.io/learn/introspection/)
 * Introspection : [https://hasura.io/learn/graphql/intro-graphql/introspection/](https://hasura.io/learn/graphql/intro-graphql/introspection/)
 * Online Demo : [https://lucasconstantino.github.io/graphiql-online/](https://lucasconstantino.github.io/graphiql-online/)
-* Online Demo : [https://demo.saleor.io/graphql/](https://demo.saleor.io/graphql/)
 * Online Demo : [https://docs.github.com/en/graphql/overview/explorer](https://docs.github.com/en/graphql/overview/explorer)

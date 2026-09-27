@@ -20,5 +20,5 @@ ClusterAPI는 User Cluster의 각 Node들에게 Kubernetes Cluster 구성에 필
 
 ## 2. 참조
 
-* [https://cluster-api.sigs.k8s.io/](https://cluster-api.sigs.k8s.io/)
-* [https://github.com/kubernetes-sigs/cluster-api-provider-openstack](https://github.com/kubernetes-sigs/cluster-api-provider-openstack)
+* The Cluster API Book : [https://cluster-api.sigs.k8s.io/](https://cluster-api.sigs.k8s.io/)
+* kubernetes-sigs/cluster-api-provider-openstack : [https://github.com/kubernetes-sigs/cluster-api-provider-openstack](https://github.com/kubernetes-sigs/cluster-api-provider-openstack)

@@ -12,5 +12,5 @@ Cloud-Native를 분석한다.
 
 ## 2. 참조
 
-* [https://stackify.com/cloud-native/](https://stackify.com/cloud-native/)
-* [https://pivotal.io/de/cloud-native](https://pivotal.io/de/cloud-native)
+* What is Cloud-Native? Is It Hype or the Future : [https://stackify.com/cloud-native/](https://stackify.com/cloud-native/)
+* Cloud Native - Pivotal : [https://pivotal.io/de/cloud-native](https://pivotal.io/de/cloud-native)

@@ -48,10 +48,10 @@ Kubernetes v1.16.0 Version부터는 본 Issue를 해결하기 위해서, `iptabl
 
 ## 4. 참조
 
-* [https://tech.xing.com/a-reason-for-unexplained-connection-timeouts-on-kubernetes-docker-abd041cf7e02](https://tech.xing.com/a-reason-for-unexplained-connection-timeouts-on-kubernetes-docker-abd041cf7e02)
-* [https://github.com/kubernetes/kubernetes/pull/78547](https://github.com/kubernetes/kubernetes/pull/78547)
-* [https://manpages.debian.org/unstable/iptables/iptables-extensions.8.en.html](https://manpages.debian.org/unstable/iptables/iptables-extensions.8.en.html)
-* [https://patchwork.ozlabs.org/project/netfilter-devel/patch/1388963586-5049-7-git-send-email-pablo@netfilter.org/](https://patchwork.ozlabs.org/project/netfilter-devel/patch/1388963586-5049-7-git-send-email-pablo@netfilter.org/)
-* [https://lwn.net/Articles/746343/](https://lwn.net/Articles/746343/)
-* [https://github.com/coreos/flannel/commit/0d7b99460b81f98df43da183258edf56c4abf854](https://github.com/coreos/flannel/commit/0d7b99460b81f98df43da183258edf56c4abf854)
-* [https://github.com/cilium/cilium/commit/4e39def13bca568a21087238877fbc60f8751567](https://github.com/cilium/cilium/commit/4e39def13bca568a21087238877fbc60f8751567)
+* A reason for unexplained connection timeouts on Kubernetes/Docker : [https://tech.xing.com/a-reason-for-unexplained-connection-timeouts-on-kubernetes-docker-abd041cf7e02](https://tech.xing.com/a-reason-for-unexplained-connection-timeouts-on-kubernetes-docker-abd041cf7e02)
+* Make iptables and ipvs modes of kube-proxy MASQUERADE --random-fully if possible : [https://github.com/kubernetes/kubernetes/pull/78547](https://github.com/kubernetes/kubernetes/pull/78547)
+* iptables-extensions(8) - Debian Manpages : [https://manpages.debian.org/unstable/iptables/iptables-extensions.8.en.html](https://manpages.debian.org/unstable/iptables/iptables-extensions.8.en.html)
+* netfilter: nf_nat: add full port randomization support : [https://patchwork.ozlabs.org/project/netfilter-devel/patch/1388963586-5049-7-git-send-email-pablo@netfilter.org/](https://patchwork.ozlabs.org/project/netfilter-devel/patch/1388963586-5049-7-git-send-email-pablo@netfilter.org/)
+* iptables 1.6.2 release : [https://lwn.net/Articles/746343/](https://lwn.net/Articles/746343/)
+* flannel: Use iptables --random-fully when available : [https://github.com/coreos/flannel/commit/0d7b99460b81f98df43da183258edf56c4abf854](https://github.com/coreos/flannel/commit/0d7b99460b81f98df43da183258edf56c4abf854)
+* cilium: Enable configuration of iptables --random-fully : [https://github.com/cilium/cilium/commit/4e39def13bca568a21087238877fbc60f8751567](https://github.com/cilium/cilium/commit/4e39def13bca568a21087238877fbc60f8751567)

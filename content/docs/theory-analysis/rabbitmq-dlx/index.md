@@ -33,4 +33,4 @@ Dead Letter가 된 Message의 `x-death` Header에는 Message가 Dead Letter가 �
 
 ## 2. 참조
 
-* [https://www.rabbitmq.com/dlx.html](https://www.rabbitmq.com/dlx.html)
+* Dead Letter Exchanges : [https://www.rabbitmq.com/dlx.html](https://www.rabbitmq.com/dlx.html)

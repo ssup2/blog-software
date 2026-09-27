@@ -34,7 +34,3 @@ $ ldconfig
 
 Build and install LXC.
 
-## 4. References
-
-* [https://github.com/lxc/lxc/blob/master/INSTALL](https://github.com/lxc/lxc/blob/master/INSTALL)
-

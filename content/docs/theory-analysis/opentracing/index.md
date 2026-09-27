@@ -46,9 +46,9 @@ OpenTracing을 지원하는 Protocol은 [Trace-Context HTTP Headers](https://git
 
 ## 3. 참조
 
-* [https://opentracing.io/docs/overview/](https://opentracing.io/docs/overview/)
-* [https://opentracing.io/docs/overview/spans/](https://opentracing.io/docs/overview/spans/)
-* [https://github.com/opentracing/specification/blob/master/specification.md](https://github.com/opentracing/specification/blob/master/specification.md)
-* [https://github.com/opentracing/specification/blob/master/rfc/trace-identifiers.md](https://github.com/opentracing/specification/blob/master/rfc/trace-identifiers.md)
-* [https://github.com/openzipkin/b3-propagation](https://github.com/openzipkin/b3-propagation)
-* [https://github.com/w3c/trace-context/tree/main/spec](https://github.com/w3c/trace-context/tree/main/spec)
+* OpenTracing Overview : [https://opentracing.io/docs/overview/](https://opentracing.io/docs/overview/)
+* OpenTracing Spans : [https://opentracing.io/docs/overview/spans/](https://opentracing.io/docs/overview/spans/)
+* OpenTracing Specification : [https://github.com/opentracing/specification/blob/master/specification.md](https://github.com/opentracing/specification/blob/master/specification.md)
+* OpenTracing Trace Identifiers RFC : [https://github.com/opentracing/specification/blob/master/rfc/trace-identifiers.md](https://github.com/opentracing/specification/blob/master/rfc/trace-identifiers.md)
+* openzipkin/b3-propagation : [https://github.com/openzipkin/b3-propagation](https://github.com/openzipkin/b3-propagation)
+* W3C Trace Context Specification : [https://github.com/w3c/trace-context/tree/main/spec](https://github.com/w3c/trace-context/tree/main/spec)

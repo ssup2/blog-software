@@ -32,8 +32,8 @@ SNMP Protocol의 Message Type에는 다음과 같은 종류가 존재한다. Mes
 
 ## 2. 참조
 
-* [https://www.joinc.co.kr/w/Site/SNMP/document/Intro-net-snmp](https://www.joinc.co.kr/w/Site/SNMP/document/Intro-net-snmp)
-* [https://blog.naver.com/koromoon/120183340921](https://blog.naver.com/koromoon/120183340921)
-* [https://www.ittsystems.com/what-is-snmp/](https://www.ittsystems.com/what-is-snmp/)
-* [https://www.comparitech.com/net-admin/snmp-mibs-oids-explained/](https://www.comparitech.com/net-admin/snmp-mibs-oids-explained/)
-* [https://www.paessler.com/it-explained/snmp](https://www.paessler.com/it-explained/snmp)
+* Net-SNMP Introduction (Joinc) : [https://www.joinc.co.kr/w/Site/SNMP/document/Intro-net-snmp](https://www.joinc.co.kr/w/Site/SNMP/document/Intro-net-snmp)
+* SNMP Overview (KOROMOON) : [https://blog.naver.com/koromoon/120183340921](https://blog.naver.com/koromoon/120183340921)
+* What is SNMP? Definition of the Protocol and its Functions : [https://www.ittsystems.com/what-is-snmp/](https://www.ittsystems.com/what-is-snmp/)
+* SNMP MIBs & SNMP OIDs Explained : [https://www.comparitech.com/net-admin/snmp-mibs-oids-explained/](https://www.comparitech.com/net-admin/snmp-mibs-oids-explained/)
+* What Is SNMP? - IT Explained (PRTG) : [https://www.paessler.com/it-explained/snmp](https://www.paessler.com/it-explained/snmp)

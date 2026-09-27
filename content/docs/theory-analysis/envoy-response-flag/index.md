@@ -54,5 +54,5 @@ Enovy의 Response Flag를 정리한다.
 
 ## 2. 참조
 
-* [https://www.envoyproxy.io/docs/envoy/latest/configuration/observability/access_log/usage](https://www.envoyproxy.io/docs/envoy/latest/configuration/observability/access_log/usage)
+* Envoy Access Logging : [https://www.envoyproxy.io/docs/envoy/latest/configuration/observability/access_log/usage](https://www.envoyproxy.io/docs/envoy/latest/configuration/observability/access_log/usage)
 

@@ -20,4 +20,4 @@ Write Lock이라고도 불리며 Critical Section 진입 후 Write 동작을 수
 
 ## 3. 참조
 
-* [http://jeong-pro.tistory.com/94](http://jeong-pro.tistory.com/94)
+* 데이터베이스 - Exclusive lock과 Shared lock의 차이 : [http://jeong-pro.tistory.com/94](http://jeong-pro.tistory.com/94)

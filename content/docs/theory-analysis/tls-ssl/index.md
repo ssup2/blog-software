@@ -48,9 +48,8 @@ Root CA의 Private Key를 이용하여 하위 CA가 발행한 Certificate에 서
 
 ## 2. 참조
 
-* [https://en.wikipedia.org/wiki/Transport-Layer-Security](https://en.wikipedia.org/wiki/Transport-Layer-Security)
-* [https://sites.google.com/site/amitsciscozone/home/security/ssl-connection-setup](https://sites.google.com/site/amitsciscozone/home/security/ssl-connection-setup)
-* [https://www.ibm.com/support/knowledgecenter/en/SSFKSJ-7.1.0/com.ibm.mq.doc/sy10660\-.htm](https://www.ibm.com/support/knowledgecenter/en/SSFKSJ-7.1.0/com.ibm.mq.doc/sy10660\-.htm)
-* [https://wiki.kldp.org/HOWTO/html/SSL-Certificates-HOWTO/x70.html](https://wiki.kldp.org/HOWTO/html/SSL-Certificates-HOWTO/x70.html)
-* [http://whitelka.tistory.com/103](http://whitelka.tistory.com/103)
-* [https://rsec.kr/?p=455](https://rsec.kr/?p=455)
+* Transport Layer Security - Wikipedia : [https://en.wikipedia.org/wiki/Transport_Layer_Security](https://en.wikipedia.org/wiki/Transport_Layer_Security)
+* An overview of the SSL or TLS handshake : [https://www.ibm.com/support/knowledgecenter/en/SSFKSJ-7.1.0/com.ibm.mq.doc/sy10660\-.htm](https://www.ibm.com/support/knowledgecenter/en/SSFKSJ-7.1.0/com.ibm.mq.doc/sy10660\-.htm)
+* SSL Certificates HOWTO : [https://wiki.kldp.org/HOWTO/html/SSL-Certificates-HOWTO/x70.html](https://wiki.kldp.org/HOWTO/html/SSL-Certificates-HOWTO/x70.html)
+* TLS 프로토콜 정리 : [http://whitelka.tistory.com/103](http://whitelka.tistory.com/103)
+* SSL/TLS Overview : [https://rsec.kr/?p=455](https://rsec.kr/?p=455)

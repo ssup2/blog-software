@@ -81,4 +81,4 @@ AllowSetSelection=yes
 
 ## 5. 참고
 
-* [https://github.com/mintty/wsltty](https://github.com/mintty/wsltty)
+* mintty/wsltty: Mintty as a Terminal for WSL : [https://github.com/mintty/wsltty](https://github.com/mintty/wsltty)

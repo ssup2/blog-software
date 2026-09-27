@@ -28,6 +28,6 @@ Consumer가 Message를 정상적으로 수신하였어도, Consumer에 의해서
 
 ## 2. 참조
 
-* [https://www.rabbitmq.com/reliability.html](https://www.rabbitmq.com/reliability.html)
-* [https://www.rabbitmq.com/confirms.html](https://www.rabbitmq.com/confirms.html)
-* [https://stackoverflow.com/questions/30546977/is-there-a-timeout-for-acking-rabbitmq-messages](https://stackoverflow.com/questions/30546977/is-there-a-timeout-for-acking-rabbitmq-messages)
+* RabbitMQ Reliability Guide : [https://www.rabbitmq.com/reliability.html](https://www.rabbitmq.com/reliability.html)
+* Consumer Acknowledgements and Publisher Confirms : [https://www.rabbitmq.com/confirms.html](https://www.rabbitmq.com/confirms.html)
+* Is there a timeout for acking RabbitMQ messages : [https://stackoverflow.com/questions/30546977/is-there-a-timeout-for-acking-rabbitmq-messages](https://stackoverflow.com/questions/30546977/is-there-a-timeout-for-acking-rabbitmq-messages)

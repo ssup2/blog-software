@@ -106,4 +106,4 @@ int main () {
 
 ## 2. 참조
 
-* [http://www.cplusplus.com/doc/oldtutorial/typecasting/](http://www.cplusplus.com/doc/oldtutorial/typecasting/)
+* Type Casting - C++ Tutorials : [http://www.cplusplus.com/doc/oldtutorial/typecasting/](http://www.cplusplus.com/doc/oldtutorial/typecasting/)

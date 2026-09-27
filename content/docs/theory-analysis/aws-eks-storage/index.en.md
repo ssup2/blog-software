@@ -68,6 +68,6 @@ Accordingly, AWS EKS also provides CSI Controller. It provides EBS CSI Storage C
 
 ## 2. References
 
-* [https://docs.aws.amazon.com/ko_kr/eks/latest/userguide/what-is-eks.html](https://docs.aws.amazon.com/ko_kr/eks/latest/userguide/what-is-eks.html)
-* [https://docs.aws.amazon.com/eks/latest/userguide/storage.html](https://docs.aws.amazon.com/eks/latest/userguide/storage.html)
+* Amazon EKS란 무엇입니까? : [https://docs.aws.amazon.com/ko_kr/eks/latest/userguide/what-is-eks.html](https://docs.aws.amazon.com/ko_kr/eks/latest/userguide/what-is-eks.html)
+* Use application data storage for your cluster - Amazon EKS : [https://docs.aws.amazon.com/eks/latest/userguide/storage.html](https://docs.aws.amazon.com/eks/latest/userguide/storage.html)
 

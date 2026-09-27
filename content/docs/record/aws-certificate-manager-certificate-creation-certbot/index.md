@@ -139,5 +139,5 @@ $ aws acm import-certificate --region ap-northeast-2 --certificate fileb://cert.
 
 ## 7. 참조
 
-* [https://certbot.eff.org/instructions?ws=other&os=pip](https://certbot.eff.org/instructions?ws=other&os=pip)
-* [https://www.skyer9.pe.kr/wordpress/?p=823](https://www.skyer9.pe.kr/wordpress/?p=823)
+* Certbot Instructions : [https://certbot.eff.org/instructions?ws=other&os=pip](https://certbot.eff.org/instructions?ws=other&os=pip)
+* Let's encrypt wild 인증서 발급받기 (with Route53) : [https://www.skyer9.pe.kr/wordpress/?p=823](https://www.skyer9.pe.kr/wordpress/?p=823)

@@ -42,7 +42,3 @@ $ make upload-images
 ```
 
 Docker Image로 생성하고 Docker Registry에 생성한 Image를 Push한다. Docker Image를 Push할 Registry 관련 정보를 환경변수로 설정해야 한다.
-
-## 5. 참조
-
-* [https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/getting-started-provider-dev.md](https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/getting-started-provider-dev.md)

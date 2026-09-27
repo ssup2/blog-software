@@ -43,11 +43,9 @@ In order to exchange SAML Request, SAML Response, and Relay State between Servic
 
 ## 3. References
 
-* [https://developer.okta.com/docs/concepts/saml/](https://developer.okta.com/docs/concepts/saml/)
-* [https://docs.aws.amazon.com/ko-kr/IAM/latest/UserGuide/id-roles-providers-saml.html](https://docs.aws.amazon.com/ko-kr/IAM/latest/UserGuide/id-roles-providers-saml.html)
-* [https://support.google.com/a/answer/6262987?hl=ko](https://support.google.com/a/answer/6262987?hl=ko)
-* [https://en.wikipedia.org/wiki/SAML-2.0](https://en.wikipedia.org/wiki/SAML-2.0)
-* [https://www.samltool.com/generic-sso-res.php](https://www.samltool.com/generic-sso-res.php)
-* [https://stackoverflow.com/questions/28110014/can-saml-do-authorization](https://stackoverflow.com/questions/28110014/can-saml-do-authorization)
-* [https://stackoverflow.com/questions/28117725/sso-saml-redirect-a-user-to-a-specified-landing-page-after-successful-log-in](https://stackoverflow.com/questions/28117725/sso-saml-redirect-a-user-to-a-specified-landing-page-after-successful-log-in)
+* Understanding SAML : [https://developer.okta.com/docs/concepts/saml/](https://developer.okta.com/docs/concepts/saml/)
+* SAML 기반 SSO 기술 개요 : [https://support.google.com/a/answer/6262987?hl=ko](https://support.google.com/a/answer/6262987?hl=ko)
+* SAML 2.0 : [https://en.wikipedia.org/wiki/SAML_2.0](https://en.wikipedia.org/wiki/SAML_2.0)
+* Can SAML do authorization? : [https://stackoverflow.com/questions/28110014/can-saml-do-authorization](https://stackoverflow.com/questions/28110014/can-saml-do-authorization)
+* SSO SAML - Redirect a user to a specified landing page after successful log in : [https://stackoverflow.com/questions/28117725/sso-saml-redirect-a-user-to-a-specified-landing-page-after-successful-log-in](https://stackoverflow.com/questions/28117725/sso-saml-redirect-a-user-to-a-specified-landing-page-after-successful-log-in)
 

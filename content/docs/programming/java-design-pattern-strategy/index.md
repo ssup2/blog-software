@@ -57,4 +57,4 @@ public class Main {
 
 ## 2. 참조
 
-* [https://www.tutorialspoint.com/design_pattern/strategy_pattern.htm](https://www.tutorialspoint.com/design_pattern/strategy_pattern.htm)
+* Design Patterns - Strategy Pattern : [https://www.tutorialspoint.com/design_pattern/strategy_pattern.htm](https://www.tutorialspoint.com/design_pattern/strategy_pattern.htm)

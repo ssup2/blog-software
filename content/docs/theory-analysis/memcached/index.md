@@ -21,4 +21,4 @@ Memcached는 Caching System이기 때문에 Memcached에 저장된 Data는 언�
 
 ## 2. 참조
 
-* [https://www.slideshare.net/AmazonWebServices/dat207](https://www.slideshare.net/AmazonWebServices/dat207)
+* AWS re:Invent DAT207: Amazon ElastiCache (SlideShare) : [https://www.slideshare.net/AmazonWebServices/dat207](https://www.slideshare.net/AmazonWebServices/dat207)

@@ -232,5 +232,5 @@ NetHogs version 0.8.5-2
 
 ## 2. 참조
 
-* [https://medium.com/netflix-techblog/linux-performance-analysis-in-60-000-milliseconds-accc10403c55](https://medium.com/netflix-techblog/linux-performance-analysis-in-60-000-milliseconds-accc10403c55)
-* [https://github.com/nicolaka/netshoot](https://github.com/nicolaka/netshoot)
+* Linux Performance Analysis in 60,000 Milliseconds : [https://medium.com/netflix-techblog/linux-performance-analysis-in-60-000-milliseconds-accc10403c55](https://medium.com/netflix-techblog/linux-performance-analysis-in-60-000-milliseconds-accc10403c55)
+* nicolaka/netshoot: Docker + Kubernetes Network Trouble-shooting Container : [https://github.com/nicolaka/netshoot](https://github.com/nicolaka/netshoot)

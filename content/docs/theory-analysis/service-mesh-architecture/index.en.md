@@ -24,7 +24,6 @@ The disadvantage of Service Mesh Architecture is Proxy Overhead. Since the same 
 
 ## 2. References
 
-* [https://medium.com/microservices-in-practice/service-mesh-for-microservices-2953109a3c9a](https://medium.com/microservices-in-practice/service-mesh-for-microservices-2953109a3c9a)
-* [http://tech.cloudz-labs.io/posts/service-mesh/](http://tech.cloudz-labs.io/posts/service-mesh/)
-* [https://waspro.tistory.com/432](https://waspro.tistory.com/432)
+* Service Mesh for Microservices : [https://medium.com/microservices-in-practice/service-mesh-for-microservices-2953109a3c9a](https://medium.com/microservices-in-practice/service-mesh-for-microservices-2953109a3c9a)
+* [MSA 개념 정립하기] MSA 아키텍처 패턴 : [https://waspro.tistory.com/432](https://waspro.tistory.com/432)
 

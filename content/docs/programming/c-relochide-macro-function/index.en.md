@@ -17,5 +17,5 @@ The `RELOC_HIDE()` macro function calculates the sum of `ptr` and `off` passed a
 
 ## 2. References
 
-* [http://studyfoss.egloos.com/viewer/5374731](http://studyfoss.egloos.com/viewer/5374731)
+* RELOC_HIDE() Macro : [http://studyfoss.egloos.com/viewer/5374731](http://studyfoss.egloos.com/viewer/5374731)
 

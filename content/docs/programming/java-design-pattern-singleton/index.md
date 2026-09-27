@@ -74,5 +74,4 @@ public class Singleton {
 
 ## 2. 참조
 
-* [https://javaplant.tistory.com/21](https://javaplant.tistory.com/21)
-* [https://elfinlas.github.io/2019/09/23/java-singleton/](https://elfinlas.github.io/2019/09/23/java-singleton/)
+* Java Singleton Pattern : [https://javaplant.tistory.com/21](https://javaplant.tistory.com/21)

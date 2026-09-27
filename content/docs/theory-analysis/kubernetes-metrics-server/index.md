@@ -26,10 +26,8 @@ Metrics Server개수에 비례하여 Metric 전송량도 비례하여 증가하�
 
 ## 2. 참조
 
-* [https://github.com/kubernetes-sigs/metrics-server](https://github.com/kubernetes-sigs/metrics-server)
-* [https://github.com/kubernetes/community/blob/master/contributors/design-proposals/instrumentation/resource-metrics-api.md](https://github.com/kubernetes/community/blob/master/contributors/design-proposals/instrumentation/resource-metrics-api.md)
-* [https://github.com/kubernetes/community/blob/master/contributors/design-proposals/instrumentation/metrics-server.md](https://github.com/kubernetes/community/blob/master/contributors/design-proposals/instrumentation/metrics-server.md)
-* [https://kubernetes.io/docs/tasks/debug-application-cluster/resource-usage-monitoring/](https://kubernetes.io/docs/tasks/debug-application-cluster/resource-usage-monitoring/)
-* [https://github.com/kubernetes/community/blob/master/contributors/design-proposals/instrumentation/monitoring-architecture.md#architecture](https://github.com/kubernetes/community/blob/master/contributors/design-proposals/instrumentation/monitoring-architecture.md#architecture)
-* [https://github.com/kubernetes-sigs/metrics-server/issues/552](https://github.com/kubernetes-sigs/metrics-server/issues/552)
-* [https://gruuuuu.github.io/cloud/monitoring-k8s1/#](https://gruuuuu.github.io/cloud/monitoring-k8s1/#)
+* kubernetes-sigs/metrics-server : [https://github.com/kubernetes-sigs/metrics-server](https://github.com/kubernetes-sigs/metrics-server)
+* Metrics Server Design Proposal : [https://github.com/kubernetes/community/blob/master/contributors/design-proposals/instrumentation/metrics-server.md](https://github.com/kubernetes/community/blob/master/contributors/design-proposals/instrumentation/metrics-server.md)
+* Tools for Monitoring Resources : [https://kubernetes.io/docs/tasks/debug-application-cluster/resource-usage-monitoring/](https://kubernetes.io/docs/tasks/debug-application-cluster/resource-usage-monitoring/)
+* Test and document high availability configuration (metrics-server #552) : [https://github.com/kubernetes-sigs/metrics-server/issues/552](https://github.com/kubernetes-sigs/metrics-server/issues/552)
+* Kubernetes Monitoring - Concept, Architecture : [https://gruuuuu.github.io/cloud/monitoring-k8s1/#](https://gruuuuu.github.io/cloud/monitoring-k8s1/#)

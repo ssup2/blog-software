@@ -254,6 +254,6 @@ int main()
 
 ## 2. 참조
 
-* [http://www.geeksforgeeks.org/smart-pointers-cpp](http://www.geeksforgeeks.org/smart-pointers-cpp)
-* [http://www.geeksforgeeks.org/auto_ptr-unique_ptr-shared_ptr-weak_ptr-2/](http://www.geeksforgeeks.org/auto_ptr-unique_ptr-shared_ptr-weak_ptr-2/)
-* [http://egloos.zum.com/sweeper/v/3059940](http://egloos.zum.com/sweeper/v/3059940)
+* Smart Pointers in C++ : [http://www.geeksforgeeks.org/smart-pointers-cpp](http://www.geeksforgeeks.org/smart-pointers-cpp)
+* auto_ptr vs unique_ptr vs shared_ptr vs weak_ptr in C++ : [http://www.geeksforgeeks.org/auto_ptr-unique_ptr-shared_ptr-weak_ptr-2/](http://www.geeksforgeeks.org/auto_ptr-unique_ptr-shared_ptr-weak_ptr-2/)
+* C++11 Smart Pointer : [http://egloos.zum.com/sweeper/v/3059940](http://egloos.zum.com/sweeper/v/3059940)

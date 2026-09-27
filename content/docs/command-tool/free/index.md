@@ -26,7 +26,7 @@ MB 단위로 Memory 사용량을 출력한다. [Shell 1]은 `free -m`를 이용�
 
 ## 2. 참조
 
-* [https://linux.die.net/man/1/free](https://linux.die.net/man/1/free)
-* [https://serverfault.com/questions/23433/in-linux-what-is-the-difference-between-buffers-and-cache-reported-by-the-f](https://serverfault.com/questions/23433/in-linux-what-is-the-difference-between-buffers-and-cache-reported-by-the-f)
+* free(1) - Linux man page : [https://linux.die.net/man/1/free](https://linux.die.net/man/1/free)
+* In Linux, what is the difference between buffers and cache reported by free : [https://serverfault.com/questions/23433/in-linux-what-is-the-difference-between-buffers-and-cache-reported-by-the-f](https://serverfault.com/questions/23433/in-linux-what-is-the-difference-between-buffers-and-cache-reported-by-the-f)
 
 

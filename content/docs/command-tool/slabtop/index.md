@@ -71,5 +71,5 @@ Cache는 다수의 Slab의 집합으로 구성되고, 각 Slab은 Slab Object의
 
 ## 2. 참고
 
-* [http://books.gigatux.nl/mirror/kerneldevelopment/0672327201/ch11lev1sec6.html](http://books.gigatux.nl/mirror/kerneldevelopment/0672327201/ch11lev1sec6.html)
-* [https://lascrea.tistory.com/66](https://lascrea.tistory.com/66)
+* Slab Layer : [http://books.gigatux.nl/mirror/kerneldevelopment/0672327201/ch11lev1sec6.html](http://books.gigatux.nl/mirror/kerneldevelopment/0672327201/ch11lev1sec6.html)
+* Linux Memory Slab 관리 : [https://lascrea.tistory.com/66](https://lascrea.tistory.com/66)

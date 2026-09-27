@@ -52,5 +52,5 @@ Cassandra 구동 및 구동을 확인한다.
 
 ## 4. 참조
 
-* [http://cassandra.apache.org/download/](http://cassandra.apache.org/download/)
-* [https://hostadvice.com/how-to/how-to-install-apache-cassandra-on-an-ubuntu-18-04-vps/](https://hostadvice.com/how-to/how-to-install-apache-cassandra-on-an-ubuntu-18-04-vps/)
+* Apache Cassandra Download : [http://cassandra.apache.org/download/](http://cassandra.apache.org/download/)
+* How to Install Apache Cassandra on an Ubuntu 18.04 VPS : [https://hostadvice.com/how-to/how-to-install-apache-cassandra-on-an-ubuntu-18-04-vps/](https://hostadvice.com/how-to/how-to-install-apache-cassandra-on-an-ubuntu-18-04-vps/)

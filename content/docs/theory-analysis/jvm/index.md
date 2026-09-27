@@ -56,7 +56,6 @@ Runtime Memory를 이용하여 실제 Bytecode를 수행한다. Execution Engine
 Execution Engine이 Native Method Library안의 Native Method를 실행 할 수 있도록 도와주는 Interface 역할을 수행한다.
 
 ## 2. 참조
-* [https://dzone.com/articles/jvm-architecture-explained](https://dzone.com/articles/jvm-architecture-explained)
-* [http://www.artima.com/insidejvm/ed2/lifetypeP.html](http://www.artima.com/insidejvm/ed2/lifetypeP.html)
-* [https://www.artima.com/insidejvm/ed2/jvm2.html](https://www.artima.com/insidejvm/ed2/jvm2.html)
-* [http://blog.cask.co/2015/08/java-class-loading-and-distributed-data-processing-frameworks/](http://blog.cask.co/2015/08/java-class-loading-and-distributed-data-processing-frameworks/)
+* The JVM Architecture Explained : [https://dzone.com/articles/jvm-architecture-explained](https://dzone.com/articles/jvm-architecture-explained)
+* Java Type Loading, Linking, and Initialization : [http://www.artima.com/insidejvm/ed2/lifetypeP.html](http://www.artima.com/insidejvm/ed2/lifetypeP.html)
+* Java Virtual Machine's Internal Architecture : [https://www.artima.com/insidejvm/ed2/jvm2.html](https://www.artima.com/insidejvm/ed2/jvm2.html)

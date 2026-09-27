@@ -31,5 +31,5 @@ Build and install iptables.
 
 ## 3. References
 
-* [http://www.linuxfromscratch.org/blfs/view/8.2/postlfs/iptables.html](http://www.linuxfromscratch.org/blfs/view/8.2/postlfs/iptables.html)
+* Iptables-1.6.2 - Beyond Linux From Scratch : [http://www.linuxfromscratch.org/blfs/view/8.2/postlfs/iptables.html](http://www.linuxfromscratch.org/blfs/view/8.2/postlfs/iptables.html)
 

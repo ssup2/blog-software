@@ -76,7 +76,7 @@ Linux에서 지원하는 I/O Multiplexer는 모두 fd를 기반으로 동작한�
 
 ## 3. 참조
 
-* timerfd-create man page : [http://man7.org/linux/man-pages/man2/timerfd-create.2.html](http://man7.org/linux/man-pages/man2/timerfd-create.2.html)
+* timerfd_create man page : [http://man7.org/linux/man-pages/man2/timerfd_create.2.html](http://man7.org/linux/man-pages/man2/timerfd_create.2.html)
 * signalfd man page : [http://man7.org/linux/man-pages/man2/signalfd.2.html](http://man7.org/linux/man-pages/man2/signalfd.2.html)
 * eventfd man page : [http://man7.org/linux/man-pages/man2/eventfd.2.html](http://man7.org/linux/man-pages/man2/eventfd.2.html)
 * eventfd : [http://lethean.github.io/2011/07/07/eventfd/](http://man7.org/linux/man-pages/man2/signalfd.2.html)

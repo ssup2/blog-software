@@ -30,6 +30,6 @@ Server의 부하는 Rendering을 Server가 수행하는 SSR가 CSR에 비해서 
 
 ## 3. 참조
 
-* [https://developers.google.com/web/updates/2019/02/rendering-on-the-web?hl=ko](https://developers.google.com/web/updates/2019/02/rendering-on-the-web?hl=ko)
-* [https://medium.com/walmartglobaltech/the-benefits-of-server-side-rendering-over-client-side-rendering-5d07ff2cefe8](https://medium.com/walmartglobaltech/the-benefits-of-server-side-rendering-over-client-side-rendering-5d07ff2cefe8)
-* [https://velog.io/@gkrba1234/SSR%EA%B3%BC-CSR%EC%97%90-%EB%8C%80%ED%95%B4-%EC%95%8C%EC%95%84%EB%B3%B4%EC%9E%90](https://velog.io/@gkrba1234/SSR%EA%B3%BC-CSR%EC%97%90-%EB%8C%80%ED%95%B4-%EC%95%8C%EC%95%84%EB%B3%B4%EC%9E%90)
+* 웹에서 렌더링 (Rendering on the Web) : [https://developers.google.com/web/updates/2019/02/rendering-on-the-web?hl=ko](https://developers.google.com/web/updates/2019/02/rendering-on-the-web?hl=ko)
+* The Benefits of Server Side Rendering Over Client Side Rendering : [https://medium.com/walmartglobaltech/the-benefits-of-server-side-rendering-over-client-side-rendering-5d07ff2cefe8](https://medium.com/walmartglobaltech/the-benefits-of-server-side-rendering-over-client-side-rendering-5d07ff2cefe8)
+* SSR과 CSR에 대해 알아보자! : [https://velog.io/@gkrba1234/SSR%EA%B3%BC-CSR%EC%97%90-%EB%8C%80%ED%95%B4-%EC%95%8C%EC%95%84%EB%B3%B4%EC%9E%90](https://velog.io/@gkrba1234/SSR%EA%B3%BC-CSR%EC%97%90-%EB%8C%80%ED%95%B4-%EC%95%8C%EC%95%84%EB%B3%B4%EC%9E%90)

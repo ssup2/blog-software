@@ -28,6 +28,6 @@ B+ Tree의 Inner Node는 Data가 없기 때문에 B-Tree의 Inner Node에 비하
 
 ## 3. 참조
 
-* [https://www.slideshare.net/MahediMahfujAnik/database-management-system-chapter12](https://www.slideshare.net/MahediMahfujAnik/database-management-system-chapter12)
-* [https://stackoverflow.com/questions/870218/differences-between-b-trees-and-b-trees](https://stackoverflow.com/questions/870218/differences-between-b-trees-and-b-trees)
-* [http://potatoggg.tistory.com/174](http://potatoggg.tistory.com/174)
+* Database Management System Chapter 12 : [https://www.slideshare.net/MahediMahfujAnik/database-management-system-chapter12](https://www.slideshare.net/MahediMahfujAnik/database-management-system-chapter12)
+* Differences between B trees and B+ trees : [https://stackoverflow.com/questions/870218/differences-between-b-trees-and-b-trees](https://stackoverflow.com/questions/870218/differences-between-b-trees-and-b-trees)
+* B-Tree(B트리), B+ 트리 : [http://potatoggg.tistory.com/174](http://potatoggg.tistory.com/174)

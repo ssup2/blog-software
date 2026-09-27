@@ -34,5 +34,5 @@ This document summarizes the usage of `tmux`, a Terminal Multiplexer.
 
 ## 2. References
 
-* [https://edykim.com/ko/post/tmux-introductory-series-summary/](https://edykim.com/ko/post/tmux-introductory-series-summary/)
+* tmux 입문자 시리즈 요약 : [https://edykim.com/ko/post/tmux-introductory-series-summary/](https://edykim.com/ko/post/tmux-introductory-series-summary/)
 

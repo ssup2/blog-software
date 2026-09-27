@@ -196,4 +196,4 @@ $ aws ec2 describe-instances
 
 ## 6. 참조
 
-* [https://aws.amazon.com/ko/premiumsupport/knowledge-center/iam-assume-role-cli/](https://aws.amazon.com/ko/premiumsupport/knowledge-center/iam-assume-role-cli/)
+* AWS CLI를 사용하여 IAM 역할 수임 : [https://aws.amazon.com/ko/premiumsupport/knowledge-center/iam-assume-role-cli/](https://aws.amazon.com/ko/premiumsupport/knowledge-center/iam-assume-role-cli/)

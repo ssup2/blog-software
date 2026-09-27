@@ -12,5 +12,4 @@ JavaScript는 **CommonJS** 또는 **AMD(Asynchronous Module Definition)** 2가�
 
 ## 2. 참조
 
-* [https://ui.toast.com/fe-guide/ko-BUNDLER/](https://ui.toast.com/fe-guide/ko-BUNDLER/)
-* [https://d2.naver.com/helloworld/0239818](https://d2.naver.com/helloworld/0239818)s
+* Bundling with webpack (NAVER D2) : [https://d2.naver.com/helloworld/0239818](https://d2.naver.com/helloworld/0239818)

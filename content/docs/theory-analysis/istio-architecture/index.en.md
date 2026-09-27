@@ -31,9 +31,8 @@ The packet permission policies between applications that Mixer used to handle ha
 ## 2. References
 
 * Introducing Istio Service Mesh for Microservices
-* [https://istio.io/docs/concepts/what-is-istio/](https://istio.io/docs/concepts/what-is-istio/)
-* [https://stackoverflow.com/questions/48639660/difference-between-mixer-and-pilot-in-istio](https://stackoverflow.com/questions/48639660/difference-between-mixer-and-pilot-in-istio)
-* [https://istio.io/latest/news/releases/1.5.x/announcing-1.5/upgrade-notes/](https://istio.io/latest/news/releases/1.5.x/announcing-1.5/upgrade-notes/)
-* [https://istio.io/v1.5/docs/tasks/policy-enforcement/enabling-policy/](https://istio.io/v1.5/docs/tasks/policy-enforcement/enabling-policy/)
-* [https://istio.io/latest/blog/2020/istiod/](https://istio.io/latest/blog/2020/istiod/)
-* [https://developer.ibm.com/components/istio/blogs/istio-15-release/](https://developer.ibm.com/components/istio/blogs/istio-15-release/)
+* The Istio service mesh : [https://istio.io/docs/concepts/what-is-istio/](https://istio.io/docs/concepts/what-is-istio/)
+* Difference between Mixer and Pilot in Istio : [https://stackoverflow.com/questions/48639660/difference-between-mixer-and-pilot-in-istio](https://stackoverflow.com/questions/48639660/difference-between-mixer-and-pilot-in-istio)
+* Istio 1.5 Upgrade Notes : [https://istio.io/latest/news/releases/1.5.x/announcing-1.5/upgrade-notes/](https://istio.io/latest/news/releases/1.5.x/announcing-1.5/upgrade-notes/)
+* Enabling Policy Enforcement (Deprecated) : [https://istio.io/v1.5/docs/tasks/policy-enforcement/enabling-policy/](https://istio.io/v1.5/docs/tasks/policy-enforcement/enabling-policy/)
+* Introducing istiod: simplifying the control plane : [https://istio.io/latest/blog/2020/istiod/](https://istio.io/latest/blog/2020/istiod/)

@@ -52,5 +52,5 @@ Listens and waits on the given Port.
 
 ## 2. References
 
-* [https://m.blog.naver.com/PostView.nhn?blogId=tawoo0&logNo=221564885896&proxyReferer=https:%2F%2Fwww.google.com%2F](https://m.blog.naver.com/PostView.nhn?blogId=tawoo0&logNo=221564885896&proxyReferer=https:%2F%2Fwww.google.com%2F)
+* nc(Netcat)를 활용한 서버 포트 오픈 확인 : [https://m.blog.naver.com/PostView.nhn?blogId=tawoo0&logNo=221564885896&proxyReferer=https:%2F%2Fwww.google.com%2F](https://m.blog.naver.com/PostView.nhn?blogId=tawoo0&logNo=221564885896&proxyReferer=https:%2F%2Fwww.google.com%2F)
 

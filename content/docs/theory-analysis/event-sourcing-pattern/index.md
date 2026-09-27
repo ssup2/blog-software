@@ -28,7 +28,7 @@ Event Store에 Event가 기록되어도 바로 Read Database에 반영되지 않
 
 ## 2. 참조
 
-* [https://docs.microsoft.com/en-us/azure/architecture/patterns/event-sourcing](https://docs.microsoft.com/en-us/azure/architecture/patterns/event-sourcing)
-* [https://dzone.com/articles/microservices-with-cqrs-and-event-sourcing](https://dzone.com/articles/microservices-with-cqrs-and-event-sourcing)
-* [https://edykim.com/ko/post/eventsourcing-pattern-cleanup/](https://edykim.com/ko/post/eventsourcing-pattern-cleanup/)
-* [https://community.risingstack.com/event-sourcing-vs-crud/](https://community.risingstack.com/event-sourcing-vs-crud/)
+* Event Sourcing Pattern - Azure Architecture Center : [https://docs.microsoft.com/en-us/azure/architecture/patterns/event-sourcing](https://docs.microsoft.com/en-us/azure/architecture/patterns/event-sourcing)
+* Microservices With CQRS and Event Sourcing : [https://dzone.com/articles/microservices-with-cqrs-and-event-sourcing](https://dzone.com/articles/microservices-with-cqrs-and-event-sourcing)
+* 이벤트 소싱 event-sourcing 패턴 정리 : [https://edykim.com/ko/post/eventsourcing-pattern-cleanup/](https://edykim.com/ko/post/eventsourcing-pattern-cleanup/)
+* Event Sourcing vs CRUD : [https://community.risingstack.com/event-sourcing-vs-crud/](https://community.risingstack.com/event-sourcing-vs-crud/)

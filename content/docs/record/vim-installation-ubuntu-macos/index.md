@@ -266,4 +266,3 @@ vim-gutentags는 `.git`, `.svn` 파일이 있는 폴더를 Project Root 폴더�
 
 * Vundle : [https://github.com/gmarik/Vundle.vim](https://github.com/gmarik/Vundle.vim)
 * Colorscheme : [https://github.com/junegunn/seoul256.vim](https://github.com/junegunn/seoul256.vim)
-* YouCompleteMe Install : [http://neverapple88.tistory.com/26](http://neverapple88.tistory.com/26)

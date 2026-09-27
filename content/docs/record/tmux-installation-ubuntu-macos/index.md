@@ -99,4 +99,4 @@ ctrl + b, I
 
 ## 5. 참조
 
-* [https://github.com/tmux-plugins/tpm](https://github.com/tmux-plugins/tpm)
+* tmux-plugins/tpm: Tmux Plugin Manager : [https://github.com/tmux-plugins/tpm](https://github.com/tmux-plugins/tpm)

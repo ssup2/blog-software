@@ -100,5 +100,5 @@ Container 안에서 `nvidia-smi` 명령어를 통해서 container에서 이용�
 
 ## 6. 참조
 
-* [https://collabnix.com/introducing-new-docker-cli-api-support-for-nvidia-gpus-under-docker-engine-19-03-0-beta-release/](https://collabnix.com/introducing-new-docker-cli-api-support-for-nvidia-gpus-under-docker-engine-19-03-0-beta-release/)
-* [https://en.wikipedia.org/wiki/Direct_Rendering_Manager](https://en.wikipedia.org/wiki/Direct_Rendering_Manager)
+* New Docker CLI API Support for NVIDIA GPUs under Docker Engine 19.03.0 Pre-Release : [https://collabnix.com/introducing-new-docker-cli-api-support-for-nvidia-gpus-under-docker-engine-19-03-0-beta-release/](https://collabnix.com/introducing-new-docker-cli-api-support-for-nvidia-gpus-under-docker-engine-19-03-0-beta-release/)
+* Direct Rendering Manager : [https://en.wikipedia.org/wiki/Direct_Rendering_Manager](https://en.wikipedia.org/wiki/Direct_Rendering_Manager)

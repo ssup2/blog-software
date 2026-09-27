@@ -27,8 +27,3 @@ Generally, Object Storage is operated in REST API format. When Object ID, which 
 {{< figure caption="[Figure 3] File Storage" src="images/file-storage.png" width="600px" >}}
 
 File Storage is **hierarchy-based Storage** using File System. It manages Files by freely creating hierarchies through Directories and placing Files in specific Directories. File Storage only stores Meta information defined by File System such as creation time and ownership for each File. File Storage can be connected through `mount` command. Once connected, it can be copied and modified using various Apps like Local Files. Due to these characteristics, it is used for File sharing between VMs and Containers.
-
-## 4. References
-
-* [https://www.storagecraft.com/blog/storage-wars-file-block-object-storage](https://www.storagecraft.com/blog/storage-wars-file-block-object-storage/)
-

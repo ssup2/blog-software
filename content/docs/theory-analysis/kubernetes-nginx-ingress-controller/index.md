@@ -145,4 +145,4 @@ Nginx Ingress Controller는 Nginx의 `/healthz` URL로 Packet을 Redirect하는 
 
 ## 2. 참조
 
-* [https://kubernetes.github.io/ingress-nginx/](https://kubernetes.github.io/ingress-nginx/)
+* Ingress-Nginx Controller : [https://kubernetes.github.io/ingress-nginx/](https://kubernetes.github.io/ingress-nginx/)

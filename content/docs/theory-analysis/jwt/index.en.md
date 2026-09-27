@@ -42,9 +42,8 @@ JWT is mainly used as a Token for authentication/authorization of Services by pu
 
 ## 2. References
 
-* [https://velopert.com/2389](https://velopert.com/2389)
-* [https://jwt.io/](https://jwt.io/)
-* [http://www.opennaru.com/opennaru-blog/jwt-json-web-token/](http://www.opennaru.com/opennaru-blog/jwt-json-web-token/)
-* [https://auth0.com/docs/tokens/concepts/jwt-claims](https://auth0.com/docs/tokens/concepts/jwt-claims)
-* [https://community.apigee.com/questions/61057/is-the-jwt-signature-properly-encoded.html](https://community.apigee.com/questions/61057/is-the-jwt-signature-properly-encoded.html)
+* [JWT] JSON Web Token 소개 및 구조 : [https://velopert.com/2389](https://velopert.com/2389)
+* JSON Web Tokens : [https://jwt.io/](https://jwt.io/)
+* JWT (JSON Web Token) - Opennaru : [http://www.opennaru.com/opennaru-blog/jwt-json-web-token/](http://www.opennaru.com/opennaru-blog/jwt-json-web-token/)
+* JSON Web Token Claims - Auth0 : [https://auth0.com/docs/tokens/concepts/jwt-claims](https://auth0.com/docs/tokens/concepts/jwt-claims)
 * Claim Type: [https://www.iana.org/assignments/jwt/jwt.xhtml#claims](https://www.iana.org/assignments/jwt/jwt.xhtml#claims)

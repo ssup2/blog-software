@@ -70,5 +70,5 @@ Run mutt. Shortcuts are as follows.
 
 ## 6. References
 
-* [http://nickdesaulniers.github.io/blog/2016/06/18/mutt-gmail-ubuntu/](http://nickdesaulniers.github.io/blog/2016/06/18/mutt-gmail-ubuntu/)
+* Setting up mutt with gmail on Ubuntu : [http://nickdesaulniers.github.io/blog/2016/06/18/mutt-gmail-ubuntu/](http://nickdesaulniers.github.io/blog/2016/06/18/mutt-gmail-ubuntu/)
 

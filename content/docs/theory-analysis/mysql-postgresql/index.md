@@ -32,10 +32,9 @@ MySQL은 새로운 Thread를 생성하는 방식이기 때문에 Process를 생�
 
 ## 2. 참조
 
-* [https://developer.okta.com/blog/2019/07/19/mysql-vs-postgres](https://developer.okta.com/blog/2019/07/19/mysql-vs-postgres)
-* [https://www.fivetran.com/blog/postgresql-vs-mysql](https://www.fivetran.com/blog/postgresql-vs-mysql)
-* [https://www.sumologickorea.com/blog/postgresql-vs-mysql/](https://www.sumologickorea.com/blog/postgresql-vs-mysql/)
-* [https://dbconvert.com/blog/mysql-vs-postgresql/](https://dbconvert.com/blog/mysql-vs-postgresql/)
-* [https://uminoh.tistory.com/32](https://uminoh.tistory.com/32)
-* [https://www.uber.com/en-KR/blog/postgres-to-mysql-migration/](https://www.uber.com/en-KR/blog/postgres-to-mysql-migration/)
-* [https://www.holistics.io/blog/why-you-should-use-postgres-over-mysql-for-analytics-purpose/?utm-campaign=pg-mysql&utm-source=medium](https://www.holistics.io/blog/why-you-should-use-postgres-over-mysql-for-analytics-purpose/?utm-campaign=pg-mysql&utm-source=medium)
+* MySQL vs PostgreSQL - Choose the Right Database for Your Project : [https://developer.okta.com/blog/2019/07/19/mysql-vs-postgres](https://developer.okta.com/blog/2019/07/19/mysql-vs-postgres)
+* PostgreSQL vs. MySQL: Differences in performance and uses : [https://www.fivetran.com/blog/postgresql-vs-mysql](https://www.fivetran.com/blog/postgresql-vs-mysql)
+* PostgreSQL vs MySQL : [https://www.sumologickorea.com/blog/postgresql-vs-mysql/](https://www.sumologickorea.com/blog/postgresql-vs-mysql/)
+* MySQL vs PostgreSQL in 2023 : [https://dbconvert.com/blog/mysql-vs-postgresql/](https://dbconvert.com/blog/mysql-vs-postgresql/)
+* [RDBMS] PostgreSQL vs MySQL 차이 (fear. 버전을 막론하고) : [https://uminoh.tistory.com/32](https://uminoh.tistory.com/32)
+* Why You Should Use Postgres Over MySQL For Analytics Purpose : [https://www.holistics.io/blog/why-you-should-use-postgres-over-mysql-for-analytics-purpose/?utm-campaign=pg-mysql&utm-source=medium](https://www.holistics.io/blog/why-you-should-use-postgres-over-mysql-for-analytics-purpose/?utm-campaign=pg-mysql&utm-source=medium)

@@ -67,7 +67,7 @@ kubelet은 Disk 용량 부족시 낮은 QoS를 갖는 Pod부터 Eviction을 통�
 
 ## 2. 참조
 
-* [https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/](https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/)
-* [https://kubernetes.io/docs/tasks/administer-cluster/out-of-resource/#evicting-end-user-pods](https://kubernetes.io/docs/tasks/administer-cluster/out-of-resource/#evicting-end-user-pods)
-* [https://m.blog.naver.com/PostView.nhn?blogId=alice-k106&logNo=221676471427&referrerCode=0&searchKeyword=Eviction](https://m.blog.naver.com/PostView.nhn?blogId=alice-k106&logNo=221676471427&referrerCode=0&searchKeyword=Eviction)
-* [https://stackoverflow.com/questions/56486023/does-kubernetes-consider-the-current-memory-usage-when-scheduling-pods](https://stackoverflow.com/questions/56486023/does-kubernetes-consider-the-current-memory-usage-when-scheduling-pods)
+* Pod Priority and Preemption : [https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/](https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/)
+* Node-pressure Eviction : [https://kubernetes.io/docs/tasks/administer-cluster/out-of-resource/#evicting-end-user-pods](https://kubernetes.io/docs/tasks/administer-cluster/out-of-resource/#evicting-end-user-pods)
+* Kubernetes Pod Eviction : [https://m.blog.naver.com/PostView.nhn?blogId=alice-k106&logNo=221676471427&referrerCode=0&searchKeyword=Eviction](https://m.blog.naver.com/PostView.nhn?blogId=alice-k106&logNo=221676471427&referrerCode=0&searchKeyword=Eviction)
+* Does Kubernetes consider the current memory usage when scheduling pods - Stack Overflow : [https://stackoverflow.com/questions/56486023/does-kubernetes-consider-the-current-memory-usage-when-scheduling-pods](https://stackoverflow.com/questions/56486023/does-kubernetes-consider-the-current-memory-usage-when-scheduling-pods)

@@ -192,5 +192,5 @@ Deploy Node에서 Kubernetes Cluster를 초기화한다.
 
 ## 6. 참고
 
-* [https://kubespray.io/#/](https://kubespray.io/#/)
-* [https://github.com/kubernetes-sigs/kubespray/blob/master/docs/openstack.md](https://github.com/kubernetes-sigs/kubespray/blob/master/docs/openstack.md)
+* Kubespray - Deploy a Production Ready Kubernetes Cluster : [https://kubespray.io/#/](https://kubespray.io/#/)
+* Kubespray OpenStack Documentation : [https://github.com/kubernetes-sigs/kubespray/blob/master/docs/openstack.md](https://github.com/kubernetes-sigs/kubespray/blob/master/docs/openstack.md)

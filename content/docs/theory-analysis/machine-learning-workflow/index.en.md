@@ -39,16 +39,13 @@ Deploying and monitoring the model after testing is complete.
 
 ## 2. References
 
-* [https://github.com/solliancenet/Azure-Machine-Learning-Dev-Guide/blob/master/creating-machine-learning-pipelines/machine-learning-pipelines.md](https://github.com/solliancenet/Azure-Machine-Learning-Dev-Guide/blob/master/creating-machine-learning-pipelines/machine-learning-pipelines.md)
-* [https://web2.qatar.cmu.edu/~gdicaro/15488/lectures/488-S20-1-Introduction.pdf](https://web2.qatar.cmu.edu/~gdicaro/15488/lectures/488-S20-1-Introduction.pdf)
-* [https://lsjsj92.tistory.com/579](https://lsjsj92.tistory.com/579)
-* [https://www.kdnuggets.com/2020/07/tour-end-to-end-machine-learning-platforms.html](https://www.kdnuggets.com/2020/07/tour-end-to-end-machine-learning-platforms.html)
-* [https://cloud.google.com/architecture/mlops-continuous-delivery-and-automation-pipelines-in-machine-learning](https://cloud.google.com/architecture/mlops-continuous-delivery-and-automation-pipelines-in-machine-learning)
-* [https://towardsdatascience.com/machine-learning-pipelines-with-kubeflow-4c59ad05522](https://towardsdatascience.com/machine-learning-pipelines-with-kubeflow-4c59ad05522)
-* [http://blog.skby.net/%EB%A8%B8%EC%8B%A0%EB%9F%AC%EB%8B%9D-%ED%8C%8C%EC%9D%B4%ED%94%84%EB%9D%BC%EC%9D%B8-machine-learning-pipeline/](http://blog.skby.net/%EB%A8%B8%EC%8B%A0%EB%9F%AC%EB%8B%9D-%ED%8C%8C%EC%9D%B4%ED%94%84%EB%9D%BC%EC%9D%B8-machine-learning-pipeline/)
-* [https://towardsdatascience.com/industrializing-ai-machine-learning-applications-with-kubeflow-5687bf56153f](https://towardsdatascience.com/industrializing-ai-machine-learning-applications-with-kubeflow-5687bf56153f)
+* Azure Machine Learning Dev Guide - Machine Learning Pipelines : [https://github.com/solliancenet/Azure-Machine-Learning-Dev-Guide/blob/master/creating-machine-learning-pipelines/machine-learning-pipelines.md](https://github.com/solliancenet/Azure-Machine-Learning-Dev-Guide/blob/master/creating-machine-learning-pipelines/machine-learning-pipelines.md)
+* Machine Learning Pipeline : [https://lsjsj92.tistory.com/579](https://lsjsj92.tistory.com/579)
+* A Tour of End-to-End Machine Learning Platforms : [https://www.kdnuggets.com/2020/07/tour-end-to-end-machine-learning-platforms.html](https://www.kdnuggets.com/2020/07/tour-end-to-end-machine-learning-platforms.html)
+* MLOps: Continuous delivery and automation pipelines in machine learning : [https://cloud.google.com/architecture/mlops-continuous-delivery-and-automation-pipelines-in-machine-learning](https://cloud.google.com/architecture/mlops-continuous-delivery-and-automation-pipelines-in-machine-learning)
+* 머신러닝 파이프라인 (Machine Learning Pipeline) : [http://blog.skby.net/%EB%A8%B8%EC%8B%A0%EB%9F%AC%EB%8B%9D-%ED%8C%8C%EC%9D%B4%ED%94%84%EB%9D%BC%EC%9D%B8-machine-learning-pipeline/](http://blog.skby.net/%EB%A8%B8%EC%8B%A0%EB%9F%AC%EB%8B%9D-%ED%8C%8C%EC%9D%B4%ED%94%84%EB%9D%BC%EC%9D%B8-machine-learning-pipeline/)
 * Data feature engineering : [http://www.incodom.kr/%EA%B8%B0%EA%B3%84%ED%95%99%EC%8A%B5/feature-engineering](http://www.incodom.kr/%EA%B8%B0%EA%B3%84%ED%95%99%EC%8A%B5/feature-engineering)
-* Data cleaning : [https://en.wikipedia.org/wiki/Data-cleansing](https://en.wikipedia.org/wiki/Data-cleansing)
+* Data cleaning : [https://en.wikipedia.org/wiki/Data_cleansing](https://en.wikipedia.org/wiki/Data_cleansing)
 * Machine learning algorithm, model : [https://www.linkedin.com/pulse/difference-between-algorithm-model-machine-learning-yahya-abi-haidar/](https://www.linkedin.com/pulse/difference-between-algorithm-model-machine-learning-yahya-abi-haidar/)
 * Model validation, model testing : [https://stats.stackexchange.com/questions/19048/what-is-the-difference-between-test-set-and-validation-set](https://stats.stackexchange.com/questions/19048/what-is-the-difference-between-test-set-and-validation-set)
 * Model hyperparameter : [https://medium.com/@f2005636/evaluating-machine-learning-models-hyper-parameter-tuning-2d7076349a6c](https://medium.com/@f2005636/evaluating-machine-learning-models-hyper-parameter-tuning-2d7076349a6c)

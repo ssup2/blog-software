@@ -40,5 +40,5 @@ Exclusive pair Pattern은 하나의 Process에서 2개의 Thread 사이의 Messa
 
 ## 2. 참고
 
-* [http://zguide.zeromq.org/page:all](http://zguide.zeromq.org/page:all)
-* [https://blog.scottlogic.com/2015/03/20/ZeroMQ-Quick-Intro.html](https://blog.scottlogic.com/2015/03/20/ZeroMQ-Quick-Intro.html)
+* ØMQ - The Guide : [http://zguide.zeromq.org/page:all](http://zguide.zeromq.org/page:all)
+* A quick and dirty introduction to ZeroMQ : [https://blog.scottlogic.com/2015/03/20/ZeroMQ-Quick-Intro.html](https://blog.scottlogic.com/2015/03/20/ZeroMQ-Quick-Intro.html)

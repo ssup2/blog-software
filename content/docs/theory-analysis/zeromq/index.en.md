@@ -40,6 +40,6 @@ Exclusive pair Pattern is a Pattern used when exchanging Messages between 2 Thre
 
 ## 2. References
 
-* [http://zguide.zeromq.org/page:all](http://zguide.zeromq.org/page:all)
-* [https://blog.scottlogic.com/2015/03/20/ZeroMQ-Quick-Intro.html](https://blog.scottlogic.com/2015/03/20/ZeroMQ-Quick-Intro.html)
+* ØMQ - The Guide : [http://zguide.zeromq.org/page:all](http://zguide.zeromq.org/page:all)
+* A quick and dirty introduction to ZeroMQ : [https://blog.scottlogic.com/2015/03/20/ZeroMQ-Quick-Intro.html](https://blog.scottlogic.com/2015/03/20/ZeroMQ-Quick-Intro.html)
 

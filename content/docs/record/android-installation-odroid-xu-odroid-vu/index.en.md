@@ -160,6 +160,5 @@ Execute the above command from Ubuntu.
 
 ## 13. References
 
-* [http://odroid.com/dokuwiki/doku.php?id=en:odroid-xu](http://odroid.com/dokuwiki/doku.php?id=en:odroid-xu)
-* [http://com.odroid.com/sigong/nf-file-board/nfile-board-view.php?keyword=&tag=ODROID-XU&bid=212](http://com.odroid.com/sigong/nf-file-board/nfile-board-view.php?keyword=&tag=ODROID-XU&bid=212)
-* [http://www.webupd8.org/2012/11/oracle-sun-java-6-installer-available.html](http://www.webupd8.org/2012/11/oracle-sun-java-6-installer-available.html)
+* ODROID-XU - ODROID Wiki : [http://odroid.com/dokuwiki/doku.php?id=en:odroid-xu](http://odroid.com/dokuwiki/doku.php?id=en:odroid-xu)
+* Oracle (Sun) Java 6 Installer Available For Ubuntu And Debian Users (PPA) : [http://www.webupd8.org/2012/11/oracle-sun-java-6-installer-available.html](http://www.webupd8.org/2012/11/oracle-sun-java-6-installer-available.html)

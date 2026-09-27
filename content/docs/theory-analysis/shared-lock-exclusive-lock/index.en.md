@@ -20,5 +20,5 @@ General Lock techniques allow only one Thread to access Critical Section simulta
 
 ## 3. References
 
-* [http://jeong-pro.tistory.com/94](http://jeong-pro.tistory.com/94)
+* 데이터베이스 - Exclusive lock과 Shared lock의 차이 : [http://jeong-pro.tistory.com/94](http://jeong-pro.tistory.com/94)
 

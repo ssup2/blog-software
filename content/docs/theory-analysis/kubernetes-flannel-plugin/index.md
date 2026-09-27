@@ -39,10 +39,9 @@ VXLAN 기법은 Encapsulation 기법이기 때문에 Packet이 Host를 나갈때
 
 ## 2. 참조
 
-* [https://github.com/coreos/flannel](https://github.com/coreos/flannel)
-* [https://github.com/coreos/flannel/blob/master/Documentation/backends.md](https://github.com/coreos/flannel/blob/master/Documentation/backends.md)
-* [https://blog.laputa.io/kubernetes-flannel-networking-6a1cb1f8ec7c](https://blog.laputa.io/kubernetes-flannel-networking-6a1cb1f8ec7c)
-* [https://github.com/coreos/flannel/blob/master/Documentation/backends.md](https://github.com/coreos/flannel/blob/master/Documentation/backends.md)
-* [https://docs.openshift.com/container-platform/3.4/architecture/additional-concepts/flannel.html](https://docs.openshift.com/container-platform/3.4/architecture/additional-concepts/flannel.html)
-* [https://stackoverflow.com/questions/45293321/why-host-gw-of-flannel-requires-direct-layer2-connectivity-between-hosts](https://stackoverflow.com/questions/45293321/why-host-gw-of-flannel-requires-direct-layer2-connectivity-between-hosts)
-* [https://www.slideshare.net/enakai/how-vxlan-works-on-linux](https://www.slideshare.net/enakai/how-vxlan-works-on-linux)
+* flannel - a network fabric for containers : [https://github.com/coreos/flannel](https://github.com/coreos/flannel)
+* Flannel Backends : [https://github.com/coreos/flannel/blob/master/Documentation/backends.md](https://github.com/coreos/flannel/blob/master/Documentation/backends.md)
+* Flannel Backends : [https://github.com/coreos/flannel/blob/master/Documentation/backends.md](https://github.com/coreos/flannel/blob/master/Documentation/backends.md)
+* OpenShift Container Platform - Flannel : [https://docs.openshift.com/container-platform/3.4/architecture/additional-concepts/flannel.html](https://docs.openshift.com/container-platform/3.4/architecture/additional-concepts/flannel.html)
+* Why host-gw of flannel requires direct layer2 connectivity between hosts : [https://stackoverflow.com/questions/45293321/why-host-gw-of-flannel-requires-direct-layer2-connectivity-between-hosts](https://stackoverflow.com/questions/45293321/why-host-gw-of-flannel-requires-direct-layer2-connectivity-between-hosts)
+* How VXLAN works on Linux : [https://www.slideshare.net/enakai/how-vxlan-works-on-linux](https://www.slideshare.net/enakai/how-vxlan-works-on-linux)

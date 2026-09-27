@@ -269,4 +269,4 @@ public class Fan implements Switchable {
 
 ## 2. 참조
 
-* [https://springframework.guru/solid-principles-object-oriented-programming/](https://springframework.guru/solid-principles-object-oriented-programming/)
+* SOLID Principles of Object Oriented Programming : [https://springframework.guru/solid-principles-object-oriented-programming/](https://springframework.guru/solid-principles-object-oriented-programming/)

@@ -19,4 +19,4 @@ Client가 ID, Password를 알고 있고, HTTP를 이용하여 단순한 인증�
 ## 2. 참조
 
 * HTTP Basic Authentication Scheme : [https://tools.ietf.org/html/rfc7617](https://tools.ietf.org/html/rfc7617)
-* [http://iloveulhj.github.io/posts/http/http-basic-auth.html](http://iloveulhj.github.io/posts/http/http-basic-auth.html)
+* [HTTP] 기본 인증 : [http://iloveulhj.github.io/posts/http/http-basic-auth.html](http://iloveulhj.github.io/posts/http/http-basic-auth.html)

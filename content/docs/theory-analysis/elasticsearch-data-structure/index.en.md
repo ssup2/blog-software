@@ -32,5 +32,5 @@ Analyzes the Data Structure of Elasticsearch.
 
 ## 2. References
 
-* [https://www.elastic.co/kr/blog/what-is-an-elasticsearch-index](https://www.elastic.co/kr/blog/what-is-an-elasticsearch-index)
+* Elasticsearch 인덱스는 무엇인가요? : [https://www.elastic.co/kr/blog/what-is-an-elasticsearch-index](https://www.elastic.co/kr/blog/what-is-an-elasticsearch-index)
 

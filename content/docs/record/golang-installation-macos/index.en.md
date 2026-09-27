@@ -36,5 +36,5 @@ Set environment variables used by golang in the `~/.bash-profile` file so that g
 
 ## 4. References
 
-* [https://ahmadawais.com/install-go-lang-on-macos-with-homebrew](https://ahmadawais.com/install-go-lang-on-macos-with-homebrew/)
+* Install Go Lang on macOS with Homebrew : [https://ahmadawais.com/install-go-lang-on-macos-with-homebrew/](https://ahmadawais.com/install-go-lang-on-macos-with-homebrew/)
 

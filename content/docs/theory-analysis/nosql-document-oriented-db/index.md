@@ -16,7 +16,7 @@ Document-oriented DB는 각 Document마다 고유의 ID를 붙여 Document를 �
 
 ## 2. 참조
 
-* [https://en.wikipedia.org/wiki/Document-oriented-database](https://en.wikipedia.org/wiki/Document-oriented-database)
-* [https://database.guide/what-is-a-document-store-database/](https://database.guide/what-is-a-document-store-database/)
-* [https://www.slideshare.net/fabiofumarola1/9-document-oriented-databases](https://www.slideshare.net/fabiofumarola1/9-document-oriented-databases)
-* [http://cs.ulb.ac.be/public/-media/teaching/infoh415/student-projects/couchdb.pdf](http://cs.ulb.ac.be/public/-media/teaching/infoh415/student-projects/couchdb.pdf)
+* Document-oriented Database : [https://en.wikipedia.org/wiki/Document_oriented_database](https://en.wikipedia.org/wiki/Document_oriented_database)
+* What is a Document Store Database? : [https://database.guide/what-is-a-document-store-database/](https://database.guide/what-is-a-document-store-database/)
+* Document Oriented Databases : [https://www.slideshare.net/fabiofumarola1/9-document-oriented-databases](https://www.slideshare.net/fabiofumarola1/9-document-oriented-databases)
+* CouchDB Student Project Report (ULB) : [http://cs.ulb.ac.be/public/-media/teaching/infoh415/student-projects/couchdb.pdf](http://cs.ulb.ac.be/public/-media/teaching/infoh415/student-projects/couchdb.pdf)

@@ -18,4 +18,4 @@ Couchbase provides Memcached compatibility so that existing Memcached deployment
 
 ## 2. References
 
-* [https://forums.couchbase.com/t/moxi-with-memcached-bucket/18438](https://forums.couchbase.com/t/moxi-with-memcached-bucket/18438)
+* Moxi with Memcached Bucket - Couchbase Forums : [https://forums.couchbase.com/t/moxi-with-memcached-bucket/18438](https://forums.couchbase.com/t/moxi-with-memcached-bucket/18438)

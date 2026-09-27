@@ -92,6 +92,6 @@ int main() {
 
 * seccomp Example : [https://blog.yadutaf.fr/2014/05/29/introduction-to-seccomp-bpf-linux-syscall-filter/](https://blog.yadutaf.fr/2014/05/29/introduction-to-seccomp-bpf-linux-syscall-filter/)
 * seccomp Man : [http://man7.org/linux/man-pages/man2/seccomp.2.html](http://man7.org/linux/man-pages/man2/seccomp.2.html)
-* Linux Document : [https://www.kernel.org/doc/Documentation/prctl/seccomp-filter.txt](https://www.kernel.org/doc/Documentation/prctl/seccomp-filter.txt)
-* libseccomp Man : [http://man7.org/linux/man-pages/man3/seccomp-rule-add.3.html](http://man7.org/linux/man-pages/man3/seccomp-rule-add.3.html)
+* Linux Document : [https://www.kernel.org/doc/Documentation/prctl/seccomp_filter.txt](https://www.kernel.org/doc/Documentation/prctl/seccomp_filter.txt)
+* libseccomp Man : [http://man7.org/linux/man-pages/man3/seccomp_rule_add.3.html](http://man7.org/linux/man-pages/man3/seccomp_rule_add.3.html)
 

@@ -26,7 +26,7 @@ Displays memory usage in MB. [Shell 1] shows the output of `free -m` displaying 
 
 ## 2. References
 
-* [https://linux.die.net/man/1/free](https://linux.die.net/man/1/free)
-* [https://serverfault.com/questions/23433/in-linux-what-is-the-difference-between-buffers-and-cache-reported-by-the-f](https://serverfault.com/questions/23433/in-linux-what-is-the-difference-between-buffers-and-cache-reported-by-the-f)
+* free(1) - Linux man page : [https://linux.die.net/man/1/free](https://linux.die.net/man/1/free)
+* In Linux, what is the difference between buffers and cache reported by free : [https://serverfault.com/questions/23433/in-linux-what-is-the-difference-between-buffers-and-cache-reported-by-the-f](https://serverfault.com/questions/23433/in-linux-what-is-the-difference-between-buffers-and-cache-reported-by-the-f)
 
 

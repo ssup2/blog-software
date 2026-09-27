@@ -152,7 +152,7 @@ kubeconfig 설정을 통해서 `kubectl`에서도 Service Account를 이용할 �
 
 ## 2. 참고
 
-* [https://kubernetes.io/docs/tasks/access-application-cluster/access-cluster/#accessing-the-api-from-a-pod](https://kubernetes.io/docs/tasks/access-application-cluster/access-cluster/#accessing-the-api-from-a-pod)
-* [https://docs.openshift.com/container-platform/3.4/dev-guide/service-accounts.html](https://docs.openshift.com/container-platform/3.4/dev-guide/service-accounts.html)
-* [https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver/](https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver/)
-* [https://stackoverflow.com/questions/55629894/kubernetes-kubeconfig-with-service-account-token](https://stackoverflow.com/questions/55629894/kubernetes-kubeconfig-with-service-account-token)
+* Accessing Clusters : [https://kubernetes.io/docs/tasks/access-application-cluster/access-cluster/#accessing-the-api-from-a-pod](https://kubernetes.io/docs/tasks/access-application-cluster/access-cluster/#accessing-the-api-from-a-pod)
+* Service Accounts - OpenShift Developer Guide : [https://docs.openshift.com/container-platform/3.4/dev-guide/service-accounts.html](https://docs.openshift.com/container-platform/3.4/dev-guide/service-accounts.html)
+* kube-apiserver : [https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver/](https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver/)
+* Kubernetes kubeconfig with service account token : [https://stackoverflow.com/questions/55629894/kubernetes-kubeconfig-with-service-account-token](https://stackoverflow.com/questions/55629894/kubernetes-kubeconfig-with-service-account-token)

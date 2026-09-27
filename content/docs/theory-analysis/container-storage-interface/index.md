@@ -63,6 +63,6 @@ CSI의 Plugin과 Volume Lifecycle이 다양한 형태로 존재하는 만큼 CO�
 
 ## 2. 참조
 
-* [https://github.com/container-storage-interface/spec/blob/master/spec.md](https://github.com/container-storage-interface/spec/blob/master/spec.md)
-* [https://kubernetes-csi.github.io/docs/](https://kubernetes-csi.github.io/docs/)
-* [https://medium.com/google-cloud/understanding-the-container-storage-interface-csi-ddbeb966a3b](https://medium.com/google-cloud/understanding-the-container-storage-interface-csi-ddbeb966a3b)
+* Container Storage Interface (CSI) Specification : [https://github.com/container-storage-interface/spec/blob/master/spec.md](https://github.com/container-storage-interface/spec/blob/master/spec.md)
+* Kubernetes CSI Developer Documentation : [https://kubernetes-csi.github.io/docs/](https://kubernetes-csi.github.io/docs/)
+* Understanding the Container Storage Interface (CSI) : [https://medium.com/google-cloud/understanding-the-container-storage-interface-csi-ddbeb966a3b](https://medium.com/google-cloud/understanding-the-container-storage-interface-csi-ddbeb966a3b)

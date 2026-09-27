@@ -80,5 +80,5 @@ Raft Algorithm을 통해서 Consensus를 맞추는 Server들은 상황에 따라
 
 ## 5. 참조
 
-* [https://raft.github.io/](https://raft.github.io/)
-* [https://web.stanford.edu/~ouster/cgi-bin/papers/OngaroPhD.pdf](https://web.stanford.edu/~ouster/cgi-bin/papers/OngaroPhD.pdf)
+* Raft Consensus Algorithm : [https://raft.github.io/](https://raft.github.io/)
+* Consensus: Bridging Theory and Practice (Ongaro PhD Dissertation) : [https://web.stanford.edu/~ouster/cgi-bin/papers/OngaroPhD.pdf](https://web.stanford.edu/~ouster/cgi-bin/papers/OngaroPhD.pdf)

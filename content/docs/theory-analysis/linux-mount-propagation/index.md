@@ -234,7 +234,7 @@ Unbindable Mount는 Private Mount처럼 Forward/Receive Propagation 둘다 허�
 
 ## 2. 참조
 
-* [http://man7.org/linux/man-pages/man7/mount-namespaces.7.html](http://man7.org/linux/man-pages/man7/mount-namespaces.7.html)
-* [https://www.kernel.org/doc/Documentation/filesystems/sharedsubtree.txt](https://www.kernel.org/doc/Documentation/filesystems/sharedsubtree.txt)
-* [https://docs.docker.com/storage/bind-mounts/](https://docs.docker.com/storage/bind-mounts/)
-* [https://lwn.net/Articles/689856/](https://lwn.net/Articles/689856/)
+* mount_namespaces(7) - Linux manual page : [http://man7.org/linux/man-pages/man7/mount_namespaces.7.html](http://man7.org/linux/man-pages/man7/mount_namespaces.7.html)
+* Shared Subtrees - Linux Kernel Documentation : [https://www.kernel.org/doc/Documentation/filesystems/sharedsubtree.txt](https://www.kernel.org/doc/Documentation/filesystems/sharedsubtree.txt)
+* Bind mounts - Docker Docs : [https://docs.docker.com/storage/bind-mounts/](https://docs.docker.com/storage/bind-mounts/)
+* Mount namespaces and shared subtrees - LWN.net : [https://lwn.net/Articles/689856/](https://lwn.net/Articles/689856/)

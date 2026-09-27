@@ -35,4 +35,4 @@ GRE Header를 바탕으로 IP-in-IP 보다 좀더 많은 기능을 지원한다.
 
 * IPIP : [http://cizz.net/lartc/lartc.tunnel.ip-ip.html](http://cizz.net/lartc/lartc.tunnel.ip-ip.html)
 * GRE : [http://cizz.net/lartc/lartc.tunnel.gre.html](http://cizz.net/lartc/lartc.tunnel.gre.html)
-* GRE : [https://en.wikipedia.org/wiki/Generic-Routing-Encapsulation](https://en.wikipedia.org/wiki/Generic-Routing-Encapsulation)
+* GRE : [https://en.wikipedia.org/wiki/Generic_Routing_Encapsulation](https://en.wikipedia.org/wiki/Generic_Routing_Encapsulation)

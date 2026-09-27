@@ -138,6 +138,6 @@ systemd       1 root  mem       REG                8,2   432640   11534609 /lib/
 
 ## 2. References
 
-* [https://github.com/nicolaka/netshoot](https://github.com/nicolaka/netshoot)
+* netshoot: a Docker + Kubernetes network trouble-shooting swiss-army container : [https://github.com/nicolaka/netshoot](https://github.com/nicolaka/netshoot)
 
 

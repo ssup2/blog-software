@@ -216,5 +216,5 @@ String Literal은 **Constant String Pool**에 위치한다. Constant String Pool
 
 ## 2. 참조
 
-* [https://velog.io/@new_wisdom/Java-String-vs-StringBuffer-vs-StringBuilder](https://velog.io/@new_wisdom/Java-String-vs-StringBuffer-vs-StringBuilder)
-* [https://velog.io/@ditt/Java-String-literal-vs-new-String](https://velog.io/@ditt/Java-String-literal-vs-new-String)
+* [Java] String vs StringBuffer vs StringBuilder : [https://velog.io/@new_wisdom/Java-String-vs-StringBuffer-vs-StringBuilder](https://velog.io/@new_wisdom/Java-String-vs-StringBuffer-vs-StringBuilder)
+* [Java] String literal vs new String : [https://velog.io/@ditt/Java-String-literal-vs-new-String](https://velog.io/@ditt/Java-String-literal-vs-new-String)

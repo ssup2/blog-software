@@ -38,4 +38,4 @@ Set environment variables used by golang in the `~/.bashrc` file so that golang 
 
 ## 4. References
 
-* [https://medium.com/@RidhamTarpara/install-go-1-11-on-ubuntu-18-04-16-04-lts-8c098c503c5f](https://medium.com/@RidhamTarpara/install-go-1-11-on-ubuntu-18-04-16-04-lts-8c098c503c5f)
+* Install Go 1.11 on Ubuntu 18.04/16.04 LTS : [https://medium.com/@RidhamTarpara/install-go-1-11-on-ubuntu-18-04-16-04-lts-8c098c503c5f](https://medium.com/@RidhamTarpara/install-go-1-11-on-ubuntu-18-04-16-04-lts-8c098c503c5f)

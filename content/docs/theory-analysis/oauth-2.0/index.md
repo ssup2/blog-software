@@ -72,10 +72,8 @@ Refresh Token은 App이 이용하던 Access Token이 Timeout되어 Invalid 상�
 
 ## 2. 참조
 
-* [http://jlabusch.github.io/oauth2-server/index.html](http://jlabusch.github.io/oauth2-server/index.html)
-* [https://opentutorials.org/course/2473/16571](https://opentutorials.org/course/2473/16571)
-* [https://db-blog.web.cern.ch/blog/luis-rodriguez-fernandez/2017-04-oracle-jet-ords-oauth2](https://db-blog.web.cern.ch/blog/luis-rodriguez-fernandez/2017-04-oracle-jet-ords-oauth2)
-* [https://www.oauth.com/oauth2-servers/client-registration/client-id-secret/](https://www.oauth.com/oauth2-servers/client-registration/client-id-secret/)
-* [https://medium.com/@pumudu88/google-oauth2-api-explained-dbb84ff97079](https://medium.com/@pumudu88/google-oauth2-api-explained-dbb84ff97079)
-* [http://tutorials.jenkov.com/oauth2/authorization.html](http://tutorials.jenkov.com/oauth2/authorization.html)
-* [https://help.memberclicks.com/hc/en-us/articles/230536287-API-Authorization](https://help.memberclicks.com/hc/en-us/articles/230536287-API-Authorization)
+* OAuth2 Server : [http://jlabusch.github.io/oauth2-server/index.html](http://jlabusch.github.io/oauth2-server/index.html)
+* 구글 API를 통해서 배우는 인증 (oauth 2.0) : [https://opentutorials.org/course/2473/16571](https://opentutorials.org/course/2473/16571)
+* The Client ID and Secret - OAuth 2.0 Simplified : [https://www.oauth.com/oauth2-servers/client-registration/client-id-secret/](https://www.oauth.com/oauth2-servers/client-registration/client-id-secret/)
+* Google OAuth2 API Explained : [https://medium.com/@pumudu88/google-oauth2-api-explained-dbb84ff97079](https://medium.com/@pumudu88/google-oauth2-api-explained-dbb84ff97079)
+* OAuth 2.0 Authorization : [http://tutorials.jenkov.com/oauth2/authorization.html](http://tutorials.jenkov.com/oauth2/authorization.html)

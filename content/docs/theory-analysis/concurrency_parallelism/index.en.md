@@ -14,5 +14,5 @@ Parallelism is a **property of machines**. Programming techniques like CUDA, Ope
 
 ## 3. References
 
-* [http://egloos.zum.com/minjang/v/2517211](http://egloos.zum.com/minjang/v/2517211)
+* Parallelism vs Concurrency : [http://egloos.zum.com/minjang/v/2517211](http://egloos.zum.com/minjang/v/2517211)
 

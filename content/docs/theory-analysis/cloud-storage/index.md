@@ -27,7 +27,3 @@ Object의 특징 중 하나는 **자유로운 Meta** 형태에 있다. 사용자
 {{< figure caption="[Figure 3] File Storage" src="images/file-storage.png" width="600px" >}}
 
 File Storage는 **File System을 이용한 계층**기반 Storage이다. Directory를 통해 자유롭게 계층을 생성하고 File을 특정 Directory에 위치시키는 형태로 File들을 관리한다. File Storage는 각 File을 위해서 생성시간, 소유권 같은 File System에서 정의한 Meta 정보만을 저장한다. File Storage는 `mount` 명령을 통해 연결 할 수 있다. 한번 연결되면 Local File 처럼 다양한 App들을 이용하여 복사, 변경이 가능하다. 이러한 특징 때문에 VM, Container 사이에서 File 공유시 이용되고 있다.
-
-## 4. 참조
-
-* [https://www.storagecraft.com/blog/storage-wars-file-block-object-storage](https://www.storagecraft.com/blog/storage-wars-file-block-object-storage/)

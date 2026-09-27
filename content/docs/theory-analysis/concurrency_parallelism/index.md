@@ -14,4 +14,4 @@ Parallelism은 **기계의 성질**이다. CUDA, OpenMP, MPI 같은 프로그래
 
 ## 3. 참조
 
-* [http://egloos.zum.com/minjang/v/2517211](http://egloos.zum.com/minjang/v/2517211)
+* Parallelism vs Concurrency : [http://egloos.zum.com/minjang/v/2517211](http://egloos.zum.com/minjang/v/2517211)

@@ -12,5 +12,5 @@ Thanos와 같이 동작하는 Prometheus를 분석한다.
 
 ## 2. 참조
 
-* [https://github.com/thanos-io/thanos](https://github.com/thanos-io/thanos)
-* [https://www.infoq.com/news/2018/06/thanos-scalable-prometheus/](https://www.infoq.com/news/2018/06/thanos-scalable-prometheus/)
+* thanos-io/thanos: Highly available Prometheus setup with long term storage capabilities : [https://github.com/thanos-io/thanos](https://github.com/thanos-io/thanos)
+* Thanos - a Scalable Prometheus with Unlimited Storage : [https://www.infoq.com/news/2018/06/thanos-scalable-prometheus/](https://www.infoq.com/news/2018/06/thanos-scalable-prometheus/)

@@ -25,5 +25,5 @@ This document summarizes Bash Shell usage.
 
 ## 2. References
 
-* [http://teohm.com/blog/shortcuts-to-move-faster-in-bash-command-line/](http://teohm.com/blog/shortcuts-to-move-faster-in-bash-command-line/)
+* Shortcuts to move faster in Bash command line : [http://teohm.com/blog/shortcuts-to-move-faster-in-bash-command-line/](http://teohm.com/blog/shortcuts-to-move-faster-in-bash-command-line/)
 

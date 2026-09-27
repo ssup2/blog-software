@@ -12,4 +12,4 @@ $ rsync -zarv --include="*/" --include="ChangeLog*" --exclude="*" -m 'rsync://rs
 
 ## 2. 참조
 
-* [https://unix.stackexchange.com/questions/506344/best-method-for-searching-linux-kernel-changelog-from-4-18-0-to-4-20-16](https://unix.stackexchange.com/questions/506344/best-method-for-searching-linux-kernel-changelog-from-4-18-0-to-4-20-16)
+* Best method for searching Linux kernel changelog from 4.18.0 to 4.20.16 : [https://unix.stackexchange.com/questions/506344/best-method-for-searching-linux-kernel-changelog-from-4-18-0-to-4-20-16](https://unix.stackexchange.com/questions/506344/best-method-for-searching-linux-kernel-changelog-from-4-18-0-to-4-20-16)

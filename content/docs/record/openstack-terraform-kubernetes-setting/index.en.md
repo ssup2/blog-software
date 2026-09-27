@@ -213,6 +213,6 @@ Initialize Terraform.
 
 ## 5. References
 
-* [https://github.com/diodonfrost/terraform-openstack-examples](https://github.com/diodonfrost/terraform-openstack-examples)
-* [https://github.com/ssup2/example-openstack-terraform-k8s](https://github.com/ssup2/example-openstack-terraform-k8s)
+* diodonfrost/terraform-openstack-examples : [https://github.com/diodonfrost/terraform-openstack-examples](https://github.com/diodonfrost/terraform-openstack-examples)
+* ssup2/example-openstack-terraform-k8s : [https://github.com/ssup2/example-openstack-terraform-k8s](https://github.com/ssup2/example-openstack-terraform-k8s)
 

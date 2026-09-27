@@ -88,6 +88,5 @@ public class MyRepository {
 
 ## 4. 참조
 
-* [https://www.baeldung.com/spring-bean-annotations](https://www.baeldung.com/spring-bean-annotations)
-* [http://wonwoo.ml/index.php/post/2000](http://wonwoo.ml/index.php/post/2000)
-* [https://www.javarticles.com/2016/01/spring-componentscan-annotation-example.html](https://www.javarticles.com/2016/01/spring-componentscan-annotation-example.html)
+* Spring Bean Annotations : [https://www.baeldung.com/spring-bean-annotations](https://www.baeldung.com/spring-bean-annotations)
+* Spring @ComponentScan Annotation Example : [https://www.javarticles.com/2016/01/spring-componentscan-annotation-example.html](https://www.javarticles.com/2016/01/spring-componentscan-annotation-example.html)

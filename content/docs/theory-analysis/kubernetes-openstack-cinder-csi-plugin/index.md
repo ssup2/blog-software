@@ -31,15 +31,14 @@ cinder-csi-plugin은 OpenStack Provider Project에 소속되있고 나머지 App
 
 ## 2. 참조
 
-* [https://github.com/container-storage-interface/spec/blob/master/spec.md](https://github.com/container-storage-interface/spec/blob/master/spec.md)
-* [https://kubernetes-csi.github.io/docs/](https://kubernetes-csi.github.io/docs/)
-* [https://medium.com/google-cloud/understanding-the-container-storage-interface-csi-ddbeb966a3b](https://medium.com/google-cloud/understanding-the-container-storage-interface-csi-ddbeb966a3b)
-* [https://docs.docker.com/ee/ucp/kubernetes/storage/use-csi/](https://docs.docker.com/ee/ucp/kubernetes/storage/use-csi/)
+* Container Storage Interface (CSI) Spec : [https://github.com/container-storage-interface/spec/blob/master/spec.md](https://github.com/container-storage-interface/spec/blob/master/spec.md)
+* Kubernetes CSI Developer Documentation : [https://kubernetes-csi.github.io/docs/](https://kubernetes-csi.github.io/docs/)
+* Understanding the Container Storage Interface (CSI) : [https://medium.com/google-cloud/understanding-the-container-storage-interface-csi-ddbeb966a3b](https://medium.com/google-cloud/understanding-the-container-storage-interface-csi-ddbeb966a3b)
+* Using CSI drivers (Docker UCP) : [https://docs.docker.com/ee/ucp/kubernetes/storage/use-csi/](https://docs.docker.com/ee/ucp/kubernetes/storage/use-csi/)
 * CSI Spec : [https://github.com/container-storage-interface/spec/blob/master/spec.md](https://github.com/container-storage-interface/spec/blob/master/spec.md)
 * csi-attacher : [https://github.com/kubernetes-csi/external-attacher](https://github.com/kubernetes-csi/external-attacher)
 * csi-provisioner : [https://github.com/kubernetes-csi/external-provisioner](https://github.com/kubernetes-csi/external-provisioner)
 * csi-snapshotter : [https://github.com/kubernetes-csi/external-snapshotter](https://github.com/kubernetes-csi/external-snapshotter)
 * csi-resizer : [https://github.com/kubernetes-csi/external-resizer](https://github.com/kubernetes-csi/external-resizer)
 * node-driver-registrar : [https://github.com/kubernetes-csi/node-driver-registrar](https://github.com/kubernetes-csi/node-driver-registrar)
-* cinder-csi-plugin : [https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/using-cinder-csi-plugin.md](https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/using-cinder-csi-plugin.md)
 * Device plugin registration : [https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/device-plugins/#device-plugin-registration](https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/device-plugins/#device-plugin-registration)

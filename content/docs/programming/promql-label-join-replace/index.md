@@ -64,6 +64,5 @@ node-memory-MemAvailable-bytes{container="node-exporter", dest="node-exporter-re
 
 ## 3. 참조
 
-* [https://prometheus.io/docs/prometheus/latest/querying/functions/#label-join](https://prometheus.io/docs/prometheus/latest/querying/functions/#label-join)
-* [https://t3guild.com/2020/07/29/prometheus-promql/](https://t3guild.com/2020/07/29/prometheus-promql/)
-* [https://devthomas.tistory.com/15](https://devthomas.tistory.com/15)
+* Prometheus Query Functions : [https://prometheus.io/docs/prometheus/latest/querying/functions/#label-join](https://prometheus.io/docs/prometheus/latest/querying/functions/#label-join)
+* Prometheus Query(PromQL) 기본 이해하기 : [https://devthomas.tistory.com/15](https://devthomas.tistory.com/15)

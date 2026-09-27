@@ -12,5 +12,5 @@ VPN (Virtual Private Network)을 분석한다.
 
 ## 2. 참조
 
-* [https://www.slideshare.net/Kajal-Thakkar/vpn-14074779](https://www.slideshare.net/Kajal-Thakkar/vpn-14074779)
-* [https://namu.wiki/w/%EA%B0%80%EC%83%81%20%EC%82%AC%EC%84%A4%EB%A7%9D](https://namu.wiki/w/%EA%B0%80%EC%83%81%20%EC%82%AC%EC%84%A4%EB%A7%9D)
+* Virtual Private Network (VPN) : [https://www.slideshare.net/Kajal-Thakkar/vpn-14074779](https://www.slideshare.net/Kajal-Thakkar/vpn-14074779)
+* 가상 사설망 : [https://namu.wiki/w/%EA%B0%80%EC%83%81%20%EC%82%AC%EC%84%A4%EB%A7%9D](https://namu.wiki/w/%EA%B0%80%EC%83%81%20%EC%82%AC%EC%84%A4%EB%A7%9D)

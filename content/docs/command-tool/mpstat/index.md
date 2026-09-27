@@ -37,6 +37,6 @@ CPU Core의 평균 사용률과 CPU Core별 사용률을 출력한다. [Shell 1]
 
 ## 2. 참조
 
-* [https://linux.die.net/man/1/free](https://linux.die.net/man/1/free)
-* [https://serverfault.com/questions/23433/in-linux-what-is-the-difference-between-buffers-and-cache-reported-by-the-f](https://serverfault.com/questions/23433/in-linux-what-is-the-difference-between-buffers-and-cache-reported-by-the-f)
+* free(1) - Linux man page : [https://linux.die.net/man/1/free](https://linux.die.net/man/1/free)
+* Difference between buffers and cache reported by free : [https://serverfault.com/questions/23433/in-linux-what-is-the-difference-between-buffers-and-cache-reported-by-the-f](https://serverfault.com/questions/23433/in-linux-what-is-the-difference-between-buffers-and-cache-reported-by-the-f)
 

@@ -50,6 +50,6 @@ title: CKA Certificate Exam Review
 
 ## 6. References
 
-* [https://chhanz.github.io/linux/2019/09/30/cka-exam-review/](https://chhanz.github.io/linux/2019/09/30/cka-exam-review/)
-* [https://coffeewhale.com/kubernetes/cka/2019/01/13/cak/](https://coffeewhale.com/kubernetes/cka/2019/01/13/cak/)
+* CKA (Certified Kubernetes Administrator) 시험 합격 후기 : [https://chhanz.github.io/linux/2019/09/30/cka-exam-review/](https://chhanz.github.io/linux/2019/09/30/cka-exam-review/)
+* Certified Kubernetes Administrator 취득 후기 : [https://coffeewhale.com/kubernetes/cka/2019/01/13/cak/](https://coffeewhale.com/kubernetes/cka/2019/01/13/cak/)
 

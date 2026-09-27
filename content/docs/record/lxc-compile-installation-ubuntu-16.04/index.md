@@ -33,7 +33,3 @@ $ ldconfig
 ```
 
 LXC를 Build 및 설치한다.
-
-## 4. 참조
-
-* [https://github.com/lxc/lxc/blob/master/INSTALL](https://github.com/lxc/lxc/blob/master/INSTALL)

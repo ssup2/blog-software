@@ -152,5 +152,5 @@ $ go tool trace trace.out
 
 ## 3. 참조
 
-* [https://pkg.go.dev/cmd/trace](https://pkg.go.dev/cmd/trace)
-* [https://programmer.ink/think/golang-performance-test-trace-planing-goang-trace.html](https://programmer.ink/think/golang-performance-test-trace-planing-goang-trace.html)
+* trace command - Go Packages : [https://pkg.go.dev/cmd/trace](https://pkg.go.dev/cmd/trace)
+* Golang Performance Test - Trace : [https://programmer.ink/think/golang-performance-test-trace-planing-goang-trace.html](https://programmer.ink/think/golang-performance-test-trace-planing-goang-trace.html)

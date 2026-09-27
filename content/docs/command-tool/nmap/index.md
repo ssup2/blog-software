@@ -76,6 +76,5 @@ host에서 Port Range에 속한 TCP Port들을 Scanning하여 Listen 상태의 T
 
 ## 2. 참조
 
-* [https://phoenixnap.com/kb/nmap-scan-open-ports](https://phoenixnap.com/kb/nmap-scan-open-ports)
-* [https://exchangeinfo.tistory.com/11](https://exchangeinfo.tistory.com/11)
-* [https://nullsec.us/top-1-000-tcp-and-udp-ports-nmap-default](https://nullsec.us/top-1-000-tcp-and-udp-ports-nmap-default)
+* How to Use Nmap to Scan for Open Ports : [https://phoenixnap.com/kb/nmap-scan-open-ports](https://phoenixnap.com/kb/nmap-scan-open-ports)
+* Top 1,000 TCP and UDP ports (nmap default) : [https://nullsec.us/top-1-000-tcp-and-udp-ports-nmap-default](https://nullsec.us/top-1-000-tcp-and-udp-ports-nmap-default)

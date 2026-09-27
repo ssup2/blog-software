@@ -345,5 +345,5 @@ Execute each Guest from the VNC Shell.
 
 ## 22. References
 
-* [http://www.virtualopensystems.com/en/solutions/guides/kvm-virtualization-on-arndale](http://www.virtualopensystems.com/en/solutions/guides/kvm-virtualization-on-arndale)
+* Guide to setup KVM virtualization on Arndale Exynos5250 development board : [http://www.virtualopensystems.com/en/solutions/guides/kvm-virtualization-on-arndale](http://www.virtualopensystems.com/en/solutions/guides/kvm-virtualization-on-arndale)
 

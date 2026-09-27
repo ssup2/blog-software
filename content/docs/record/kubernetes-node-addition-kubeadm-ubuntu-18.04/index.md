@@ -83,4 +83,4 @@ Master Node에서 추가된 Node를 확인한다. `vm04`가 추가된 Node이다
 
 ## 5. 참조
 
-* [https://sarc.io/index.php/cloud/1383-join-token](https://sarc.io/index.php/cloud/1383-join-token)
+* 쿠버네티스 노드 조인(Join)시 Token 값 확인 : [https://sarc.io/index.php/cloud/1383-join-token](https://sarc.io/index.php/cloud/1383-join-token)

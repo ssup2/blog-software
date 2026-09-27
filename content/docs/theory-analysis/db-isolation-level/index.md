@@ -116,13 +116,10 @@ Phantom Read는 다른 Transaction에 의해서 새롭게 추가된 Row가 결�
 
 ## 4. 참조
 
-* [http://whiteship.tistory.com/1554](http://whiteship.tistory.com/1554)
-* [http://hundredin.net/2012/07/26/isolation-level/](http://hundredin.net/2012/07/26/isolation-level/)
-* [https://blog.pythian.com/understanding-mysql-isolation-levels-Repeatable Read/](https://blog.pythian.com/understanding-mysql-isolation-levels-Repeatable Read/)
-* [https://vladmihalcea.com/a-beginners-guide-to-database-locking-and-the-lost-update-phenomena/](https://vladmihalcea.com/a-beginners-guide-to-database-locking-and-the-lost-update-phenomena/)
-* [https://docs.microsoft.com/ko-kr/sql/t-sql/statements/set-transaction-isolation-level-transact-sql?view=sql-server-2017](https://docs.microsoft.com/ko-kr/sql/t-sql/statements/set-transaction-isolation-level-transact-sql?view=sql-server-2017)
-* [https://en.wikipedia.org/wiki/Isolation-(database-systems)](https://en.wikipedia.org/wiki/Isolation-(database-systems))
-* [https://stackoverflow.com/questions/10935850/when-to-use-select-for-update](https://stackoverflow.com/questions/10935850/when-to-use-select-for-update)
-* [https://stackoverflow.com/questions/33784779/whats-the-use-of-select-for-update-when-using-Repeatable Read-isolation](https://stackoverflow.com/questions/33784779/whats-the-use-of-select-for-update-when-using-Repeatable Read-isolation)
-* [https://stackoverflow.com/questions/33784779/whats-the-use-of-select-for-update-when-using-repeatable-read-isolation](https://stackoverflow.com/questions/33784779/whats-the-use-of-select-for-update-when-using-repeatable-read-isolation)
-* [https://jyeonth.tistory.com/32](https://jyeonth.tistory.com/32)
+* Understanding MySQL Isolation Levels: Repeatable Read : [https://blog.pythian.com/understanding-mysql-isolation-levels-Repeatable Read/](https://blog.pythian.com/understanding-mysql-isolation-levels-Repeatable Read/)
+* A beginner's guide to database locking and the lost update phenomena : [https://vladmihalcea.com/a-beginners-guide-to-database-locking-and-the-lost-update-phenomena/](https://vladmihalcea.com/a-beginners-guide-to-database-locking-and-the-lost-update-phenomena/)
+* SET TRANSACTION ISOLATION LEVEL (Transact-SQL) : [https://docs.microsoft.com/ko-kr/sql/t-sql/statements/set-transaction-isolation-level-transact-sql?view=sql-server-2017](https://docs.microsoft.com/ko-kr/sql/t-sql/statements/set-transaction-isolation-level-transact-sql?view=sql-server-2017)
+* When to use SELECT FOR UPDATE : [https://stackoverflow.com/questions/10935850/when-to-use-select-for-update](https://stackoverflow.com/questions/10935850/when-to-use-select-for-update)
+* What's the use of SELECT FOR UPDATE when using Repeatable Read isolation : [https://stackoverflow.com/questions/33784779/whats-the-use-of-select-for-update-when-using-Repeatable Read-isolation](https://stackoverflow.com/questions/33784779/whats-the-use-of-select-for-update-when-using-Repeatable Read-isolation)
+* What's the use of SELECT FOR UPDATE when using Repeatable Read isolation : [https://stackoverflow.com/questions/33784779/whats-the-use-of-select-for-update-when-using-repeatable-read-isolation](https://stackoverflow.com/questions/33784779/whats-the-use-of-select-for-update-when-using-repeatable-read-isolation)
+* MySQL Transaction Isolation level: REPEATABLE_READ Mode에서의 Lock 이해 : [https://jyeonth.tistory.com/32](https://jyeonth.tistory.com/32)

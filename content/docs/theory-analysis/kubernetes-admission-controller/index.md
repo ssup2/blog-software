@@ -168,8 +168,8 @@ Custom Admission Controller가 `MutatingAdmissionWebhook` Controller로부터 AP
 
 ## 2. 참조
 
-* [https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/](https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/)
-* [https://kubernetes.io/blog/2019/03/21/a-guide-to-kubernetes-admission-controllers/](https://kubernetes.io/blog/2019/03/21/a-guide-to-kubernetes-admission-controllers/)
-* [https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/)
-* [https://docs.openshift.com/container-platform/3.11/architecture/additional-concepts/dynamic-admission-controllers.html](https://docs.openshift.com/container-platform/3.11/architecture/additional-concepts/dynamic-admission-controllers.html)
-* [https://m.blog.naver.com/alice-k106/221546328906](https://m.blog.naver.com/alice-k106/221546328906)
+* Dynamic Admission Control : [https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/](https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/)
+* A Guide to Kubernetes Admission Controllers : [https://kubernetes.io/blog/2019/03/21/a-guide-to-kubernetes-admission-controllers/](https://kubernetes.io/blog/2019/03/21/a-guide-to-kubernetes-admission-controllers/)
+* Admission Control in Kubernetes : [https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/)
+* OpenShift Dynamic Admission Controllers : [https://docs.openshift.com/container-platform/3.11/architecture/additional-concepts/dynamic-admission-controllers.html](https://docs.openshift.com/container-platform/3.11/architecture/additional-concepts/dynamic-admission-controllers.html)
+* Kubernetes Admission Controller - alice-k106 Blog : [https://m.blog.naver.com/alice-k106/221546328906](https://m.blog.naver.com/alice-k106/221546328906)

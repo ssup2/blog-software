@@ -71,5 +71,4 @@ Packet이 외부로부터 Pod까지 전달되는 과정을 보면 LB VM안의 Ha
 
 ## 3. 참조
 
-* [https://kubernetes.io/docs/concepts/cluster-administration/cloud-providers/](https://kubernetes.io/docs/concepts/cluster-administration/cloud-providers/)
-* [https://github.com/kubernetes/cloud-provider](https://github.com/kubernetes/cloud-provider)
+* kubernetes/cloud-provider: the shared interfaces which Kubernetes cloud providers implement : [https://github.com/kubernetes/cloud-provider](https://github.com/kubernetes/cloud-provider)

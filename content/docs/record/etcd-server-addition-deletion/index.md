@@ -318,6 +318,6 @@ Node03의 etcd Server가 Learner로 추가되고 Follower로 Promote될때 Node0
 
 ## 6. 참조
 
-* [https://etcd.io/docs/v3.4.0/op-guide/container/](https://etcd.io/docs/v3.4.0/op-guide/container/)
-* [https://etcd.io/docs/v3.4.0/op-guide/runtime-configuration/](https://etcd.io/docs/v3.4.0/op-guide/runtime-configuration/)
-* [https://etcd.io/docs/v3.4.0/learning/design-learner/](https://etcd.io/docs/v3.4.0/learning/design-learner/)
+* Run etcd clusters inside containers : [https://etcd.io/docs/v3.4.0/op-guide/container/](https://etcd.io/docs/v3.4.0/op-guide/container/)
+* Runtime reconfiguration : [https://etcd.io/docs/v3.4.0/op-guide/runtime-configuration/](https://etcd.io/docs/v3.4.0/op-guide/runtime-configuration/)
+* etcd learner design : [https://etcd.io/docs/v3.4.0/learning/design-learner/](https://etcd.io/docs/v3.4.0/learning/design-learner/)

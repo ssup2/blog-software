@@ -192,6 +192,6 @@ Reset the Kubernetes Cluster from the Deploy Node.
 
 ## 6. References
 
-* [https://kubespray.io/#/](https://kubespray.io/#/)
-* [https://github.com/kubernetes-sigs/kubespray/blob/master/docs/openstack.md](https://github.com/kubernetes-sigs/kubespray/blob/master/docs/openstack.md)
+* Kubespray - Deploy a Production Ready Kubernetes Cluster : [https://kubespray.io/#/](https://kubespray.io/#/)
+* Kubespray OpenStack Documentation : [https://github.com/kubernetes-sigs/kubespray/blob/master/docs/openstack.md](https://github.com/kubernetes-sigs/kubespray/blob/master/docs/openstack.md)
 

@@ -56,5 +56,5 @@ $ netplan apply
 Apply the changed Network configuration.
 
 ## 4. References
-* [https://deploywindows.com/2017/06/01/missing-nat-in-windows-10-hyper-v/](https://deploywindows.com/2017/06/01/missing-nat-in-windows-10-hyper-v/)
+* Missing NAT in Windows 10 Hyper-V : [https://deploywindows.com/2017/06/01/missing-nat-in-windows-10-hyper-v/](https://deploywindows.com/2017/06/01/missing-nat-in-windows-10-hyper-v/)
 

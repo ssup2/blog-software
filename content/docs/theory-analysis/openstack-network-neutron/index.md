@@ -68,8 +68,8 @@ VM의 모든 Inbound/Outbound Packet은 TAP Interface와 연결된 Bridge를 지
 
 ## 3. 참조
 
-* [https://docs.openstack.org/install-guide/](https://docs.openstack.org/install-guide/)
-* [https://docs.openstack.org/security-guide/networking/architecture.html](https://docs.openstack.org/security-guide/networking/architecture.html)
-* [https://docs.openstack.org/liberty/networking-guide/scenario-classic-ovs.html](https://docs.openstack.org/liberty/networking-guide/scenario-classic-ovs.html)
-* [https://docs.openstack.org/liberty/networking-guide/scenario-classic-lb.html](https://docs.openstack.org/liberty/networking-guide/scenario-classic-lb.html)
-* [https://www.suse.com/c/vms-get-access-metadata-neutron/](https://www.suse.com/c/vms-get-access-metadata-neutron/)
+* OpenStack Installation Guide : [https://docs.openstack.org/install-guide/](https://docs.openstack.org/install-guide/)
+* OpenStack Networking Architecture : [https://docs.openstack.org/security-guide/networking/architecture.html](https://docs.openstack.org/security-guide/networking/architecture.html)
+* Scenario: Classic with Open vSwitch : [https://docs.openstack.org/liberty/networking-guide/scenario-classic-ovs.html](https://docs.openstack.org/liberty/networking-guide/scenario-classic-ovs.html)
+* Scenario: Classic with Linux Bridge : [https://docs.openstack.org/liberty/networking-guide/scenario-classic-lb.html](https://docs.openstack.org/liberty/networking-guide/scenario-classic-lb.html)
+* How VMs Get Access to the Metadata in Neutron : [https://www.suse.com/c/vms-get-access-metadata-neutron/](https://www.suse.com/c/vms-get-access-metadata-neutron/)

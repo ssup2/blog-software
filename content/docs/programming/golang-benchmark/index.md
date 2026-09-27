@@ -147,4 +147,4 @@ ok      ssup2.com/test  0.006s
 
 ## 2. 참조
 
-* [https://blog.logrocket.com/benchmarking-golang-improve-function-performance/](https://blog.logrocket.com/benchmarking-golang-improve-function-performance/)
+* Benchmarking in Golang: Improving function performance : [https://blog.logrocket.com/benchmarking-golang-improve-function-performance/](https://blog.logrocket.com/benchmarking-golang-improve-function-performance/)

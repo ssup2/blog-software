@@ -122,8 +122,8 @@ Install Calico.
 
 ## 5. References
 
-* [https://medium.com/@elfakharany/how-to-enable-ipv6-on-kubernetes-aka-dual-stack-cluster-ac0fe294e4cf](https://medium.com/@elfakharany/how-to-enable-ipv6-on-kubernetes-aka-dual-stack-cluster-ac0fe294e4cf)
-* [https://kubernetes.io/docs/concepts/services-networking/dual-stack/](https://kubernetes.io/docs/concepts/services-networking/dual-stack/)
-* [https://docs.projectcalico.org/getting-started/kubernetes/self-managed-onprem/onpremises](https://docs.projectcalico.org/getting-started/kubernetes/self-managed-onprem/onpremises)
-* [https://docs.projectcalico.org/networking/dual-stack](https://docs.projectcalico.org/networking/dual-stack)
+* How to enable IPv6 on Kubernetes (Dual Stack Cluster) : [https://medium.com/@elfakharany/how-to-enable-ipv6-on-kubernetes-aka-dual-stack-cluster-ac0fe294e4cf](https://medium.com/@elfakharany/how-to-enable-ipv6-on-kubernetes-aka-dual-stack-cluster-ac0fe294e4cf)
+* IPv4/IPv6 dual-stack : [https://kubernetes.io/docs/concepts/services-networking/dual-stack/](https://kubernetes.io/docs/concepts/services-networking/dual-stack/)
+* Installing Calico on on-premises deployments : [https://docs.projectcalico.org/getting-started/kubernetes/self-managed-onprem/onpremises](https://docs.projectcalico.org/getting-started/kubernetes/self-managed-onprem/onpremises)
+* Calico Dual Stack Networking : [https://docs.projectcalico.org/networking/dual-stack](https://docs.projectcalico.org/networking/dual-stack)
 

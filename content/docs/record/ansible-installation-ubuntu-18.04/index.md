@@ -80,7 +80,3 @@ Control Node에서 `ssh-copy-id` 명령어를 이용하여 생성한 ssh Public 
 ```
 
 Control Node에서 `ansible all -m ping` 명령어를 이용하여 Control Node에서 Managed Node로 ssh 접속이 가능한지 확인한다.
-
-## 6. 참조
-
-* [https://docs.ansible.com/ansible/latest/installation-guide/index.html](https://docs.ansible.com/ansible/latest/installation-guide/index.html)

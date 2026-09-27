@@ -9,4 +9,4 @@ draft: true
 
 * MCP : [https://modelcontextprotocol.io/introduction](https://modelcontextprotocol.io/introduction)
 * MCP Lifecycle : [https://modelcontextprotocol.io/specification/2025-06-18/basic/lifecycle](https://modelcontextprotocol.io/specification/2025-06-18/basic/lifecycle)
-* [https://wikidocs.net/268793](https://wikidocs.net/268793)
+* MCP 보안 및 신뢰 모델 : [https://wikidocs.net/268793](https://wikidocs.net/268793)

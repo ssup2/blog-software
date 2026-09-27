@@ -141,5 +141,5 @@ Open a new Terminal and run the Consumer.
 
 ## 5. References
 
-* [https://www.howtoforge.com/tutorial/ubuntu-apache-kafka-installation/](https://www.howtoforge.com/tutorial/ubuntu-apache-kafka-installation/)
+* How to Install Apache Kafka on Ubuntu : [https://www.howtoforge.com/tutorial/ubuntu-apache-kafka-installation/](https://www.howtoforge.com/tutorial/ubuntu-apache-kafka-installation/)
 

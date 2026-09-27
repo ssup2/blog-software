@@ -294,10 +294,7 @@ Commands related to Golang Modules are as follows.
 
 ## 2. References
 
-* [https://blog.golang.org/using-go-modules](https://blog.golang.org/using-go-modules)
-* [https://jusths.tistory.com/107](https://jusths.tistory.com/107)
-* [https://velog.io/@kimmachinegun/Go-Go-Modules-%EC%82%B4%ED%8E%B4%EB%B3%B4%EA%B8%B0-7cjn4soifk](https://velog.io/@kimmachinegun/Go-Go-Modules-%EC%82%B4%ED%8E%B4%EB%B3%B4%EA%B8%B0-7cjn4soifk)
-* [https://aidanbae.github.io/code/golang/modules/](https://aidanbae.github.io/code/golang/modules/)
-* [https://medium.com/rungo/anatomy-of-modules-in-go-c8274d215c16](https://medium.com/rungo/anatomy-of-modules-in-go-c8274d215c16)
-* [https://johngrib.github.io/wiki/golang-mod/](https://johngrib.github.io/wiki/golang-mod/)
+* Using Go Modules : [https://blog.golang.org/using-go-modules](https://blog.golang.org/using-go-modules)
+* Go Modules - Local Modules : [https://jusths.tistory.com/107](https://jusths.tistory.com/107)
+* Anatomy of Modules in Go : [https://medium.com/rungo/anatomy-of-modules-in-go-c8274d215c16](https://medium.com/rungo/anatomy-of-modules-in-go-c8274d215c16)
 

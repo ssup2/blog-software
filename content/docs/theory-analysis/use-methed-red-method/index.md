@@ -27,5 +27,5 @@ RED Method는 **Rate**, **Errors**, **Duration** 3가지를 기반으로 모니�
 
 ## 4. 참조
 
-* [https://www.pusnow.com/note/use-method-and-red-method/](https://www.pusnow.com/note/use-method-and-red-method/)
-* [https://pagertree.com/learn/devops/what-is-observability/use-and-red-method](https://pagertree.com/learn/devops/what-is-observability/use-and-red-method)
+* USE 방법론과 RED 방법론 : [https://www.pusnow.com/note/use-method-and-red-method/](https://www.pusnow.com/note/use-method-and-red-method/)
+* USE and RED Method : [https://pagertree.com/learn/devops/what-is-observability/use-and-red-method](https://pagertree.com/learn/devops/what-is-observability/use-and-red-method)

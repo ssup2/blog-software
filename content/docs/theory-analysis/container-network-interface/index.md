@@ -65,6 +65,6 @@ Container Platform 또는 Container Runtime은 Conf 파일 생성, Plugin을 위
 
 ## 2. 참조
 
-* [https://github.com/containernetworking/cni/blob/master/SPEC.md](https://github.com/containernetworking/cni/blob/master/SPEC.md)
-* [https://kubernetes-csi.github.io/docs/](https://kubernetes-csi.github.io/docs/)
-* [https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/](https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/)
+* Container Network Interface (CNI) Specification : [https://github.com/containernetworking/cni/blob/master/SPEC.md](https://github.com/containernetworking/cni/blob/master/SPEC.md)
+* Kubernetes CSI Developer Documentation : [https://kubernetes-csi.github.io/docs/](https://kubernetes-csi.github.io/docs/)
+* Kubernetes Network Plugins : [https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/](https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/)

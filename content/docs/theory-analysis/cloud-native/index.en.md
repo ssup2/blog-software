@@ -12,6 +12,6 @@ The Architecture that maximizes the scalability and flexibility of Cloud is MSA 
 
 ## 2. References
 
-* [https://stackify.com/cloud-native/](https://stackify.com/cloud-native/)
-* [https://pivotal.io/de/cloud-native](https://pivotal.io/de/cloud-native)
+* What is Cloud-Native? Is It Hype or the Future : [https://stackify.com/cloud-native/](https://stackify.com/cloud-native/)
+* Cloud Native - Pivotal : [https://pivotal.io/de/cloud-native](https://pivotal.io/de/cloud-native)
 

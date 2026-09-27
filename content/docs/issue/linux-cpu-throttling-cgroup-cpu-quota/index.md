@@ -33,5 +33,5 @@ Kernel Upgrade가 힘들다면 CPU Quota 값을 원하는 값보다 높게 설�
 
 ## 3. 참조
 
-* [https://sched.co/Uae1](https://sched.co/Uae1)
-* [https://github.com/kubernetes/kubernetes/issues/70585](https://github.com/kubernetes/kubernetes/issues/70585)
+* Throttling: New Developments in Application Performance - KubeCon NA 2019 : [https://sched.co/Uae1](https://sched.co/Uae1)
+* Disable cpu quota(use only cpuset) for pod Guaranteed - kubernetes Issue #70585 : [https://github.com/kubernetes/kubernetes/issues/70585](https://github.com/kubernetes/kubernetes/issues/70585)

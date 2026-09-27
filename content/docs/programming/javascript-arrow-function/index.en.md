@@ -59,6 +59,6 @@ arrowObject.callFunction()
 
 ## 2. References
 
-* [https://poiemaweb.com/es6-arrow-function](https://poiemaweb.com/es6-arrow-function)
-* [https://www.w3schools.com/js/js_arrow_function.asp](https://www.w3schools.com/js/js_arrow_function.asp)
+* Arrow function : [https://poiemaweb.com/es6-arrow-function](https://poiemaweb.com/es6-arrow-function)
+* JavaScript Arrow Functions : [https://www.w3schools.com/js/js_arrow_function.asp](https://www.w3schools.com/js/js_arrow_function.asp)
 

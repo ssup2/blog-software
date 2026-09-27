@@ -31,6 +31,6 @@ Couchbase의 Replica는 오직 HA를 위해서 존재한다. Replica는 Failover
 
 ## 2. 참조
 
-* [https://docs.couchbase.com/server/5.0/architecture/core-data-access-buckets.html](https://docs.couchbase.com/server/5.0/architecture/core-data-access-buckets.html)
-* [https://docs.couchbase.com/server/6.0/learn/buckets-memory-and-storage/vbuckets.html](https://docs.couchbase.com/server/6.0/learn/buckets-memory-and-storage/vbuckets.html)
-* [https://docs.couchbase.com/server/4.1/concepts/data-management.html](https://docs.couchbase.com/server/4.1/concepts/data-management.html)
+* Buckets : [https://docs.couchbase.com/server/5.0/architecture/core-data-access-buckets.html](https://docs.couchbase.com/server/5.0/architecture/core-data-access-buckets.html)
+* vBuckets : [https://docs.couchbase.com/server/6.0/learn/buckets-memory-and-storage/vbuckets.html](https://docs.couchbase.com/server/6.0/learn/buckets-memory-and-storage/vbuckets.html)
+* Data Management : [https://docs.couchbase.com/server/4.1/concepts/data-management.html](https://docs.couchbase.com/server/4.1/concepts/data-management.html)

@@ -83,5 +83,5 @@ Verify the added Node from the Master Node. `vm04` is the added Node.
 
 ## 5. References
 
-* [https://sarc.io/index.php/cloud/1383-join-token](https://sarc.io/index.php/cloud/1383-join-token)
+* 쿠버네티스 노드 조인(Join)시 Token 값 확인 : [https://sarc.io/index.php/cloud/1383-join-token](https://sarc.io/index.php/cloud/1383-join-token)
 

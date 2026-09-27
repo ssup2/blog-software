@@ -180,8 +180,8 @@ HAProxy는 Amphora의 Network Namespace가 아닌 HAProxy 전용 Network Namespa
 
 ## 2. 참조
 
-* [https://www.slideshare.net/openstack-kr/openinfra-days-korea-2018-track-2-neutron-lbaas-octavia](https://www.slideshare.net/openstack-kr/openinfra-days-korea-2018-track-2-neutron-lbaas-octavia)
-* [https://docs.openstack.org/mitaka/networking-guide/config-lbaas.html](https://docs.openstack.org/mitaka/networking-guide/config-lbaas.html)
-* [https://docs.openstack.org/octavia/queens/reference/introduction.html](https://docs.openstack.org/octavia/queens/reference/introduction.html)
-* [https://access.redhat.com/documentation/en-us/red-hat-openstack-platform/13/html/networking-guide/sec-octavia](https://access.redhat.com/documentation/en-us/red-hat-openstack-platform/13/html/networking-guide/sec-octavia)
+* OpenInfra Days Korea 2018 - Neutron LBaaS & Octavia : [https://www.slideshare.net/openstack-kr/openinfra-days-korea-2018-track-2-neutron-lbaas-octavia](https://www.slideshare.net/openstack-kr/openinfra-days-korea-2018-track-2-neutron-lbaas-octavia)
+* Load Balancer as a Service (LBaaS) - OpenStack Docs : [https://docs.openstack.org/mitaka/networking-guide/config-lbaas.html](https://docs.openstack.org/mitaka/networking-guide/config-lbaas.html)
+* Introducing Octavia - OpenStack Docs : [https://docs.openstack.org/octavia/queens/reference/introduction.html](https://docs.openstack.org/octavia/queens/reference/introduction.html)
+* Octavia - Red Hat OpenStack Platform Networking Guide : [https://access.redhat.com/documentation/en-us/red-hat-openstack-platform/13/html/networking-guide/sec-octavia](https://access.redhat.com/documentation/en-us/red-hat-openstack-platform/13/html/networking-guide/sec-octavia)
 

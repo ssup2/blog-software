@@ -26,8 +26,7 @@ In this way, the higher the `GOGC` environment variable value, the lower the fre
 
 ## 2. References
 
-* [https://engineering.linecorp.com/ko/blog/detail/342/](https://engineering.linecorp.com/ko/blog/detail/342/)
-* [https://aidanbae.github.io/video/gogc/](https://aidanbae.github.io/video/gogc/)
-* [https://groups.google.com/g/golang-nuts/c/KJiyv2mV2pU](https://groups.google.com/g/golang-nuts/c/KJiyv2mV2pU)
-* [http://goog-perftools.sourceforge.net/doc/tcmalloc.html](http://goog-perftools.sourceforge.net/doc/tcmalloc.html)
-* [https://golang.org/pkg/runtime/debug/#SetGCPercent](https://golang.org/pkg/runtime/debug/#SetGCPercent)
+* Go Garbage Collection (LINE Engineering) : [https://engineering.linecorp.com/ko/blog/detail/342/](https://engineering.linecorp.com/ko/blog/detail/342/)
+* Why golang garbage-collector not implement Generational and Compact gc? : [https://groups.google.com/g/golang-nuts/c/KJiyv2mV2pU](https://groups.google.com/g/golang-nuts/c/KJiyv2mV2pU)
+* TCMalloc : Thread-Caching Malloc : [http://goog-perftools.sourceforge.net/doc/tcmalloc.html](http://goog-perftools.sourceforge.net/doc/tcmalloc.html)
+* runtime/debug package - SetGCPercent : [https://golang.org/pkg/runtime/debug/#SetGCPercent](https://golang.org/pkg/runtime/debug/#SetGCPercent)

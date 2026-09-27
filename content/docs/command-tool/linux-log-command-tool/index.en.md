@@ -74,5 +74,5 @@ Jul 13 19:06:29 node09 sshd[2675]: Server listening on :: port 22.
 
 ## 2. References
 
-* [https://github.com/nicolaka/netshoot](https://github.com/nicolaka/netshoot)
+* nicolaka/netshoot: a Docker + Kubernetes network trouble-shooting swiss-army container : [https://github.com/nicolaka/netshoot](https://github.com/nicolaka/netshoot)
 

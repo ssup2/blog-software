@@ -108,9 +108,9 @@ The biggest reason gRPC is currently attracting attention is that it is faster t
 
 ## 2. References
 
-* [https://grpc.io/docs/](https://grpc.io/docs/)
-* [https://medium.com/@goinhacker/microservices-with-grpc-d504133d191d](https://medium.com/@goinhacker/microservices-with-grpc-d504133d191d)
-* [https://github.com/HomoEfficio/dev-tips/blob/master/gRPC%20-%20Overview.md](https://github.com/HomoEfficio/dev-tips/blob/master/gRPC%20-%20Overview.md)
-* [https://github.com/protocolbuffers/protobuf/blob/master/examples/addressbook.proto](https://github.com/protocolbuffers/protobuf/blob/master/examples/addressbook.proto)
-* [https://tech.ktcloud.com/entry/gRPC%EC%9D%98-%EB%82%B4%EB%B6%80-%EA%B5%AC%EC%A1%B0-%ED%8C%8C%ED%97%A4%EC%B9%98%EA%B8%B0-HTTP2-Protobuf-%EA%B7%B8%EB%A6%AC%EA%B3%A0-%EC%8A%A4%ED%8A%B8%EB%A6%AC%EB%B0%8D](https://tech.ktcloud.com/entry/gRPC%EC%9D%98-%EB%82%B4%EB%B6%80-%EA%B5%AC%EC%A1%B0-%ED%8C%8C%ED%97%A4%EC%B9%98%EA%B8%B0-HTTP2-Protobuf-%EA%B7%B8%EB%A6%AC%EA%B3%A0-%EC%8A%A4%ED%8A%B8%EB%A6%AC%EB%B0%8D)
+* gRPC Documentation : [https://grpc.io/docs/](https://grpc.io/docs/)
+* Microservices with gRPC : [https://medium.com/@goinhacker/microservices-with-grpc-d504133d191d](https://medium.com/@goinhacker/microservices-with-grpc-d504133d191d)
+* gRPC Overview - HomoEfficio dev-tips : [https://github.com/HomoEfficio/dev-tips/blob/master/gRPC%20-%20Overview.md](https://github.com/HomoEfficio/dev-tips/blob/master/gRPC%20-%20Overview.md)
+* Protocol Buffers Example - addressbook.proto : [https://github.com/protocolbuffers/protobuf/blob/master/examples/addressbook.proto](https://github.com/protocolbuffers/protobuf/blob/master/examples/addressbook.proto)
+* gRPC의 내부 구조 파헤치기 - HTTP2, Protobuf 그리고 스트리밍 : [https://tech.ktcloud.com/entry/gRPC%EC%9D%98-%EB%82%B4%EB%B6%80-%EA%B5%AC%EC%A1%B0-%ED%8C%8C%ED%97%A4%EC%B9%98%EA%B8%B0-HTTP2-Protobuf-%EA%B7%B8%EB%A6%AC%EA%B3%A0-%EC%8A%A4%ED%8A%B8%EB%A6%AC%EB%B0%8D](https://tech.ktcloud.com/entry/gRPC%EC%9D%98-%EB%82%B4%EB%B6%80-%EA%B5%AC%EC%A1%B0-%ED%8C%8C%ED%97%A4%EC%B9%98%EA%B8%B0-HTTP2-Protobuf-%EA%B7%B8%EB%A6%AC%EA%B3%A0-%EC%8A%A4%ED%8A%B8%EB%A6%AC%EB%B0%8D)
 * GRPC Status Code : [https://grpc.io/docs/guides/status-codes/](https://grpc.io/docs/guides/status-codes/)

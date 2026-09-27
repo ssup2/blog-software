@@ -390,11 +390,11 @@ Create Memcached CRs as in [Code 5] to run Memcached. Since Spec's `Size` is 3 i
 
 ## 3. References
 
-* [https://github.com/dev4devs-com/memcached-kubebuilder](https://github.com/dev4devs-com/memcached-kubebuilder)
-* [https://github.com/operator-framework/operator-sdk/issues/1124](https://github.com/operator-framework/operator-sdk/issues/1124)
-* [https://book.kubebuilder.io/quick-start.html](https://book.kubebuilder.io/quick-start.html)
-* [https://book.kubebuilder.io/cronjob-tutorial/cronjob-tutorial.html](https://book.kubebuilder.io/cronjob-tutorial/cronjob-tutorial.html)
-* [https://pkg.go.dev/sigs.k8s.io/controller-runtime](https://pkg.go.dev/sigs.k8s.io/controller-runtime)
-* [https://getoutsidedoor.com/2020/05/09/kubernetes-controller-%EA%B5%AC%ED%98%84%ED%95%B4%EB%B3%B4%EA%B8%B0/](https://getoutsidedoor.com/2020/05/09/kubernetes-controller-%EA%B5%AC%ED%98%84%ED%95%B4%EB%B3%B4%EA%B8%B0/)
-* [https://stuartleeks.com/posts/kubebuilder-event-filters-part-2-update/](https://stuartleeks.com/posts/kubebuilder-event-filters-part-2-update/)
+* Memcached Operator Example built using Kubebuilder : [https://github.com/dev4devs-com/memcached-kubebuilder](https://github.com/dev4devs-com/memcached-kubebuilder)
+* Failed with "the server could not find the requested resource" - operator-sdk Issue #1124 : [https://github.com/operator-framework/operator-sdk/issues/1124](https://github.com/operator-framework/operator-sdk/issues/1124)
+* Quick Start - The Kubebuilder Book : [https://book.kubebuilder.io/quick-start.html](https://book.kubebuilder.io/quick-start.html)
+* Tutorial: Building CronJob - The Kubebuilder Book : [https://book.kubebuilder.io/cronjob-tutorial/cronjob-tutorial.html](https://book.kubebuilder.io/cronjob-tutorial/cronjob-tutorial.html)
+* controller-runtime package - Go Packages : [https://pkg.go.dev/sigs.k8s.io/controller-runtime](https://pkg.go.dev/sigs.k8s.io/controller-runtime)
+* Kubernetes Controller 구현해보기 : [https://getoutsidedoor.com/2020/05/09/kubernetes-controller-%EA%B5%AC%ED%98%84%ED%95%B4%EB%B3%B4%EA%B8%B0/](https://getoutsidedoor.com/2020/05/09/kubernetes-controller-%EA%B5%AC%ED%98%84%ED%95%B4%EB%B3%B4%EA%B8%B0/)
+* Using Event Filters with Kubebuilder - Part 2: Filtering Updates : [https://stuartleeks.com/posts/kubebuilder-event-filters-part-2-update/](https://stuartleeks.com/posts/kubebuilder-event-filters-part-2-update/)
 

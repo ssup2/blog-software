@@ -115,8 +115,8 @@ When a Thread is executing Code while holding the Lock of an Instance's Monitor 
 
 ## 2. References
 
-* [https://en.wikipedia.org/wiki/Monitor_(synchronization)](https://en.wikipedia.org/wiki/Monitor_(synchronization))
-* [http://christian.heinleins.net/apples/sync/](http://christian.heinleins.net/apples/sync/)
-* [http://egloos.zum.com/iilii/v/4071694](http://egloos.zum.com/iilii/v/4071694)
-* [https://www.baeldung.com/java-wait-notify](https://www.baeldung.com/java-wait-notify)
+* Monitor (synchronization) : [https://en.wikipedia.org/wiki/Monitor_(synchronization)](https://en.wikipedia.org/wiki/Monitor_(synchronization))
+* High-Level Thread Synchronization : [http://christian.heinleins.net/apples/sync/](http://christian.heinleins.net/apples/sync/)
+* Java synchronized Keyword : [http://egloos.zum.com/iilii/v/4071694](http://egloos.zum.com/iilii/v/4071694)
+* wait and notify() Methods in Java : [https://www.baeldung.com/java-wait-notify](https://www.baeldung.com/java-wait-notify)
 

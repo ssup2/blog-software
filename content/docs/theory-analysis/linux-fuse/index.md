@@ -36,4 +36,4 @@ struct fuse-operations fuse-oper = {
 
 * Linux FUSE Documentation : [https://www.kernel.org/doc/Documentation/filesystems/fuse.txt](https://www.kernel.org/doc/Documentation/filesystems/fuse.txt)
 * libfuse : [https://github.com/libfuse/libfuse](https://github.com/libfuse/libfuse)
-* [https://www.slideshare.net/danny00076/fuse-filesystem-in-user-space](https://www.slideshare.net/danny00076/fuse-filesystem-in-user-space)
+* FUSE - Filesystem in User Space : [https://www.slideshare.net/danny00076/fuse-filesystem-in-user-space](https://www.slideshare.net/danny00076/fuse-filesystem-in-user-space)

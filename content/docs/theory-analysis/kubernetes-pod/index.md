@@ -204,6 +204,6 @@ Hook Handler Type에는 Exec, HTTP를 제공한다.
 
 ## 2. 참조
 
-* [https://kubernetes.io/docs/concepts/workloads/pods/pod-overview/](https://kubernetes.io/docs/concepts/workloads/pods/pod-overview/)
-* [https://www.mirantis.com/blog/multi-container-pods-and-container-communication-in-kubernetes/](https://www.mirantis.com/blog/multi-container-pods-and-container-communication-in-kubernetes/)
-* [https://medium.com/google-cloud/quality-of-service-class-qos-in-kubernetes-bb76a89eb2c6](https://medium.com/google-cloud/quality-of-service-class-qos-in-kubernetes-bb76a89eb2c6)
+* Kubernetes Pods : [https://kubernetes.io/docs/concepts/workloads/pods/pod-overview/](https://kubernetes.io/docs/concepts/workloads/pods/pod-overview/)
+* Kubernetes Pod vs. Container: Multi-Container Communication : [https://www.mirantis.com/blog/multi-container-pods-and-container-communication-in-kubernetes/](https://www.mirantis.com/blog/multi-container-pods-and-container-communication-in-kubernetes/)
+* Quality of Service Class (QoS) in Kubernetes : [https://medium.com/google-cloud/quality-of-service-class-qos-in-kubernetes-bb76a89eb2c6](https://medium.com/google-cloud/quality-of-service-class-qos-in-kubernetes-bb76a89eb2c6)

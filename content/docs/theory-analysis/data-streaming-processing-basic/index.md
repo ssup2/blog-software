@@ -7,6 +7,6 @@ draft: true
 
 ## 2. 참조
 
-* [https://www.oreilly.com/radar/the-world-beyond-batch-streaming-101/](https://www.oreilly.com/radar/the-world-beyond-batch-streaming-101/)
-* [https://medium.com/@akash.d.goel/stream-processing-fundamentals-d4090f33451d](https://medium.com/@akash.d.goel/stream-processing-fundamentals-d4090f33451d)
+* Streaming 101: The World Beyond Batch : [https://www.oreilly.com/radar/the-world-beyond-batch-streaming-101/](https://www.oreilly.com/radar/the-world-beyond-batch-streaming-101/)
+* Stream Processing Fundamentals : [https://medium.com/@akash.d.goel/stream-processing-fundamentals-d4090f33451d](https://medium.com/@akash.d.goel/stream-processing-fundamentals-d4090f33451d)
 

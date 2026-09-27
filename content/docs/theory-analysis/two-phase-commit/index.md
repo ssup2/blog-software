@@ -16,5 +16,5 @@ Transaction Coordinator는 Transaction을 수행해야 하는 모든 Node들에�
 
 ## 2. 참조
 
-* [http://swdev.tistory.com/2](http://swdev.tistory.com/2)
-* [https://stackoverflow.com/questions/7389382/two-phase-commit](https://stackoverflow.com/questions/7389382/two-phase-commit)
+* Two-Phase Commit : [http://swdev.tistory.com/2](http://swdev.tistory.com/2)
+* Two phase commit - Stack Overflow : [https://stackoverflow.com/questions/7389382/two-phase-commit](https://stackoverflow.com/questions/7389382/two-phase-commit)

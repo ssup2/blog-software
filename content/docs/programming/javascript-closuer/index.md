@@ -62,9 +62,9 @@ Closure는 외부에서는 접근할 수 없는 공간이기 때문에 Closure�
 
 ## 2. 참조
 
-* [https://developer.mozilla.org/ko/docs/Web/JavaScript/Guide/Closures](https://developer.mozilla.org/ko/docs/Web/JavaScript/Guide/Closures)
-* [https://hyunseob.github.io/2016/08/30/javascript-closure/](https://hyunseob.github.io/2016/08/30/javascript-closure/)
-* [https://poiemaweb.com/js-closure](https://poiemaweb.com/js-closure)
-* [https://www.w3schools.com/js/js_function_closures.asp](https://www.w3schools.com/js/js_function_closures.asp)
-* [https://stackoverflow.com/questions/750486/javascript-closure-inside-loops-simple-practical-example](https://stackoverflow.com/questions/750486/javascript-closure-inside-loops-simple-practical-example)
-* [https://stackoverflow.com/questions/16959342/javascript-closures-on-heap-or-stack](https://stackoverflow.com/questions/16959342/javascript-closures-on-heap-or-stack)
+* 클로저 - JavaScript : [https://developer.mozilla.org/ko/docs/Web/JavaScript/Guide/Closures](https://developer.mozilla.org/ko/docs/Web/JavaScript/Guide/Closures)
+* JavaScript 클로저(Closure) : [https://hyunseob.github.io/2016/08/30/javascript-closure/](https://hyunseob.github.io/2016/08/30/javascript-closure/)
+* Closure : [https://poiemaweb.com/js-closure](https://poiemaweb.com/js-closure)
+* JavaScript Function Closures : [https://www.w3schools.com/js/js_function_closures.asp](https://www.w3schools.com/js/js_function_closures.asp)
+* JavaScript closure inside loops - simple practical example : [https://stackoverflow.com/questions/750486/javascript-closure-inside-loops-simple-practical-example](https://stackoverflow.com/questions/750486/javascript-closure-inside-loops-simple-practical-example)
+* JavaScript closures on heap or stack : [https://stackoverflow.com/questions/16959342/javascript-closures-on-heap-or-stack](https://stackoverflow.com/questions/16959342/javascript-closures-on-heap-or-stack)

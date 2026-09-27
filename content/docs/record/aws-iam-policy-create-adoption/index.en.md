@@ -103,5 +103,5 @@ You can see that the Describe Instance operation is possible, but the Describe V
 
 ## 5. References
 
-* [https://www.youtube.com/watch?v=iPKaylieTV8](https://www.youtube.com/watch?v=iPKaylieTV8)
+* IAM 정책을 잘 알아야 AWS 보안도 쉬워진다. 이것은 꼭 알고 가자! : [https://www.youtube.com/watch?v=iPKaylieTV8](https://www.youtube.com/watch?v=iPKaylieTV8)
 

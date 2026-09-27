@@ -42,4 +42,4 @@ Receiver는 **Value Receiver**와 **Pointer Receiver**가 존재한다. Value Re
 
 ## 2. 참조
 
-* [https://kamang-it.tistory.com/entry/Go15%EB%A9%94%EC%86%8C%EB%93%9CMethod%EC%99%80-%EB%A6%AC%EC%8B%9C%EB%B2%84Receiver](https://kamang-it.tistory.com/entry/Go15%EB%A9%94%EC%86%8C%EB%93%9CMethod%EC%99%80-%EB%A6%AC%EC%8B%9C%EB%B2%84Receiver)
+* Go Method and Receiver : [https://kamang-it.tistory.com/entry/Go15%EB%A9%94%EC%86%8C%EB%93%9CMethod%EC%99%80-%EB%A6%AC%EC%8B%9C%EB%B2%84Receiver](https://kamang-it.tistory.com/entry/Go15%EB%A9%94%EC%86%8C%EB%93%9CMethod%EC%99%80-%EB%A6%AC%EC%8B%9C%EB%B2%84Receiver)

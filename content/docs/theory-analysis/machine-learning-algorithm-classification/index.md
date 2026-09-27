@@ -51,7 +51,6 @@ Data Labeling은 의미 그대로 Label이 붙어 있지 않는 Data에 Label을
 
 ## 2. 참고
 
-* [https://www.sas.com/en-gb/insights/articles/analytics/machine-learning-algorithms.html](https://www.sas.com/en-gb/insights/articles/analytics/machine-learning-algorithms.html)
-* [https://opentutorials.org/module/4916/28934](https://opentutorials.org/module/4916/28934)
+* 머신러닝의 분류 : [https://opentutorials.org/module/4916/28934](https://opentutorials.org/module/4916/28934)
 * 지도 학습 : [https://aimb.tistory.com/149](https://aimb.tistory.com/149)
 * 차원 축소 : [https://docs.sangyunlee.com/ml/analysis/undefined-1](https://docs.sangyunlee.com/ml/analysis/undefined-1)

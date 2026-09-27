@@ -31,8 +31,6 @@ IP-in-IP를 이용하여 가상의 Pod Network를 만드는 방식이지만, Hos
 
 ## 2. 참조
 
-* [https://docs.projectcalico.org/master/reference/architecture/](https://docs.projectcalico.org/master/reference/architecture/)
-* [https://platform9.com/blog/kubernetes-networking-achieving-high-performance-with-calico/](https://platform9.com/blog/kubernetes-networking-achieving-high-performance-with-calico/)
-* [http://leebriggs.co.uk/blog/2017/02/18/kubernetes-networking-calico.html](http://leebriggs.co.uk/blog/2017/02/18/kubernetes-networking-calico.html)
-* [https://kubernetes.feisky.xyz/zh/network/calico/](https://kubernetes.feisky.xyz/zh/network/calico/)
-* [https://jvns.ca/blog/2016/07/16/calico/](https://jvns.ca/blog/2016/07/16/calico/)
+* Calico Architecture : [https://docs.projectcalico.org/master/reference/architecture/](https://docs.projectcalico.org/master/reference/architecture/)
+* Kubernetes Networking: Achieving High Performance with Calico : [https://platform9.com/blog/kubernetes-networking-achieving-high-performance-with-calico/](https://platform9.com/blog/kubernetes-networking-achieving-high-performance-with-calico/)
+* Kubernetes Networking: Part 2 - Calico : [http://leebriggs.co.uk/blog/2017/02/18/kubernetes-networking-calico.html](http://leebriggs.co.uk/blog/2017/02/18/kubernetes-networking-calico.html)

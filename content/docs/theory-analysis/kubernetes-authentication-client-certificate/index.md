@@ -70,6 +70,6 @@ kubeconfig 설정을 통해서 `kubectl`에서도 Client Certificate를 이용�
 
 ## 2. 참고
 
-* [https://kubernetes.io/docs/reference/access-authn-authz/authentication/#x509-client-certs](https://kubernetes.io/docs/reference/access-authn-authz/authentication/#x509-client-certs)
-* [https://kubernetes.io/docs/reference/access-authn-authz/rbac/#referring-to-subjects](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#referring-to-subjects)
-* [https://coffeewhale.com/kubernetes/authentication/x509/2020/05/02/auth01/](https://coffeewhale.com/kubernetes/authentication/x509/2020/05/02/auth01/)
+* Authenticating - X509 Client Certs : [https://kubernetes.io/docs/reference/access-authn-authz/authentication/#x509-client-certs](https://kubernetes.io/docs/reference/access-authn-authz/authentication/#x509-client-certs)
+* Using RBAC Authorization - Referring to Subjects : [https://kubernetes.io/docs/reference/access-authn-authz/rbac/#referring-to-subjects](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#referring-to-subjects)
+* k8s 인증 완벽이해 #1 - X.509 Client Certs : [https://coffeewhale.com/kubernetes/authentication/x509/2020/05/02/auth01/](https://coffeewhale.com/kubernetes/authentication/x509/2020/05/02/auth01/)

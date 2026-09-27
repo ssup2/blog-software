@@ -16,5 +16,5 @@ Instance는 Class로 설계된 Object가 프로그램 안에서 **실체화** �
 
 ## 4. 참조
 
-* [https://alfredjava.wordpress.com/2008/07/08/class-vs-object-vs-instance](https://alfredjava.wordpress.com/2008/07/08/class-vs-object-vs-instance)
-* [http://cerulean85.tistory.com/149](http://cerulean85.tistory.com/149)
+* Class vs Object vs Instance : [https://alfredjava.wordpress.com/2008/07/08/class-vs-object-vs-instance](https://alfredjava.wordpress.com/2008/07/08/class-vs-object-vs-instance)
+* 객체와 인스턴스의 차이 : [http://cerulean85.tistory.com/149](http://cerulean85.tistory.com/149)

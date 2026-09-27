@@ -72,4 +72,4 @@ $ aws iam create-access-key --user-name admin
 
 ## 4. 참조
 
-* [https://docs.aws.amazon.com/IAM/latest/UserGuide/getting-started-create-admin-group.html](https://docs.aws.amazon.com/IAM/latest/UserGuide/getting-started-create-admin-group.html)
+* Creating Your First IAM Admin User and Group : [https://docs.aws.amazon.com/IAM/latest/UserGuide/getting-started-create-admin-group.html](https://docs.aws.amazon.com/IAM/latest/UserGuide/getting-started-create-admin-group.html)

@@ -24,5 +24,4 @@ A -> [Barrier] -> B -> C -> D -> E
 
 ### 2. 참조
 
-* [https://en.wikipedia.org/wiki/Barrier_(computer_scienc)](https://en.wikipedia.org/wiki/Barrier_(computer_science))
-* [http://forum.falinux.com/zbxe/index.php?document_srl=534002&mid=Kernel_API](http://forum.falinux.com/zbxe/index.php?document_srl=534002&mid=Kernel_API)
+* 커널 API - Barrier : [http://forum.falinux.com/zbxe/index.php?document_srl=534002&mid=Kernel_API](http://forum.falinux.com/zbxe/index.php?document_srl=534002&mid=Kernel_API)

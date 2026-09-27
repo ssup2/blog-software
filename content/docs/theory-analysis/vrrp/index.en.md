@@ -20,6 +20,5 @@ If Master Router stops operating due to failure, VRRP Advertisement Packet is no
 
 ## 2. References
 
-* [https://www.slideshare.net/netmanias-ko/netmanias20080324-vrrp-protocoloverview](https://www.slideshare.net/netmanias-ko/netmanias20080324-vrrp-protocoloverview)
-* [http://www.rfwireless-world.com/Terminology/Virtual-MAC-Address-vs-Physical-MAC-Address.html](http://www.rfwireless-world.com/Terminology/Virtual-MAC-Address-vs-Physical-MAC-Address.html)
+* VRRP Protocol Overview - SlideShare : [https://www.slideshare.net/netmanias-ko/netmanias20080324-vrrp-protocoloverview](https://www.slideshare.net/netmanias-ko/netmanias20080324-vrrp-protocoloverview)
 

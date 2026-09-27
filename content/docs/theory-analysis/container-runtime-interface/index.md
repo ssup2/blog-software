@@ -50,5 +50,4 @@ service ImageService {
 
 ## 2. 참고
 
-* [https://kubernetes.io/blog/2016/12/container-runtime-interface-cri-in-kubernetes/](https://kubernetes.io/blog/2016/12/container-runtime-interface-cri-in-kubernetes/)
-* [https://github.com/kubernetes/cri-api/blob/master/pkg/apis/runtime/v1alpha2/api.proto](https://github.com/kubernetes/cri-api/blob/master/pkg/apis/runtime/v1alpha2/api.proto)
+* Introducing Container Runtime Interface (CRI) in Kubernetes : [https://kubernetes.io/blog/2016/12/container-runtime-interface-cri-in-kubernetes/](https://kubernetes.io/blog/2016/12/container-runtime-interface-cri-in-kubernetes/)

@@ -44,8 +44,8 @@ WebSocket 기법은 Web Browser와 Server 사이의 양방향 실시간 통신�
 
 ## 6. 참조
 
-* [https://medium.com/system-design-blog/long-polling-vs-websockets-vs-server-sent-events-c43ba96df7c1](https://medium.com/system-design-blog/long-polling-vs-websockets-vs-server-sent-events-c43ba96df7c1)
-* [https://codeburst.io/polling-vs-sse-vs-websocket-how-to-choose-the-right-one-1859e4e13bd9](https://codeburst.io/polling-vs-sse-vs-websocket-how-to-choose-the-right-one-1859e4e13bd9)
-* [https://stackoverflow.com/questions/5195452/websockets-vs-server-sent-events-eventsource](https://stackoverflow.com/questions/5195452/websockets-vs-server-sent-events-eventsource)
-* [https://ko.javascript.info/long-polling](https://ko.javascript.info/long-polling)
-* [https://stackoverflow.com/questions/39274809/does-server-sent-events-utilise-http-2-pipelining](https://stackoverflow.com/questions/39274809/does-server-sent-events-utilise-http-2-pipelining)
+* Long Polling vs WebSockets vs Server-Sent Events : [https://medium.com/system-design-blog/long_polling_vs_websockets_vs_server_sent_events_c43ba96df7c1](https://medium.com/system-design-blog/long_polling_vs_websockets_vs_server_sent_events_c43ba96df7c1)
+* Polling vs SSE vs WebSocket - How to Choose the Right One : [https://codeburst.io/polling-vs-sse-vs-websocket-how-to-choose-the-right-one-1859e4e13bd9](https://codeburst.io/polling-vs-sse-vs-websocket-how-to-choose-the-right-one-1859e4e13bd9)
+* WebSockets vs Server-Sent Events/EventSource : [https://stackoverflow.com/questions/5195452/websockets-vs-server-sent-events-eventsource](https://stackoverflow.com/questions/5195452/websockets-vs-server-sent-events-eventsource)
+* 롱 폴링 : [https://ko.javascript.info/long-polling](https://ko.javascript.info/long-polling)
+* Does Server-Sent Events Utilise HTTP/2 Pipelining : [https://stackoverflow.com/questions/39274809/does-server-sent-events-utilise-http-2-pipelining](https://stackoverflow.com/questions/39274809/does-server-sent-events-utilise-http-2-pipelining)

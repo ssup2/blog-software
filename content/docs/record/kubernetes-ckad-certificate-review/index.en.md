@@ -45,5 +45,5 @@ title: CKAD Certificate Exam Review
 
 ## 6. References
 
-* [https://jyeonth.tistory.com/34](https://jyeonth.tistory.com/34)
+* CKAD(Certified Kubernetes Application Developer) 합격 후기 및 팁 : [https://jyeonth.tistory.com/34](https://jyeonth.tistory.com/34)
 

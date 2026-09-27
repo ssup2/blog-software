@@ -58,6 +58,4 @@ Straw에 Item 추가,제거 또는 Item의 Weight가 변경되더라도 각 Item
 
 ## 3. 참조
 
-* [https://ceph.com/wp-content/uploads/2016/08/weil-crush-sc06.pdf](https://ceph.com/wp-content/uploads/2016/08/weil-crush-sc06.pdf)
-* [http://docs.ceph.com/docs/jewel/rados/operations/crush-map/](http://docs.ceph.com/docs/jewel/rados/operations/crush-map/)
-* [http://www.lamsade.dauphine.fr/~litwin/cours98/Doc-cours-clouds/ceph-2009-02%5B1%5D.pdf](http://www.lamsade.dauphine.fr/~litwin/cours98/Doc-cours-clouds/ceph-2009-02%5B1%5D.pdf)
+* Ceph Presentation Slides : [http://www.lamsade.dauphine.fr/~litwin/cours98/Doc-cours-clouds/ceph-2009-02%5B1%5D.pdf](http://www.lamsade.dauphine.fr/~litwin/cours98/Doc-cours-clouds/ceph-2009-02%5B1%5D.pdf)

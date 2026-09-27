@@ -305,6 +305,6 @@ Verify RGW operation.
 
 ## 6. References
 
-* [http://docs.ceph.com/docs/master/start/](http://docs.ceph.com/docs/master/start/)
-* [https://kubernetes.io/docs/concepts/storage/storage-classes/#ceph-rbd](https://kubernetes.io/docs/concepts/storage/storage-classes/#ceph-rbd)
+* Intro to Ceph : [http://docs.ceph.com/docs/master/start/](http://docs.ceph.com/docs/master/start/)
+* Storage Classes : [https://kubernetes.io/docs/concepts/storage/storage-classes/#ceph-rbd](https://kubernetes.io/docs/concepts/storage/storage-classes/#ceph-rbd)
 

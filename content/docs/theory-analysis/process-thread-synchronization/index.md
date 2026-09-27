@@ -147,7 +147,6 @@ Semaphore의 Value가 0과 1만 이용할 경우 Mutex와 동일하게 Critical 
 
 * Mutex : [https://www.joinc.co.kr/w/Site/Thread/Beginning/Mutex](https://www.joinc.co.kr/w/Site/Thread/Beginning/Mutex)
 * Mutex : [http://www.qnx.com/developers/docs/6.5.0/index.jsp?topic=%2Fcom.qnx.doc.neutrino-lib-ref%2Fp%2Fpthread-mutex-unlock.html](http://www.qnx.com/developers/docs/6.5.0/index.jsp?topic=%2Fcom.qnx.doc.neutrino-lib-ref%2Fp%2Fpthread-mutex-unlock.html)
-* Spinlock : [https://seokbeomkim.github.io/posts/locks-in-the-kernel-1/](https://seokbeomkim.github.io/posts/locks-in-the-kernel-1/)
 * Condition Variable : [https://stackoverflow.com/questions/49281906/which-thread-would-be-notified-by-pthread-cond-signal](https://stackoverflow.com/questions/49281906/which-thread-would-be-notified-by-pthread-cond-signal)
 * Condition Variable : [https://elecs.tistory.com/135](https://elecs.tistory.com/135)
 * Semaphore : [https://yebig.tistory.com/305](https://yebig.tistory.com/305)

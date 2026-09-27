@@ -141,7 +141,7 @@ Chain ISTIO_REDIRECT (1 references)
 
 ## 2. 참조
 
-* [https://istio.io/latest/docs/ops/configuration/traffic-management/dns-proxy/](https://istio.io/latest/docs/ops/configuration/traffic-management/dns-proxy/)
-* [https://istio.io/latest/blog/2020/dns-proxy/](https://istio.io/latest/blog/2020/dns-proxy/)
-* [https://tetrate.io/blog/trying-out-istios-dns-proxy-2/](https://tetrate.io/blog/trying-out-istios-dns-proxy-2/)
-* [https://www.anyflow.net/sw-engineer/istio-dns-proxying](https://www.anyflow.net/sw-engineer/istio-dns-proxying)
+* DNS Proxying : [https://istio.io/latest/docs/ops/configuration/traffic-management/dns-proxy/](https://istio.io/latest/docs/ops/configuration/traffic-management/dns-proxy/)
+* Expanding into New Frontiers - Smart DNS Proxying in Istio : [https://istio.io/latest/blog/2020/dns-proxy/](https://istio.io/latest/blog/2020/dns-proxy/)
+* Trying out Istio's DNS Proxy : [https://tetrate.io/blog/trying-out-istios-dns-proxy-2/](https://tetrate.io/blog/trying-out-istios-dns-proxy-2/)
+* Istio DNS proxy: 지연 개선, DNS 부하 감소 : [https://www.anyflow.net/sw-engineer/istio-dns-proxying](https://www.anyflow.net/sw-engineer/istio-dns-proxying)

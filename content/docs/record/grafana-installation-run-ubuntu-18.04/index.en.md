@@ -39,5 +39,5 @@ Start Grafana and verify access.
 
 ## 3. References
 
-* [http://docs.grafana.org/installation/debian/](http://docs.grafana.org/installation/debian/)
+* Install Grafana on Debian or Ubuntu : [http://docs.grafana.org/installation/debian/](http://docs.grafana.org/installation/debian/)
 

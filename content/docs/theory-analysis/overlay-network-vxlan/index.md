@@ -68,7 +68,6 @@ VXLAN의 VNI는 약 16,000,000개를 이용 할 수 있기 때문에 많은 수�
 
 ## 4. 참조
 
-* [http://youngmind.tistory.com/entry/Network-Overlay-VXLAN-%EB%B6%84%EC%84%9D-1](http://youngmind.tistory.com/entry/Network-Overlay-VXLAN-%EB%B6%84%EC%84%9D-1)
-* [https://www.slideshare.net/KwonSunBae/vxlan-deep-dive-session-rev05-final](https://www.slideshare.net/KwonSunBae/vxlan-deep-dive-session-rev05-final)
-* [https://www.arista.com/assets/data/pdf/Whitepapers/Arista-Networks-VXLAN-White-Paper.pdf](https://www.arista.com/assets/data/pdf/Whitepapers/Arista-Networks-VXLAN-White-Paper.pdf)
-* [https://www.slideshare.net/enakai/how-vxlan-works-on-linux](https://www.slideshare.net/enakai/how-vxlan-works-on-linux)
+* Network Overlay - VXLAN를 말한다 #1 : [http://youngmind.tistory.com/entry/Network-Overlay-VXLAN-%EB%B6%84%EC%84%9D-1](http://youngmind.tistory.com/entry/Network-Overlay-VXLAN-%EB%B6%84%EC%84%9D-1)
+* VXLAN Deep Dive Session (SlideShare) : [https://www.slideshare.net/KwonSunBae/vxlan-deep-dive-session-rev05-final](https://www.slideshare.net/KwonSunBae/vxlan-deep-dive-session-rev05-final)
+* How VXLAN Works on Linux (SlideShare) : [https://www.slideshare.net/enakai/how-vxlan-works-on-linux](https://www.slideshare.net/enakai/how-vxlan-works-on-linux)

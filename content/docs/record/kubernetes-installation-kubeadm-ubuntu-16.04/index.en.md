@@ -201,5 +201,4 @@ After executing the `kubectl proxy` command, access `http://localhost:8001/ui` f
 
 * Kubernetes Installation: [https://kubernetes.io/docs/setup/independent/install-kubeadm/](https://kubernetes.io/docs/setup/independent/install-kubeadm/)
 * Docker Installation: [https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/](https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/)
-* flannel Issue: [https://github.com/coreos/flannel/issues/671](https://github.com/coreos/flannel/issues/671)
 

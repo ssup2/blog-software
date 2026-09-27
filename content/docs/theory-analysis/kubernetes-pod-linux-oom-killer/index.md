@@ -72,4 +72,4 @@ $ dmesg
 
 ## 2. 참조
 
-* [https://kubernetes.io/docs/tasks/administer-cluster/out-of-resource/#node-oom-behavior](https://kubernetes.io/docs/tasks/administer-cluster/out-of-resource/#node-oom-behavior)
+* Node-pressure Eviction : [https://kubernetes.io/docs/tasks/administer-cluster/out-of-resource/#node-oom-behavior](https://kubernetes.io/docs/tasks/administer-cluster/out-of-resource/#node-oom-behavior)

@@ -40,6 +40,6 @@ Stack을 동적으로 할당하는 기법에는 기존의 Stack은 그대로 유
 
 ## 2. 참조
 
-* [https://www.youtube.com/watch?v=-K11rY57K7k](https://www.youtube.com/watch?v=-K11rY57K7k)
-* [https://assets.ctfassets.net/oxjq45e8ilak/48lwQdnyDJr2O64KUsUB5V/5d8343da0119045c4b26eb65a83e786f/100545-516729073-DMITRII-VIUKOV-Go-scheduler-Implementing-language-with-lightweight-concurrency.pdf](https://assets.ctfassets.net/oxjq45e8ilak/48lwQdnyDJr2O64KUsUB5V/5d8343da0119045c4b26eb65a83e786f/100545-516729073-DMITRII-VIUKOV-Go-scheduler-Implementing-language-with-lightweight-concurrency.pdf)
-* [https://kuaaan.tistory.com/449](https://kuaaan.tistory.com/449)
+* Dmitry Vyukov - Go scheduler: Implementing language with lightweight concurrency : [https://www.youtube.com/watch?v=-K11rY57K7k](https://www.youtube.com/watch?v=-K11rY57K7k)
+* Go scheduler: Implementing language with lightweight concurrency (Slides) : [https://assets.ctfassets.net/oxjq45e8ilak/48lwQdnyDJr2O64KUsUB5V/5d8343da0119045c4b26eb65a83e786f/100545-516729073-DMITRII-VIUKOV-Go-scheduler-Implementing-language-with-lightweight-concurrency.pdf](https://assets.ctfassets.net/oxjq45e8ilak/48lwQdnyDJr2O64KUsUB5V/5d8343da0119045c4b26eb65a83e786f/100545-516729073-DMITRII-VIUKOV-Go-scheduler-Implementing-language-with-lightweight-concurrency.pdf)
+* x64 디버깅 강좌 (1) - x64 Stack 개요 : [https://kuaaan.tistory.com/449](https://kuaaan.tistory.com/449)

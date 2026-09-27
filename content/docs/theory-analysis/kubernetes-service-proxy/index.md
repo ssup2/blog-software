@@ -289,7 +289,7 @@ IPVS도 iptables와 동일하게 Linux Kernel의 Conntrack의 TCP Connection 정
 
 ## 5. 참조
 
-* [https://www.slideshare.net/Docker/deep-dive-in-container-service-discovery](https://www.slideshare.net/Docker/deep-dive-in-container-service-discovery)
-* [http://www.system-rescue-cd.org/networking/Load-balancing-using-iptables-with-connmark/](http://www.system-rescue-cd.org/networking/Load-balancing-using-iptables-with-connmark/)
-* [https://kubernetes.io/docs/concepts/services-networking/service/](https://kubernetes.io/docs/concepts/services-networking/service/)
-* [https://kubernetes.io/docs/tutorials/services/source-ip/](https://kubernetes.io/docs/tutorials/services/source-ip/)
+* Deep Dive in Container Service Discovery : [https://www.slideshare.net/Docker/deep-dive-in-container-service-discovery](https://www.slideshare.net/Docker/deep-dive-in-container-service-discovery)
+* Load Balancing Using iptables with connmark : [http://www.system-rescue-cd.org/networking/Load-balancing-using-iptables-with-connmark/](http://www.system-rescue-cd.org/networking/Load-balancing-using-iptables-with-connmark/)
+* Kubernetes Service : [https://kubernetes.io/docs/concepts/services-networking/service/](https://kubernetes.io/docs/concepts/services-networking/service/)
+* Using Source IP : [https://kubernetes.io/docs/tutorials/services/source-ip/](https://kubernetes.io/docs/tutorials/services/source-ip/)

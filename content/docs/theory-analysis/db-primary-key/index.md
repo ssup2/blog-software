@@ -22,4 +22,4 @@ Read 성능의 경우에도 Auto Increment 방식이 Random 방식에 비해서 
 
 ## 2. 참조
 
-* [https://www.percona.com/blog/2019/11/22/uuids-are-popular-but-bad-for-performance-lets-discuss/](https://www.percona.com/blog/2019/11/22/uuids-are-popular-but-bad-for-performance-lets-discuss/)
+* UUIDs Are Popular, but Bad for Performance : [https://www.percona.com/blog/2019/11/22/uuids-are-popular-but-bad-for-performance-lets-discuss/](https://www.percona.com/blog/2019/11/22/uuids-are-popular-but-bad-for-performance-lets-discuss/)

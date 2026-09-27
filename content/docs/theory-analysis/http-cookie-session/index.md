@@ -26,5 +26,4 @@ HTTP Cookie는 HTTP Session을 구현하기 위해 이용된다. Client는 Serve
 
 ## 3. 참조
 
-* [https://developer.mozilla.org/ko/docs/Web/HTTP/Cookies](https://developer.mozilla.org/ko/docs/Web/HTTP/Cookies)
-* [https://www.dev2qa.com/http-session-management-cookie/](https://www.dev2qa.com/http-session-management-cookie/)
+* HTTP 쿠키 : [https://developer.mozilla.org/ko/docs/Web/HTTP/Cookies](https://developer.mozilla.org/ko/docs/Web/HTTP/Cookies)

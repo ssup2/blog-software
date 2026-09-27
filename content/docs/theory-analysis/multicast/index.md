@@ -42,5 +42,5 @@ Switch는 Packet의 Ethernet Address를 보고 해당 Packet이 Multicast Packet
 
 ## 3. 참고
 
-* [https://osrg.github.io/ryu-book/ko/html/igmp-snooping.html](https://osrg.github.io/ryu-book/ko/html/igmp-snooping.html)
-*  [http://www.cisco.com/c/en/us/td/docs/ios/solutions-docs/ip-multicast/White-papers/mcst-ovr.html](http://www.cisco.com/c/en/us/td/docs/ios/solutions-docs/ip-multicast/White-papers/mcst-ovr.html)
+* Ryu Book - IGMP Snooping : [https://osrg.github.io/ryu-book/ko/html/igmp_snooping.html](https://osrg.github.io/ryu-book/ko/html/igmp_snooping.html)
+* IP Multicast Technology Overview : [http://www.cisco.com/c/en/us/td/docs/ios/solutions-docs/ip-multicast/White-papers/mcst-ovr.html](http://www.cisco.com/c/en/us/td/docs/ios/solutions-docs/ip-multicast/White-papers/mcst-ovr.html)

@@ -46,5 +46,5 @@ DB는 [Query 4]의 수행 과정에서 `dept.id` 값을 `emp` Table의 `dept-id`
 
 ## 4. 참조
 
-* [https://www.progress.com/tutorials/odbc/using-indexes](https://www.progress.com/tutorials/odbc/using-indexes)
-* [https://hoing.io/archives/24493](https://hoing.io/archives/24493)
+* Using Indexes - Progress ODBC Tutorial : [https://www.progress.com/tutorials/odbc/using-indexes](https://www.progress.com/tutorials/odbc/using-indexes)
+* MySQL - 정상 수행되던 쿼리가 IN 절에서 Index Scan 을 하지 않을 경우 Table Full Scan : [https://hoing.io/archives/24493](https://hoing.io/archives/24493)

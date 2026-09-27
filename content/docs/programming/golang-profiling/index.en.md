@@ -268,14 +268,14 @@ Since a 30-second CPU Profile was obtained, functions executed inside the `Incre
 
 ## 4. References
 
-* [https://github.com/DataDog/go-profiler-notes/blob/main/guide/README.md](https://github.com/DataDog/go-profiler-notes/blob/main/guide/README.md)
-* [https://hackernoon.com/go-the-complete-guide-to-profiling-your-code-h51r3waz](https://hackernoon.com/go-the-complete-guide-to-profiling-your-code-h51r3waz)
-* [https://go.dev/doc/diagnostics](https://go.dev/doc/diagnostics)
-* [https://pkg.go.dev/net/http/pprof](https://pkg.go.dev/net/http/pprof)
-* [https://github.com/google/pprof](https://github.com/google/pprof)
-* [https://github.com/google/gops](https://github.com/google/gops)
-* [https://jvns.ca/blog/2017/09/24/profiling-go-with-pprof/](https://jvns.ca/blog/2017/09/24/profiling-go-with-pprof/)
-* [https://medium.com/a-journey-with-go/go-how-does-gops-interact-with-the-runtime-778d7f9d7c18](https://medium.com/a-journey-with-go/go-how-does-gops-interact-with-the-runtime-778d7f9d7c18)
-* [https://riptutorial.com/go/example/25406/basic-cpu-and-memory-profiling](https://riptutorial.com/go/example/25406/basic-cpu-and-memory-profiling)
-* [https://stackoverflow.com/questions/32571396/pprof-and-golang-how-to-interpret-a-results](https://stackoverflow.com/questions/32571396/pprof-and-golang-how-to-interpret-a-results)
+* go-profiler-notes - The Busy Developer's Guide to Go Profiling : [https://github.com/DataDog/go-profiler-notes/blob/main/guide/README.md](https://github.com/DataDog/go-profiler-notes/blob/main/guide/README.md)
+* Go: The Complete Guide to Profiling Your Code : [https://hackernoon.com/go-the-complete-guide-to-profiling-your-code-h51r3waz](https://hackernoon.com/go-the-complete-guide-to-profiling-your-code-h51r3waz)
+* Diagnostics : [https://go.dev/doc/diagnostics](https://go.dev/doc/diagnostics)
+* pprof package - net/http/pprof : [https://pkg.go.dev/net/http/pprof](https://pkg.go.dev/net/http/pprof)
+* google/pprof: pprof is a tool for visualization and analysis of profiling data : [https://github.com/google/pprof](https://github.com/google/pprof)
+* google/gops: A tool to list and diagnose Go processes currently running on your system : [https://github.com/google/gops](https://github.com/google/gops)
+* Profiling Go programs with pprof : [https://jvns.ca/blog/2017/09/24/profiling-go-with-pprof/](https://jvns.ca/blog/2017/09/24/profiling-go-with-pprof/)
+* Go: How Does gops Interact With the Runtime? : [https://medium.com/a-journey-with-go/go-how-does-gops-interact-with-the-runtime-778d7f9d7c18](https://medium.com/a-journey-with-go/go-how-does-gops-interact-with-the-runtime-778d7f9d7c18)
+* Go Tutorial - Basic cpu and memory profiling : [https://riptutorial.com/go/example/25406/basic-cpu-and-memory-profiling](https://riptutorial.com/go/example/25406/basic-cpu-and-memory-profiling)
+* pprof and golang - how to interpret a results? : [https://stackoverflow.com/questions/32571396/pprof-and-golang-how-to-interpret-a-results](https://stackoverflow.com/questions/32571396/pprof-and-golang-how-to-interpret-a-results)
 

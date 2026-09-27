@@ -68,10 +68,8 @@ Apartment Resource에 `color=white`, `floor=20` Data가 저장되어 있다고 �
 
 ## 2. 참조
 
-* [https://www.redhat.com/archives/rest-practices/2011-August/pdfa1nfEjPMmT.pdf](https://www.redhat.com/archives/rest-practices/2011-August/pdfa1nfEjPMmT.pdf)
-* [http://meetup.toast.com/posts/92](http://meetup.toast.com/posts/92)
-* [https://spring.io/understanding/REST](https://spring.io/understanding/REST)
-* [http://restful-api-design.readthedocs.io/en/latest/methods.html](http://restful-api-design.readthedocs.io/en/latest/methods.html)
-* [https://restfulapi.net/resource-naming/](https://restfulapi.net/resource-naming/)
-* [https://lornajane.net/posts/2013/are-subqueries-restful](https://lornajane.net/posts/2013/are-subqueries-restful)
-* [https://medium.com/backticks-tildes/restful-api-design-put-vs-patch-4a061aa3ed0b](https://medium.com/backticks-tildes/restful-api-design-put-vs-patch-4a061aa3ed0b)
+* REST API 제대로 알고 사용하기 : [http://meetup.toast.com/posts/92](http://meetup.toast.com/posts/92)
+* RESTful API Design - Methods : [http://restful-api-design.readthedocs.io/en/latest/methods.html](http://restful-api-design.readthedocs.io/en/latest/methods.html)
+* REST API URI Naming Conventions and Best Practices : [https://restfulapi.net/resource-naming/](https://restfulapi.net/resource-naming/)
+* Are Subqueries RESTful? : [https://lornajane.net/posts/2013/are-subqueries-restful](https://lornajane.net/posts/2013/are-subqueries-restful)
+* RESTful API Design: PUT vs PATCH : [https://medium.com/backticks-tildes/restful-api-design-put-vs-patch-4a061aa3ed0b](https://medium.com/backticks-tildes/restful-api-design-put-vs-patch-4a061aa3ed0b)

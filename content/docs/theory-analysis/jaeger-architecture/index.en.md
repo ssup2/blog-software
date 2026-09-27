@@ -32,10 +32,10 @@ When too much Trace information is transmitted to Storage and Storage receives t
 
 ## 2. References
 
-* [https://www.jaegertracing.io/docs/1.22/architecture/](https://www.jaegertracing.io/docs/1.22/architecture/)
-* [https://www.jaegertracing.io/docs/1.22/deployment/](https://www.jaegertracing.io/docs/1.22/deployment/)
-* [https://www.scalyr.com/blog/jaeger-tracing-tutorial/](https://www.scalyr.com/blog/jaeger-tracing-tutorial/)
-* [https://github.com/jaegertracing/spark-dependencies](https://github.com/jaegertracing/spark-dependencies)
-* [https://github.com/jaegertracing/jaeger-analytics-flink](https://github.com/jaegertracing/jaeger-analytics-flink)
-* [https://github.com/opentracing/specification/blob/master/specification.md](https://github.com/opentracing/specification/blob/master/specification.md)
+* Jaeger Architecture : [https://www.jaegertracing.io/docs/1.22/architecture/](https://www.jaegertracing.io/docs/1.22/architecture/)
+* Jaeger Deployment : [https://www.jaegertracing.io/docs/1.22/deployment/](https://www.jaegertracing.io/docs/1.22/deployment/)
+* Jaeger Tracing Tutorial : [https://www.scalyr.com/blog/jaeger-tracing-tutorial/](https://www.scalyr.com/blog/jaeger-tracing-tutorial/)
+* jaegertracing/spark-dependencies : [https://github.com/jaegertracing/spark-dependencies](https://github.com/jaegertracing/spark-dependencies)
+* jaegertracing/jaeger-analytics-flink : [https://github.com/jaegertracing/jaeger-analytics-flink](https://github.com/jaegertracing/jaeger-analytics-flink)
+* OpenTracing Specification : [https://github.com/opentracing/specification/blob/master/specification.md](https://github.com/opentracing/specification/blob/master/specification.md)
 

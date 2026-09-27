@@ -12,4 +12,4 @@ Inverted Index가 존재하지 않는다면 특정 단어를 찾기 위해서는
 
 ## 2. 참조
 
-*  [https://esbook.kimjmin.net/06-text-analysis/6.1-indexing-data](https://esbook.kimjmin.net/06-text-analysis/6.1-indexing-data)
+*  역 인덱스 - Inverted Index : [https://esbook.kimjmin.net/06-text-analysis/6.1-indexing-data](https://esbook.kimjmin.net/06-text-analysis/6.1-indexing-data)

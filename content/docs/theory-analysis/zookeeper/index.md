@@ -57,6 +57,6 @@ Sequence Node의 숫자는 중복되어 생성되지 않는 특징을 이용하�
 
 ## 2. 참조
 
-* [https://www.slideshare.net/madvirus/zookeeper-34888385](https://www.slideshare.net/madvirus/zookeeper-34888385)
-* [http://www.allprogrammingtutorials.com/tutorials/introduction-to-apache-zookeeper.php](http://www.allprogrammingtutorials.com/tutorials/introduction-to-apache-zookeeper.php)
-* [https://www.slideshare.net/javawork/zookeeper-24265680](https://www.slideshare.net/javawork/zookeeper-24265680)
+* Zookeeper 소개 : [https://www.slideshare.net/madvirus/zookeeper-34888385](https://www.slideshare.net/madvirus/zookeeper-34888385)
+* Introduction to Apache ZooKeeper : [http://www.allprogrammingtutorials.com/tutorials/introduction-to-apache-zookeeper.php](http://www.allprogrammingtutorials.com/tutorials/introduction-to-apache-zookeeper.php)
+* ZooKeeper Overview Slides : [https://www.slideshare.net/javawork/zookeeper-24265680](https://www.slideshare.net/javawork/zookeeper-24265680)

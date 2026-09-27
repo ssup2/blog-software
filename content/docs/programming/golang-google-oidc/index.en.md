@@ -214,8 +214,8 @@ prompt=consent
 
 ## 5. References
 
-* [https://www.daleseo.com/google-oidc/](https://www.daleseo.com/google-oidc/)
-* [https://www.daleseo.com/google-oauth/](https://www.daleseo.com/google-oauth/)
-* [https://opentutorials.org/course/2473/16571](https://opentutorials.org/course/2473/16571)
-* [https://github.com/coreos/go-oidc](https://github.com/coreos/go-oidc)
+* 구글 OpenID Connect 사용법 : [https://www.daleseo.com/google-oidc/](https://www.daleseo.com/google-oidc/)
+* OAuth 2.0으로 구글 API 호출하기 : [https://www.daleseo.com/google-oauth/](https://www.daleseo.com/google-oauth/)
+* 구글 API를 통해서 배우는 인증 (OAuth 2.0) : [https://opentutorials.org/course/2473/16571](https://opentutorials.org/course/2473/16571)
+* coreos/go-oidc: A Go OpenID Connect Client : [https://github.com/coreos/go-oidc](https://github.com/coreos/go-oidc)
 

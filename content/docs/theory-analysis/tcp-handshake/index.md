@@ -81,11 +81,11 @@ TCP RST Flag는 예상치 못한 상황으로 인해서 생성된 TCP Connection
 
 ## 2. 참조
 
-* [http://intronetworks.cs.luc.edu/1/html/tcp.html](http://intronetworks.cs.luc.edu/1/html/tcp.html)
-* [https://unix.stackexchange.com/questions/386536/when-how-does-linux-decides-to-close-a-socket-on-application-kill](https://unix.stackexchange.com/questions/386536/when-how-does-linux-decides-to-close-a-socket-on-application-kill)
-* [https://unix.stackexchange.com/questions/282613/can-you-send-a-tcp-packet-with-rst-flag-set-using-iptables-as-a-way-to-trick-nma](https://unix.stackexchange.com/questions/282613/can-you-send-a-tcp-packet-with-rst-flag-set-using-iptables-as-a-way-to-trick-nma)
-* [https://stackoverflow.com/questions/16259774/what-if-a-tcp-handshake-segment-is-lost](https://stackoverflow.com/questions/16259774/what-if-a-tcp-handshake-segment-is-lost)
-* [https://tech.kakao.com/2016/04/21/closewait-timewait/](https://tech.kakao.com/2016/04/21/closewait-timewait/)
-* [https://stackoverflow.com/questions/25338862/why-time-wait-state-need-to-be-2msl-long](https://stackoverflow.com/questions/25338862/why-time-wait-state-need-to-be-2msl-long)
-* [https://cs.stackexchange.com/questions/76393/tcp-connection-termination-fin-fin-ack-ack](https://cs.stackexchange.com/questions/76393/tcp-connection-termination-fin-fin-ack-ack)
-* [https://stackoverflow.com/questions/30043126/what-is-a-finack-message-in-tcp](https://stackoverflow.com/questions/30043126/what-is-a-finack-message-in-tcp)
+* TCP Transport - An Introduction to Computer Networks : [http://intronetworks.cs.luc.edu/1/html/tcp.html](http://intronetworks.cs.luc.edu/1/html/tcp.html)
+* When/how does Linux decide to close a socket on application kill : [https://unix.stackexchange.com/questions/386536/when-how-does-linux-decides-to-close-a-socket-on-application-kill](https://unix.stackexchange.com/questions/386536/when-how-does-linux-decides-to-close-a-socket-on-application-kill)
+* Can you send a TCP packet with RST flag set using iptables : [https://unix.stackexchange.com/questions/282613/can-you-send-a-tcp-packet-with-rst-flag-set-using-iptables-as-a-way-to-trick-nma](https://unix.stackexchange.com/questions/282613/can-you-send-a-tcp-packet-with-rst-flag-set-using-iptables-as-a-way-to-trick-nma)
+* What if a TCP handshake segment is lost : [https://stackoverflow.com/questions/16259774/what-if-a-tcp-handshake-segment-is-lost](https://stackoverflow.com/questions/16259774/what-if-a-tcp-handshake-segment-is-lost)
+* CLOSE_WAIT & TIME_WAIT 최종 분석 : [https://tech.kakao.com/2016/04/21/closewait-timewait/](https://tech.kakao.com/2016/04/21/closewait-timewait/)
+* Why TIME_WAIT state need to be 2MSL long : [https://stackoverflow.com/questions/25338862/why-time-wait-state-need-to-be-2msl-long](https://stackoverflow.com/questions/25338862/why-time-wait-state-need-to-be-2msl-long)
+* TCP connection termination FIN, FIN ACK, ACK : [https://cs.stackexchange.com/questions/76393/tcp-connection-termination-fin-fin-ack-ack](https://cs.stackexchange.com/questions/76393/tcp-connection-termination-fin-fin-ack-ack)
+* What is a FIN/ACK message in TCP : [https://stackoverflow.com/questions/30043126/what-is-a-finack-message-in-tcp](https://stackoverflow.com/questions/30043126/what-is-a-finack-message-in-tcp)

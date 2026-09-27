@@ -71,6 +71,5 @@ After rebooting Windows OS, access the following address from File Browser.
 
 ## 7. References
 
-* [https://embeddedaroma.tistory.com/64](https://embeddedaroma.tistory.com/64)
-* [https://www.python2.net/questions-1217707.htm](https://www.python2.net/questions-1217707.htm)
+* wsl2 에서 파일처리 속도 느릴때 방법, 고정아이피 사용 대안방법 : [https://embeddedaroma.tistory.com/64](https://embeddedaroma.tistory.com/64)
 

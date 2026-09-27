@@ -29,11 +29,11 @@ LDAP은 Transaction, Rollback을 지원하지 않는다. LDAP은 Data Write 보�
 
 ## 3. 참조
 
-* [https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ldap/what-is-a-directory-service](https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ldap/what-is-a-directory-service)
-* [http://quark.humbug.org.au/publications/ldap/ldap-tut.html](http://quark.humbug.org.au/publications/ldap/ldap-tut.html)
-* [https://blog.hkwon.me/use-openldap-part1/](https://blog.hkwon.me/use-openldap-part1/)
-* [https://wiki.gentoo.org/wiki/Centralized-authentication-using-OpenLDAP](https://wiki.gentoo.org/wiki/Centralized-authentication-using-OpenLDAP)
-* [https://www.linuxjournal.com/article/5505](https://www.linuxjournal.com/article/5505)
-* [https://medium.com/happyprogrammer-in-jeju/ldap-%ED%94%84%ED%86%A0%ED%86%A0%EC%BD%9C-%EB%A7%9B%EB%B3%B4%EA%B8%B0-15b53c6a6f26](https://medium.com/happyprogrammer-in-jeju/ldap-%ED%94%84%ED%86%A0%ED%86%A0%EC%BD%9C-%EB%A7%9B%EB%B3%B4%EA%B8%B0-15b53c6a6f26)
-* [http://umich.edu/~dirsvcs/ldap/doc/guides/slapd/1.html](http://umich.edu/~dirsvcs/ldap/doc/guides/slapd/1.html)
-* [https://docs.bmc.com/docs/fpsc121/ldap-attributes-and-associated-fields-495323340.html](https://docs.bmc.com/docs/fpsc121/ldap-attributes-and-associated-fields-495323340.html)
+* What is a Directory Service : [https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ldap/what-is-a-directory-service](https://docs.microsoft.com/en-us/previous-versions/windows/desktop/ldap/what-is-a-directory-service)
+* LDAP Tutorial : [http://quark.humbug.org.au/publications/ldap/ldap_tut.html](http://quark.humbug.org.au/publications/ldap/ldap_tut.html)
+* OpenLDAP을 활용한 기반시스템 중앙 인증관리 #1 : [https://blog.hkwon.me/use-openldap-part1/](https://blog.hkwon.me/use-openldap-part1/)
+* Centralized Authentication Using OpenLDAP : [https://wiki.gentoo.org/wiki/Centralized_authentication_using_OpenLDAP](https://wiki.gentoo.org/wiki/Centralized_authentication_using_OpenLDAP)
+* Highly Available LDAP : [https://www.linuxjournal.com/article/5505](https://www.linuxjournal.com/article/5505)
+* LDAP 프로토콜 맛보기 : [https://medium.com/happyprogrammer-in-jeju/ldap-%ED%94%84%ED%86%A0%ED%86%A0%EC%BD%9C-%EB%A7%9B%EB%B3%B4%EA%B8%B0-15b53c6a6f26](https://medium.com/happyprogrammer-in-jeju/ldap-%ED%94%84%ED%86%A0%ED%86%A0%EC%BD%9C-%EB%A7%9B%EB%B3%B4%EA%B8%B0-15b53c6a6f26)
+* SLAPD and SLURPD Administrators Guide : [http://umich.edu/~dirsvcs/ldap/doc/guides/slapd/1.html](http://umich.edu/~dirsvcs/ldap/doc/guides/slapd/1.html)
+* LDAP Attributes and Associated Fields : [https://docs.bmc.com/docs/fpsc121/ldap-attributes-and-associated-fields-495323340.html](https://docs.bmc.com/docs/fpsc121/ldap-attributes-and-associated-fields-495323340.html)

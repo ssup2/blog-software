@@ -97,11 +97,10 @@ The `BPF-PROG-TYPE-SK-LOOKUP` Type performs the role of determining which Socket
 
 ## 2. References
 
-* [https://blogs.oracle.com/linux/post/bpf-a-tour-of-program-types](https://blogs.oracle.com/linux/post/bpf-a-tour-of-program-types)
-* [https://access.redhat.com/documentation/en-us/red-hat-enterprise-linux/8/html/configuring-and-managing-networking/assembly-understanding-the-ebpf-features-in-rhel-configuring-and-managing-networking](https://access.redhat.com/documentation/en-us/red-hat-enterprise-linux/8/html/configuring-and-managing-networking/assembly-understanding-the-ebpf-features-in-rhel-configuring-and-managing-networking)
-* [https://elixir.bootlin.com/linux/latest/source/include/uapi/linux/bpf.h](https://elixir.bootlin.com/linux/latest/source/include/uapi/linux/bpf.h)
-* [https://qmonnet.github.io/whirl-offload/2020/04/11/tc-bpf-direct-action/](https://qmonnet.github.io/whirl-offload/2020/04/11/tc-bpf-direct-action/)
-* [https://cilium.readthedocs.io/en/v1.0/bpf/?fbclid=IwAR38RyvJXSsuzWk1jaTOGR7OhlgvQezoIHRLuiUA4rG2fc-AA70yyQTvxOg#bpf-guide](https://cilium.readthedocs.io/en/v1.0/bpf/?fbclid=IwAR38RyvJXSsuzWk1jaTOGR7OhlgvQezoIHRLuiUA4rG2fc-AA70yyQTvxOg#bpf-guide)
-* [http://man7.org/linux/man-pages/man2/bpf.2.html](http://man7.org/linux/man-pages/man2/bpf.2.html)
-* [https://kccncna19.sched.com/event/Uae7](https://kccncna19.sched.com/event/Uae7)
+* BPF: A Tour of Program Types : [https://blogs.oracle.com/linux/post/bpf-a-tour-of-program-types](https://blogs.oracle.com/linux/post/bpf-a-tour-of-program-types)
+* Understanding the eBPF networking features in RHEL : [https://access.redhat.com/documentation/en-us/red-hat-enterprise-linux/8/html/configuring-and-managing-networking/assembly-understanding-the-ebpf-features-in-rhel-configuring-and-managing-networking](https://access.redhat.com/documentation/en-us/red-hat-enterprise-linux/8/html/configuring-and-managing-networking/assembly-understanding-the-ebpf-features-in-rhel-configuring-and-managing-networking)
+* include/uapi/linux/bpf.h - Linux Source : [https://elixir.bootlin.com/linux/latest/source/include/uapi/linux/bpf.h](https://elixir.bootlin.com/linux/latest/source/include/uapi/linux/bpf.h)
+* Understanding tc “direct action” mode for BPF : [https://qmonnet.github.io/whirl-offload/2020/04/11/tc-bpf-direct-action/](https://qmonnet.github.io/whirl-offload/2020/04/11/tc-bpf-direct-action/)
+* bpf(2) - Linux manual page : [http://man7.org/linux/man-pages/man2/bpf.2.html](http://man7.org/linux/man-pages/man2/bpf.2.html)
+* Understanding and Troubleshooting the eBPF Datapath in Cilium (KubeCon NA 2019) : [https://kccncna19.sched.com/event/Uae7](https://kccncna19.sched.com/event/Uae7)
 

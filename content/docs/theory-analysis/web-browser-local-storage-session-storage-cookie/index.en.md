@@ -28,6 +28,6 @@ The reason Cookie is needed in Web Server is to enable Web Server to recognize W
 
 ## 4. References
 
-* [http://www.gwtproject.org/doc/latest/DevGuideHtml5Storage.html](http://www.gwtproject.org/doc/latest/DevGuideHtml5Storage.html)
-* [https://krishankantsinghal.medium.com/local-storage-vs-session-storage-vs-cookie-22655ff75a8](https://krishankantsinghal.medium.com/local-storage-vs-session-storage-vs-cookie-22655ff75a8)
+* GWT Dev Guide - HTML5 Storage : [http://www.gwtproject.org/doc/latest/DevGuideHtml5Storage.html](http://www.gwtproject.org/doc/latest/DevGuideHtml5Storage.html)
+* Local Storage vs Session Storage vs Cookie : [https://krishankantsinghal.medium.com/local-storage-vs-session-storage-vs-cookie-22655ff75a8](https://krishankantsinghal.medium.com/local-storage-vs-session-storage-vs-cookie-22655ff75a8)
 

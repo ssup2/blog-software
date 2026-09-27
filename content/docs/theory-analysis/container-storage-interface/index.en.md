@@ -63,7 +63,7 @@ As CSI's Plugin and Volume Lifecycle exist in various forms, CO must obtain Plug
 
 ## 2. References
 
-* [https://github.com/container-storage-interface/spec/blob/master/spec.md](https://github.com/container-storage-interface/spec/blob/master/spec.md)
-* [https://kubernetes-csi.github.io/docs/](https://kubernetes-csi.github.io/docs/)
-* [https://medium.com/google-cloud/understanding-the-container-storage-interface-csi-ddbeb966a3b](https://medium.com/google-cloud/understanding-the-container-storage-interface-csi-ddbeb966a3b)
+* Container Storage Interface (CSI) Specification : [https://github.com/container-storage-interface/spec/blob/master/spec.md](https://github.com/container-storage-interface/spec/blob/master/spec.md)
+* Kubernetes CSI Developer Documentation : [https://kubernetes-csi.github.io/docs/](https://kubernetes-csi.github.io/docs/)
+* Understanding the Container Storage Interface (CSI) : [https://medium.com/google-cloud/understanding-the-container-storage-interface-csi-ddbeb966a3b](https://medium.com/google-cloud/understanding-the-container-storage-interface-csi-ddbeb966a3b)
 

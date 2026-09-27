@@ -104,5 +104,5 @@ Organize missing content based on the following organized content
 
 ## 4. References
 
-* [https://www.udemy.com/course/aws-certified-database-specialty-dbs/](https://www.udemy.com/course/aws-certified-database-specialty-dbs/)
+* AWS Certified Database Specialty (Udemy) : [https://www.udemy.com/course/aws-certified-database-specialty-dbs/](https://www.udemy.com/course/aws-certified-database-specialty-dbs/)
 

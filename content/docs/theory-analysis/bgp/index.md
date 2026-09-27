@@ -16,7 +16,6 @@ Internal Router로 전달된 목적지가 외부 AS인 Packet은 IGP (Interior G
 
 ### 2. 참조
 
-* [https://www.slideshare.net/apnic/bgp-techniques-for-network-operators](https://www.slideshare.net/apnic/bgp-techniques-for-network-operators)
-* [https://www.nanog.org/meetings/nanog53/presentations/Sunday/bgp-101-NANOG53.pdf](https://www.nanog.org/meetings/nanog53/presentations/Sunday/bgp-101-NANOG53.pdf)
-* [http://luk.kis.p.lodz.pl/ZTIP/BGP.pdf](http://luk.kis.p.lodz.pl/ZTIP/BGP.pdf)
-* [https://www.netmanias.com/ko/?m=view&id=techdocs&no=5128](https://www.netmanias.com/ko/?m=view&id=techdocs&no=5128)
+* BGP Techniques for Network Operators : [https://www.slideshare.net/apnic/bgp-techniques-for-network-operators](https://www.slideshare.net/apnic/bgp-techniques-for-network-operators)
+* BGP 101 - NANOG 53 : [https://www.nanog.org/meetings/nanog53/presentations/Sunday/bgp-101-NANOG53.pdf](https://www.nanog.org/meetings/nanog53/presentations/Sunday/bgp-101-NANOG53.pdf)
+* BGP (Border Gateway Protocol) 상세 동작 원리 : [https://www.netmanias.com/ko/?m=view&id=techdocs&no=5128](https://www.netmanias.com/ko/?m=view&id=techdocs&no=5128)

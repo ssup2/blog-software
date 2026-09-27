@@ -42,9 +42,9 @@ Nginx은 HTTP/HTTPS를 기반으로하는 L7 Web Server, Load Balancer 역할을
 
 ## 2. 참조
 
-* [https://www.slideshare.net/jen6/nginx-architecture](https://www.slideshare.net/jen6/nginx-architecture)
-* [http://www.aosabook.org/en/nginx.html](http://www.aosabook.org/en/nginx.html)
-* [https://www.slideshare.net/joshzhu/nginx-internals](https://www.slideshare.net/joshzhu/nginx-internals)
-* [https://www.nginx.com/blog/nginx-high-performance-caching/](https://www.nginx.com/blog/nginx-high-performance-caching/)
-* [https://www.nginx.com/blog/thread-pools-boost-performance-9x/](https://www.nginx.com/blog/thread-pools-boost-performance-9x/)
-* [https://stackoverflow.com/questions/11488453/can-i-call-accept-for-one-socket-from-several-threads-simultaneously](https://stackoverflow.com/questions/11488453/can-i-call-accept-for-one-socket-from-several-threads-simultaneously)
+* NGINX Architecture - SlideShare : [https://www.slideshare.net/jen6/nginx-architecture](https://www.slideshare.net/jen6/nginx-architecture)
+* The Architecture of Open Source Applications - nginx : [http://www.aosabook.org/en/nginx.html](http://www.aosabook.org/en/nginx.html)
+* NGINX Internals - SlideShare : [https://www.slideshare.net/joshzhu/nginx-internals](https://www.slideshare.net/joshzhu/nginx-internals)
+* NGINX High Performance Caching : [https://www.nginx.com/blog/nginx-high-performance-caching/](https://www.nginx.com/blog/nginx-high-performance-caching/)
+* Thread Pools in NGINX Boost Performance 9x : [https://www.nginx.com/blog/thread-pools-boost-performance-9x/](https://www.nginx.com/blog/thread-pools-boost-performance-9x/)
+* Can I call accept() for one socket from several threads simultaneously : [https://stackoverflow.com/questions/11488453/can-i-call-accept-for-one-socket-from-several-threads-simultaneously](https://stackoverflow.com/questions/11488453/can-i-call-accept-for-one-socket-from-several-threads-simultaneously)

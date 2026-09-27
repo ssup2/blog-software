@@ -38,4 +38,4 @@ export PATH=$GOROOT/bin:$GOBIN:$PATH
 
 ## 4. 참조
 
-* [https://medium.com/@RidhamTarpara/install-go-1-11-on-ubuntu-18-04-16-04-lts-8c098c503c5f](https://medium.com/@RidhamTarpara/install-go-1-11-on-ubuntu-18-04-16-04-lts-8c098c503c5f)
+* Install Go 1.11 on Ubuntu 18.04/16.04 LTS : [https://medium.com/@RidhamTarpara/install-go-1-11-on-ubuntu-18-04-16-04-lts-8c098c503c5f](https://medium.com/@RidhamTarpara/install-go-1-11-on-ubuntu-18-04-16-04-lts-8c098c503c5f)

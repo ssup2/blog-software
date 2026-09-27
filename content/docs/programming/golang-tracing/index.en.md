@@ -152,6 +152,6 @@ The `trace` CLI Web can also check state ratios by Goroutine. [Figure 2] shows t
 
 ## 3. References
 
-* [https://pkg.go.dev/cmd/trace](https://pkg.go.dev/cmd/trace)
-* [https://programmer.ink/think/golang-performance-test-trace-planing-goang-trace.html](https://programmer.ink/think/golang-performance-test-trace-planing-goang-trace.html)
+* trace command - Go Packages : [https://pkg.go.dev/cmd/trace](https://pkg.go.dev/cmd/trace)
+* Golang Performance Test - Trace : [https://programmer.ink/think/golang-performance-test-trace-planing-goang-trace.html](https://programmer.ink/think/golang-performance-test-trace-planing-goang-trace.html)
 

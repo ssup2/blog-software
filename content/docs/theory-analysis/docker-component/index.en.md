@@ -60,10 +60,10 @@ Subreaper Process means that when an orphan Process occurs among all its child P
 
 ## 2. References
 
-* [https://iximiuz.com/en/posts/implementing-container-runtime-shim/?utm-medium=reddit&utm-source=r-kubernetes](https://iximiuz.com/en/posts/implementing-container-runtime-shim/?utm-medium=reddit&utm-source=r-kubernetes)
-* [http://alexander.holbreich.org/docker-components-explained/](http://alexander.holbreich.org/docker-components-explained/)
-* [http://cloudrain21.com/examination-of-docker-process-binary](http://cloudrain21.com/examination-of-docker-process-binary)
-* [https://unix.stackexchange.com/questions/206386/what-does-the-symbol-denote-in-the-beginning-of-a-unix-domain-socket-path-in-l](https://unix.stackexchange.com/questions/206386/what-does-the-symbol-denote-in-the-beginning-of-a-unix-domain-socket-path-in-l)
-* [https://github.com/containerd/containerd/pull/2631](https://github.com/containerd/containerd/pull/2631)
-* [https://windsock.io/the-docker-proxy/](https://windsock.io/the-docker-proxy/)
+* Implementing Container Runtime Shim: runc : [https://iximiuz.com/en/posts/implementing-container-runtime-shim/?utm-medium=reddit&utm-source=r-kubernetes](https://iximiuz.com/en/posts/implementing-container-runtime-shim/?utm-medium=reddit&utm-source=r-kubernetes)
+* Docker components explained : [http://alexander.holbreich.org/docker-components-explained/](http://alexander.holbreich.org/docker-components-explained/)
+* Examination of Docker Process and Binary : [http://cloudrain21.com/examination-of-docker-process-binary](http://cloudrain21.com/examination-of-docker-process-binary)
+* What does the @ symbol denote in the beginning of a unix domain socket path : [https://unix.stackexchange.com/questions/206386/what-does-the-symbol-denote-in-the-beginning-of-a-unix-domain-socket-path-in-l](https://unix.stackexchange.com/questions/206386/what-does-the-symbol-denote-in-the-beginning-of-a-unix-domain-socket-path-in-l)
+* Use named pipes for shim logs - Pull Request #2631 - containerd/containerd : [https://github.com/containerd/containerd/pull/2631](https://github.com/containerd/containerd/pull/2631)
+* The docker-proxy : [https://windsock.io/the-docker-proxy/](https://windsock.io/the-docker-proxy/)
 

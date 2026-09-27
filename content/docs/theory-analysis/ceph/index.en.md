@@ -80,13 +80,11 @@ Among OSDs determined through CRUSH, the first OSD is expressed as **Primary OSD
 
 ## 2. References
 
-* [http://docs.ceph.com/docs/master/architecture/](http://docs.ceph.com/docs/master/architecture/)
-* [http://yauuu.me/ride-around-ceph-crush-map.html](http://yauuu.me/ride-around-ceph-crush-map.html)
-* [http://docs.ceph.com/docs/jewel/rados/configuration/mon-config-ref/](http://docs.ceph.com/docs/jewel/rados/configuration/mon-config-ref/)
-* [https://www.slideshare.net/sageweil1/20150222-scale-sdc-tiering-and-ec](https://www.slideshare.net/sageweil1/20150222-scale-sdc-tiering-and-ec)
-* [http://140.120.7.21/LinuxRef/CephAndVirtualStorage/VirtualStorageAndUsbHdd.html](http://140.120.7.21/LinuxRef/CephAndVirtualStorage/VirtualStorageAndUsbHdd.html)
-* [https://ceph.com/wp-content/uploads/2016/08/weil-crush-sc06.pdf](https://ceph.com/wp-content/uploads/2016/08/weil-crush-sc06.pdf)
-* [https://www.slideshare.net/LarryCover/ceph-open-source-storage-software-optimizations-on-intel-architecture-for-cloud-workloads](https://www.slideshare.net/LarryCover/ceph-open-source-storage-software-optimizations-on-intel-architecture-for-cloud-workloads)
-* [http://www.lamsade.dauphine.fr/~litwin/cours98/Doc-cours-clouds/ceph-2009-02%5B1%5D.pdf](http://www.lamsade.dauphine.fr/~litwin/cours98/Doc-cours-clouds/ceph-2009-02%5B1%5D.pdf)
-* [https://thenewstack.io/software-defined-storage-ceph-way/](https://thenewstack.io/software-defined-storage-ceph-way/)
+* Ceph Architecture : [http://docs.ceph.com/docs/master/architecture/](http://docs.ceph.com/docs/master/architecture/)
+* Ceph - Look around the CRUSH Map : [http://yauuu.me/ride-around-ceph-crush-map.html](http://yauuu.me/ride-around-ceph-crush-map.html)
+* Ceph Tiering and Erasure Coding (SlideShare) : [https://www.slideshare.net/sageweil1/20150222-scale-sdc-tiering-and-ec](https://www.slideshare.net/sageweil1/20150222-scale-sdc-tiering-and-ec)
+* Ceph Virtual Storage and USB HDD : [http://140.120.7.21/LinuxRef/CephAndVirtualStorage/VirtualStorageAndUsbHdd.html](http://140.120.7.21/LinuxRef/CephAndVirtualStorage/VirtualStorageAndUsbHdd.html)
+* Ceph Optimizations on Intel Architecture for Cloud Workloads (SlideShare) : [https://www.slideshare.net/LarryCover/ceph-open-source-storage-software-optimizations-on-intel-architecture-for-cloud-workloads](https://www.slideshare.net/LarryCover/ceph-open-source-storage-software-optimizations-on-intel-architecture-for-cloud-workloads)
+* Ceph Paper (PDF) : [http://www.lamsade.dauphine.fr/~litwin/cours98/Doc-cours-clouds/ceph-2009-02%5B1%5D.pdf](http://www.lamsade.dauphine.fr/~litwin/cours98/Doc-cours-clouds/ceph-2009-02%5B1%5D.pdf)
+* Software-Defined Storage the Ceph Way, Part Two : [https://thenewstack.io/software-defined-storage-ceph-way/](https://thenewstack.io/software-defined-storage-ceph-way/)
 

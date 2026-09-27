@@ -22,7 +22,7 @@ User Log means Logs left by Apps. Apps can leave App Logs using the `syslog(3)` 
 
 ## 2. References
 
-* [https://www.ibm.com/developerworks/library/l-kernel-logging-apis/](https://www.ibm.com/developerworks/library/l-kernel-logging-apis/)
-* [https://unix.stackexchange.com/questions/205883/understand-logging-in-linux/294206#294206](https://unix.stackexchange.com/questions/205883/understand-logging-in-linux/294206#294206)
-* [https://unix.stackexchange.com/questions/35851/whats-the-difference-of-dmesg-output-and-var-log-messages](https://unix.stackexchange.com/questions/35851/whats-the-difference-of-dmesg-output-and-var-log-messages)
+* Kernel logging APIs - IBM Developer : [https://www.ibm.com/developerworks/library/l-kernel-logging-apis/](https://www.ibm.com/developerworks/library/l-kernel-logging-apis/)
+* Understand logging in Linux - Unix & Linux Stack Exchange : [https://unix.stackexchange.com/questions/205883/understand-logging-in-linux/294206#294206](https://unix.stackexchange.com/questions/205883/understand-logging-in-linux/294206#294206)
+* What's the difference of dmesg output and /var/log/messages - Unix & Linux Stack Exchange : [https://unix.stackexchange.com/questions/35851/whats-the-difference-of-dmesg-output-and-var-log-messages](https://unix.stackexchange.com/questions/35851/whats-the-difference-of-dmesg-output-and-var-log-messages)
 

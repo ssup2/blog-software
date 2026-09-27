@@ -159,5 +159,5 @@ Organize missing content based on the following organized content
 
 ## 6. References
 
-* [https://www.udemy.com/course/ultimate-aws-certified-sysops-administrator-associate](https://www.udemy.com/course/ultimate-aws-certified-sysops-administrator-associate)
+* Ultimate AWS Certified SysOps Administrator Associate (Udemy) : [https://www.udemy.com/course/ultimate-aws-certified-sysops-administrator-associate](https://www.udemy.com/course/ultimate-aws-certified-sysops-administrator-associate)
 

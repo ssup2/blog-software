@@ -14,5 +14,5 @@ This document compares Serialization and Marshaling, which have similar meanings
 
 ## 3. References
 
-* [http://stackoverflow.com/questions/770474/what-is-the-difference-between-serialization-and-marshaling](http://stackoverflow.com/questions/770474/what-is-the-difference-between-serialization-and-marshaling)
+* What is the difference between Serialization and Marshaling : [http://stackoverflow.com/questions/770474/what-is-the-difference-between-serialization-and-marshaling](http://stackoverflow.com/questions/770474/what-is-the-difference-between-serialization-and-marshaling)
 

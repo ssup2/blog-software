@@ -983,4 +983,4 @@ title: AWS Certified Developer Associate 자격증 이론 정리
 
 ## 21. Reference
 
-* [https://www.udemy.com/course/best-aws-certified-developer-associate/](https://www.udemy.com/course/best-aws-certified-developer-associate/)
+* AWS Certified Developer Associate Course (Udemy) : [https://www.udemy.com/course/best-aws-certified-developer-associate/](https://www.udemy.com/course/best-aws-certified-developer-associate/)

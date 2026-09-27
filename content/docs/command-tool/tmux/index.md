@@ -34,4 +34,4 @@ Terminal Multiplexer인 `tmux`의 사용법을 정리한다.
 
 ## 2. 참조
 
-* [https://edykim.com/ko/post/tmux-introductory-series-summary/](https://edykim.com/ko/post/tmux-introductory-series-summary/)
+* tmux 입문자 시리즈 요약 : [https://edykim.com/ko/post/tmux-introductory-series-summary/](https://edykim.com/ko/post/tmux-introductory-series-summary/)

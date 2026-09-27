@@ -31,8 +31,8 @@ Couchbase's Replica exists only for HA. Replica is not provided to other Clients
 
 ## 2. References
 
-* [https://docs.couchbase.com/server/5.0/architecture/core-data-access-buckets.html](https://docs.couchbase.com/server/5.0/architecture/core-data-access-buckets.html)
-* [https://docs.couchbase.com/server/6.0/learn/buckets-memory-and-storage/vbuckets.html](https://docs.couchbase.com/server/6.0/learn/buckets-memory-and-storage/vbuckets.html)
-* [https://docs.couchbase.com/server/4.1/concepts/data-management.html](https://docs.couchbase.com/server/4.1/concepts/data-management.html)
+* Buckets : [https://docs.couchbase.com/server/5.0/architecture/core-data-access-buckets.html](https://docs.couchbase.com/server/5.0/architecture/core-data-access-buckets.html)
+* vBuckets : [https://docs.couchbase.com/server/6.0/learn/buckets-memory-and-storage/vbuckets.html](https://docs.couchbase.com/server/6.0/learn/buckets-memory-and-storage/vbuckets.html)
+* Data Management : [https://docs.couchbase.com/server/4.1/concepts/data-management.html](https://docs.couchbase.com/server/4.1/concepts/data-management.html)
 
 

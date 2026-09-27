@@ -74,10 +74,10 @@ Because the ICMP protocol is an L3 protocol, an L3-based firewall can be used to
 
 ## 4. References
 
-* [https://www.akamai.com/ko/our-thinking/ddos](https://www.akamai.com/ko/our-thinking/ddos)
-* [https://www.imperva.com/learn/ddos/ddos-attacks/](https://www.imperva.com/learn/ddos/ddos-attacks/)
-* [https://www.onelogin.com/learn/ddos-attack](https://www.onelogin.com/learn/ddos-attack)
-* [https://cybersecurity.att.com/blogs/security-essentials/types-of-ddos-attacks-explained](https://cybersecurity.att.com/blogs/security-essentials/types-of-ddos-attacks-explained)
+* What Is a DDoS Attack? - Akamai : [https://www.akamai.com/ko/our-thinking/ddos](https://www.akamai.com/ko/our-thinking/ddos)
+* DDoS Attack Types & Mitigation Methods : [https://www.imperva.com/learn/ddos/ddos-attacks/](https://www.imperva.com/learn/ddos/ddos-attacks/)
+* DDoS Attack - OneLogin : [https://www.onelogin.com/learn/ddos-attack](https://www.onelogin.com/learn/ddos-attack)
+* Types of DDoS Attacks Explained - AT&T Cybersecurity : [https://cybersecurity.att.com/blogs/security-essentials/types-of-ddos-attacks-explained](https://cybersecurity.att.com/blogs/security-essentials/types-of-ddos-attacks-explained)
 * SYN Flood : [https://www.cloudflare.com/learning/ddos/syn-flood-ddos-attack/](https://www.cloudflare.com/learning/ddos/syn-flood-ddos-attack/)
 * DNS Flood : [https://www.cloudflare.com/learning/ddos/dns-flood-ddos-attack/](https://www.cloudflare.com/learning/ddos/dns-flood-ddos-attack/)
 * DNS Amplification : [https://www.cloudflare.com/learning/ddos/dns-amplification-ddos-attack/](https://www.cloudflare.com/learning/ddos/dns-amplification-ddos-attack/)

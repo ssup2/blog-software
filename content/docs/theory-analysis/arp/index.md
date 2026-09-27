@@ -33,4 +33,4 @@ Data를 전송할때마다 ARP를 이용하여 주소를 알아낸다면 네트�
 
 ## 2. 참조
 
-* [https://www.slideshare.net/naveenarvinth/arp-36193303](https://www.slideshare.net/naveenarvinth/arp-36193303)
+* ARP Overview Slides : [https://www.slideshare.net/naveenarvinth/arp-36193303](https://www.slideshare.net/naveenarvinth/arp-36193303)

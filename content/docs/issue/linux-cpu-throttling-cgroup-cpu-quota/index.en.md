@@ -33,5 +33,5 @@ If kernel upgrade is difficult, you can bypass the CPU throttling issue by setti
 
 ## 3. References
 
-* [https://sched.co/Uae1](https://sched.co/Uae1)
-* [https://github.com/kubernetes/kubernetes/issues/70585](https://github.com/kubernetes/kubernetes/issues/70585)
+* Throttling: New Developments in Application Performance - KubeCon NA 2019 : [https://sched.co/Uae1](https://sched.co/Uae1)
+* Disable cpu quota(use only cpuset) for pod Guaranteed - kubernetes Issue #70585 : [https://github.com/kubernetes/kubernetes/issues/70585](https://github.com/kubernetes/kubernetes/issues/70585)

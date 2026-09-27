@@ -345,4 +345,4 @@ VNC Shell에서 각 Guest를 실행한다.
 
 ## 22. 참조
 
-* [http://www.virtualopensystems.com/en/solutions/guides/kvm-virtualization-on-arndale](http://www.virtualopensystems.com/en/solutions/guides/kvm-virtualization-on-arndale)
+* Guide to setup KVM virtualization on Arndale Exynos5250 development board : [http://www.virtualopensystems.com/en/solutions/guides/kvm-virtualization-on-arndale](http://www.virtualopensystems.com/en/solutions/guides/kvm-virtualization-on-arndale)

@@ -18,6 +18,6 @@ Deployment Git Repo에 있는 배포 설정은 선언적으로 (Declaratively) �
 
 ## 2. 참조
 
-* [https://www.weave.works/technologies/gitops/](https://www.weave.works/technologies/gitops/)
-* [https://www.weave.works/blog/automate-kubernetes-with-gitops](https://www.weave.works/blog/automate-kubernetes-with-gitops)
-* [https://cloud.google.com/kubernetes-engine/docs/tutorials/gitops-cloud-build](https://cloud.google.com/kubernetes-engine/docs/tutorials/gitops-cloud-build)
+* GitOps - Weaveworks : [https://www.weave.works/technologies/gitops/](https://www.weave.works/technologies/gitops/)
+* Automate Kubernetes with GitOps - Weaveworks : [https://www.weave.works/blog/automate-kubernetes-with-gitops](https://www.weave.works/blog/automate-kubernetes-with-gitops)
+* GitOps-style continuous delivery with Cloud Build : [https://cloud.google.com/kubernetes-engine/docs/tutorials/gitops-cloud-build](https://cloud.google.com/kubernetes-engine/docs/tutorials/gitops-cloud-build)

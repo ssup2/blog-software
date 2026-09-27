@@ -141,4 +141,4 @@ $ ./kafka-console-consumer.sh --bootstrap-server localhost:9092 \
 
 ## 5. 참조
 
-* [https://www.howtoforge.com/tutorial/ubuntu-apache-kafka-installation/](https://www.howtoforge.com/tutorial/ubuntu-apache-kafka-installation/)
+* How to Install Apache Kafka on Ubuntu : [https://www.howtoforge.com/tutorial/ubuntu-apache-kafka-installation/](https://www.howtoforge.com/tutorial/ubuntu-apache-kafka-installation/)

@@ -63,4 +63,4 @@ PROMPT+='%{$fg_bold[blue]%}k8s:(%{$fg[red]%}$(kubectx_prompt_info)%{$fg_bold[blu
 
 ## 4. 참조
 
-* [https://gist.github.com/ganapativs/e571d9287cb74121d41bfe75a0c864d7](https://gist.github.com/ganapativs/e571d9287cb74121d41bfe75a0c864d7)
+* iTerm2 + oh-my-zsh + Pure theme + zsh plugins setup : [https://gist.github.com/ganapativs/e571d9287cb74121d41bfe75a0c864d7](https://gist.github.com/ganapativs/e571d9287cb74121d41bfe75a0c864d7)

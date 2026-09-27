@@ -22,4 +22,4 @@ System Design 관점에서 Cache의 고려 사항을 정리한다.
 
 ## 2. 참조
 
-* [https://www.educative.io/courses/grokking-the-system-design-interview/3j6NnJrpp5p](https://www.educative.io/courses/grokking-the-system-design-interview/3j6NnJrpp5p)
+* Grokking the System Design Interview : [https://www.educative.io/courses/grokking-the-system-design-interview/3j6NnJrpp5p](https://www.educative.io/courses/grokking-the-system-design-interview/3j6NnJrpp5p)

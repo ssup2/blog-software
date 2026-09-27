@@ -14,4 +14,4 @@ Verification은 의미 그대로 Digital Data가 서명자로부터 인증된 Da
 
 ## 2. 참조
 
-* [https://blog.mailfence.com/how-do-digital-signatures-work/](https://blog.mailfence.com/how-do-digital-signatures-work/)
+* Digital Signatures: What Are They and How to Use Them? : [https://blog.mailfence.com/how-do-digital-signatures-work/](https://blog.mailfence.com/how-do-digital-signatures-work/)

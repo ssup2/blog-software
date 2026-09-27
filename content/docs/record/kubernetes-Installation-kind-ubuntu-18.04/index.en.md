@@ -76,5 +76,5 @@ Since it is configured with 1 Master and 2 Worker nodes, you can see that 3 Dock
 
 ## 5. References
 
-* [https://kind.sigs.k8s.io/docs/user/quick-start/](https://kind.sigs.k8s.io/docs/user/quick-start/)
+* kind - Quick Start : [https://kind.sigs.k8s.io/docs/user/quick-start/](https://kind.sigs.k8s.io/docs/user/quick-start/)
 

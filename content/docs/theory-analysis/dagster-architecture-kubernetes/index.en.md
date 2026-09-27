@@ -445,5 +445,4 @@ When creating external Kubernetes Jobs with these two functions, the Pod's Spec 
 
 * Dagster Run Launcher: [https://docs.dagster.io/guides/deploy/execution/run-launchers](https://docs.dagster.io/guides/deploy/execution/run-launchers)
 * Dagster Executor: [https://docs.dagster.io/guides/operate/run-executors](https://docs.dagster.io/guides/operate/run-executors)
-* Dagster Kubernetes : [https://docs.dagster.io/api/python-api/libraries/dagster-k8s](https://docs.dagster.io/api/python-api/libraries/dagster-k8s)
 

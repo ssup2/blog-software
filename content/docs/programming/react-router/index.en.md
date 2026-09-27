@@ -151,6 +151,6 @@ The `Link` Component is a React Component used to move to other Paths within Rea
 
 ## 2. References
 
-* [https://velopert.com/3417](https://velopert.com/3417)
-* [https://jeonghwan-kim.github.io/dev/2019/07/08/react-router-ts.html](https://jeonghwan-kim.github.io/dev/2019/07/08/react-router-ts.html)
+* react-router :: 1장. 리액트 라우터 사용해보기 : [https://velopert.com/3417](https://velopert.com/3417)
+* 리액트 라우터 사용하기 (타입스크립트 버전) : [https://jeonghwan-kim.github.io/dev/2019/07/08/react-router-ts.html](https://jeonghwan-kim.github.io/dev/2019/07/08/react-router-ts.html)
 

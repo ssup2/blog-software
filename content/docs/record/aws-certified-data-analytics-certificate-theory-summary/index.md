@@ -606,5 +606,5 @@ title: AWS Certified Data Analytics 자격증 이론 정리
 
 ## 6. 참고
 
-* [https://www.udemy.com/course/aws-data-analytics/](https://www.udemy.com/course/aws-data-analytics/)
-* [https://hevodata.com/learn/redshift-elastic-resize/](https://hevodata.com/learn/redshift-elastic-resize/)
+* AWS Data Analytics Course (Udemy) : [https://www.udemy.com/course/aws-data-analytics/](https://www.udemy.com/course/aws-data-analytics/)
+* Redshift Elastic Resize : [https://hevodata.com/learn/redshift-elastic-resize/](https://hevodata.com/learn/redshift-elastic-resize/)

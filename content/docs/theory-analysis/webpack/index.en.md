@@ -12,6 +12,5 @@ JavaScript has two Module standards: **CommonJS** or **AMD (Asynchronous Module 
 
 ## 2. References
 
-* [https://ui.toast.com/fe-guide/ko-BUNDLER/](https://ui.toast.com/fe-guide/ko-BUNDLER/)
-* [https://d2.naver.com/helloworld/0239818](https://d2.naver.com/helloworld/0239818)s
+* Bundling with webpack (NAVER D2) : [https://d2.naver.com/helloworld/0239818](https://d2.naver.com/helloworld/0239818)
 

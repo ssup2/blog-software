@@ -846,11 +846,9 @@ Logs for OpenStack services are stored in the `/var/log/kolla` directory on each
 
 ## 19. References
 
-* [https://docs.openstack.org/kolla/stein/](https://docs.openstack.org/kolla/stein/)
-* [https://docs.openstack.org/kolla-ansible/stein/](https://docs.openstack.org/kolla-ansible/stein)
-* [https://shreddedbacon.com/post/openstack-kolla/](https://shreddedbacon.com/post/openstack-kolla/)
-* [https://docs.oracle.com/cd/E90981_01/E90982/html/kolla-openstack-network.html](https://docs.oracle.com/cd/E90981_01/E90982/html/kolla-openstack-network.html)
-* [https://github.com/osrg/openvswitch/blob/master/debian/openvswitch-switch.README.Debian](https://github.com/osrg/openvswitch/blob/master/debian/openvswitch-switch.README.Debian)
-* [https://blog.zufardhiyaulhaq.com/manual-instalation-octavia-openstack-queens/](https://blog.zufardhiyaulhaq.com/manual-instalation-octavia-openstack-queens/)
-* [http://www.panticz.de/openstack-octavia-loadbalancer](http://www.panticz.de/openstack-octavia-loadbalancer)
+* Kolla Documentation : [https://docs.openstack.org/kolla/stein/](https://docs.openstack.org/kolla/stein/)
+* Kolla-Ansible Documentation : [https://docs.openstack.org/kolla-ansible/stein/](https://docs.openstack.org/kolla-ansible/stein)
+* OpenStack Kolla : [https://shreddedbacon.com/post/openstack-kolla/](https://shreddedbacon.com/post/openstack-kolla/)
+* Configuring Network Interfaces for OpenStack Networks : [https://docs.oracle.com/cd/E90981_01/E90982/html/kolla-openstack-network.html](https://docs.oracle.com/cd/E90981_01/E90982/html/kolla-openstack-network.html)
+* Open vSwitch Debian README : [https://github.com/osrg/openvswitch/blob/master/debian/openvswitch-switch.README.Debian](https://github.com/osrg/openvswitch/blob/master/debian/openvswitch-switch.README.Debian)
 

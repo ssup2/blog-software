@@ -983,4 +983,4 @@ Summarizes the missing parts based on the following summary
 
 ## 21. Reference
 
-* [https://www.udemy.com/course/best-aws-certified-developer-associate/](https://www.udemy.com/course/best-aws-certified-developer-associate/)
+* AWS Certified Developer Associate Course (Udemy) : [https://www.udemy.com/course/best-aws-certified-developer-associate/](https://www.udemy.com/course/best-aws-certified-developer-associate/)

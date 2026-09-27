@@ -137,5 +137,5 @@ Client가 Server Cluster의 Server들의 IP/Port 정보들을 알고 있다고 �
 
 ## 2. 참조
 
-* [https://web.stanford.edu/~ouster/cgi-bin/papers/OngaroPhD.pdf](https://web.stanford.edu/~ouster/cgi-bin/papers/OngaroPhD.pdf)
-* [https://raft.github.io/](https://raft.github.io/)
+* Consensus: Bridging Theory and Practice (Ongaro PhD Thesis) : [https://web.stanford.edu/~ouster/cgi-bin/papers/OngaroPhD.pdf](https://web.stanford.edu/~ouster/cgi-bin/papers/OngaroPhD.pdf)
+* Raft Consensus Algorithm : [https://raft.github.io/](https://raft.github.io/)

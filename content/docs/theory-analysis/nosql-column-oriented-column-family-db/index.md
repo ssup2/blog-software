@@ -24,8 +24,7 @@ Column Family DB는 Column을 나타내는 Column Key/Data/Timestamp Tuple을 Ro
 
 ## 3. 참조
 
-* [https://en.wikipedia.org/wiki/Column-oriented-DBMS](https://en.wikipedia.org/wiki/Column-oriented-DBMS)
-* [https://en.wikipedia.org/wiki/Column-family](https://en.wikipedia.org/wiki/Column-family)
-* [https://database.guide/what-is-a-column-store-database/](https://database.guide/what-is-a-column-store-database/)
-* [https://stackoverflow.com/questions/13010225/why-many-refer-to-cassandra-as-a-column-oriented-database](https://stackoverflow.com/questions/13010225/why-many-refer-to-cassandra-as-a-column-oriented-database)
-* [https://www.scnsoft.com/blog/cassandra-vs-hbase](https://www.scnsoft.com/blog/cassandra-vs-hbase)
+* Column family - Wikipedia : [https://en.wikipedia.org/wiki/Column_family](https://en.wikipedia.org/wiki/Column_family)
+* What is a Column Store Database? : [https://database.guide/what-is-a-column-store-database/](https://database.guide/what-is-a-column-store-database/)
+* Why many refer to Cassandra as a Column oriented database : [https://stackoverflow.com/questions/13010225/why-many-refer-to-cassandra-as-a-column-oriented-database](https://stackoverflow.com/questions/13010225/why-many-refer-to-cassandra-as-a-column-oriented-database)
+* Cassandra vs. HBase: twins or just strangers with similar looks? : [https://www.scnsoft.com/blog/cassandra-vs-hbase](https://www.scnsoft.com/blog/cassandra-vs-hbase)

@@ -42,7 +42,5 @@ InnoDB가 Log Buffer의 내용을 Redo Log에 Write 및 Flush 동작을 언제 �
 
 ## 3. 참조
 
-* Buffer Pool : [http://actimem.com/mysql/innodb/attachment/innodb-2/](http://actimem.com/mysql/innodb/attachment/innodb-2/)
-* Redo Log : [http://majesty76.tistory.com/62](http://majesty76.tistory.com/62)
 * Redo Log : [http://intomysql.blogspot.com/2010/12/redo-log.html](http://intomysql.blogspot.com/2010/12/redo-log.html)
 * Configuration : [https://dev.mysql.com/doc/refman/8.0/en/innodb-parameters.html](https://dev.mysql.com/doc/refman/8.0/en/innodb-parameters.html)

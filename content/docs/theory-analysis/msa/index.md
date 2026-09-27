@@ -60,10 +60,9 @@ Message Queue가 도입되기 전에 Service A는 Service B, Service C의 존재
 
 ## 2. 참조
 
-* [https://www.slideshare.net/Byungwook/msa-52918441](https://www.slideshare.net/Byungwook/msa-52918441)
-* [https://www.joinc.co.kr/w/man/12/MicroserviceArchitecture](https://www.joinc.co.kr/w/man/12/MicroserviceArchitecture)
-* [https://www.slideshare.net/saltynut/building-micro-service-architecture](https://www.slideshare.net/saltynut/building-micro-service-architecture)
-* [http://microservices.io/articles/scalecube.html](http://microservices.io/articles/scalecube.html)
-* [http://cyberx.tistory.com/64](http://cyberx.tistory.com/64)
-* [https://readme.skplanet.com/?p=13782](https://readme.skplanet.com/?p=13782)
-* [https://www.slideshare.net/wso2.org/wso2con-eu-2017-microservice-architecture-msa-and-integration-microservices-81654363](https://www.slideshare.net/wso2.org/wso2con-eu-2017-microservice-architecture-msa-and-integration-microservices-81654363)
+* Microservice Architecture (SlideShare) : [https://www.slideshare.net/Byungwook/msa-52918441](https://www.slideshare.net/Byungwook/msa-52918441)
+* Microservice Architecture (Joinc) : [https://www.joinc.co.kr/w/man/12/MicroserviceArchitecture](https://www.joinc.co.kr/w/man/12/MicroserviceArchitecture)
+* Building Micro Service Architecture (SlideShare) : [https://www.slideshare.net/saltynut/building-micro-service-architecture](https://www.slideshare.net/saltynut/building-micro-service-architecture)
+* The Scale Cube : [http://microservices.io/articles/scalecube.html](http://microservices.io/articles/scalecube.html)
+* 모놀리틱 시스템에서 MSA로 전환 : [http://cyberx.tistory.com/64](http://cyberx.tistory.com/64)
+* Microservice Architecture (MSA) and Integration Microservices (WSO2Con EU 2017) : [https://www.slideshare.net/wso2.org/wso2con-eu-2017-microservice-architecture-msa-and-integration-microservices-81654363](https://www.slideshare.net/wso2.org/wso2con-eu-2017-microservice-architecture-msa-and-integration-microservices-81654363)

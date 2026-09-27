@@ -133,6 +133,5 @@ apparmor
 
 ## 2. References
 
-* [http://wiki.apparmor.net](http://wiki.apparmor.net)
-* [https://wiki.ubuntu.com/AppArmor](https://wiki.ubuntu.com/AppArmor)
+* AppArmor Documentation : [http://wiki.apparmor.net](http://wiki.apparmor.net)
 

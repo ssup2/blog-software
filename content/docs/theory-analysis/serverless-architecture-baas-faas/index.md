@@ -28,6 +28,6 @@ Function은 Event Handler 형태로 구현되기 때문에 반드시 Stateless�
 
 ### 2. 참조
 
-* [https://martinfowler.com/articles/serverless.html](https://martinfowler.com/articles/serverless.html)
-* [https://hackernoon.com/what-is-serverless-architecture-what-are-its-pros-and-cons-cc4b804022e9](https://hackernoon.com/what-is-serverless-architecture-what-are-its-pros-and-cons-cc4b804022e9)
-* [https://velopert.com/3543](https://velopert.com/3543)
+* Serverless Architectures : [https://martinfowler.com/articles/serverless.html](https://martinfowler.com/articles/serverless.html)
+* What is Serverless Architecture? Pros and Cons : [https://hackernoon.com/what-is-serverless-architecture-what-are-its-pros-and-cons-cc4b804022e9](https://hackernoon.com/what-is-serverless-architecture-what-are-its-pros-and-cons-cc4b804022e9)
+* 서버리스 아키텍쳐(Serverless)란? : [https://velopert.com/3543](https://velopert.com/3543)

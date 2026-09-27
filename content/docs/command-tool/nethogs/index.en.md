@@ -34,6 +34,6 @@ Displays only processes using [Interface].
 
 ## 2. References
 
-* [https://unix.stackexchange.com/questions/91055/how-to-tell-if-mysterious-programs-in-nethogs-listing-are-malware](https://unix.stackexchange.com/questions/91055/how-to-tell-if-mysterious-programs-in-nethogs-listing-are-malware)
+* How to tell if mysterious programs in nethogs listing are malware : [https://unix.stackexchange.com/questions/91055/how-to-tell-if-mysterious-programs-in-nethogs-listing-are-malware](https://unix.stackexchange.com/questions/91055/how-to-tell-if-mysterious-programs-in-nethogs-listing-are-malware)
 
 

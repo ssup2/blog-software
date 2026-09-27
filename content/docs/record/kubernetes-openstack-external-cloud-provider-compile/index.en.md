@@ -43,7 +43,3 @@ $ make upload-images
 
 Create Docker images and push the created images to the Docker Registry. Registry-related information for pushing Docker images must be set as environment variables.
 
-## 5. References
-
-* [https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/getting-started-provider-dev.md](https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/getting-started-provider-dev.md)
-

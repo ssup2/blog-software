@@ -60,9 +60,7 @@ v1/v4 UUID는 DB Table의 PK(Primary Key)로도 많이 이용된다. 일반적�
 
 ## 3. 참조
 
-* [https://en.wikipedia.org/wiki/Universally-unique-identifier](https://en.wikipedia.org/wiki/Universally-unique-identifier)
-* [https://uuid.ramsey.dev/en/latest/introduction.html](https://uuid.ramsey.dev/en/latest/introduction.html)
-* [https://docs.python.org/3/library/uuid.html](https://docs.python.org/3/library/uuid.html)
-* [https://www.uuidtools.com/what-is-uuid](https://www.uuidtools.com/what-is-uuid)
-* [https://www.sohamkamani.com/uuid-versions-explained/](https://www.sohamkamani.com/uuid-versions-explained/)
-* [https://www.davidangulo.xyz/advantages-and-disadvantages-of-uuid/](https://www.davidangulo.xyz/advantages-and-disadvantages-of-uuid/)
+* Universally unique identifier - Wikipedia : [https://en.wikipedia.org/wiki/Universally_unique_identifier](https://en.wikipedia.org/wiki/Universally_unique_identifier)
+* uuid - UUID objects according to RFC 9562 (Python Documentation) : [https://docs.python.org/3/library/uuid.html](https://docs.python.org/3/library/uuid.html)
+* Complete guide to Universal Unique Identifiers (UUID) : [https://www.uuidtools.com/what-is-uuid](https://www.uuidtools.com/what-is-uuid)
+* A Complete Guide to UUID Versions (v1, v4, v5) - With Examples : [https://www.sohamkamani.com/uuid-versions-explained/](https://www.sohamkamani.com/uuid-versions-explained/)

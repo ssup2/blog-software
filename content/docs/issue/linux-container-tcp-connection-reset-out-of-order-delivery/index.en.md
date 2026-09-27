@@ -93,8 +93,7 @@ The second method is to drop packets in an invalid state. In the case of Docker 
 
 ## 4. References
 
-* [https://github.com/moby/libnetwork/issues/1090](https://github.com/moby/libnetwork/issues/1090)
-* [https://github.com/moby/libnetwork/issues/1090#issuecomment-425421288](https://github.com/moby/libnetwork/issues/1090#issuecomment-425421288)
-* [https://imbstack.com/2020/05/03/debugging-docker-connection-resets.html](https://imbstack.com/2020/05/03/debugging-docker-connection-resets.html)
-* [https://github.com/kubernetes/kubernetes/pull/74840#issuecomment-491674987](https://github.com/kubernetes/kubernetes/pull/74840#issuecomment-491674987)
-* [https://kubernetes.io/blog/2019/03/29/kube-proxy-subtleties-debugging-an-intermittent-connection-reset/](https://kubernetes.io/blog/2019/03/29/kube-proxy-subtleties-debugging-an-intermittent-connection-reset/)
+* Add workaround for spurious retransmits leading to connection resets · moby/libnetwork #1090 : [https://github.com/moby/libnetwork/issues/1090](https://github.com/moby/libnetwork/issues/1090)
+* Add workaround for spurious retransmits leading to connection resets · moby/libnetwork #1090 (comment) : [https://github.com/moby/libnetwork/issues/1090#issuecomment-425421288](https://github.com/moby/libnetwork/issues/1090#issuecomment-425421288)
+* kube-proxy: Drop packets in INVALID state · kubernetes/kubernetes #74840 (comment) : [https://github.com/kubernetes/kubernetes/pull/74840#issuecomment-491674987](https://github.com/kubernetes/kubernetes/pull/74840#issuecomment-491674987)
+* kube-proxy Subtleties: Debugging an Intermittent Connection Reset : [https://kubernetes.io/blog/2019/03/29/kube-proxy-subtleties-debugging-an-intermittent-connection-reset/](https://kubernetes.io/blog/2019/03/29/kube-proxy-subtleties-debugging-an-intermittent-connection-reset/)

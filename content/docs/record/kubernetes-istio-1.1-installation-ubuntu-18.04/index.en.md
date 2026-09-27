@@ -58,7 +58,3 @@ prometheus-5977597c75-xgkvz               1/1     Running     0          115s
 
 Verify istio installation.
 
-## 3. References
-
-* [https://istio.io/docs/setup/kubernetes/install/helm/](https://istio.io/docs/setup/kubernetes/install/helm/)
-

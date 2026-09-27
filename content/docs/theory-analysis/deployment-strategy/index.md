@@ -38,8 +38,6 @@ A/B Test는 다수의 동일한 환경에서 설정 또는 Version이 다른 App
 
 ## 5. 참조
 
-* [https://octopus.com/docs/deployment-patterns/rolling-deployments](https://octopus.com/docs/deployment-patterns/rolling-deployments)
-* [https://dev.to/mostlyjason/intro-to-deployment-strategies-blue-green-canary-and-more-3a3](https://dev.to/mostlyjason/intro-to-deployment-strategies-blue-green-canary-and-more-3a3)
-* [https://opensource.com/article/17/5/colorful-deployments](https://opensource.com/article/17/5/colorful-deployments)
-* [https://blog.christianposta.com/deploy/blue-green-deployments-a-b-testing-and-canary-releases/](https://blog.christianposta.com/deploy/blue-green-deployments-a-b-testing-and-canary-releases/)
-* [http://cgrant.io/article/deployment-strategies/](http://cgrant.io/article/deployment-strategies/)
+* Rolling Deployments - Octopus Deploy : [https://octopus.com/docs/deployment-patterns/rolling-deployments](https://octopus.com/docs/deployment-patterns/rolling-deployments)
+* Intro to deployment strategies: blue-green, canary, and more : [https://dev.to/mostlyjason/intro-to-deployment-strategies-blue-green-canary-and-more-3a3](https://dev.to/mostlyjason/intro-to-deployment-strategies-blue-green-canary-and-more-3a3)
+* Colorful deployments: An introduction to blue-green, canary, and rolling deployments : [https://opensource.com/article/17/5/colorful-deployments](https://opensource.com/article/17/5/colorful-deployments)

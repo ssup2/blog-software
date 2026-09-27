@@ -36,4 +36,4 @@ export PATH=$GOROOT/bin:$GOBIN:$PATH
 
 ## 4. 참조
 
-* [https://ahmadawais.com/install-go-lang-on-macos-with-homebrew](https://ahmadawais.com/install-go-lang-on-macos-with-homebrew/)
+* Install Go Lang on macOS with Homebrew : [https://ahmadawais.com/install-go-lang-on-macos-with-homebrew/](https://ahmadawais.com/install-go-lang-on-macos-with-homebrew/)

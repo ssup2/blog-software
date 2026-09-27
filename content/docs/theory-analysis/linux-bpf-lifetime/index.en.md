@@ -29,6 +29,5 @@ BPFFS is a special Filesystem for Pinning BPF Programs and BPF Maps, and in envi
 * BPF System Call : [https://man7.org/linux/man-pages/man2/bpf.2.html](https://man7.org/linux/man-pages/man2/bpf.2.html)
 * BPFFS : [https://facebookmicrosites.github.io/bpf/blog/2018/08/31/object-lifetime.html](https://facebookmicrosites.github.io/bpf/blog/2018/08/31/object-lifetime.html)
 * BPFFS : [https://github.com/cilium/cilium/blob/v1.7.12/bpf/init.sh](https://github.com/cilium/cilium/blob/v1.7.12/bpf/init.sh)
-* BPFFS : [https://github.com/cilium/cilium/blob/v1.7.12/pkg/bpf/bpf-linux.go#L291](https://github.com/cilium/cilium/blob/v1.7.12/pkg/bpf/bpf-linux.go#L291)
-* BPFFS : [https://www.ferrisellis.com/content/ebpf-syscall-and-maps/](https://www.ferrisellis.com/content/ebpf-syscall-and-maps/)
+* BPFFS : [https://github.com/cilium/cilium/blob/v1.7.12/pkg/bpf/bpf_linux.go#L291](https://github.com/cilium/cilium/blob/v1.7.12/pkg/bpf/bpf_linux.go#L291)
 

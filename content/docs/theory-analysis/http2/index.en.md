@@ -80,9 +80,7 @@ In [Figure 3], we can see PUSH-PROMISE Type frames, which serve to notify the cl
 
 ## 2. References
 
-* [https://http2.github.io/http2-spec](https://http2.github.io/http2-spec)
 * HTTP/2 RFC 9113 : [https://datatracker.ietf.org/doc/html/rfc9113](https://datatracker.ietf.org/doc/html/rfc9113)
-* [https://developers.google.com/web/fundamentals/performance/http2?hl=ko](https://developers.google.com/web/fundamentals/performance/http2?hl=ko)
-* [https://www.slideshare.net/eungjun/http2-40582114](https://www.slideshare.net/eungjun/http2-40582114)
-* [https://b.luavis.kr/http2/](https://b.luavis.kr/http2/)
-* [https://www.slideshare.net/BrandonK/http2-analysis-and-performance-evaluation-tech-summit-2017-86562049](https://www.slideshare.net/BrandonK/http2-analysis-and-performance-evaluation-tech-summit-2017-86562049)
+* HTTP/2 - High Performance Browser Networking : [https://developers.google.com/web/fundamentals/performance/http2?hl=ko](https://developers.google.com/web/fundamentals/performance/http2?hl=ko)
+* HTTP/2 Introduction Slides : [https://www.slideshare.net/eungjun/http2-40582114](https://www.slideshare.net/eungjun/http2-40582114)
+* HTTP/2 Analysis and Performance Evaluation : [https://www.slideshare.net/BrandonK/http2-analysis-and-performance-evaluation-tech-summit-2017-86562049](https://www.slideshare.net/BrandonK/http2-analysis-and-performance-evaluation-tech-summit-2017-86562049)

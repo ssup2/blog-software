@@ -190,8 +190,8 @@ The fact that calculating subordinate Bucket's Straw value uses not only that Bu
 
 ## 3. References
 
-* [http://www.nminoru.jp/~nminoru/unix/ceph/rados-overview.html#mapping](http://www.nminoru.jp/~nminoru/unix/ceph/rados-overview.html#mapping)
-* [https://github.com/ceph/ceph/blob/master/src/crush/mapper.c](https://github.com/ceph/ceph/blob/master/src/crush/mapper.c)
-* [https://github.com/ceph/ceph/blob/master/src/crush/builder.c](https://github.com/ceph/ceph/blob/master/src/crush/builder.c)
-* [https://my.oschina.net/linuxhunter/blog/639016](https://my.oschina.net/linuxhunter/blog/639016)
+* RADOS Overview (RADOS, CRUSH and Placement Group) : [http://www.nminoru.jp/~nminoru/unix/ceph/rados-overview.html#mapping](http://www.nminoru.jp/~nminoru/unix/ceph/rados-overview.html#mapping)
+* ceph/src/crush/mapper.c : [https://github.com/ceph/ceph/blob/master/src/crush/mapper.c](https://github.com/ceph/ceph/blob/master/src/crush/mapper.c)
+* ceph/src/crush/builder.c : [https://github.com/ceph/ceph/blob/master/src/crush/builder.c](https://github.com/ceph/ceph/blob/master/src/crush/builder.c)
+* Ceph CRUSH Algorithm Analysis : [https://my.oschina.net/linuxhunter/blog/639016](https://my.oschina.net/linuxhunter/blog/639016)
 

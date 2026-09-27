@@ -44,4 +44,4 @@ Hotfix Branch는 의미 그대로 빠른 Bug 수정을 위한 Branch이다. Mast
 
 ## 2. 참조
 
-* [https://nvie.com/posts/a-successful-git-branching-model/](https://nvie.com/posts/a-successful-git-branching-model/)
+* A successful Git branching model : [https://nvie.com/posts/a-successful-git-branching-model/](https://nvie.com/posts/a-successful-git-branching-model/)

@@ -72,5 +72,5 @@ Create an Access Key for the created `admin` User.
 
 ## 4. References
 
-* [https://docs.aws.amazon.com/IAM/latest/UserGuide/getting-started-create-admin-group.html](https://docs.aws.amazon.com/IAM/latest/UserGuide/getting-started-create-admin-group.html)
+* Creating Your First IAM Admin User and Group : [https://docs.aws.amazon.com/IAM/latest/UserGuide/getting-started-create-admin-group.html](https://docs.aws.amazon.com/IAM/latest/UserGuide/getting-started-create-admin-group.html)
 

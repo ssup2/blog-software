@@ -104,4 +104,4 @@ title: AWS Certified Database 자격증 이론 정리
 
 ## 4. 참고
 
-* [https://www.udemy.com/course/aws-certified-database-specialty-dbs/](https://www.udemy.com/course/aws-certified-database-specialty-dbs/)]
+* AWS Certified Database Specialty (Udemy) : [https://www.udemy.com/course/aws-certified-database-specialty-dbs/](https://www.udemy.com/course/aws-certified-database-specialty-dbs/)

@@ -60,6 +60,6 @@ Token 붙여넣기 연산자 (`##`)는 분리된 Token을 하나로 합친다. [
 
 ## 4. 참조
 
-* [http://msdn.microsoft.com/en-us/library/7e3a913x.aspx](http://msdn.microsoft.com/en-us/library/7e3a913x.aspx)
-* [https://www.google.co.kr/?gfe_rd=cr&ei=HzoMVIOrEYTN8ge3oYGgDw&gws_rd=ssl#newwindow=1&q=c+macro+%EB%AC%B8%EB%B2%95](https://www.google.co.kr/?gfe_rd=cr&ei=HzoMVIOrEYTN8ge3oYGgDw&gws_rd=ssl#newwindow=1&q=c+macro+%EB%AC%B8%EB%B2%95)
-* [https://gcc.gnu.org/onlinedocs/cpp/Variadic-Macros.html](https://gcc.gnu.org/onlinedocs/cpp/Variadic-Macros.html)
+* Stringizing operator (#) : [http://msdn.microsoft.com/en-us/library/7e3a913x.aspx](http://msdn.microsoft.com/en-us/library/7e3a913x.aspx)
+* Google Search - C Macro Syntax : [https://www.google.co.kr/?gfe_rd=cr&ei=HzoMVIOrEYTN8ge3oYGgDw&gws_rd=ssl#newwindow=1&q=c+macro+%EB%AC%B8%EB%B2%95](https://www.google.co.kr/?gfe_rd=cr&ei=HzoMVIOrEYTN8ge3oYGgDw&gws_rd=ssl#newwindow=1&q=c+macro+%EB%AC%B8%EB%B2%95)
+* Variadic Macros - The C Preprocessor : [https://gcc.gnu.org/onlinedocs/cpp/Variadic-Macros.html](https://gcc.gnu.org/onlinedocs/cpp/Variadic-Macros.html)

@@ -17,6 +17,6 @@ WebSocket을 분석한다.
 `Sec-WebSocket-Accept`값은 `258EAFA5-E914-47DA-95CA-C5AB0DC85B11` 문자열을 CONCATENATE 한 값과 `Sec-WebSocket-Accept`값을 더한 다음 SHA-1 Hashing과 Base64 Encoding을 통해 구할 수 있다. `Sec-WebSocket-Protocol`은 Application이 이용할 SubProtocol을 나타낸다. WebSocket Handshaking이 완료된 후 Client와 Server는 서로 자유롭게 Message를 주고 받을 수 있다. Message는 **Data Frame**라는 작은 단위로 쪼개져서 전송된다. Data Frame은 작은 크기의 Header와 Payload로 구성되어 있다.
 
 ## 2. 참조
-* [https://tools.ietf.org/html/rfc6455](https://tools.ietf.org/html/rfc6455)
-* [https://en.wikipedia.org/wiki/WebSocket](https://en.wikipedia.org/wiki/WebSocket)
-* [https://stackoverflow.com/questions/14133452/which-osi-layer-does-websocket-protocol-lay-on](https://stackoverflow.com/questions/14133452/which-osi-layer-does-websocket-protocol-lay-on)
+* RFC 6455: The WebSocket Protocol : [https://tools.ietf.org/html/rfc6455](https://tools.ietf.org/html/rfc6455)
+* WebSocket - Wikipedia : [https://en.wikipedia.org/wiki/WebSocket](https://en.wikipedia.org/wiki/WebSocket)
+* Which OSI layer does WebSocket protocol lay on : [https://stackoverflow.com/questions/14133452/which-osi-layer-does-websocket-protocol-lay-on](https://stackoverflow.com/questions/14133452/which-osi-layer-does-websocket-protocol-lay-on)

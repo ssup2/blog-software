@@ -80,5 +80,5 @@ The reason why old and new server configuration settings must exist simultaneous
 
 ## 5. References
 
-* [https://raft.github.io/](https://raft.github.io/)
-* [https://web.stanford.edu/~ouster/cgi-bin/papers/OngaroPhD.pdf](https://web.stanford.edu/~ouster/cgi-bin/papers/OngaroPhD.pdf)
+* Raft Consensus Algorithm : [https://raft.github.io/](https://raft.github.io/)
+* Consensus: Bridging Theory and Practice (Ongaro PhD Dissertation) : [https://web.stanford.edu/~ouster/cgi-bin/papers/OngaroPhD.pdf](https://web.stanford.edu/~ouster/cgi-bin/papers/OngaroPhD.pdf)

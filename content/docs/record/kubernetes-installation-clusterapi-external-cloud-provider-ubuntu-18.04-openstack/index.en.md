@@ -474,11 +474,11 @@ SSH into the Bastion VM using the `ssup2` keypair, then use the `ssup2` keypair 
 
 ## 12. References
 
-* [https://kind.sigs.k8s.io/](https://kind.sigs.k8s.io/)
-* [https://cluster-api.sigs.k8s.io/](https://cluster-api.sigs.k8s.io/)
-* [https://cluster-api.sigs.k8s.io/user/quick-start.html](https://cluster-api.sigs.k8s.io/user/quick-start.html)
-* [https://image-builder.sigs.k8s.io/capi/providers/openstack.html](https://image-builder.sigs.k8s.io/capi/providers/openstack.html)
-* [https://github.com/kubernetes-sigs/cluster-api-provider-openstack](https://github.com/kubernetes-sigs/cluster-api-provider-openstack)
-* [https://github.com/kubernetes-sigs/cluster-api-provider-openstack/blob/master/docs/configuration.md](https://github.com/kubernetes-sigs/cluster-api-provider-openstack/blob/master/docs/configuration.md)
-* [https://github.com/kubernetes-sigs/cluster-api-provider-openstack/blob/v0.3.3/docs/external-cloud-provider.md](https://github.com/kubernetes-sigs/cluster-api-provider-openstack/blob/v0.3.3/docs/external-cloud-provider.md)
+* kind (Kubernetes in Docker) : [https://kind.sigs.k8s.io/](https://kind.sigs.k8s.io/)
+* Introduction - The Cluster API Book : [https://cluster-api.sigs.k8s.io/](https://cluster-api.sigs.k8s.io/)
+* Quick Start - The Cluster API Book : [https://cluster-api.sigs.k8s.io/user/quick-start.html](https://cluster-api.sigs.k8s.io/user/quick-start.html)
+* OpenStack - The Image Builder Book : [https://image-builder.sigs.k8s.io/capi/providers/openstack.html](https://image-builder.sigs.k8s.io/capi/providers/openstack.html)
+* cluster-api-provider-openstack: Cluster API implementation for OpenStack : [https://github.com/kubernetes-sigs/cluster-api-provider-openstack](https://github.com/kubernetes-sigs/cluster-api-provider-openstack)
+* Cluster API Provider OpenStack Configuration : [https://github.com/kubernetes-sigs/cluster-api-provider-openstack/blob/master/docs/configuration.md](https://github.com/kubernetes-sigs/cluster-api-provider-openstack/blob/master/docs/configuration.md)
+* Cluster API Provider OpenStack External Cloud Provider : [https://github.com/kubernetes-sigs/cluster-api-provider-openstack/blob/v0.3.3/docs/external-cloud-provider.md](https://github.com/kubernetes-sigs/cluster-api-provider-openstack/blob/v0.3.3/docs/external-cloud-provider.md)
 

@@ -95,7 +95,3 @@ tcp6       0      0 :::5000                 :::*                    LISTEN      
 
 Displays port and process information in LISTEN state. [Shell 4] shows the output of `netstat -plnt` displaying port and process information in LISTEN state.
 
-## 2. References
-
-* [https://linuxacademy.com/blog/linux/netstat-network-analysis-and-troubleshooting-explained/](https://linuxacademy.com/blog/linux/netstat-network-analysis-and-troubleshooting-explained/)
-

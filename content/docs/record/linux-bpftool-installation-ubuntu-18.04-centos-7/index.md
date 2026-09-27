@@ -88,6 +88,5 @@ $ make -C tools/bpf/bpftool/
 
 ## 4. 참조
 
-* [https://github.com/Netronome/bpf-tool](https://github.com/Netronome/bpf-tool)
-* [https://wiki.ubuntu.com/Kernel/BuildYourOwnKernel](https://wiki.ubuntu.com/Kernel/BuildYourOwnKernel)
-* [https://lore.kernel.org/patchwork/patch/866970/](https://lore.kernel.org/patchwork/patch/866970/)
+* Netronome/bpf-tool : [https://github.com/Netronome/bpf-tool](https://github.com/Netronome/bpf-tool)
+* bpftool patch (Linux kernel patchwork) : [https://lore.kernel.org/patchwork/patch/866970/](https://lore.kernel.org/patchwork/patch/866970/)

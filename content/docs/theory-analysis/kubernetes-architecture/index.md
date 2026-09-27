@@ -36,6 +36,6 @@ Worker Node는 Kubernetes 사용자가 배포한 Application이 동작하는 Nod
 
 ## 2. 참조
 
-* [https://www.aquasec.com/wiki/display/containers/Kubernetes+Architecture+101](https://www.aquasec.com/wiki/display/containers/Kubernetes+Architecture+101)
-* [https://www.slideshare.net/harryzhang735/kubernetes-beyond-a-black-box-part-1](https://www.slideshare.net/harryzhang735/kubernetes-beyond-a-black-box-part-1)
-* [https://www.slideshare.net/harryzhang735/kubernetes-beyond-a-black-box-part-2](https://www.slideshare.net/harryzhang735/kubernetes-beyond-a-black-box-part-2)
+* Kubernetes Architecture 101 : [https://www.aquasec.com/wiki/display/containers/Kubernetes+Architecture+101](https://www.aquasec.com/wiki/display/containers/Kubernetes+Architecture+101)
+* Kubernetes: Beyond a Black Box - Part 1 : [https://www.slideshare.net/harryzhang735/kubernetes-beyond-a-black-box-part-1](https://www.slideshare.net/harryzhang735/kubernetes-beyond-a-black-box-part-1)
+* Kubernetes: Beyond a Black Box - Part 2 : [https://www.slideshare.net/harryzhang735/kubernetes-beyond-a-black-box-part-2](https://www.slideshare.net/harryzhang735/kubernetes-beyond-a-black-box-part-2)

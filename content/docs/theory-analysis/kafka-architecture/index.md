@@ -190,11 +190,11 @@ Consumer도 처리가 완료된 Record의 Offset을 Broker에게 전송했지만
 ## 2. 참조
 
 * Kafka :[https://fizalihsan.github.io/technology/bigdata-frameworks.html](https://fizalihsan.github.io/technology/bigdata-frameworks.html)
-* Kafka : [https://en.wikipedia.org/wiki/Apache-Kafka](https://en.wikipedia.org/wiki/Apache-Kafka)
+* Kafka : [https://en.wikipedia.org/wiki/Apache_Kafka](https://en.wikipedia.org/wiki/Apache_Kafka)
 * Kafka : [https://www.quora.com/What-is-Apache-Kafka](https://www.quora.com/What-is-Apache-Kafka)
 * Kafka : [https://sookocheff.com/post/kafka/kafka-in-a-nutshell/](https://sookocheff.com/post/kafka/kafka-in-a-nutshell/)
 * Kafka ACK : [https://medium.freecodecamp.org/what-makes-apache-kafka-so-fast-a8d4f94ab145](https://medium.freecodecamp.org/what-makes-apache-kafka-so-fast-a8d4f94ab145)
-* [https://www.popit.kr/kafka-%EC%9A%B4%EC%98%81%EC%9E%90%EA%B0%80-%EB%A7%90%ED%95%98%EB%8A%94-producer-acks/](https://www.popit.kr/kafka-%EC%9A%B4%EC%98%81%EC%9E%90%EA%B0%80-%EB%A7%90%ED%95%98%EB%8A%94-producer-acks/)
+* Kafka 운영자가 말하는 Producer ACKS : [https://www.popit.kr/kafka-%EC%9A%B4%EC%98%81%EC%9E%90%EA%B0%80-%EB%A7%90%ED%95%98%EB%8A%94-producer-acks/](https://www.popit.kr/kafka-%EC%9A%B4%EC%98%81%EC%9E%90%EA%B0%80-%EB%A7%90%ED%95%98%EB%8A%94-producer-acks/)
 * Kafka Record : [https://lankydan.dev/intro-to-kafka-consumers](https://lankydan.dev/intro-to-kafka-consumers)
 * Kafka Record : [https://zzzzseong.tistory.com/107](https://zzzzseong.tistory.com/107)
 * Kafka Buffer, Batch : [https://stackoverflow.com/questions/49649241/apache-kafka-batch-size-vs-buffer-memory](https://stackoverflow.com/questions/49649241/apache-kafka-batch-size-vs-buffer-memory)

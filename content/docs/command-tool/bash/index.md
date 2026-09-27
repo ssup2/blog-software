@@ -25,4 +25,4 @@ Bash Shell 사용법을 정리한다.
 
 ## 2. 참조
 
-* [http://teohm.com/blog/shortcuts-to-move-faster-in-bash-command-line/](http://teohm.com/blog/shortcuts-to-move-faster-in-bash-command-line/)
+* Shortcuts to move faster in Bash command line : [http://teohm.com/blog/shortcuts-to-move-faster-in-bash-command-line/](http://teohm.com/blog/shortcuts-to-move-faster-in-bash-command-line/)

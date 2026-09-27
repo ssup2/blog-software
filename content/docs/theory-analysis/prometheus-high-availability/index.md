@@ -20,9 +20,8 @@ Prometheus Alertmanager Cluster는 중복 수신한 Alert을 중복 횟수만큼
 
 ## 2. 참조
 
-* [https://www.perimeterx.com/blog/scaling-out-with-prometheus/](https://www.perimeterx.com/blog/scaling-out-with-prometheus/)
-* [https://coreos.com/operators/prometheus/docs/latest/high-availability.html](https://coreos.com/operators/prometheus/docs/latest/high-availability.html)
-* [https://prometheus.io/docs/introduction/faq/#can-prometheus-be-made-highly-available](https://prometheus.io/docs/introduction/faq/#can-prometheus-be-made-highly-available)
-* [https://promcon.io/2017-munich/slides/alertmanager-and-high-availability.pdf](https://promcon.io/2017-munich/slides/alertmanager-and-high-availability.pdf)
-* [https://github.com/prometheus/pushgateway/issues/241](https://github.com/prometheus/pushgateway/issues/241)
-* [https://github.com/prometheus/pushgateway/issues/319](https://github.com/prometheus/pushgateway/issues/319)
+* Prometheus Operator - High Availability : [https://coreos.com/operators/prometheus/docs/latest/high-availability.html](https://coreos.com/operators/prometheus/docs/latest/high-availability.html)
+* Prometheus FAQ - Can Prometheus be made highly available? : [https://prometheus.io/docs/introduction/faq/#can-prometheus-be-made-highly-available](https://prometheus.io/docs/introduction/faq/#can-prometheus-be-made-highly-available)
+* Alertmanager and High Availability : [https://promcon.io/2017-munich/slides/alertmanager-and-high-availability.pdf](https://promcon.io/2017-munich/slides/alertmanager-and-high-availability.pdf)
+* feature request: cluster (pushgateway #241) : [https://github.com/prometheus/pushgateway/issues/241](https://github.com/prometheus/pushgateway/issues/241)
+* Pushgateway HA (pushgateway #319) : [https://github.com/prometheus/pushgateway/issues/319](https://github.com/prometheus/pushgateway/issues/319)

@@ -16,4 +16,4 @@ Key-value DB는 Key를 Unique한 Key를 기준으로 Key/Value Data의 CRUD 기�
 
 ## 2. 참조
 
-* [https://database.guide/what-is-a-key-value-database/](https://database.guide/what-is-a-key-value-database/)
+* What is a Key-Value Database? : [https://database.guide/what-is-a-key-value-database/](https://database.guide/what-is-a-key-value-database/)

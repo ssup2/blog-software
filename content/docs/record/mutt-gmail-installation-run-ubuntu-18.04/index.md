@@ -70,4 +70,4 @@ mutt을 실행한다. 단축키는 아래와 같다.
 
 ## 6. 참조
 
-* [http://nickdesaulniers.github.io/blog/2016/06/18/mutt-gmail-ubuntu/](http://nickdesaulniers.github.io/blog/2016/06/18/mutt-gmail-ubuntu/)
+* Setting up mutt with gmail on Ubuntu : [http://nickdesaulniers.github.io/blog/2016/06/18/mutt-gmail-ubuntu/](http://nickdesaulniers.github.io/blog/2016/06/18/mutt-gmail-ubuntu/)

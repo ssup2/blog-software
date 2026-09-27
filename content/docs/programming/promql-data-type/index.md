@@ -59,7 +59,7 @@ Range Vector Type은 Instant Vector Type의 값 중에서 **특정 시간대의 
 
 ## 2. 참조
 
-* [https://prometheus.io/docs/prometheus/latest/querying/basics/#expression-language-data-types](https://prometheus.io/docs/prometheus/latest/querying/basics/#expression-language-data-types)
-* [https://devthomas.tistory.com/15](https://devthomas.tistory.com/15)
-* [https://gurumee92.tistory.com/244](https://gurumee92.tistory.com/244)
-* [https://www.robustperception.io/cardinality-is-key](https://www.robustperception.io/cardinality-is-key)
+* Querying basics : [https://prometheus.io/docs/prometheus/latest/querying/basics/#expression-language-data-types](https://prometheus.io/docs/prometheus/latest/querying/basics/#expression-language-data-types)
+* Prometheus Query(PromQL) 기본 이해하기 : [https://devthomas.tistory.com/15](https://devthomas.tistory.com/15)
+* Prometheus Query (1) PromQL 기본 : [https://gurumee92.tistory.com/244](https://gurumee92.tistory.com/244)
+* Cardinality is key : [https://www.robustperception.io/cardinality-is-key](https://www.robustperception.io/cardinality-is-key)

@@ -94,5 +94,3 @@ Kubeflow를 설치한다. 설치가 완료된 이후에 `istio-system` Namespace
 ## 7. 참조
 
 * kustomize Install : [https://kubectl.docs.kubernetes.io/installation/kustomize/binaries/](https://kubectl.docs.kubernetes.io/installation/kustomize/binaries/)
-* Kubeflow Install : [https://www.kubeflow.org/docs/started/k8s/kfctl_k8s_istio/](https://www.kubeflow.org/docs/started/k8s/kfctl_k8s_istio/)
-* Kubeflow kustomize : [https://www.kubeflow.org/docs/other-guides/kustomize/](https://www.kubeflow.org/docs/other-guides/kustomize/)

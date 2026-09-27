@@ -606,6 +606,6 @@ Organize missing content based on the following organized content
 
 ## 6. References
 
-* [https://www.udemy.com/course/aws-data-analytics/](https://www.udemy.com/course/aws-data-analytics/)
-* [https://hevodata.com/learn/redshift-elastic-resize/](https://hevodata.com/learn/redshift-elastic-resize/)
+* AWS Data Analytics Course (Udemy) : [https://www.udemy.com/course/aws-data-analytics/](https://www.udemy.com/course/aws-data-analytics/)
+* Redshift Elastic Resize : [https://hevodata.com/learn/redshift-elastic-resize/](https://hevodata.com/learn/redshift-elastic-resize/)
 

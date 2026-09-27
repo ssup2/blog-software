@@ -75,5 +75,4 @@ type=SYSCALL msg=audit(2018년 02월 14일 15:33:57.911:363) : arch=x86-64 sysca
 
 ## 2. 참조
 
-* [https://access.redhat.com/documentation/en-us/red-hat-enterprise-linux/6/html/security-guide/chap-system-auditing](https://access.redhat.com/documentation/en-us/red-hat-enterprise-linux/6/html/security-guide/chap-system-auditing)
-* [https://blog.selectel.com/auditing-system-events-linux/](https://blog.selectel.com/auditing-system-events-linux/)
+* RHEL 6 Security Guide: System Auditing : [https://access.redhat.com/documentation/en-us/red-hat-enterprise-linux/6/html/security-guide/chap-system-auditing](https://access.redhat.com/documentation/en-us/red-hat-enterprise-linux/6/html/security-guide/chap-system-auditing)

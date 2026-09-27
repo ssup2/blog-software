@@ -45,4 +45,4 @@ title: CKAD 자격증 시험 정리/후기
 
 ## 6. 참고
 
-* [https://jyeonth.tistory.com/34](https://jyeonth.tistory.com/34)
+* CKAD(Certified Kubernetes Application Developer) 합격 후기 및 팁 : [https://jyeonth.tistory.com/34](https://jyeonth.tistory.com/34)

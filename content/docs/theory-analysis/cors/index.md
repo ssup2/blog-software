@@ -34,8 +34,8 @@ CORS 기법을 통해서 Cross-Origin은 검증되지 않은 임의의 Web Appli
 
 ## 2. 참조
 
-* [https://stackoverflow.com/questions/27365303/what-is-the-issue-cors-is-trying-to-solve](https://stackoverflow.com/questions/27365303/what-is-the-issue-cors-is-trying-to-solve)
-* [https://ko.javascript.info/fetch-crossorigin](https://ko.javascript.info/fetch-crossorigin)
-* [https://developer.mozilla.org/ko/docs/Web/HTTP/CORS](https://developer.mozilla.org/ko/docs/Web/HTTP/CORS)
-* [https://evan-moon.github.io/2020/05/21/about-cors/](https://evan-moon.github.io/2020/05/21/about-cors/)
-* [https://security.stackexchange.com/questions/108835/how-does-cors-prevent-xss](https://security.stackexchange.com/questions/108835/how-does-cors-prevent-xss)
+* What is the issue CORS is trying to solve? - Stack Overflow : [https://stackoverflow.com/questions/27365303/what-is-the-issue-cors-is-trying-to-solve](https://stackoverflow.com/questions/27365303/what-is-the-issue-cors-is-trying-to-solve)
+* CORS : [https://ko.javascript.info/fetch-crossorigin](https://ko.javascript.info/fetch-crossorigin)
+* 교차 출처 리소스 공유 (CORS) : [https://developer.mozilla.org/ko/docs/Web/HTTP/CORS](https://developer.mozilla.org/ko/docs/Web/HTTP/CORS)
+* CORS는 왜 이렇게 우리를 힘들게 하는걸까? : [https://evan-moon.github.io/2020/05/21/about-cors/](https://evan-moon.github.io/2020/05/21/about-cors/)
+* How does CORS prevent XSS? - Information Security Stack Exchange : [https://security.stackexchange.com/questions/108835/how-does-cors-prevent-xss](https://security.stackexchange.com/questions/108835/how-does-cors-prevent-xss)

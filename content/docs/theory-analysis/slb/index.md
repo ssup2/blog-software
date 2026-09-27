@@ -73,5 +73,4 @@ GSLB는 SLB와 이름은 유사하지만 VIP기반이 아닌 **DNS**기반의 Lo
 ## 3. 참조
 
 * SLB : [https://www.slideshare.net/ryuichitakashima3/ss-72343772](https://www.slideshare.net/ryuichitakashima3/ss-72343772)
-* SLB : [https://vzealand.com/2016/10/04/vcap6-nv-3v0-643-study-guide-part-8/](https://vzealand.com/2016/10/04/vcap6-nv-3v0-643-study-guide-part-8/)
 * GSLB : [https://www.netmanias.com/ko/post/blog/5620/dns-data-center-gslb-network-protocol/global-server-load-balancing-for-enterprise-part-1-concept-workflow](https://www.netmanias.com/ko/post/blog/5620/dns-data-center-gslb-network-protocol/global-server-load-balancing-for-enterprise-part-1-concept-workflow)

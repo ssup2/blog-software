@@ -159,4 +159,4 @@ title: AWS SysOps Administrator Associate 자격증 시험 정리
 
 ## 6. 참고
 
-* [https://www.udemy.com/course/ultimate-aws-certified-sysops-administrator-associate](https://www.udemy.com/course/ultimate-aws-certified-sysops-administrator-associate)
+* Ultimate AWS Certified SysOps Administrator Associate (Udemy) : [https://www.udemy.com/course/ultimate-aws-certified-sysops-administrator-associate](https://www.udemy.com/course/ultimate-aws-certified-sysops-administrator-associate)

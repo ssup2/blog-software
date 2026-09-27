@@ -24,7 +24,7 @@ If it should be processed in Server existing in external Data Center, Server tha
 
 ## 2. References
 
-* [https://www.consul.io/intro/index.html](https://www.consul.io/intro/index.html)
-* [https://www.consul.io/docs/internals/architecture.html](https://www.consul.io/docs/internals/architecture.html)
-* [https://www.consul.io/docs/internals/gossip.html](https://www.consul.io/docs/internals/gossip.html)
+* What is Consul? : [https://www.consul.io/intro/index.html](https://www.consul.io/intro/index.html)
+* Consul Architecture : [https://www.consul.io/docs/internals/architecture.html](https://www.consul.io/docs/internals/architecture.html)
+* Consul Gossip Protocol : [https://www.consul.io/docs/internals/gossip.html](https://www.consul.io/docs/internals/gossip.html)
 

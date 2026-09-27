@@ -31,4 +31,4 @@ iptables를 Build하고 설치한다.
 
 ## 3. 참조
 
-* [http://www.linuxfromscratch.org/blfs/view/8.2/postlfs/iptables.html](http://www.linuxfromscratch.org/blfs/view/8.2/postlfs/iptables.html)
+* Iptables-1.6.2 - Beyond Linux From Scratch : [http://www.linuxfromscratch.org/blfs/view/8.2/postlfs/iptables.html](http://www.linuxfromscratch.org/blfs/view/8.2/postlfs/iptables.html)

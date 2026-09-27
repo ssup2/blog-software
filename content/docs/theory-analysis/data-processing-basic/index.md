@@ -46,6 +46,6 @@ Batch Processing은 축적된 Data를 한꺼번에 처리하는 방식이기 때
 
 ## 6. 참조
 
-* [https://www.oreilly.com/radar/the-world-beyond-batch-streaming-101/](https://www.oreilly.com/radar/the-world-beyond-batch-streaming-101/)
-* [https://medium.com/@akash.d.goel/stream-processing-fundamentals-d4090f33451d](https://medium.com/@akash.d.goel/stream-processing-fundamentals-d4090f33451d)
+* Streaming 101: The world beyond batch : [https://www.oreilly.com/radar/the-world-beyond-batch-streaming-101/](https://www.oreilly.com/radar/the-world-beyond-batch-streaming-101/)
+* Stream Processing Fundamentals : [https://medium.com/@akash.d.goel/stream-processing-fundamentals-d4090f33451d](https://medium.com/@akash.d.goel/stream-processing-fundamentals-d4090f33451d)
 * Latency, Throughput : [https://medium.com/@apurvaagrawal_95485/latency-vs-throughput-c6c1c902dbfa](https://medium.com/@apurvaagrawal_95485/latency-vs-throughput-c6c1c902dbfa)

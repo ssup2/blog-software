@@ -21,6 +21,6 @@ Trino는 다양한 Data Source를 대상으로 Query 수행이 가능하며, 다
 
 ## 2. 참조
 
-* [https://www.oreilly.com/library/view/trino-the-definitive/9781098107703/ch04.html](https://www.oreilly.com/library/view/trino-the-definitive/9781098107703/ch04.html)
-* [https://trino.io/docs/current/overview/concepts.html](https://trino.io/docs/current/overview/concepts.html)
-* [https://www.slideshare.net/streamnative/trino-a-ludicrously-fast-query-engine-pulsar-summit-na-2021](https://www.slideshare.net/streamnative/trino-a-ludicrously-fast-query-engine-pulsar-summit-na-2021)
+* Trino: The Definitive Guide - Chapter 4 : [https://www.oreilly.com/library/view/trino-the-definitive/9781098107703/ch04.html](https://www.oreilly.com/library/view/trino-the-definitive/9781098107703/ch04.html)
+* Trino Concepts : [https://trino.io/docs/current/overview/concepts.html](https://trino.io/docs/current/overview/concepts.html)
+* Trino: A Ludicrously Fast Query Engine (Pulsar Summit NA 2021) : [https://www.slideshare.net/streamnative/trino-a-ludicrously-fast-query-engine-pulsar-summit-na-2021](https://www.slideshare.net/streamnative/trino-a-ludicrously-fast-query-engine-pulsar-summit-na-2021)

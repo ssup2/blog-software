@@ -198,7 +198,6 @@ TO-DO
 
 ## 2. References
 
-* [https://iximiuz.com/en/posts/prometheus-vector-matching/](https://iximiuz.com/en/posts/prometheus-vector-matching/)
-* [https://devthomas.tistory.com/15](https://devthomas.tistory.com/15)
-* [https://blog.naver.com/PostView.nhn?blogId=alice-k106&logNo=221535575875](https://blog.naver.com/PostView.nhn?blogId=alice-k106&logNo=221535575875)
+* Prometheus Cheat Sheet - How to Join Multiple Metrics (Vector Matching) : [https://iximiuz.com/en/posts/prometheus-vector-matching/](https://iximiuz.com/en/posts/prometheus-vector-matching/)
+* Prometheus Query(PromQL) 기본 이해하기 : [https://devthomas.tistory.com/15](https://devthomas.tistory.com/15)
 

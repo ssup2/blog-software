@@ -40,4 +40,4 @@ Snapshot File을 통해서 etcd를 복구한다.
 
 ## 4. 참조
 
-* [https://stackoverflow.com/questions/47807892/how-to-access-kubernetes-keys-in-etcd](https://stackoverflow.com/questions/47807892/how-to-access-kubernetes-keys-in-etcd)
+* How to access kubernetes keys in etcd : [https://stackoverflow.com/questions/47807892/how-to-access-kubernetes-keys-in-etcd](https://stackoverflow.com/questions/47807892/how-to-access-kubernetes-keys-in-etcd)

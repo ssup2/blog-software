@@ -30,7 +30,7 @@ Level 0은 Subscriber에게 Message가 전달되는 것을 보장하지 못한�
 
 ## 2. 참조
 
-* [https://www.slideshare.net/javierarilos/rabbitmq-intromsgingpatterns](https://www.slideshare.net/javierarilos/rabbitmq-intromsgingpatterns)
-* [http://gjchoi.github.io/rabbit/rabbit-mq-%EC%9D%B4%ED%95%B4%ED%95%98%EA%B8%B0/](http://gjchoi.github.io/rabbit/rabbit-mq-%EC%9D%B4%ED%95%B4%ED%95%98%EA%B8%B0/)
-* [https://www.joinc.co.kr/w/man/12/MQTT/Tutorial](https://www.joinc.co.kr/w/man/12/MQTT/Tutorial)
-* [http://dalkomit.tistory.com/111](http://dalkomit.tistory.com/111)
+* RabbitMQ Intro and Messaging Patterns - SlideShare : [https://www.slideshare.net/javierarilos/rabbitmq-intromsgingpatterns](https://www.slideshare.net/javierarilos/rabbitmq-intromsgingpatterns)
+* RabbitMQ - 이해하기 : [http://gjchoi.github.io/rabbit/rabbit-mq-%EC%9D%B4%ED%95%B4%ED%95%98%EA%B8%B0/](http://gjchoi.github.io/rabbit/rabbit-mq-%EC%9D%B4%ED%95%B4%ED%95%98%EA%B8%B0/)
+* MQTT Tutorial - Joinc : [https://www.joinc.co.kr/w/man/12/MQTT/Tutorial](https://www.joinc.co.kr/w/man/12/MQTT/Tutorial)
+* MQTT QoS(Quality of Service) : [http://dalkomit.tistory.com/111](http://dalkomit.tistory.com/111)

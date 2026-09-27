@@ -87,7 +87,7 @@ MapReduce Framework는 HDFS과 YARN위에서 MapReduce를 수행을 도와주는
 ## 5. 참조
 
 * Hadoop : [https://noobergeek.wordpress.com/2012/11/12/why-is-hadoop-so-fast/](https://noobergeek.wordpress.com/2012/11/12/why-is-hadoop-so-fast/)
-* HDFS : [https://hadoop.apache.org/docs/r1.2.1/hdfs-design.html](https://hadoop.apache.org/docs/r1.2.1/hdfs-design.html)
+* HDFS : [https://hadoop.apache.org/docs/r1.2.1/hdfs_design.html](https://hadoop.apache.org/docs/r1.2.1/hdfs_design.html)
 * HDFS : [http://www.waytoeasylearn.com/2018/01/hdfs-read-write-architecture.html](http://www.waytoeasylearn.com/2018/01/hdfs-read-write-architecture.html)
 * HDFS : [https://www.quora.com/How-is-replication-done-in-Hadoop](https://www.quora.com/How-is-replication-done-in-Hadoop)
 * YARN : [https://www.popit.kr/what-is-hadoop-yarn/](https://www.popit.kr/what-is-hadoop-yarn/)

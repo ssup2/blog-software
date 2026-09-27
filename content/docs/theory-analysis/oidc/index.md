@@ -29,7 +29,7 @@ ID Token에는 일반적으로 다음과 같은 Claim을 포함하고 있다.
 
 ## 2. 참조
 
-* [https://www.oauth.com/oauth2-servers/openid-connect/id-tokens/](https://www.oauth.com/oauth2-servers/openid-connect/id-tokens/)
-* [https://coffeewhale.com/kubernetes/authentication/oidc/2020/05/04/auth03/](https://coffeewhale.com/kubernetes/authentication/oidc/2020/05/04/auth03/)
-* [https://darutk.medium.com/understanding-id-token-5f83f50fa02e](https://darutk.medium.com/understanding-id-token-5f83f50fa02e)
-* [https://benohead.com/blog/2018/07/05/oauth-2-0-openid-connect-explained/](https://benohead.com/blog/2018/07/05/oauth-2-0-openid-connect-explained/)
+* ID Tokens (OAuth 2.0 Simplified) : [https://www.oauth.com/oauth2-servers/openid-connect/id-tokens/](https://www.oauth.com/oauth2-servers/openid-connect/id-tokens/)
+* k8s 인증 완벽이해 #3 - OpenID Connect : [https://coffeewhale.com/kubernetes/authentication/oidc/2020/05/04/auth03/](https://coffeewhale.com/kubernetes/authentication/oidc/2020/05/04/auth03/)
+* Understanding ID Token : [https://darutk.medium.com/understanding-id-token-5f83f50fa02e](https://darutk.medium.com/understanding-id-token-5f83f50fa02e)
+* OAuth 2.0 & OpenID Connect explained : [https://benohead.com/blog/2018/07/05/oauth-2-0-openid-connect-explained/](https://benohead.com/blog/2018/07/05/oauth-2-0-openid-connect-explained/)

@@ -134,8 +134,8 @@ CoreDNS는 `log` 설정을 통해서 CoreDNS로 전달되는 모든 DNS Record �
 
 ## 2. 참조
 
-* [https://jonnung.dev/kubernetes/2020/05/11/kubernetes-dns-about-coredns/](https://jonnung.dev/kubernetes/2020/05/11/kubernetes-dns-about-coredns/)
-* [https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/)
-* [https://kubernetes.io/docs/tasks/administer-cluster/dns-custom-nameservers/](https://kubernetes.io/docs/tasks/administer-cluster/dns-custom-nameservers/)
-* [https://coredns.io/plugins/kubernetes/](https://coredns.io/plugins/kubernetes/)
-* [https://coredns.io/plugins/log/](https://coredns.io/plugins/log/)
+* Kubernetes의 DNS, CoreDNS를 알아보자 : [https://jonnung.dev/kubernetes/2020/05/11/kubernetes-dns-about-coredns/](https://jonnung.dev/kubernetes/2020/05/11/kubernetes-dns-about-coredns/)
+* DNS for Services and Pods : [https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/)
+* Customizing DNS Service : [https://kubernetes.io/docs/tasks/administer-cluster/dns-custom-nameservers/](https://kubernetes.io/docs/tasks/administer-cluster/dns-custom-nameservers/)
+* CoreDNS kubernetes Plugin : [https://coredns.io/plugins/kubernetes/](https://coredns.io/plugins/kubernetes/)
+* CoreDNS log Plugin : [https://coredns.io/plugins/log/](https://coredns.io/plugins/log/)

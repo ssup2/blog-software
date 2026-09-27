@@ -99,5 +99,5 @@ Run `tmux` and press the shortcut keys inside tmux to install plugins.
 
 ## 5. References
 
-* [https://github.com/tmux-plugins/tpm](https://github.com/tmux-plugins/tpm)
+* tmux-plugins/tpm: Tmux Plugin Manager : [https://github.com/tmux-plugins/tpm](https://github.com/tmux-plugins/tpm)
 

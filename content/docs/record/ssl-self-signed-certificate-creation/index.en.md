@@ -57,6 +57,5 @@ Create `server.key`, `server.crt`, and `server.pem` files.
 
 ## 4. References
 
-* [https://alexanderzeitler.com/articles/Fixing-Chrome-missing-subjectAltName-selfsigned-cert-openssl/](https://alexanderzeitler.com/articles/Fixing-Chrome-missing-subjectAltName-selfsigned-cert-openssl/)
-* [https://stackoverflow.com/questions/7580508/getting-chrome-to-accept-self-signed-localhost-certificate](https://stackoverflow.com/questions/7580508/getting-chrome-to-accept-self-signed-localhost-certificate)
+* Getting Chrome to accept self-signed localhost certificate : [https://stackoverflow.com/questions/7580508/getting-chrome-to-accept-self-signed-localhost-certificate](https://stackoverflow.com/questions/7580508/getting-chrome-to-accept-self-signed-localhost-certificate)
 

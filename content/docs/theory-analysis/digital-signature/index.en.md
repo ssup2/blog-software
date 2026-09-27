@@ -14,5 +14,5 @@ Verification literally means the stage of verifying whether Digital Data is auth
 
 ## 2. References
 
-* [https://blog.mailfence.com/how-do-digital-signatures-work/](https://blog.mailfence.com/how-do-digital-signatures-work/)
+* Digital Signatures: What Are They and How to Use Them? : [https://blog.mailfence.com/how-do-digital-signatures-work/](https://blog.mailfence.com/how-do-digital-signatures-work/)
 

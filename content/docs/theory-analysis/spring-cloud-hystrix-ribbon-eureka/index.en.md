@@ -98,7 +98,6 @@ Zuul performs the role of Service End-point as an API Gateway. Zuul also uses Hy
 
 ## 6. References
 
-* Spring Cloud : [https://readme.skplanet.com/?p=13782](https://readme.skplanet.com/?p=13782)
 * Hystrix : [https://github.com/Netflix/Hystrix/wiki](https://github.com/Netflix/Hystrix/wiki)
 * Hystrix : [http://woowabros.github.io/experience/2017/08/21/hystrix-tunning.html](http://woowabros.github.io/experience/2017/08/21/hystrix-tunning.html)
 * Ribbon : [https://github.com/Netflix/ribbon/wiki/Working-with-load-balancers](https://github.com/Netflix/ribbon/wiki/Working-with-load-balancers)

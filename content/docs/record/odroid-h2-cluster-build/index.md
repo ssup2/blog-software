@@ -38,4 +38,4 @@ Ceph, Openstack 설치를 위한 ODROID-H2 Cluster를 구축한다.
 
 ## 2. 참조
 
-* [https://docs.openstack.org/devstack/stein/guides/neutron.html](https://docs.openstack.org/devstack/stein/guides/neutron.html)
+* Using DevStack with neutron Networking : [https://docs.openstack.org/devstack/stein/guides/neutron.html](https://docs.openstack.org/devstack/stein/guides/neutron.html)

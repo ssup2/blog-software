@@ -229,12 +229,9 @@ Create and configure a Storage Class with the content from [File 5].
 
 ## 9. References
 
-* [https://kubernetes.io/docs/setup/independent/install-kubeadm/](https://kubernetes.io/docs/setup/independent/install-kubeadm/)
-* [https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/](https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/)
-* [https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#pod-network](https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#pod-network)
-* [https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/openstack-kubernetes-integration-options.md](https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/openstack-kubernetes-integration-options.md)
-* [https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/using-controller-manager-with-kubeadm.md](https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/using-controller-manager-with-kubeadm.md)
-* [https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/using-cinder-csi-plugin.md](https://github.com/kubernetes/cloud-provider-openstack/blob/master/docs/using-cinder-csi-plugin.md)
-* [https://github.com/kubernetes/cloud-provider-openstack/issues/758](https://github.com/kubernetes/cloud-provider-openstack/issues/758)
-* [https://kubernetes.io/docs/tasks/administer-cluster/running-cloud-controller/](https://kubernetes.io/docs/tasks/administer-cluster/running-cloud-controller/)
+* Installing kubeadm : [https://kubernetes.io/docs/setup/independent/install-kubeadm/](https://kubernetes.io/docs/setup/independent/install-kubeadm/)
+* Install Docker Engine on Ubuntu : [https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/](https://docs.docker.com/engine/installation/linux/docker-ce/ubuntu/)
+* Creating a cluster with kubeadm : [https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#pod-network](https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#pod-network)
+* Using cinder as storage class with cloud-provider-openstack - Issue #758 : [https://github.com/kubernetes/cloud-provider-openstack/issues/758](https://github.com/kubernetes/cloud-provider-openstack/issues/758)
+* Cloud Controller Manager Administration : [https://kubernetes.io/docs/tasks/administer-cluster/running-cloud-controller/](https://kubernetes.io/docs/tasks/administer-cluster/running-cloud-controller/)
 

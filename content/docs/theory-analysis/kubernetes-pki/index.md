@@ -22,7 +22,7 @@ etcd Server를 제외한 나머지 Kubernetes Component들은 `ca.crt`를 기반
 
 ## 2. 참고
 
-* [https://kubernetes.cn/docs/setup/best-practices/certificates/](https://kubernetes.cn/docs/setup/best-practices/certificates/)
-* [https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/setup-ha-etcd-with-kubeadm/](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/setup-ha-etcd-with-kubeadm/)
-* [https://kubernetes.io/docs/tasks/access-kubernetes-api/configure-aggregation-layer/](https://kubernetes.io/docs/tasks/access-kubernetes-api/configure-aggregation-layer/)
-* [https://github.com/kubernetes-sigs/apiserver-builder-alpha](https://github.com/kubernetes-sigs/apiserver-builder-alpha)
+* PKI Certificates and Requirements : [https://kubernetes.cn/docs/setup/best-practices/certificates/](https://kubernetes.cn/docs/setup/best-practices/certificates/)
+* Set up a High Availability etcd Cluster with kubeadm : [https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/setup-ha-etcd-with-kubeadm/](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/setup-ha-etcd-with-kubeadm/)
+* Configure the Aggregation Layer : [https://kubernetes.io/docs/tasks/access-kubernetes-api/configure-aggregation-layer/](https://kubernetes.io/docs/tasks/access-kubernetes-api/configure-aggregation-layer/)
+* kubernetes-sigs/apiserver-builder-alpha : [https://github.com/kubernetes-sigs/apiserver-builder-alpha](https://github.com/kubernetes-sigs/apiserver-builder-alpha)

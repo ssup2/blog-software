@@ -14,4 +14,4 @@ title: Serialization, Marshaling
 
 ## 3. 참조
 
-* [http://stackoverflow.com/questions/770474/what-is-the-difference-between-serialization-and-marshaling](http://stackoverflow.com/questions/770474/what-is-the-difference-between-serialization-and-marshaling)
+* What is the difference between Serialization and Marshaling : [http://stackoverflow.com/questions/770474/what-is-the-difference-between-serialization-and-marshaling](http://stackoverflow.com/questions/770474/what-is-the-difference-between-serialization-and-marshaling)

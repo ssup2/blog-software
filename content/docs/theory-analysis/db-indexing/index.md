@@ -40,8 +40,8 @@ Index는 성격과 특징에 따라서 Clustered Index와 Non-clustered Index로
 
 ## 3. 참조
 
-* [https://www.progress.com/tutorials/odbc/using-indexes](https://www.progress.com/tutorials/odbc/using-indexes)
-* [https://www.sqlshack.com/what-is-the-difference-between-clustered-and-non-clustered-indexes-in-sql-server/](https://www.sqlshack.com/what-is-the-difference-between-clustered-and-non-clustered-indexes-in-sql-server/)
-* [https://velog.io/@gillog/SQL-Clustered-Index-Non-Clustered-Index](https://velog.io/@gillog/SQL-Clustered-Index-Non-Clustered-Index)
-* [https://dev-navill.tistory.com/26](https://dev-navill.tistory.com/26)
-* [https://yurimkoo.github.io/db/2020/03/14/db-index.html](https://yurimkoo.github.io/db/2020/03/14/db-index.html)
+* Using Indexes : [https://www.progress.com/tutorials/odbc/using-indexes](https://www.progress.com/tutorials/odbc/using-indexes)
+* What is the difference between Clustered and Non-Clustered Indexes in SQL Server? : [https://www.sqlshack.com/what-is-the-difference-between-clustered-and-non-clustered-indexes-in-sql-server/](https://www.sqlshack.com/what-is-the-difference-between-clustered-and-non-clustered-indexes-in-sql-server/)
+* Clustered Index & Non-Clustered Index : [https://velog.io/@gillog/SQL-Clustered-Index-Non-Clustered-Index](https://velog.io/@gillog/SQL-Clustered-Index-Non-Clustered-Index)
+* MySQL - INDEX 정리 : [https://dev-navill.tistory.com/26](https://dev-navill.tistory.com/26)
+* DB 인덱스를 효과적으로 설정하는 방법 - 고려해야 할 4가지 : [https://yurimkoo.github.io/db/2020/03/14/db-index.html](https://yurimkoo.github.io/db/2020/03/14/db-index.html)

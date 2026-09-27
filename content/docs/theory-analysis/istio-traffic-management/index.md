@@ -219,9 +219,8 @@ Virtual Service를 Gateway에 연결하기 위해서는 Virtual Service의 `host
 
 ## 2. 참고
 
-* [https://istio.io/latest/docs/concepts/traffic-management/](https://istio.io/latest/docs/concepts/traffic-management/)
-* [https://istio.io/latest/docs/reference/config/networking/virtual-service/](https://istio.io/latest/docs/reference/config/networking/virtual-service/)
-* [https://istio.io/latest/docs/reference/config/networking/destination-rule/](https://istio.io/latest/docs/reference/config/networking/destination-rule/)
-* [https://medium.com/better-programming/how-to-manage-traffic-using-istio-on-kubernetes-cd4b96e00b57](https://medium.com/better-programming/how-to-manage-traffic-using-istio-on-kubernetes-cd4b96e00b57)
-* [https://bcho.tistory.com/1367](https://bcho.tistory.com/1367)
-* [http://itnp.kr/post/istio-routing-api](http://itnp.kr/post/istio-routing-api)
+* Istio Traffic Management : [https://istio.io/latest/docs/concepts/traffic-management/](https://istio.io/latest/docs/concepts/traffic-management/)
+* Istio Virtual Service : [https://istio.io/latest/docs/reference/config/networking/virtual-service/](https://istio.io/latest/docs/reference/config/networking/virtual-service/)
+* Istio Destination Rule : [https://istio.io/latest/docs/reference/config/networking/destination-rule/](https://istio.io/latest/docs/reference/config/networking/destination-rule/)
+* How to Manage Traffic Using Istio on Kubernetes : [https://medium.com/better-programming/how-to-manage-traffic-using-istio-on-kubernetes-cd4b96e00b57](https://medium.com/better-programming/how-to-manage-traffic-using-istio-on-kubernetes-cd4b96e00b57)
+* Istio Traffic management : [https://bcho.tistory.com/1367](https://bcho.tistory.com/1367)

@@ -32,4 +32,4 @@ Elasticsearch의 Data Structure를 분석한다.
 
 ## 2. 참조
 
-* [https://www.elastic.co/kr/blog/what-is-an-elasticsearch-index](https://www.elastic.co/kr/blog/what-is-an-elasticsearch-index)
+* Elasticsearch 인덱스는 무엇인가요? : [https://www.elastic.co/kr/blog/what-is-an-elasticsearch-index](https://www.elastic.co/kr/blog/what-is-an-elasticsearch-index)

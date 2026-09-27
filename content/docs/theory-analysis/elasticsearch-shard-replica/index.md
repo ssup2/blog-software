@@ -14,6 +14,6 @@ Elasticsearch의 Shard, Replica 관련 내용을 분석한다.
 
 ## 2. 참조
 
-* [https://esbook.kimjmin.net/03-cluster/3.2-index-and-shards](https://esbook.kimjmin.net/03-cluster/3.2-index-and-shards)
-* [https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-replication.html](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-replication.html)
-* [https://nesoy.github.io/articles/2019-01/ElasticSearch-Document](https://nesoy.github.io/articles/2019-01/ElasticSearch-Document)
+* 인덱스와 샤드 - Index & Shards : [https://esbook.kimjmin.net/03-cluster/3.2-index-and-shards](https://esbook.kimjmin.net/03-cluster/3.2-index-and-shards)
+* Reading and writing documents : [https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-replication.html](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-replication.html)
+* Elasticsearch Document : [https://nesoy.github.io/articles/2019-01/ElasticSearch-Document](https://nesoy.github.io/articles/2019-01/ElasticSearch-Document)

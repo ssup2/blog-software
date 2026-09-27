@@ -38,8 +38,8 @@ Count to Infinity는 Distance Vector Protocol에서 빈번하게 발생 할 수 
 
 ## 4. 참조
 
-* [https://www.slideshare.net/ayyakathir/it6601-mobile-computing-55359646](https://www.slideshare.net/ayyakathir/it6601-mobile-computing-55359646)
-* [https://www.slideshare.net/WayneJonesJnr/ch22-3361678](https://www.slideshare.net/WayneJonesJnr/ch22-3361678)
-* [https://www.slideshare.net/vsharma87/internet-routing-protocols-fundamental-concepts-of-distancevector-and-linkstate-routing](https://www.slideshare.net/vsharma87/internet-routing-protocols-fundamental-concepts-of-distancevector-and-linkstate-routing)
-* [https://www.quora.com/Why-is-Dijkstra-used-for-link-state-routing-and-Bellman-Ford-for-distance-vector-routing-Why-not-use-the-same](https://www.quora.com/Why-is-Dijkstra-used-for-link-state-routing-and-Bellman-Ford-for-distance-vector-routing-Why-not-use-the-same)
-* [https://courses.cs.washington.edu/courses/cse461/18sp/slides/sections/section-6.pdf](https://courses.cs.washington.edu/courses/cse461/18sp/slides/sections/section-6.pdf)
+* IT6601 Mobile Computing (SlideShare) : [https://www.slideshare.net/ayyakathir/it6601-mobile-computing-55359646](https://www.slideshare.net/ayyakathir/it6601-mobile-computing-55359646)
+* Network Layer: Delivery, Forwarding, and Routing (SlideShare) : [https://www.slideshare.net/WayneJonesJnr/ch22-3361678](https://www.slideshare.net/WayneJonesJnr/ch22-3361678)
+* Internet Routing Protocols: Distance-Vector and Link-State Routing (SlideShare) : [https://www.slideshare.net/vsharma87/internet-routing-protocols-fundamental-concepts-of-distancevector-and-linkstate-routing](https://www.slideshare.net/vsharma87/internet-routing-protocols-fundamental-concepts-of-distancevector-and-linkstate-routing)
+* Why is Dijkstra used for link-state routing and Bellman-Ford for distance-vector routing (Quora) : [https://www.quora.com/Why-is-Dijkstra-used-for-link-state-routing-and-Bellman-Ford-for-distance-vector-routing-Why-not-use-the-same](https://www.quora.com/Why-is-Dijkstra-used-for-link-state-routing-and-Bellman-Ford-for-distance-vector-routing-Why-not-use-the-same)
+* CSE461 Section 6: Routing Slides (PDF) : [https://courses.cs.washington.edu/courses/cse461/18sp/slides/sections/section-6.pdf](https://courses.cs.washington.edu/courses/cse461/18sp/slides/sections/section-6.pdf)

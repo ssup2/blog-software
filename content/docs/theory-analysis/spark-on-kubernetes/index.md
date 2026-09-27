@@ -327,12 +327,11 @@ Prometheus에서 Executor Pod에 몇가지 Annotation을 붙이면 Prometheus에
 
 ## 2. 참조
 
-* [https://spark.apache.org/docs/latest/running-on-kubernetes.html](https://spark.apache.org/docs/latest/running-on-kubernetes.html)
-* [https://swalloow.github.io/spark-on-kubernetes-scheduler/](https://swalloow.github.io/spark-on-kubernetes-scheduler/)
+* Running Spark on Kubernetes : [https://spark.apache.org/docs/latest/running-on-kubernetes.html](https://spark.apache.org/docs/latest/running-on-kubernetes.html)
+* Spark on Kubernetes: 커스텀 스케줄러 (1) : [https://swalloow.github.io/spark-on-kubernetes-scheduler/](https://swalloow.github.io/spark-on-kubernetes-scheduler/)
 * spark-submit : [https://spark.apache.org/docs/latest/submitting-applications.html](https://spark.apache.org/docs/latest/submitting-applications.html)
 * Spark Configuration : [https://spark.apache.org/docs/latest/configuration.html](https://spark.apache.org/docs/latest/configuration.html)
 * Spark Pod Template Example : [https://docs.aws.amazon.com/emr/latest/EMR-on-EKS-DevelopmentGuide/pod-templates.html](https://docs.aws.amazon.com/emr/latest/EMR-on-EKS-DevelopmentGuide/pod-templates.html)
-* Spark Operator API Spec : [https://googlecloudplatform.github.io/spark-on-k8s-operator/docs/api-docs.html](https://googlecloudplatform.github.io/spark-on-k8s-operator/docs/api-docs.html)
 * Spark Executor Metric : [https://spark.apache.org/docs/latest/monitoring.html#executor-metrics](https://spark.apache.org/docs/latest/monitoring.html#executor-metrics)
 * Spark Monitoring with Prometheus : [http://jason-heo.github.io/bigdata/2021/01/31/spark30-prometheus.html](http://jason-heo.github.io/bigdata/2021/01/31/spark30-prometheus.html)
 * Spark Monitoring with Prometheus : [https://dzlab.github.io/bigdata/2020/07/03/spark3-monitoring-1/](https://dzlab.github.io/bigdata/2020/07/03/spark3-monitoring-1/)

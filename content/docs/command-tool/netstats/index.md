@@ -94,7 +94,3 @@ tcp6       0      0 :::5000                 :::*                    LISTEN      
 ```
 
 Listen 상태의 Port 및 Process 정보를 출력한다. [Shell 4]는 `netstat -plnt`을 이용하여 Listen 상태의 Port 및 Process 정보를 출력하는 Shell의 모습을 나타내고 있다.
-
-## 2. 참조
-
-* [https://linuxacademy.com/blog/linux/netstat-network-analysis-and-troubleshooting-explained/](https://linuxacademy.com/blog/linux/netstat-network-analysis-and-troubleshooting-explained/)

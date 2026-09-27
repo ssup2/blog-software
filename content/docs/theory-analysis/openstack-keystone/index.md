@@ -35,8 +35,8 @@ PKI 또는 JWT Type의 Token에는 Token의 유효성 검사를 위한 정보 �
 
 ## 2. 참조
 
-* [https://github.com/openstack/keystone](https://github.com/openstack/keystone)
-* [https://www.oreilly.com/library/view/identity-authentication-and/9781491941249/ch01.html](https://www.oreilly.com/library/view/identity-authentication-and/9781491941249/ch01.html)
-* [https://blog.flux7.com/blogs/openstack/tutorial-what-is-keystone-and-how-to-install-keystone-in-openstack](https://blog.flux7.com/blogs/openstack/tutorial-what-is-keystone-and-how-to-install-keystone-in-openstack)
-* [https://www.slideshare.net/eprasad/keystone-openstack-identity-service](https://www.slideshare.net/eprasad/keystone-openstack-identity-service)
+* GitHub - openstack/keystone: OpenStack Identity (Keystone) : [https://github.com/openstack/keystone](https://github.com/openstack/keystone)
+* Identity, Authentication, and Access Management in OpenStack - O'Reilly : [https://www.oreilly.com/library/view/identity-authentication-and/9781491941249/ch01.html](https://www.oreilly.com/library/view/identity-authentication-and/9781491941249/ch01.html)
+* Tutorial: What is Keystone and how to install Keystone in OpenStack : [https://blog.flux7.com/blogs/openstack/tutorial-what-is-keystone-and-how-to-install-keystone-in-openstack](https://blog.flux7.com/blogs/openstack/tutorial-what-is-keystone-and-how-to-install-keystone-in-openstack)
+* Keystone - OpenStack Identity Service - SlideShare : [https://www.slideshare.net/eprasad/keystone-openstack-identity-service](https://www.slideshare.net/eprasad/keystone-openstack-identity-service)
 

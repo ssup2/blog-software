@@ -97,7 +97,5 @@ Generate kustomize files for Kubeflow.
 ## 6. References
 
 * kustomize Install: [https://kubectl.docs.kubernetes.io/installation/kustomize/binaries/](https://kubectl.docs.kubernetes.io/installation/kustomize/binaries/)
-* Kubeflow Install: [https://www.kubeflow.org/docs/started/k8s/kfctl_k8s_istio/](https://www.kubeflow.org/docs/started/k8s/kfctl_k8s_istio/)
-* Kubeflow kustomize: [https://www.kubeflow.org/docs/other-guides/kustomize/](https://www.kubeflow.org/docs/other-guides/kustomize/)
 * Kubeflow ARM Support: [https://github.com/kubeflow/kfctl/pull/318](https://github.com/kubeflow/kfctl/pull/318)
 

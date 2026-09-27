@@ -16,5 +16,4 @@ Client의 Hello Message는 암호화 되지 않고 Server에게 전송되기 때
 
 ## 2. 참조
 
-* [https://msm8994.tistory.com/38](https://msm8994.tistory.com/38)
-* [https://www.researchgate.net/figure/SNI-extension-of-the-TLS-handshake-protocol-fig6-321580115](https://www.researchgate.net/figure/SNI-extension-of-the-TLS-handshake-protocol-fig6-321580115)
+* SNI extension of the TLS handshake protocol (figure) : [https://www.researchgate.net/figure/SNI-extension-of-the-TLS-handshake-protocol-fig6-321580115](https://www.researchgate.net/figure/SNI-extension-of-the-TLS-handshake-protocol-fig6-321580115)
