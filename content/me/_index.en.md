@@ -16,6 +16,8 @@ comments: false
 
 ### Article
 
+* **Karrot Blog** : [Our Journey to Autoscaling EKS Node Groups for Job Workloads](https://medium.com/daangn/our-journey-to-autoscaling-eks-node-groups-for-job-workloads-e8a6a7ed845e)
+* **Karrot Blog** : [Our Journey to Using Host Network in Kubernetes Pods](https://medium.com/daangn/our-journey-to-using-host-network-in-kubernetes-pods-c87e19b63c78)
 * **AWS Korea Blog** : [Woowa Brothers' Data Platform Construction Case Study Centered on Data on EKS](https://aws.amazon.com/ko/blogs/tech/woowa-brothers-amazon-data-on-eks-data-platform/)
 * **AWS Korea Blog** : [Comparing Various Spark Application Submission Methods in Amazon EKS Environment](https://aws.amazon.com/ko/blogs/tech/amazon-eks-spark-submission-comparison/)
 * **AWS Korea Blog** : [Reducing Cross-AZ Communication Costs Using Topology Aware Hint Feature in Amazon EKS](https://aws.amazon.com/ko/blogs/tech/amazon-eks-reduce-cross-az-traffic-costs-with-topology-aware-hints/)
