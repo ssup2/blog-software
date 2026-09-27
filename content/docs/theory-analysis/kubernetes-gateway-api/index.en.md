@@ -119,19 +119,19 @@ The Gateway API provides five Route Resources according to Protocol: HTTPRoute, 
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: version
-  namespace: version-namespace
+  name: server
+  namespace: server-namespace
 spec:
   parentRefs:
   - name: gateway
     namespace: gateway-namespace
   hostnames:
-  - "version.ssup2.com"
+  - "server.ssup2.com"
   rules:
   - matches:
     - path:
         type: PathPrefix
-        value: /version
+        value: /server
     filters:
     - type: RequestHeaderModifier
       requestHeaderModifier:
@@ -139,25 +139,25 @@ spec:
         - name: x-gateway
           value: gateway-api
     backendRefs:
-    - name: version-v1
+    - name: server-v1
       port: 8080
       weight: 90
-    - name: version-v2
+    - name: server-v2
       port: 8080
       weight: 10
 ```
 
-**HTTPRoute** is the Resource that defines the rules for routing the HTTP Traffic received by a Gateway to Services. [File 3] shows an example of an HTTPRoute that routes Traffic received on the `version.ssup2.com` Hostname to the `version-v1` and `version-v2` Services. `parentRefs` specifies the Gateway the HTTPRoute attaches to, and `hostnames` specifies the Hostnames subject to Routing.
+**HTTPRoute** is the Resource that defines the rules for routing the HTTP Traffic received by a Gateway to Services. [File 3] shows an example of an HTTPRoute that routes Traffic received on the `server.ssup2.com` Hostname to the `server-v1` and `server-v2` Services. `parentRefs` specifies the Gateway the HTTPRoute attaches to, and `hostnames` specifies the Hostnames subject to Routing.
 
-As in [File 3], if only the Gateway is specified in `parentRefs` without a `sectionName`, the HTTPRoute attaches to all Listeners with compatible Protocols. Therefore, the HTTPRoute in [File 3] routes not only the HTTP Traffic received by the `http` Listener in [File 2], but also the HTTPS Traffic on which the `https` Listener has performed TLS Termination. However, since the `allowedRoutes` of the `https` Listener is set to `Selector`, the `version-namespace` Namespace must have the `gateway-access: "true"` Label for the HTTPRoute to be attached to the `https` Listener.
+As in [File 3], if only the Gateway is specified in `parentRefs` without a `sectionName`, the HTTPRoute attaches to all Listeners with compatible Protocols. Therefore, the HTTPRoute in [File 3] routes not only the HTTP Traffic received by the `http` Listener in [File 2], but also the HTTPS Traffic on which the `https` Listener has performed TLS Termination. However, since the `allowedRoutes` of the `https` Listener is set to `Selector`, the `server-namespace` Namespace must have the `gateway-access: "true"` Label for the HTTPRoute to be attached to the `https` Listener.
 
-The `hostnames` of an HTTPRoute are valid only when they overlap with the `hostname` of the attached Gateway Listener, and since `version.ssup2.com` in [File 3] is included in `*.ssup2.com` in [File 2], the HTTPRoute is attached to the Gateway normally. Multiple HTTPRoutes specifying the same Hostname can also be attached to a single Gateway, in which case the rules of all HTTPRoutes are **merged and act as a single Routing rule**.
+The `hostnames` of an HTTPRoute are valid only when they overlap with the `hostname` of the attached Gateway Listener, and since `server.ssup2.com` in [File 3] is included in `*.ssup2.com` in [File 2], the HTTPRoute is attached to the Gateway normally. Multiple HTTPRoutes specifying the same Hostname can also be attached to a single Gateway, in which case the rules of all HTTPRoutes are **merged and act as a single Routing rule**.
 
 When multiple HTTPRoute rules match the same Traffic, the rule that defines more specific conditions is applied first. Priority is determined in the order of exact Path match, longer PathPrefix, Method condition, more Header conditions, and more Query Parameter conditions. If the specificity of the conditions is the same, the rule of the HTTPRoute created earlier is applied first, and if the creation times are also the same, priority is determined by the alphabetical order of Namespace and name. Because the earlier-created HTTPRoute has priority, it is impossible for a later-created HTTPRoute to define the same conditions and hijack the Traffic of an existing HTTPRoute.
 
 `rules` defines the Routing rules for Traffic. `matches` defines the conditions of the Traffic subject to Routing, and conditions based not only on Path but also on Header, Method, and Query Parameter can be defined. `filters` serves to manipulate Traffic during the Routing process, and Request/Response Header modification (`RequestHeaderModifier`, `ResponseHeaderModifier`), Redirect (`RequestRedirect`), URL rewriting (`URLRewrite`), and Traffic mirroring (`RequestMirror`) features are provided as standard. In Ingress, these features must be used through Annotations, but in the Gateway API, they are provided as standard APIs and can be used identically regardless of the implementation.
 
-`backendRefs` specifies the Services to which Traffic is delivered, and when multiple Services are specified, the Traffic ratio can be set through `weight`. In [File 3], you can see that 90% of the Traffic is set to be delivered to the `version-v1` Service and 10% to the `version-v2` Service. Therefore, unlike Ingress, the Gateway API can perform Canary deployments without separate implementation-specific extension features.
+`backendRefs` specifies the Services to which Traffic is delivered, and when multiple Services are specified, the Traffic ratio can be set through `weight`. In [File 3], you can see that 90% of the Traffic is set to be delivered to the `server-v1` Service and 10% to the `server-v2` Service. Therefore, unlike Ingress, the Gateway API can perform Canary deployments without separate implementation-specific extension features.
 
 #### 1.3.2. GRPCRoute
 
@@ -165,8 +165,8 @@ When multiple HTTPRoute rules match the same Traffic, the rule that defines more
 apiVersion: gateway.networking.k8s.io/v1
 kind: GRPCRoute
 metadata:
-  name: version
-  namespace: version-namespace
+  name: server
+  namespace: server-namespace
 spec:
   parentRefs:
   - name: gateway
@@ -176,14 +176,14 @@ spec:
   rules:
   - matches:
     - method:
-        service: version.VersionService
-        method: GetVersion
+        service: server.ServerService
+        method: Get
     backendRefs:
-    - name: version-grpc
+    - name: server-grpc
       port: 9090
 ```
 
-**GRPCRoute** is the Resource that defines the rules for routing the gRPC Traffic received by a Gateway to Services. [File 4] shows an example of a GRPCRoute that routes gRPC Traffic received on the `grpc.ssup2.com` Hostname to the `version-grpc` Service. Since gRPC operates on top of HTTP/2, gRPC Traffic can also be routed through an HTTPRoute, but GRPCRoute can define Routing rules based on gRPC Service and Method, as in the `matches` of [File 4]. Like HTTPRoute, Header-based conditions and Header modification and Traffic mirroring `filters` can also be used.
+**GRPCRoute** is the Resource that defines the rules for routing the gRPC Traffic received by a Gateway to Services. [File 4] shows an example of a GRPCRoute that routes gRPC Traffic received on the `grpc.ssup2.com` Hostname to the `server-grpc` Service. Since gRPC operates on top of HTTP/2, gRPC Traffic can also be routed through an HTTPRoute, but GRPCRoute can define Routing rules based on gRPC Service and Method, as in the `matches` of [File 4]. Like HTTPRoute, Header-based conditions and Header modification and Traffic mirroring `filters` can also be used.
 
 #### 1.3.3. TLSRoute
 
@@ -191,22 +191,22 @@ spec:
 apiVersion: gateway.networking.k8s.io/v1
 kind: TLSRoute
 metadata:
-  name: version
-  namespace: version-namespace
+  name: server
+  namespace: server-namespace
 spec:
   parentRefs:
   - name: gateway
     namespace: gateway-namespace
     sectionName: tls
   hostnames:
-  - "version.ssup2.com"
+  - "server.ssup2.com"
   rules:
   - backendRefs:
-    - name: version
+    - name: server
       port: 8443
 ```
 
-**TLSRoute** is the Resource that defines the rules for routing the TLS Traffic received by a Gateway based on **SNI** (Server Name Indication) without decrypting it. [File 5] shows an example of a TLSRoute that routes TLS Traffic whose SNI is `version.ssup2.com` to the `version` Service. To use a TLSRoute, the Protocol of the attached Gateway Listener must be set to `TLS` and the TLS Mode must be set to `Passthrough`. Since the Gateway only checks the SNI during the TLS Handshake process and forwards the Traffic without decrypting it, TLS Termination is performed by the Backend that receives the Traffic.
+**TLSRoute** is the Resource that defines the rules for routing the TLS Traffic received by a Gateway based on **SNI** (Server Name Indication) without decrypting it. [File 5] shows an example of a TLSRoute that routes TLS Traffic whose SNI is `server.ssup2.com` to the `server` Service. To use a TLSRoute, the Protocol of the attached Gateway Listener must be set to `TLS` and the TLS Mode must be set to `Passthrough`. Since the Gateway only checks the SNI during the TLS Handshake process and forwards the Traffic without decrypting it, TLS Termination is performed by the Backend that receives the Traffic.
 
 #### 1.3.4. TCPRoute
 
@@ -256,13 +256,13 @@ spec:
 apiVersion: gateway.networking.k8s.io/v1
 kind: ReferenceGrant
 metadata:
-  name: allow-version-route
+  name: allow-server-route
   namespace: backend-namespace
 spec:
   from:
   - group: gateway.networking.k8s.io
     kind: HTTPRoute
-    namespace: version-namespace
+    namespace: server-namespace
   to:
   - group: ""
     kind: Service
@@ -270,7 +270,7 @@ spec:
 
 **ReferenceGrant** is the Resource that allows references between Resources in different Namespaces. In the Gateway API, when a Service in another Namespace is specified in a Route's `backendRefs`, the reference is rejected if a ReferenceGrant does not exist in the target Service's Namespace. This is to prevent the security problem where a Route in an arbitrary Namespace could reference a Service in another Namespace and hijack its Traffic.
 
-[File 8] shows an example of a ReferenceGrant that allows an HTTPRoute in the `version-namespace` Namespace to reference Services in the `backend-namespace` Namespace. A ReferenceGrant must be created in the Namespace where the referenced Resource exists, and `from` specifies the Resources that perform the reference, while `to` specifies the Resources for which the reference is allowed.
+[File 8] shows an example of a ReferenceGrant that allows an HTTPRoute in the `server-namespace` Namespace to reference Services in the `backend-namespace` Namespace. A ReferenceGrant must be created in the Namespace where the referenced Resource exists, and `from` specifies the Resources that perform the reference, while `to` specifies the Resources for which the reference is allowed.
 
 ### 1.5. Comparison with Ingress
 

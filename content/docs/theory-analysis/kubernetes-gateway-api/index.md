@@ -119,19 +119,19 @@ Gateway API는 Protocol에 따라서 HTTPRoute, GRPCRoute, TLSRoute, TCPRoute, U
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: version
-  namespace: version-namespace
+  name: server
+  namespace: server-namespace
 spec:
   parentRefs:
   - name: gateway
     namespace: gateway-namespace
   hostnames:
-  - "version.ssup2.com"
+  - "server.ssup2.com"
   rules:
   - matches:
     - path:
         type: PathPrefix
-        value: /version
+        value: /server
     filters:
     - type: RequestHeaderModifier
       requestHeaderModifier:
@@ -139,25 +139,25 @@ spec:
         - name: x-gateway
           value: gateway-api
     backendRefs:
-    - name: version-v1
+    - name: server-v1
       port: 8080
       weight: 90
-    - name: version-v2
+    - name: server-v2
       port: 8080
       weight: 10
 ```
 
-**HTTPRoute**는 Gateway가 수신한 HTTP Traffic을 Service로 Routing하는 규칙을 정의하는 Resource이다. [File 3]은 `version.ssup2.com` Hostname으로 수신한 Traffic을 `version-v1`, `version-v2` Service로 Routing하는 HTTPRoute의 예제를 나타내고 있다. `parentRefs`에는 HTTPRoute가 연결될 Gateway를 명시하며, `hostnames`에는 Routing 대상이 되는 Hostname을 명시한다.
+**HTTPRoute**는 Gateway가 수신한 HTTP Traffic을 Service로 Routing하는 규칙을 정의하는 Resource이다. [File 3]은 `server.ssup2.com` Hostname으로 수신한 Traffic을 `server-v1`, `server-v2` Service로 Routing하는 HTTPRoute의 예제를 나타내고 있다. `parentRefs`에는 HTTPRoute가 연결될 Gateway를 명시하며, `hostnames`에는 Routing 대상이 되는 Hostname을 명시한다.
 
-[File 3]처럼 `parentRefs`에 `sectionName` 없이 Gateway만 명시하면 HTTPRoute는 Protocol이 호환되는 모든 Listener에 연결된다. 따라서 [File 3]의 HTTPRoute는 [File 2]의 `http` Listener가 수신한 HTTP Traffic뿐만 아니라, `https` Listener가 TLS Termination을 수행한 HTTPS Traffic도 같이 Routing한다. 다만 `https` Listener의 `allowedRoutes`에는 `Selector`가 설정되어 있기 때문에, `version-namespace` Namespace에 `gateway-access: "true"` Label이 설정되어 있어야 `https` Listener에 연결될 수 있다.
+[File 3]처럼 `parentRefs`에 `sectionName` 없이 Gateway만 명시하면 HTTPRoute는 Protocol이 호환되는 모든 Listener에 연결된다. 따라서 [File 3]의 HTTPRoute는 [File 2]의 `http` Listener가 수신한 HTTP Traffic뿐만 아니라, `https` Listener가 TLS Termination을 수행한 HTTPS Traffic도 같이 Routing한다. 다만 `https` Listener의 `allowedRoutes`에는 `Selector`가 설정되어 있기 때문에, `server-namespace` Namespace에 `gateway-access: "true"` Label이 설정되어 있어야 `https` Listener에 연결될 수 있다.
 
-HTTPRoute의 `hostnames`는 연결된 Gateway Listener의 `hostname`과 겹치는 경우에만 유효하며, [File 3]의 `version.ssup2.com`은 [File 2]의 `*.ssup2.com`에 포함되기 때문에 HTTPRoute는 정상적으로 Gateway에 연결된다. 동일한 Hostname을 명시한 다수의 HTTPRoute도 하나의 Gateway에 연결될 수 있으며, 이 경우 모든 HTTPRoute의 규칙이 **병합되어 하나의 Routing 규칙**처럼 동작한다.
+HTTPRoute의 `hostnames`는 연결된 Gateway Listener의 `hostname`과 겹치는 경우에만 유효하며, [File 3]의 `server.ssup2.com`은 [File 2]의 `*.ssup2.com`에 포함되기 때문에 HTTPRoute는 정상적으로 Gateway에 연결된다. 동일한 Hostname을 명시한 다수의 HTTPRoute도 하나의 Gateway에 연결될 수 있으며, 이 경우 모든 HTTPRoute의 규칙이 **병합되어 하나의 Routing 규칙**처럼 동작한다.
 
 다수의 HTTPRoute 규칙이 동일한 Traffic에 부합하는 경우에는 더 구체적인 조건을 정의한 규칙이 우선 적용된다. 정확한 Path 일치, 긴 PathPrefix, Method 조건, 많은 Header 조건, 많은 Query Parameter 조건 순서로 우선순위가 결정되며, 조건의 구체성이 동일하면 먼저 생성된 HTTPRoute의 규칙이 우선 적용되고, 생성 시점도 동일하면 Namespace와 이름의 알파벳 순서로 결정된다. 먼저 생성된 HTTPRoute가 우선권을 갖기 때문에, 나중에 생성된 HTTPRoute가 동일한 조건을 정의하여 기존 HTTPRoute의 Traffic을 가로채는 것은 불가능하다.
 
 `rules`에는 Traffic의 Routing 규칙을 정의한다. `matches`는 Routing 대상이 되는 Traffic의 조건을 정의하며 Path뿐만 아니라 Header, Method, Query Parameter 기반의 조건도 정의할 수 있다. `filters`는 Routing 과정에서 Traffic을 조작하는 역할을 수행하며, Request/Response Header 수정 (`RequestHeaderModifier`, `ResponseHeaderModifier`), Redirect (`RequestRedirect`), URL 재작성 (`URLRewrite`), Traffic 복제 (`RequestMirror`) 기능을 표준으로 제공한다. Ingress에서는 이러한 기능들을 Annotation을 통해서 이용해야 하지만, Gateway API에서는 표준 API로 제공되기 때문에 구현체와 관계없이 동일하게 이용할 수 있다.
 
-`backendRefs`에는 Traffic이 전달될 Service를 명시하며, 다수의 Service를 명시하는 경우 `weight`를 통해서 Traffic의 비율을 설정할 수 있다. [File 3]에서는 `version-v1` Service에 90%, `version-v2` Service에 10%의 Traffic이 전달되도록 설정되어 있는 것을 확인할 수 있다. 따라서 Gateway API는 Ingress와 다르게 별도의 구현체 확장 기능 없이 Canary 배포를 수행할 수 있다.
+`backendRefs`에는 Traffic이 전달될 Service를 명시하며, 다수의 Service를 명시하는 경우 `weight`를 통해서 Traffic의 비율을 설정할 수 있다. [File 3]에서는 `server-v1` Service에 90%, `server-v2` Service에 10%의 Traffic이 전달되도록 설정되어 있는 것을 확인할 수 있다. 따라서 Gateway API는 Ingress와 다르게 별도의 구현체 확장 기능 없이 Canary 배포를 수행할 수 있다.
 
 #### 1.3.2. GRPCRoute
 
@@ -165,8 +165,8 @@ HTTPRoute의 `hostnames`는 연결된 Gateway Listener의 `hostname`과 겹치�
 apiVersion: gateway.networking.k8s.io/v1
 kind: GRPCRoute
 metadata:
-  name: version
-  namespace: version-namespace
+  name: server
+  namespace: server-namespace
 spec:
   parentRefs:
   - name: gateway
@@ -176,14 +176,14 @@ spec:
   rules:
   - matches:
     - method:
-        service: version.VersionService
-        method: GetVersion
+        service: server.ServerService
+        method: Get
     backendRefs:
-    - name: version-grpc
+    - name: server-grpc
       port: 9090
 ```
 
-**GRPCRoute**는 Gateway가 수신한 gRPC Traffic을 Service로 Routing하는 규칙을 정의하는 Resource이다. [File 4]는 `grpc.ssup2.com` Hostname으로 수신한 gRPC Traffic을 `version-grpc` Service로 Routing하는 GRPCRoute의 예제를 나타내고 있다. gRPC는 HTTP/2 기반으로 동작하기 때문에 HTTPRoute를 통해서도 gRPC Traffic을 Routing할 수 있지만, GRPCRoute는 [File 4]의 `matches`처럼 gRPC의 Service와 Method 기반의 Routing 규칙을 정의할 수 있다. HTTPRoute와 동일하게 Header 기반의 조건과 Header 수정, Traffic 복제 `filters`도 이용할 수 있다.
+**GRPCRoute**는 Gateway가 수신한 gRPC Traffic을 Service로 Routing하는 규칙을 정의하는 Resource이다. [File 4]는 `grpc.ssup2.com` Hostname으로 수신한 gRPC Traffic을 `server-grpc` Service로 Routing하는 GRPCRoute의 예제를 나타내고 있다. gRPC는 HTTP/2 기반으로 동작하기 때문에 HTTPRoute를 통해서도 gRPC Traffic을 Routing할 수 있지만, GRPCRoute는 [File 4]의 `matches`처럼 gRPC의 Service와 Method 기반의 Routing 규칙을 정의할 수 있다. HTTPRoute와 동일하게 Header 기반의 조건과 Header 수정, Traffic 복제 `filters`도 이용할 수 있다.
 
 #### 1.3.3. TLSRoute
 
@@ -191,22 +191,22 @@ spec:
 apiVersion: gateway.networking.k8s.io/v1
 kind: TLSRoute
 metadata:
-  name: version
-  namespace: version-namespace
+  name: server
+  namespace: server-namespace
 spec:
   parentRefs:
   - name: gateway
     namespace: gateway-namespace
     sectionName: tls
   hostnames:
-  - "version.ssup2.com"
+  - "server.ssup2.com"
   rules:
   - backendRefs:
-    - name: version
+    - name: server
       port: 8443
 ```
 
-**TLSRoute**는 Gateway가 수신한 TLS Traffic을 복호화하지 않고 **SNI** (Server Name Indication) 기반으로 Routing하는 규칙을 정의하는 Resource이다. [File 5]는 SNI가 `version.ssup2.com`인 TLS Traffic을 `version` Service로 Routing하는 TLSRoute의 예제를 나타내고 있다. TLSRoute를 이용하기 위해서는 연결된 Gateway Listener의 Protocol이 `TLS`로 설정되어 있고 TLS Mode가 `Passthrough`로 설정되어 있어야 한다. Gateway는 TLS Handshake 과정의 SNI만 확인하고 Traffic을 복호화하지 않고 전달하기 때문에, TLS Termination은 Traffic을 전달받는 Backend에서 수행된다.
+**TLSRoute**는 Gateway가 수신한 TLS Traffic을 복호화하지 않고 **SNI** (Server Name Indication) 기반으로 Routing하는 규칙을 정의하는 Resource이다. [File 5]는 SNI가 `server.ssup2.com`인 TLS Traffic을 `server` Service로 Routing하는 TLSRoute의 예제를 나타내고 있다. TLSRoute를 이용하기 위해서는 연결된 Gateway Listener의 Protocol이 `TLS`로 설정되어 있고 TLS Mode가 `Passthrough`로 설정되어 있어야 한다. Gateway는 TLS Handshake 과정의 SNI만 확인하고 Traffic을 복호화하지 않고 전달하기 때문에, TLS Termination은 Traffic을 전달받는 Backend에서 수행된다.
 
 #### 1.3.4. TCPRoute
 
@@ -256,13 +256,13 @@ spec:
 apiVersion: gateway.networking.k8s.io/v1
 kind: ReferenceGrant
 metadata:
-  name: allow-version-route
+  name: allow-server-route
   namespace: backend-namespace
 spec:
   from:
   - group: gateway.networking.k8s.io
     kind: HTTPRoute
-    namespace: version-namespace
+    namespace: server-namespace
   to:
   - group: ""
     kind: Service
@@ -270,7 +270,7 @@ spec:
 
 **ReferenceGrant**는 서로 다른 Namespace의 Resource 참조를 허용하는 Resource이다. Gateway API에서 Route의 `backendRefs`에 다른 Namespace의 Service를 명시하는 경우, 대상 Service의 Namespace에 ReferenceGrant가 존재하지 않으면 참조가 거부된다. 임의의 Namespace의 Route가 다른 Namespace의 Service를 참조하여 Traffic을 가로챌 수 있는 보안 문제를 방지하기 위함이다.
 
-[File 8]은 `version-namespace` Namespace의 HTTPRoute가 `backend-namespace` Namespace의 Service를 참조할 수 있도록 허용하는 ReferenceGrant의 예제를 나타내고 있다. ReferenceGrant는 참조 대상 Resource가 존재하는 Namespace에 생성되어야 하며, `from`에는 참조를 수행하는 Resource를, `to`에는 참조를 허용할 Resource를 명시한다.
+[File 8]은 `server-namespace` Namespace의 HTTPRoute가 `backend-namespace` Namespace의 Service를 참조할 수 있도록 허용하는 ReferenceGrant의 예제를 나타내고 있다. ReferenceGrant는 참조 대상 Resource가 존재하는 Namespace에 생성되어야 하며, `from`에는 참조를 수행하는 Resource를, `to`에는 참조를 허용할 Resource를 명시한다.
 
 ### 1.5. Ingress 비교
 
