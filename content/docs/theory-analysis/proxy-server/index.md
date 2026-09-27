@@ -18,4 +18,4 @@ Forward Proxy의 Server 응답 Caching을 통해서 네트워크 사용량을 �
 
 ### 1.2. Reverse Proxy
 
-Reverse Proxy는 다수의 Server의 역할을 대신 수행하는 **Server Side Proxy**를 의미한다. Forward Proxy의 주요 역할은 **Server Load Balancing**과 **Server 응답 Caching**이다. Reverse Proxy는 Server Load Balancing을 통해서 Client 요청을 다수의 Server에 골고루 분배하여 Server의 부하를 분산 시키고, 일부 Server가 동작하지 않더라도 Client의 요청을 동작하는 Server에게만 전달하여 Server의 고가용성을 제공한다. 또한 필요에 따라서 Forward Proxy처럼 Server 응답 Caching 역할도 수행가능하다.
+Reverse Proxy는 다수의 Server의 역할을 대신 수행하는 **Server Side Proxy**를 의미한다. Reverse Proxy의 주요 역할은 **Server Load Balancing**과 **Server 응답 Caching**이다. Reverse Proxy는 Server Load Balancing을 통해서 Client 요청을 다수의 Server에 골고루 분배하여 Server의 부하를 분산 시키고, 일부 Server가 동작하지 않더라도 Client의 요청을 동작하는 Server에게만 전달하여 Server의 고가용성을 제공한다. 또한 필요에 따라서 Forward Proxy처럼 Server 응답 Caching 역할도 수행가능하다.

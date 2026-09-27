@@ -11,17 +11,17 @@ MySQL과 PostgreSQL을 비교 분석한다.
 * **MySQL** : 단순한 기능/Architecture을 기반으로 빠른 성능
 * **PostgreSQL** : 다양한 기능을 기반으로 다양한 요구사항 충족
 
-MySQL는 PostgreSQL 대비 단순한 기능/Architecture를 갖는다. 따라서 PostgreSQL 대비 적은 Resource를 이용하며, 단순한 CRUD 동작의 경우에도 PosgreSQL 대비 일반적으로 빠른 성능을 보여주는 것으로 알려져 있다. 과거의 Monolithic Architecture에서는 많은 Business Logic을 Database에 넣었기 때문에 Database의 다양한 기능이 중요했지만, MSA (Micro Service Architecture)에서 일반적으로 Business Logic을 Application에서 처리하기 때문에 Database 기능의 중요성이 많이 떨어진다. 따라서 MSA에서의 OLTP를 위한 RDMBS 선택시 일반적으로 PosgreSQL보다 MySQL이 더 적합한 경우가 많다.
+MySQL는 PostgreSQL 대비 단순한 기능/Architecture를 갖는다. 따라서 PostgreSQL 대비 적은 Resource를 이용하며, 단순한 CRUD 동작의 경우에도 PostgreSQL 대비 일반적으로 빠른 성능을 보여주는 것으로 알려져 있다. 과거의 Monolithic Architecture에서는 많은 Business Logic을 Database에 넣었기 때문에 Database의 다양한 기능이 중요했지만, MSA (Micro Service Architecture)에서 일반적으로 Business Logic을 Application에서 처리하기 때문에 Database 기능의 중요성이 많이 떨어진다. 따라서 MSA에서의 OLTP를 위한 RDMBS 선택시 일반적으로 PostgreSQL보다 MySQL이 더 적합한 경우가 많다.
 
 반면에 PostgreSQL의 다양한 기능은 Data 분석시에 유용한 경우가 많다. 즉 OLAP를 위한 RDBMS 선택시에는 PostgreSQL을 일반적으로 더 권장한다. 동일한 이유로 소규모의 Data Warehose 구축시에도 RDMBS를 이용하는 경우 PostgreSQL 보다 MySQL 이용을 권장한다.
 
-### 1.1. Relation Database vs Object-Relational Database
+### 1.2. Relation Database vs Object-Relational Database
 
-### 1.2. Engine
+### 1.3. Engine
 
-### 1.3. Replication
+### 1.4. Replication
 
-### 1.4. Client Connection
+### 1.5. Client Connection
 
 * **MySQL** : Client Connection 생성 시에 새로운 Thread를 생성
 * **PostgreSQL** : Client Connection 생성 시에 새로운 Process를 생성

@@ -66,7 +66,7 @@ Follower Server가 투표 요청에 포함된 Log 정보를 확인하는 이유�
 
 Follower Server는 Log 조건을 충족하는 Candidate Server의 투표 요청중에서 가장 먼저 투표를 요청한 Candidate Server에게만 표를 전송한다. 따라서 동시에 다수의 Server가 Candidate Server가 된다면 투표로 Leader Server가 선출되지 않을 확률이 높아진다. 이러한 문제를 방지하기 위해서 각 Server는 Random한 Election Timeout을 갖는다. 즉 Follower Server가 Candidate Server가 되기 위한 대기 시간이 각 Follower Server마다 다르기 때문에, 동시에 다수의 Follower Server가 Candidate Server가 되는것을 방지한다.
 
-### 1.4. Leader Tranfser
+### 1.4. Leader Transfer
 
 Leader Server가 재시작이 필요한 경우에 가장 안전하게 재시작할 수 있는 방법은 재시작전에 Leader Server가 Leader 역할을 다른 Server에게 넘기는 방법이 있다. 이처럼 Leader Server가 Leader 역할을 다른 Server에게 넘기고 Follower Server가 되는 과정을 Raft에서는 **Step Down**이라고 명칭한다. Raft에서 Leader Server가 다른 Server에게 Leader 역할을 넘기는 과정은 다음과 같다.
 
