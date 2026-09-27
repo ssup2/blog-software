@@ -27,24 +27,26 @@
     width: 18rem;
 }
 
-/* Divider lines between the sidebars and the content */
+/* Divider lines between the sidebars and the content, fading out at both ends */
 @media (min-width: 768px) {
     .hextra-sidebar-container {
-        border-right: 1px solid rgb(229 231 235);
+        border-right: 1px solid transparent;
+        border-image: linear-gradient(to bottom, transparent, rgb(229 231 235) 3rem, rgb(229 231 235) calc(100% - 3rem), transparent) 1;
     }
 
     .dark .hextra-sidebar-container {
-        border-right-color: rgb(38 38 38);
+        border-image: linear-gradient(to bottom, transparent, rgb(38 38 38) 3rem, rgb(38 38 38) calc(100% - 3rem), transparent) 1;
     }
 }
 
 @media (min-width: 1280px) {
     .hextra-toc {
-        border-left: 1px solid rgb(229 231 235);
+        border-left: 1px solid transparent;
+        border-image: linear-gradient(to bottom, transparent, rgb(229 231 235) 3rem, rgb(229 231 235) calc(100% - 3rem), transparent) 1;
     }
 
     .dark .hextra-toc {
-        border-left-color: rgb(38 38 38);
+        border-image: linear-gradient(to bottom, transparent, rgb(38 38 38) 3rem, rgb(38 38 38) calc(100% - 3rem), transparent) 1;
     }
 }
 
