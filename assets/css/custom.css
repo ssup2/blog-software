@@ -40,12 +40,13 @@
 }
 
 @media (min-width: 1280px) {
-    .hextra-toc {
+    .hextra-toc > div {
         border-left: 1px solid transparent;
         border-image: linear-gradient(to bottom, transparent 1.5rem, rgb(229 231 235) 1.5rem, rgb(229 231 235) calc(100% - 1.5rem), transparent calc(100% - 1.5rem)) 1;
+        padding-left: 1rem;
     }
 
-    .dark .hextra-toc {
+    .dark .hextra-toc > div {
         border-image: linear-gradient(to bottom, transparent 1.5rem, rgb(38 38 38) 1.5rem, rgb(38 38 38) calc(100% - 1.5rem), transparent calc(100% - 1.5rem)) 1;
     }
 }
