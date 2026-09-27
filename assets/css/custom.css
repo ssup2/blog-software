@@ -1,6 +1,9 @@
 :root {
     --hx-default-font-family: "Pretendard Variable", Pretendard, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     --hx-font-sans: "Pretendard Variable", Pretendard, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    --hextra-max-page-width: 110rem;
+    --hextra-max-navbar-width: 110rem;
+    --hextra-max-footer-width: 110rem;
 }
 
 .content {
@@ -10,11 +13,11 @@
 }
 
 .hextra-sidebar-container {
-    width: 21rem;
+    width: 19rem;
 }
 
 .hextra-toc {
-    width: 20rem;
+    width: 18rem;
 }
 
 .content table {
