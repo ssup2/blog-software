@@ -32,7 +32,7 @@ spec:
 
 GAMMA에서 Route가 연결되는 대상은 **Kubernetes Service**이다. Kubernetes Service는 Client가 요청을 전송하는 대상인 DNS 이름, ClusterIP와 Traffic이 실제로 전달되는 Endpoint IP의 집합이라는 두 역할을 하나의 Resource에 묶어서 제공한다. 따라서 GAMMA는 Route가 Service에 연결될 때 Route가 동작하는 지점을 명확하게 정의하기 위해서, 두 역할을 개념적으로 분리하여 전자를 **Frontend**, 후자를 **Backend**로 정의한다. [File 1]의 `server` Service에서는 Service 이름으로 생성되는 DNS 이름과 ClusterIP가 Frontend에 해당하며, `app: server` Selector로 선택된 Pod들이 Backend에 해당한다.
 
-Route는 Service의 Frontend에 연결되어 Frontend로 전달되는 Traffic을 대상으로 동작하며, Traffic이 실제로 전달되는 Backend는 Route의 `backendRefs`를 통해서 결정된다. 따라서 Client는 기존과 동일하게 Service의 DNS 이름으로 요청을 전송하지만, 요청은 Route의 규칙에 따라서 `server` Service의 Backend가 아닌 다른 Version의 Service나 다른 Service의 Backend로 전달될 수 있다.
+Route는 **Service의 Frontend에 연결**되어 Frontend로 전달되는 Traffic을 대상으로 동작하며, Traffic이 실제로 전달되는 Backend는 Route의 `backendRefs`를 통해서 결정된다. 따라서 Client는 기존과 동일하게 Service의 DNS 이름으로 요청을 전송하지만, 요청은 Route의 규칙에 따라서 `server` Service의 Backend가 아닌 다른 Version의 Service나 다른 Service의 Backend로 전달될 수 있다.
 
 Route가 연결된 Service는 요청 처리 방식이 변경된다는 점에 주의해야 한다. Route의 `matches` 조건에 부합하는 요청은 `backendRefs`에 명시된 Backend로 전달되지만, 부합하지 않는 요청은 Service의 Backend로 전달되지 않고 거부된다. Route가 연결되지 않은 Service는 기존과 동일하게 동작한다.
 
