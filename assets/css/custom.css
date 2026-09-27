@@ -27,6 +27,28 @@
     width: 18rem;
 }
 
+/* Replace the navbar bottom hairline with a line stopping short of both ends */
+.hextra-nav-container-blur,
+.dark .hextra-nav-container-blur {
+    box-shadow: none;
+}
+
+.hextra-nav-container-blur::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin-inline: auto;
+    height: 1px;
+    width: min(calc(100% - 3rem), calc(var(--hextra-max-navbar-width) - 3rem));
+    background: rgb(229 231 235);
+}
+
+.dark .hextra-nav-container-blur::after {
+    background: rgb(38 38 38);
+}
+
 /* Divider lines between the sidebars and the content, stopping short of both ends */
 @media (min-width: 768px) {
     .hextra-sidebar-container {
