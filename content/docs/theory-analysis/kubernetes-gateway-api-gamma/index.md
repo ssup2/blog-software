@@ -14,6 +14,8 @@ Kubernetes Gateway API를 Service Mesh의 East-West Traffic 제어로 확장하�
 
 Mesh에서 이용할 수 있는 Route는 HTTPRoute와 GRPCRoute이며, TCPRoute와 TLSRoute의 Mesh 지원은 아직 실험 단계이다. GAMMA를 지원하는 대표적인 Mesh 구현체로는 Istio, Linkerd, Kuma, Cilium이 존재하며, Gateway API는 Mesh 전용 Conformance Profile을 통해서 구현체의 GAMMA 표준 준수 여부를 검증한다.
 
+GAMMA의 동작을 이해하기 위해서는 두 가지 개념이 필요하다. 하나는 Route가 연결되는 Kubernetes Service를 Frontend와 Backend 역할로 구분하는 개념이며, 다른 하나는 Route가 생성되는 Namespace에 따라서 적용 범위가 달라지는 Producer Route와 Consumer Route의 구분이다.
+
 ### 1.1. Kubernetes Service Frontend, Backend
 
 ```yaml {caption="[File 1] server Service 예제", linenos=table}
@@ -33,6 +35,8 @@ spec:
 GAMMA에서 Route가 연결되는 대상은 **Kubernetes Service**이다. Kubernetes Service는 Client가 요청을 전송하는 대상인 DNS 이름, ClusterIP와 Traffic이 실제로 전달되는 Endpoint IP의 집합이라는 두 역할을 하나의 Resource에 묶어서 제공한다. 따라서 GAMMA는 Route가 Service에 연결될 때 Route가 동작하는 지점을 명확하게 정의하기 위해서, 두 역할을 개념적으로 분리하여 전자를 **Frontend**, 후자를 **Backend**로 정의한다. [File 1]의 `server` Service에서는 Service 이름으로 생성되는 DNS 이름과 ClusterIP가 Frontend에 해당하며, `app: server` Selector로 선택된 Pod들이 Backend에 해당한다.
 
 Route는 **Service의 Frontend에 연결**되어 Frontend로 전달되는 Traffic을 대상으로 동작하며, Traffic이 실제로 전달되는 Backend는 Route의 `backendRefs`를 통해서 결정된다. 따라서 Client는 기존과 동일하게 Service의 DNS 이름으로 요청을 전송하지만, 요청은 Route의 규칙에 따라서 `server` Service의 Backend가 아닌 다른 Version의 Service나 다른 Service의 Backend로 전달될 수 있다.
+
+한편 Service의 Selector는 Route의 연결과 동작에 아무런 영향을 주지 않는다. Route는 Service의 Frontend만을 기준으로 연결되며, Selector는 해당 Service의 Backend를 구성하는 역할만 수행하기 때문이다. Selector가 구성한 Backend는 Route의 `backendRefs`에 해당 Service가 명시된 경우에만 Traffic의 목적지로 이용된다. 이러한 특성을 활용하면 Selector가 없는 Service를 순수한 Frontend 진입점으로 생성하고, Route를 통해서 Traffic을 다른 Service의 Backend로만 분배하는 구성도 가능하다.
 
 Route가 연결된 Service는 요청 처리 방식이 변경된다는 점에 주의해야 한다. Route의 `matches` 조건에 부합하는 요청은 `backendRefs`에 명시된 Backend로 전달되지만, 부합하지 않는 요청은 Service의 Backend로 전달되지 않고 거부된다. Route가 연결되지 않은 Service는 기존과 동일하게 동작한다.
 

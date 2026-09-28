@@ -14,6 +14,8 @@ This post analyzes GAMMA, which extends the Kubernetes Gateway API to control Ea
 
 The Routes available in a Mesh are HTTPRoute and GRPCRoute, and Mesh support for TCPRoute and TLSRoute is still experimental. Representative Mesh implementations supporting GAMMA include Istio, Linkerd, Kuma, and Cilium, and the Gateway API verifies whether an implementation complies with the GAMMA standard through a Mesh-specific Conformance Profile.
 
+Two concepts are needed to understand how GAMMA operates. One is the division of the Kubernetes Service that a Route attaches to into the Frontend and Backend roles, and the other is the distinction between the Producer Route and the Consumer Route, whose scope of application differs depending on the Namespace in which the Route is created.
+
 ### 1.1. Kubernetes Service Frontend, Backend
 
 ```yaml {caption="[File 1] server Service Example", linenos=table}
@@ -33,6 +35,8 @@ spec:
 In GAMMA, the target to which a Route attaches is a **Kubernetes Service**. A Kubernetes Service bundles two roles into a single Resource: the DNS name and ClusterIP that Clients send requests to, and the set of Endpoint IPs to which Traffic is actually delivered. Therefore, to clearly define where a Route acts when it attaches to a Service, GAMMA conceptually separates the two roles, defining the former as the **Frontend** and the latter as the **Backend**. In the `server` Service of [File 1], the DNS name created from the Service name and the ClusterIP correspond to the Frontend, and the Pods selected by the `app: server` Selector correspond to the Backend.
 
 A Route **attaches to the Service's Frontend** and operates on the Traffic delivered to the Frontend, and the Backend to which the Traffic is actually delivered is determined through the Route's `backendRefs`. Therefore, the Client sends requests to the Service's DNS name as before, but according to the Route's rules the requests can be delivered not to the Backend of the `server` Service but to a different Version of the Service or to the Backend of a different Service.
+
+Meanwhile, the Selector of a Service has no effect on the attachment or operation of a Route. This is because a Route attaches based only on the Service's Frontend, and the Selector serves only to compose the Backend of that Service. The Backend composed by the Selector is used as the destination of Traffic only when the Service is specified in a Route's `backendRefs`. Utilizing this characteristic, it is also possible to create a Service without a Selector as a pure Frontend entry point and distribute Traffic only to the Backends of other Services through a Route.
 
 Note that a Service with an attached Route changes how requests are handled. Requests that match the Route's `matches` conditions are delivered to the Backends specified in `backendRefs`, but requests that do not match are rejected instead of being delivered to the Service's Backend. A Service without an attached Route operates the same as before.
 
