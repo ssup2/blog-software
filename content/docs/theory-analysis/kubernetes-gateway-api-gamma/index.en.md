@@ -97,7 +97,7 @@ The rules of a Consumer Route are applied only to requests sent by Clients in th
 
 When both a Producer Route and a Consumer Route match the same request, the Consumer Route takes precedence. In [Figure 1], the requests of Client C also match the rules of the Producer HTTPRoute, but the Consumer HTTPRoute takes precedence and the requests are delivered not to the Backend of the `server` Service but to the Backends of the `server-v1` and `server-v2` Services. However, since multiple Routes in the same Namespace are merged and operate together, different Consumer Routes cannot be defined per Client within a single Namespace.
 
-Also, since a Consumer Route specifies a Service in another Namespace in its `backendRefs`, a ReferenceGrant must exist in the target Namespace, and since Consumer Route support differs by Mesh implementation, the support scope of the implementation in use must be checked.
+Also, a Consumer Route specifies Services located in a different Namespace in its `backendRefs`, as in [File 3], and the Gateway API rejects references to Services in other Namespaces by default to prevent Traffic hijacking. Therefore, a **ReferenceGrant** that allows the reference must exist in the Namespace where the Backend Services are located; in the case of [File 3], a ReferenceGrant that allows HTTPRoutes in the `client-c-namespace` Namespace to reference Services is required in the `server-namespace` Namespace. Meanwhile, since Consumer Route support differs by Mesh implementation, the support scope of the implementation in use must be checked.
 
 ### 1.4. Gateway API Comparison
 

@@ -97,7 +97,7 @@ Consumer Route의 규칙은 Route와 동일한 Namespace의 Client가 전송하�
 
 동일한 요청에 Producer Route와 Consumer Route가 모두 부합하는 경우에는 Consumer Route가 우선 적용된다. [Figure 1]에서 Client C의 요청도 Producer HTTPRoute의 규칙에 부합하지만, Consumer HTTPRoute가 우선 적용되어 `server` Service의 Backend가 아닌 `server-v1`, `server-v2` Service의 Backend로 전달된다. 다만 동일한 Namespace의 다수의 Route는 병합되어 동작하기 때문에, 하나의 Namespace 안에서 Client별로 서로 다른 Consumer Route를 정의할 수는 없다.
 
-또한 Consumer Route는 다른 Namespace의 Service를 `backendRefs`에 명시하기 때문에 대상 Namespace에 ReferenceGrant가 존재해야 하며, Consumer Route의 지원 여부는 Mesh 구현체마다 다르기 때문에 이용하는 구현체의 지원 범위를 확인해야 한다.
+또한 Consumer Route는 [File 3]처럼 다른 Namespace에 위치한 Service를 `backendRefs`에 명시하게 되는데, Gateway API는 Traffic 가로채기를 방지하기 위해서 다른 Namespace의 Service 참조를 기본적으로 거부한다. 따라서 Backend Service가 위치한 Namespace에 해당 참조를 허용하는 **ReferenceGrant**가 존재해야 하며, [File 3]의 경우 `server-namespace` Namespace에 `client-c-namespace` Namespace의 HTTPRoute가 Service를 참조할 수 있도록 허용하는 ReferenceGrant가 필요하다. 한편 Consumer Route의 지원 여부는 Mesh 구현체마다 다르기 때문에 이용하는 구현체의 지원 범위를 확인해야 한다.
 
 ### 1.4. Gateway API 비교
 
