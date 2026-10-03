@@ -6,15 +6,17 @@ This post analyzes the Gateway API, which emerged to overcome the limitations of
 
 ## 1. Kubernetes Gateway API
 
-{{< figure caption="[Figure 1] Gateway API Resource Relationships" src="images/gateway-api-resource.png" width="1000px" >}}
-
 The **Gateway API** is a standard API that defines how Traffic from outside a Kubernetes Cluster is routed to Services inside the Cluster. The existing Ingress is designed around the HTTP/HTTPS Protocol and lacks features defined as a standard, so most Ingress Controllers extend their features through Annotations.
 
 Since Annotations are defined differently for each Ingress Controller, there is a portability problem where the Ingress must also be modified when the Ingress Controller is changed. In addition, because Ingress defines both the Load Balancer configuration and the Routing rules in a single Resource, it is difficult to separate the roles of the Cluster administrator and the App developer. The Gateway API emerged to overcome these limitations of Ingress.
 
+{{< figure caption="[Figure 1] Gateway API Resource Relationships" src="images/gateway-api-resource.png" width="1000px" >}}
+
 [Figure 1] shows the main Resources of the Gateway API and the relationships between the roles that manage each Resource. The Gateway API is based on a **Role-oriented** design and provides Resources in three layers: GatewayClass, Gateway, and Route. GatewayClass is the Resource that defines the implementation of Gateways and is managed by the Infrastructure Provider. Gateway is the Resource that defines the Load Balancer (Proxy) that receives Traffic and is managed by the Cluster Operator. Routes, including HTTPRoute, are Resources that define the rules for routing received Traffic to Services and are managed by App developers.
 
-The **Infrastructure Provider** is the role that provides the Gateway API implementation and the underlying environment it runs on, like a Cloud Provider. The **Cluster Operator** is the administrator responsible for operating the Kubernetes Cluster and managing Traffic policies, and the **App developer** is responsible for developing and deploying the Apps running in the Cluster. Taking an AWS EKS environment as an example, AWS, which provides the Gateway Controller and Load Balancer, corresponds to the Infrastructure Provider; the Platform team, which creates Gateways and manages Domains and certificates, corresponds to the Cluster Operator; and each service's development team, which defines Routes to expose its own App, corresponds to the App developer.
+The **Infrastructure Provider** is the role that provides the Gateway API implementation and the underlying environment it runs on, like a Cloud Provider. The **Cluster Operator** is the administrator responsible for operating the Kubernetes Cluster and managing Traffic policies, and the **App developer** is responsible for developing and deploying the Apps running in the Cluster. The Gateway Controller in [Figure 1] is drawn across the boundary between the Infrastructure Provider and Cluster Operator areas because the Infrastructure Provider is responsible for developing the Gateway Controller, while the Cluster Operator is responsible for installing and operating it in the Cluster.
+
+Taking an AWS EKS environment as an example, AWS, which provides the Gateway Controller and Load Balancer, corresponds to the Infrastructure Provider; the Platform team, which creates Gateways and manages Domains and certificates, corresponds to the Cluster Operator; and each service's development team, which defines Routes to expose its own App, corresponds to the App developer.
 
 Since the Gateway API separates Resources by role in this way, App developers can expose their Apps externally by defining only Routes in their own Namespace, without modifying the Gateway managed by the Cluster Operator. However, the roles do not necessarily have to be separated across different parties; in an On-Premise environment where an implementation such as Istio is installed and used directly, a single team can serve as both the Infrastructure Provider and the Cluster Operator.
 

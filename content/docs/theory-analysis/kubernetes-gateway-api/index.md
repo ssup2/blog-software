@@ -6,15 +6,17 @@ Kubernetes에서 Ingress의 한계를 극복하기 위해서 등장한 Gateway A
 
 ## 1. Kubernetes Gateway API
 
-{{< figure caption="[Figure 1] Gateway API Resource 관계" src="images/gateway-api-resource.png" width="1000px" >}}
-
 **Gateway API**는 Kubernetes Cluster 외부의 Traffic을 Cluster 내부의 Service로 Routing하는 방법을 정의하는 표준 API이다. 기존의 Ingress는 HTTP/HTTPS Protocol 중심으로 설계되어 있고, 표준으로 정의된 기능이 부족하기 때문에 대부분의 Ingress Controller는 Annotation을 통해서 기능을 확장한다.
 
 Annotation은 Ingress Controller마다 다르게 정의되어 있기 때문에 Ingress Controller를 변경하는 경우 Ingress도 같이 수정되어야 하는 이식성 문제가 존재한다. 또한 Ingress는 하나의 Resource에 Load Balancer 설정과 Routing 규칙이 모두 정의되기 때문에 Cluster 관리자와 App 개발자의 역할을 분리하기 어려운 문제도 존재한다. Gateway API는 이러한 Ingress의 한계를 극복하기 위해서 등장하였다.
 
+{{< figure caption="[Figure 1] Gateway API Resource 관계" src="images/gateway-api-resource.png" width="1000px" >}}
+
 [Figure 1]은 Gateway API의 주요 Resource와 각 Resource를 관리하는 역할의 관계를 나타내고 있다. Gateway API는 **역할 지향 (Role-oriented)** 설계를 기반으로 GatewayClass, Gateway, Route 3가지 계층의 Resource를 제공한다. GatewayClass는 Gateway의 구현체를 정의하는 Resource이며 Infrastructure Provider가 관리한다. Gateway는 Traffic을 수신하는 Load Balancer (Proxy)를 정의하는 Resource이며 Cluster Operator가 관리한다. HTTPRoute를 포함한 Route는 수신한 Traffic을 Service로 Routing하는 규칙을 정의하는 Resource이며 App 개발자가 관리한다.
 
-**Infrastructure Provider**는 Cloud Provider처럼 Gateway API의 구현체와 구현체가 동작하는 기반 환경을 제공하는 역할이고, **Cluster Operator**는 Kubernetes Cluster의 운영과 Traffic 정책 관리를 담당하는 관리자이며, **App 개발자**는 Cluster에서 동작하는 App의 개발과 배포를 담당한다. AWS EKS 환경을 예로 들면 Gateway Controller와 Load Balancer를 제공하는 AWS가 Infrastructure Provider에 해당하고, Gateway를 생성하여 Domain과 인증서를 관리하는 Platform 팀이 Cluster Operator에 해당하며, Route를 정의하여 자신의 App을 노출하는 각 서비스의 개발 팀이 App 개발자에 해당한다.
+**Infrastructure Provider**는 Cloud Provider처럼 Gateway API의 구현체와 구현체가 동작하는 기반 환경을 제공하는 역할이고, **Cluster Operator**는 Kubernetes Cluster의 운영과 Traffic 정책 관리를 담당하는 관리자이며, **App 개발자**는 Cluster에서 동작하는 App의 개발과 배포를 담당한다. [Figure 1]에서 Gateway Controller가 Infrastructure Provider와 Cluster Operator 영역의 경계에 걸쳐서 표현된 것은, Gateway Controller의 개발은 Infrastructure Provider가 담당하고 Cluster에 설치하여 운영하는 것은 Cluster Operator가 담당하기 때문이다.
+
+AWS EKS 환경을 예로 들면 Gateway Controller와 Load Balancer를 제공하는 AWS가 Infrastructure Provider에 해당하고, Gateway를 생성하여 Domain과 인증서를 관리하는 Platform 팀이 Cluster Operator에 해당하며, Route를 정의하여 자신의 App을 노출하는 각 서비스의 개발 팀이 App 개발자에 해당한다.
 
 이처럼 Gateway API는 역할별로 Resource가 분리되어 있기 때문에, App 개발자는 Cluster Operator가 관리하는 Gateway를 수정하지 않고 자신의 Namespace에서 Route만 정의하여 App을 외부에 노출할 수 있다. 다만 역할이 반드시 서로 다른 주체에게 분리되어야 하는 것은 아니며, On-Premise 환경에서 Istio와 같은 구현체를 직접 설치하여 이용하는 경우에는 하나의 팀이 Infrastructure Provider와 Cluster Operator 역할을 겸할 수도 있다.
 
