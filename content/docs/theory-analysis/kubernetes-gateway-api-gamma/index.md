@@ -6,15 +6,15 @@ Kubernetes Gateway API를 Service Mesh의 East-West Traffic 제어로 확장하�
 
 ## 1. Kubernetes Gateway API GAMMA
 
-{{< figure caption="[Figure 1] GAMMA의 Route, Service 연결 구조" src="images/gamma-route-service.png" width="900px" >}}
+{{< figure caption="[Figure 1] GAMMA의 Route, Service 연결 구조" src="images/gamma-route-service.png" width="800px" >}}
 
 **GAMMA** (Gateway API for Mesh Management and Administration)는 Cluster 외부 Traffic을 대상으로 설계된 Gateway API를 Service Mesh 내부의 East-West Traffic 제어에도 이용할 수 있도록 확장하는 표준이다. 기존의 Service Mesh는 Istio의 VirtualService, Linkerd의 ServiceProfile처럼 구현체마다 전용 API를 제공하기 때문에 Mesh 구현체를 변경하는 경우 Traffic 제어 설정도 같이 수정되어야 하는 이식성 문제가 존재한다. GAMMA는 이러한 문제를 해결하기 위해서 등장하였으며, Gateway API v1.1부터 Mesh 지원이 Standard Channel로 승격되었다.
 
-[Figure 1]은 GAMMA의 Route와 Service 연결 구조를 나타내고 있다. GAMMA는 별도의 Resource를 추가하지 않고 기존 Route의 `parentRefs`에 Gateway 대신 Service를 명시하는 방식으로 동작하기 때문에, GatewayClass와 Gateway Resource 없이 Route만으로 Mesh 내부의 Traffic을 제어할 수 있다. Mesh 구현체는 Service에 연결된 Route를 Watch하여 Data Plane에 Routing 규칙을 적용하며, Sidecar Mode에서는 요청을 전송하는 Client의 Sidecar에서, Ambient Mode에서는 Waypoint에서 규칙이 적용된다.
+[Figure 1]은 GAMMA의 Route와 Service 연결 구조를 나타내고 있다. GAMMA는 별도의 Resource를 추가하지 않고 기존 Route의 `parentRefs`에 Gateway 대신 Service를 명시하는 방식으로 동작하기 때문에, [Figure 1]의 두 HTTPRoute처럼 GatewayClass와 Gateway Resource 없이 Route만으로 Mesh 내부의 Traffic을 제어할 수 있다. Mesh 구현체는 Service에 연결된 Route를 Watch하여 Data Plane에 Routing 규칙을 적용하며, Sidecar Mode에서는 요청을 전송하는 Client의 Sidecar에서, Ambient Mode에서는 Waypoint에서 규칙이 적용된다.
 
 Mesh에서 이용할 수 있는 Route는 HTTPRoute와 GRPCRoute이며, TCPRoute와 TLSRoute의 Mesh 지원은 아직 실험 단계이다. GAMMA를 지원하는 대표적인 Mesh 구현체로는 Istio, Linkerd, Kuma, Cilium이 존재하며, Gateway API는 Mesh 전용 Conformance Profile을 통해서 구현체의 GAMMA 표준 준수 여부를 검증한다.
 
-GAMMA의 동작을 이해하기 위해서는 두 가지 개념이 필요하다. 하나는 Route가 연결되는 Kubernetes Service를 Frontend와 Backend 역할로 구분하는 개념이며, 다른 하나는 Route가 생성되는 Namespace에 따라서 적용 범위가 달라지는 Producer Route와 Consumer Route의 구분이다.
+GAMMA의 동작을 이해하기 위해서는 두 가지 개념이 필요하다. 하나는 Route가 연결되는 Kubernetes Service를 Frontend와 Backend 역할로 구분하는 개념이며, 다른 하나는 Route가 생성되는 Namespace에 따라서 적용 범위가 달라지는 Producer Route와 Consumer Route의 구분이다. [Figure 1]에서 각 Service가 Frontend와 Backend로 분리되어 표현된 것과 두 HTTPRoute가 Producer, Consumer로 구분되어 서로 다른 Namespace에 위치하는 것도 이 두 개념을 나타내며, 이후 각 절에서 [Figure 1]의 구성을 기준으로 설명한다.
 
 ### 1.1. Kubernetes Service Frontend, Backend
 
@@ -34,9 +34,9 @@ spec:
 
 GAMMA에서 Route가 연결되는 대상은 **Kubernetes Service**이다. Kubernetes Service는 Client가 요청을 전송하는 대상인 DNS 이름, ClusterIP와 Traffic이 실제로 전달되는 Endpoint IP의 집합이라는 두 역할을 하나의 Resource에 묶어서 제공한다. 따라서 GAMMA는 Route가 Service에 연결될 때 Route가 동작하는 지점을 명확하게 정의하기 위해서, 두 역할을 개념적으로 분리하여 전자를 **Frontend**, 후자를 **Backend**로 정의한다. [File 1]의 `server` Service에서는 Service 이름으로 생성되는 DNS 이름과 ClusterIP가 Frontend에 해당하며, `app: server` Selector로 선택된 Pod들이 Backend에 해당한다.
 
-Route는 **Service의 Frontend에 연결**되어 Frontend로 전달되는 Traffic을 대상으로 동작하며, Traffic이 실제로 전달되는 Backend는 Route의 `backendRefs`를 통해서 결정된다. 따라서 Client는 기존과 동일하게 Service의 DNS 이름으로 요청을 전송하지만, 요청은 Route의 규칙에 따라서 `server` Service의 Backend가 아닌 다른 Version의 Service나 다른 Service의 Backend로 전달될 수 있다.
+Route는 **Service의 Frontend에 연결**되어 Frontend로 전달되는 Traffic을 대상으로 동작하며, Traffic이 실제로 전달되는 Backend는 Route의 `backendRefs`를 통해서 결정된다. 따라서 Client는 기존과 동일하게 Service의 DNS 이름으로 요청을 전송하지만, 요청은 Route의 규칙에 따라서 `server` Service의 Backend가 아닌 다른 Version의 Service나 다른 Service의 Backend로 전달될 수 있다. [Figure 1]에서 Client C의 요청이 `server` Service의 Frontend로 전송되었지만 Server Version 1, 2 Service의 Backend로 전달되는 것이 이러한 경우에 해당한다.
 
-한편 Service의 Selector는 Route의 연결과 동작에 아무런 영향을 주지 않는다. Route는 Service의 Frontend만을 기준으로 연결되며, Selector는 해당 Service의 Backend를 구성하는 역할만 수행하기 때문이다. Selector가 구성한 Backend는 Route의 `backendRefs`에 해당 Service가 명시된 경우에만 Traffic의 목적지로 이용된다. 이러한 특성을 활용하면 Selector가 없는 Service를 순수한 Frontend 진입점으로 생성하고, Route를 통해서 Traffic을 다른 Service의 Backend로만 분배하는 구성도 가능하다.
+한편 Service의 Selector는 Route의 연결과 동작에 아무런 영향을 주지 않는다. Route는 Service의 Frontend만을 기준으로 연결되며, Selector는 해당 Service의 Backend를 구성하는 역할만 수행하기 때문이다. Selector가 구성한 Backend는 [Figure 1]의 Server Version 1, 2 Service처럼 Route의 `backendRefs`에 해당 Service가 명시된 경우에만 Traffic의 목적지로 이용되며, 이러한 특성을 활용하면 Selector가 없는 Service를 순수한 Frontend 진입점으로 생성하고 Route를 통해서 Traffic을 다른 Service의 Backend로만 분배하는 구성도 가능하다.
 
 Route가 연결된 Service는 요청 처리 방식이 변경된다는 점에 주의해야 한다. Route의 `matches` 조건에 부합하는 요청은 `backendRefs`에 명시된 Backend로 전달되지만, 부합하지 않는 요청은 Service의 Backend로 전달되지 않고 거부된다. Route가 연결되지 않은 Service는 기존과 동일하게 동작한다.
 
@@ -54,16 +54,16 @@ spec:
     kind: Service
     name: server
   rules:
-  - backendRefs:
-    - name: server-v1
+  - timeouts:
+      request: 5s
+    backendRefs:
+    - name: server
       port: 8080
-      weight: 90
-    - name: server-v2
-      port: 8080
-      weight: 10
 ```
 
-**Producer Route**는 대상 Service와 동일한 Namespace에 생성되는 Route이며, Service를 소유한 App 개발자가 자신의 Service로 전달되는 Traffic의 처리 방식을 정의할 때 이용한다. [File 2]는 `server` Service로 전달되는 Traffic을 `server-v1`, `server-v2` Service로 분배하는 Producer Route의 예제를 나타내고 있다. `parentRefs`에 `kind: Service`와 함께 대상 Service의 이름을 명시하며, Producer Route의 규칙은 요청을 전송하는 Client의 Namespace와 관계없이 Mesh 내부의 모든 요청에 적용된다. 따라서 Producer Route는 Canary 배포처럼 Service 소유자가 모든 Client에게 동일하게 적용할 규칙을 정의할 때 이용된다.
+**Producer Route**는 대상 Service와 동일한 Namespace에 생성되는 Route이며, Service를 소유한 App 개발자가 자신의 Service로 전달되는 Traffic의 처리 방식을 정의할 때 이용한다. [File 2]는 [Figure 1]의 Server Namespace에 위치한 Producer HTTPRoute를 나타내고 있으며, `parentRefs`에 `kind: Service`와 함께 대상 `server` Service의 이름을 명시하고, `server` Service로 전달되는 모든 요청에 5초의 Timeout을 적용하여 `backendRefs`에 명시된 `server` Service의 Backend로 전달한다.
+
+Producer Route의 규칙은 요청을 전송하는 Client의 Namespace와 관계없이 Mesh 내부의 모든 요청에 적용된다. [Figure 1]에서 서로 다른 Namespace에 위치한 Client A와 Client B의 요청이 모두 Producer HTTPRoute의 규칙에 따라서 `server` Service의 Frontend를 거쳐 Backend로 전달되는 것을 확인할 수 있다. 따라서 Producer Route는 Timeout이나 Canary 배포처럼 Service 소유자가 모든 Client에게 동일하게 적용할 규칙을 정의할 때 이용된다.
 
 ### 1.3. Consumer Route
 
@@ -72,7 +72,7 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
   name: server-consumer
-  namespace: client-namespace
+  namespace: client-c-namespace
 spec:
   parentRefs:
   - group: ""
@@ -80,25 +80,24 @@ spec:
     name: server
     namespace: server-namespace
   rules:
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /
-    filters:
-    - type: RequestHeaderModifier
-      requestHeaderModifier:
-        add:
-        - name: x-consumer
-          value: client-namespace
-    backendRefs:
-    - name: server
+  - backendRefs:
+    - name: server-v1
       namespace: server-namespace
       port: 8080
+      weight: 90
+    - name: server-v2
+      namespace: server-namespace
+      port: 8080
+      weight: 10
 ```
 
-**Consumer Route**는 대상 Service와 다른 Namespace에 생성되는 Route이며, Service를 이용하는 Client가 자신의 요청에만 적용될 규칙을 정의할 때 이용한다. [File 3]은 `client-namespace` Namespace의 Client가 `server` Service로 전송하는 요청에 Header를 추가하는 Consumer Route의 예제를 나타내고 있다. Consumer Route의 규칙은 Route와 동일한 Namespace의 Client가 전송하는 요청에만 적용되며, 다른 Namespace의 Client가 전송하는 요청에는 영향을 주지 않는다.
+**Consumer Route**는 대상 Service와 다른 Namespace에 생성되는 Route이며, Service를 이용하는 Client가 자신의 요청에만 적용될 규칙을 정의할 때 이용한다. [File 3]은 [Figure 1]의 Client C Namespace에 위치한 Consumer HTTPRoute를 나타내고 있으며, `client-c-namespace` Namespace의 Client가 `server` Service로 전송하는 요청을 `server-v1`, `server-v2` Service의 Backend로 90:10 비율로 분배한다. [Figure 1]의 Server Version 1, 2 Service가 각각 `server-v1`, `server-v2` Service에 해당한다.
 
-동일한 요청에 Producer Route와 Consumer Route가 모두 부합하는 경우에는 Consumer Route가 우선 적용된다. 다만 동일한 Namespace의 다수의 Route는 병합되어 동작하기 때문에, 하나의 Namespace 안에서 Client별로 서로 다른 Consumer Route를 정의할 수는 없다. 또한 Consumer Route는 다른 Namespace의 Service를 `backendRefs`에 명시하기 때문에 대상 Namespace에 ReferenceGrant가 존재해야 하며, Consumer Route의 지원 여부는 Mesh 구현체마다 다르기 때문에 이용하는 구현체의 지원 범위를 확인해야 한다.
+Consumer Route의 규칙은 Route와 동일한 Namespace의 Client가 전송하는 요청에만 적용되며, 다른 Namespace의 Client가 전송하는 요청에는 영향을 주지 않는다. [Figure 1]에서 Client A와 Client B의 요청이 Consumer HTTPRoute의 영향을 받지 않는 것도 이 때문이다.
+
+동일한 요청에 Producer Route와 Consumer Route가 모두 부합하는 경우에는 Consumer Route가 우선 적용된다. [Figure 1]에서 Client C의 요청도 Producer HTTPRoute의 규칙에 부합하지만, Consumer HTTPRoute가 우선 적용되어 `server` Service의 Backend가 아닌 `server-v1`, `server-v2` Service의 Backend로 전달된다. 다만 동일한 Namespace의 다수의 Route는 병합되어 동작하기 때문에, 하나의 Namespace 안에서 Client별로 서로 다른 Consumer Route를 정의할 수는 없다.
+
+또한 Consumer Route는 다른 Namespace의 Service를 `backendRefs`에 명시하기 때문에 대상 Namespace에 ReferenceGrant가 존재해야 하며, Consumer Route의 지원 여부는 Mesh 구현체마다 다르기 때문에 이용하는 구현체의 지원 범위를 확인해야 한다.
 
 ### 1.4. Gateway API 비교
 

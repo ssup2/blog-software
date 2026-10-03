@@ -6,15 +6,15 @@ This post analyzes GAMMA, which extends the Kubernetes Gateway API to control Ea
 
 ## 1. Kubernetes Gateway API GAMMA
 
-{{< figure caption="[Figure 1] GAMMA Route and Service Connection Structure" src="images/gamma-route-service.png" width="900px" >}}
+{{< figure caption="[Figure 1] GAMMA Route and Service Connection Structure" src="images/gamma-route-service.png" width="800px" >}}
 
 **GAMMA** (Gateway API for Mesh Management and Administration) is a standard that extends the Gateway API, originally designed for Traffic from outside the Cluster, so that it can also be used to control East-West Traffic inside a Service Mesh. Existing Service Meshes provide implementation-specific APIs, such as Istio's VirtualService and Linkerd's ServiceProfile, so a portability problem exists where Traffic control configuration must also be modified when the Mesh implementation is changed. GAMMA emerged to solve this problem, and Mesh support was promoted to the Standard Channel starting from Gateway API v1.1.
 
-[Figure 1] shows the connection structure between a Route and a Service in GAMMA. GAMMA operates by specifying a Service instead of a Gateway in the `parentRefs` of an existing Route without adding a separate Resource, so Traffic inside the Mesh can be controlled with only a Route, without GatewayClass and Gateway Resources. The Mesh implementation watches the Routes attached to Services and applies Routing rules to the Data Plane; in Sidecar Mode the rules are applied at the Sidecar of the Client sending the request, and in Ambient Mode they are applied at the Waypoint.
+[Figure 1] shows the connection structure between a Route and a Service in GAMMA. GAMMA operates by specifying a Service instead of a Gateway in the `parentRefs` of an existing Route without adding a separate Resource, so Traffic inside the Mesh can be controlled with only a Route, without GatewayClass and Gateway Resources, like the two HTTPRoutes in [Figure 1]. The Mesh implementation watches the Routes attached to Services and applies Routing rules to the Data Plane; in Sidecar Mode the rules are applied at the Sidecar of the Client sending the request, and in Ambient Mode they are applied at the Waypoint.
 
 The Routes available in a Mesh are HTTPRoute and GRPCRoute, and Mesh support for TCPRoute and TLSRoute is still experimental. Representative Mesh implementations supporting GAMMA include Istio, Linkerd, Kuma, and Cilium, and the Gateway API verifies whether an implementation complies with the GAMMA standard through a Mesh-specific Conformance Profile.
 
-Two concepts are needed to understand how GAMMA operates. One is the division of the Kubernetes Service that a Route attaches to into the Frontend and Backend roles, and the other is the distinction between the Producer Route and the Consumer Route, whose scope of application differs depending on the Namespace in which the Route is created.
+Two concepts are needed to understand how GAMMA operates. One is the division of the Kubernetes Service that a Route attaches to into the Frontend and Backend roles, and the other is the distinction between the Producer Route and the Consumer Route, whose scope of application differs depending on the Namespace in which the Route is created. The separation of each Service into a Frontend and a Backend in [Figure 1] and the two HTTPRoutes placed in different Namespaces as Producer and Consumer also represent these two concepts, and the following sections explain them based on the composition of [Figure 1].
 
 ### 1.1. Kubernetes Service Frontend, Backend
 
@@ -34,9 +34,9 @@ spec:
 
 In GAMMA, the target to which a Route attaches is a **Kubernetes Service**. A Kubernetes Service bundles two roles into a single Resource: the DNS name and ClusterIP that Clients send requests to, and the set of Endpoint IPs to which Traffic is actually delivered. Therefore, to clearly define where a Route acts when it attaches to a Service, GAMMA conceptually separates the two roles, defining the former as the **Frontend** and the latter as the **Backend**. In the `server` Service of [File 1], the DNS name created from the Service name and the ClusterIP correspond to the Frontend, and the Pods selected by the `app: server` Selector correspond to the Backend.
 
-A Route **attaches to the Service's Frontend** and operates on the Traffic delivered to the Frontend, and the Backend to which the Traffic is actually delivered is determined through the Route's `backendRefs`. Therefore, the Client sends requests to the Service's DNS name as before, but according to the Route's rules the requests can be delivered not to the Backend of the `server` Service but to a different Version of the Service or to the Backend of a different Service.
+A Route **attaches to the Service's Frontend** and operates on the Traffic delivered to the Frontend, and the Backend to which the Traffic is actually delivered is determined through the Route's `backendRefs`. Therefore, the Client sends requests to the Service's DNS name as before, but according to the Route's rules the requests can be delivered not to the Backend of the `server` Service but to a different Version of the Service or to the Backend of a different Service. The requests of Client C in [Figure 1], which are sent to the Frontend of the `server` Service but delivered to the Backends of the Server Version 1 and 2 Services, correspond to this case.
 
-Meanwhile, the Selector of a Service has no effect on the attachment or operation of a Route. This is because a Route attaches based only on the Service's Frontend, and the Selector serves only to compose the Backend of that Service. The Backend composed by the Selector is used as the destination of Traffic only when the Service is specified in a Route's `backendRefs`. Utilizing this characteristic, it is also possible to create a Service without a Selector as a pure Frontend entry point and distribute Traffic only to the Backends of other Services through a Route.
+Meanwhile, the Selector of a Service has no effect on the attachment or operation of a Route. This is because a Route attaches based only on the Service's Frontend, and the Selector serves only to compose the Backend of that Service. The Backend composed by the Selector is used as the destination of Traffic only when the Service is specified in a Route's `backendRefs`, like the Server Version 1 and 2 Services in [Figure 1], and utilizing this characteristic, it is also possible to create a Service without a Selector as a pure Frontend entry point and distribute Traffic only to the Backends of other Services through a Route.
 
 Note that a Service with an attached Route changes how requests are handled. Requests that match the Route's `matches` conditions are delivered to the Backends specified in `backendRefs`, but requests that do not match are rejected instead of being delivered to the Service's Backend. A Service without an attached Route operates the same as before.
 
@@ -54,16 +54,16 @@ spec:
     kind: Service
     name: server
   rules:
-  - backendRefs:
-    - name: server-v1
+  - timeouts:
+      request: 5s
+    backendRefs:
+    - name: server
       port: 8080
-      weight: 90
-    - name: server-v2
-      port: 8080
-      weight: 10
 ```
 
-A **Producer Route** is a Route created in the same Namespace as the target Service, and is used when the App developer who owns the Service defines how the Traffic delivered to their Service is handled. [File 2] shows an example of a Producer Route that distributes the Traffic delivered to the `server` Service across the `server-v1` and `server-v2` Services. The name of the target Service is specified in `parentRefs` along with `kind: Service`, and the rules of a Producer Route are applied to all requests inside the Mesh regardless of the Namespace of the Client sending the request. Therefore, a Producer Route is used when the Service owner defines rules to be applied identically to all Clients, such as a Canary deployment.
+A **Producer Route** is a Route created in the same Namespace as the target Service, and is used when the App developer who owns the Service defines how the Traffic delivered to their Service is handled. [File 2] shows the Producer HTTPRoute located in the Server Namespace of [Figure 1]; it specifies the name of the target `server` Service in `parentRefs` along with `kind: Service`, applies a 5-second Timeout to all requests delivered to the `server` Service, and delivers them to the Backend of the `server` Service specified in `backendRefs`.
+
+The rules of a Producer Route are applied to all requests inside the Mesh regardless of the Namespace of the Client sending the request. In [Figure 1], the requests of Client A and Client B, located in different Namespaces, are all delivered to the Backend of the `server` Service through its Frontend according to the rules of the Producer HTTPRoute. Therefore, a Producer Route is used when the Service owner defines rules to be applied identically to all Clients, such as a Timeout or a Canary deployment.
 
 ### 1.3. Consumer Route
 
@@ -72,7 +72,7 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
   name: server-consumer
-  namespace: client-namespace
+  namespace: client-c-namespace
 spec:
   parentRefs:
   - group: ""
@@ -80,25 +80,24 @@ spec:
     name: server
     namespace: server-namespace
   rules:
-  - matches:
-    - path:
-        type: PathPrefix
-        value: /
-    filters:
-    - type: RequestHeaderModifier
-      requestHeaderModifier:
-        add:
-        - name: x-consumer
-          value: client-namespace
-    backendRefs:
-    - name: server
+  - backendRefs:
+    - name: server-v1
       namespace: server-namespace
       port: 8080
+      weight: 90
+    - name: server-v2
+      namespace: server-namespace
+      port: 8080
+      weight: 10
 ```
 
-A **Consumer Route** is a Route created in a different Namespace from the target Service, and is used when a Client using the Service defines rules that apply only to its own requests. [File 3] shows an example of a Consumer Route that adds a Header to requests sent to the `server` Service by Clients in the `client-namespace` Namespace. The rules of a Consumer Route are applied only to requests sent by Clients in the same Namespace as the Route, and do not affect requests sent by Clients in other Namespaces.
+A **Consumer Route** is a Route created in a different Namespace from the target Service, and is used when a Client using the Service defines rules that apply only to its own requests. [File 3] shows the Consumer HTTPRoute located in the Client C Namespace of [Figure 1]; it distributes the requests sent to the `server` Service by Clients in the `client-c-namespace` Namespace across the Backends of the `server-v1` and `server-v2` Services at a 90:10 ratio. The Server Version 1 and 2 Services in [Figure 1] correspond to the `server-v1` and `server-v2` Services, respectively.
 
-When both a Producer Route and a Consumer Route match the same request, the Consumer Route takes precedence. However, since multiple Routes in the same Namespace are merged and operate together, different Consumer Routes cannot be defined per Client within a single Namespace. Also, since a Consumer Route specifies a Service in another Namespace in its `backendRefs`, a ReferenceGrant must exist in the target Namespace, and since Consumer Route support differs by Mesh implementation, the support scope of the implementation in use must be checked.
+The rules of a Consumer Route are applied only to requests sent by Clients in the same Namespace as the Route, and do not affect requests sent by Clients in other Namespaces. This is also why the requests of Client A and Client B in [Figure 1] are not affected by the Consumer HTTPRoute.
+
+When both a Producer Route and a Consumer Route match the same request, the Consumer Route takes precedence. In [Figure 1], the requests of Client C also match the rules of the Producer HTTPRoute, but the Consumer HTTPRoute takes precedence and the requests are delivered not to the Backend of the `server` Service but to the Backends of the `server-v1` and `server-v2` Services. However, since multiple Routes in the same Namespace are merged and operate together, different Consumer Routes cannot be defined per Client within a single Namespace.
+
+Also, since a Consumer Route specifies a Service in another Namespace in its `backendRefs`, a ReferenceGrant must exist in the target Namespace, and since Consumer Route support differs by Mesh implementation, the support scope of the implementation in use must be checked.
 
 ### 1.4. Gateway API Comparison
 
