@@ -12,7 +12,9 @@ Kubernetes에서 LLM Inference Traffic을 위한 Routing 기능을 제공하는 
 
 이러한 특성 때문에 Kubernetes Service의 Round Robin, Random 방식의 Load Balancing을 LLM Inference Traffic에 이용하는 경우, 처리 비용이 큰 요청이 특정 Model Server에 몰리면 해당 Model Server의 Queue에 요청이 쌓여 Tail Latency가 증가하고 GPU 활용률도 불균형해지는 문제가 발생한다. Gateway API Inference Extension은 Model Server의 상태를 기반으로 최적의 Model Server를 선택하는 Load Balancing을 통해서 이러한 문제를 해결하며, Gateway API Inference Extension이 적용된 Gateway를 **Inference Gateway**라고 부른다.
 
-[Figure 1]은 Inference Gateway의 구성을 나타내고 있다. Gateway API Inference Extension은 Model Server의 집합을 정의하는 **InferencePool** Resource와 최적의 Model Server를 선택하는 **Endpoint Picker (EPP)** Component로 구성된다. Inference Gateway는 Envoy의 **External Processing (ext-proc) Filter**를 기반으로 동작하기 때문에 ext-proc을 지원하는 Gateway API 구현체에서 이용할 수 있으며, 대표적인 구현체로는 Envoy Gateway, Istio, kgateway, NGINX Gateway Fabric, GKE Inference Gateway가 존재한다.
+[Figure 1]은 Inference Gateway의 구성을 나타내고 있다. Gateway API Inference Extension은 Model Server의 집합을 정의하는 **InferencePool** Resource와 최적의 Model Server를 선택하는 **Endpoint Picker (EPP)** Component로 구성되며, [Figure 1]의 Model A, Model B처럼 Model 단위로 InferencePool과 EPP를 배포하여 이용한다. Gateway API Inference Extension은 표준 API만 정의하고 실제 동작은 Gateway API 구현체가 담당하며, 대표적인 구현체로는 Envoy Gateway, Istio, kgateway, NGINX Gateway Fabric, GKE Inference Gateway가 존재한다.
+
+[Figure 1]에서 Gateway Controller는 Gateway의 내용에 따라서 Traffic을 수신하는 Proxy의 Deployment와 Load Balancer 역할의 Service를 생성하며, Gateway 구현체와 EPP는 InferencePool의 `selector`를 통해서 Model Server Pod의 Endpoint를 파악한다. Client의 요청은 Load Balancer와 Proxy를 거쳐서 HTTPRoute의 규칙에 따라 InferencePool로 전달되며, Proxy는 EPP에게 최적의 Model Server 선택을 요청한 다음 선택된 Model Server Pod로 요청을 전달한다.
 
 ### 1.1. InferencePool
 
@@ -37,7 +39,7 @@ spec:
 
 **InferencePool**은 동일한 Model을 서비스하는 Model Server Pod의 집합을 정의하는 Resource이다. InferencePool은 Kubernetes Service와 유사하게 Pod의 집합을 정의하지만, Load Balancing 대상 선택을 `endpointPickerRef`에 명시된 EPP에게 위임한다는 차이점이 존재한다. [File 1]은 vLLM 기반의 Model Server Pod를 묶는 InferencePool의 예제를 나타내고 있다. `selector`에는 InferencePool에 포함될 Model Server Pod의 Label을 명시하고, `targetPorts`에는 Model Server가 요청을 수신하는 Port를 명시한다. `endpointPickerRef`에는 EPP를 노출하는 Service의 이름과 Port를 명시하며, Gateway는 해당 Service를 통해서 EPP에게 Model Server 선택을 요청한다.
 
-`endpointPickerRef`의 `failureMode`는 EPP에 장애가 발생한 경우의 동작을 정의한다. `FailOpen`으로 설정되어 있으면 EPP 장애시 Traffic은 일반적인 Load Balancing 방식으로 전달되며, `FailClose`로 설정되어 있으면 EPP 장애시 Traffic은 전달되지 않고 실패한다. InferencePool은 Gateway API의 역할 지향 설계와 동일하게 GPU Node와 Model Server를 관리하는 Inference Platform Owner가 관리하며, App 개발자는 HTTPRoute를 통해서 InferencePool을 참조만 하여 이용한다.
+`endpointPickerRef`의 `failureMode`는 EPP에 장애가 발생한 경우의 동작을 정의한다. `FailOpen`으로 설정되어 있으면 EPP 장애시 Traffic은 일반적인 Load Balancing 방식으로 전달되며, `FailClose`로 설정되어 있으면 EPP 장애시 Traffic은 전달되지 않고 실패한다. 이러한 선택이 가능한 이유는 EPP가 Traffic이 통과하는 경로가 아니라 Model Server 선택만 담당하기 때문이며, EPP에 장애가 발생해도 Gateway가 Model Server Pod로 Traffic을 직접 전달하는 경로는 유지된다. InferencePool은 Gateway API의 역할 지향 설계와 동일하게 GPU Node와 Model Server를 관리하는 Inference Platform Owner가 관리하며, App 개발자는 HTTPRoute를 통해서 InferencePool을 참조만 하여 이용한다.
 
 ```yaml {caption="[File 2] InferencePool을 참조하는 HTTPRoute 예제", linenos=table}
 apiVersion: gateway.networking.k8s.io/v1
@@ -66,11 +68,9 @@ Gateway API Inference Extension은 별도의 Route Resource를 정의하지 않�
 
 ### 1.2. Endpoint Picker
 
-{{< figure caption="[Figure 2] Endpoint Picker의 요청 처리 과정" src="images/endpoint-picker.png" width="900px" >}}
+**Endpoint Picker** (EPP)는 InferencePool에 포함된 Model Server 중에서 요청을 처리할 최적의 Model Server를 선택하는 Component이며, [Figure 1]처럼 InferencePool마다 별도의 Pod로 배포되어 EPP Service를 통해서 Gateway와 통신한다. Gateway는 HTTPRoute를 통해서 Traffic이 전달될 InferencePool을 결정한 다음 요청 정보를 해당 InferencePool의 EPP에게 전달하고, EPP는 InferencePool에 포함된 Model Server의 Metric을 기반으로 최적의 Model Server를 선택하여 Gateway에게 반환한다. [Figure 1]의 Select Endpoint가 이 과정에 해당한다.
 
-**Endpoint Picker** (EPP)는 InferencePool에 포함된 Model Server 중에서 요청을 처리할 최적의 Model Server를 선택하는 Component이며, 별도의 Pod로 배포되어 Envoy의 ext-proc Protocol을 통해서 Gateway와 통신한다. [Figure 2]는 EPP의 요청 처리 과정을 나타내고 있다. Gateway는 HTTPRoute를 통해서 Traffic이 전달될 InferencePool을 결정한 다음, 요청 정보를 EPP에게 전달한다. EPP는 InferencePool에 포함된 Model Server의 Metric을 기반으로 최적의 Model Server를 선택하여 Gateway에게 반환하고, Gateway는 선택된 Model Server Pod로 요청을 전달한다.
-
-EPP는 Model Server가 노출하는 Metric을 주기적으로 수집하며, Model Server의 Queue에 대기중인 요청의 개수, KV Cache 사용률, 적재된 LoRA Adapter 목록, Prefix Cache 상태를 기반으로 Model Server를 선택한다. 예를 들어 Queue가 짧고 KV Cache에 여유가 있는 Model Server를 우선 선택하고, LoRA Adapter를 이용하는 요청은 해당 Adapter가 이미 적재된 Model Server로 전달하여 Adapter 적재 비용을 제거한다. Model Server가 노출해야 하는 Metric의 규격은 **Model Server Protocol**로 표준화되어 있으며, vLLM과 같은 Model Serving Platform이 지원하고 있다.
+EPP는 [Figure 1]의 Get Metrics처럼 Model Server가 노출하는 Metric을 주기적으로 수집하며, Model Server의 Queue에 대기중인 요청의 개수, KV Cache 사용률, 적재된 LoRA Adapter 목록, Prefix Cache 상태를 기반으로 Model Server를 선택한다. 예를 들어 Queue가 짧고 KV Cache에 여유가 있는 Model Server를 우선 선택하고, LoRA Adapter를 이용하는 요청은 해당 Adapter가 이미 적재된 Model Server로 전달하여 Adapter 적재 비용을 제거한다. Model Server가 노출해야 하는 Metric의 규격은 **Model Server Protocol**로 표준화되어 있으며, vLLM과 같은 Model Serving Platform이 지원하고 있다.
 
 EPP의 선택 기법은 Plugin 형태로 구현되어 있기 때문에 필요에 따라서 Custom Plugin을 추가하여 선택 기법을 확장할 수 있다. v1.6 Version부터는 경량화된 **Lightweight EPP**가 기본 EPP로 제공되며, 기존의 EPP와 요청 Body의 Model 이름 기반으로 Routing을 수행하는 **Body-based Router**는 llm-d Project로 이관되어 개발되고 있다.
 
