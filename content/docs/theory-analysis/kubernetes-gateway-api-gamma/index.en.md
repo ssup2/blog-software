@@ -65,9 +65,9 @@ A **Producer Route** is a Route created in the same Namespace as the target Serv
 
 The rules of a Producer Route are applied to all requests inside the Mesh regardless of the Namespace of the Client sending the request. In [Figure 1], the requests of Client A and Client B, located in different Namespaces, are all delivered to the Backend of the `server` Service through its Frontend according to the rules of the Producer HTTPRoute. Therefore, a Producer Route is used when the Service owner defines rules to be applied identically to all Clients, such as a Timeout or a Canary deployment.
 
-### 1.3. Consumer Route
+### 1.3. Consumer Route, ReferenceGrant
 
-```yaml {caption="[File 3] Consumer Route Example", linenos=table}
+```yaml {caption="[File 3] Consumer Route, ReferenceGrant Example", linenos=table}
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -89,15 +89,31 @@ spec:
       namespace: server-namespace
       port: 8080
       weight: 10
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: ReferenceGrant
+metadata:
+  name: client-c
+  namespace: server-namespace
+spec:
+  from:
+  - group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    namespace: client-c-namespace
+  to:
+  - group: ""
+    kind: Service
 ```
 
-A **Consumer Route** is a Route created in a different Namespace from the target Service, and is used when a Client using the Service defines rules that apply only to its own requests. [File 3] shows the Consumer HTTPRoute located in the Client C Namespace of [Figure 1]; it distributes the requests sent to the `server` Service by Clients in the `client-c-namespace` Namespace across the Backends of the `server-v1` and `server-v2` Services at a 90:10 ratio. The Server Version 1 and 2 Services in [Figure 1] correspond to the `server-v1` and `server-v2` Services, respectively.
+A **Consumer Route** is a Route created in a different Namespace from the target Service, and is used when a Client using the Service defines rules that apply only to its own requests. [File 3] shows the Consumer HTTPRoute located in the Client C Namespace of [Figure 1] and the ReferenceGrant located in the Server Namespace; it distributes the requests sent to the `server` Service by Clients in the `client-c-namespace` Namespace across the Backends of the `server-v1` and `server-v2` Services at a 90:10 ratio. The Server Version 1 and 2 Services in [Figure 1] correspond to the `server-v1` and `server-v2` Services, respectively.
 
 The rules of a Consumer Route are applied only to requests sent by Clients in the same Namespace as the Route, and do not affect requests sent by Clients in other Namespaces. This is also why the requests of Client A and Client B in [Figure 1] are not affected by the Consumer HTTPRoute.
 
 When both a Producer Route and a Consumer Route match the same request, the Consumer Route takes precedence. In [Figure 1], the requests of Client C also match the rules of the Producer HTTPRoute, but the Consumer HTTPRoute takes precedence and the requests are delivered not to the Backend of the `server` Service but to the Backends of the `server-v1` and `server-v2` Services. However, since multiple Routes in the same Namespace are merged and operate together, different Consumer Routes cannot be defined per Client within a single Namespace.
 
-Also, a Consumer Route specifies Services located in a different Namespace in its `backendRefs`, as in [File 3], and the Gateway API rejects references to Services in other Namespaces by default to prevent Traffic hijacking. Therefore, a **ReferenceGrant** that allows the reference must exist in the Namespace where the Backend Services are located; in the case of [File 3], a ReferenceGrant that allows HTTPRoutes in the `client-c-namespace` Namespace to reference Services is required in the `server-namespace` Namespace. Meanwhile, since Consumer Route support differs by Mesh implementation, the support scope of the implementation in use must be checked.
+Also, a Consumer Route specifies Services located in a different Namespace in its `backendRefs`, and the Gateway API rejects references to Services in other Namespaces by default to prevent Traffic hijacking. Therefore, a **ReferenceGrant** that allows the reference must be created together in the Namespace where the Backend Services are located, and the ReferenceGrant in [File 3] allows HTTPRoutes in the `client-c-namespace` Namespace to reference Services in the `server-namespace` Namespace. In [Figure 1], it is represented as the ReferenceGrant located in the Server Namespace.
+
+Meanwhile, since Consumer Route support differs by Mesh implementation, the support scope of the implementation in use must be checked.
 
 ### 1.4. Gateway API Comparison
 
