@@ -103,6 +103,7 @@ spec:
   to:
   - group: ""
     kind: Service
+    name: server
 ```
 
 A **Consumer Route** is a Route created in a different Namespace from the target Service, and is used when a Client using the Service defines rules that apply only to its own requests. [File 3] shows the Consumer HTTPRoute located in the Client C Namespace of [Figure 1] and the ReferenceGrant located in the Server Namespace; it distributes the requests sent to the `server` Service by Clients in the `client-c-namespace` Namespace across the Backends of the `server-v1` and `server-v2` Services at a 90:10 ratio. The Server Version 1 and 2 Services in [Figure 1] correspond to the `server-v1` and `server-v2` Services, respectively.

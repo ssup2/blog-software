@@ -103,6 +103,7 @@ spec:
   to:
   - group: ""
     kind: Service
+    name: server
 ```
 
 **Consumer Route**는 대상 Service와 다른 Namespace에 생성되는 Route이며, Service를 이용하는 Client가 자신의 요청에만 적용될 규칙을 정의할 때 이용한다. [File 3]은 [Figure 1]의 Client C Namespace에 위치한 Consumer HTTPRoute와 Server Namespace에 위치한 ReferenceGrant를 나타내고 있으며, `client-c-namespace` Namespace의 Client가 `server` Service로 전송하는 요청을 `server-v1`, `server-v2` Service의 Backend로 90:10 비율로 분배한다. [Figure 1]의 Server Version 1, 2 Service가 각각 `server-v1`, `server-v2` Service에 해당한다.
