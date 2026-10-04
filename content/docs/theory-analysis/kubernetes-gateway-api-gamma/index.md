@@ -103,7 +103,10 @@ spec:
   to:
   - group: ""
     kind: Service
-    name: server
+    name: server-v1 # name을 명시하지 않으면 Namespace의 모든 Service 참조가 허용된다
+  - group: ""
+    kind: Service
+    name: server-v2
 ```
 
 **Consumer Route**는 대상 Service와 다른 Namespace에 생성되는 Route이며, Service를 이용하는 Client가 자신의 요청에만 적용될 규칙을 정의할 때 이용한다. [File 3]은 [Figure 1]의 Client C Namespace에 위치한 Consumer HTTPRoute와 Server Namespace에 위치한 ReferenceGrant를 나타내고 있으며, `client-c-namespace` Namespace의 Client가 `server` Service로 전송하는 요청을 `server-v1`, `server-v2` Service의 Backend로 90:10 비율로 분배한다. [Figure 1]의 Server Version 1, 2 Service가 각각 `server-v1`, `server-v2` Service에 해당한다.
@@ -112,9 +115,7 @@ Consumer Route의 규칙은 Route와 동일한 Namespace의 Client가 전송하�
 
 동일한 요청에 Producer Route와 Consumer Route가 모두 부합하는 경우에는 Consumer Route가 우선 적용된다. [Figure 1]에서 Client C의 요청도 Producer HTTPRoute의 규칙에 부합하지만, Consumer HTTPRoute가 우선 적용되어 `server` Service의 Backend가 아닌 `server-v1`, `server-v2` Service의 Backend로 전달된다. 다만 동일한 Namespace의 다수의 Route는 병합되어 동작하기 때문에, 하나의 Namespace 안에서 Client별로 서로 다른 Consumer Route를 정의할 수는 없다.
 
-또한 Consumer Route는 다른 Namespace에 위치한 Service를 `backendRefs`에 명시하게 되는데, Gateway API는 Traffic 가로채기를 방지하기 위해서 다른 Namespace의 Service 참조를 기본적으로 거부한다. 따라서 참조를 허용하는 **ReferenceGrant**가 Backend Service가 위치한 Namespace에 같이 생성되어야 하며, [File 3]의 ReferenceGrant는 `server-namespace` Namespace에서 `client-c-namespace` Namespace의 HTTPRoute가 Service를 참조하는 것을 허용한다. [Figure 1]에서는 Server Namespace에 위치한 ReferenceGrant로 표현되어 있다.
-
-한편 Consumer Route의 지원 여부는 Mesh 구현체마다 다르기 때문에 이용하는 구현체의 지원 범위를 확인해야 한다.
+또한 Consumer Route는 다른 Namespace에 위치한 Service를 `backendRefs`에 명시하기 때문에, Gateway API는 Traffic 가로채기를 방지하기 위해서 이러한 참조를 기본적으로 거부한다. 참조를 허용하기 위해서는 [File 3]처럼 Backend Service가 위치한 `server-namespace` Namespace에 **ReferenceGrant**를 같이 생성하고, `to`의 `name`에 Backend로 이용할 `server-v1`, `server-v2` Service를 명시한다. `name`을 명시하지 않으면 Namespace의 모든 Service 참조가 허용된다. [Figure 1]에서는 Server Namespace에 위치한 ReferenceGrant로 표현되어 있다. 한편 Consumer Route의 지원 여부는 Mesh 구현체마다 다르기 때문에 이용하는 구현체의 지원 범위를 확인해야 한다.
 
 ### 1.4. Gateway API 비교
 
