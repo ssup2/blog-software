@@ -12,7 +12,7 @@ Istio에서 Gateway API Inference Extension이 어떻게 구현되어 동작하�
 
 [Figure 1]은 2개의 Model을 서비스하는 Istio Inference Gateway의 구성을 나타내고 있다. 각 Model은 Model Server의 Deployment, Model Server의 집합을 정의하는 InferencePool, Traffic을 InferencePool로 전달하는 HTTPRoute, 최적의 Model Server를 선택하는 전용 **EPP** (Endpoint Picker)의 조합으로 구성되며, EPP는 자신이 담당하는 Model Server의 Metric만 수집한다.
 
-istiod는 Gateway의 Envoy Deployment와 Service뿐만 아니라, InferencePool에 대응하는 **Shadow Service**도 Headless Service 형태로 함께 생성한다. Shadow Service의 selector는 InferencePool의 `selector`로 설정되기 때문에 InferencePool이 선택한 Model Server Pod들은 Shadow Service의 Endpoint로 등록되며, 이를 통해서 istiod는 Model Server Pod도 기존 Service의 Endpoint와 동일한 방식으로 관리한다.
+istiod는 Gateway의 Envoy Deployment와 Service뿐만 아니라, InferencePool에 대응하는 **Shadow Service**도 함께 생성한다. Shadow Service는 Istio가 InferencePool이라는 새로운 개념을 직접 처리하는 대신 기존 Service와 동일한 방식으로 처리할 수 있도록, istiod가 InferencePool을 대신하여 생성하는 숨겨진 Headless Service이다. Shadow Service의 selector는 InferencePool의 `selector`로 설정되기 때문에, InferencePool이 선택한 Model Server Pod들은 일반 Service의 Pod처럼 Shadow Service의 Endpoint로 등록되어 관리된다.
 
 Envoy에는 Inference를 위한 전용 기능이 존재하지 않기 때문에, Istio는 Envoy의 범용 기능인 **External Processing (ext-proc) Filter**와 **Override Host Load Balancing Policy**를 조합하여 Inference Traffic을 처리한다. Client의 Inference 요청을 수신한 Gateway의 Envoy는 요청 정보를 EPP에게 전달하고, EPP는 수집한 Metric을 기반으로 최적의 Model Server Pod를 선택하여 Envoy에게 반환한다. Envoy는 EPP가 반환한 Model Server Pod로 요청을 전달한다.
 
