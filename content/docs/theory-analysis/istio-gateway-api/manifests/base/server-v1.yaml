@@ -1,25 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: version-v2
-  namespace: version-namespace
+  name: server-v1
+  namespace: server-namespace
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: version
-      version: v2
+      app: server
+      version: v1
   template:
     metadata:
       labels:
-        app: version
-        version: v2
+        app: server
+        version: v1
     spec:
       containers:
       - name: http-echo
         image: hashicorp/http-echo:1.0
         args:
-        - -text=version-v2
+        - -text=server-v1
         - -listen=:8080
         ports:
         - containerPort: 8080
@@ -27,12 +27,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: version-v2
-  namespace: version-namespace
+  name: server-v1
+  namespace: server-namespace
 spec:
   selector:
-    app: version
-    version: v2
+    app: server
+    version: v1
   ports:
   - name: http
     port: 8080

@@ -25,6 +25,8 @@ Istio는 자체 Traffic 관리 API인 Gateway, VirtualService Resource를 제공
 
 ### 1.1. Test 환경 구축
 
+{{< figure caption="[Figure 2] Test 환경 구성" src="images/test-environment.png" width="1000px" >}}
+
 ```shell {caption="[Shell 1] Test 환경 구성"}
 # Create kind cluster
 $ kind create cluster --name istio-gateway-api
@@ -54,32 +56,32 @@ metadata:
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: version-namespace
+  name: server-namespace
   labels:
     istio-injection: enabled
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: version-v1
-  namespace: version-namespace
+  name: server-v1
+  namespace: server-namespace
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: version
+      app: server
       version: v1
   template:
     metadata:
       labels:
-        app: version
+        app: server
         version: v1
     spec:
       containers:
       - name: http-echo
         image: hashicorp/http-echo:1.0
         args:
-        - -text=version-v1
+        - -text=server-v1
         - -listen=:8080
         ports:
         - containerPort: 8080
@@ -87,26 +89,26 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: version-v1
-  namespace: version-namespace
+  name: server-v1
+  namespace: server-namespace
 spec:
   selector:
-    app: version
+    app: server
     version: v1
   ports:
   - name: http
     port: 8080
     targetPort: 8080
 ---
-# version-v2 Deployment and Service are identical to version-v1 except the version label and text
+# server-v2 Deployment and Service are identical to server-v1 except the version label and text
 apiVersion: v1
 kind: Service
 metadata:
-  name: version
-  namespace: version-namespace
+  name: server
+  namespace: server-namespace
 spec:
   selector:
-    app: version
+    app: server
   ports:
   - name: http
     port: 8080
@@ -116,7 +118,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: client
-  namespace: version-namespace
+  namespace: server-namespace
   labels:
     app: client
 spec:
@@ -127,19 +129,19 @@ spec:
 ```
 
 ```shell {caption="[Shell 3] Test Workload 확인"}
-$ kubectl -n version-namespace get pods,services
+$ kubectl -n server-namespace get pods,services
 NAME                              READY   STATUS    RESTARTS   AGE
 pod/client                        2/2     Running   0          3h20m
-pod/version-v1-7cf5688dfc-rcw7t   2/2     Running   0          3h20m
-pod/version-v2-69bf76f867-htddz   2/2     Running   0          3h20m
+pod/server-v1-7cf5688dfc-rcw7t    2/2     Running   0          3h20m
+pod/server-v2-69bf76f867-htddz    2/2     Running   0          3h20m
 
-NAME                 TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
-service/version      ClusterIP   10.96.4.246     <none>        8080/TCP   3h20m
-service/version-v1   ClusterIP   10.96.255.26    <none>        8080/TCP   3h20m
-service/version-v2   ClusterIP   10.96.153.106   <none>        8080/TCP   3h20m
+NAME                TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
+service/server      ClusterIP   10.96.4.246     <none>        8080/TCP   3h20m
+service/server-v1   ClusterIP   10.96.255.26    <none>        8080/TCP   3h20m
+service/server-v2   ClusterIP   10.96.153.106   <none>        8080/TCP   3h20m
 ```
 
-Test Workload는 [File 1]과 같이 자신의 이름을 응답하는 `version-v1`, `version-v2` Deployment와 Service, 두 Deployment의 Pod를 모두 선택하는 `version` Service, 요청을 전송하는 `client` Pod로 구성하며, [File 1]을 적용하면 [Shell 3]과 같이 `version-namespace` Namespace에 Test Workload가 생성된 것을 확인할 수 있다. `version-namespace` Namespace에는 `istio-injection` Label이 설정되어 있기 때문에, 모든 Pod의 READY가 2/2로 Sidecar가 주입된 것을 확인할 수 있다. Gateway는 `gateway-namespace` Namespace에 생성한다.
+Test Workload는 [File 1]과 같이 자신의 이름을 응답하는 `server-v1`, `server-v2` Deployment와 Service, 두 Deployment의 Pod를 모두 선택하는 `server` Service, 요청을 전송하는 `client` Pod로 구성하며, [File 1]을 적용하면 [Shell 3]과 같이 `server-namespace` Namespace에 Test Workload가 생성된 것을 확인할 수 있다. `server-namespace` Namespace에는 `istio-injection` Label이 설정되어 있기 때문에, 모든 Pod의 READY가 2/2로 Sidecar가 주입된 것을 확인할 수 있다. Gateway는 `gateway-namespace` Namespace에 생성한다.
 
 ### 1.2. Gateway 배포
 
@@ -272,24 +274,24 @@ istiod의 Gateway API Controller는 Gateway API Resource를 Istio API와 동일�
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: version
-  namespace: version-namespace
+  name: server
+  namespace: server-namespace
 spec:
   parentRefs:
   - name: gateway
     namespace: gateway-namespace
   hostnames:
-  - "version.ssup2.com"
+  - "server.ssup2.com"
   rules:
   - matches:
     - path:
         type: PathPrefix
         value: /
     backendRefs:
-    - name: version-v1
+    - name: server-v1
       port: 8080
       weight: 90
-    - name: version-v2
+    - name: server-v2
       port: 8080
       weight: 10
 ```
@@ -299,12 +301,12 @@ spec:
 $ kubectl -n gateway-namespace port-forward svc/gateway-istio 8080:80 &
 
 # Send 100 requests
-$ for i in $(seq 1 100); do curl -s -H "Host: version.ssup2.com" http://127.0.0.1:8080/; done | sort | uniq -c
-  93 version-v1
-   7 version-v2
+$ for i in $(seq 1 100); do curl -s -H "Host: server.ssup2.com" http://127.0.0.1:8080/; done | sort | uniq -c
+  93 server-v1
+   7 server-v2
 ```
 
-[File 6]은 Gateway가 수신한 Traffic을 `version-v1` Service에 90%, `version-v2` Service에 10% 비율로 분배하는 HTTPRoute의 예제를 나타내고 있다. HTTPRoute 적용 후 [Shell 5]와 같이 100번의 요청을 전송하면 93번은 `version-v1`이, 7번은 `version-v2`가 응답하여 `weight` 설정에 근접한 비율로 분배되는 것을 확인할 수 있다. kind Cluster에는 LoadBalancer가 존재하지 않기 때문에 `port-forward`를 통해서 요청을 전송하였다.
+[File 6]은 Gateway가 수신한 Traffic을 `server-v1` Service에 90%, `server-v2` Service에 10% 비율로 분배하는 HTTPRoute의 예제를 나타내고 있다. HTTPRoute 적용 후 [Shell 5]와 같이 100번의 요청을 전송하면 93번은 `server-v1`이, 7번은 `server-v2`가 응답하여 `weight` 설정에 근접한 비율로 분배되는 것을 확인할 수 있다. kind Cluster에는 LoadBalancer가 존재하지 않기 때문에 `port-forward`를 통해서 요청을 전송하였다.
 
 ```shell {caption="[Shell 6] HTTPRoute의 내부 설정 변환 확인"}
 # No VirtualService is stored in kubernetes
@@ -318,23 +320,23 @@ $ istioctl proxy-config routes gateway-istio-6cf9dd97dd-8lrn4 -n gateway-namespa
         "name": "http.80",
         "virtualHosts": [
             {
-                "name": "version.ssup2.com:80",
+                "name": "server.ssup2.com:80",
                 "domains": [
-                    "version.ssup2.com"
+                    "server.ssup2.com"
                 ],
                 "routes": [
                     {
-                        "name": "version-namespace.version.0",
+                        "name": "server-namespace.server.0",
                         ...
                         "route": {
                             "weightedClusters": {
                                 "clusters": [
                                     {
-                                        "name": "outbound|8080||version-v1.version-namespace.svc.cluster.local",
+                                        "name": "outbound|8080||server-v1.server-namespace.svc.cluster.local",
                                         "weight": 90
                                     },
                                     {
-                                        "name": "outbound|8080||version-v2.version-namespace.svc.cluster.local",
+                                        "name": "outbound|8080||server-v2.server-namespace.svc.cluster.local",
                                         "weight": 10
                                     }
                                 ]
@@ -344,7 +346,7 @@ $ istioctl proxy-config routes gateway-istio-6cf9dd97dd-8lrn4 -n gateway-namespa
                         "metadata": {
                             "filterMetadata": {
                                 "istio": {
-                                    "config": "/apis/networking.istio.io/v1/namespaces/version-namespace/virtual-service/gateway-namespace~gateway~istio-autogenerated-k8s-gateway~http~version.ssup2.com"
+                                    "config": "/apis/networking.istio.io/v1/namespaces/server-namespace/virtual-service/gateway-namespace~gateway~istio-autogenerated-k8s-gateway~http~server.ssup2.com"
                                 }
                             }
                         },
@@ -375,61 +377,61 @@ Istio는 Gateway API의 Route 중에서 HTTPRoute, GRPCRoute, TLSRoute, TCPRoute
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: version-mesh
-  namespace: version-namespace
+  name: server-mesh
+  namespace: server-namespace
 spec:
   parentRefs:
   - group: ""
     kind: Service
-    name: version
+    name: server
   rules:
   - backendRefs:
-    - name: version-v1
+    - name: server-v1
       port: 8080
       weight: 90
-    - name: version-v2
+    - name: server-v2
       port: 8080
       weight: 10
 ```
 
-Gateway API는 **GAMMA** (Gateway API for Mesh Management and Administration)를 통해서 Cluster 외부에서 유입되는 North-South Traffic뿐만 아니라 Mesh 내부의 East-West Traffic 제어에도 이용할 수 있다. [File 7]은 `parentRefs`에 Gateway 대신 Service를 명시하여 Mesh 내부에서 `version` Service로 전달되는 Traffic을 `version-v1`, `version-v2` Service로 분배하는 HTTPRoute의 예제를 나타내고 있다. Sidecar Mode에서는 요청을 전송하는 Client의 Sidecar에서 Routing 규칙이 적용되며, 이는 VirtualService를 mesh Gateway에 적용하는 방식과 동일한 역할을 수행한다.
+Gateway API는 **GAMMA** (Gateway API for Mesh Management and Administration)를 통해서 Cluster 외부에서 유입되는 North-South Traffic뿐만 아니라 Mesh 내부의 East-West Traffic 제어에도 이용할 수 있다. [File 7]은 `parentRefs`에 Gateway 대신 Service를 명시하여 Mesh 내부에서 `server` Service로 전달되는 Traffic을 `server-v1`, `server-v2` Service로 분배하는 HTTPRoute의 예제를 나타내고 있다. Sidecar Mode에서는 요청을 전송하는 Client의 Sidecar에서 Routing 규칙이 적용되며, 이는 VirtualService를 mesh Gateway에 적용하는 방식과 동일한 역할을 수행한다.
 
 ```shell {caption="[Shell 7] Mesh Traffic 분배 확인"}
 # Before applying the mesh httproute
-$ kubectl -n version-namespace exec client -c curl -- sh -c 'for i in $(seq 1 100); do curl -s http://version:8080/; done' | sort | uniq -c
-  55 version-v1
-  45 version-v2
+$ kubectl -n server-namespace exec client -c curl -- sh -c 'for i in $(seq 1 100); do curl -s http://server:8080/; done' | sort | uniq -c
+  55 server-v1
+  45 server-v2
 
 # After applying the mesh httproute
-$ kubectl -n version-namespace exec client -c curl -- sh -c 'for i in $(seq 1 100); do curl -s http://version:8080/; done' | sort | uniq -c
-  90 version-v1
-  10 version-v2
+$ kubectl -n server-namespace exec client -c curl -- sh -c 'for i in $(seq 1 100); do curl -s http://server:8080/; done' | sort | uniq -c
+  90 server-v1
+  10 server-v2
 ```
 
-[Shell 7]은 [File 7]의 HTTPRoute 적용 전후에 `client` Pod에서 `version` Service로 100번의 요청을 전송한 결과를 나타내고 있다. 적용 전에는 Routing 규칙이 없기 때문에 요청은 `version` Service의 Endpoint인 `version-v1`, `version-v2` Pod로 약 50:50 비율로 분배되지만, 적용 후에는 HTTPRoute의 `weight` 설정에 따라서 `version-v1`, `version-v2` Service로 90:10 비율로 분배되는 것을 확인할 수 있다.
+[Shell 7]은 [File 7]의 HTTPRoute 적용 전후에 `client` Pod에서 `server` Service로 100번의 요청을 전송한 결과를 나타내고 있다. 적용 전에는 Routing 규칙이 없기 때문에 요청은 `server` Service의 Endpoint인 `server-v1`, `server-v2` Pod로 약 50:50 비율로 분배되지만, 적용 후에는 HTTPRoute의 `weight` 설정에 따라서 `server-v1`, `server-v2` Service로 90:10 비율로 분배되는 것을 확인할 수 있다.
 
 ```shell {caption="[Shell 8] Client Sidecar의 Route 설정 확인"}
-$ istioctl proxy-config routes client -n version-namespace --name 8080 -o json
+$ istioctl proxy-config routes client -n server-namespace --name 8080 -o json
 ...
             {
-                "name": "version.version-namespace.svc.cluster.local:8080",
+                "name": "server.server-namespace.svc.cluster.local:8080",
                 "domains": [
-                    "version.version-namespace.svc.cluster.local",
+                    "server.server-namespace.svc.cluster.local",
                     ...
                 ],
                 "routes": [
                     {
-                        "name": "version-namespace.version-mesh.0",
+                        "name": "server-namespace.server-mesh.0",
                         ...
                         "route": {
                             "weightedClusters": {
                                 "clusters": [
                                     {
-                                        "name": "outbound|8080||version-v1.version-namespace.svc.cluster.local",
+                                        "name": "outbound|8080||server-v1.server-namespace.svc.cluster.local",
                                         "weight": 90
                                     },
                                     {
-                                        "name": "outbound|8080||version-v2.version-namespace.svc.cluster.local",
+                                        "name": "outbound|8080||server-v2.server-namespace.svc.cluster.local",
                                         "weight": 10
                                     }
                                 ]
@@ -446,7 +448,7 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
   name: waypoint
-  namespace: version-namespace
+  namespace: server-namespace
   labels:
     istio.io/waypoint-for: service
 spec:

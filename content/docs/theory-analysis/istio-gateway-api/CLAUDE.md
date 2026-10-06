@@ -18,9 +18,15 @@ Istio의 Kubernetes Gateway API 구현을 분석하는 문서. 본문 기준 Ver
   File 3(수동 배포)·File 4(istio-remote)·1.5 Waypoint는 실측 없이 문서 기반 예제 (본문에서 실측이라고 주장하지 않음).
   - Shell 4 분배 결과: 93:7/100회. Shell 6: 적용 전 55:45, 적용 후 90:10.
   - minimal Profile 설치 시 GatewayClass는 istio, istio-remote만 생성됨을 실측으로 확인 (본문 [Table 1] 문단에 반영).
+- 2026-10-06 이름 변경: version-namespace → server-namespace, version/version-v1/version-v2 → server/server-v1/server-v2,
+  version-mesh → server-mesh, Hostname version.ssup2.com → server.ssup2.com (본문 ko/en, manifests, 그림 라벨 모두 반영).
+  라벨 Key `version: v1/v2`는 유지. **본문 Shell 출력의 Resource 이름은 실측 당시(version-\*) 출력에서 기계적으로 치환된 상태**라
+  엄밀한 실측 발췌가 아니며, 유지 중인 kind Cluster에는 아직 옛 이름(version-\*)의 Resource가 남아 있음 — 재실측 시 교체 필요.
 - 실측 환경의 kind Cluster(`istio-gateway-api` 이름, context `kind-istio-gateway-api`)는 재확인용으로 유지 중.
   삭제: `kind delete cluster --name istio-gateway-api`. istioctl 1.31.0은 `/tmp/istio-1.31.0/bin/istioctl`에 있었음 (재부팅 시 소실 가능).
-- Figure 1 이미지 미제작.
+- Figure 1(images/istio-gateway-api.png, 구성도)과 Figure 2(images/test-environment.png, 1.1 Test 환경) 모두
+  2026-10-06에 matplotlib로 생성한 **초안** 상태 — 사용자가 pptx 스타일(기존 images.pptx 컨벤션)로 다시 그릴 예정.
+  본문에는 figure shortcode가 이미 삽입되어 있으므로 파일명 유지한 채 교체하면 된다.
 
 ## Test 환경 (재현 방법)
 
@@ -34,7 +40,7 @@ Istio의 Kubernetes Gateway API 구현을 분석하는 문서. 본문 기준 Ver
   3. `istioctl install --set profile=minimal -y` (Sidecar Mode, Ambient 불필요)
   4. `kubectl apply -f manifests/namespaces.yaml` → `manifests/base/` → `manifests/gateway/` → `manifests/mesh/`
 - kind에는 LoadBalancer가 없으므로 gateway Service의 EXTERNAL-IP는 pending이 정상.
-  curl 테스트는 `kubectl port-forward` 또는 gateway Pod IP로 수행하고, Host Header(`version.ssup2.com`)를 명시한다.
+  curl 테스트는 `kubectl port-forward` 또는 gateway Pod IP로 수행하고, Host Header(`server.ssup2.com`)를 명시한다.
 
 ## Test 시나리오
 
@@ -43,20 +49,20 @@ Istio의 Kubernetes Gateway API 구현을 분석하는 문서. 본문 기준 Ver
    → 본문 [Shell 1]을 실측 출력으로 교체. gateway-options ConfigMap의 replicas 3, ClusterIP 반영 확인
    (`infrastructure.parametersRef` 검증).
 3. **HTTPRoute Routing**: `manifests/gateway/httproute.yaml` 적용 → port-forward 후
-   `curl -H "Host: version.ssup2.com"` 반복 → version-v1/v2 약 90:10 분배 확인.
+   `curl -H "Host: server.ssup2.com"` 반복 → server-v1/v2 약 90:10 분배 확인.
 4. **설정 변환 확인**: `istioctl proxy-config routes <gateway-istio pod> -n gateway-namespace` 등으로
    HTTPRoute가 내부 VirtualService로 변환되어 xDS에 반영된 것 확인 (본문 1.2 검증).
    `kubectl get virtualservice -A`가 비어 있음(in-memory 변환, Kubernetes 미저장)도 함께 확인.
 5. **GAMMA Mesh Routing**: `manifests/mesh/httproute-mesh.yaml` 적용 → client Pod(Sidecar 주입됨)에서
-   `curl version.version-namespace:8080` 반복 → 90:10 분배 확인. Sidecar 없는 요청과의 차이도 확인.
+   `curl server.server-namespace:8080` 반복 → 90:10 분배 확인. Sidecar 없는 요청과의 차이도 확인.
    client Pod의 `istioctl proxy-config routes`에서 규칙이 Client Sidecar의 outbound에 적용됨을 확인 (본문 1.4 검증).
 6. Ambient Mode(Waypoint) 테스트는 하지 않는다.
 
 ## 폴더 구조
 
 - `index.md` — 문서 본문.
-- `manifests/namespaces.yaml` — gateway-namespace, version-namespace(istio-injection=enabled).
-- `manifests/base/` — 테스트 Workload (version-v1/v2 = Deployment+Service, version = GAMMA parent Service, client = curl Pod).
+- `manifests/namespaces.yaml` — gateway-namespace, server-namespace(istio-injection=enabled).
+- `manifests/base/` — 테스트 Workload (server-v1/v2 = Deployment+Service, server = GAMMA parent Service, client = curl Pod).
 - `manifests/gateway/` — Gateway, gateway-options ConfigMap, HTTPRoute (본문 [File 1], [File 2] 대응).
 - `manifests/mesh/` — GAMMA Producer Route (본문 [File 4] 대응).
 - 실측 후 Shell 출력 원본이나 proxy-config dump를 남길 경우 envoy-configuration-istio 문서의

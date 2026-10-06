@@ -25,6 +25,8 @@ Istio provides its own Traffic management APIs, the Gateway and VirtualService R
 
 ### 1.1. Test Environment Setup
 
+{{< figure caption="[Figure 2] Test Environment" src="images/test-environment.png" width="1000px" >}}
+
 ```shell {caption="[Shell 1] Test Environment Setup"}
 # Create kind cluster
 $ kind create cluster --name istio-gateway-api
@@ -54,32 +56,32 @@ metadata:
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: version-namespace
+  name: server-namespace
   labels:
     istio-injection: enabled
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: version-v1
-  namespace: version-namespace
+  name: server-v1
+  namespace: server-namespace
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: version
+      app: server
       version: v1
   template:
     metadata:
       labels:
-        app: version
+        app: server
         version: v1
     spec:
       containers:
       - name: http-echo
         image: hashicorp/http-echo:1.0
         args:
-        - -text=version-v1
+        - -text=server-v1
         - -listen=:8080
         ports:
         - containerPort: 8080
@@ -87,26 +89,26 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: version-v1
-  namespace: version-namespace
+  name: server-v1
+  namespace: server-namespace
 spec:
   selector:
-    app: version
+    app: server
     version: v1
   ports:
   - name: http
     port: 8080
     targetPort: 8080
 ---
-# version-v2 Deployment and Service are identical to version-v1 except the version label and text
+# server-v2 Deployment and Service are identical to server-v1 except the version label and text
 apiVersion: v1
 kind: Service
 metadata:
-  name: version
-  namespace: version-namespace
+  name: server
+  namespace: server-namespace
 spec:
   selector:
-    app: version
+    app: server
   ports:
   - name: http
     port: 8080
@@ -116,7 +118,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: client
-  namespace: version-namespace
+  namespace: server-namespace
   labels:
     app: client
 spec:
@@ -127,19 +129,19 @@ spec:
 ```
 
 ```shell {caption="[Shell 3] Checking Test Workloads"}
-$ kubectl -n version-namespace get pods,services
+$ kubectl -n server-namespace get pods,services
 NAME                              READY   STATUS    RESTARTS   AGE
 pod/client                        2/2     Running   0          3h20m
-pod/version-v1-7cf5688dfc-rcw7t   2/2     Running   0          3h20m
-pod/version-v2-69bf76f867-htddz   2/2     Running   0          3h20m
+pod/server-v1-7cf5688dfc-rcw7t    2/2     Running   0          3h20m
+pod/server-v2-69bf76f867-htddz    2/2     Running   0          3h20m
 
-NAME                 TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
-service/version      ClusterIP   10.96.4.246     <none>        8080/TCP   3h20m
-service/version-v1   ClusterIP   10.96.255.26    <none>        8080/TCP   3h20m
-service/version-v2   ClusterIP   10.96.153.106   <none>        8080/TCP   3h20m
+NAME                TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
+service/server      ClusterIP   10.96.4.246     <none>        8080/TCP   3h20m
+service/server-v1   ClusterIP   10.96.255.26    <none>        8080/TCP   3h20m
+service/server-v2   ClusterIP   10.96.153.106   <none>        8080/TCP   3h20m
 ```
 
-The Test Workloads consist of the `version-v1` and `version-v2` Deployments and Services that respond with their own names, the `version` Service that selects the Pods of both Deployments, and the `client` Pod that sends requests, as shown in [File 1]. Applying [File 1] creates the Test Workloads in the `version-namespace` Namespace as shown in [Shell 3]. Since the `istio-injection` Label is set on the `version-namespace` Namespace, the READY of every Pod is 2/2, confirming that the Sidecar has been injected. The Gateway is created in the `gateway-namespace` Namespace.
+The Test Workloads consist of the `server-v1` and `server-v2` Deployments and Services that respond with their own names, the `server` Service that selects the Pods of both Deployments, and the `client` Pod that sends requests, as shown in [File 1]. Applying [File 1] creates the Test Workloads in the `server-namespace` Namespace as shown in [Shell 3]. Since the `istio-injection` Label is set on the `server-namespace` Namespace, the READY of every Pod is 2/2, confirming that the Sidecar has been injected. The Gateway is created in the `gateway-namespace` Namespace.
 
 ### 1.2. Gateway Deployment
 
@@ -272,24 +274,24 @@ istiod's Gateway API Controller converts Gateway API Resources into internal con
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: version
-  namespace: version-namespace
+  name: server
+  namespace: server-namespace
 spec:
   parentRefs:
   - name: gateway
     namespace: gateway-namespace
   hostnames:
-  - "version.ssup2.com"
+  - "server.ssup2.com"
   rules:
   - matches:
     - path:
         type: PathPrefix
         value: /
     backendRefs:
-    - name: version-v1
+    - name: server-v1
       port: 8080
       weight: 90
-    - name: version-v2
+    - name: server-v2
       port: 8080
       weight: 10
 ```
@@ -299,12 +301,12 @@ spec:
 $ kubectl -n gateway-namespace port-forward svc/gateway-istio 8080:80 &
 
 # Send 100 requests
-$ for i in $(seq 1 100); do curl -s -H "Host: version.ssup2.com" http://127.0.0.1:8080/; done | sort | uniq -c
-  93 version-v1
-   7 version-v2
+$ for i in $(seq 1 100); do curl -s -H "Host: server.ssup2.com" http://127.0.0.1:8080/; done | sort | uniq -c
+  93 server-v1
+   7 server-v2
 ```
 
-[File 6] shows an example of an HTTPRoute that distributes the Traffic received by the Gateway to the `version-v1` Service at a 90% ratio and the `version-v2` Service at a 10% ratio. After applying the HTTPRoute, sending 100 requests as shown in [Shell 5] results in 93 responses from `version-v1` and 7 responses from `version-v2`, confirming that the distribution follows a ratio close to the `weight` setting. Since no LoadBalancer exists in a kind Cluster, the requests were sent through `port-forward`.
+[File 6] shows an example of an HTTPRoute that distributes the Traffic received by the Gateway to the `server-v1` Service at a 90% ratio and the `server-v2` Service at a 10% ratio. After applying the HTTPRoute, sending 100 requests as shown in [Shell 5] results in 93 responses from `server-v1` and 7 responses from `server-v2`, confirming that the distribution follows a ratio close to the `weight` setting. Since no LoadBalancer exists in a kind Cluster, the requests were sent through `port-forward`.
 
 ```shell {caption="[Shell 6] Checking the Internal Configuration Conversion of the HTTPRoute"}
 # No VirtualService is stored in kubernetes
@@ -318,23 +320,23 @@ $ istioctl proxy-config routes gateway-istio-6cf9dd97dd-8lrn4 -n gateway-namespa
         "name": "http.80",
         "virtualHosts": [
             {
-                "name": "version.ssup2.com:80",
+                "name": "server.ssup2.com:80",
                 "domains": [
-                    "version.ssup2.com"
+                    "server.ssup2.com"
                 ],
                 "routes": [
                     {
-                        "name": "version-namespace.version.0",
+                        "name": "server-namespace.server.0",
                         ...
                         "route": {
                             "weightedClusters": {
                                 "clusters": [
                                     {
-                                        "name": "outbound|8080||version-v1.version-namespace.svc.cluster.local",
+                                        "name": "outbound|8080||server-v1.server-namespace.svc.cluster.local",
                                         "weight": 90
                                     },
                                     {
-                                        "name": "outbound|8080||version-v2.version-namespace.svc.cluster.local",
+                                        "name": "outbound|8080||server-v2.server-namespace.svc.cluster.local",
                                         "weight": 10
                                     }
                                 ]
@@ -344,7 +346,7 @@ $ istioctl proxy-config routes gateway-istio-6cf9dd97dd-8lrn4 -n gateway-namespa
                         "metadata": {
                             "filterMetadata": {
                                 "istio": {
-                                    "config": "/apis/networking.istio.io/v1/namespaces/version-namespace/virtual-service/gateway-namespace~gateway~istio-autogenerated-k8s-gateway~http~version.ssup2.com"
+                                    "config": "/apis/networking.istio.io/v1/namespaces/server-namespace/virtual-service/gateway-namespace~gateway~istio-autogenerated-k8s-gateway~http~server.ssup2.com"
                                 }
                             }
                         },
@@ -375,61 +377,61 @@ Among the Routes of the Gateway API, Istio supports HTTPRoute, GRPCRoute, TLSRou
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: version-mesh
-  namespace: version-namespace
+  name: server-mesh
+  namespace: server-namespace
 spec:
   parentRefs:
   - group: ""
     kind: Service
-    name: version
+    name: server
   rules:
   - backendRefs:
-    - name: version-v1
+    - name: server-v1
       port: 8080
       weight: 90
-    - name: version-v2
+    - name: server-v2
       port: 8080
       weight: 10
 ```
 
-Through **GAMMA** (Gateway API for Mesh Management and Administration), the Gateway API can be used not only for controlling North-South Traffic coming from outside the Cluster but also for controlling East-West Traffic inside the Mesh. [File 7] shows an example of an HTTPRoute that specifies a Service instead of a Gateway in `parentRefs`, distributing the Traffic sent to the `version` Service inside the Mesh to the `version-v1` and `version-v2` Services. In Sidecar Mode, the Routing rules are applied in the Sidecar of the Client sending the request, which performs the same role as applying a VirtualService to the mesh Gateway.
+Through **GAMMA** (Gateway API for Mesh Management and Administration), the Gateway API can be used not only for controlling North-South Traffic coming from outside the Cluster but also for controlling East-West Traffic inside the Mesh. [File 7] shows an example of an HTTPRoute that specifies a Service instead of a Gateway in `parentRefs`, distributing the Traffic sent to the `server` Service inside the Mesh to the `server-v1` and `server-v2` Services. In Sidecar Mode, the Routing rules are applied in the Sidecar of the Client sending the request, which performs the same role as applying a VirtualService to the mesh Gateway.
 
 ```shell {caption="[Shell 7] Checking Mesh Traffic Distribution"}
 # Before applying the mesh httproute
-$ kubectl -n version-namespace exec client -c curl -- sh -c 'for i in $(seq 1 100); do curl -s http://version:8080/; done' | sort | uniq -c
-  55 version-v1
-  45 version-v2
+$ kubectl -n server-namespace exec client -c curl -- sh -c 'for i in $(seq 1 100); do curl -s http://server:8080/; done' | sort | uniq -c
+  55 server-v1
+  45 server-v2
 
 # After applying the mesh httproute
-$ kubectl -n version-namespace exec client -c curl -- sh -c 'for i in $(seq 1 100); do curl -s http://version:8080/; done' | sort | uniq -c
-  90 version-v1
-  10 version-v2
+$ kubectl -n server-namespace exec client -c curl -- sh -c 'for i in $(seq 1 100); do curl -s http://server:8080/; done' | sort | uniq -c
+  90 server-v1
+  10 server-v2
 ```
 
-[Shell 7] shows the results of sending 100 requests from the `client` Pod to the `version` Service before and after applying the HTTPRoute of [File 7]. Before applying, since there are no Routing rules, the requests are distributed at roughly a 50:50 ratio to the `version-v1` and `version-v2` Pods, which are the Endpoints of the `version` Service, but after applying, it can be confirmed that the requests are distributed at a 90:10 ratio to the `version-v1` and `version-v2` Services according to the `weight` setting of the HTTPRoute.
+[Shell 7] shows the results of sending 100 requests from the `client` Pod to the `server` Service before and after applying the HTTPRoute of [File 7]. Before applying, since there are no Routing rules, the requests are distributed at roughly a 50:50 ratio to the `server-v1` and `server-v2` Pods, which are the Endpoints of the `server` Service, but after applying, it can be confirmed that the requests are distributed at a 90:10 ratio to the `server-v1` and `server-v2` Services according to the `weight` setting of the HTTPRoute.
 
 ```shell {caption="[Shell 8] Checking the Route Configuration of the Client Sidecar"}
-$ istioctl proxy-config routes client -n version-namespace --name 8080 -o json
+$ istioctl proxy-config routes client -n server-namespace --name 8080 -o json
 ...
             {
-                "name": "version.version-namespace.svc.cluster.local:8080",
+                "name": "server.server-namespace.svc.cluster.local:8080",
                 "domains": [
-                    "version.version-namespace.svc.cluster.local",
+                    "server.server-namespace.svc.cluster.local",
                     ...
                 ],
                 "routes": [
                     {
-                        "name": "version-namespace.version-mesh.0",
+                        "name": "server-namespace.server-mesh.0",
                         ...
                         "route": {
                             "weightedClusters": {
                                 "clusters": [
                                     {
-                                        "name": "outbound|8080||version-v1.version-namespace.svc.cluster.local",
+                                        "name": "outbound|8080||server-v1.server-namespace.svc.cluster.local",
                                         "weight": 90
                                     },
                                     {
-                                        "name": "outbound|8080||version-v2.version-namespace.svc.cluster.local",
+                                        "name": "outbound|8080||server-v2.server-namespace.svc.cluster.local",
                                         "weight": 10
                                     }
                                 ]
@@ -446,7 +448,7 @@ apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
   name: waypoint
-  namespace: version-namespace
+  namespace: server-namespace
   labels:
     istio.io/waypoint-for: service
 spec:

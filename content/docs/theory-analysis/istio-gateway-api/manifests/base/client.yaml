@@ -3,7 +3,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: client
-  namespace: version-namespace
+  namespace: server-namespace
   labels:
     app: client
 spec:
