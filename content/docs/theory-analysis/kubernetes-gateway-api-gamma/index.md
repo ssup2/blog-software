@@ -6,7 +6,7 @@ Kubernetes Gateway API를 Service Mesh의 East-West Traffic 제어로 확장하�
 
 ## 1. Kubernetes Gateway API GAMMA
 
-{{< figure caption="[Figure 1] GAMMA의 Route, Service 연결 구조" src="images/gamma-route-service.png" width="800px" >}}
+{{< figure caption="[Figure 1] GAMMA의 Route, Service 연결 구조" src="images/gamma-route-service.png" width="900px" >}}
 
 **GAMMA** (Gateway API for Mesh Management and Administration)는 Cluster 외부 Traffic을 대상으로 설계된 Gateway API를 Service Mesh 내부의 East-West Traffic 제어에도 이용할 수 있도록 확장하는 표준이다. 기존의 Service Mesh는 Istio의 VirtualService, Linkerd의 ServiceProfile처럼 구현체마다 전용 API를 제공하기 때문에 Mesh 구현체를 변경하는 경우 Traffic 제어 설정도 같이 수정되어야 하는 이식성 문제가 존재한다. GAMMA는 이러한 문제를 해결하기 위해서 등장하였으며, Gateway API v1.1부터 Mesh 지원이 Standard Channel로 승격되었다.
 

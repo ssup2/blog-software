@@ -6,7 +6,7 @@ This post analyzes GAMMA, which extends the Kubernetes Gateway API to control Ea
 
 ## 1. Kubernetes Gateway API GAMMA
 
-{{< figure caption="[Figure 1] GAMMA Route and Service Connection Structure" src="images/gamma-route-service.png" width="800px" >}}
+{{< figure caption="[Figure 1] GAMMA Route and Service Connection Structure" src="images/gamma-route-service.png" width="900px" >}}
 
 **GAMMA** (Gateway API for Mesh Management and Administration) is a standard that extends the Gateway API, originally designed for Traffic from outside the Cluster, so that it can also be used to control East-West Traffic inside a Service Mesh. Existing Service Meshes provide implementation-specific APIs, such as Istio's VirtualService and Linkerd's ServiceProfile, so a portability problem exists where Traffic control configuration must also be modified when the Mesh implementation is changed. GAMMA emerged to solve this problem, and Mesh support was promoted to the Standard Channel starting from Gateway API v1.1.
 
