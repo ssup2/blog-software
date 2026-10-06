@@ -8,15 +8,17 @@ This post analyzes how the Gateway API Inference Extension is implemented and op
 
 {{< figure caption="[Figure 1] Istio Inference Gateway Architecture" src="images/istio-inference-gateway.png" width="1000px" >}}
 
-Envoy has no dedicated feature for Inference. Therefore, Istio implements the **Gateway API Inference Extension** by combining Envoy's general-purpose features, the **External Processing (ext-proc) Filter** and the **Override Host Load Balancing Policy**. The ext-proc Filter is an HTTP Filter that forwards the Headers and Body of requests and responses to an external gRPC Server so the external Server can inspect and modify the Traffic, and the Override Host Load Balancing Policy is a Load Balancing policy that, instead of selecting an Endpoint with a Load Balancing algorithm, reads the Endpoint address from a specific Header of the request or from the Envoy Metadata set on the request and forwards the Traffic to that Endpoint.
+The **Gateway API Inference Extension** is an extension standard of the Gateway API for controlling Inference Traffic delivered to LLM Model Servers, and Istio serves as an implementation of the Gateway API Inference Extension just as it does for the Gateway API. The Controller role is handled by istiod without installing a separate Controller; istiod watches InferencePool Resources, and when an HTTPRoute that references an InferencePool exists, it converts the InferencePool into the existing Service Model and delivers the necessary configuration to the Envoy that acts as the Gateway via xDS.
 
-istiod watches InferencePool Resources, and when an HTTPRoute that references an InferencePool exists, it delivers the ext-proc Filter and Override Host Load Balancing Policy configuration to the Envoy that acts as the Gateway.
+[Figure 1] shows the architecture of an Istio Inference Gateway serving 2 Models. Each Model consists of the combination of a Model Server Deployment, an InferencePool that defines the set of Model Servers, an HTTPRoute that forwards Traffic to the InferencePool, and a dedicated **EPP** (Endpoint Picker) that selects the optimal Model Server, and each EPP collects only the Metrics of the Model Servers it is responsible for.
 
-[Figure 1] shows the architecture of an Istio Inference Gateway serving 2 Models. Each Model consists of the combination of a Model Server Deployment, an InferencePool that defines the set of Model Servers, an HTTPRoute that forwards Traffic to the InferencePool, and a dedicated **EPP** (Endpoint Picker) that selects the optimal Model Server, and each EPP collects only the Metrics of the Model Servers it is responsible for. istiod creates not only the Gateway's Envoy Deployment and Service but also a Headless Service corresponding to the InferencePool.
+istiod creates not only the Gateway's Envoy Deployment and Service but also a **Shadow Service** corresponding to the InferencePool in the form of a Headless Service. Since the Shadow Service's selector is set to the InferencePool's `selector`, the Model Server Pods selected by the InferencePool are registered as the Shadow Service's Endpoints, and through this, istiod manages the Model Server Pods in the same way as the Endpoints of existing Services.
 
-The Gateway's Envoy that receives a Client request forwards the request information to the EPP through the ext-proc Filter, and the address of the Model Server Pod selected by the EPP is returned to Envoy through the Metadata of the ext-proc response. Envoy forwards the request to the Model Server Pod specified in the Metadata through the Override Host Load Balancing Policy.
+Since Envoy has no dedicated feature for Inference, Istio processes Inference Traffic by combining Envoy's general-purpose features, the **External Processing (ext-proc) Filter** and the **Override Host Load Balancing Policy**. The Gateway's Envoy that receives a Client's Inference request forwards the request information to the EPP, and the EPP selects the optimal Model Server Pod based on the collected Metrics and returns it to Envoy. Envoy forwards the request to the Model Server Pod returned by the EPP.
 
 ### 1.1. Test Environment Setup
+
+{{< figure caption="[Figure 2] Test Environment" src="images/test-environment.png" width="1000px" >}}
 
 ```shell {caption="[Shell 1] Test Environment Setup"}
 # Create kind cluster
@@ -202,7 +204,7 @@ The Gateway uses the `istio` GatewayClass Gateway in the `gateway-namespace` Nam
 
 ### 1.2. InferencePool Conversion
 
-istiod handles an InferencePool by converting it into Istio's existing Service Model. When an InferencePool is created, istiod creates a **Shadow Service** as a Headless Service for each InferencePool, named in the form `[InferencePool Name]-ip-[Hash].[Namespace].svc.cluster.local`. Since the Shadow Service's selector and Target Port are set to the InferencePool's `selector` and Target Port, the Model Server Pods that match the `selector` are registered as the Shadow Service's Endpoints. Therefore, the creation and removal of Model Server Pods are reflected in Envoy through EDS (Endpoint Discovery Service), the same as Istio's existing Service Discovery.
+istiod handles an InferencePool by converting it into Istio's existing Service Model. When an InferencePool is created, istiod creates a Shadow Service as a Headless Service for each InferencePool, named in the form `[InferencePool Name]-ip-[Hash].[Namespace].svc.cluster.local`. Since the Shadow Service's selector and Target Port are set to the InferencePool's `selector` and Target Port, the Model Server Pods that match the `selector` are registered as the Shadow Service's Endpoints. Therefore, the creation and removal of Model Server Pods are reflected in Envoy through EDS (Endpoint Discovery Service), the same as Istio's existing Service Discovery.
 
 In Envoy, an `EDS` Type Cluster in the form `outbound|54321||[Shadow Service Name]` corresponding to the Shadow Service is created. The `54321` in the Cluster name is a fixed virtual Port used for the Shadow Service, and the Port to which Traffic is actually forwarded is the InferencePool's Target Port set on the Cluster's Endpoints. If an InferencePool is specified in the `backendRefs` of an HTTPRoute, the Cluster of that Route is set to the InferencePool's Shadow Service Cluster. Because Istio converts the InferencePool into the existing Service Model rather than handling it as a separate concept, the mTLS and Telemetry features provided by Istio can also be applied to the InferencePool's Model Servers in the same way.
 
@@ -220,6 +222,12 @@ $ istioctl proxy-config endpoints gateway-istio-6cf9dd97dd-8lrn4 -n gateway-name
 [Shell 4] shows the Clusters and Endpoints of the Gateway Envoy after the `vllm-llama3-8b` InferencePool is created. Although no separate Service was created for the Model Servers, the Service list in [Shell 2] shows that the Shadow Service named `vllm-llama3-8b-ip-22dc7de1` created by istiod exists as a Headless Service. In Envoy, the Cluster corresponding to the Shadow Service has been created, and the Cluster's Endpoints show the 3 Model Server Pod IPs selected by the InferencePool's `selector` registered together with the Target Port, Port 8000.
 
 ### 1.3. Request Processing Flow
+
+{{< figure caption="[Figure 3] Inference Request Processing Flow" src="images/request-processing.png" width="1000px" >}}
+
+[Figure 3] shows the Inference request processing flow of the Gateway Envoy. Envoy's ext-proc Filter is an HTTP Filter that forwards the Headers and Body of requests and responses to an external gRPC Server so the external Server can inspect and modify the Traffic, and in the Inference Extension, the EPP acts as the external gRPC Server that receives the ext-proc requests.
+
+The Override Host Load Balancing Policy is a Load Balancing policy that, instead of selecting an Endpoint with a Load Balancing algorithm, reads the Endpoint address from a specific Header of the request or from the Envoy Metadata set on the request and forwards the Traffic to that Endpoint. Through these two features, Envoy forwards Inference requests to the Model Server Pod selected by the EPP.
 
 ```shell {caption="[Shell 5] ext-proc Filter Configuration of the InferencePool Route"}
 $ istioctl proxy-config routes gateway-istio-6cf9dd97dd-8lrn4 -n gateway-namespace --name http.80 -o json
@@ -338,14 +346,6 @@ $ istioctl proxy-config clusters gateway-istio-6cf9dd97dd-8lrn4 -n gateway-names
 [Shell 8] shows the Override Host Load Balancing Policy set on the Shadow Service Cluster. The Endpoint address returned by the EPP is stored and referenced in Envoy's `envoy.lb` Metadata under the `x-gateway-destination-endpoint` Key, and the Fallback Load Balancing algorithm can be seen set to Round Robin. Since the `envoy.lb` Namespace is set in the `receiving_namespaces` of `metadata_options` on the Listener's ext-proc Filter, the Metadata that the EPP sets in the ext-proc response is received by Envoy and stored in a state that the Override Host Load Balancing Policy can reference.
 
 The InferencePool's `failureMode` is converted into the ext-proc Filter's `failure_mode_allow` setting. When set to `FailOpen`, `failure_mode_allow` is set to `true` so that requests are still forwarded through Fallback Load Balancing even when the EPP fails, and when set to `FailClose`, requests fail when the EPP fails. Since the InferencePool of the Test environment is set to `FailOpen`, [Shell 5] shows that `failureModeAllow` has been converted to `true`.
-
-### 1.4. Comparison with the Envoy Gateway Implementation
-
-Since the Gateway API Inference Extension standardizes only the communication method with the EPP as the ext-proc Protocol, the method of forwarding requests to the Model Server Pod selected by the EPP differs per implementation. The reason the EPP Protocol defines setting the same value in both the Header and Metadata channels is that there is no guarantee that a Proxy supports both delivery paths, and each implementation reads the channel it uses.
-
-Envoy Gateway uses the Header channel; it sets the Cluster to the `ORIGINAL_DST` Type and forwards requests to the address specified in the Header through the `use_http_header` option. Since an `ORIGINAL_DST` Type Cluster does not manage Endpoint information, the implementation is simple, but Envoy's Endpoint-based features cannot be used.
-
-In contrast, Istio uses the Metadata channel; it keeps the `EDS` Type Cluster and selects the Endpoint specified in the Metadata through the Override Host Load Balancing Policy. Therefore, Istio manages the InferencePool's Model Servers based on Endpoints just like existing Services, and has the advantage of integrating naturally with Istio's Service Model. The initial Version of the Istio Gateway API Inference Extension supports only North-South Traffic through the Gateway, and East-West Traffic support through the Waypoint of the Ambient Mesh is being developed in later Versions.
 
 ## 2. References
 

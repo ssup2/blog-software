@@ -12,7 +12,11 @@ Istio의 Gateway API Inference Extension 구현을 분석하는 문서. 본문 �
   재현은 manifests/ 원본 기준 (sim의 `POD_NAME` env가 없으면 응답의 `x-inference-pod` Header 값이 달라질 수 있음).
   1.2 InferencePool 변환: Shell 4(Shadow Cluster/Endpoint, 설명은 Shell 2의 Service 목록을 교차 참조).
   1.3 요청 처리 과정: Shell 5(ext-proc per-route 설정), Shell 6(curl 요청), Shell 7(Model Server /metrics — 2026-09-22 실측, vLLM Simulator는 cache_config_info/kv_cache_usage_perc/lora_requests_info/num_requests_running/num_requests_waiting 5종 노출), Shell 8(Override Host Policy).
-  1.4 Envoy Gateway 구현과 비교: 이론만.
+  1.4 Envoy Gateway 구현과 비교: 2026-10-06 사용자 지시로 **섹션 전체 삭제됨** (Header/Metadata 채널 비교,
+  ORIGINAL_DST vs EDS 내용 — 복원 필요 시 git history 참조).
+- 2026-10-06 구조 변경: 도입부는 전체 아키텍처 관점으로 재구성 — ① 표준 정의 + istiod의 Controller 역할
+  (Watch → Service Model 변환 → xDS 전달), ② [Figure 1] 구성 요소, ③ Envoy 범용 기능 조합(키워드 bold만) + 요청 흐름 요약.
+  ext-proc Filter, Override Host LB Policy의 상세 정의와 동작 설명은 1.3 요청 처리 과정의 도입 문단([Figure 3] 설명)으로 이동.
   Shell 2의 AGE 21m, Shell 3의 AGE 40m은 각각의 캡처 시점 값.
 - 본문 Shell 출력은 전부 실측 발췌. 초기 초안의 [File 1](ext-proc 설정 예시)은 창작이어서 Shell 3 실측으로 교체됨.
 - 실측으로 확인·수정된 사실:
@@ -23,7 +27,11 @@ Istio의 Gateway API Inference Extension 구현을 분석하는 문서. 본문 �
   - Shadow Service는 selector/Target Port가 InferencePool의 것으로 설정된 채 생성되며 ownerReference가 InferencePool로 걸려 있음. Endpoint 등록은 Service selector에 의한 표준 동작.
   - `FailOpen` → `failureModeAllow: true` 변환 확인.
   - v1.6부터 release image는 `epp`가 없고 `lwepp`(Lightweight EPP)만 존재 (registry.k8s.io/gateway-api-inference-extension/lwepp:v1.6.2, amd64 전용 — OrbStack Rosetta로 kind에서 실행됨).
-- Figure 1(istio-inference-gateway.png, 2개 Model 구성) 제작 완료. Figure 2(요청 처리 과정)는 본문에서 제거됨.
+- Figure 1(istio-inference-gateway.png, 2개 Model 구성) 제작 완료. 초기의 "요청 처리 과정" Figure는 본문에서 제거됨.
+- Figure 2(images/test-environment.png, 1.1 Test 환경)와 Figure 3(images/request-processing.png, 1.3 요청 처리 과정)은
+  2026-10-06에 matplotlib로 생성한 **초안** — 사용자가 pptx 스타일로 다시 그릴 예정.
+  본문 1.1/1.3에 figure shortcode 삽입 완료 (파일명 유지한 채 교체).
+  Figure 3의 범례는 Figure 1과 동일 체계(Traffic 빨강, Select Endpoint 파랑 점선, Get Metrics 주황) + Internal 검정.
 
 ## Test 환경 (재현 방법)
 
