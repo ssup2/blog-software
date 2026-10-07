@@ -10,9 +10,11 @@ Istio가 Kubernetes Gateway API를 어떻게 구현하여 동작하는지 분석
 
 Istio는 자체 Traffic 관리 API인 Gateway, VirtualService Resource를 제공하지만, Kubernetes 표준 API인 **Gateway API**의 구현체 역할도 수행한다. Istio는 향후 Gateway API를 기본 Traffic 관리 API로 전환할 계획이며, 신규 기능인 Ambient Mode의 Waypoint도 Gateway API를 기반으로 동작한다. Gateway API의 CRD는 Istio에 포함되어 있지 않기 때문에 별도로 설치되어야 하며, CRD가 설치되어 있으면 istiod가 Gateway API Resource를 Watch하여 처리하기 때문에 별도의 Controller 설치는 필요하지 않다.
 
-[Figure 1]은 Istio Gateway API의 구성을 나타내고 있다. istiod의 **Gateway API Controller**는 Gateway API Resource를 Watch하여 내부의 Istio Gateway, VirtualService 설정으로 변환하며, 변환된 설정은 **crdclient**가 Watch하는 Istio CR의 설정, **Service Registry**가 Watch하는 Kubernetes Service, Endpoints 정보와 함께 **PushContext**로 모인다. 이후 **ConfigGenerator**는 Gateway 설정을 Envoy의 Listener 설정으로, VirtualService 설정을 Envoy의 Route 설정으로 변환하며, **DiscoveryServer**는 변환된 설정을 xDS를 통해서 Gateway와 Sidecar의 Envoy에 전달한다. 따라서 Gateway API를 이용해도 실제 Traffic 처리 방식은 Istio API를 이용하는 경우와 동일하다.
+[Figure 1]은 Istio Gateway API의 구성을 나타내고 있다. istiod의 **Gateway API Controller**는 각 Namespace에 생성된 Gateway, HTTPRoute 같은 Gateway API Resource를 Watch하여 내부의 Istio Gateway, VirtualService 설정으로 변환하며, 변환된 설정은 **crdclient**가 Watch하는 Istio CR의 설정, **Service Registry**가 Watch하는 Kubernetes Service, Endpoints 정보와 함께 **PushContext**로 모인다.
 
-istiod의 **Gateway Deployment Controller**는 Gateway Resource를 Watch하여 Envoy가 동작하는 Deployment와 Traffic을 수신하는 Service를 직접 생성하는 역할을 수행하며, [Figure 1]의 gateway Namespace의 external-gateway, internal-gateway처럼 필요한 Namespace에 다수의 Gateway를 생성하여 이용할 수 있다.
+이후 **ConfigGenerator**는 PushContext에 모인 Gateway 설정을 Envoy의 Listener 설정으로, VirtualService 설정을 Envoy의 Route 설정으로 변환하며, **DiscoveryServer**는 변환된 설정을 xDS를 통해서 Ingress/Egress Gateway와 Sidecar를 포함한 모든 Envoy에 전달한다. 따라서 Gateway API를 이용해도 실제 Traffic 처리 방식은 Istio API를 이용하는 경우와 동일하다.
+
+istiod의 **Gateway Deployment Controller**는 Gateway Resource를 Watch하여 Envoy가 동작하는 Deployment와 Traffic을 수신하는 Service를 직접 생성하는 역할을 수행한다. [Figure 1]의 gateway Namespace처럼 `gateway-external`, `gateway-internal` Gateway를 생성하면 각각 external-gateway, internal-gateway Service와 Deployment가 생성되며, 이를 통해서 필요한 Namespace에 다수의 Gateway를 두고 이용할 수 있다.
 
 {{< table caption="[Table 1] Istio가 제공하는 GatewayClass 종류" >}}
 | GatewayClass | 용도 |
