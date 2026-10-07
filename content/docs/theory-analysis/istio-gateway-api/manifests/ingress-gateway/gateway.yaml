@@ -1,0 +1,18 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: gateway-ingress
+  namespace: istio-system
+spec:
+  gatewayClassName: istio
+  addresses:
+  - type: Hostname
+    value: istio-ingressgateway.istio-system.svc.cluster.local
+  listeners:
+  - name: http
+    protocol: HTTP
+    port: 80
+    hostname: "*.ssup2.com"
+    allowedRoutes:
+      namespaces:
+        from: All

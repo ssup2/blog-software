@@ -10,7 +10,9 @@ This post analyzes how Istio implements and operates the Kubernetes Gateway API.
 
 Istio provides its own Traffic management APIs, the Gateway and VirtualService Resources, but it also serves as an implementation of the **Gateway API**, the Kubernetes standard API. Istio plans to transition to the Gateway API as its default Traffic management API in the future, and the Waypoint of the new Ambient Mode also operates based on the Gateway API. Since the CRDs of the Gateway API are not included in Istio, they must be installed separately, and once the CRDs are installed, istiod Watches and processes Gateway API Resources, so no separate Controller installation is required.
 
-[Figure 1] shows the architecture of the Istio Gateway API. istiod converts the Gateway API's Gateway and Route Resources into internal Istio Gateway and VirtualService configuration, and the converted configuration goes through the same process as existing Istio configuration and is delivered to Envoy via xDS. Therefore, even when using the Gateway API, the actual Traffic processing behavior is identical to the case of using the Istio API.
+[Figure 1] shows the architecture of the Istio Gateway API. istiod's **Gateway API Controller** Watches Gateway API Resources and converts them into internal Istio Gateway and VirtualService configuration, and the converted configuration is gathered into the **PushContext** together with the Istio CR configuration Watched by the **crdclient** and the Kubernetes Service and Endpoints information Watched by the **Service Registry**. The **ConfigGenerator** then converts the Gateway configuration into Envoy Listener configuration and the VirtualService configuration into Envoy Route configuration, and the **DiscoveryServer** delivers the converted configuration to the Envoys of Gateways and Sidecars via xDS. Therefore, even when using the Gateway API, the actual Traffic processing behavior is identical to the case of using the Istio API.
+
+istiod's **Gateway Deployment Controller** Watches Gateway Resources and is responsible for directly creating the Deployment where Envoy runs and the Service that receives Traffic, and multiple Gateways can be created and used in the required Namespaces, like the external-gateway and internal-gateway in the gateway Namespace of [Figure 1].
 
 {{< table caption="[Table 1] GatewayClass Types Provided by Istio" >}}
 | GatewayClass | Purpose |
@@ -143,9 +145,13 @@ service/server-v2   ClusterIP   10.96.153.106   <none>        8080/TCP   3h20m
 
 The Test Workloads consist of the `server-v1` and `server-v2` Deployments and Services that respond with their own names, the `server` Service that selects the Pods of both Deployments, and the `client` Pod that sends requests, as shown in [File 1]. Applying [File 1] creates the Test Workloads in the `server-namespace` Namespace as shown in [Shell 3]. Since the `istio-injection` Label is set on the `server-namespace` Namespace, the READY of every Pod is 2/2, confirming that the Sidecar has been injected. The Gateway is created in the `gateway-namespace` Namespace.
 
-### 1.2. Gateway Deployment
+[Figure 2] shows the constructed Test environment. The `gateway-namespace` Namespace is still empty as the place where the Gateway will be deployed, and the Ingress Gateway in the istio-system Namespace is drawn with a dashed line because it is deployed directly later in the process of checking the approach of using an existing Ingress Gateway. The curl Client outside the Cluster sends requests to the Test Workloads through the Gateway.
 
-#### 1.2.1. Automated Deployment
+### 1.2. Ingress Gateway Setup
+
+#### 1.2.1. Deployment via Gateway CR
+
+{{< figure caption="[Figure 3] Deployment via Gateway CR" src="images/gateway-cr.png" width="1000px" >}}
 
 ```yaml {caption="[File 2] Gateway Example", linenos=table}
 apiVersion: gateway.networking.k8s.io/v1
@@ -170,7 +176,7 @@ spec:
       name: gateway-options
 ```
 
-The Gateway Resource of the Istio API defines only the configuration of an already deployed Ingress Gateway, so the Ingress Gateway must be deployed separately through a Helm Chart or IstioOperator, whereas the Gateway Resource of the Gateway API is responsible not only for configuration but also for deployment. When a Gateway using the `istio` GatewayClass is created as shown in [File 2], istiod automatically creates a Deployment and Service whose names take the form `[Gateway name]-[GatewayClass name]`. Envoy runs in the Pods of the created Deployment and receives its configuration from istiod via xDS. The Type of the Service is set to `LoadBalancer` by default and can be changed through the `networking.istio.io/service-type` Annotation.
+The Gateway Resource of the Istio API defines only the configuration of an already deployed Ingress Gateway, so the Ingress Gateway must be deployed separately through a Helm Chart or IstioOperator, whereas the Gateway Resource of the Gateway API is responsible not only for configuration but also for deployment. When a Gateway using the `istio` GatewayClass is created as shown in [File 2], istiod automatically creates a Deployment and Service whose names take the form `[Gateway name]-[GatewayClass name]`, as shown in [Figure 3]. Envoy runs in the Pods of the created Deployment and receives its configuration from istiod via xDS. The Type of the Service is set to `LoadBalancer` by default and can be changed through the `networking.istio.io/service-type` Annotation.
 
 ```yaml {caption="[File 3] ConfigMap Example for Customizing Gateway Deployment", linenos=table}
 apiVersion: v1
@@ -214,13 +220,54 @@ $ kubectl -n gateway-namespace get deployment gateway-istio -o jsonpath='{.spec.
 
 Applying the Gateway of [File 2] and the ConfigMap of [File 3] shows that the `gateway-istio` Deployment and Service are automatically created, as can be seen in [Shell 4]. According to the contents of the ConfigMap, the Deployment has 3 Replicas, the `resources` of the `istio-proxy` Container are set to the specified values, and the Service Type is created as `ClusterIP`, confirming that the Customization through `parametersRef` has been reflected. Since no LoadBalancer exists in a kind Cluster, the Service Type was changed to `ClusterIP`, and the ADDRESS of the Gateway is set to the Domain address of the created Service.
 
-#### 1.2.2. Manual Deployment
+#### 1.2.2. Using an Existing Ingress Gateway
 
-```yaml {caption="[File 4] Gateway Example Using a Manually Deployed Ingress Gateway", linenos=table}
+{{< figure caption="[Figure 4] Using an Existing Ingress Gateway" src="images/gateway-ingress.png" width="1000px" >}}
+
+```yaml {caption="[File 4] Ingress Gateway Deployment Example Using Gateway Injection", linenos=table}
+apiVersion: v1
+kind: Service
+metadata:
+  name: istio-ingressgateway
+  namespace: istio-system
+spec:
+  type: ClusterIP
+  selector:
+    istio: ingressgateway
+  ports:
+  - name: http
+    port: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: istio-ingressgateway
+  namespace: istio-system
+spec:
+  selector:
+    matchLabels:
+      istio: ingressgateway
+  template:
+    metadata:
+      annotations:
+        inject.istio.io/templates: gateway
+      labels:
+        istio: ingressgateway
+        sidecar.istio.io/inject: "true"
+        gateway.networking.k8s.io/gateway-name: gateway-ingress
+    spec:
+      containers:
+      - name: istio-proxy
+        image: auto
+```
+
+Instead of using automated deployment, it is also possible to apply only the Gateway API configuration to an already deployed Ingress Gateway. [File 4] shows an example of deploying an Ingress Gateway directly in the **Gateway Injection** manner, where istiod's Injection Webhook creates the `istio-proxy` Container as a Gateway-purpose Proxy according to the `sidecar.istio.io/inject` Label and the `inject.istio.io/templates` Annotation set on the Pod. The `gateway.networking.k8s.io/gateway-name` Label specifies the name of the Gateway to be attached, and the Label must be set for the Routes and Policies attached to the Gateway to be applied correctly.
+
+```yaml {caption="[File 5] Gateway Example Using an Existing Ingress Gateway", linenos=table}
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
-  name: gateway
+  name: gateway-ingress
   namespace: istio-system
 spec:
   gatewayClassName: istio
@@ -237,40 +284,34 @@ spec:
         from: All
 ```
 
-Instead of using automated deployment, it is also possible to apply only the Gateway API configuration to an already deployed Ingress Gateway. When the name of the Ingress Gateway Service is specified in the Gateway's `addresses` with the `Hostname` Type as shown in [File 4], istiod does not create a Deployment and Service and only delivers the Listener configuration to the Ingress Gateway of the specified Service. In this case, the `gateway.networking.k8s.io/gateway-name` Label must be set on the Pods of the Ingress Gateway for the Routes and Policies attached to the Gateway to be applied correctly. Manual deployment is used when the deployment of the Ingress Gateway must be controlled directly, and the automated deployment approach is generally recommended.
+```shell {caption="[Shell 5] Checking the Gateway Using an Existing Ingress Gateway"}
+$ kubectl -n istio-system get gateway,deployment,service
+NAME                                                CLASS   ADDRESS                                               PROGRAMMED   AGE
+gateway.gateway.networking.k8s.io/gateway-ingress   istio   istio-ingressgateway.istio-system.svc.cluster.local   True         10s
 
-#### 1.2.3. Remote Gateway Registration
+NAME                                   READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/istio-ingressgateway   1/1     1            1           16m
+deployment.apps/istiod                 1/1     1            1           16d
 
-```yaml {caption="[File 5] Gateway Example Registering an East-West Gateway in a Remote Cluster", linenos=table}
-apiVersion: gateway.networking.k8s.io/v1
-kind: Gateway
-metadata:
-  name: cross-network-gateway
-  namespace: istio-system
-  labels:
-    topology.istio.io/network: network2
-spec:
-  gatewayClassName: istio-remote
-  addresses:
-  - type: IPAddress
-    value: 10.0.200.10
-  listeners:
-  - name: cross-network
-    port: 15443
-    protocol: TLS
-    tls:
-      mode: Passthrough
+NAME                                  TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                                 AGE
+service/istio-ingressgateway          ClusterIP   10.96.230.0     <none>        80/TCP                                  16m
+service/istiod                        ClusterIP   10.96.229.61    <none>        15010/TCP,15012/TCP,443/TCP,15014/TCP   16d
+service/istiod-revision-tag-default   ClusterIP   10.96.145.230   <none>        15010/TCP,15012/TCP,443/TCP,15014/TCP   16d
 ```
 
-The `istio-remote` GatewayClass is used to register Gateways that istiod does not deploy or manage, and as can be seen in [Shell 2], it is processed under the separate Controller name `istio.io/unmanaged-gateway`. Even when a Gateway using the `istio-remote` GatewayClass is created, istiod does not create a Deployment and Service and only uses the address information specified in `addresses`. [File 5] shows an example of a Gateway that registers an East-West Gateway existing in a remote Cluster on a different Network in a Multi-Network Mesh setup.
+When the name of the Ingress Gateway Service is specified in the Gateway's `addresses` with the `Hostname` Type as shown in [File 5], istiod does not create a Deployment and Service and only delivers the Listener configuration to the Ingress Gateway of the specified Service, as shown in [Figure 4]. Applying [File 4] and [File 5] shows in [Shell 5] that no Deployment and Service in the form of `gateway-istio` are created and that the ADDRESS of the Gateway is set to the address of the existing Ingress Gateway Service specified in `addresses`. The approach of using an existing Ingress Gateway is used when the deployment of the Ingress Gateway must be controlled directly, and the deployment approach via the Gateway CR is generally recommended.
 
-The `topology.istio.io/network` Label specifies the Network to which the remote Gateway belongs, and after registration, Traffic sent to Workloads of that Network is transmitted to the East-West Gateway address specified in `addresses`. Previously, inter-Network Gateway addresses had to be managed through the `meshNetworks` setting of `meshConfig`, but with the `istio-remote` GatewayClass, they can be managed declaratively as Gateway API Resources.
-
-### 1.3. Istio Configuration Conversion
+### 1.3. Gateway Traffic Control
 
 istiod's Gateway API Controller converts Gateway API Resources into internal configuration of the same form as the Istio API. The Gateway Resource is converted into Istio's Gateway configuration, and the HTTPRoute, GRPCRoute, TLSRoute, and TCPRoute Resources are converted into VirtualService configuration. The converted configuration exists only in istiod's Memory and is not stored in Kubernetes, so it cannot be queried through `kubectl`, and the final configuration delivered to Envoy can be checked through the `istioctl proxy-config` command.
 
-```yaml {caption="[File 6] HTTPRoute Example Attached to a Gateway", linenos=table}
+Among the Routes of the Gateway API, Istio supports HTTPRoute, GRPCRoute, TLSRoute, and TCPRoute, and since Envoy-based Istio does not provide a UDP Proxy feature, UDPRoute is not supported. Also, since the Gateway API does not yet provide all of Istio's features as standards, the Istio API must be used together when features like Fault Injection or Circuit Breaking are needed. DestinationRule is applied based on the Host, so it can be used together with the Routes of the Gateway API.
+
+#### 1.3.1. Attaching to the Gateway CR
+
+{{< figure caption="[Figure 5] Traffic Distribution of the HTTPRoute Attached to the Gateway CR" src="images/config-cr.png" width="1000px" >}}
+
+```yaml {caption="[File 6] HTTPRoute Example Attached to the Gateway CR", linenos=table}
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -296,7 +337,7 @@ spec:
       weight: 10
 ```
 
-```shell {caption="[Shell 5] Checking Traffic Distribution through the Gateway"}
+```shell {caption="[Shell 6] Checking Traffic Distribution through the Gateway"}
 # Port-forward to the gateway service
 $ kubectl -n gateway-namespace port-forward svc/gateway-istio 8080:80 &
 
@@ -306,9 +347,9 @@ $ for i in $(seq 1 100); do curl -s -H "Host: server.ssup2.com" http://127.0.0.1
    7 server-v2
 ```
 
-[File 6] shows an example of an HTTPRoute that distributes the Traffic received by the Gateway to the `server-v1` Service at a 90% ratio and the `server-v2` Service at a 10% ratio. After applying the HTTPRoute, sending 100 requests as shown in [Shell 5] results in 93 responses from `server-v1` and 7 responses from `server-v2`, confirming that the distribution follows a ratio close to the `weight` setting. Since no LoadBalancer exists in a kind Cluster, the requests were sent through `port-forward`.
+[File 6] shows an example of an HTTPRoute that specifies the Gateway of [File 2] in `parentRefs` and distributes the Traffic received by the Gateway to the `server-v1` Service at a 90% ratio and the `server-v2` Service at a 10% ratio, as shown in [Figure 5]. After applying the HTTPRoute, sending 100 requests as shown in [Shell 6] results in 93 responses from `server-v1` and 7 responses from `server-v2`, confirming that the distribution follows a ratio close to the `weight` setting. Since no LoadBalancer exists in a kind Cluster, the requests were sent through `port-forward`.
 
-```shell {caption="[Shell 6] Checking the Internal Configuration Conversion of the HTTPRoute"}
+```shell {caption="[Shell 7] Checking the Internal Configuration Conversion of the HTTPRoute"}
 # No VirtualService is stored in kubernetes
 $ kubectl get virtualservice -A
 No resources found
@@ -353,27 +394,88 @@ $ istioctl proxy-config routes gateway-istio-6cf9dd97dd-8lrn4 -n gateway-namespa
                         ...
 ```
 
-As shown in [Shell 6], even after applying the HTTPRoute, no VirtualService is stored in Kubernetes, but the contents of the HTTPRoute have been converted into `weightedClusters` and reflected in the Route configuration of the Gateway Envoy. The `metadata` of the Route specifies a VirtualService path containing the name `istio-autogenerated-k8s-gateway`, which confirms that istiod converts the HTTPRoute into an in-Memory VirtualService for processing.
+As shown in [Shell 7], even after applying the HTTPRoute, no VirtualService is stored in Kubernetes, but the contents of the HTTPRoute have been converted into `weightedClusters` and reflected in the Route configuration of the Gateway Envoy. The `metadata` of the Route specifies a VirtualService path containing the name `istio-autogenerated-k8s-gateway`, which confirms that istiod converts the HTTPRoute into an in-Memory VirtualService for processing.
 
-Among the Routes of the Gateway API, Istio supports HTTPRoute, GRPCRoute, TLSRoute, and TCPRoute, and since Envoy-based Istio does not provide a UDP Proxy feature, UDPRoute is not supported. Also, since the Gateway API does not yet provide all of Istio's features as standards, the Istio API must be used together when features like Fault Injection or Circuit Breaking are needed. DestinationRule is applied based on the Host, so it can be used together with the Routes of the Gateway API.
+#### 1.3.2. Attaching to an Existing Ingress Gateway
 
-### 1.4. Comparison with the Istio API
+{{< figure caption="[Figure 6] Traffic Distribution of the HTTPRoute Attached to an Existing Ingress Gateway" src="images/config-ingress.png" width="1000px" >}}
 
-{{< table caption="[Table 2] Comparison of Istio API and Gateway API" >}}
-| Category | Istio API | Gateway API |
-|---|---|---|
-| Resource Composition | Gateway, VirtualService, DestinationRule | GatewayClass, Gateway, Route |
-| Gateway Role | Defines only the configuration of a deployed Ingress Gateway | Handles both Gateway configuration and deployment |
-| Protocol Handling | Defines HTTP, TLS, TCP in a single VirtualService | Separate Route Resources per Protocol |
-| Role Separation | Limited | Separation of Cluster Operators and App developers |
-| Feature Scope | All Istio features | Focused on standard features |
-{{< /table >}}
+```yaml {caption="[File 7] HTTPRoute Example Attached to a Gateway Using an Existing Ingress Gateway", linenos=table}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: server-ingress
+  namespace: server-namespace
+spec:
+  parentRefs:
+  - name: gateway-ingress
+    namespace: istio-system
+  hostnames:
+  - "server.ssup2.com"
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: server-v1
+      port: 8080
+      weight: 90
+    - name: server-v2
+      port: 8080
+      weight: 10
+```
 
-[Table 2] shows the main differences between the Istio API and the Gateway API. The Istio API allows the use of all of Istio's features, but since it is an Istio-specific API, it cannot be ported to other implementations, whereas the Gateway API is a standard API with high portability but cannot use all of Istio's features. Since Istio supports both APIs, they can be mixed in a single Cluster, but from a management perspective it is recommended to use only one API per Ingress Gateway.
+Even when using an existing Ingress Gateway, the conversion process of the HTTPRoute is the same, and only the target to which the converted configuration is delivered differs. [File 7] shows an example of the `server-ingress` HTTPRoute that specifies the Gateway of [File 5] in `parentRefs` to apply the same distribution rules as [File 6] to the existing Ingress Gateway. As shown in [Figure 6], istiod delivers the converted configuration not to an automatically deployed Gateway but to the Envoy of the existing Ingress Gateway with the `gateway.networking.k8s.io/gateway-name` Label set.
 
-### 1.5. Mesh Traffic Control
+```shell {caption="[Shell 8] Checking the Configuration Conversion on the Existing Ingress Gateway"}
+# Check the converted route config of the existing ingress gateway envoy
+$ istioctl proxy-config routes istio-ingressgateway-585694fd7c-kf6qj -n istio-system --name http.80 -o json
+[
+    {
+        "name": "http.80",
+        "virtualHosts": [
+            {
+                "name": "server.ssup2.com:80",
+                "domains": [
+                    "server.ssup2.com"
+                ],
+                "routes": [
+                    {
+                        "name": "server-namespace.server-ingress.0",
+                        ...
+                        "route": {
+                            "weightedClusters": {
+                                "clusters": [
+                                    {
+                                        "name": "outbound|8080||server-v1.server-namespace.svc.cluster.local",
+                                        "weight": 90
+                                    },
+                                    {
+                                        "name": "outbound|8080||server-v2.server-namespace.svc.cluster.local",
+                                        "weight": 10
+                                    }
+                                ]
+                            },
+                            ...
+                        },
+                        "metadata": {
+                            "filterMetadata": {
+                                "istio": {
+                                    "config": "/apis/networking.istio.io/v1/namespaces/server-namespace/virtual-service/istio-system~gateway-ingress~istio-autogenerated-k8s-gateway~http~server.ssup2.com"
+                                }
+                            }
+                        },
+                        ...
+```
 
-```yaml {caption="[File 7] HTTPRoute Example Attached to a Service", linenos=table}
+As shown in [Shell 8], after applying the HTTPRoute, the contents of the HTTPRoute have also been converted into `weightedClusters` and reflected in the Route configuration of the Envoy of the existing Ingress Gateway. Unlike [Shell 7], the VirtualService path specified in the `metadata` of the Route contains the `istio-system` Namespace where the Gateway of [File 5] exists and the Gateway name, which shows that the HTTPRoute has been converted into the configuration of the Gateway using the existing Ingress Gateway.
+
+### 1.4. Mesh Traffic Control
+
+{{< figure caption="[Figure 7] Mesh Traffic Distribution of the HTTPRoute Attached to a Service" src="images/config-gamma.png" width="1000px" >}}
+
+```yaml {caption="[File 8] HTTPRoute Example Attached to a Service", linenos=table}
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -394,9 +496,9 @@ spec:
       weight: 10
 ```
 
-Through **GAMMA** (Gateway API for Mesh Management and Administration), the Gateway API can be used not only for controlling North-South Traffic coming from outside the Cluster but also for controlling East-West Traffic inside the Mesh. [File 7] shows an example of an HTTPRoute that specifies a Service instead of a Gateway in `parentRefs`, distributing the Traffic sent to the `server` Service inside the Mesh to the `server-v1` and `server-v2` Services. In Sidecar Mode, the Routing rules are applied in the Sidecar of the Client sending the request, which performs the same role as applying a VirtualService to the mesh Gateway.
+Through **GAMMA** (Gateway API for Mesh Management and Administration), the Gateway API can be used not only for controlling North-South Traffic coming from outside the Cluster but also for controlling East-West Traffic inside the Mesh. [File 8] shows an example of an HTTPRoute that specifies a Service instead of a Gateway in `parentRefs`, distributing the Traffic sent to the `server` Service inside the Mesh to the `server-v1` and `server-v2` Services. As shown in [Figure 7], in Sidecar Mode the Routing rules are applied in the Sidecar of the Client sending the request, which performs the same role as applying a VirtualService to the mesh Gateway.
 
-```shell {caption="[Shell 7] Checking Mesh Traffic Distribution"}
+```shell {caption="[Shell 9] Checking Mesh Traffic Distribution"}
 # Before applying the mesh httproute
 $ kubectl -n server-namespace exec client -c curl -- sh -c 'for i in $(seq 1 100); do curl -s http://server:8080/; done' | sort | uniq -c
   55 server-v1
@@ -408,9 +510,9 @@ $ kubectl -n server-namespace exec client -c curl -- sh -c 'for i in $(seq 1 100
   10 server-v2
 ```
 
-[Shell 7] shows the results of sending 100 requests from the `client` Pod to the `server` Service before and after applying the HTTPRoute of [File 7]. Before applying, since there are no Routing rules, the requests are distributed at roughly a 50:50 ratio to the `server-v1` and `server-v2` Pods, which are the Endpoints of the `server` Service, but after applying, it can be confirmed that the requests are distributed at a 90:10 ratio to the `server-v1` and `server-v2` Services according to the `weight` setting of the HTTPRoute.
+[Shell 9] shows the results of sending 100 requests from the `client` Pod to the `server` Service before and after applying the HTTPRoute of [File 8]. Before applying, since there are no Routing rules, the requests are distributed at roughly a 50:50 ratio to the `server-v1` and `server-v2` Pods, which are the Endpoints of the `server` Service, but after applying, it can be confirmed that the requests are distributed at a 90:10 ratio to the `server-v1` and `server-v2` Services according to the `weight` setting of the HTTPRoute.
 
-```shell {caption="[Shell 8] Checking the Route Configuration of the Client Sidecar"}
+```shell {caption="[Shell 10] Checking the Route Configuration of the Client Sidecar"}
 $ istioctl proxy-config routes client -n server-namespace --name 8080 -o json
 ...
             {
@@ -439,35 +541,26 @@ $ istioctl proxy-config routes client -n server-namespace --name 8080 -o json
                             ...
 ```
 
-As shown in [Shell 8], it can be confirmed that the Routing rules are reflected in the Sidecar Route configuration of the `client` Pod that sends the requests, which shows that the rules for Mesh Traffic are applied not at the Gateway but at the Client's Sidecar.
+As shown in [Shell 10], it can be confirmed that the Routing rules are reflected in the Sidecar Route configuration of the `client` Pod that sends the requests, which shows that the rules for Mesh Traffic are applied not at the Gateway but at the Client's Sidecar.
 
-### 1.6. Ambient Mode Waypoint
+### 1.5. Comparison with the Istio API
 
-```yaml {caption="[File 8] Waypoint Gateway Example", linenos=table}
-apiVersion: gateway.networking.k8s.io/v1
-kind: Gateway
-metadata:
-  name: waypoint
-  namespace: server-namespace
-  labels:
-    istio.io/waypoint-for: service
-spec:
-  gatewayClassName: istio-waypoint
-  listeners:
-  - name: mesh
-    port: 15008
-    protocol: HBONE
-```
+{{< table caption="[Table 2] Comparison of Istio API and Gateway API" >}}
+| Category | Istio API | Gateway API |
+|---|---|---|
+| Resource Composition | Gateway, VirtualService, DestinationRule | GatewayClass, Gateway, Route |
+| Gateway Role | Defines only the configuration of a deployed Ingress Gateway | Handles both Gateway configuration and deployment |
+| Protocol Handling | Defines HTTP, TLS, TCP in a single VirtualService | Separate Route Resources per Protocol |
+| Role Separation | Limited | Separation of Cluster Operators and App developers |
+| Feature Scope | All Istio features | Focused on standard features |
+{{< /table >}}
 
-The **Waypoint**, which handles L7 Traffic in Ambient Mode, is also deployed based on the Gateway API. [File 8] shows the Waypoint Gateway created by istioctl's `istioctl waypoint apply` command. The `istio-waypoint` GatewayClass and a Listener with the HBONE Protocol are configured, and when the Gateway is created, istiod automatically deploys the Waypoint's Deployment and Service in the same way as a general Gateway. However, in the case of the Waypoint, the GatewayClass name is not appended to the names of the created Resources.
-
-The deployed Waypoint is used by setting the `istio.io/use-waypoint` Label on Namespaces, Services, or Pods, and Traffic sent to Resources with the Label set passes through the Waypoint. L7 Routing rules can also be applied to Traffic passing through the Waypoint via an HTTPRoute attached to a Service like [File 7]. In this way, Ambient Mode is designed around the Gateway API rather than the Istio API.
+[Table 2] shows the main differences between the Istio API and the Gateway API. The Istio API allows the use of all of Istio's features, but since it is an Istio-specific API, it cannot be ported to other implementations, whereas the Gateway API is a standard API with high portability but cannot use all of Istio's features. Since Istio supports both APIs, they can be mixed in a single Cluster, but from a management perspective it is recommended to use only one API per Ingress Gateway.
 
 ## 2. References
 
 * Istio Kubernetes Gateway API : [https://istio.io/latest/docs/tasks/traffic-management/ingress/gateway-api/](https://istio.io/latest/docs/tasks/traffic-management/ingress/gateway-api/)
 * Istio Gateway Deployment : [https://istio.io/latest/docs/setup/additional-setup/gateway/](https://istio.io/latest/docs/setup/additional-setup/gateway/)
-* Istio Waypoint : [https://istio.io/latest/docs/ambient/usage/waypoint/](https://istio.io/latest/docs/ambient/usage/waypoint/)
 * Gateway API : [https://gateway-api.sigs.k8s.io/](https://gateway-api.sigs.k8s.io/)
 * Gateway API GAMMA : [https://gateway-api.sigs.k8s.io/docs/mesh/mesh-overview/](https://gateway-api.sigs.k8s.io/docs/mesh/mesh-overview/)
 * Istio Gateway API Conversion : [https://deepwiki.com/istio/istio/3.5.1-gateway-api-integration-and-conversion](https://deepwiki.com/istio/istio/3.5.1-gateway-api-integration-and-conversion)
