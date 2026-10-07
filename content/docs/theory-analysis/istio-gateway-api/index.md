@@ -12,7 +12,7 @@ Istio는 자체 Traffic 관리 API인 Gateway, VirtualService Resource를 제공
 
 [Figure 1]은 Istio Gateway API의 구성을 나타내고 있다. istiod의 **Gateway API Controller**는 각 Namespace에 생성된 Gateway, HTTPRoute 같은 Gateway API Resource를 Watch하여 내부의 Istio Gateway, VirtualService 설정으로 변환하며, 변환된 설정은 **crdclient**가 Watch하는 Istio CR의 설정, **Service Registry**가 Watch하는 Kubernetes Service, Endpoints 정보와 함께 **PushContext**로 모인다.
 
-이후 **ConfigGenerator**는 PushContext에 모인 Gateway 설정을 Envoy의 Listener 설정으로, VirtualService 설정을 Envoy의 Route 설정으로 변환하며, **DiscoveryServer**는 변환된 설정을 xDS를 통해서 Ingress/Egress Gateway와 Sidecar를 포함한 모든 Envoy에 전달한다. 따라서 Gateway API를 이용해도 실제 Traffic 처리 방식은 Istio API를 이용하는 경우와 동일하다.
+이후 **ConfigGenerator**는 PushContext에 모인 Gateway 설정을 Envoy의 Listener 설정으로, VirtualService 설정을 Envoy의 Route 설정으로 변환하며, **DiscoveryServer**는 변환된 설정을 xDS를 통해서 Ingress/Egress Gateway와 Sidecar를 포함한 모든 Envoy에 전달한다. 설정을 전달받은 Envoy는 [Figure 1]의 Traffic 흐름과 같이 Cluster 외부에서 유입되는 Traffic을 Gateway에서 수신하여 App의 Sidecar로 전달하고, App 사이의 Traffic은 Sidecar 사이에서 직접 전달한다. 따라서 Gateway API를 이용해도 실제 Traffic 처리 방식은 Istio API를 이용하는 경우와 동일하다.
 
 istiod의 **Gateway Deployment Controller**는 Gateway Resource를 Watch하여 Envoy가 동작하는 Deployment와 Traffic을 수신하는 Service를 직접 생성하는 역할을 수행한다. [Figure 1]의 gateway Namespace처럼 `gateway-external`, `gateway-internal` Gateway를 생성하면 각각 external-gateway, internal-gateway Service와 Deployment가 생성되며, 이를 통해서 필요한 Namespace에 다수의 Gateway를 두고 이용할 수 있다.
 
