@@ -6,7 +6,8 @@ Istio의 Gateway API Inference Extension 구현을 분석하는 문서. 본문 �
 ## 문서 구성 및 상태
 
 - 1.1 Test 환경 구축: Shell 1(환경 구성), File 1(Test Workload — sim/EPP/Service/DestinationRule),
-  File 2(InferencePool/HTTPRoute), Shell 2(Test Workload 목록 — Pod IP·Headless Shadow Service 포함),
+  File 2(Gateway/InferencePool/HTTPRoute — 2026-10-08에 gateway-namespace Namespace와 Gateway 추가됨),
+  Shell 2(Test Workload 목록 — Pod IP·Headless Shadow Service 포함),
   Shell 3(InferencePool 상태 — Accepted/ResolvedRefs Condition).
   본문 [File 1]은 manifests/ 원본에서 sim의 env(`POD_NAME` 등)·resources, EPP의 probe·9003/9090 Port, RBAC을 축약한 버전.
   재현은 manifests/ 원본 기준 (sim의 `POD_NAME` env가 없으면 응답의 `x-inference-pod` Header 값이 달라질 수 있음).
@@ -27,7 +28,13 @@ Istio의 Gateway API Inference Extension 구현을 분석하는 문서. 본문 �
   - Shadow Service는 selector/Target Port가 InferencePool의 것으로 설정된 채 생성되며 ownerReference가 InferencePool로 걸려 있음. Endpoint 등록은 Service selector에 의한 표준 동작.
   - `FailOpen` → `failureModeAllow: true` 변환 확인.
   - v1.6부터 release image는 `epp`가 없고 `lwepp`(Lightweight EPP)만 존재 (registry.k8s.io/gateway-api-inference-extension/lwepp:v1.6.2, amd64 전용 — OrbStack Rosetta로 kind에서 실행됨).
-- Figure 1(istio-inference-gateway.png, 2개 Model 구성) 제작 완료. 초기의 "요청 처리 과정" Figure는 본문에서 제거됨.
+- Figure 1(istio-inference-gateway.png): 2026-10-08 사용자가 istiod 내부 구성 스타일(istio-gateway-api 문서 Figure 1과 동일 체계)로
+  재작성 — istiod Pod의 InferencePool Controller·Gateway API Controller·crdclient·Service Registry → PushContext →
+  ConfigGenerator → DiscoveryServer 파이프라인, Inference Resources(InferencePool/InferenceObjective) Watch,
+  llm Namespace의 model-a 단일 Model 구성(HTTPRoute/InferencePool/Headless Shadow Service/EPP),
+  범례 6종(Configs/Watch/Create/Traffic/Select Endpoint/Get Metrics). 도입부를 5문단으로 재구성
+  (표준 정의+InferencePool Controller / 설정 파이프라인 / Model 구성 / Shadow Service / ext-proc·Override Host 요청 흐름).
+  초기의 "요청 처리 과정" Figure는 본문에서 제거됨.
 - Figure 2(images/test-environment.png, 1.1 Test 환경)와 Figure 3(images/request-processing.png, 1.3 요청 처리 과정)은
   2026-10-06에 matplotlib로 생성한 **초안** — 사용자가 pptx 스타일로 다시 그릴 예정.
   본문 1.1/1.3에 figure shortcode 삽입 완료 (파일명 유지한 채 교체).
@@ -39,8 +46,11 @@ Istio의 Gateway API Inference Extension 구현을 분석하는 문서. 본문 �
   istiod는 이 문서 실측 시 `SUPPORT_GATEWAY_API_INFERENCE_EXTENSION=true`, `ENABLE_GATEWAY_API_INFERENCE_EXTENSION=true`로 재설치된 상태.
 - Inference Extension CRD: `kubectl apply -f https://github.com/kubernetes-sigs/gateway-api-inference-extension/releases/download/v1.6.2/manifests.yaml`
 - 적용 순서: `manifests/namespace.yaml` → `manifests/base/`(vLLM Simulator, ghcr.io/llm-d/llm-d-inference-sim:v0.7.1 multi-arch)
-  → `manifests/epp/`(lwepp Deployment+Service+DestinationRule+RBAC) → `manifests/inferencepool.yaml` → `manifests/httproute.yaml`
-- Gateway는 istio-gateway-api 문서의 `gateway-namespace`/`gateway`(hostname `*.ssup2.com`)를 재사용. 요청 테스트는
+  → `manifests/epp/`(lwepp Deployment+Service+DestinationRule+RBAC) → `manifests/gateway.yaml` → `manifests/inferencepool.yaml` → `manifests/httproute.yaml`
+- Gateway: 2026-10-08부터 본문 [File 2]에 gateway-namespace Namespace + `gateway` Gateway를 포함 (문서 자체 완결성, 사용자 지시).
+  `manifests/gateway.yaml`로도 추가됨. 실측 당시에는 istio-gateway-api 문서의 `gateway-namespace`/`gateway`(hostname `*.ssup2.com`,
+  gateway-options ConfigMap으로 ClusterIP·replicas 3 적용된 상태)를 재사용했으며, [File 2]의 Gateway에는 ConfigMap 참조가 없어서
+  새로 적용하면 Service Type이 LoadBalancer(kind에서는 pending)로 생성되지만 port-forward 테스트에는 영향 없음. 요청 테스트는
   `kubectl -n gateway-namespace port-forward svc/gateway-istio 8080:80` 후 `curl -H "Host: llm.ssup2.com" http://127.0.0.1:8080/v1/completions -d '{"model": "reviews-1", ...}'`.
 - EPP는 기본으로 TLS(secure-serving)라서 DestinationRule(SIMPLE, insecureSkipVerify)이 없으면 ext-proc 연결이 실패한다.
 - Shadow Service 이름의 Hash(`vllm-llama3-8b-ip-22dc7de1`)와 Gateway Pod 이름은 재생성 시 달라지므로 재실측 시 본문 Shell 교체 필요.
@@ -49,6 +59,7 @@ Istio의 Gateway API Inference Extension 구현을 분석하는 문서. 본문 �
 
 - `index.md` — 문서 본문.
 - `manifests/namespace.yaml` — llm-namespace.
+- `manifests/gateway.yaml` — gateway-namespace, `gateway` Gateway (본문 [File 2] 앞부분 대응).
 - `manifests/base/vllm-sim.yaml` — vLLM Simulator Deployment (app=vllm-llama3-8b, 3 replicas, port 8000, lora `reviews-1`).
 - `manifests/epp/epp.yaml` — Lightweight EPP Deployment/Service(9002 http2)/DestinationRule(TLS)/RBAC.
 - `manifests/inferencepool.yaml` — InferencePool vllm-llama3-8b (targetPorts 8000, endpointPickerRef 9002, `FailOpen`).

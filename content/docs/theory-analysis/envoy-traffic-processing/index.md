@@ -125,6 +125,7 @@ Envoy에서 제공하는 커스텀 로직 Filter는 다음과 같다.
 
 * `envoy.filters.http.lua` : Lua Script를 이용한 커스텀 로직.
 * `envoy.filters.http.wasm` : L7 WASM (WebAssembly) 기반 커스텀 로직.
+* `envoy.filters.http.ext_proc` : 외부 gRPC 서비스(External Processor)를 호출하여 요청/응답의 Header와 Body를 검사하거나 수정하는 커스텀 로직. 외부 서비스가 반환한 Dynamic Metadata를 Load Balancing 같은 이후 처리 단계에서 활용할 수도 있다.
 * `envoy.filters.http.fault` : Fault Injection
 * `envoy.filters.http.buffer` : 요청 전체를 Buffering.
 * `envoy.filters.http.health_check` : 특정 경로를 Health Check 응답으로 처리.

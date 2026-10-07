@@ -125,6 +125,7 @@ The custom logic Filters provided by Envoy are as follows.
 
 * `envoy.filters.http.lua` : Custom logic using Lua Scripts.
 * `envoy.filters.http.wasm` : L7 WASM (WebAssembly) based custom logic.
+* `envoy.filters.http.ext_proc` : Custom logic that calls an external gRPC service (External Processor) to inspect or modify the Headers and Bodies of requests/responses. The Dynamic Metadata returned by the external service can also be utilized in later processing stages such as Load Balancing.
 * `envoy.filters.http.fault` : Fault Injection.
 * `envoy.filters.http.buffer` : Buffers the entire request.
 * `envoy.filters.http.health_check` : Handles a specific path as the Health Check response.

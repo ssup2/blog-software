@@ -8,17 +8,19 @@ Istio에서 Gateway API Inference Extension이 어떻게 구현되어 동작하�
 
 {{< figure caption="[Figure 1] Istio Inference Gateway 구성" src="images/istio-inference-gateway.png" width="1000px" >}}
 
-**Gateway API Inference Extension**은 LLM Model Server로 전달되는 Inference Traffic을 제어하기 위한 Gateway API의 확장 표준이며, Istio는 Gateway API와 마찬가지로 Gateway API Inference Extension의 구현체 역할도 수행한다. Controller 역할은 별도의 Controller 설치 없이 istiod가 담당하며, istiod는 InferencePool Resource를 Watch하고 있다가 InferencePool을 참조하는 HTTPRoute가 존재하면 InferencePool을 기존 Service Model로 변환하여 처리하고, Gateway 역할을 수행하는 Envoy에 필요한 설정을 xDS를 통해서 전달한다.
+**Gateway API Inference Extension**은 LLM Model Server로 전달되는 Inference Traffic을 제어하기 위한 Gateway API의 확장 표준이며, Istio는 Gateway API와 마찬가지로 Gateway API Inference Extension의 구현체 역할도 수행한다. Controller 역할은 별도의 Controller 설치 없이 istiod가 담당하며, istiod의 **InferencePool Controller**는 InferencePool, InferenceObjective 같은 Inference Resource를 Watch하고 있다가 InferencePool을 참조하는 HTTPRoute가 존재하면 InferencePool을 기존 Service Model로 변환하여 처리한다.
 
-[Figure 1]은 2개의 Model을 서비스하는 Istio Inference Gateway의 구성을 나타내고 있다. 각 Model은 Model Server의 Deployment, Model Server의 집합을 정의하는 InferencePool, Traffic을 InferencePool로 전달하는 HTTPRoute, 최적의 Model Server를 선택하는 전용 **EPP** (Endpoint Picker)의 조합으로 구성되며, EPP는 자신이 담당하는 Model Server의 Metric만 수집한다.
+[Figure 1]은 Istio Inference Gateway의 구성을 나타내고 있다. InferencePool Controller가 변환한 설정은 **Gateway API Controller**, **crdclient**, **Service Registry**가 각각 Watch하는 Gateway API Resource, Istio CR, Kubernetes Service 설정과 함께 **PushContext**로 모이며, **ConfigGenerator**가 Envoy의 Listener, Route 설정으로 변환한 뒤에 **DiscoveryServer**가 xDS를 통해서 Gateway의 Envoy에 전달한다.
 
-istiod는 Gateway의 Envoy Deployment와 Service뿐만 아니라, InferencePool에 대응하는 **Shadow Service**도 함께 생성한다. Shadow Service는 Istio가 InferencePool이라는 새로운 개념을 직접 처리하는 대신 기존 Service와 동일한 방식으로 처리할 수 있도록, istiod가 InferencePool을 대신하여 생성하는 숨겨진 Headless Service이다. Shadow Service의 selector는 InferencePool의 `selector`로 설정되기 때문에, InferencePool이 선택한 Model Server Pod들은 일반 Service의 Pod처럼 Shadow Service의 Endpoint로 등록되어 관리된다.
+[Figure 1]의 llm Namespace처럼 하나의 Model은 Model Server의 Deployment, Model Server의 집합을 정의하는 InferencePool, Traffic을 InferencePool로 전달하는 HTTPRoute, 최적의 Model Server를 선택하는 전용 **EPP** (Endpoint Picker)의 조합으로 구성되며, Model마다 존재하는 EPP는 자신이 담당하는 Model Server의 Metric만 수집한다.
 
-Envoy에는 Inference를 위한 전용 기능이 존재하지 않기 때문에, Istio는 Envoy의 범용 기능인 **External Processing (ext-proc) Filter**와 **Override Host Load Balancing Policy**를 조합하여 Inference Traffic을 처리한다. Client의 Inference 요청을 수신한 Gateway의 Envoy는 요청 정보를 EPP에게 전달하고, EPP는 수집한 Metric을 기반으로 최적의 Model Server Pod를 선택하여 Envoy에게 반환한다. Envoy는 EPP가 반환한 Model Server Pod로 요청을 전달한다.
+istiod는 Gateway의 Envoy Deployment와 Service뿐만 아니라, InferencePool에 대응하는 **Shadow Service**도 [Figure 1]의 model-a Headless Service처럼 함께 생성한다. Shadow Service는 Istio가 InferencePool이라는 새로운 개념을 직접 처리하는 대신 기존 Service와 동일한 방식으로 처리할 수 있도록, istiod가 InferencePool을 대신하여 생성하는 숨겨진 Headless Service이다. Shadow Service의 selector는 InferencePool의 `selector`로 설정되기 때문에, InferencePool이 선택한 Model Server Pod들은 일반 Service의 Pod처럼 Shadow Service의 Endpoint로 등록되어 관리된다.
+
+Envoy에는 Inference를 위한 전용 기능이 존재하지 않기 때문에, Istio는 Envoy의 범용 기능인 **External Processing (ext-proc) Filter**와 **Override Host Load Balancing Policy**를 조합하여 Inference Traffic을 처리한다. [Figure 1]의 Select Endpoint 흐름과 같이 Client의 Inference 요청을 수신한 Gateway의 Envoy는 요청 정보를 EPP에게 전달하고, EPP는 Get Metrics 흐름을 통해서 수집한 Metric을 기반으로 최적의 Model Server Pod를 선택하여 Envoy에게 반환한다. Envoy는 EPP가 반환한 Model Server Pod로 요청을 전달한다.
 
 ### 1.1. Test 환경 구축
 
-{{< figure caption="[Figure 2] Test 환경 구성" src="images/test-environment.png" width="1000px" >}}
+{{< figure caption="[Figure 2] Test 환경 구성" src="images/test-environment.png" width="800px" >}}
 
 ```shell {caption="[Shell 1] Test 환경 구성"}
 # Create kind cluster
@@ -150,7 +152,28 @@ Test 환경의 Model Server는 [File 1]과 같이 GPU 없이 동작하는 vLLM S
 
 [File 1]을 적용하면 [Shell 2]와 같이 3개의 Model Server Pod와 EPP Pod, EPP Service가 생성된 것을 확인할 수 있다. Service 목록의 `vllm-llama3-8b-ip-22dc7de1` Service는 이후 [File 2]의 InferencePool을 적용하면 istiod가 생성하는 Shadow Service이다.
 
-```yaml {caption="[File 2] InferencePool, HTTPRoute 구성", linenos=table}
+```yaml {caption="[File 2] Gateway, InferencePool, HTTPRoute 구성", linenos=table}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gateway-namespace
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: gateway
+  namespace: gateway-namespace
+spec:
+  gatewayClassName: istio
+  listeners:
+  - name: http
+    protocol: HTTP
+    port: 80
+    hostname: "*.ssup2.com"
+    allowedRoutes:
+      namespaces:
+        from: All
+---
 apiVersion: inference.networking.k8s.io/v1
 kind: InferencePool
 metadata:
@@ -200,7 +223,7 @@ Accepted=True (Accepted)
 ResolvedRefs=True (ResolvedRefs)
 ```
 
-Gateway는 `gateway-namespace` Namespace의 `istio` GatewayClass Gateway를 이용하며, [File 2]는 Model Server Pod를 묶는 `vllm-llama3-8b` InferencePool과 `llm.ssup2.com` Hostname의 Traffic을 InferencePool로 전달하는 HTTPRoute를 나타내고 있다. [Shell 3]은 [File 2] 적용 이후 생성된 InferencePool과 status를 나타내고 있다. status의 `Accepted` Condition을 통해서 InferencePool이 HTTPRoute를 통해서 Gateway에 정상적으로 연결된 것을 확인할 수 있고, `ResolvedRefs` Condition을 통해서 `endpointPickerRef`에 명시된 EPP 참조가 정상적으로 해석된 것을 확인할 수 있다. 이후 본문의 동작 확인은 이 상태의 Test 환경에서 수행한다.
+[File 2]는 Traffic을 수신하는 `istio` GatewayClass의 Gateway, Model Server Pod를 묶는 `vllm-llama3-8b` InferencePool, `llm.ssup2.com` Hostname의 Traffic을 InferencePool로 전달하는 HTTPRoute를 나타내고 있다. [Shell 3]은 [File 2] 적용 이후 생성된 InferencePool과 status를 나타내고 있다. status의 `Accepted` Condition을 통해서 InferencePool이 HTTPRoute를 통해서 Gateway에 정상적으로 연결된 것을 확인할 수 있고, `ResolvedRefs` Condition을 통해서 `endpointPickerRef`에 명시된 EPP 참조가 정상적으로 해석된 것을 확인할 수 있다. 이후 본문의 동작 확인은 이 상태의 Test 환경에서 수행한다.
 
 ### 1.2. InferencePool 변환
 

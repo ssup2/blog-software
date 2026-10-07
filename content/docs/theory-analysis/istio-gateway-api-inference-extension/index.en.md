@@ -8,17 +8,19 @@ This post analyzes how the Gateway API Inference Extension is implemented and op
 
 {{< figure caption="[Figure 1] Istio Inference Gateway Architecture" src="images/istio-inference-gateway.png" width="1000px" >}}
 
-The **Gateway API Inference Extension** is an extension standard of the Gateway API for controlling Inference Traffic delivered to LLM Model Servers, and Istio serves as an implementation of the Gateway API Inference Extension just as it does for the Gateway API. The Controller role is handled by istiod without installing a separate Controller; istiod watches InferencePool Resources, and when an HTTPRoute that references an InferencePool exists, it converts the InferencePool into the existing Service Model and delivers the necessary configuration to the Envoy that acts as the Gateway via xDS.
+The **Gateway API Inference Extension** is an extension standard of the Gateway API for controlling Inference Traffic delivered to LLM Model Servers, and Istio serves as an implementation of the Gateway API Inference Extension just as it does for the Gateway API. The Controller role is handled by istiod without installing a separate Controller; istiod's **InferencePool Controller** Watches Inference Resources such as InferencePools and InferenceObjectives, and when an HTTPRoute that references an InferencePool exists, it converts the InferencePool into the existing Service Model.
 
-[Figure 1] shows the architecture of an Istio Inference Gateway serving 2 Models. Each Model consists of the combination of a Model Server Deployment, an InferencePool that defines the set of Model Servers, an HTTPRoute that forwards Traffic to the InferencePool, and a dedicated **EPP** (Endpoint Picker) that selects the optimal Model Server, and each EPP collects only the Metrics of the Model Servers it is responsible for.
+[Figure 1] shows the architecture of the Istio Inference Gateway. The configuration converted by the InferencePool Controller is gathered into the **PushContext** together with the Gateway API Resource, Istio CR, and Kubernetes Service configuration Watched by the **Gateway API Controller**, the **crdclient**, and the **Service Registry** respectively, and after the **ConfigGenerator** converts it into Envoy Listener and Route configuration, the **DiscoveryServer** delivers it to the Gateway's Envoy via xDS.
 
-istiod creates not only the Gateway's Envoy Deployment and Service but also a **Shadow Service** corresponding to the InferencePool. The Shadow Service is a hidden Headless Service that istiod creates on behalf of the InferencePool, so that Istio can handle the new InferencePool concept in the same way as existing Services instead of processing it directly. Since the Shadow Service's selector is set to the InferencePool's `selector`, the Model Server Pods selected by the InferencePool are registered and managed as the Shadow Service's Endpoints, just like the Pods of a normal Service.
+Like the llm Namespace in [Figure 1], a single Model consists of the combination of a Model Server Deployment, an InferencePool that defines the set of Model Servers, an HTTPRoute that forwards Traffic to the InferencePool, and a dedicated **EPP** (Endpoint Picker) that selects the optimal Model Server, and the EPP that exists per Model collects only the Metrics of the Model Servers it is responsible for.
 
-Since Envoy has no dedicated feature for Inference, Istio processes Inference Traffic by combining Envoy's general-purpose features, the **External Processing (ext-proc) Filter** and the **Override Host Load Balancing Policy**. The Gateway's Envoy that receives a Client's Inference request forwards the request information to the EPP, and the EPP selects the optimal Model Server Pod based on the collected Metrics and returns it to Envoy. Envoy forwards the request to the Model Server Pod returned by the EPP.
+istiod creates not only the Gateway's Envoy Deployment and Service but also a **Shadow Service** corresponding to the InferencePool, like the model-a Headless Service in [Figure 1]. The Shadow Service is a hidden Headless Service that istiod creates on behalf of the InferencePool, so that Istio can handle the new InferencePool concept in the same way as existing Services instead of processing it directly. Since the Shadow Service's selector is set to the InferencePool's `selector`, the Model Server Pods selected by the InferencePool are registered and managed as the Shadow Service's Endpoints, just like the Pods of a normal Service.
+
+Since Envoy has no dedicated feature for Inference, Istio processes Inference Traffic by combining Envoy's general-purpose features, the **External Processing (ext-proc) Filter** and the **Override Host Load Balancing Policy**. The Gateway's Envoy that receives a Client's Inference request forwards the request information to the EPP as in the Select Endpoint flow of [Figure 1], and the EPP selects the optimal Model Server Pod based on the Metrics collected through the Get Metrics flow and returns it to Envoy. Envoy forwards the request to the Model Server Pod returned by the EPP.
 
 ### 1.1. Test Environment Setup
 
-{{< figure caption="[Figure 2] Test Environment" src="images/test-environment.png" width="1000px" >}}
+{{< figure caption="[Figure 2] Test Environment" src="images/test-environment.png" width="800px" >}}
 
 ```shell {caption="[Shell 1] Test Environment Setup"}
 # Create kind cluster
@@ -150,7 +152,28 @@ The Model Server of the Test environment is composed of 3 Pods of the vLLM Simul
 
 After applying [File 1], the 3 Model Server Pods, the EPP Pod, and the EPP Service can be seen created as shown in [Shell 2]. The `vllm-llama3-8b-ip-22dc7de1` Service in the Service list is the Shadow Service that istiod creates once the InferencePool of [File 2] is applied later.
 
-```yaml {caption="[File 2] InferencePool, HTTPRoute Configuration", linenos=table}
+```yaml {caption="[File 2] Gateway, InferencePool, HTTPRoute Configuration", linenos=table}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gateway-namespace
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: gateway
+  namespace: gateway-namespace
+spec:
+  gatewayClassName: istio
+  listeners:
+  - name: http
+    protocol: HTTP
+    port: 80
+    hostname: "*.ssup2.com"
+    allowedRoutes:
+      namespaces:
+        from: All
+---
 apiVersion: inference.networking.k8s.io/v1
 kind: InferencePool
 metadata:
@@ -200,7 +223,7 @@ Accepted=True (Accepted)
 ResolvedRefs=True (ResolvedRefs)
 ```
 
-The Gateway uses the `istio` GatewayClass Gateway in the `gateway-namespace` Namespace, and [File 2] shows the `vllm-llama3-8b` InferencePool that groups the Model Server Pods and the HTTPRoute that forwards Traffic of the `llm.ssup2.com` Hostname to the InferencePool. [Shell 3] shows the InferencePool and its status after applying [File 2]. The `Accepted` Condition of the status confirms that the InferencePool is properly connected to the Gateway through the HTTPRoute, and the `ResolvedRefs` Condition confirms that the EPP reference specified in `endpointPickerRef` has been properly resolved. The behavior verification in the rest of this post is performed on the Test environment in this state.
+[File 2] shows the Gateway of the `istio` GatewayClass that receives Traffic, the `vllm-llama3-8b` InferencePool that groups the Model Server Pods, and the HTTPRoute that forwards Traffic of the `llm.ssup2.com` Hostname to the InferencePool. [Shell 3] shows the InferencePool and its status after applying [File 2]. The `Accepted` Condition of the status confirms that the InferencePool is properly connected to the Gateway through the HTTPRoute, and the `ResolvedRefs` Condition confirms that the EPP reference specified in `endpointPickerRef` has been properly resolved. The behavior verification in the rest of this post is performed on the Test environment in this state.
 
 ### 1.2. InferencePool Conversion
 
