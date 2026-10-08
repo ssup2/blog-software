@@ -95,7 +95,11 @@ The **HTTP Connection Manager** (HCM) operates as the Terminal Network Filter th
 
 When request Traffic is sent from the Downstream to the Upstream, the **HTTP Codec** decodes the Stream and separates the Header and Body so that HTTP Filters can process it in a consistent form regardless of the HTTP Protocol Version. Conversely, when response Traffic is sent from the Upstream to the Downstream, it encodes the Stream to match the HTTP Protocol Version in use by the Downstream and sends it.
 
-##### 1.5.1.2. Downstream HTTP Filter
+##### 1.5.1.2. Route Match
+
+**Route Match** is responsible for selecting the Route that will handle a request from the Route Config, based on the request Headers separated by the HTTP Codec. A Route is selected by comparing the Domains of the Virtual Hosts and the Path, Header, and Query Parameter Match conditions of each Route, and the selected Route is cached in the Stream and referenced in later stages. Since Route Match runs before the Downstream HTTP Filters, each Downstream HTTP Filter can apply its behavior differently per Route by referring to the per-Route configuration (`typed_per_filter_config`) set on the selected Route.
+
+##### 1.5.1.3. Downstream HTTP Filter
 
 The **Downstream HTTP Filter** processes Traffic on an L7 basis before handing it to the Router. It can perform various functions such as authentication/authorization, Traffic limiting, and Traffic transformation. Downstream HTTP Filters can also be freely reordered, but the Router Filter must be located last.
 
@@ -130,9 +134,9 @@ The custom logic Filters provided by Envoy are as follows.
 * `envoy.filters.http.buffer` : Buffers the entire request.
 * `envoy.filters.http.health_check` : Handles a specific path as the Health Check response.
 
-##### 1.5.1.3. Router Filter
+##### 1.5.1.4. Router Filter
 
-The **Router Filter** is the Terminal Filter located at the end of the Downstream HTTP Filters, responsible for sending the request to the actual Upstream. For a request that has passed all the preceding Filters, it determines the **Target Cluster** according to the rules of the Route Config. Then, unhealthy Hosts among the Hosts belonging to the Cluster are excluded through the **Outlier Detection** policy. Afterwards, the actual Host is selected from the remaining healthy Hosts according to the **Load Balancing** policy, and the request is delivered through the connection to that Host.
+The **Router Filter** is the Terminal Filter located at the end of the Downstream HTTP Filters, responsible for sending the request to the actual Upstream. For a request that has passed all the preceding Filters, it determines the **Target Cluster** specified in the Route selected by Route Match. Then, unhealthy Hosts among the Hosts belonging to the Cluster are excluded through the **Outlier Detection** policy. Afterwards, the actual Host is selected from the remaining healthy Hosts according to the **Load Balancing** policy, and the request is delivered through the connection to that Host.
 
 The Router Filter provides the following Load Balancing policies.
 
@@ -203,6 +207,7 @@ static_resources:
         stat_prefix: ingress_http
         codec_type: AUTO                              # ── 7. HTTP Codec ──
 
+        # ── 8. Route Match ─────────────────────────────────────
         route_config:
           name: local_route
           virtual_hosts:
@@ -212,7 +217,7 @@ static_resources:
             - match: { prefix: "/" }
               route: { cluster: backend }
 
-        # ── 8. Downstream HTTP Filter ──────────────────────────
+        # ── 9. Downstream HTTP Filter ──────────────────────────
         http_filters:
         - name: envoy.filters.http.cors
         - name: envoy.filters.http.jwt_authn
@@ -221,7 +226,7 @@ static_resources:
         - name: envoy.filters.http.compressor
         - name: envoy.filters.http.lua
 
-        # ── 9. Router Filter (terminal filter of the downstream chain) ──
+        # ── 10. Router Filter (terminal filter of the downstream chain) ──
         - name: envoy.filters.http.router
 
     # (b) Match by ALPN — route h2 traffic to this chain
@@ -252,27 +257,27 @@ static_resources:
         explicit_http_config:
           http_protocol_options: {}
 
-        # ── 10. Upstream HTTP Filter ──────────────────────────
+        # ── 11. Upstream HTTP Filter ──────────────────────────
         http_filters:
         - name: envoy.filters.http.header_mutation
         - name: envoy.filters.http.lua
         - name: envoy.filters.http.upstream_codec        # terminal
 
-    # ── 11. Upstream Transport Socket (TLS origination) ────────
+    # ── 12. Upstream Transport Socket (TLS origination) ────────
     transport_socket:
       name: envoy.transport_sockets.tls
       sni: httpbin.org
 ```
 
-[Config 1] is an example showing where the components examined in Chapter 1 are defined in an actual Envoy configuration, and the numbers in the comments correspond to the components of [Figure 1]. For brevity, the detailed configuration of each Filter (`typed_config`) is omitted and only the Filter names are shown. It can be seen that the components in the Downstream direction (1-9) are defined under `listeners`, and the components in the Upstream direction (10-11) are defined under `clusters`.
+[Config 1] is an example showing where the components examined in Chapter 1 are defined in an actual Envoy configuration, and the numbers in the comments correspond to the components of [Figure 1]. For brevity, the detailed configuration of each Filter (`typed_config`) is omitted and only the Filter names are shown. It can be seen that the components in the Downstream direction (1-10) are defined under `listeners`, and the components in the Upstream direction (11-12) are defined under `clusters`.
 
 `main_listener` is the Listener that accepts Downstream connections on the `10000` Port (1), and `listener_filters` contains the Listener Filter Chain composed in the recommended order described in 1.2 (2). The SNI and ALPN information extracted by the Listener Filters is compared against the `filter_chain_match` conditions of each Filter Chain defined in `filter_chains` and used to select the one Filter Chain that will handle the connection, and this selection is the role of the Filter Chain Manager (3). In the example, Chain (a) is matched by SNI and Chain (b) is matched by ALPN.
 
 The `transport_socket` of the selected Filter Chain corresponds to the Downstream Transport Socket, and since the TLS Transport Socket is specified together with certificates, it performs TLS Termination and pushes Plain Text up to the Network Filter Chain (4). The Network Filter Chain is composed in `filters` (5), where the three Non-terminal Filters `connection_limit`, `rbac`, and `local_ratelimit` inspect the connection at the L4 level, and then the Terminal Filter, the HTTP Connection Manager, takes charge of HTTP processing (6). The `codec_type` of the HTTP Connection Manager is the setting that specifies the HTTP Codec, and since it is set to `AUTO`, the Codec matching the HTTP Version used by the Downstream is selected automatically (7).
 
-The `http_filters` of the HTTP Connection Manager composes the Downstream HTTP Filter Chain (8), and the Router Filter located at the end determines the Target Cluster according to the rules of `route_config` (9). The `route_config` in the example is a simple configuration that routes requests of every Domain (`*`) and every path (`/`) to the `backend` Cluster, and the actual Host is selected according to the Load Balancing policy specified in the `lb_policy` of the `backend` Cluster.
+The `route_config` of the HTTP Connection Manager defines the rules that Route Match uses to select a Route (8), and in the example it is a simple configuration where a single Route is selected for requests of every Domain (`*`) and every path (`/`). The `http_filters` composes the Downstream HTTP Filter Chain (9), and the Router Filter located at the end forwards the request to the `backend` Cluster specified in the selected Route (10), with the actual Host selected according to the Load Balancing policy specified in the `lb_policy` of the `backend` Cluster.
 
-The components in the Upstream direction are located in the definition of the Cluster that the Router Filter selects. The Upstream HTTP Filter Chain is composed as `http_filters` under the Cluster's `typed_extension_protocol_options`, and the `upstream_codec` Terminal Filter at the end is responsible for Encoding/Decoding in the Upstream direction (10). The Cluster's `transport_socket` corresponds to the Upstream Transport Socket, and since the TLS Transport Socket is specified, it performs TLS Origination, which encrypts the Traffic going out to the Upstream (11). In this way, the Listener's Transport Socket terminates TLS in the Downstream direction and the Cluster's Transport Socket newly starts TLS in the Upstream direction, so the Filter Chains between the two Transport Sockets always process Plain Text.
+The components in the Upstream direction are located in the definition of the Cluster that the Router Filter selects. The Upstream HTTP Filter Chain is composed as `http_filters` under the Cluster's `typed_extension_protocol_options`, and the `upstream_codec` Terminal Filter at the end is responsible for Encoding/Decoding in the Upstream direction (11). The Cluster's `transport_socket` corresponds to the Upstream Transport Socket, and since the TLS Transport Socket is specified, it performs TLS Origination, which encrypts the Traffic going out to the Upstream (12). In this way, the Listener's Transport Socket terminates TLS in the Downstream direction and the Cluster's Transport Socket newly starts TLS in the Upstream direction, so the Filter Chains between the two Transport Sockets always process Plain Text.
 
 ## 3. References
 

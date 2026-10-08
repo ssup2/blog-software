@@ -95,7 +95,11 @@ virtual FilterStatus onWrite(Buffer::Instance& data, bool end_stream) PURE;
 
 **HTTP Codec**은 Downstream에서 Upstream으로 요청 Traffic을 전송하는 경우에는, HTTP Protocol Version에 관계없이 HTTP Filter가 일관된 형태로 처리할 수 있도록 Stream을 Decoding하여 Header와 Body를 분리한다. 반대로 Upstream에서 Downstream으로 응답 Traffic을 전송하는 경우에는, Downstream에서 이용중인 HTTP Protocol Version에 맞춰서 Stream을 Encoding하여 전송하는 역할을 수행한다.
 
-##### 1.5.1.2. Downstream HTTP Filter
+##### 1.5.1.2. Route Match
+
+**Route Match**는 HTTP Codec이 분리한 요청 Header를 기반으로, Route Config에서 해당 요청을 처리할 Route를 선택하는 역할을 수행한다. Virtual Host의 Domain과 각 Route의 Path, Header, Query Parameter Match 조건을 비교하여 Route를 선택하며, 선택된 Route는 Stream에 Cache되어 이후 단계에서 참조된다. Route Match가 Downstream HTTP Filter보다 먼저 수행되기 때문에, 각 Downstream HTTP Filter는 선택된 Route에 설정된 Route 단위 설정(`typed_per_filter_config`)을 참조하여 자신의 동작을 Route별로 다르게 적용할 수 있다.
+
+##### 1.5.1.3. Downstream HTTP Filter
 
 **Downstream HTTP Filter**는 Router에 넘기기 전에 L7 기반으로 Traffic을 처리하는 역할을 수행한다. 인증/인가, Traffic 제한, Traffic 가공 등의 다양한 기능을 수행할 수 있다. Downstream HTTP Filter도 자유롭게 순서를 변경하여 구성할 수 있지만, Router Filter는 반드시 마지막에 위치해야 한다.
 
@@ -130,9 +134,9 @@ Envoy에서 제공하는 커스텀 로직 Filter는 다음과 같다.
 * `envoy.filters.http.buffer` : 요청 전체를 Buffering.
 * `envoy.filters.http.health_check` : 특정 경로를 Health Check 응답으로 처리.
 
-##### 1.5.1.3. Router Filter
+##### 1.5.1.4. Router Filter
 
-**Router Filter**는 Downstream HTTP Filter 의 마지막에 위치하는 Terminal Filter로, 요청을 실제 Upstream으로 보내는 역할을 담당한다. 앞의 모든 Filter를 통과한 요청에 대해, Route Config의 규칙에 따라 **Target Cluster**를 결정한다. 이후 **Outlier Detection** 정책을 통해서 Cluster에 소속되어 있는 Host 중에서 비정상 Host를 제외한다. 이후에는 남은 정상 Host 중에서 **Load Balancing** 정책에 따라 실제 Host를 선택하고, 해당 Host로의 연결을 통해 요청을 전달한다.
+**Router Filter**는 Downstream HTTP Filter 의 마지막에 위치하는 Terminal Filter로, 요청을 실제 Upstream으로 보내는 역할을 담당한다. 앞의 모든 Filter를 통과한 요청에 대해, Route Match가 선택한 Route에 명시된 **Target Cluster**를 결정한다. 이후 **Outlier Detection** 정책을 통해서 Cluster에 소속되어 있는 Host 중에서 비정상 Host를 제외한다. 이후에는 남은 정상 Host 중에서 **Load Balancing** 정책에 따라 실제 Host를 선택하고, 해당 Host로의 연결을 통해 요청을 전달한다.
 
 Router Filter는 다음과 같은 Load Balancing 정책을 제공한다.
 
@@ -203,6 +207,7 @@ static_resources:
         stat_prefix: ingress_http
         codec_type: AUTO                              # ── 7. HTTP Codec ──
 
+        # ── 8. Route Match ─────────────────────────────────────
         route_config:
           name: local_route
           virtual_hosts:
@@ -212,7 +217,7 @@ static_resources:
             - match: { prefix: "/" }
               route: { cluster: backend }
 
-        # ── 8. Downstream HTTP Filter ──────────────────────────
+        # ── 9. Downstream HTTP Filter ──────────────────────────
         http_filters:
         - name: envoy.filters.http.cors
         - name: envoy.filters.http.jwt_authn
@@ -221,7 +226,7 @@ static_resources:
         - name: envoy.filters.http.compressor
         - name: envoy.filters.http.lua
 
-        # ── 9. Router Filter (terminal filter of the downstream chain) ──
+        # ── 10. Router Filter (terminal filter of the downstream chain) ──
         - name: envoy.filters.http.router
 
     # (b) Match by ALPN — route h2 traffic to this chain
@@ -252,27 +257,27 @@ static_resources:
         explicit_http_config:
           http_protocol_options: {}
 
-        # ── 10. Upstream HTTP Filter ──────────────────────────
+        # ── 11. Upstream HTTP Filter ──────────────────────────
         http_filters:
         - name: envoy.filters.http.header_mutation
         - name: envoy.filters.http.lua
         - name: envoy.filters.http.upstream_codec        # terminal
 
-    # ── 11. Upstream Transport Socket (TLS origination) ────────
+    # ── 12. Upstream Transport Socket (TLS origination) ────────
     transport_socket:
       name: envoy.transport_sockets.tls
       sni: httpbin.org
 ```
 
-[Config 1]은 1장에서 살펴본 구성 요소들이 실제 Envoy 설정의 어느 위치에 정의되는지 나타내는 예시이며, 주석의 번호는 [Figure 1]의 각 구성 요소에 대응한다. 분량상 각 Filter의 상세 설정(`typed_config`)은 생략하고 Filter 이름만 표기했다. Downstream 방향의 구성 요소(1-9)는 `listeners` 아래에, Upstream 방향의 구성 요소(10-11)는 `clusters` 아래에 정의된다는 것을 확인할 수 있다.
+[Config 1]은 1장에서 살펴본 구성 요소들이 실제 Envoy 설정의 어느 위치에 정의되는지 나타내는 예시이며, 주석의 번호는 [Figure 1]의 각 구성 요소에 대응한다. 분량상 각 Filter의 상세 설정(`typed_config`)은 생략하고 Filter 이름만 표기했다. Downstream 방향의 구성 요소(1-10)는 `listeners` 아래에, Upstream 방향의 구성 요소(11-12)는 `clusters` 아래에 정의된다는 것을 확인할 수 있다.
 
 `main_listener`는 `10000` Port에서 Downstream 연결을 수락하는 Listener이며 (1), `listener_filters`에는 1.2에서 설명한 권장 순서대로 Listener Filter Chain이 구성되어 있다 (2). Listener Filter가 추출한 SNI, ALPN 정보는 `filter_chains`에 정의된 각 Filter Chain의 `filter_chain_match` 조건과 비교되어 해당 연결을 처리할 Filter Chain 하나를 선택하는 데 사용되며, 이 선택이 Filter Chain Manager의 역할이다 (3). 예시에서는 (a) Chain이 SNI 기준으로, (b) Chain이 ALPN 기준으로 매칭된다.
 
 선택된 Filter Chain의 `transport_socket`은 Downstream Transport Socket에 해당하며, TLS Transport Socket이 인증서와 함께 지정되어 있어 TLS Termination을 수행한 뒤 Plain Text를 Network Filter Chain으로 올린다 (4). `filters`에는 Network Filter Chain이 구성되며 (5), `connection_limit`, `rbac`, `local_ratelimit` 세 Non-terminal Filter가 L4 수준에서 연결을 검사한 뒤 Terminal Filter인 HTTP Connection Manager가 HTTP 처리를 담당한다 (6). HTTP Connection Manager의 `codec_type`은 HTTP Codec을 지정하는 설정으로, `AUTO`로 설정되어 있어 Downstream이 이용하는 HTTP Version에 맞는 Codec이 자동으로 선택된다 (7).
 
-HTTP Connection Manager의 `http_filters`에는 Downstream HTTP Filter Chain이 구성되며 (8), 마지막에 위치하는 Router Filter가 `route_config`의 규칙에 따라 Target Cluster를 결정한다 (9). 예시의 `route_config`는 모든 Domain (`*`)의 모든 경로 (`/`) 요청을 `backend` Cluster로 라우팅하는 단순한 구성이며, `backend` Cluster의 `lb_policy`에 지정된 Load Balancing 정책에 따라 실제 Host가 선택된다.
+HTTP Connection Manager의 `route_config`는 Route Match가 Route를 선택할 때 이용하는 규칙을 정의하며 (8), 예시에서는 모든 Domain (`*`)의 모든 경로 (`/`) 요청에 하나의 Route가 선택되는 단순한 구성이다. `http_filters`에는 Downstream HTTP Filter Chain이 구성되며 (9), 마지막에 위치하는 Router Filter가 선택된 Route에 명시된 `backend` Cluster로 요청을 전달하고 (10), `backend` Cluster의 `lb_policy`에 지정된 Load Balancing 정책에 따라 실제 Host가 선택된다.
 
-Upstream 방향의 구성 요소는 Router Filter가 선택하는 Cluster의 정의에 위치한다. Upstream HTTP Filter Chain은 Cluster의 `typed_extension_protocol_options` 아래에 `http_filters`로 구성되며, 마지막의 `upstream_codec` Terminal Filter가 Upstream 방향의 Encoding/Decoding을 담당한다 (10). Cluster의 `transport_socket`은 Upstream Transport Socket에 해당하며, TLS Transport Socket이 지정되어 있어 Upstream으로 나가는 Traffic을 암호화하는 TLS Origination을 수행한다 (11). 이처럼 Downstream 방향은 Listener의 Transport Socket이 TLS를 종료하고 Upstream 방향은 Cluster의 Transport Socket이 TLS를 새로 시작하므로, 두 Transport Socket 사이의 Filter Chain들은 항상 Plain Text를 처리한다.
+Upstream 방향의 구성 요소는 Router Filter가 선택하는 Cluster의 정의에 위치한다. Upstream HTTP Filter Chain은 Cluster의 `typed_extension_protocol_options` 아래에 `http_filters`로 구성되며, 마지막의 `upstream_codec` Terminal Filter가 Upstream 방향의 Encoding/Decoding을 담당한다 (11). Cluster의 `transport_socket`은 Upstream Transport Socket에 해당하며, TLS Transport Socket이 지정되어 있어 Upstream으로 나가는 Traffic을 암호화하는 TLS Origination을 수행한다 (12). 이처럼 Downstream 방향은 Listener의 Transport Socket이 TLS를 종료하고 Upstream 방향은 Cluster의 Transport Socket이 TLS를 새로 시작하므로, 두 Transport Socket 사이의 Filter Chain들은 항상 Plain Text를 처리한다.
 
 ## 3. 참조
 
