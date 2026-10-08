@@ -35,10 +35,13 @@ Istio의 Gateway API Inference Extension 구현을 분석하는 문서. 본문 �
   범례 6종(Configs/Watch/Create/Traffic/Select Endpoint/Get Metrics). 도입부를 5문단으로 재구성
   (표준 정의+InferencePool Controller / 설정 파이프라인 / Model 구성 / Shadow Service / ext-proc·Override Host 요청 흐름).
   초기의 "요청 처리 과정" Figure는 본문에서 제거됨.
-- Figure 2(images/test-environment.png, 1.1 Test 환경)와 Figure 3(images/request-processing.png, 1.3 요청 처리 과정)은
-  2026-10-06에 matplotlib로 생성한 **초안** — 사용자가 pptx 스타일로 다시 그릴 예정.
-  본문 1.1/1.3에 figure shortcode 삽입 완료 (파일명 유지한 채 교체).
-  Figure 3의 범례는 Figure 1과 동일 체계(Traffic 빨강, Select Endpoint 파랑 점선, Get Metrics 주황) + Internal 검정.
+- Figure 2(images/test-environment.png, 1.1)와 Figure 3(images/request-processing.png, 1.3)은 2026-10-08 사용자가 pptx 스타일로
+  재작성 완료 (matplotlib 초안 대체). Figure 3는 Gateway Envoy 내부 구조 기준 — ingress-gateway Pod > Ingress envoy >
+  Network Filters > HCM(HTTP Codec → Route Match(llm.ssup2.com) → Downstream HTTP Filters의 ext_proc → Router),
+  istiod의 RDS Route Table 전달, Endpoint Picker Cluster(TLS via DestinationRule) → EPP Pod,
+  Shadow Service Cluster(Override Host LB Policy) → Model Pod Upstream Connection, x-gateway-destination-endpoint
+  Request Header·envoy.lb Dynamic Metadata 두 채널 표현. 범례: RDS Config 검정/Traffic 빨강/Select Endpoint 파랑/Get Metrics 주황.
+  1.3 도입부를 이 구조 기준 3문단(RDS·Route Match 흐름 / ext-proc 정의·EPP Cluster / Override Host·Shadow Service Cluster)으로 재구성.
 
 ## Test 환경 (재현 방법)
 

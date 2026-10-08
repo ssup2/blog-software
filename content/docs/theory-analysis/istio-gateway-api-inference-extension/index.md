@@ -248,9 +248,11 @@ $ istioctl proxy-config endpoints gateway-istio-6cf9dd97dd-8lrn4 -n gateway-name
 
 {{< figure caption="[Figure 3] Inference 요청 처리 과정" src="images/request-processing.png" width="1000px" >}}
 
-[Figure 3]은 Gateway Envoy의 Inference 요청 처리 과정을 나타내고 있다. Envoy의 ext-proc Filter는 요청과 응답의 Header, Body를 외부 gRPC Server에 전달하여 외부 Server가 Traffic을 검사하고 수정할 수 있도록 하는 HTTP Filter이며, Inference Extension에서는 EPP가 ext-proc 요청을 수신하는 외부 gRPC Server 역할을 수행한다.
+[Figure 3]은 Gateway Envoy의 Inference 요청 처리 과정을 나타내고 있다. istiod는 InferencePool을 참조하는 Route가 포함된 Route Table을 RDS를 통해서 Envoy에 전달하며, Client의 요청을 수신한 HTTP Connection Manager는 HTTP Codec으로 요청을 Decoding한 뒤에 Route Match를 통해서 `llm.ssup2.com` Hostname에 해당하는 Route를 선택한다.
 
-Override Host Load Balancing Policy는 Load Balancing 알고리즘으로 Endpoint를 선택하지 않고, 요청의 특정 Header나 요청에 설정된 Envoy Metadata에서 Endpoint 주소를 읽어 해당 Endpoint로 Traffic을 전달하는 Load Balancing 정책이다. Envoy는 두 기능을 통해서 EPP가 선택한 Model Server Pod로 Inference 요청을 전달한다.
+Envoy의 ext-proc Filter는 요청과 응답의 Header, Body를 외부 gRPC Server에 전달하여 외부 Server가 Traffic을 검사하고 수정할 수 있도록 하는 HTTP Filter이며, Inference Extension에서는 EPP가 ext-proc 요청을 수신하는 외부 gRPC Server 역할을 수행한다. [Figure 3]과 같이 ext-proc Filter는 Downstream HTTP Filter Chain의 중간에 위치하며, EPP와의 연결은 별도의 Endpoint Picker Cluster를 통해서 수행되고 [File 1]의 DestinationRule에 의해서 TLS가 적용된다.
+
+Override Host Load Balancing Policy는 Load Balancing 알고리즘으로 Endpoint를 선택하지 않고, 요청의 특정 Header나 요청에 설정된 Envoy Metadata에서 Endpoint 주소를 읽어 해당 Endpoint로 Traffic을 전달하는 Load Balancing 정책이며, [Figure 3]과 같이 Shadow Service Cluster에 설정된다. Envoy는 두 기능을 통해서 EPP가 선택한 Model Server Pod로 Inference 요청을 전달한다.
 
 ```shell {caption="[Shell 5] InferencePool Route의 ext-proc Filter 설정 확인"}
 $ istioctl proxy-config routes gateway-istio-6cf9dd97dd-8lrn4 -n gateway-namespace --name http.80 -o json
@@ -290,7 +292,7 @@ $ istioctl proxy-config routes gateway-istio-6cf9dd97dd-8lrn4 -n gateway-namespa
 
 [Shell 5]는 InferencePool을 참조하는 Route에 설정된 ext-proc Filter의 실제 설정을 나타내고 있다. Route의 Cluster는 InferencePool의 Shadow Service Cluster로 설정되어 있으며, ext-proc Filter의 `grpcService`에는 EPP의 Cluster가 명시되어 있다.
 
-Gateway의 Envoy가 요청을 수신하면 HTTPRoute의 `matches` 조건에 따라서 InferencePool의 Route가 선택되고, Route에 설정된 ext-proc Filter는 요청의 Header와 Body를 EPP에게 gRPC로 전달한다. ext-proc Filter는 InferencePool을 참조하는 Route에만 설정되기 때문에, 동일한 Gateway에서 일반 Service로 전달되는 요청은 EPP를 경유하지 않는다. Route 설정에는 특정 Pod를 지정하는 부분이 존재하지 않으며, Route는 요청을 EPP에게 전달하는 것까지만 담당하고 EPP가 선택한 Pod로 요청을 전달하는 동작은 Shadow Service Cluster의 Load Balancing 설정이 담당한다.
+Gateway의 Envoy가 요청을 수신하면 HTTPRoute의 `matches` 조건에 따라서 Route Match가 InferencePool의 Route를 선택하고, Route에 설정된 ext-proc Filter는 요청의 Header와 Body를 EPP에게 gRPC로 전달한다. ext-proc Filter는 InferencePool을 참조하는 Route에만 설정되기 때문에, 동일한 Gateway에서 일반 Service로 전달되는 요청은 EPP를 경유하지 않는다. Route 설정에는 특정 Pod를 지정하는 부분이 존재하지 않으며, Route는 요청을 EPP에게 전달하는 것까지만 담당하고 EPP가 선택한 Pod로 요청을 전달하는 동작은 Shadow Service Cluster의 Load Balancing 설정이 담당한다.
 
 ```shell {caption="[Shell 6] Inference 요청 확인"}
 $ curl -s -i -H "Host: llm.ssup2.com" http://127.0.0.1:8080/v1/completions \
@@ -330,7 +332,7 @@ vllm:num_requests_waiting{model_name="meta-llama/Llama-3.1-8B-Instruct"} 0
 
 [Shell 7]은 Model Server Pod의 `/metrics` Endpoint를 조회한 결과를 나타내고 있다. EPP는 각 Model Server의 Metric을 주기적으로 수집하며, Queue에 대기 중인 요청의 개수를 나타내는 `vllm:num_requests_waiting`, KV Cache 사용률을 나타내는 `vllm:kv_cache_usage_perc`, 적재된 LoRA Adapter 목록을 나타내는 `vllm:lora_requests_info`를 기반으로 최적의 Model Server Pod를 선택한다. Model Server가 노출해야 하는 Metric의 규격은 Model Server Protocol로 표준화되어 있기 때문에, vLLM이 아닌 다른 Model Serving Platform도 동일한 방식으로 이용할 수 있다.
 
-EPP는 선택한 Pod의 주소를 ext-proc 응답에 실어서 Envoy에게 반환하며, 주소는 EPP Protocol이 표준으로 정의한 `x-gateway-destination-endpoint` 이름으로 요청에 추가되는 Header와 응답의 `dynamic_metadata` 필드 두 곳에 동일하게 설정된다. `dynamic_metadata`는 외부 Server가 Envoy 내부에 저장할 값을 전달할 수 있도록 ext-proc 응답 Message에 정의되어 있는 필드이다. Envoy의 ext-proc Filter는 응답의 `dynamic_metadata` 필드에서 `envoy.lb` Namespace의 값을 꺼내서 처리 중인 요청의 Metadata로 저장한다. Metadata는 Header와 다르게 요청 메시지에 포함되어 전송되는 값이 아니라, Envoy가 요청 하나를 처리하는 동안만 내부적으로 유지하는 요청별 상태이다.
+EPP는 선택한 Pod의 주소를 ext-proc 응답에 실어서 Envoy에게 반환하며, 주소는 EPP Protocol이 표준으로 정의한 `x-gateway-destination-endpoint` 이름으로 [Figure 3]과 같이 요청에 추가되는 Header와 응답의 `dynamic_metadata` 필드 두 곳에 동일하게 설정된다. `dynamic_metadata`는 외부 Server가 Envoy 내부에 저장할 값을 전달할 수 있도록 ext-proc 응답 Message에 정의되어 있는 필드이다. Envoy의 ext-proc Filter는 응답의 `dynamic_metadata` 필드에서 `envoy.lb` Namespace의 값을 꺼내서 처리 중인 요청의 Metadata로 저장한다. Metadata는 Header와 다르게 요청 메시지에 포함되어 전송되는 값이 아니라, Envoy가 요청 하나를 처리하는 동안만 내부적으로 유지하는 요청별 상태이다.
 
 Envoy의 Cluster에는 Override Host Load Balancing Policy가 설정되어 있기 때문에, Envoy는 일반적인 Load Balancing 알고리즘 대신 Metadata에 명시된 Pod로 요청을 전달한다. Metadata가 존재하지 않는 경우에는 Fallback으로 설정된 Load Balancing 알고리즘을 이용한다.
 
