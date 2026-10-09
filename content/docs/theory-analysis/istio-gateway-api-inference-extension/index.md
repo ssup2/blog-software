@@ -20,7 +20,7 @@ Envoy에는 Inference를 위한 전용 기능이 존재하지 않기 때문에, 
 
 ### 1.1. Test 환경 구축
 
-{{< figure caption="[Figure 2] Test 환경 구성" src="images/test-environment.png" width="800px" >}}
+{{< figure caption="[Figure 2] Test 환경 구성" src="images/test-environment.png" width="700px" >}}
 
 ```shell {caption="[Shell 1] Test 환경 구성"}
 # Create kind cluster

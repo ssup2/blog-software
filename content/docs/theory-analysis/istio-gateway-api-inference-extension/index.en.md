@@ -20,7 +20,7 @@ Since Envoy has no dedicated feature for Inference, Istio processes Inference Tr
 
 ### 1.1. Test Environment Setup
 
-{{< figure caption="[Figure 2] Test Environment" src="images/test-environment.png" width="800px" >}}
+{{< figure caption="[Figure 2] Test Environment" src="images/test-environment.png" width="700px" >}}
 
 ```shell {caption="[Shell 1] Test Environment Setup"}
 # Create kind cluster
