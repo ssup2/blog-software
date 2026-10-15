@@ -2,6 +2,8 @@
 
 Kubernetes HAMi (Heterogeneous AI Computing Virtualization Middleware)의 vGPU 동작을 분석하는 문서.
 kubernetes-nvidia-device-plugin 문서를 참고하여 동일한 포맷(Architecture → 등록 → Scheduling → 할당 → 격리)으로 작성.
+배경 글로 kubernetes-scheduler(Extender 이해)와 kubernetes-dra(Device Plugin 한계의 표준 해결책) 초안이 2026-10-13에 작성됨 —
+세 글 모두 draft 상태이며, 발행 시 이 글의 참조 절에 두 배경 글 링크 추가를 검토할 것.
 
 ## 문서 구성 및 상태
 
