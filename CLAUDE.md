@@ -6,6 +6,11 @@ ssup2의 개인 기술 블로그 (Hugo 기반). 글은 `content/docs/` 아래 Ma
 
 - 브랜치/PR/머지 절차 없이 main에 직접 커밋하고 `git push origin main` 한다. 개인 블로그라 리뷰 절차가 불필요하다.
 
+## 발행 (Draft 해지)
+
+- 글의 Front Matter에서 `draft: true`를 제거해 발행할 때는 반드시 영문 번역본 `index.en.md`를 함께 추가/갱신한다. 한글 본문(`index.md`)만 발행된 상태로 commit하지 않는다.
+- 영문본은 한글본과 동일한 섹션 구성·Shell/Diff 출력·강조 규칙을 유지한다. 번역은 한국어 특유의 조사·어미만 영어 표현으로 바꾸고 코드/명령어/식별자는 그대로 둔다.
+
 ## 실험(Test) 기록
 
 - 실험이 포함된 글은 글 폴더에 재현용 파일을 함께 남긴다: 적용한 리소스는 `manifests/`에, 필요시 캡처 스크립트와 dump도 하위 폴더로 남긴다 (envoy-configuration-istio 폴더가 기준 예시).
