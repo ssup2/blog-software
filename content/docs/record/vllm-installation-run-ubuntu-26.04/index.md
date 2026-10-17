@@ -1,6 +1,5 @@
 ---
 title: vLLM 설치 및 모델 서빙 / Ubuntu 26.04 환경
-draft: true
 ---
 
 ## 1. 설치, 실행 환경
@@ -16,7 +15,7 @@ draft: true
   * **Python** : 3.12.15 (uv 설치)
   * **vLLM** : 0.31.0
   * **PyTorch** : 2.13.0+cu130
-  * **Model** : Qwen/Qwen2.5-1.5B-Instruct
+  * **Model** : Qwen/Qwen3-14B-AWQ (AWQ 4-bit)
 
 ## 2. uv 설치
 
@@ -77,37 +76,43 @@ cuda True NVIDIA GeForce RTX 5060 Ti
 ## 5. 모델 서빙
 
 ```shell
-$ nohup vllm serve Qwen/Qwen2.5-1.5B-Instruct \
+$ nohup vllm serve Qwen/Qwen3-14B-AWQ \
     --host 0.0.0.0 --port 8000 \
-    --max-model-len 4096 \
+    --max-model-len 8192 \
+    --reasoning-parser qwen3 \
     > /root/vllm-test/vllm.log 2>&1 &
 ```
 
-**Qwen/Qwen2.5-1.5B-Instruct** Model을 Serving한다. `vllm serve`는 Hugging Face Hub에서 지정한 Model을 Download하여 OpenAI 호환 API Server를 띄우는 명령어다. 최초 실행 시 Model Weight가 `~/.cache/huggingface/` 아래로 Download된 뒤 GPU에 Load된다.
+**Qwen/Qwen3-14B-AWQ** Model을 Serving한다. `vllm serve`는 Hugging Face Hub에서 지정한 Model을 Download하여 OpenAI 호환 API Server를 띄우는 명령어다. 최초 실행 시 Model Weight가 `~/.cache/huggingface/` 아래로 Download된 뒤 GPU에 Load된다.
 
 * `--host` : Listen Address로 `0.0.0.0`을 지정하면 모든 Interface에서 요청을 수신한다.
 * `--port` : API Server Port
-* `--max-model-len` : 단일 Request가 사용할 수 있는 최대 Context Token 수. RTX 5060 Ti 16GB VRAM에서 KV Cache 여유를 확보하기 위해 4096으로 축소한다.
+* `--max-model-len` : 단일 Request가 사용할 수 있는 최대 Context Token 수. 14B 모델이 Weight로 ~9.4GiB를 쓰므로 KV Cache 여유 확보를 위해 8192로 축소한다.
+* `--reasoning-parser` : Qwen3는 응답 앞에 `<think>...</think>` 추론 과정을 포함하는 Thinking 모드를 기본 활성화한다. `qwen3` Parser를 지정하면 Thinking Token을 응답의 `message.reasoning` Field로 분리하여 `message.content`는 최종 답변만 담도록 한다.
+
+Qwen3-14B-AWQ는 **AWQ** (Activation-aware Weight Quantization) 방식으로 Weight가 4-bit로 양자화된 Model이다. 16-bit Weight 대비 Weight Memory를 1/4 수준으로 줄여 16GB VRAM GPU에서 14B급 Model을 서빙할 수 있게 한다. vLLM은 Model의 `config.json`에서 `quantization_config`를 확인해 `quantization=auto_awq`로 자동 적용한다.
 
 ```text
-(EngineCore pid=18579) INFO 10-17 01:22:27 [model_runner.py:407] Model loading took 2.98 GiB memory and 55.235320 seconds
-(EngineCore pid=18579) INFO 10-17 01:23:21 [gpu_worker.py:692] Available KV cache memory: 10.23 GiB
-(EngineCore pid=18579) INFO 10-17 01:23:21 [kv_cache_utils.py:2464] GPU KV cache size: 383,216 tokens, Maximum concurrency for 4,096 tokens per request: 93.56x
+(APIServer pid=51419) INFO 10-17 20:29:11 [api_utils.py:286] non-default args: {'model_tag': 'Qwen/Qwen3-14B-AWQ', 'host': '0.0.0.0', 'model': 'Qwen/Qwen3-14B-AWQ', 'max_model_len': 8192, 'reasoning_parser': 'qwen3'}
+(EngineCore pid=51646) INFO 10-17 20:29:21 [core.py:129] Initializing a V1 LLM engine (v0.31.0) with config: model='Qwen/Qwen3-14B-AWQ', ... dtype=torch.float16, max_seq_len=8192, ... quantization=auto_awq, ... structured_outputs_config=StructuredOutputsConfig(..., reasoning_parser='qwen3', ...), ...
+(EngineCore pid=51646) INFO 10-17 20:29:26 [model_runner.py:407] Model loading took 9.44 GiB memory and 4.675787 seconds
+(EngineCore pid=51646) INFO 10-17 20:29:39 [gpu_worker.py:692] Available KV cache memory: 3.85 GiB
+(EngineCore pid=51646) INFO 10-17 20:29:39 [kv_cache_utils.py:2464] GPU KV cache size: 25,232 tokens, Maximum concurrency for 8,192 tokens per request: 3.08x
 INFO:     Application startup complete.
 ```
 
-`/root/vllm-test/vllm.log`에서 Model Load 결과를 확인한다. Model Weight는 bfloat16으로 2.98GiB를 차지하고, KV Cache에는 10.23GiB가 할당되어 4096 Token Request 기준 최대 93.56배 동시성을 확보한다. `Application startup complete` Log 이후 Server가 Request를 받을 준비가 완료된다.
+`/root/vllm-test/vllm.log`에서 Model Load 결과를 확인한다. Activation은 float16을 쓰면서 Weight는 AWQ 4-bit로 Load되어 9.44GiB를 차지하고, 남은 3.85GiB를 KV Cache로 할당하여 8192 Token Context 기준 약 3.08배 동시성을 확보한다. `Application startup complete` Log 이후 Server가 Request를 받을 준비가 완료된다.
 
 ```shell
 $ nvidia-smi
 ...
 |   0  NVIDIA GeForce RTX 5060 Ti     Off |   00000000:01:00.0 Off |                  N/A |
-|  0%   32C    P1             20W /  180W |   14811MiB /  16311MiB |      0%      Default |
+|  0%   37C    P8              8W /  180W |   14997MiB /  16311MiB |      0%      Default |
 ...
-|    0   N/A  N/A           18579      C   VLLM::EngineCore                      14360MiB |
+|    0   N/A  N/A           51646      C   VLLM::EngineCore                      14546MiB |
 ```
 
-`nvidia-smi`로 GPU 사용량을 확인한다. `VLLM::EngineCore` Process가 14.36GB VRAM을 점유한 상태로 Idle을 유지한다. Weight (2.98GiB)와 KV Cache (10.23GiB), CUDA Graph 등 부가 Memory가 합쳐진 양이다.
+`nvidia-smi`로 GPU 사용량을 확인한다. `VLLM::EngineCore` Process가 14.5GB VRAM을 점유한 상태로 Idle을 유지한다. Weight (9.44GiB), KV Cache (3.85GiB), CUDA Graph 등 부가 Memory가 합쳐진 양이다.
 
 ## 6. 추론 확인
 
@@ -117,13 +122,13 @@ $ curl -s http://localhost:8000/v1/models | python3 -m json.tool
     "object": "list",
     "data": [
         {
-            "id": "Qwen/Qwen2.5-1.5B-Instruct",
+            "id": "Qwen/Qwen3-14B-AWQ",
             "object": "model",
-            "created": 1792167980,
+            "created": 1792236627,
             "owned_by": "vllm",
-            "root": "Qwen/Qwen2.5-1.5B-Instruct",
+            "root": "Qwen/Qwen3-14B-AWQ",
             "parent": null,
-            "max_model_len": 4096,
+            "max_model_len": 8192,
             ...
         }
     ]
@@ -136,22 +141,23 @@ $ curl -s http://localhost:8000/v1/models | python3 -m json.tool
 $ curl -s http://localhost:8000/v1/chat/completions \
     -H 'Content-Type: application/json' \
     -d '{
-      "model": "Qwen/Qwen2.5-1.5B-Instruct",
+      "model": "Qwen/Qwen3-14B-AWQ",
       "messages": [{"role": "user", "content": "안녕! 너는 어떤 모델이고 뭘 할 수 있는지 2문장으로 알려줘."}],
-      "max_tokens": 128,
+      "max_tokens": 512,
       "temperature": 0.7
     }' | python3 -c 'import json,sys; d=json.load(sys.stdin); print(json.dumps(d, ensure_ascii=False, indent=2))'
 {
-  "id": "chatcmpl-b4d221d94865f355",
+  "id": "chatcmpl-9fdfb90f7591f4d9",
   "object": "chat.completion",
-  "created": 1792168083,
-  "model": "Qwen/Qwen2.5-1.5B-Instruct",
+  "created": 1792236676,
+  "model": "Qwen/Qwen3-14B-AWQ",
   "choices": [
     {
       "index": 0,
       "message": {
         "role": "assistant",
-        "content": "저는 Qwen라는 AI 언어 모델입니다. 다양한 주제에 대해 대화를 나누고 정보 검색, 질문 응답 등 다양한 작업을 수행할 수 있습니다.",
+        "content": "\n\n안녕하세요! 저는 알리바바 그룹에서 개발한 초대규모 언어 모델인 Qwen입니다. 저는 질문에 답변하거나 텍스트 생성, 번역, 프로그래밍 등 다양한 작업을 수행할 수 있으며, 한국어를 포함한 여러 언어를 지원합니다.",
+        "reasoning": "\nOkay, the user greeted me with \"안녕!\" which means \"Hello!\" in Korean. They asked me to introduce myself in two sentences, explaining what model I am and what I can do.\n\nFirst, I need to confirm my identity. I am Qwen, a large-scale language model developed by Alibaba. ...\n",
         ...
       },
       "finish_reason": "stop",
@@ -160,18 +166,24 @@ $ curl -s http://localhost:8000/v1/chat/completions \
   ],
   ...
   "usage": {
-    "prompt_tokens": 53,
-    "total_tokens": 94,
-    "completion_tokens": 41
+    "prompt_tokens": 32,
+    "total_tokens": 276,
+    "completion_tokens": 244,
+    "completion_tokens_details": {
+      "reasoning_tokens": 174
+    }
   }
 }
 ```
 
-OpenAI 호환 `/v1/chat/completions` Endpoint로 Chat 요청을 보내 Qwen2.5의 응답을 받는다. Request Body의 `model` 필드는 `/v1/models`로 조회한 Model `id`와 동일해야 하며, `messages`에는 OpenAI Chat Completions 규격의 Message 배열을 전달한다. 응답의 `usage` 필드로 입력/출력 Token 수를 확인할 수 있다.
+OpenAI 호환 `/v1/chat/completions` Endpoint로 Chat 요청을 보내 Qwen3의 응답을 받는다. Request Body의 `model` 필드는 `/v1/models`로 조회한 Model `id`와 동일해야 하며, `messages`에는 OpenAI Chat Completions 규격의 Message 배열을 전달한다.
+
+`--reasoning-parser qwen3` Option 효과로 응답이 `message.content` (최종 답변)와 `message.reasoning` (Thinking 과정)으로 분리된다. OpenAI SDK 기반 Client는 `message.content`만 참조하므로 Thinking Token이 사용자에게 노출되지 않는다. `usage.completion_tokens_details.reasoning_tokens`로 Thinking에 소비된 Token 수를 별도로 확인할 수 있다.
 
 ## 7. 참조
 
 * vLLM Documentation : [https://docs.vllm.ai/](https://docs.vllm.ai/)
 * uv Documentation : [https://docs.astral.sh/uv/](https://docs.astral.sh/uv/)
-* Qwen2.5-1.5B-Instruct Model Card : [https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct](https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct)
+* Qwen3-14B-AWQ Model Card : [https://huggingface.co/Qwen/Qwen3-14B-AWQ](https://huggingface.co/Qwen/Qwen3-14B-AWQ)
+* AWQ: Activation-aware Weight Quantization : [https://arxiv.org/abs/2306.00978](https://arxiv.org/abs/2306.00978)
 * OpenAI Chat Completions API Reference : [https://platform.openai.com/docs/api-reference/chat](https://platform.openai.com/docs/api-reference/chat)
