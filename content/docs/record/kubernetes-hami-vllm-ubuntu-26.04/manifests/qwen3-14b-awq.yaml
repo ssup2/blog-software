@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qwen3-14b-awq
+  namespace: default
+  labels:
+    app: qwen3-14b-awq
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: qwen3-14b-awq
+  template:
+    metadata:
+      labels:
+        app: qwen3-14b-awq
+    spec:
+      containers:
+      - name: vllm
+        image: vllm/vllm-openai:latest
+        args:
+          - "--model=Qwen/Qwen3-14B-AWQ"
+          - "--max-model-len=8192"
+          - "--reasoning-parser=qwen3"
+          - "--host=0.0.0.0"
+          - "--port=8000"
+        ports:
+        - containerPort: 8000
+          name: http
+        resources:
+          limits:
+            nvidia.com/gpu: 1
+            nvidia.com/gpumem: 15000
+        volumeMounts:
+        - name: hf-cache
+          mountPath: /root/.cache/huggingface
+        - name: shm
+          mountPath: /dev/shm
+        readinessProbe:
+          httpGet:
+            path: /v1/models
+            port: 8000
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 60
+      volumes:
+      - name: hf-cache
+        hostPath:
+          path: /root/.cache/huggingface
+          type: Directory
+      - name: shm
+        emptyDir:
+          medium: Memory
+          sizeLimit: 4Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: qwen3-14b-awq
+  namespace: default
+spec:
+  type: NodePort
+  selector:
+    app: qwen3-14b-awq
+  ports:
+  - name: http
+    port: 8000
+    targetPort: 8000
+    nodePort: 30800
