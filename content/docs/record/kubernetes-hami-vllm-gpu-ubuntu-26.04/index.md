@@ -6,6 +6,7 @@ title: Kubernetes HAMi 설치 및 vLLM 모델 서빙 / GPU Ubuntu 26.04 환경
 
 설치, 실행 환경은 다음과 같다. 단일 Node가 Control-plane과 Worker 역할을 겸하는 Single-node Cluster로 구성한다.
 
+* `192.168.1.32` 단일 Server (Control-plane + Worker 겸용)
 * Ubuntu 26.04 LTS 64bit, root user
 * Nvidia RTX 5060 Ti GPU 16GB
   * **GPU Driver** : 610.43.02

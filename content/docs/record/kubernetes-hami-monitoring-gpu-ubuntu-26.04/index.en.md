@@ -6,6 +6,7 @@ title: Kubernetes HAMi Monitoring Setup / GPU Ubuntu 26.04 Environment
 
 The installation and runtime environment is as follows. A Kubernetes Single-node Cluster and HAMi are assumed to be already running.
 
+* `192.168.1.32` single Server (Control-plane + Worker combined)
 * Ubuntu 26.04 LTS 64bit, root user
 * Nvidia RTX 5060 Ti GPU 16GB
 * Kubernetes v1.34.12 (kubeadm) + HAMi Chart 2.10.0
