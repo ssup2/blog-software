@@ -1,0 +1,15 @@
+serviceMonitor:
+  enabled: true
+  interval: 30s
+  honorLabels: false
+  additionalLabels:
+    release: monitoring
+
+extraEnv:
+  - name: NVIDIA_VISIBLE_DEVICES
+    value: "all"
+
+tolerations:
+  - key: node-role.kubernetes.io/control-plane
+    operator: Exists
+    effect: NoSchedule

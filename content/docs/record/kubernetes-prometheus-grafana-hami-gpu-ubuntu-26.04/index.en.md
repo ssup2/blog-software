@@ -12,7 +12,8 @@ The installation and runtime environment is as follows. A Kubernetes Single-node
 * Software
   * **Helm** : v3
   * **kube-prometheus-stack** : Chart 92.10.1 (Prometheus Operator v0.94.1)
-  * **Grafana Dashboard** : Official HAMi vGPU Metrics Dashboard
+  * **DCGM Exporter** : Chart 4.8.4 (App 4.8.4)
+  * **Grafana Dashboard** : Official HAMi vGPU Metrics Dashboard, NVIDIA DCGM Exporter Dashboard (grafana.com ID 12239)
 
 ## 2. kube-prometheus-stack Installation
 
@@ -209,12 +210,134 @@ HAMi vGPU metrics /d/hami-vgpu-metrics/hami-vgpu-metrics
 
 Check the Sidecar Log showing the Dashboard was written and that the Grafana API accepted the reload request. Also confirm via `/api/search` that the Dashboard is registered. Open `http://192.168.1.32:30300` in a browser, log in as `admin/admin`, and open the `HAMi vGPU metrics` Dashboard from the Dashboards menu on the left to see cluster resource totals, physical GPU utilization and VRAM, scheduler allocation, and per-Pod/per-Container vGPU usage Panels populated with real data.
 
-The Dashboard optionally also queries **NVIDIA DCGM Exporter** Metrics (`DCGM_FI_DEV_GPU_TEMP`, `DCGM_FI_DEV_POWER_USAGE`, `DCGM_FI_DEV_SM_CLOCK`, `DCGM_FI_DEV_XID_ERRORS`). Since this post does not install the DCGM Exporter, the Temperature, Power, SM Clock, and XID Error Panels show "No data", while the remaining core Panels operate from HAMi Metrics alone.
+The Dashboard optionally also queries **NVIDIA DCGM Exporter** Metrics (`DCGM_FI_DEV_GPU_TEMP`, `DCGM_FI_DEV_POWER_USAGE`, `DCGM_FI_DEV_SM_CLOCK`, `DCGM_FI_DEV_XID_ERRORS`). Installing the DCGM Exporter in sections 5 and 6 below fills in the Temperature, Power, SM Clock, and XID Error Panels so the Dashboard becomes complete.
 
-## 5. References
+## 5. DCGM Exporter Installation
+
+While the HAMi Exporter is specialized for vGPU virtualization and per-Pod accounting, the **NVIDIA DCGM Exporter** exposes physical GPU hardware telemetry (Temperature, Power, SM/Memory Clock, PCIe Throughput, ECC/XID Errors, etc.). The two Exporters complement each other; running them together lets you monitor both virtualization usage and hardware health.
+
+```shell
+$ helm repo add gpu-helm-charts https://nvidia.github.io/dcgm-exporter/helm-charts
+$ helm repo update
+```
+
+Add the official NVIDIA Helm Chart repository.
+
+```yaml {caption="[File 3] dcgm-values.yaml", linenos=table}
+serviceMonitor:
+  enabled: true
+  interval: 30s
+  honorLabels: false
+  additionalLabels:
+    release: monitoring
+
+extraEnv:
+  - name: NVIDIA_VISIBLE_DEVICES
+    value: "all"
+
+tolerations:
+  - key: node-role.kubernetes.io/control-plane
+    operator: Exists
+    effect: NoSchedule
+```
+
+The key items in Chart Values are as follows.
+
+* `serviceMonitor.enabled: true` : The Chart creates a ServiceMonitor on its own; no additional Manifest is needed.
+* `extraEnv.NVIDIA_VISIBLE_DEVICES: all` : Lets the DCGM Exporter access all physical GPUs on the Host through nvidia-container-toolkit directly, bypassing HAMi's vGPU Slot allocation. Hardware telemetry can only be collected against physical Devices, not virtual Slots.
+* `tolerations` : Tolerates the default Control-plane Taint. The Taint has already been removed from this Cluster, but the Chart default is kept.
+
+```shell
+$ helm install dcgm-exporter gpu-helm-charts/dcgm-exporter \
+    --version 4.8.4 \
+    --namespace monitoring \
+    -f dcgm-values.yaml
+NAME: dcgm-exporter
+LAST DEPLOYED: ...
+NAMESPACE: monitoring
+STATUS: deployed
+```
+
+Install the DCGM Exporter. It runs as a DaemonSet with one Pod per GPU Node and exposes Metrics on Port 9400.
+
+```shell
+$ kubectl -n monitoring get pods -l app.kubernetes.io/name=dcgm-exporter -o wide
+NAME                  READY   STATUS    RESTARTS   AGE   IP            NODE
+dcgm-exporter-rgr94   1/1     Running   0          58s   10.244.0.17   gpu
+$ curl -s 'http://192.168.1.32:30900/api/v1/targets?state=active' \
+    | python3 -c '
+import json,sys
+for t in json.load(sys.stdin)["data"]["activeTargets"]:
+    if "dcgm" in t["scrapePool"].lower(): print(t["scrapePool"], t["health"], t["scrapeUrl"])'
+serviceMonitor/monitoring/dcgm-exporter/0 up http://10.244.0.17:9400/metrics
+```
+
+Verify the DCGM Exporter Pod is Running and that the Prometheus Target is `up`.
+
+```shell
+$ curl -s 'http://192.168.1.32:30900/api/v1/query?query=DCGM_FI_DEV_GPU_TEMP' \
+    | python3 -c '
+import json,sys
+r = json.load(sys.stdin)["data"]["result"][0]
+print(r["metric"]["device"], "temp=", r["value"][1], "°C")'
+nvidia0 temp= 30 °C
+$ curl -s 'http://192.168.1.32:30900/api/v1/query?query=DCGM_FI_DEV_POWER_USAGE' \
+    | python3 -c '
+import json,sys
+r = json.load(sys.stdin)["data"]["result"][0]
+print(r["metric"]["device"], "power=", r["value"][1], "W")'
+nvidia0 power= 7.9 W
+```
+
+Query Temperature and Power usage through the Prometheus Query API. The idle RTX 5060 Ti reports 30°C and 7.9W. Installing the DCGM Exporter also fills the Temperature, Power, SM Clock, and XID Error Panels of the **HAMi Dashboard from section 4**, which were previously "No data", with real values.
+
+## 6. NVIDIA DCGM Grafana Dashboard Addition
+
+NVIDIA publishes an **official DCGM-dedicated Dashboard** on grafana.com (ID 12239, `NVIDIA DCGM Exporter Dashboard`). While the HAMi Dashboard only references a handful of DCGM Metrics, this Dashboard surfaces the full range: Temperature, Power, SM Clock, Memory Clock, Framebuffer Usage, Tensor Core Activity, and more.
+
+```shell
+$ curl -sL 'https://grafana.com/api/dashboards/12239/revisions/latest/download' -o dcgm-dashboard.json
+$ python3 <<'PY'
+import json
+with open('dcgm-dashboard.json') as f: text = f.read()
+text = text.replace('${DS_PROMETHEUS}', 'Prometheus')
+d = json.loads(text)
+for k in ('__inputs','__requires','__elements'): d.pop(k, None)
+def fix(o):
+    if isinstance(o, dict):
+        for k,v in list(o.items()):
+            if k == 'datasource' and isinstance(v, dict):
+                v['type']='prometheus'; v['uid']='prometheus'
+        for v in o.values(): fix(v)
+    elif isinstance(o, list):
+        for i in o: fix(i)
+fix(d)
+json.dump(d, open('dcgm-dashboard-fixed.json','w'), indent=2)
+PY
+$ kubectl -n monitoring create cm dcgm-dashboard \
+    --from-file=dcgm-dashboard.json=dcgm-dashboard-fixed.json \
+    --dry-run=client -o yaml \
+  | kubectl label --local -f - grafana_dashboard=1 --dry-run=client -o yaml \
+  | kubectl apply -f -
+configmap/dcgm-dashboard created
+```
+
+Replace the `${DS_PROMETHEUS}` Variable with `Prometheus` and set an explicit Prometheus UID on each Panel's `datasource` Field, then apply the result as a ConfigMap. This follows the same Sidecar auto-import flow as the HAMi Dashboard in section 4.
+
+```shell
+$ curl -s -u admin:admin 'http://192.168.1.32:30300/api/search?query=DCGM' \
+    | python3 -c 'import json,sys;[print(d["title"],d["url"]) for d in json.load(sys.stdin)]'
+NVIDIA DCGM Exporter Dashboard /d/Oxed_c6Wz/nvidia-dcgm-exporter-dashboard
+```
+
+Confirm the Dashboard is registered in Grafana. Open `http://192.168.1.32:30300` in a browser, log in as `admin/admin`, and open `NVIDIA DCGM Exporter Dashboard` from the Dashboards menu on the left to see Panels for GPU Temperature, Power Usage, SM/Memory Clock, GPU Utilization, Framebuffer, and Tensor Core activity populated with real data.
+
+## 7. References
 
 * kube-prometheus-stack : [https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack)
 * Prometheus Operator ServiceMonitor : [https://prometheus-operator.dev/docs/getting-started/design/#servicemonitor](https://prometheus-operator.dev/docs/getting-started/design/#servicemonitor)
 * HAMi Grafana Dashboard Docs : [https://project-hami.io/docs/userguide/monitoring/grafana-dashboard](https://project-hami.io/docs/userguide/monitoring/grafana-dashboard)
 * HAMi Dashboard JSON : [https://project-hami.io/grafana/gpu-dashboard.json](https://project-hami.io/grafana/gpu-dashboard.json)
+* NVIDIA DCGM Exporter : [https://github.com/NVIDIA/dcgm-exporter](https://github.com/NVIDIA/dcgm-exporter)
+* NVIDIA DCGM Exporter Dashboard : [https://grafana.com/grafana/dashboards/12239-nvidia-dcgm-exporter-dashboard/](https://grafana.com/grafana/dashboards/12239-nvidia-dcgm-exporter-dashboard/)
 * Prometheus honor_labels : [https://prometheus.io/docs/prometheus/latest/configuration/configuration/#scrape_config](https://prometheus.io/docs/prometheus/latest/configuration/configuration/#scrape_config)

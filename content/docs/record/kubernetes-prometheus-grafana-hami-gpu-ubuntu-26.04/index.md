@@ -12,7 +12,8 @@ title: Kubernetes Prometheus/Grafana + HAMi GPU 모니터링 설치 / Ubuntu 26.
 * Software
   * **Helm** : v3
   * **kube-prometheus-stack** : Chart 92.10.1 (Prometheus Operator v0.94.1)
-  * **Grafana Dashboard** : HAMi 공식 vGPU Metrics Dashboard
+  * **DCGM Exporter** : Chart 4.8.4 (App 4.8.4)
+  * **Grafana Dashboard** : HAMi 공식 vGPU Metrics Dashboard, NVIDIA DCGM Exporter Dashboard (grafana.com ID 12239)
 
 ## 2. kube-prometheus-stack 설치
 
@@ -209,12 +210,134 @@ HAMi vGPU metrics /d/hami-vgpu-metrics/hami-vgpu-metrics
 
 Sidecar Log에서 Dashboard가 Write되고 Grafana API에 Reload 요청이 성공한 것을 확인한다. `/api/search`로 Grafana에 Dashboard가 등록되었는지도 다시 확인한다. 브라우저에서 `http://192.168.1.32:30300` → `admin/admin` 로그인 후 좌측 Dashboards 메뉴에서 `HAMi vGPU metrics` Dashboard를 열면 Cluster 자원 현황, 물리 GPU 사용률·VRAM, Scheduler 할당량, Pod·Container 단위 vGPU 사용 Panel이 실데이터로 표시된다.
 
-Dashboard는 선택적으로 **NVIDIA DCGM Exporter** Metric (`DCGM_FI_DEV_GPU_TEMP`, `DCGM_FI_DEV_POWER_USAGE`, `DCGM_FI_DEV_SM_CLOCK`, `DCGM_FI_DEV_XID_ERRORS`)도 참조한다. 본 글에서는 DCGM Exporter를 설치하지 않으므로 Temperature·Power·SM Clock·XID Error Panel은 "No data"로 뜨고, 나머지 핵심 Panel은 HAMi Metric만으로 정상 동작한다.
+Dashboard는 선택적으로 **NVIDIA DCGM Exporter** Metric (`DCGM_FI_DEV_GPU_TEMP`, `DCGM_FI_DEV_POWER_USAGE`, `DCGM_FI_DEV_SM_CLOCK`, `DCGM_FI_DEV_XID_ERRORS`)도 참조한다. 아래 5·6절에서 DCGM Exporter까지 설치하면 Temperature·Power·SM Clock·XID Error Panel도 함께 채워져 Dashboard가 완전해진다.
 
-## 5. 참조
+## 5. DCGM Exporter 설치
+
+HAMi Exporter가 vGPU 가상화·Pod 단위 Accounting에 특화되어 있다면, **NVIDIA DCGM Exporter**는 물리 GPU의 하드웨어 Telemetry (Temperature, Power, SM/Memory Clock, PCIe Throughput, ECC/XID Error 등) 를 노출한다. 두 Exporter는 서로 보완 관계로, 함께 설치하면 가상화 사용 현황과 하드웨어 Health를 모두 모니터링할 수 있다.
+
+```shell
+$ helm repo add gpu-helm-charts https://nvidia.github.io/dcgm-exporter/helm-charts
+$ helm repo update
+```
+
+NVIDIA에서 공식 배포하는 Helm Chart Repo를 추가한다.
+
+```yaml {caption="[File 3] dcgm-values.yaml", linenos=table}
+serviceMonitor:
+  enabled: true
+  interval: 30s
+  honorLabels: false
+  additionalLabels:
+    release: monitoring
+
+extraEnv:
+  - name: NVIDIA_VISIBLE_DEVICES
+    value: "all"
+
+tolerations:
+  - key: node-role.kubernetes.io/control-plane
+    operator: Exists
+    effect: NoSchedule
+```
+
+Chart Values의 주요 항목은 다음과 같다.
+
+* `serviceMonitor.enabled: true` : Chart가 자체적으로 ServiceMonitor를 생성한다. 별도 Manifest가 필요없다.
+* `extraEnv.NVIDIA_VISIBLE_DEVICES: all` : DCGM Exporter가 HAMi의 vGPU Slot 할당을 거치지 않고 nvidia-container-toolkit을 통해 Host의 모든 물리 GPU에 직접 접근한다. HAMi가 할당하는 가상 Slot이 아닌 물리 Device를 봐야 하드웨어 Telemetry를 수집할 수 있다.
+* `tolerations` : Control-plane Node에 걸린 Default Taint를 Tolerate한다. 본 Cluster는 이미 Taint를 제거해 두었으나 Chart Default 유지를 위해 그대로 둔다.
+
+```shell
+$ helm install dcgm-exporter gpu-helm-charts/dcgm-exporter \
+    --version 4.8.4 \
+    --namespace monitoring \
+    -f dcgm-values.yaml
+NAME: dcgm-exporter
+LAST DEPLOYED: ...
+NAMESPACE: monitoring
+STATUS: deployed
+```
+
+DCGM Exporter를 설치한다. DaemonSet 형태로 GPU Node마다 Pod가 뜨며, Port 9400에서 Metric을 노출한다.
+
+```shell
+$ kubectl -n monitoring get pods -l app.kubernetes.io/name=dcgm-exporter -o wide
+NAME                  READY   STATUS    RESTARTS   AGE   IP            NODE
+dcgm-exporter-rgr94   1/1     Running   0          58s   10.244.0.17   gpu
+$ curl -s 'http://192.168.1.32:30900/api/v1/targets?state=active' \
+    | python3 -c '
+import json,sys
+for t in json.load(sys.stdin)["data"]["activeTargets"]:
+    if "dcgm" in t["scrapePool"].lower(): print(t["scrapePool"], t["health"], t["scrapeUrl"])'
+serviceMonitor/monitoring/dcgm-exporter/0 up http://10.244.0.17:9400/metrics
+```
+
+DCGM Exporter Pod가 Running 상태이고 Prometheus Target도 `up`인지 확인한다.
+
+```shell
+$ curl -s 'http://192.168.1.32:30900/api/v1/query?query=DCGM_FI_DEV_GPU_TEMP' \
+    | python3 -c '
+import json,sys
+r = json.load(sys.stdin)["data"]["result"][0]
+print(r["metric"]["device"], "temp=", r["value"][1], "°C")'
+nvidia0 temp= 30 °C
+$ curl -s 'http://192.168.1.32:30900/api/v1/query?query=DCGM_FI_DEV_POWER_USAGE' \
+    | python3 -c '
+import json,sys
+r = json.load(sys.stdin)["data"]["result"][0]
+print(r["metric"]["device"], "power=", r["value"][1], "W")'
+nvidia0 power= 7.9 W
+```
+
+Prometheus Query API로 Temperature와 Power 사용량을 조회한다. 각각 30°C, 7.9W로 Idle 상태의 RTX 5060 Ti가 수집된다. DCGM Exporter 설치로 **4절의 HAMi Dashboard** 안에 있던 Temperature·Power·SM Clock·XID Error Panel이 "No data"에서 실측 값으로 채워진다.
+
+## 6. NVIDIA DCGM Grafana Dashboard 추가
+
+NVIDIA는 grafana.com에 **DCGM 전용 공식 Dashboard** (ID 12239, `NVIDIA DCGM Exporter Dashboard`) 를 공개하고 있다. HAMi Dashboard는 DCGM Metric 몇 개만 참조하는 반면 이 Dashboard는 Temperature, Power, SM Clock, Memory Clock, Framebuffer Usage, Tensor Core Activity 등 DCGM이 노출하는 Metric 전반을 Panel로 보여준다.
+
+```shell
+$ curl -sL 'https://grafana.com/api/dashboards/12239/revisions/latest/download' -o dcgm-dashboard.json
+$ python3 <<'PY'
+import json
+with open('dcgm-dashboard.json') as f: text = f.read()
+text = text.replace('${DS_PROMETHEUS}', 'Prometheus')
+d = json.loads(text)
+for k in ('__inputs','__requires','__elements'): d.pop(k, None)
+def fix(o):
+    if isinstance(o, dict):
+        for k,v in list(o.items()):
+            if k == 'datasource' and isinstance(v, dict):
+                v['type']='prometheus'; v['uid']='prometheus'
+        for v in o.values(): fix(v)
+    elif isinstance(o, list):
+        for i in o: fix(i)
+fix(d)
+json.dump(d, open('dcgm-dashboard-fixed.json','w'), indent=2)
+PY
+$ kubectl -n monitoring create cm dcgm-dashboard \
+    --from-file=dcgm-dashboard.json=dcgm-dashboard-fixed.json \
+    --dry-run=client -o yaml \
+  | kubectl label --local -f - grafana_dashboard=1 --dry-run=client -o yaml \
+  | kubectl apply -f -
+configmap/dcgm-dashboard created
+```
+
+Dashboard JSON의 `${DS_PROMETHEUS}` Variable을 `Prometheus`로 치환하고 각 Panel의 `datasource` Field에 Prometheus UID를 명시한 뒤 ConfigMap으로 적용한다. 4절의 HAMi Dashboard와 동일한 Sidecar 자동 Import 흐름을 따른다.
+
+```shell
+$ curl -s -u admin:admin 'http://192.168.1.32:30300/api/search?query=DCGM' \
+    | python3 -c 'import json,sys;[print(d["title"],d["url"]) for d in json.load(sys.stdin)]'
+NVIDIA DCGM Exporter Dashboard /d/Oxed_c6Wz/nvidia-dcgm-exporter-dashboard
+```
+
+Grafana에 Dashboard가 등록된 것을 확인한다. 브라우저에서 `http://192.168.1.32:30300` → `admin/admin` 로그인 후 좌측 Dashboards 메뉴에서 `NVIDIA DCGM Exporter Dashboard`를 열면 GPU Temperature, Power Usage, SM/Memory Clock, GPU Utilization, Framebuffer, Tensor Core 활용률 Panel이 모두 실데이터로 표시된다.
+
+## 7. 참조
 
 * kube-prometheus-stack : [https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack)
 * Prometheus Operator ServiceMonitor : [https://prometheus-operator.dev/docs/getting-started/design/#servicemonitor](https://prometheus-operator.dev/docs/getting-started/design/#servicemonitor)
 * HAMi Grafana Dashboard Docs : [https://project-hami.io/docs/userguide/monitoring/grafana-dashboard](https://project-hami.io/docs/userguide/monitoring/grafana-dashboard)
 * HAMi Dashboard JSON : [https://project-hami.io/grafana/gpu-dashboard.json](https://project-hami.io/grafana/gpu-dashboard.json)
+* NVIDIA DCGM Exporter : [https://github.com/NVIDIA/dcgm-exporter](https://github.com/NVIDIA/dcgm-exporter)
+* NVIDIA DCGM Exporter Dashboard : [https://grafana.com/grafana/dashboards/12239-nvidia-dcgm-exporter-dashboard/](https://grafana.com/grafana/dashboards/12239-nvidia-dcgm-exporter-dashboard/)
 * Prometheus honor_labels : [https://prometheus.io/docs/prometheus/latest/configuration/configuration/#scrape_config](https://prometheus.io/docs/prometheus/latest/configuration/configuration/#scrape_config)
