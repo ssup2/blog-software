@@ -16,7 +16,7 @@ title: Kubernetes (kubeadm) + HAMi 설치 및 vLLM 모델 서빙 / Ubuntu 26.04 
   * **Kubernetes** : v1.34.12 (kubeadm 설치)
   * **CNI** : Flannel (Pod CIDR `10.244.0.0/16`)
   * **Helm** : v3
-  * **HAMi** : latest (hami-charts Repo)
+  * **HAMi** : Chart 2.10.0 (App v2.10.0)
   * **vLLM Image** : vllm/vllm-openai:latest
   * **Model** : Qwen/Qwen3-14B-AWQ
 
@@ -166,7 +166,7 @@ HAMi가 관리할 GPU Node에 **`gpu=on`** Label을 부착한다. HAMi Device Pl
 ```shell
 $ helm repo add hami-charts https://project-hami.github.io/HAMi/
 $ helm repo update
-$ helm install hami hami-charts/hami -n kube-system
+$ helm install hami hami-charts/hami --version 2.10.0 -n kube-system
 NAME: hami
 LAST DEPLOYED: ...
 NAMESPACE: kube-system

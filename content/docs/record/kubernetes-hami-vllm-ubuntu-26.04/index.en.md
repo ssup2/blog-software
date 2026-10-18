@@ -16,7 +16,7 @@ The installation and runtime environment is as follows. The cluster is configure
   * **Kubernetes** : v1.34.12 (installed with kubeadm)
   * **CNI** : Flannel (Pod CIDR `10.244.0.0/16`)
   * **Helm** : v3
-  * **HAMi** : latest (hami-charts Repo)
+  * **HAMi** : Chart 2.10.0 (App v2.10.0)
   * **vLLM Image** : vllm/vllm-openai:latest
   * **Model** : Qwen/Qwen3-14B-AWQ
 
@@ -166,7 +166,7 @@ Attach the **`gpu=on`** Label to the GPU Node that HAMi will manage. The HAMi De
 ```shell
 $ helm repo add hami-charts https://project-hami.github.io/HAMi/
 $ helm repo update
-$ helm install hami hami-charts/hami -n kube-system
+$ helm install hami hami-charts/hami --version 2.10.0 -n kube-system
 NAME: hami
 LAST DEPLOYED: ...
 NAMESPACE: kube-system
