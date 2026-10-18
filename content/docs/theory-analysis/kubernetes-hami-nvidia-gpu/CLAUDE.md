@@ -6,11 +6,12 @@ kubernetes-hami(HAMi 자체, 벤더 중립 구조) 문서의 NVIDIA 상세 글�
 
 ## 문서 구성 및 상태
 
-- **2026-10-16 이론 초안 작성** (Claude 작성, 사용자 검토 전, frontmatter `draft: true`). **실측 없음** — Shell 블록 없음.
+- **2026-10-16 이론 초안 작성** (Claude 작성, 사용자 검토 전, frontmatter `draft: true`).
   index.en.md는 초안 확정 전이라 미작성.
-- 1장 구성: 1. 개요(hami-device-plugin/HAMi-core, vGPU Resource Table, Pod 예제) / 1.1 vGPU 설정(Table 2) /
-  1.2 Memory·SM 사용률 제한(HAMi-core, 정책 환경 변수, Monitor) / 1.3 GPU 선택과 Scheduling 정책(Type/UUID Annotation,
-  binpack/spread/mutex, Topology-aware) / 1.4 Dynamic MIG(Flexible MIG 예약 방식).
+- **2026-10-18 Memory·SM 격리 실측 추가** (Claude): 1.1 Test 환경 구축을 신설하고 1.3(Memory·SM) 섹션에 Shell 블록 2개(2500MB OOM, matmul 중 SM 샘플링) 추가. 실측 환경은 kubernetes-hami-vllm-gpu-ubuntu-26.04 Record 글의 Cluster 재사용. `GPU_CORE_UTILIZATION_POLICY=force` 설정으로 유휴 Burst를 꺼서 vgpu-monitor Metric이 ~31%에 수렴하는 모습 확인. 호스트 nvidia-smi dmon은 Token Bucket Burst 특성으로 99/0 번갈아 나오는 것 함께 수록.
+- 1장 구성: 1. 개요(hami-device-plugin/HAMi-core, vGPU Resource Table, Pod 예제) / 1.1 Test 환경 구축 / 1.2 vGPU 설정(Table 2) /
+  1.3 Memory·SM 사용률 제한(HAMi-core, 정책 환경 변수, Monitor, 실측 Shell 2종) / 1.4 GPU 선택과 Scheduling 정책(Type/UUID Annotation,
+  binpack/spread/mutex, Topology-aware) / 1.5 Dynamic MIG(Flexible MIG 예약 방식).
 - 사실 관계는 2026-10-16 웹 리서치(HAMi master 소스 pkg/device/nvidia/device.go, charts/hami/values.yaml, HAMi-core README,
   공식 docs·릴리스 노트) 기반. **사실 검증 필요 목록**:
   - vGPU Resource: `nvidia.com/priority` (0 높음/1 낮음, 기본 1) — 같은 GPU에서 런타임 QoS로 동작(Scheduling 선점 아님).
@@ -36,13 +37,15 @@ kubernetes-hami(HAMi 자체, 벤더 중립 구조) 문서의 NVIDIA 상세 글�
   hami-core-isolation.png는 분리 전 kubernetes-hami 글(2026-10-09 matplotlib 초안)에서 이동 — 모두 사용자가 pptx 스타일로
   다시 그릴 예정 (파일명 유지한 채 교체). images/images.pptx는 아직 없음.
 
-## Test 계획 (미수행)
+## Test 수행 상태
 
-- GPU Node 필요 (Dynamic MIG는 Ampere/Hopper/Blackwell MIG-capable GPU 필요).
-- 실측 시나리오 후보: vGPU Pod의 환경 변수(`kubectl exec env`로 CUDA_DEVICE_MEMORY_LIMIT_0, CUDA_DEVICE_SM_LIMIT, LD_PRELOAD 확인),
-  `nvidia-smi`의 vGPU Memory 크기, Memory 제한 초과 시 CUDA OOM, 31992/31993 Metric,
-  use-gputype Annotation 동작, mig 모드 Node에서 `nvidia-smi mig -lgi`로 동적 생성 확인, Pod 삭제 후 Instance 회수 확인.
-- 실측 완료 시 본문에 [Shell N] 블록을 실측 발췌로 추가하고 manifests/ 폴더에 재현 파일을 남길 것 (repo 컨벤션).
+- Memory·SM 격리 (1.1, 1.3): **완료 (2026-10-18)** — `manifests/hami-isolation-test.yaml` 재현 파일 보관.
+  - RTX 5060 Ti 1장 (Blackwell) 환경이라 nvidia-smi 안에서 `LD_PRELOAD` 환경 변수는 안 보였고 `/etc/ld.so.preload` 파일 주입 방식 확인. 본문도 이에 맞춰 수정.
+  - `CUDA_DEVICE_MEMORY_LIMIT_0=2000m` (단위: MiB), `CUDA_DEVICE_SM_LIMIT=30` 둘 다 Container 내 환경 변수로 주입.
+- 미수행:
+  - use-gputype Annotation 동작 (단일 GPU Node 환경이라 Type 선택 효과 관찰 불가).
+  - Dynamic MIG (RTX 5060 Ti는 MIG 미지원).
+  - 추가 실측 시 본문에 [Shell N] 블록을 실측 발췌로 추가하고 manifests/ 폴더에 재현 파일을 남길 것 (repo 컨벤션).
 
 ## 폴더 구조
 

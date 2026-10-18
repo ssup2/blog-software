@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hami-isolation-test
+  namespace: default
+spec:
+  enableServiceLinks: false
+  containers:
+  - name: cuda
+    image: vllm/vllm-openai:latest
+    command: ["sleep", "infinity"]
+    env:
+    - name: GPU_CORE_UTILIZATION_POLICY
+      value: force
+    resources:
+      limits:
+        nvidia.com/gpu: 1
+        nvidia.com/gpumem: 2000
+        nvidia.com/gpucores: 30
+  restartPolicy: Never
