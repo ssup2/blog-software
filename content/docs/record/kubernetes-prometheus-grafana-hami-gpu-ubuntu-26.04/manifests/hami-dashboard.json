@@ -1,0 +1,167 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "liveNow": false,
+  "panels": [
+    {
+      "id": 1,
+      "type": "gauge",
+      "title": "GPU Core Utilization (%)",
+      "gridPos": {"x": 0, "y": 0, "w": 6, "h": 6},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [
+        {"expr": "hami_host_gpu_utilization_ratio", "refId": "A", "legendFormat": "{{device_type}}"}
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "min": 0, "max": 100, "unit": "percent",
+          "thresholds": {"mode": "absolute", "steps": [
+            {"color": "green", "value": null},
+            {"color": "yellow", "value": 70},
+            {"color": "red", "value": 90}
+          ]}
+        }
+      },
+      "options": {"orientation": "auto", "showThresholdLabels": false, "showThresholdMarkers": true}
+    },
+    {
+      "id": 2,
+      "type": "gauge",
+      "title": "GPU Memory Used",
+      "gridPos": {"x": 6, "y": 0, "w": 6, "h": 6},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [
+        {"expr": "hami_host_gpu_memory_used_bytes", "refId": "A", "legendFormat": "{{device_type}}"}
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "min": 0, "unit": "bytes",
+          "thresholds": {"mode": "absolute", "steps": [
+            {"color": "green", "value": null},
+            {"color": "yellow", "value": 12000000000},
+            {"color": "red", "value": 15000000000}
+          ]}
+        }
+      },
+      "options": {"orientation": "auto", "showThresholdLabels": false, "showThresholdMarkers": true}
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Containers Sharing GPU",
+      "gridPos": {"x": 12, "y": 0, "w": 6, "h": 6},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [
+        {"expr": "hami_gpu_shared_count", "refId": "A", "legendFormat": "{{device_type}}"}
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "thresholds": {"mode": "absolute", "steps": [
+            {"color": "green", "value": null}
+          ]}
+        }
+      },
+      "options": {"colorMode": "value", "graphMode": "none", "textMode": "value", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}}
+    },
+    {
+      "id": 4,
+      "type": "gauge",
+      "title": "HAMi vGPU Memory Allocated (%)",
+      "gridPos": {"x": 18, "y": 0, "w": 6, "h": 6},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [
+        {"expr": "hami_node_gpu_memory_allocated_ratio * 100", "refId": "A", "legendFormat": "{{device_type}}"}
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "min": 0, "max": 100, "unit": "percent",
+          "thresholds": {"mode": "absolute", "steps": [
+            {"color": "green", "value": null},
+            {"color": "yellow", "value": 70},
+            {"color": "red", "value": 90}
+          ]}
+        }
+      },
+      "options": {"orientation": "auto", "showThresholdLabels": false, "showThresholdMarkers": true}
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "GPU Utilization Over Time",
+      "gridPos": {"x": 0, "y": 6, "w": 12, "h": 8},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [
+        {"expr": "hami_host_gpu_utilization_ratio", "refId": "A", "legendFormat": "core: {{device_type}}"},
+        {"expr": "hami_host_gpu_memory_controller_utilization_ratio", "refId": "B", "legendFormat": "memctl: {{device_type}}"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "percent", "min": 0, "max": 100, "custom": {"drawStyle": "line", "lineInterpolation": "linear", "fillOpacity": 10}}},
+      "options": {"legend": {"displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "multi"}}
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "GPU Memory Used Over Time",
+      "gridPos": {"x": 12, "y": 6, "w": 12, "h": 8},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [
+        {"expr": "hami_host_gpu_memory_used_bytes", "refId": "A", "legendFormat": "used: {{device_type}}"},
+        {"expr": "hami_gpu_memory_allocated_bytes", "refId": "B", "legendFormat": "allocated: {{device_type}}"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "bytes", "min": 0, "custom": {"drawStyle": "line", "lineInterpolation": "linear", "fillOpacity": 10}}},
+      "options": {"legend": {"displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "multi"}}
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Per-Pod vGPU Memory Used",
+      "gridPos": {"x": 0, "y": 14, "w": 12, "h": 8},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [
+        {"expr": "hami_container_device_memory_bytes", "refId": "A", "legendFormat": "{{namespace}}/{{pod}}/{{container}}"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "bytes", "min": 0, "custom": {"drawStyle": "line", "lineInterpolation": "linear", "fillOpacity": 10}}},
+      "options": {"legend": {"displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "multi"}}
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Per-Pod vGPU SM Utilization",
+      "gridPos": {"x": 12, "y": 14, "w": 12, "h": 8},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [
+        {"expr": "hami_container_device_utilization_ratio", "refId": "A", "legendFormat": "{{namespace}}/{{pod}}/{{container}}"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "percent", "min": 0, "max": 100, "custom": {"drawStyle": "line", "lineInterpolation": "linear", "fillOpacity": 10}}},
+      "options": {"legend": {"displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "multi"}}
+    },
+    {
+      "id": 9,
+      "type": "table",
+      "title": "Per-Pod vGPU Memory Allocated (via HAMi)",
+      "gridPos": {"x": 0, "y": 22, "w": 24, "h": 8},
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [
+        {"expr": "hami_vgpu_memory_allocated_bytes", "refId": "A", "format": "table", "instant": true}
+      ],
+      "fieldConfig": {"defaults": {"unit": "bytes"}, "overrides": [
+        {"matcher": {"id": "byName", "options": "Value"}, "properties": [{"id": "displayName", "value": "Allocated"}, {"id": "unit", "value": "bytes"}]}
+      ]},
+      "options": {"showHeader": true}
+    }
+  ],
+  "refresh": "15s",
+  "schemaVersion": 39,
+  "tags": ["hami", "gpu"],
+  "templating": {"list": []},
+  "time": {"from": "now-30m", "to": "now"},
+  "timepicker": {},
+  "timezone": "",
+  "title": "HAMi GPU Monitoring",
+  "uid": "hami-gpu-2x",
+  "version": 1,
+  "weekStart": ""
+}

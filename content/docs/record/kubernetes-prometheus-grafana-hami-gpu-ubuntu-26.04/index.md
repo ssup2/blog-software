@@ -12,7 +12,7 @@ title: Kubernetes Prometheus/Grafana + HAMi GPU 모니터링 설치 / Ubuntu 26.
 * Software
   * **Helm** : v3
   * **kube-prometheus-stack** : Chart 92.10.1 (Prometheus Operator v0.94.1)
-  * **Grafana Dashboard** : hami-vgpu-dashboard (grafana.com ID 21833)
+  * **Grafana Dashboard** : HAMi 2.x `hami_*` Metric 기반 Custom Dashboard
 
 ## 2. kube-prometheus-stack 설치
 
@@ -119,6 +119,7 @@ spec:
     - port: monitorport
       path: /metrics
       interval: 15s
+      honorLabels: true
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -139,9 +140,12 @@ spec:
     - port: monitor
       path: /metrics
       interval: 15s
+      honorLabels: true
 ```
 
 Prometheus가 두 HAMi Service를 Scrape하도록 **ServiceMonitor** 두 개를 생성한다. `namespaceSelector`는 Target Service가 있는 Namespace(`kube-system`)를 가리키고, `selector.matchLabels`는 Service의 Label과 일치시킨다. `endpoints.port`는 Service Port의 이름 (`monitorport`, `monitor`)으로 지정한다.
+
+`honorLabels: true`는 HAMi가 Metric에 심어 보낸 `namespace`/`pod`/`container` Label을 Prometheus Operator의 Default Relabeling이 Scrape 대상인 `hami-device-plugin` Pod의 값으로 덮어쓰지 않도록 유지시킨다. 이 Option이 없으면 vLLM Pod의 vGPU Memory 사용량이 `hami-device-plugin-xxxxx/vgpu-monitor`로 뒤바뀌어 Dashboard에서 실제 사용 Pod를 구분할 수 없다.
 
 ```shell
 $ kubectl apply -f hami-servicemonitor.yaml
@@ -161,62 +165,90 @@ serviceMonitor/monitoring/hami-scheduler/0  up  http://10.244.0.6:9395/metrics
 Prometheus의 `/api/v1/targets` Endpoint로 두 HAMi Scrape Target이 `up` 상태인지 확인한다.
 
 ```shell
-$ curl -s 'http://192.168.1.32:30900/api/v1/query?query=hami_host_gpu_memory_used_bytes' \
-    | python3 -c 'import json,sys;r=json.load(sys.stdin)["data"]["result"][0]; print(r["metric"]["device_type"], "used=", int(r["value"][1])/2**30, "GiB")'
-NVIDIA-NVIDIA GeForce RTX 5060 Ti used= 13.360000610351562 GiB
+$ curl -s 'http://192.168.1.32:30900/api/v1/query?query=hami_container_device_memory_bytes' \
+    | python3 -c '
+import json,sys
+for r in json.load(sys.stdin)["data"]["result"]:
+    m=r["metric"]; print(f"{m[\"namespace\"]}/{m[\"pod\"]}/{m[\"container\"]} = {int(r[\"value\"][1])/2**30:.2f} GiB")'
+default/qwen3-14b-awq-84dfd5c495-nw9rg/vllm = 12.08 GiB
 ```
 
-Prometheus Query API로 현재 VRAM 사용량을 조회한다. vLLM Pod가 ~13.4 GiB를 점유 중인 상태가 그대로 수치로 노출된다.
+Prometheus Query API로 현재 Pod 단위 VRAM 사용량을 조회한다. HAMi가 심어 보낸 `namespace`/`pod`/`container` Label이 그대로 유지되어 vLLM Pod가 ~12 GiB vGPU Memory를 점유하는 상태가 바로 노출된다.
 
 ## 4. Grafana Dashboard 추가
 
-[Grafana.com Dashboard 21833 `hami-vgpu-dashboard`](https://grafana.com/grafana/dashboards/21833-hami-vgpu-dashboard/)를 Import한다. Prometheus Datasource를 그대로 쓰도록 Dashboard JSON의 Datasource Variable `${DS_ALL}`을 `Prometheus`로 치환한 뒤 ConfigMap으로 넘기면 Grafana Sidecar가 자동 Import한다.
+Grafana.com에 등록된 `hami-vgpu-dashboard` (ID 21833)와 `hami-vgpu-metrics-dashboard` (ID 22043)는 모두 HAMi 1.x 시절의 옛 Metric 이름 (`HostCoreUtilization`, `Device_memory_desc_of_container` 등)과 NVIDIA DCGM Exporter Metric을 섞어 쓴다. HAMi 2.x에서는 Metric이 `hami_*` Prefix로 재명명되어 두 Dashboard 모두 대부분 Panel이 "No data"로 뜬다. 이 글에서는 HAMi 2.x의 `hami_*` Metric만으로 동작하는 Dashboard를 직접 만들어 ConfigMap으로 등록한다.
+
+```yaml {caption="[File 3] hami-dashboard.json 핵심 Panel 발췌", linenos=table}
+{
+  "title": "HAMi GPU Monitoring",
+  "uid": "hami-gpu-2x",
+  "schemaVersion": 39,
+  "panels": [
+    {
+      "title": "GPU Core Utilization (%)",
+      "type": "gauge",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [{"expr": "hami_host_gpu_utilization_ratio"}]
+    },
+    {
+      "title": "GPU Memory Used",
+      "type": "gauge",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [{"expr": "hami_host_gpu_memory_used_bytes"}]
+    },
+    {
+      "title": "HAMi vGPU Memory Allocated (%)",
+      "type": "gauge",
+      "targets": [{"expr": "hami_node_gpu_memory_allocated_ratio * 100"}]
+    },
+    {
+      "title": "Per-Pod vGPU Memory Used",
+      "type": "timeseries",
+      "targets": [{"expr": "hami_container_device_memory_bytes",
+                   "legendFormat": "{{namespace}}/{{pod}}/{{container}}"}]
+    }
+  ]
+}
+```
+
+Dashboard는 9개 Panel을 포함한다 (상단 Gauge 4개 + 시계열 4개 + Table 1개). 쓰이는 Metric은 다음과 같다.
+
+* **`hami_host_gpu_utilization_ratio`** : 물리 GPU의 SM Core 사용률 (0-100).
+* **`hami_host_gpu_memory_used_bytes`** : 물리 GPU에 올라간 Memory 사용량 (bytes).
+* **`hami_host_gpu_memory_controller_utilization_ratio`** : GPU Memory Controller 사용률.
+* **`hami_gpu_memory_allocated_bytes`** : HAMi Scheduler가 할당한 Memory 총합.
+* **`hami_node_gpu_memory_allocated_ratio`** : Node 전체 Memory 중 HAMi가 할당한 비율 (0-1).
+* **`hami_gpu_shared_count`** : 해당 GPU를 공유 중인 Container 수.
+* **`hami_container_device_memory_bytes`** : Container별 실제 vGPU Memory 사용량. `namespace`/`pod`/`container` Label 포함.
+* **`hami_container_device_utilization_ratio`** : Container별 SM 사용률.
+* **`hami_vgpu_memory_allocated_bytes`** : Container별 HAMi 할당량.
 
 ```shell
-$ curl -sL 'https://grafana.com/api/dashboards/21833/revisions/2/download' -o hami-dashboard.json
-$ python3 <<'PY'
-import json
-with open('hami-dashboard.json') as f: text = f.read()
-text = text.replace('${DS_ALL}', 'Prometheus')
-d = json.loads(text)
-for k in ('__inputs','__requires','__elements'): d.pop(k, None)
-def fix(o):
-    if isinstance(o, dict):
-        for k,v in list(o.items()):
-            if k == 'datasource' and isinstance(v, dict):
-                v['type']='prometheus'; v['uid']='prometheus'
-            fix(v)
-    elif isinstance(o, list):
-        for i in o: fix(i)
-fix(d)
-json.dump(d, open('hami-dashboard-fixed.json','w'), indent=2)
-PY
 $ kubectl -n monitoring create cm hami-dashboard \
-    --from-file=hami-dashboard.json=hami-dashboard-fixed.json \
+    --from-file=hami-dashboard.json=./hami-dashboard.json \
     --dry-run=client -o yaml \
   | kubectl label --local -f - grafana_dashboard=1 --dry-run=client -o yaml \
   | kubectl apply -f -
 configmap/hami-dashboard created
 ```
 
-Dashboard JSON을 가공해 ConfigMap에 담아 적용한다. 핵심 변경은 두 가지다. `${DS_ALL}` Variable은 Grafana에 Import할 때 Datasource 선택을 요구하는데 Sidecar 자동 Import 경로에서는 이 선택을 할 수 없으므로 `Prometheus` 이름으로 치환한다. 또한 Panel의 `datasource` Field에 UID (`prometheus`)를 명시해 Grafana가 Datasource를 바로 Resolve하도록 한다. Grafana Sidecar는 `grafana_dashboard=1` Label이 붙은 ConfigMap을 Watch하여 Dashboard를 Grafana에 자동 등록한다.
+Dashboard JSON을 ConfigMap에 담아 적용한다. Grafana Sidecar는 `grafana_dashboard=1` Label이 붙은 ConfigMap을 Watch하여 Dashboard를 Grafana에 자동 등록한다.
 
 ```shell
 $ kubectl -n monitoring logs deploy/monitoring-grafana -c grafana-sc-dashboard --tail=5 | grep hami
-{"time": "2026-10-18T04:28:55.895011+00:00", "level": "INFO", "msg": "Writing /tmp/dashboards/hami-dashboard.json (ascii)"}
-{"time": "2026-10-18T04:28:55.932181+00:00", "level": "INFO", "msg": "None sent to http://localhost:3000/api/admin/provisioning/dashboards/reload. Response: 200 OK {\"message\":\"Dashboards config reloaded\"}"}
+{"time": "...", "level": "INFO", "msg": "Writing /tmp/dashboards/hami-dashboard.json (ascii)"}
+{"time": "...", "level": "INFO", "msg": "None sent to http://localhost:3000/api/admin/provisioning/dashboards/reload. Response: 200 OK {\"message\":\"Dashboards config reloaded\"}"}
 $ curl -s -u admin:admin 'http://192.168.1.32:30300/api/search?query=hami' \
     | python3 -c 'import json,sys;[print(d["title"],d["url"]) for d in json.load(sys.stdin)]'
-hami-vgpu-dashboard /d/Oxed_c6Wz21/hami-vgpu-dashboard
+HAMi GPU Monitoring /d/hami-gpu-2x/hami-gpu-monitoring
 ```
 
-Sidecar Log에서 Dashboard가 Write되고 Grafana API에 Reload 요청이 성공한 것을 확인한다. `/api/search`로 Grafana에 Dashboard가 등록되었는지도 다시 확인한다. 브라우저에서 `http://192.168.1.32:30300` → `admin/admin` 로그인 후 좌측 Dashboards 메뉴에서 `hami-vgpu-dashboard`를 열면 GPU 사용률, vGPU Memory 할당, Pod 단위 사용량 Panel을 볼 수 있다.
-
-Dashboard는 **HAMi Metric** (`hami_*`) 기반 Panel과 **NVIDIA DCGM Exporter Metric** (`DCGM_*`) 기반 Panel을 함께 포함한다. 본 글에서는 DCGM Exporter를 추가 설치하지 않으므로 DCGM Panel은 "No data"로 표시되고, GPU 사용률·VRAM·vGPU 할당 등 핵심 Panel은 HAMi Metric만으로 정상 동작한다.
+Sidecar Log에서 Dashboard가 Write되고 Grafana API에 Reload 요청이 성공한 것을 확인한다. `/api/search`로 Grafana에 Dashboard가 등록되었는지도 다시 확인한다. 브라우저에서 `http://192.168.1.32:30300` → `admin/admin` 로그인 후 좌측 Dashboards 메뉴에서 `HAMi GPU Monitoring` Dashboard를 열면 GPU 사용률 Gauge, 시계열 Panel, 그리고 Pod별 vGPU Memory 사용량이 모두 실데이터로 표시된다.
 
 ## 5. 참조
 
 * kube-prometheus-stack : [https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack)
 * Prometheus Operator ServiceMonitor : [https://prometheus-operator.dev/docs/getting-started/design/#servicemonitor](https://prometheus-operator.dev/docs/getting-started/design/#servicemonitor)
 * HAMi Monitoring : [https://github.com/Project-HAMi/HAMi/blob/master/docs/dashboard.md](https://github.com/Project-HAMi/HAMi/blob/master/docs/dashboard.md)
-* Grafana Dashboard hami-vgpu-dashboard : [https://grafana.com/grafana/dashboards/21833-hami-vgpu-dashboard/](https://grafana.com/grafana/dashboards/21833-hami-vgpu-dashboard/)
+* Prometheus honor_labels : [https://prometheus.io/docs/prometheus/latest/configuration/configuration/#scrape_config](https://prometheus.io/docs/prometheus/latest/configuration/configuration/#scrape_config)

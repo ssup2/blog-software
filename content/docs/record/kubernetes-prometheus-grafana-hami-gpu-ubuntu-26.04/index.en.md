@@ -12,7 +12,7 @@ The installation and runtime environment is as follows. A Kubernetes Single-node
 * Software
   * **Helm** : v3
   * **kube-prometheus-stack** : Chart 92.10.1 (Prometheus Operator v0.94.1)
-  * **Grafana Dashboard** : hami-vgpu-dashboard (grafana.com ID 21833)
+  * **Grafana Dashboard** : Custom dashboard built on HAMi 2.x `hami_*` metrics
 
 ## 2. kube-prometheus-stack Installation
 
@@ -119,6 +119,7 @@ spec:
     - port: monitorport
       path: /metrics
       interval: 15s
+      honorLabels: true
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -139,9 +140,12 @@ spec:
     - port: monitor
       path: /metrics
       interval: 15s
+      honorLabels: true
 ```
 
 Create two **ServiceMonitors** so that Prometheus Scrapes both HAMi Services. `namespaceSelector` points to the Namespace where the Target Services live (`kube-system`), and `selector.matchLabels` matches the Service Labels. `endpoints.port` is specified by Service Port name (`monitorport`, `monitor`).
+
+`honorLabels: true` keeps the `namespace`/`pod`/`container` Labels that HAMi embeds in each metric so the Prometheus Operator's default relabeling does not overwrite them with the scrape target Pod (`hami-device-plugin`). Without this option, the vGPU Memory usage of a vLLM Pod is attributed to `hami-device-plugin-xxxxx/vgpu-monitor`, making it impossible to identify the real consumer in the Dashboard.
 
 ```shell
 $ kubectl apply -f hami-servicemonitor.yaml
@@ -161,62 +165,90 @@ serviceMonitor/monitoring/hami-scheduler/0  up  http://10.244.0.6:9395/metrics
 Confirm via Prometheus's `/api/v1/targets` Endpoint that both HAMi Scrape Targets are in the `up` state.
 
 ```shell
-$ curl -s 'http://192.168.1.32:30900/api/v1/query?query=hami_host_gpu_memory_used_bytes' \
-    | python3 -c 'import json,sys;r=json.load(sys.stdin)["data"]["result"][0]; print(r["metric"]["device_type"], "used=", int(r["value"][1])/2**30, "GiB")'
-NVIDIA-NVIDIA GeForce RTX 5060 Ti used= 13.360000610351562 GiB
+$ curl -s 'http://192.168.1.32:30900/api/v1/query?query=hami_container_device_memory_bytes' \
+    | python3 -c '
+import json,sys
+for r in json.load(sys.stdin)["data"]["result"]:
+    m=r["metric"]; print(f"{m[\"namespace\"]}/{m[\"pod\"]}/{m[\"container\"]} = {int(r[\"value\"][1])/2**30:.2f} GiB")'
+default/qwen3-14b-awq-84dfd5c495-nw9rg/vllm = 12.08 GiB
 ```
 
-Query current VRAM usage through the Prometheus Query API. The ~13.4 GiB occupied by the vLLM Pod is surfaced directly as a number.
+Query current per-Pod VRAM usage through the Prometheus Query API. Because the `namespace`/`pod`/`container` Labels embedded by HAMi are preserved, the vLLM Pod occupying ~12 GiB of vGPU Memory is surfaced directly.
 
 ## 4. Grafana Dashboard Addition
 
-Import [Grafana.com Dashboard 21833 `hami-vgpu-dashboard`](https://grafana.com/grafana/dashboards/21833-hami-vgpu-dashboard/). Replace the Dashboard JSON's Datasource Variable `${DS_ALL}` with `Prometheus` so the existing Prometheus Datasource is used, then hand the result to Grafana as a ConfigMap for Sidecar auto-import.
+The Grafana.com dashboards `hami-vgpu-dashboard` (ID 21833) and `hami-vgpu-metrics-dashboard` (ID 22043) both use the old HAMi 1.x metric names (`HostCoreUtilization`, `Device_memory_desc_of_container`, etc.) mixed with NVIDIA DCGM Exporter metrics. In HAMi 2.x, metrics were renamed with the `hami_*` prefix, so most Panels in those dashboards show "No data". This post builds a Dashboard that operates purely on HAMi 2.x `hami_*` Metrics and registers it via a ConfigMap.
+
+```yaml {caption="[File 3] hami-dashboard.json (key panels excerpt)", linenos=table}
+{
+  "title": "HAMi GPU Monitoring",
+  "uid": "hami-gpu-2x",
+  "schemaVersion": 39,
+  "panels": [
+    {
+      "title": "GPU Core Utilization (%)",
+      "type": "gauge",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [{"expr": "hami_host_gpu_utilization_ratio"}]
+    },
+    {
+      "title": "GPU Memory Used",
+      "type": "gauge",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "targets": [{"expr": "hami_host_gpu_memory_used_bytes"}]
+    },
+    {
+      "title": "HAMi vGPU Memory Allocated (%)",
+      "type": "gauge",
+      "targets": [{"expr": "hami_node_gpu_memory_allocated_ratio * 100"}]
+    },
+    {
+      "title": "Per-Pod vGPU Memory Used",
+      "type": "timeseries",
+      "targets": [{"expr": "hami_container_device_memory_bytes",
+                   "legendFormat": "{{namespace}}/{{pod}}/{{container}}"}]
+    }
+  ]
+}
+```
+
+The Dashboard contains 9 panels (4 top gauges + 4 time series + 1 table). The metrics in use are as follows.
+
+* **`hami_host_gpu_utilization_ratio`** : Physical GPU SM Core utilization (0-100).
+* **`hami_host_gpu_memory_used_bytes`** : Memory loaded on the physical GPU (bytes).
+* **`hami_host_gpu_memory_controller_utilization_ratio`** : GPU Memory Controller utilization.
+* **`hami_gpu_memory_allocated_bytes`** : Total Memory allocated by the HAMi Scheduler.
+* **`hami_node_gpu_memory_allocated_ratio`** : Fraction of Node Memory allocated by HAMi (0-1).
+* **`hami_gpu_shared_count`** : Number of Containers sharing this GPU.
+* **`hami_container_device_memory_bytes`** : Per-Container actual vGPU Memory usage with `namespace`/`pod`/`container` Labels.
+* **`hami_container_device_utilization_ratio`** : Per-Container SM utilization.
+* **`hami_vgpu_memory_allocated_bytes`** : Per-Container HAMi allocation.
 
 ```shell
-$ curl -sL 'https://grafana.com/api/dashboards/21833/revisions/2/download' -o hami-dashboard.json
-$ python3 <<'PY'
-import json
-with open('hami-dashboard.json') as f: text = f.read()
-text = text.replace('${DS_ALL}', 'Prometheus')
-d = json.loads(text)
-for k in ('__inputs','__requires','__elements'): d.pop(k, None)
-def fix(o):
-    if isinstance(o, dict):
-        for k,v in list(o.items()):
-            if k == 'datasource' and isinstance(v, dict):
-                v['type']='prometheus'; v['uid']='prometheus'
-            fix(v)
-    elif isinstance(o, list):
-        for i in o: fix(i)
-fix(d)
-json.dump(d, open('hami-dashboard-fixed.json','w'), indent=2)
-PY
 $ kubectl -n monitoring create cm hami-dashboard \
-    --from-file=hami-dashboard.json=hami-dashboard-fixed.json \
+    --from-file=hami-dashboard.json=./hami-dashboard.json \
     --dry-run=client -o yaml \
   | kubectl label --local -f - grafana_dashboard=1 --dry-run=client -o yaml \
   | kubectl apply -f -
 configmap/hami-dashboard created
 ```
 
-Rewrite the Dashboard JSON and apply it as a ConfigMap. Two key changes are made. The `${DS_ALL}` Variable prompts the user to pick a Datasource at Grafana Import time, but the Sidecar auto-import path cannot make that choice, so it is replaced with the Datasource name `Prometheus`. In addition, the `datasource` Field on each Panel is set with an explicit UID (`prometheus`) so Grafana resolves the Datasource immediately. The Grafana Sidecar watches ConfigMaps tagged with the Label `grafana_dashboard=1` and registers the Dashboard into Grafana automatically.
+Apply the Dashboard JSON as a ConfigMap. The Grafana Sidecar watches ConfigMaps labeled `grafana_dashboard=1` and registers the Dashboard automatically.
 
 ```shell
 $ kubectl -n monitoring logs deploy/monitoring-grafana -c grafana-sc-dashboard --tail=5 | grep hami
-{"time": "2026-10-18T04:28:55.895011+00:00", "level": "INFO", "msg": "Writing /tmp/dashboards/hami-dashboard.json (ascii)"}
-{"time": "2026-10-18T04:28:55.932181+00:00", "level": "INFO", "msg": "None sent to http://localhost:3000/api/admin/provisioning/dashboards/reload. Response: 200 OK {\"message\":\"Dashboards config reloaded\"}"}
+{"time": "...", "level": "INFO", "msg": "Writing /tmp/dashboards/hami-dashboard.json (ascii)"}
+{"time": "...", "level": "INFO", "msg": "None sent to http://localhost:3000/api/admin/provisioning/dashboards/reload. Response: 200 OK {\"message\":\"Dashboards config reloaded\"}"}
 $ curl -s -u admin:admin 'http://192.168.1.32:30300/api/search?query=hami' \
     | python3 -c 'import json,sys;[print(d["title"],d["url"]) for d in json.load(sys.stdin)]'
-hami-vgpu-dashboard /d/Oxed_c6Wz21/hami-vgpu-dashboard
+HAMi GPU Monitoring /d/hami-gpu-2x/hami-gpu-monitoring
 ```
 
-Check the Sidecar Log showing the Dashboard was written and that the Grafana API accepted the reload request. Also confirm via `/api/search` that the Dashboard is registered in Grafana. Open `http://192.168.1.32:30300` in a browser, log in as `admin/admin`, and open `hami-vgpu-dashboard` from the Dashboards menu on the left to see Panels for GPU utilization, vGPU Memory allocation, and per-Pod usage.
-
-The Dashboard contains both **HAMi Metric** (`hami_*`) based Panels and **NVIDIA DCGM Exporter Metric** (`DCGM_*`) based Panels. Since this post does not add a DCGM Exporter, the DCGM Panels display "No data", while the core Panels for GPU utilization, VRAM, and vGPU allocation work from HAMi Metrics alone.
+Check the Sidecar Log showing the Dashboard was written and that the Grafana API accepted the reload request. Also confirm via `/api/search` that the Dashboard is registered. Open `http://192.168.1.32:30300` in a browser, log in as `admin/admin`, and open the `HAMi GPU Monitoring` Dashboard from the Dashboards menu on the left to see GPU utilization gauges, time-series panels, and per-Pod vGPU Memory usage all populated with real data.
 
 ## 5. References
 
 * kube-prometheus-stack : [https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack)
 * Prometheus Operator ServiceMonitor : [https://prometheus-operator.dev/docs/getting-started/design/#servicemonitor](https://prometheus-operator.dev/docs/getting-started/design/#servicemonitor)
 * HAMi Monitoring : [https://github.com/Project-HAMi/HAMi/blob/master/docs/dashboard.md](https://github.com/Project-HAMi/HAMi/blob/master/docs/dashboard.md)
-* Grafana Dashboard hami-vgpu-dashboard : [https://grafana.com/grafana/dashboards/21833-hami-vgpu-dashboard/](https://grafana.com/grafana/dashboards/21833-hami-vgpu-dashboard/)
+* Prometheus honor_labels : [https://prometheus.io/docs/prometheus/latest/configuration/configuration/#scrape_config](https://prometheus.io/docs/prometheus/latest/configuration/configuration/#scrape_config)
