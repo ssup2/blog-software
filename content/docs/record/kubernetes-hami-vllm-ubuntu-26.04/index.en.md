@@ -1,5 +1,5 @@
 ---
-title: Kubernetes (kubeadm) + HAMi Installation and vLLM Model Serving / Ubuntu 26.04 Environment
+title: Kubernetes HAMi Installation and vLLM Model Serving / GPU Ubuntu 26.04 Environment
 ---
 
 ## 1. Installation and Runtime Environment

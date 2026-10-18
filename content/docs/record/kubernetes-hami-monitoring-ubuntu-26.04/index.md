@@ -1,5 +1,5 @@
 ---
-title: Kubernetes Prometheus/Grafana + HAMi GPU 모니터링 설치 / Ubuntu 26.04 환경
+title: Kubernetes HAMi Monitoring 구성 / GPU Ubuntu 26.04 환경
 ---
 
 ## 1. 설치, 실행 환경

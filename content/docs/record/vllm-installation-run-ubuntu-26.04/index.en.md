@@ -1,5 +1,5 @@
 ---
-title: vLLM Installation and Model Serving / Ubuntu 26.04 Environment
+title: vLLM Installation and Model Serving / GPU Ubuntu 26.04 Environment
 ---
 
 ## 1. Installation and Runtime Environment

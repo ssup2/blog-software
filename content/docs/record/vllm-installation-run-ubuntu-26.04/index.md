@@ -1,5 +1,5 @@
 ---
-title: vLLM 설치 및 모델 서빙 / Ubuntu 26.04 환경
+title: vLLM 설치 및 모델 서빙 / GPU Ubuntu 26.04 환경
 ---
 
 ## 1. 설치, 실행 환경
