@@ -60,46 +60,32 @@ Grafana/Prometheus Service가 각 NodePort로 노출되었는지 확인한다.
 
 ## 3. HAMi Exporter 연동
 
-HAMi 2.x는 Metrics Exporter를 자체 포함한다. `hami-device-plugin` Pod의 `vgpu-monitor` Sidecar가 Port 9394로 Host·Container 단위 GPU Metric을, `hami-scheduler` Pod가 Port 9395로 Cluster vGPU 할당 Metric을 노출한다.
-
-```yaml {caption="[File 2] hami-servicemonitor.yaml", linenos=table}
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
-metadata:
-  name: hami-device-plugin
-  namespace: monitoring
-spec:
-  namespaceSelector:
-    matchNames: [kube-system]
-  selector:
-    matchLabels:
-      app.kubernetes.io/component: hami-device-plugin
-      app.kubernetes.io/instance: hami
-  endpoints:
-    - port: monitorport
-      honorLabels: true
----
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
-metadata:
-  name: hami-scheduler
-  namespace: monitoring
-spec:
-  namespaceSelector:
-    matchNames: [kube-system]
-  selector:
-    matchLabels:
-      app.kubernetes.io/component: hami-scheduler
-      app.kubernetes.io/instance: hami
-  endpoints:
-    - port: monitor
-      honorLabels: true
-```
-
-HAMi 두 Exporter Service를 Scrape하는 ServiceMonitor를 Prometheus Operator에 등록한다. `honorLabels: true`는 HAMi가 Metric에 심은 `namespace`/`pod`/`container` Label을 Prometheus Operator의 Default Relabeling이 Scrape 대상 Pod(`hami-device-plugin`)의 값으로 덮어쓰지 않도록 유지시킨다. 이 Option이 없으면 vLLM Pod의 GPU 사용량이 `hami-device-plugin` Pod로 뒤바뀌어 보인다.
+HAMi 2.x는 Metrics Exporter를 자체 포함하고 Helm Chart에 ServiceMonitor Template도 들어 있다. HAMi 설치 시 `prometheus.enabled=true`를 지정하면 Chart가 `hami-device-plugin-metrics-monitor`, `hami-scheduler-metrics-monitor` ServiceMonitor를 자동 생성한다. 다만 Chart Template에는 `honorLabels` 설정이 없어서 그대로 두면 Prometheus Operator의 Default Relabeling이 Metric에 심어진 `namespace`/`pod`/`container` Label을 Scrape 대상 Pod(`hami-device-plugin`)의 값으로 덮어쓰고 vLLM Pod 단위 사용량이 보이지 않는다.
 
 ```shell
-$ kubectl apply -f hami-servicemonitor.yaml
+$ helm upgrade hami hami-charts/hami --version 2.10.0 \
+    --reuse-values \
+    --set prometheus.enabled=true \
+    -n kube-system
+Release "hami" has been upgraded. Happy Helming!
+$ kubectl -n kube-system get servicemonitor
+NAME                                 AGE
+hami-device-plugin-metrics-monitor   7s
+hami-scheduler-metrics-monitor       7s
+```
+
+HAMi Chart를 Upgrade하여 ServiceMonitor를 생성한다. HAMi 설치 시점에 `--set prometheus.enabled=true`를 미리 넣었다면 이 단계는 생략해도 된다.
+
+```shell
+$ kubectl -n kube-system patch servicemonitor hami-device-plugin-metrics-monitor \
+    --type=json -p='[{"op":"add","path":"/spec/endpoints/0/honorLabels","value":true}]'
+$ kubectl -n kube-system patch servicemonitor hami-scheduler-metrics-monitor \
+    --type=json -p='[{"op":"add","path":"/spec/endpoints/0/honorLabels","value":true}]'
+```
+
+생성된 두 ServiceMonitor에 `honorLabels: true`를 Patch로 주입한다. 이 Option은 Prometheus Scrape Config의 `honor_labels`를 활성화해 Metric 본문의 Label을 Target Discovery Label보다 우선시한다.
+
+```shell
 $ curl -s 'http://192.168.1.32:30900/api/v1/query?query=hami_container_device_memory_bytes' \
     | python3 -c '
 import json,sys
@@ -108,13 +94,13 @@ for r in json.load(sys.stdin)["data"]["result"]:
 default/qwen3-14b-awq-84dfd5c495-nw9rg/vllm = 12.08 GiB
 ```
 
-ServiceMonitor를 적용하고 Prometheus Query API로 Pod 단위 vGPU Memory 사용량을 조회한다. vLLM Pod가 ~12 GiB를 점유 중인 상태가 바로 노출된다.
+Prometheus Query API로 Pod 단위 vGPU Memory 사용량이 vLLM Pod로 올바르게 attribute되는지 확인한다.
 
 ## 4. DCGM Exporter 설치
 
 HAMi Exporter가 가상화·Pod 단위 Accounting에 특화되어 있다면, **NVIDIA DCGM Exporter**는 물리 GPU의 하드웨어 Telemetry (Temperature, Power, SM/Memory Clock, ECC/XID Error 등) 를 노출한다. 두 Exporter는 보완 관계로 함께 설치한다.
 
-```yaml {caption="[File 3] dcgm-values.yaml", linenos=table}
+```yaml {caption="[File 2] dcgm-values.yaml", linenos=table}
 serviceMonitor:
   enabled: true
 

@@ -60,46 +60,32 @@ Confirm that the Grafana and Prometheus Services are exposed on their NodePorts.
 
 ## 3. HAMi Exporter Integration
 
-HAMi 2.x embeds its own Metrics Exporters. The `vgpu-monitor` Sidecar in the `hami-device-plugin` Pod exposes Host- and Container-level GPU Metrics on Port 9394, and the `hami-scheduler` Pod exposes cluster-wide vGPU allocation Metrics on Port 9395.
-
-```yaml {caption="[File 2] hami-servicemonitor.yaml", linenos=table}
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
-metadata:
-  name: hami-device-plugin
-  namespace: monitoring
-spec:
-  namespaceSelector:
-    matchNames: [kube-system]
-  selector:
-    matchLabels:
-      app.kubernetes.io/component: hami-device-plugin
-      app.kubernetes.io/instance: hami
-  endpoints:
-    - port: monitorport
-      honorLabels: true
----
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
-metadata:
-  name: hami-scheduler
-  namespace: monitoring
-spec:
-  namespaceSelector:
-    matchNames: [kube-system]
-  selector:
-    matchLabels:
-      app.kubernetes.io/component: hami-scheduler
-      app.kubernetes.io/instance: hami
-  endpoints:
-    - port: monitor
-      honorLabels: true
-```
-
-Register two ServiceMonitors so Prometheus Operator scrapes both HAMi Exporter Services. `honorLabels: true` keeps the `namespace`/`pod`/`container` Labels HAMi embeds in each metric so the Prometheus Operator's default relabeling does not overwrite them with the scrape target Pod (`hami-device-plugin`). Without this option, a vLLM Pod's GPU usage is attributed to the `hami-device-plugin` Pod instead.
+HAMi 2.x embeds its own Metrics Exporters, and the Helm Chart ships ServiceMonitor templates. Setting `prometheus.enabled=true` at install time makes the Chart create the `hami-device-plugin-metrics-monitor` and `hami-scheduler-metrics-monitor` ServiceMonitors automatically. However, the Chart templates do not set `honorLabels`, so the Prometheus Operator's default relabeling overwrites the `namespace`/`pod`/`container` Labels embedded in each metric with the scrape target Pod (`hami-device-plugin`), hiding per-Pod vGPU usage of a vLLM Pod.
 
 ```shell
-$ kubectl apply -f hami-servicemonitor.yaml
+$ helm upgrade hami hami-charts/hami --version 2.10.0 \
+    --reuse-values \
+    --set prometheus.enabled=true \
+    -n kube-system
+Release "hami" has been upgraded. Happy Helming!
+$ kubectl -n kube-system get servicemonitor
+NAME                                 AGE
+hami-device-plugin-metrics-monitor   7s
+hami-scheduler-metrics-monitor       7s
+```
+
+Upgrade the HAMi Chart so the ServiceMonitors are created. If `--set prometheus.enabled=true` is passed at the initial `helm install` time, this upgrade step can be skipped.
+
+```shell
+$ kubectl -n kube-system patch servicemonitor hami-device-plugin-metrics-monitor \
+    --type=json -p='[{"op":"add","path":"/spec/endpoints/0/honorLabels","value":true}]'
+$ kubectl -n kube-system patch servicemonitor hami-scheduler-metrics-monitor \
+    --type=json -p='[{"op":"add","path":"/spec/endpoints/0/honorLabels","value":true}]'
+```
+
+Patch `honorLabels: true` into both ServiceMonitors. This surfaces Prometheus's `honor_labels` scrape setting so the metric body labels win over target discovery labels.
+
+```shell
 $ curl -s 'http://192.168.1.32:30900/api/v1/query?query=hami_container_device_memory_bytes' \
     | python3 -c '
 import json,sys
@@ -108,13 +94,13 @@ for r in json.load(sys.stdin)["data"]["result"]:
 default/qwen3-14b-awq-84dfd5c495-nw9rg/vllm = 12.08 GiB
 ```
 
-Apply the ServiceMonitors and query per-Pod vGPU Memory usage through the Prometheus Query API. The vLLM Pod occupying ~12 GiB is surfaced directly.
+Query the Prometheus API to confirm per-Pod vGPU Memory usage is attributed to the vLLM Pod correctly.
 
 ## 4. DCGM Exporter Installation
 
 While the HAMi Exporter is specialized for vGPU virtualization and per-Pod accounting, the **NVIDIA DCGM Exporter** exposes physical GPU hardware telemetry (Temperature, Power, SM/Memory Clock, ECC/XID Errors, etc.). The two Exporters are complementary and are installed together.
 
-```yaml {caption="[File 3] dcgm-values.yaml", linenos=table}
+```yaml {caption="[File 2] dcgm-values.yaml", linenos=table}
 serviceMonitor:
   enabled: true
 
