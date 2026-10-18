@@ -12,7 +12,7 @@ title: Kubernetes Prometheus/Grafana + HAMi GPU 모니터링 설치 / Ubuntu 26.
 * Software
   * **Helm** : v3
   * **kube-prometheus-stack** : Chart 92.10.1 (Prometheus Operator v0.94.1)
-  * **Grafana Dashboard** : HAMi 2.x `hami_*` Metric 기반 Custom Dashboard
+  * **Grafana Dashboard** : HAMi 공식 vGPU Metrics Dashboard
 
 ## 2. kube-prometheus-stack 설치
 
@@ -177,56 +177,19 @@ Prometheus Query API로 현재 Pod 단위 VRAM 사용량을 조회한다. HAMi�
 
 ## 4. Grafana Dashboard 추가
 
-Grafana.com에 등록된 `hami-vgpu-dashboard` (ID 21833)와 `hami-vgpu-metrics-dashboard` (ID 22043)는 모두 HAMi 1.x 시절의 옛 Metric 이름 (`HostCoreUtilization`, `Device_memory_desc_of_container` 등)과 NVIDIA DCGM Exporter Metric을 섞어 쓴다. HAMi 2.x에서는 Metric이 `hami_*` Prefix로 재명명되어 두 Dashboard 모두 대부분 Panel이 "No data"로 뜬다. 이 글에서는 HAMi 2.x의 `hami_*` Metric만으로 동작하는 Dashboard를 직접 만들어 ConfigMap으로 등록한다.
+HAMi는 공식 Grafana Dashboard JSON을 자체 Website (`project-hami.io`)에서 호스팅한다. Grafana.com에 올라와 있는 `hami-vgpu-dashboard` (ID 21833, 2024-09 업로드)와 `hami-vgpu-metrics-dashboard` (ID 22043, 2024-10)는 HAMi 1.x 시절의 옛 Metric 이름 (`HostCoreUtilization`, `Device_memory_desc_of_container`, `nodeGPUOverview` 등)을 쓰기 때문에 HAMi 2.x에 적용하면 대부분 Panel이 "No data"로 뜬다. HAMi 2.10부터 Metric이 `hami_*` Prefix로 재명명되었고 (PR #2301), 공식 Dashboard는 HAMi 저장소에서 분리되어 Website 저장소에 통합되었다 (PR #3002, #3031). 2.x 환경에서는 `https://project-hami.io/grafana/gpu-dashboard.json`을 받아 쓰는 것이 올바른 경로다.
 
-```yaml {caption="[File 3] hami-dashboard.json 핵심 Panel 발췌", linenos=table}
-{
-  "title": "HAMi GPU Monitoring",
-  "uid": "hami-gpu-2x",
-  "schemaVersion": 39,
-  "panels": [
-    {
-      "title": "GPU Core Utilization (%)",
-      "type": "gauge",
-      "datasource": {"type": "prometheus", "uid": "prometheus"},
-      "targets": [{"expr": "hami_host_gpu_utilization_ratio"}]
-    },
-    {
-      "title": "GPU Memory Used",
-      "type": "gauge",
-      "datasource": {"type": "prometheus", "uid": "prometheus"},
-      "targets": [{"expr": "hami_host_gpu_memory_used_bytes"}]
-    },
-    {
-      "title": "HAMi vGPU Memory Allocated (%)",
-      "type": "gauge",
-      "targets": [{"expr": "hami_node_gpu_memory_allocated_ratio * 100"}]
-    },
-    {
-      "title": "Per-Pod vGPU Memory Used",
-      "type": "timeseries",
-      "targets": [{"expr": "hami_container_device_memory_bytes",
-                   "legendFormat": "{{namespace}}/{{pod}}/{{container}}"}]
-    }
-  ]
-}
+```shell
+$ curl -sLO https://project-hami.io/grafana/gpu-dashboard.json
+$ python3 -c 'import json; d=json.load(open("gpu-dashboard.json")); print(d["title"], "panels=", len(d["panels"]))'
+HAMi vGPU metrics panels= 31
 ```
 
-Dashboard는 9개 Panel을 포함한다 (상단 Gauge 4개 + 시계열 4개 + Table 1개). 쓰이는 Metric은 다음과 같다.
-
-* **`hami_host_gpu_utilization_ratio`** : 물리 GPU의 SM Core 사용률 (0-100).
-* **`hami_host_gpu_memory_used_bytes`** : 물리 GPU에 올라간 Memory 사용량 (bytes).
-* **`hami_host_gpu_memory_controller_utilization_ratio`** : GPU Memory Controller 사용률.
-* **`hami_gpu_memory_allocated_bytes`** : HAMi Scheduler가 할당한 Memory 총합.
-* **`hami_node_gpu_memory_allocated_ratio`** : Node 전체 Memory 중 HAMi가 할당한 비율 (0-1).
-* **`hami_gpu_shared_count`** : 해당 GPU를 공유 중인 Container 수.
-* **`hami_container_device_memory_bytes`** : Container별 실제 vGPU Memory 사용량. `namespace`/`pod`/`container` Label 포함.
-* **`hami_container_device_utilization_ratio`** : Container별 SM 사용률.
-* **`hami_vgpu_memory_allocated_bytes`** : Container별 HAMi 할당량.
+공식 Dashboard를 Download하고 Panel 개수를 확인한다. Cluster Overview, Physical GPUs, Scheduler Allocation, Workloads, Hardware Telemetry 5개 Section에 걸쳐 31개 Panel이 포함된다. Dashboard는 Datasource를 `${datasource}` Variable (type: datasource, query: prometheus)로 받으므로 Grafana가 기본 Prometheus Datasource를 자동으로 선택한다.
 
 ```shell
 $ kubectl -n monitoring create cm hami-dashboard \
-    --from-file=hami-dashboard.json=./hami-dashboard.json \
+    --from-file=hami-dashboard.json=./gpu-dashboard.json \
     --dry-run=client -o yaml \
   | kubectl label --local -f - grafana_dashboard=1 --dry-run=client -o yaml \
   | kubectl apply -f -
@@ -239,16 +202,19 @@ Dashboard JSON을 ConfigMap에 담아 적용한다. Grafana Sidecar는 `grafana_
 $ kubectl -n monitoring logs deploy/monitoring-grafana -c grafana-sc-dashboard --tail=5 | grep hami
 {"time": "...", "level": "INFO", "msg": "Writing /tmp/dashboards/hami-dashboard.json (ascii)"}
 {"time": "...", "level": "INFO", "msg": "None sent to http://localhost:3000/api/admin/provisioning/dashboards/reload. Response: 200 OK {\"message\":\"Dashboards config reloaded\"}"}
-$ curl -s -u admin:admin 'http://192.168.1.32:30300/api/search?query=hami' \
+$ curl -s -u admin:admin 'http://192.168.1.32:30300/api/search?query=HAMi' \
     | python3 -c 'import json,sys;[print(d["title"],d["url"]) for d in json.load(sys.stdin)]'
-HAMi GPU Monitoring /d/hami-gpu-2x/hami-gpu-monitoring
+HAMi vGPU metrics /d/hami-vgpu-metrics/hami-vgpu-metrics
 ```
 
-Sidecar Log에서 Dashboard가 Write되고 Grafana API에 Reload 요청이 성공한 것을 확인한다. `/api/search`로 Grafana에 Dashboard가 등록되었는지도 다시 확인한다. 브라우저에서 `http://192.168.1.32:30300` → `admin/admin` 로그인 후 좌측 Dashboards 메뉴에서 `HAMi GPU Monitoring` Dashboard를 열면 GPU 사용률 Gauge, 시계열 Panel, 그리고 Pod별 vGPU Memory 사용량이 모두 실데이터로 표시된다.
+Sidecar Log에서 Dashboard가 Write되고 Grafana API에 Reload 요청이 성공한 것을 확인한다. `/api/search`로 Grafana에 Dashboard가 등록되었는지도 다시 확인한다. 브라우저에서 `http://192.168.1.32:30300` → `admin/admin` 로그인 후 좌측 Dashboards 메뉴에서 `HAMi vGPU metrics` Dashboard를 열면 Cluster 자원 현황, 물리 GPU 사용률·VRAM, Scheduler 할당량, Pod·Container 단위 vGPU 사용 Panel이 실데이터로 표시된다.
+
+Dashboard는 선택적으로 **NVIDIA DCGM Exporter** Metric (`DCGM_FI_DEV_GPU_TEMP`, `DCGM_FI_DEV_POWER_USAGE`, `DCGM_FI_DEV_SM_CLOCK`, `DCGM_FI_DEV_XID_ERRORS`)도 참조한다. 본 글에서는 DCGM Exporter를 설치하지 않으므로 Temperature·Power·SM Clock·XID Error Panel은 "No data"로 뜨고, 나머지 핵심 Panel은 HAMi Metric만으로 정상 동작한다.
 
 ## 5. 참조
 
 * kube-prometheus-stack : [https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack)
 * Prometheus Operator ServiceMonitor : [https://prometheus-operator.dev/docs/getting-started/design/#servicemonitor](https://prometheus-operator.dev/docs/getting-started/design/#servicemonitor)
-* HAMi Monitoring : [https://github.com/Project-HAMi/HAMi/blob/master/docs/dashboard.md](https://github.com/Project-HAMi/HAMi/blob/master/docs/dashboard.md)
+* HAMi Grafana Dashboard Docs : [https://project-hami.io/docs/userguide/monitoring/grafana-dashboard](https://project-hami.io/docs/userguide/monitoring/grafana-dashboard)
+* HAMi Dashboard JSON : [https://project-hami.io/grafana/gpu-dashboard.json](https://project-hami.io/grafana/gpu-dashboard.json)
 * Prometheus honor_labels : [https://prometheus.io/docs/prometheus/latest/configuration/configuration/#scrape_config](https://prometheus.io/docs/prometheus/latest/configuration/configuration/#scrape_config)
