@@ -146,4 +146,5 @@ Device Plugin 방식의 HAMi는 `Allocate()` 응답의 환경 변수와 `LD_PREL
 * Kubernetes DRA Consumable Capacity : [https://kubernetes.io/blog/2025/09/18/kubernetes-v1-34-dra-consumable-capacity/](https://kubernetes.io/blog/2025/09/18/kubernetes-v1-34-dra-consumable-capacity/)
 * KEP-5075 DRA Consumable Capacity : [https://github.com/kubernetes/enhancements/tree/master/keps/sig-scheduling/5075-dra-consumable-capacity](https://github.com/kubernetes/enhancements/tree/master/keps/sig-scheduling/5075-dra-consumable-capacity)
 * Kubernetes HAMi : [https://ssup2.github.io/blog-software/docs/theory-analysis/kubernetes-hami/](https://ssup2.github.io/blog-software/docs/theory-analysis/kubernetes-hami/)
+* Kubernetes HAMi NVIDIA GPU : [https://ssup2.github.io/blog-software/docs/theory-analysis/kubernetes-hami-nvidia-gpu/](https://ssup2.github.io/blog-software/docs/theory-analysis/kubernetes-hami-nvidia-gpu/)
 * Kubernetes DRA : [https://ssup2.github.io/blog-software/docs/theory-analysis/kubernetes-dra/](https://ssup2.github.io/blog-software/docs/theory-analysis/kubernetes-dra/)

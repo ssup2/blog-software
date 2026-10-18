@@ -2,7 +2,9 @@
 
 HAMi의 vGPU 기능을 DRA 표준 위에서 제공하는 HAMi DRA의 구조와 동작(등록, Scheduling, 할당)을 분석하는 문서.
 kubernetes-hami(Device Plugin 방식)와 kubernetes-dra(DRA 표준)의 후속 글이며, 두 글과 동일한 포맷(Architecture → 등록 → Scheduling → 할당 → 비교)으로 작성.
-kubernetes-nvidia-dra-driver 문서와 같은 시기(2026-10-15)에 작성됨. 세 배경 글 모두 draft 상태 — 발행 시 상호 참조 링크 유지 여부 확인.
+kubernetes-nvidia-dra-driver 문서와 같은 시기(2026-10-15)에 작성됨. 배경 글 모두 draft 상태 — 발행 시 상호 참조 링크 유지 여부 확인.
+2026-10-16에 HAMi 글이 3부작으로 분리됨: kubernetes-hami(HAMi 자체) / kubernetes-hami-nvidia-gpu(NVIDIA GPU 기능 + MIG) /
+kubernetes-hami-dra(이 글). HAMi-core 격리 상세는 kubernetes-hami-nvidia-gpu에 있음 (참조 링크 추가함).
 
 ## 문서 구성 및 상태
 
