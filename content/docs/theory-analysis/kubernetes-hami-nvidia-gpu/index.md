@@ -72,11 +72,13 @@ spec:
 ```shell {caption="[Shell 1] Test Pod 생성과 vGPU 환경 변수 확인"}
 $ kubectl apply -f hami-isolation-test.yaml
 pod/hami-isolation-test created
+
 $ kubectl exec hami-isolation-test -- env | grep -E 'CUDA_DEVICE|GPU_CORE' | sort
 CUDA_DEVICE_MEMORY_LIMIT_0=2000m
 CUDA_DEVICE_MEMORY_SHARED_CACHE=/usr/local/vgpu/6edc4a8e-f839-4dce-a451-4751001f6576.cache
 CUDA_DEVICE_SM_LIMIT=30
 GPU_CORE_UTILIZATION_POLICY=force
+
 $ kubectl exec hami-isolation-test -- cat /etc/ld.so.preload
 /usr/local/vgpu/libvgpu.so
 ```
@@ -110,11 +112,13 @@ Memory 크기 제한은 Memory 할당 API를 가로채서 수행된다. `libvgpu
 $ kubectl exec hami-isolation-test -- nvidia-smi --query-gpu=memory.total --format=csv
 memory.total [MiB]
 2000 MiB
+
 $ kubectl exec hami-isolation-test -- python3 -c '
 import torch
 x = torch.empty(1_200_000_000, dtype=torch.uint8, device="cuda")
 print(f"alloc OK, used {torch.cuda.memory_allocated()/2**20:.0f} MiB")'
 alloc OK, used 1144 MiB
+
 $ kubectl exec hami-isolation-test -- python3 -c '
 import torch
 try:
@@ -137,6 +141,7 @@ a = torch.randn(2048, 2048, device="cuda"); b = torch.randn(2048, 2048, device="
 end = time.time() + 90
 while time.time() < end:
     c = a @ b; torch.cuda.synchronize()' &
+
 $ for i in 1 2 3; do
     curl -s 'http://192.168.1.32:30900/api/v1/query?query=hami_container_device_utilization_ratio' \
       | python3 -c 'import json,sys;r=json.load(sys.stdin)["data"]["result"];print([(e["metric"]["pod"], e["value"][1]) for e in r])'
@@ -145,6 +150,7 @@ $ for i in 1 2 3; do
 [('hami-isolation-test', '31')]
 [('hami-isolation-test', '31')]
 [('hami-isolation-test', '31')]
+
 $ nvidia-smi dmon -s u -c 10 -o T | awk 'NR>2 {print $1, "sm="$3"%"}'
 23:38:16 sm=45%
 23:38:17 sm=0%
