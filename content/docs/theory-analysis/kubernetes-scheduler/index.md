@@ -75,8 +75,12 @@ Defaulting이 Mutating Admission보다 먼저 수행되기 때문에, Mutating A
 [Figure 3]은 Scheduling Queue의 구조를 나타내고 있다. Scheduling Queue는 미배치 Pod를 저장하는 Queue이며, 내부적으로 세 가지 영역으로 구분된다.
 
 * **activeQ** : Scheduling을 대기하는 Pod가 저장되는 우선순위 Queue이다. 정렬 순서는 QueueSort Plugin이 결정하며, 기본 Plugin인 `PrioritySort`는 PriorityClass가 높은 Pod를 먼저 처리하도록 정렬한다.
-* **backoffQ** : Scheduling에 실패한 Pod가 재시도 전에 대기하는 Queue이다. 실패 횟수에 따라서 지수적으로 증가하는 Backoff 시간이 지나면 activeQ로 이동한다.
-* **unschedulablePods** : 모든 Node가 Filtering에서 탈락하여 Scheduling이 불가능하다고 판정된 Pod가 저장되는 영역이다. Node 추가나 Pod 삭제 같은 Cluster Event가 발생하면 해당 Event로 Scheduling 가능성이 생긴 Pod만 activeQ나 backoffQ로 이동한다.
+* **backoffQ** : 재시도가 예정된 Pod가 Backoff 시간 동안 대기하는 Queue이다. 반복해서 실패하는 Pod가 직렬 구조의 Scheduling Cycle을 계속 점유하는 것을 막기 위한 영역이며, 실패 횟수에 따라서 지수적으로 증가하는 Backoff 시간 (기본 1초에서 최대 10초)이 지나면 activeQ로 이동한다.
+* **unschedulablePods** : Cluster의 상태가 변하지 않는 한 재시도해도 같은 결과가 나오는 Pod가 저장되는 영역이다. 시간이 지나면 벗어나는 backoffQ와 다르게, Scheduling 가능성이 생기는 Cluster Event가 발생해야 벗어난다.
+
+Scheduling에 실패한 Pod는 기본적으로 unschedulablePods에 저장된다. 모든 Node가 Filtering에서 탈락한 Pod는 Cluster의 상태가 변하지 않는 한 몇 번을 재시도해도 같은 결과가 나오기 때문에, Node 추가나 Pod 삭제 같은 Cluster Event가 발생하여 Scheduling 가능성이 생겼을 때만 unschedulablePods에서 벗어난다. 벗어나는 시점에 Backoff 시간이 남아 있으면 backoffQ를 거쳐서 activeQ로 이동하고 이미 지났으면 activeQ로 바로 이동하기 때문에, backoffQ는 unschedulablePods에서 activeQ로 돌아가는 길목의 완충 구간으로 동작한다.
+
+단 모든 실패가 unschedulablePods를 거치는 것은 아니다. Scheduling이 진행되는 동안 Cluster Event가 발생한 경우에는 해당 Pod가 Event를 놓쳤을 가능성이 있기 때문에 Event를 기다리지 않고 바로 backoffQ로 이동하며, kube-apiserver 요청 오류 같은 일시적인 오류로 실패한 Pod도 Cluster의 변화와 무관하게 재시도가 필요하기 때문에 backoffQ로 이동한다. 또한 unschedulablePods에 일정 시간 (기본 5분) 이상 머문 Pod는 Event가 발생하지 않아도 주기적으로 backoffQ나 activeQ로 이동하는 안전장치도 존재한다.
 
 #### 1.2.1. QueueingHint
 

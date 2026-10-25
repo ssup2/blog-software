@@ -38,7 +38,10 @@ kubernetes-hami 문서의 배경 글 (HAMi의 Scheduler Extender 방식 이해 �
   - Pending 상태로 거부된 Pod의 재입장 시 backoffQ 생략 동작 (DRA Plugin 사례) — scheduling framework 문서 기반, 재확인 필요.
   - [Code 1]의 framework package 경로와 타입 이름 (ClusterEventWithHint, QueueingHintFn, Queue/QueueSkip) — 최신 버전에서
     fwk package로 이동했는지 확인 필요.
-  - backoffQ의 기본 Backoff 시간 (initial/max).
+  - backoffQ의 기본 Backoff 시간: 본문에 1초(initial)~10초(max)로 서술함 (2026-10-25 보강) — flag 기본값 재확인 필요.
+  - 실패 Pod의 이동 경로 (2026-10-25 보강, 사용자 질문 "backoffQ vs unschedulablePods 차이" 반영): 기본은 unschedulablePods,
+    Scheduling 도중 Event 발생 시(moveRequestCycle) 또는 일시적 오류 시 backoffQ 직행, unschedulablePods 체류 상한
+    기본 5분(podMaxInUnschedulablePodsDuration) 주기 flush — 소스/문서 재확인 필요.
   - Extender verb 목록 — 본문은 filter/prioritize/bind만 서술했으나 `preemptVerb`도 존재함. 추가 여부 검토.
   - PostFilter 기본 Plugin 이름 `DefaultPreemption`, QueueSort 기본 Plugin 이름 `PrioritySort` 확인.
   - Permit의 Gang Scheduling 사례 (scheduler-plugins의 Coscheduling) 서술 수준.
