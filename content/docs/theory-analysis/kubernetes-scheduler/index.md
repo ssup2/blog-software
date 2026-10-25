@@ -9,21 +9,110 @@ draft: true
 
 **Kubernetes Scheduler** (kube-scheduler)는 생성된 Pod를 어느 Node에서 실행할지 결정하는 Control Plane Component이다. kube-scheduler는 kube-apiserver를 Watch하여 Node가 결정되지 않은 Pod를 감지하고, Node 선별과 점수 계산을 거쳐서 최적의 Node를 선택한 뒤에 Pod의 `spec.nodeName`을 설정하는 Bind를 수행한다. Pod의 `spec.schedulerName`에는 해당 Pod의 Scheduling을 담당할 Scheduler의 이름을 명시할 수 있으며, 기본 Scheduler는 `default-scheduler` 이름을 이용한다. 각 Scheduler는 자신의 이름이 명시된 Pod만 처리하기 때문에 하나의 Kubernetes Cluster에서 다수의 Scheduler를 함께 운영할 수 있다.
 
-[Figure 1]은 kube-scheduler의 Architecture를 나타내고 있다. Informer가 Watch를 통해서 감지한 미배치 Pod는 Scheduling Queue에 저장되고, Scheduling Cycle이 Queue에서 Pod를 하나씩 꺼내서 Node를 결정하며, Binding Cycle이 결정된 Node로 Bind를 수행한다. Scheduling Cycle은 한 번에 하나의 Pod만 처리하는 직렬 구조이지만, Binding Cycle은 Goroutine을 통해서 비동기로 처리되기 때문에 Bind가 완료되기 전에 다음 Pod의 Scheduling이 시작될 수 있다.
+[Figure 1]은 kube-scheduler의 Architecture를 나타내고 있다. Pod를 담당할 Scheduler의 이름은 Pod가 생성될 때 kube-apiserver에서 결정되고, Informer가 Watch를 통해서 감지한 미배치 Pod는 Scheduling Queue에 저장되며, Scheduling Cycle이 Queue에서 Pod를 하나씩 꺼내서 Node를 결정하고 Binding Cycle이 결정된 Node로 Bind를 수행한다. Scheduling Cycle은 한 번에 하나의 Pod만 처리하는 직렬 구조이지만, Binding Cycle은 Goroutine을 통해서 비동기로 처리되기 때문에 Bind가 완료되기 전에 다음 Pod의 Scheduling이 시작될 수 있다. 두 Cycle의 동작은 Scheduling Framework Plugin으로 구현되며, Scheduler Extender와 Custom Scheduler를 통해서 Scheduling 동작을 확장할 수 있다.
 
-### 1.1. Scheduling Queue
+### 1.1. Scheduler 지정
 
-Scheduling Queue는 미배치 Pod를 저장하는 Queue이며, 내부적으로 세 가지 영역으로 구분된다.
+{{< figure caption="[Figure 2] Scheduler Assignment Process" src="images/scheduler-assignment.png" width="700px" >}}
+
+```yaml {caption="[File 1] 기본 설정과 동일한 KubeSchedulerConfiguration Profile 예제", linenos=table}
+apiVersion: kubescheduler.config.k8s.io/v1
+kind: KubeSchedulerConfiguration
+profiles:
+- schedulerName: default-scheduler
+```
+
+Scheduler의 이름은 kube-scheduler가 실행될 때 전달받는 KubeSchedulerConfiguration의 `profiles`에 정의되며, [File 1]은 기본 설정과 동일한 Profile 설정을 나타내고 있다. `profiles` 자체를 생략하거나 Profile의 `schedulerName`을 생략하면 kube-scheduler는 `default-scheduler` 이름이 설정된 하나의 Profile로 동작하며, 이 기본값 때문에 기본 Scheduler의 이름이 `default-scheduler`가 된다. 하나의 kube-scheduler에 다수의 Profile을 정의하면 Profile마다 다른 Plugin 구성을 갖는 다수의 Scheduler를 하나의 kube-scheduler Process가 함께 제공할 수도 있다.
+
+```yaml {caption="[File 2] schedulerName을 생략한 Pod 생성 요청과 저장된 Pod 예제", linenos=table}
+# 생성 요청 Manifest (schedulerName 생략)
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pod
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.27
+---
+# kube-apiserver에 저장된 Pod (schedulerName 자동 설정)
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pod
+spec:
+  schedulerName: default-scheduler
+  containers:
+  - name: nginx
+    image: nginx:1.27
+```
+
+Pod의 `spec.schedulerName`도 생성 시점에 자동으로 채워진다. [File 2]는 schedulerName을 생략한 Pod 생성 요청과 kube-apiserver에 저장된 Pod를 나타내고 있다. Pod 생성 요청이 kube-apiserver에 도달하면 요청을 객체로 변환하는 시점에 수행되는 **Defaulting** 단계에서 비어 있는 `schedulerName`에 `default-scheduler`가 설정되기 때문에, 저장된 모든 Pod는 담당 Scheduler의 이름을 항상 갖는다. kube-scheduler는 자신의 Profile 이름과 일치하는 Pod만 Scheduling Queue에 넣기 때문에, 존재하지 않는 Scheduler 이름이 명시된 Pod는 어느 Scheduler도 처리하지 않아 Pending 상태로 남는다.
+
+```go {caption="[Code 1] Pod의 Defaulting 함수 (축약)", linenos=table}
+// pkg/apis/core/v1/defaults.go
+func SetDefaults_PodSpec(obj *v1.PodSpec) {
+	if obj.RestartPolicy == "" {
+		obj.RestartPolicy = v1.RestartPolicyAlways
+	}
+	if obj.DNSPolicy == "" {
+		obj.DNSPolicy = v1.DNSClusterFirst
+	}
+	if obj.SchedulerName == "" {
+		obj.SchedulerName = v1.DefaultSchedulerName // "default-scheduler"
+	}
+}
+```
+
+[Figure 2]는 Pod 생성 요청이 kube-apiserver에서 처리되어 저장되기까지의 과정과 `schedulerName`이 결정되는 지점을 나타내고 있다. kube-apiserver가 생성 요청의 내용을 변형하는 단계는 두 곳이다. 요청 Body를 객체로 Decode하는 시점에 수행되는 Defaulting과, 이후 Admission 단계에서 수행되는 **Mutating Admission** (내장 Admission Plugin과 Mutating Admission Webhook)이다. `schedulerName`의 기본값은 Mutating Admission이 아니라 Defaulting 단계에서 설정되며, [Code 1]은 Pod의 Defaulting 함수를 축약하여 나타내고 있다. kube-apiserver는 API 버전마다 등록된 Defaulting 함수를 Decode 직후에 실행하며, `SetDefaults_PodSpec()`은 `restartPolicy`, `dnsPolicy` 같은 다른 필드의 기본값과 함께 비어 있는 `schedulerName`에 `DefaultSchedulerName` 상수의 값인 `default-scheduler`를 설정한다.
+
+Defaulting이 Mutating Admission보다 먼저 수행되기 때문에, Mutating Admission Webhook이 Pod를 전달받는 시점에는 이미 `default-scheduler`가 설정되어 있다. 따라서 HAMi처럼 특정 Pod를 Custom Scheduler로 보내는 Middleware는 기본값이 설정된 `schedulerName`을 Admission 단계에서 자신의 Scheduler 이름으로 덮어쓰는 방식으로 동작하며, `schedulerName`은 생성 후에는 변경할 수 없는 필드이기 때문에 이러한 변경은 생성 시점에만 가능하다.
+
+### 1.2. Scheduling Queue
+
+{{< figure caption="[Figure 3] Scheduling Queue" src="images/scheduling-queue.png" width="700px" >}}
+
+[Figure 3]은 Scheduling Queue의 구조를 나타내고 있다. Scheduling Queue는 미배치 Pod를 저장하는 Queue이며, 내부적으로 세 가지 영역으로 구분된다.
 
 * **activeQ** : Scheduling을 대기하는 Pod가 저장되는 우선순위 Queue이다. 정렬 순서는 QueueSort Plugin이 결정하며, 기본 Plugin인 `PrioritySort`는 PriorityClass가 높은 Pod를 먼저 처리하도록 정렬한다.
 * **backoffQ** : Scheduling에 실패한 Pod가 재시도 전에 대기하는 Queue이다. 실패 횟수에 따라서 지수적으로 증가하는 Backoff 시간이 지나면 activeQ로 이동한다.
-* **unschedulablePods** : 모든 Node가 Filtering에서 탈락하여 Scheduling이 불가능하다고 판정된 Pod가 저장되는 영역이다. Node 추가나 Pod 삭제 같은 Cluster Event가 발생하면 해당 Event로 Scheduling 가능성이 생긴 Pod만 activeQ나 backoffQ로 이동하며, Event와 Pod의 연관성은 각 Plugin이 제공하는 QueueingHint를 통해서 판단된다.
+* **unschedulablePods** : 모든 Node가 Filtering에서 탈락하여 Scheduling이 불가능하다고 판정된 Pod가 저장되는 영역이다. Node 추가나 Pod 삭제 같은 Cluster Event가 발생하면 해당 Event로 Scheduling 가능성이 생긴 Pod만 activeQ나 backoffQ로 이동한다.
 
-### 1.2. Scheduling Framework
+#### 1.2.1. QueueingHint
 
-{{< figure caption="[Figure 2] Scheduling Framework Extension Points" src="images/scheduling-framework.png" width="1000px" >}}
+```go {caption="[Code 2] NodeAffinity Plugin의 QueueingHint 구현 (축약)", linenos=table}
+// NodeAffinity Plugin이 관심있는 Cluster Event와 QueueingHintFn 등록
+func (pl *NodeAffinity) EventsToRegister(_ context.Context) ([]framework.ClusterEventWithHint, error) {
+	return []framework.ClusterEventWithHint{
+		{
+			Event:          framework.ClusterEvent{Resource: framework.Node, ActionType: framework.Add | framework.UpdateNodeLabel},
+			QueueingHintFn: pl.isSchedulableAfterNodeChange,
+		},
+	}, nil
+}
 
-kube-scheduler는 **Scheduling Framework** 구조로 동작한다. Scheduling Framework는 Scheduling 과정을 Extension Point 단위로 나누고 각 Extension Point에 Plugin을 등록할 수 있는 구조이며, Resource 검사나 Affinity 처리 같은 kube-scheduler의 기본 기능도 모두 내장 Plugin으로 구현되어 있다. [Figure 2]는 Scheduling Framework의 Extension Point를 나타내고 있다. Scheduling Cycle의 Extension Point는 다음과 같다.
+// Node의 Add/Update Event가 발생하면 호출되어 Pod의 재시도 여부를 판단
+func (pl *NodeAffinity) isSchedulableAfterNodeChange(logger klog.Logger, pod *v1.Pod,
+	oldObj, newObj interface{}) (framework.QueueingHint, error) {
+	node := newObj.(*v1.Node)
+	if matchesNodeAffinity(pod, node) {
+		return framework.Queue, nil
+	}
+	return framework.QueueSkip, nil
+}
+```
+
+Event와 Pod의 연관성은 각 Plugin이 제공하는 **QueueingHint**를 통해서 판단되며, [Code 2]는 NodeAffinity Plugin의 QueueingHint 구현을 축약하여 나타내고 있다. 각 Plugin은 자신의 판단 결과에 영향을 줄 수 있는 Cluster Event의 종류를 `EventsToRegister()`를 통해서 등록하고, Event마다 재시도 여부를 판단하는 QueueingHintFn을 함께 제공한다. kube-scheduler는 Pod가 Scheduling에 실패하면 거부한 Plugin의 이름을 Pod와 함께 기록해두고, 이후 Cluster Event가 발생하면 거부했던 Plugin의 QueueingHintFn만 호출하여 `Queue` 또는 `QueueSkip` 판정을 받는다.
+
+예를 들어 Node Affinity 조건을 만족하는 Node가 없어서 unschedulablePods에 저장된 Pod가 있을 때 새로운 Node가 추가되면, NodeAffinity Plugin의 QueueingHintFn은 추가된 Node의 Label이 Pod의 Node Affinity를 만족하는지 검사한다. 만족하면 `Queue` 판정으로 Pod가 activeQ나 backoffQ로 이동하여 Scheduling이 재시도되고, 만족하지 않으면 `QueueSkip` 판정으로 Pod는 unschedulablePods에 그대로 남는다. QueueingHint가 도입되기 전에는 Event의 종류만으로 Pod의 이동을 결정했기 때문에 성공 가능성이 없는 Scheduling 재시도가 반복되었지만, QueueingHint는 Event의 내용까지 검사하기 때문에 불필요한 재시도가 제거된다.
+
+QueueingHint는 Kubernetes 1.28에 `SchedulerQueueingHints` Feature Gate와 함께 Alpha로 도입되었고, Event 판단을 위한 메모리 사용량 증가 문제로 한동안 기본 비활성화를 거친 뒤에 1.32부터 기본 활성화되었다. 한편 DRA Plugin처럼 외부 Controller의 동작을 기다리기 위해서 Pod를 Pending 상태로 거부하는 Plugin의 경우에는, 거부가 kube-scheduler의 잘못된 판단이 아니기 때문에 `Queue` 판정 시 backoffQ를 거치지 않고 activeQ로 바로 이동하여 대기 시간을 줄인다.
+
+### 1.3. Scheduling Framework
+
+{{< figure caption="[Figure 4] Scheduling Framework Extension Points" src="images/scheduling-framework.png" width="1000px" >}}
+
+kube-scheduler는 **Scheduling Framework** 구조로 동작한다. Scheduling Framework는 Scheduling 과정을 Extension Point 단위로 나누고 각 Extension Point에 Plugin을 등록할 수 있는 구조이며, Resource 검사나 Affinity 처리 같은 kube-scheduler의 기본 기능도 모두 내장 Plugin으로 구현되어 있다. [Figure 4]는 Scheduling Framework의 Extension Point를 나타내고 있다. Scheduling Cycle의 Extension Point는 다음과 같다.
 
 * **PreFilter** : Filtering 전에 Pod의 요청 정보를 전처리하고 사전 조건을 검사한다.
 * **Filter** : 각 Node가 Pod를 실행할 수 있는지 검사하여 불가능한 Node를 제외한다. Node의 가용 Resource를 검사하는 `NodeResourcesFit`, Node Affinity를 검사하는 `NodeAffinity`, Taint와 Toleration을 검사하는 `TaintToleration` Plugin이 대표적이다.
@@ -38,9 +127,9 @@ Binding Cycle의 Extension Point는 다음과 같다.
 * **Bind** : kube-apiserver에 Binding 요청을 전송하여 Pod의 `spec.nodeName`을 설정한다.
 * **PostBind** : Bind 완료 후 정리 작업을 수행한다.
 
-### 1.3. Scheduler 확장
+### 1.4. Scheduler 확장
 
-{{< figure caption="[Figure 3] Scheduler Extender" src="images/scheduler-extender.png" width="700px" >}}
+{{< figure caption="[Figure 5] Scheduler Extender" src="images/scheduler-extender.png" width="700px" >}}
 
 kube-scheduler의 Scheduling 동작을 확장하는 방법은 세 가지가 존재한다.
 
@@ -48,7 +137,7 @@ kube-scheduler의 Scheduling 동작을 확장하는 방법은 세 가지가 존�
 * **Scheduler Extender** : kube-scheduler의 설정에 HTTP Webhook 서버를 등록하는 방식이다. 재빌드 없이 확장할 수 있지만 이용할 수 있는 Extension Point가 제한적이고 HTTP 통신 비용이 발생한다.
 * **Custom Scheduler** : 별도의 Scheduler를 배포하고 Pod의 `spec.schedulerName`으로 해당 Scheduler를 지정하는 방식이다.
 
-```yaml {caption="[File 1] Scheduler Extender 설정 예제", linenos=table}
+```yaml {caption="[File 3] Scheduler Extender 설정 예제", linenos=table}
 apiVersion: kubescheduler.config.k8s.io/v1
 kind: KubeSchedulerConfiguration
 extenders:
@@ -62,7 +151,7 @@ extenders:
     ignoredByScheduler: true
 ```
 
-[Figure 3]은 Scheduler Extender의 구조를 나타내고 있고, [File 1]은 KubeSchedulerConfiguration의 Scheduler Extender 설정 예제를 나타내고 있다. Extender는 Node를 선별하는 `filter`, Node의 점수를 계산하는 `prioritize`, Bind를 대신 수행하는 `bind` 세 가지 Verb를 제공하며, kube-scheduler는 각 단계에서 명시된 URL로 HTTP 요청을 전송하여 Extender의 판단을 반영한다. `managedResources`에는 Extender가 담당하는 Resource를 명시하며, 해당 Resource를 요청하는 Pod에만 Extender가 호출된다. `ignoredByScheduler`가 `true`로 설정되어 있으면 해당 Resource는 kube-scheduler의 기본 Resource 검사에서 제외되어 Extender가 할당 가능 여부를 전담한다.
+[Figure 5]는 Scheduler Extender의 구조를 나타내고 있고, [File 3]은 KubeSchedulerConfiguration의 Scheduler Extender 설정 예제를 나타내고 있다. Extender는 Node를 선별하는 `filter`, Node의 점수를 계산하는 `prioritize`, Bind를 대신 수행하는 `bind` 세 가지 Verb를 제공하며, kube-scheduler는 각 단계에서 명시된 URL로 HTTP 요청을 전송하여 Extender의 판단을 반영한다. `managedResources`에는 Extender가 담당하는 Resource를 명시하며, 해당 Resource를 요청하는 Pod에만 Extender가 호출된다. `ignoredByScheduler`가 `true`로 설정되어 있으면 해당 Resource는 kube-scheduler의 기본 Resource 검사에서 제외되어 Extender가 할당 가능 여부를 전담한다.
 
 Scheduler Extender와 Custom Scheduler 방식은 함께 이용되기도 한다. GPU 공유 Middleware인 HAMi의 hami-scheduler가 대표적인 예이며, kube-scheduler와 Scheduler Extender를 하나의 Pod로 배포하고 Mutating Webhook을 통해서 vGPU Pod의 `spec.schedulerName`을 hami-scheduler로 변경하는 방식으로 동작한다.
 
