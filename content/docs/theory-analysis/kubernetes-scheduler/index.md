@@ -1,6 +1,5 @@
 ---
 title: Kubernetes Scheduler
-draft: true
 ---
 
 ## 1. Kubernetes Scheduler
@@ -16,6 +15,8 @@ draft: true
 
 ### 1.1. Scheduler 지정
 
+Kubernetes Cluster에서 동작하는 각 Scheduler는 고유한 이름을 갖고 있으며, Pod를 담당할 Scheduler는 Pod의 `spec.schedulerName`에 Scheduler의 이름을 명시하여 지정한다. 각 Scheduler는 자신의 이름과 일치하는 Pod만 가져가서 Scheduling을 수행하기 때문에, 이름을 기준으로 하나의 Kubernetes Cluster에서 다수의 Scheduler를 함께 운영할 수 있다. 반대로 존재하지 않는 Scheduler 이름이 명시된 Pod는 어느 Scheduler도 가져가지 않기 때문에 Pending 상태로 남는다.
+
 ```yaml {caption="[File 1] Default 설정과 동일한 KubeSchedulerConfiguration Profile 예제", linenos=table}
 apiVersion: kubescheduler.config.k8s.io/v1
 kind: KubeSchedulerConfiguration
@@ -23,7 +24,7 @@ profiles:
 - schedulerName: default-scheduler
 ```
 
-Scheduler의 이름은 kube-scheduler가 실행될 때 전달받는 KubeSchedulerConfiguration의 `profiles`에 정의되며, [File 1]은 Default 설정과 동일한 Profile 설정을 나타내고 있다. `profiles` 자체를 생략하거나 Profile의 `schedulerName`을 생략하면 kube-scheduler는 `default-scheduler` 이름이 설정된 하나의 Profile로 동작하며, 이 기본값 때문에 Default Scheduler의 이름이 `default-scheduler`가 된다.
+기본 Scheduler인 kube-scheduler의 이름은 실행될 때 `--config` 파라미터로 전달받는 KubeSchedulerConfiguration의 `profiles`에 정의되며, [File 1]은 Default 설정과 동일한 Profile 설정을 나타내고 있다. `profiles` 자체를 생략하거나 Profile의 `schedulerName`을 생략하면 kube-scheduler는 `default-scheduler` 이름이 설정된 하나의 Profile로 동작하며, 이 기본값 때문에 Default Scheduler의 이름이 `default-scheduler`가 된다.
 
 ```yaml {caption="[File 2] 다수의 Profile을 정의하는 KubeSchedulerConfiguration 예제", linenos=table}
 apiVersion: kubescheduler.config.k8s.io/v1
@@ -40,7 +41,7 @@ profiles:
       - name: '*'
 ```
 
-[File 2]는 두 개의 Profile을 정의하는 KubeSchedulerConfiguration의 예제를 나타내고 있다. `default-scheduler` Profile은 Plugin 구성을 변경하지 않아 Default Scheduler 그대로 동작하고, `no-scoring-scheduler` Profile은 `plugins` 설정으로 PreScore와 Score 단계의 모든 Plugin을 비활성화하여 점수 계산 없이 빠르게 Node를 결정하는 Scheduler를 제공한다. 이처럼 Profile마다 다른 Plugin 구성을 정의하면, 하나의 kube-scheduler Process가 서로 다른 Scheduling 동작을 갖는 다수의 Scheduler를 함께 제공할 수 있다.
+[File 2]는 두 개의 Profile을 정의하는 KubeSchedulerConfiguration의 예제를 나타내고 있다. `default-scheduler` Profile은 Plugin 구성을 변경하지 않아 Default Scheduler 그대로 동작하고, `no-scoring-scheduler` Profile은 `plugins` 설정으로 PreScore와 Score 단계의 모든 Plugin을 비활성화하여 점수 계산 없이 빠르게 Node를 결정하는 Scheduler를 제공한다. 이처럼 Profile마다 다른 Plugin 구성을 정의하면, 하나의 kube-scheduler로 Scheduling 동작이 서로 다른 여러 Scheduler를 운영할 수 있다.
 
 ```yaml {caption="[File 3] schedulerName을 생략한 Pod 생성 요청과 저장된 Pod 예제", linenos=table}
 # Pod creation request (schedulerName omitted)
@@ -65,7 +66,7 @@ spec:
     image: nginx:1.27
 ```
 
-Pod를 담당할 Scheduler는 Pod의 `spec.schedulerName`에 이름을 명시하여 지정하며, 생략하면 생성 시점에 kube-apiserver가 자동으로 채우기 때문에 저장된 모든 Pod는 담당 Scheduler의 이름을 항상 갖는다. [File 3]은 schedulerName을 생략한 Pod 생성 요청과 kube-apiserver에 저장된 Pod를 나타내고 있다. 각 Scheduler는 자신의 Profile 이름과 일치하는 Pod만 Scheduling Queue에 넣기 때문에 하나의 Kubernetes Cluster에서 다수의 Scheduler를 함께 운영할 수 있으며, 존재하지 않는 Scheduler 이름이 명시된 Pod는 어느 Scheduler도 처리하지 않아 Pending 상태로 남는다.
+[File 3]은 schedulerName을 생략한 Pod 생성 요청과 kube-apiserver에 저장된 Pod를 나타내고 있다. 생략된 `spec.schedulerName`은 kube-apiserver의 **Defaulting** 단계에서 자동으로 채워지기 때문에, 저장된 모든 Pod는 담당 Scheduler의 이름을 항상 갖는다.
 
 ```go {caption="[Code 1] Pod의 Defaulting 함수 (축약)", linenos=table}
 // pkg/apis/core/v1/defaults.go
@@ -82,9 +83,9 @@ func SetDefaults_PodSpec(obj *v1.PodSpec) {
 }
 ```
 
-[Figure 1]의 Scheduler Assignment 영역과 같이 kube-apiserver가 생성 요청의 내용을 변형하는 단계는 두 곳이다. 요청 Body를 객체로 Decode하는 시점에 수행되는 **Defaulting**과, 이후 Admission 단계에서 수행되는 **Mutating Admission**이다. `schedulerName`의 기본값은 Mutating Admission이 아니라 Defaulting 단계에서 설정되며, [Code 1]은 Pod의 Defaulting 함수를 축약하여 나타내고 있다. kube-apiserver는 API 버전마다 등록된 Defaulting 함수를 Decode 직후에 실행하며, `SetDefaults_PodSpec()`은 `restartPolicy`, `dnsPolicy` 같은 다른 필드의 기본값과 함께 비어 있는 `schedulerName`에 `DefaultSchedulerName` 상수의 값인 `default-scheduler`를 설정한다.
+Defaulting은 [Figure 1]의 Scheduler Assignment 영역과 같이 kube-apiserver가 요청 Body를 객체로 Decode한 직후에 API 버전마다 등록된 Defaulting 함수로 비어 있는 필드를 채우는 단계이며, [Code 1]은 Pod의 Defaulting 함수를 축약하여 나타내고 있다. `SetDefaults_PodSpec()`은 `restartPolicy`, `dnsPolicy` 같은 다른 필드의 기본값과 함께 비어 있는 `schedulerName`에 `DefaultSchedulerName` 상수의 값인 `default-scheduler`를 설정한다.
 
-Defaulting이 Mutating Admission보다 먼저 수행되기 때문에, Mutating Admission Webhook이 Pod를 전달받는 시점에는 이미 `default-scheduler`가 설정되어 있다. 따라서 특정 Pod를 Custom Scheduler로 보내려는 Middleware는 기본값이 설정된 `schedulerName`을 Admission 단계에서 자신의 Scheduler 이름으로 덮어쓰는 방식으로 동작하며, `schedulerName`은 생성 후에는 변경할 수 없는 필드이기 때문에 이러한 변경은 생성 시점에만 가능하다.
+Defaulting 이후에는 **Mutating Admission** 단계가 수행되기 때문에, Mutating Admission Webhook이 Pod를 전달받는 시점에는 `schedulerName`이 이미 `default-scheduler`로 채워져 있다. 따라서 특정 Pod를 Custom Scheduler로 보내려는 Middleware는 채워진 `schedulerName`을 Mutating Webhook에서 자신의 Scheduler 이름으로 덮어쓰는 방식으로 동작하며, `schedulerName`은 생성 후에는 변경할 수 없는 필드이기 때문에 이러한 변경은 생성 시점에만 가능하다.
 
 ### 1.2. Scheduling Cycle
 
@@ -100,7 +101,7 @@ Node가 결정되지 않은 Pod는 먼저 **Scheduling Queue**에 저장되며, 
 
 Scheduling에 실패한 Pod는 기본적으로 unschedulablePods에 저장된다. 모든 Node가 Filtering에서 탈락한 Pod는 Cluster의 상태가 변하지 않는 한 몇 번을 재시도해도 같은 결과가 나오기 때문에, Node 추가나 Pod 삭제 같은 Cluster Event가 발생하여 Scheduling 가능성이 생겼을 때만 unschedulablePods에서 벗어난다. 벗어나는 시점에 Backoff 시간이 남아 있으면 backoffQ를 거쳐서 activeQ로 이동하고 이미 지났으면 activeQ로 바로 이동하기 때문에, backoffQ는 unschedulablePods에서 activeQ로 돌아가는 길목의 완충 구간으로 동작한다.
 
-단 모든 실패가 unschedulablePods를 거치는 것은 아니다. Scheduling이 진행되는 동안 Cluster Event가 발생한 경우에는 해당 Pod가 Event를 놓쳤을 가능성이 있기 때문에 Event를 기다리지 않고 바로 backoffQ로 이동하며, kube-apiserver 요청 오류 같은 일시적인 오류로 실패한 Pod도 Cluster의 변화와 무관하게 재시도가 필요하기 때문에 backoffQ로 이동한다. 또한 unschedulablePods에 일정 시간 (기본 5분) 이상 머문 Pod는 Event가 발생하지 않아도 주기적으로 backoffQ나 activeQ로 이동하는 안전장치도 존재한다.
+단 모든 실패가 unschedulablePods를 거치는 것은 아니다. Scheduling이 진행되는 동안 발생한 Cluster Event는 해당 Pod가 놓쳤을 가능성이 있기 때문에 kube-scheduler가 따로 기록해 두고, Pod가 실패하여 Queue로 돌아오는 시점에 기록된 Event를 검사하여 Scheduling 가능성이 생긴 경우에는 unschedulablePods를 거치지 않고 backoffQ로 이동한다. 또한 kube-apiserver 요청 오류 같은 일시적인 오류로 실패한 Pod도 Cluster의 변화와 무관하게 재시도가 필요하기 때문에 backoffQ로 이동하며, unschedulablePods에 일정 시간 (기본 5분) 이상 머문 Pod는 Event가 발생하지 않아도 주기적으로 backoffQ나 activeQ로 이동하는 안전장치도 존재한다.
 
 #### 1.2.2. QueueingHint
 
@@ -139,13 +140,16 @@ Scheduling Cycle의 Extension Point는 다음과 같다.
 * **PreFilter** : Filtering 전에 Pod의 요청 정보를 전처리하고 사전 조건을 검사한다.
 * **Filter** : 각 Node가 Pod를 실행할 수 있는지 검사하여 불가능한 Node를 제외한다. Node의 가용 Resource를 검사하는 `NodeResourcesFit`, Node Affinity를 검사하는 `NodeAffinity`, Taint와 Toleration을 검사하는 `TaintToleration` Plugin이 대표적이다.
 * **PostFilter** : 모든 Node가 Filtering에서 탈락한 경우에만 실행된다. 기본 Plugin인 `DefaultPreemption`은 우선순위가 낮은 Pod를 축출하여 배치 공간을 확보하는 Preemption을 수행한다.
-* **PreScore, Score** : Filtering을 통과한 Node들의 점수를 계산하고, 가장 높은 점수의 Node를 선택한다. Resource 사용률의 균형을 평가하는 `NodeResourcesBalancedAllocation`, Container Image 보유 여부를 평가하는 `ImageLocality` Plugin이 대표적이다.
+* **PreScore** : Scoring 전에 Filtering을 통과한 Node 목록을 전달받아, 점수 계산에 공통으로 필요한 정보를 미리 계산하여 저장한다.
+* **Score** : 각 Node의 점수를 계산하고, Plugin마다 가중치를 적용해 합산한 점수가 가장 높은 Node를 선택한다. Resource 사용률의 균형을 평가하는 `NodeResourcesBalancedAllocation`, Container Image 보유 여부를 평가하는 `ImageLocality` Plugin이 대표적이다.
 * **Reserve** : 선택된 Node에 Pod가 사용할 Resource를 kube-scheduler 내부 Cache에 미리 반영한다.
 * **Permit** : Bind 직전에 Pod의 Bind를 승인, 지연 또는 거부한다. 다수의 Pod가 함께 배치되어야 하는 Gang Scheduling 구현에 이용된다.
 
 ### 1.3. Binding Cycle
 
-**Binding Cycle**은 Scheduling Cycle이 결정한 Node로 Pod를 Bind하는 과정이다. Goroutine을 통해서 비동기로 수행되며, Scheduling Cycle의 Reserve 단계에서 Pod가 사용할 Resource가 kube-scheduler 내부 Cache에 미리 반영되기 때문에 Bind가 완료되기 전에도 다음 Pod의 Scheduling이 시작될 수 있다. Binding Cycle의 Extension Point는 다음과 같다.
+**Binding Cycle**은 Scheduling Cycle이 결정한 Node로 Pod를 Bind하는 과정이다. Bind는 kube-apiserver에 요청을 전송하고 응답을 기다리는 느린 작업이기 때문에, kube-scheduler는 Binding Cycle을 별도의 Goroutine으로 분리하여 비동기로 수행하고 Bind의 완료를 기다리지 않고 다음 Pod의 Scheduling을 바로 시작한다.
+
+이러한 비동기 구조에서는 Resource가 중복으로 배치될 위험이 생긴다. Node의 남은 Resource는 해당 Node에 `spec.nodeName`이 설정된 Pod들의 요청량을 제외하여 계산되는데, Bind가 끝나지 않은 Pod는 아직 `spec.nodeName`이 없어서 이 집계에서 누락되고, 그 사이에 Scheduling되는 다음 Pod가 같은 Resource를 다시 차지할 수 있기 때문이다. kube-scheduler는 Scheduling Cycle의 Reserve 단계에서 해당 Pod가 사용할 Resource를 내부 Cache에 미리 반영해 두고 다음 Pod의 Scheduling은 이 Cache를 기준으로 판단하기 때문에, Bind가 끝나기 전에도 결정된 배치가 집계에 포함되어 중복 배치가 방지된다. Binding Cycle의 Extension Point는 다음과 같다.
 
 * **PreBind** : Bind 전에 필요한 준비 작업을 수행한다. Volume을 Node에 Attach하는 `VolumeBinding` Plugin이 대표적이다.
 * **Bind** : kube-apiserver에 Binding 요청을 전송하여 Pod의 `spec.nodeName`을 설정한다. 설정된 Node 정보는 kube-apiserver를 통해서 etcd에 기록되며, 해당 Node의 kubelet이 이를 감지하여 Pod를 실행한다.
