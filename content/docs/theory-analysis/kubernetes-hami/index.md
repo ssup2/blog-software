@@ -9,28 +9,28 @@ draft: true
 
 **HAMi** (Heterogeneous AI Computing Virtualization Middleware)는 Kubernetes 환경에서 GPU, NPU 같은 AI 가속기를 가상화하여 하나의 가속기를 다수의 Pod이 공유할 수 있도록 하는 CNCF의 Middleware이다. Kubernetes의 Device Plugin 방식은 가속기를 개수 단위로만 할당할 수 있지만, HAMi는 Device Plugin 방식 위에서 Memory 크기 제한과 연산 Core 사용률 제한을 제공하여 하나의 가속기를 조각 단위로 나누어 할당한다. 2024년에 CNCF Sandbox Project로 채택되었고 2026년 7월에 Incubating Project로 승격되었다.
 
-[Figure 1]은 HAMi의 Architecture를 나타내고 있다. HAMi는 다음의 세 가지 Component로 구성된다.
+[Figure 1]은 HAMi의 Architecture를 나타내고 있다. HAMi는 다음의 세 가지 요소로 구성된다.
 
 * **hami-scheduler** : Deployment를 통해서 동작하며, 하나의 Pod 안에서 kube-scheduler Container와 Scheduler Extender Container가 함께 동작한다. 가속기를 요청하는 Pod의 Scheduler를 hami-scheduler로 변경하는 Mutating Webhook도 Scheduler Extender가 함께 제공한다. 모든 종류의 가속기가 하나의 hami-scheduler를 공유하며, 가속기별 Scheduling 동작은 hami-scheduler 내부의 가속기별 Package로 구현되어 있다.
 * **Device Plugin** : DaemonSet을 통해서 가속기가 존재하는 Node에서 동작하며, 가속기를 kubelet에 등록하고 Container에 할당하는 역할을 수행한다. NVIDIA GPU용 hami-device-plugin은 HAMi 설치에 포함되어 있고, 그 외의 가속기는 HAMi가 별도로 제공하는 Device Plugin이나 가속기 제조사가 제공하는 Device Plugin을 이용한다.
-* **격리 Library** : Container 내부에 주입되는 가속기별 Library이며, 가속기 API 호출을 가로채서 Memory 크기 제한과 Core 사용률 제한을 수행한다. NVIDIA GPU는 CUDA Driver API 호출을 가로채는 HAMi-core (`libvgpu.so`)를 이용한다.
+* **격리 계층** : 조각 단위로 할당된 가속기가 제한을 초과하여 사용되지 않도록 강제하는 계층이다. 가속기에 따라서 Container에 주입된 Library가 API 호출을 가로채는 Library 수준, Driver가 할당량을 제한하는 Driver 수준, 가속기 자체가 분할되는 Hardware 수준으로 구분되며, NVIDIA GPU는 CUDA Driver API 호출을 가로채는 HAMi-core (`libvgpu.so`) Library를 이용한다.
 
 {{< table caption="[Table 1] HAMi가 지원하는 주요 가속기" >}}
-| 가속기 | Resource 이름 | Memory / Core 제한 |
-|---|---|---|
-| NVIDIA GPU | `nvidia.com/gpu`, `nvidia.com/gpumem`, `nvidia.com/gpucores` | O / O |
-| Huawei Ascend NPU | `huawei.com/Ascend910B3`, `huawei.com/Ascend910B3-memory` | O / O |
-| Cambricon MLU | `cambricon.com/vmlu`, `cambricon.com/mlu.smlu.vmemory`, `cambricon.com/mlu.smlu.vcore` | O / O |
-| Hygon HCU | `hygon.com/hcunum`, `hygon.com/hcumem`, `hygon.com/hcucores` | O / O |
-| Iluvatar GPU | `iluvatar.ai/MR-V100-vgpu`, `iluvatar.ai/MR-V100.vMem`, `iluvatar.ai/MR-V100.vCore` | O / O |
-| Moore Threads GPU | `mthreads.com/vgpu`, `mthreads.com/sgpu-memory`, `mthreads.com/sgpu-core` | O / O |
-| MetaX GPU | `metax-tech.com/sgpu`, `metax-tech.com/vmemory`, `metax-tech.com/vcore` | O / O |
-| Kunlunxin XPU | `kunlunxin.com/vxpu`, `kunlunxin.com/vxpu-memory` | O / X |
-| AWS Neuron | `aws.amazon.com/neuron`, `aws.amazon.com/neuroncore` | X / O |
-| AMD GPU | `amd.com/gpu`, `amd.com/gpumem`, `amd.com/gpucores` | O / O |
+| 가속기 | Resource 이름 | Memory / Core 제한 | 격리 계층 |
+|---|---|---|---|
+| NVIDIA GPU | `nvidia.com/gpu`, `nvidia.com/gpumem`, `nvidia.com/gpucores` | O / O | Library |
+| Huawei Ascend NPU | `huawei.com/Ascend910B3`, `huawei.com/Ascend910B3-memory` | O / O | Hardware |
+| Cambricon MLU | `cambricon.com/vmlu`, `cambricon.com/mlu.smlu.vmemory`, `cambricon.com/mlu.smlu.vcore` | O / O | Driver |
+| Hygon HCU | `hygon.com/hcunum`, `hygon.com/hcumem`, `hygon.com/hcucores` | O / O | Driver |
+| Iluvatar GPU | `iluvatar.ai/MR-V100-vgpu`, `iluvatar.ai/MR-V100.vMem`, `iluvatar.ai/MR-V100.vCore` | O / O | Library |
+| Moore Threads GPU | `mthreads.com/vgpu`, `mthreads.com/sgpu-memory`, `mthreads.com/sgpu-core` | O / O | Driver |
+| MetaX GPU | `metax-tech.com/sgpu`, `metax-tech.com/vmemory`, `metax-tech.com/vcore` | O / O | Driver |
+| Kunlunxin XPU | `kunlunxin.com/vxpu`, `kunlunxin.com/vxpu-memory` | O / X | Hardware |
+| AWS Neuron | `aws.amazon.com/neuron`, `aws.amazon.com/neuroncore` | X / O | Hardware |
+| AMD GPU | `amd.com/gpu`, `amd.com/gpumem`, `amd.com/gpucores` | O / O | Library |
 {{< /table >}}
 
-[Table 1]은 HAMi가 지원하는 주요 가속기와 Resource 이름을 나타내고 있다 (v2.10.0 기준 14종 지원). 각 가속기는 개수를 요청하는 Resource와 함께 Memory 크기, Core 사용률을 요청하는 Resource를 제공하며, hami-scheduler가 인식할 가속기별 Resource 이름은 `hami-scheduler-device` ConfigMap에 정의된다. 격리 방식은 가속기마다 다른데, NVIDIA GPU처럼 Library가 API 호출을 가로채는 방식뿐만 아니라 Ascend NPU의 가상화 Template 방식, Cambricon MLU의 Driver 수준 sMLU 방식도 이용된다.
+[Table 1]은 HAMi가 지원하는 주요 가속기와 Resource 이름을 나타내고 있다 (v2.10.0 기준 14종 지원). 각 가속기는 개수를 요청하는 Resource와 함께 Memory 크기, Core 사용률을 요청하는 Resource를 제공하며, hami-scheduler가 인식할 가속기별 Resource 이름은 `hami-scheduler-device` ConfigMap에 정의된다. 각 가속기의 격리가 수행되는 계층도 [Table 1]에 함께 표시하였다.
 
 ```yaml {caption="[File 1] vGPU를 요청하는 Pod 예제", linenos=table}
 apiVersion: v1
@@ -87,15 +87,24 @@ Device Plugin의 두 번째 역할은 hami-scheduler가 선택한 가속기를 �
 
 1. Pod가 Bind된 Node의 kubelet은 Device Plugin에게 `Allocate()` gRPC 요청을 전송한다.
 2. Device Plugin은 kube-apiserver를 통해서 해당 Pod의 Annotation을 조회하여, hami-scheduler가 선택한 가속기의 UUID와 Memory 크기, Core 사용률 제한 값을 파악한다. 일반적인 Device Plugin은 `Allocate()` 요청에 포함된 Device ID만으로 동작하지만, HAMi의 Device Plugin은 hami-scheduler의 가속기 선택 결과를 그대로 따라야 하기 때문에 Pod의 Annotation을 참조한다.
-3. Device Plugin은 `Allocate()` 응답으로 할당할 가속기 정보와 제한 값이 설정된 환경 변수, 격리 Library의 Mount 설정을 반환한다. NVIDIA GPU의 경우 `NVIDIA_VISIBLE_DEVICES`, `CUDA_DEVICE_MEMORY_LIMIT`, `CUDA_DEVICE_SM_LIMIT` 환경 변수와 `libvgpu.so`를 우선 Load하는 `LD_PRELOAD` 환경 변수가 반환된다.
-4. kubelet은 반환받은 환경 변수와 Mount 설정을 반영하여 Container를 생성하고, Container 내부의 격리 Library가 환경 변수의 제한 값에 따라서 Memory 크기 제한과 Core 사용률 제한을 수행한다.
+3. Device Plugin은 `Allocate()` 응답으로 할당할 가속기 정보와 격리 설정을 반환한다. 반환 내용은 격리 계층에 따라서 다른데, Library 수준인 NVIDIA GPU는 `NVIDIA_VISIBLE_DEVICES`, `CUDA_DEVICE_MEMORY_LIMIT`, `CUDA_DEVICE_SM_LIMIT` 환경 변수와 함께 `libvgpu.so`를 우선 Load하는 `LD_PRELOAD` 환경 변수와 Library Mount 설정이 반환된다.
+4. kubelet은 반환받은 설정을 반영하여 Container를 생성하며, 이후 Container가 가속기를 사용하면 격리 계층이 Memory 크기 제한과 Core 사용률 제한을 강제한다.
 
-격리 Library의 제한 방식은 가속기마다 다르다. NVIDIA GPU의 HAMi-core는 CUDA Driver API 호출을 가로채는 Software Level의 제한을 수행하고, AMD GPU도 유사하게 `libamvgpu.so` Library를 이용한다. 반면 Ascend NPU는 제조사가 정의한 가상화 Template 단위의 분할을 이용하고, Cambricon MLU는 Driver 수준의 sMLU 기능을 이용하기 때문에 별도의 Library 주입이 필요하지 않다. 이처럼 HAMi는 Scheduling 계층은 공통으로 유지하면서 격리 계층은 가속기별 구현에 위임하는 구조를 갖는다.
+격리 방식은 격리가 수행되는 계층에 따라서 세 가지로 구분되며, 계층이 Hardware에 가까울수록 격리는 강해지지만 분할의 유연성은 줄어든다.
+
+* **Library 수준 격리** : Container에 주입된 격리 Library가 User 공간에서 가속기 API 호출을 가로채서 Memory 할당과 Core 사용을 제한한다. NVIDIA GPU의 HAMi-core (`libvgpu.so`)는 CUDA Driver API 호출을 가로채고, AMD GPU도 유사하게 `libamvgpu.so` Library를 이용한다. 제한이 API 호출 시점에 이루어지기 때문에 Memory 크기와 Core 사용률을 임의의 값으로 지정할 수 있다.
+* **Driver 수준 격리** : Cambricon MLU는 Driver에 내장된 **sMLU** 기능이 Memory 크기와 Core 사용률 할당량을 직접 제한한다. 제조사의 Device Plugin을 `dynamic-smlu` Mode로 실행하면 하나의 MLU를 할당량이 설정된 다수의 공유 Instance로 분할할 수 있으며, 제한을 Application이 아니라 Driver가 수행하기 때문에 별도의 Library 주입이 필요하지 않다.
+* **Hardware 수준 격리** : Ascend NPU는 가속기 자체를 분할하여 **vNPU**를 생성한다. Hardware는 제조사가 Chip마다 미리 정의한 가상화 Template 구성으로만 분할될 수 있는데, 예를 들어 20개의 AI Core와 64GB Memory를 갖는 Ascend 910B3는 1/4 크기의 `vir05_1c_16g` (AI Core 5개, 16GB) Template과 1/2 크기의 `vir10_3c_32g` (AI Core 10개, 32GB) Template만 제공한다. Pod가 요청한 Memory 크기를 수용하는 가장 작은 Template이 선택되어 vNPU가 생성되며, 격리가 가장 확실한 대신 요청한 크기가 Template 크기로 올림되기 때문에 Template보다 세밀한 분할은 불가능하다.
+
+이처럼 HAMi는 Scheduling 계층은 공통으로 유지하면서 격리 계층은 가속기별 구현에 위임하는 구조를 갖는다. 한편 세 계층의 구분은 HAMi에 국한되지 않고 일반적인 가속기 가상화 기법에도 그대로 적용되는데, vCUDA와 NVIDIA MPS는 Library 수준, Alibaba cGPU와 Tencent qGPU는 Driver 수준, NVIDIA MIG와 SR-IOV 기반의 AMD MxGPU는 Hardware 수준의 격리에 해당한다.
 
 ## 2. 참조
 
 * HAMi GitHub : [https://github.com/Project-HAMi/HAMi](https://github.com/Project-HAMi/HAMi)
 * HAMi Docs : [https://project-hami.io/docs/](https://project-hami.io/docs/)
 * HAMi 지원 Device 목록 : [https://project-hami.io/docs/userguide/device-supported](https://project-hami.io/docs/userguide/device-supported)
+* HAMi Ascend NPU Sharing : [https://project-hami.io/docs/userguide/Ascend-device/enable-ascend-sharing](https://project-hami.io/docs/userguide/Ascend-device/enable-ascend-sharing)
+* HAMi Ascend Device Plugin : [https://github.com/Project-HAMi/ascend-device-plugin](https://github.com/Project-HAMi/ascend-device-plugin)
+* HAMi Cambricon MLU Sharing : [https://project-hami.io/docs/userguide/cambricon-device/enable-cambricon-mlu-sharing](https://project-hami.io/docs/userguide/cambricon-device/enable-cambricon-mlu-sharing)
 * CNCF HAMi : [https://www.cncf.io/projects/hami/](https://www.cncf.io/projects/hami/)
 * Kubernetes NVIDIA Device Plugin : [https://ssup2.github.io/blog-software/docs/theory-analysis/kubernetes-nvidia-device-plugin/](https://ssup2.github.io/blog-software/docs/theory-analysis/kubernetes-nvidia-device-plugin/)
