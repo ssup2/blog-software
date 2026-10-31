@@ -85,7 +85,7 @@ $ kubectl exec hami-isolation-test -- cat /etc/ld.so.preload
 
 [File 2]는 2000MB Memory와 30% SM 사용률로 제한된 vGPU 하나를 요청하는 Pod 예제이다. `GPU_CORE_UTILIZATION_POLICY=force`로 유휴 상태에서도 제한을 강제한다 (기본 `default`는 유휴 상태의 Burst를 허용). 이미지는 CUDA 13.0 PyTorch가 포함된 vLLM 공식 이미지를 재활용한다.
 
-[Shell 1]은 Pod 생성 후 Container 안의 환경 변수와 Preload 설정을 나타내고 있다. hami-device-plugin이 `nvidia.com/gpumem`·`nvidia.com/gpucores` 요청에 맞춰 `CUDA_DEVICE_MEMORY_LIMIT_0`과 `CUDA_DEVICE_SM_LIMIT`을 주입한 것을 확인할 수 있고, HAMi 2.x는 `LD_PRELOAD` 환경 변수가 아닌 `/etc/ld.so.preload` 파일을 Container에 마운트하여 `libvgpu.so`를 CUDA Library보다 먼저 Load하도록 설정한다.
+[Shell 1]은 Pod 생성 후 Container 안의 환경 변수와 Preload 설정을 나타내고 있다. hami-device-plugin이 `nvidia.com/gpumem`·`nvidia.com/gpucores` 요청에 맞춰 `CUDA_DEVICE_MEMORY_LIMIT_0`과 `CUDA_DEVICE_SM_LIMIT`을 주입한 것을 확인할 수 있고, HAMi 2.x는 `LD_PRELOAD` 환경 변수가 아닌 `/etc/ld.so.preload` 파일을 Container에 마운트하여 `libvgpu.so`를 CUDA Library보다 먼저 Load하도록 설정한다. `LD_PRELOAD` 환경 변수는 물려받은 Process에만 적용되기 때문에 App이 자식 Process를 생성하면서 환경 변수를 정리하면 격리가 끊기지만, `/etc/ld.so.preload` 파일은 동적 링커가 모든 Process의 시작 시점에 항상 읽기 때문에 Container 안의 모든 Process에 환경 변수와 무관하게 적용된다.
 
 ### 1.2. vGPU 설정
 
@@ -104,7 +104,7 @@ $ kubectl exec hami-isolation-test -- cat /etc/ld.so.preload
 
 {{< figure caption="[Figure 2] HAMi-core Isolation" src="images/hami-core-isolation.png" width="700px" >}}
 
-vGPU의 Memory 크기 제한과 SM 사용률 제한은 Container 내부의 HAMi-core (`libvgpu.so`)가 수행한다. [Figure 2]는 HAMi-core의 제한 동작을 나타내고 있다. `libvgpu.so`는 Container 안의 `/etc/ld.so.preload` 파일에 등록되어 CUDA Library보다 먼저 Load되기 때문에, App이 호출하는 CUDA Driver API는 실제 CUDA Library에 전달되기 전에 `libvgpu.so`를 거치게 된다.
+vGPU의 Memory 크기 제한과 SM 사용률 제한은 Container 내부의 HAMi-core (`libvgpu.so`)가 수행한다. [Figure 2]는 HAMi-core의 제한 동작을 나타내고 있다. `libvgpu.so`는 CUDA Driver API와 같은 이름의 함수들을 정의한 Library이며, 동적 링커는 같은 이름의 함수가 여러 Library에 존재하면 먼저 Load된 Library의 함수에 호출을 연결하기 때문에, `/etc/ld.so.preload`에 등록되어 CUDA Library보다 먼저 Load되는 `libvgpu.so`의 함수가 App의 CUDA Driver API 호출을 대신 받는다. `libvgpu.so`는 전달받은 호출이 제한 조건을 만족하는지 검사한 후 실제 CUDA Library의 함수로 전달하기 때문에, App과 CUDA Library를 수정하지 않고 모든 호출에 개입할 수 있다.
 
 Memory 크기 제한은 Memory 할당 API를 가로채서 수행된다. `libvgpu.so`는 `cuMemAlloc()` 같은 Memory 할당 함수가 호출될 때마다 Container의 GPU Memory 사용량을 추적하며, 사용량이 `CUDA_DEVICE_MEMORY_LIMIT` 환경 변수에 설정된 제한을 초과하면 CUDA의 OOM (Out of Memory) Error를 반환한다. 또한 `cuMemGetInfo()` 같은 Memory 조회 함수는 물리 GPU의 Memory 크기 대신 vGPU의 Memory 크기를 반환하도록 가로채지기 때문에, App과 `nvidia-smi` 명령어는 vGPU의 Memory 크기를 전체 Memory 크기로 인식한다.
 
@@ -132,7 +132,11 @@ OOM: CUDA out of memory
 
 [Shell 2]는 Memory 제한이 적용되는 모습을 나타내고 있다. `nvidia-smi`는 Pod 안에서 전체 Memory를 `2000 MiB`로 보고하여 HAMi-core가 `cuMemGetInfo()` 결과를 vGPU 크기로 치환한 것을 확인할 수 있다. 1200MB 할당은 제한 안이라 성공하지만, 2500MB 할당은 HAMi-core의 `Device 0 OOM 2636120064 / 2097152000` Log와 함께 거부되어 PyTorch는 `CUDA out of memory`를 반환한다. 로그의 `2097152000` Byte는 `2000 MiB`를 Byte로 환산한 값이다.
 
-SM 사용률 제한은 Kernel 실행 API를 가로채서 수행된다. `libvgpu.so`는 GPU의 사용률을 주기적으로 측정하면서 Token 기반으로 Kernel 실행 가능 여부를 관리하며, `cuLaunchKernel()` 같은 Kernel 실행 함수가 호출될 때 Token이 부족하면 Kernel 실행을 지연시켜 vGPU의 SM 사용률을 `CUDA_DEVICE_SM_LIMIT` 환경 변수에 설정된 제한 이하로 유지한다. 제한 동작은 `GPU_CORE_UTILIZATION_POLICY` 환경 변수로 변경할 수 있으며, 기본값인 `default`는 GPU가 유휴 상태이면 제한을 초과하는 이용을 허용하고, `force`는 항상 제한을 강제하며, `disable`은 SM 사용률 제한을 수행하지 않는다.
+SM 사용률 제한은 Kernel 실행 API를 가로채서 수행된다. `libvgpu.so`는 GPU의 사용률을 주기적으로 측정하면서 Token 기반으로 Kernel 실행 가능 여부를 관리하며, `cuLaunchKernel()` 같은 Kernel 실행 함수가 호출될 때 Token이 부족하면 Kernel 실행을 지연시켜 vGPU의 SM 사용률을 `CUDA_DEVICE_SM_LIMIT` 환경 변수에 설정된 제한 이하로 유지한다. 제한 동작은 `GPU_CORE_UTILIZATION_POLICY` 환경 변수로 변경할 수 있다.
+
+* `default` : GPU가 유휴 상태이면 제한을 초과하는 이용을 허용한다 (기본값).
+* `force` : 유휴 상태와 무관하게 항상 제한을 강제한다.
+* `disable` : SM 사용률 제한을 수행하지 않는다.
 
 ```shell {caption="[Shell 3] SM 사용률 제한 확인"}
 $ kubectl exec hami-isolation-test -- python3 -c '
@@ -166,7 +170,9 @@ $ nvidia-smi dmon -s u -c 10 -o T | awk 'NR>2 {print $1, "sm="$3"%"}'
 
 [Shell 3]은 Pod 안에서 matmul을 지속적으로 수행하는 동안의 SM 사용률을 두 Source에서 샘플링한 결과이다. HAMi `vgpu-monitor`가 시간 평균으로 노출하는 `hami_container_device_utilization_ratio` Metric은 `31`로 요청한 30% 제한에 수렴하는 반면, Host의 `nvidia-smi dmon`은 99%와 0% 사이를 1초 단위로 번갈아 보여준다. HAMi-core가 Token Bucket 방식으로 짧은 Burst 뒤에 Kernel 실행을 지연시켜 평균을 제한값에 맞추기 때문에, 순간 샘플링에서는 Burst 구간의 높은 값과 Pause 구간의 0%가 교차한다.
 
-Container의 vGPU 사용량 정보는 Container와 hami-device-plugin이 공유하는 Shared Memory Region에 기록된다. hami-device-plugin의 vGPU Monitor는 Shared Memory Region을 주기적으로 읽어서 Container별 Memory 사용량과 SM 사용률을 GPU Node의 31992 Port로 노출하며, hami-scheduler도 Cluster 전체의 vGPU 할당 현황을 31993 Port로 노출한다. 이처럼 HAMi의 제한은 CUDA API 가로채기를 통한 Software Level의 제한이기 때문에 별도의 Hardware 지원 없이 모든 NVIDIA GPU에서 이용할 수 있지만, MIG 같은 Hardware Level의 격리보다는 격리 수준이 낮다.
+vGPU를 할당받은 App Container의 사용량 정보는 HAMi-core가 **Shared Memory Region**에 기록한다. Memory 제한은 Process가 아니라 Container 단위로 적용되기 때문에 Container 안의 모든 CUDA Process가 하나의 사용량 집계를 공유해야 하는데, HAMi-core는 [Shell 1]의 `CUDA_DEVICE_MEMORY_SHARED_CACHE` 환경 변수가 가리키는 Cache 파일을 mmap하는 방식으로 Process 사이의 Shared Memory를 구성한다. 파일 안에는 Memory·SM 제한값과 Process Slot 배열이 저장되며, 최초 실행된 Process가 제한값을 초기화한 후 각 Process는 자신의 Slot에 Device별 Memory 사용량과 SM 사용률을 기록한다.
+
+Cache 파일은 hami-device-plugin이 hostPath Volume으로 App Container에 마운트한 경로에 생성되기 때문에 Container 밖에서도 같은 파일을 읽을 수 있다. hami-device-plugin의 vGPU Monitor는 Node에 존재하는 vGPU Container들의 Cache 파일을 주기적으로 읽어서 Container별 Memory 사용량과 SM 사용률을 GPU Node의 31992 Port로 노출하며, hami-scheduler도 Cluster 전체의 vGPU 할당 현황을 31993 Port로 노출한다. 이처럼 HAMi의 제한은 CUDA API 가로채기를 통한 Software Level의 제한이기 때문에 별도의 Hardware 지원 없이 모든 NVIDIA GPU에서 이용할 수 있지만, MIG 같은 Hardware Level의 격리보다는 격리 수준이 낮다.
 
 ### 1.4. GPU 선택과 Scheduling 정책
 
