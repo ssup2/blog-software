@@ -238,6 +238,69 @@ spec:
 
 도입 초기의 Dynamic MIG는 `knownMigGeometries` 설정에 정의된 Geometry (Profile 조합) 단위로 GPU 전체의 MIG 구성을 전환하는 방식이었지만, v2.10.0의 Flexible MIG부터는 Profile 단위의 예약 방식으로 재구성되어 Node의 Cordon 없이 Workload별로 MIG Instance가 생성되고 회수된다. 단 HAMi가 MIG Instance의 생성과 제거를 단독으로 담당해야 하기 때문에, GPU Operator의 MIG Manager나 `mig-parted` 도구를 HAMi와 함께 운용할 수 없다.
 
+### 1.6. HAMi Annotation 정리
+
+HAMi NVIDIA Device Plugin과 hami-scheduler는 Node와 Pod에 다수의 Annotation을 기록하거나 참조한다. Node Annotation은 등록 단계에서 Device Plugin이 작성하고, Pod Annotation은 Scheduling 단계에서 Scheduler Extender가 작성한다. 사용자가 Pod에 지정하여 Scheduling 동작을 제어하는 Annotation도 함께 존재한다.
+
+```yaml {caption="[File 5] Node에 설정되는 HAMi Annotation", linenos=table}
+apiVersion: v1
+kind: Node
+metadata:
+  name: gpu
+  annotations:
+    hami.io/node-nvidia-register: '[{"id":"GPU-034026c4-...","count":10,"devmem":16311,"devcore":100,"type":"NVIDIA GeForce RTX 5060 Ti","mode":"hami-core","health":true}]'
+    hami.io/node-handshake: Requesting_2026-10-17 14:03:04
+    hami.io/node-nvidia-score: "<Topology Score JSON>"
+```
+
+[File 5]는 hami-device-plugin이 NVIDIA GPU Node에 기록하는 Annotation을 나타내고 있다.
+
+* **`hami.io/node-nvidia-register`** : 해당 Node의 NVIDIA GPU 목록을 JSON 배열로 담는다. GPU UUID (`id`), 분할 가능 vGPU 개수 (`count`, `deviceSplitCount` 값), 물리 Memory 크기 (`devmem` MiB), Core 수 (`devcore` %), Chip Type, 동작 Mode (`hami-core` 또는 `mig`), Health 상태로 구성된다. hami-device-plugin이 주기적으로 갱신한다.
+* **`hami.io/node-handshake`** : Scheduler Extender가 Node 상태를 주기적으로 확인하는 Health check 표시. `Requesting_<timestamp>` 형태로 갱신된다. 다른 가속기는 `hami.io/node-handshake-[가속기]` Suffix 형태를 쓴다.
+* **`hami.io/node-nvidia-score`** : NVLink 등 GPU 간 연결 Topology Score. `ENABLE_TOPOLOGY_SCORE` 환경 변수를 활성화한 경우에만 기록된다 (v2.7.0 도입).
+
+```yaml {caption="[File 6] Pod에 설정되는 HAMi Annotation", linenos=table}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: qwen3-14b-awq-...
+  annotations:
+    # Scheduler Extender가 Scheduling 단계에서 기록
+    hami.io/vgpu-devices-to-allocate: ;;
+    hami.io/vgpu-devices-allocated: GPU-034026c4-...,NVIDIA,15000,0:;
+    hami.io/vgpu-node: gpu
+    hami.io/bind-phase: success
+    hami.io/bind-time: "1792334371"
+    hami.io/vgpu-time: "1792334371"
+    # 사용자가 Scheduling 동작 제어를 위해 지정
+    nvidia.com/use-gputype: "A100,V100"
+    nvidia.com/nouse-gputype: "H100"
+    nvidia.com/use-gpuuuid: "GPU-xxx"
+    nvidia.com/nouse-gpuuuid: "GPU-yyy"
+    nvidia.com/vgpu-mode: "mig"
+    hami.io/node-scheduler-policy: "binpack"
+    hami.io/gpu-scheduler-policy: "topology-aware"
+```
+
+[File 6]은 Pod에 설정되는 HAMi Annotation을 나타내고 있다. Scheduler Extender가 Scheduling 단계에서 자동으로 기록하는 Annotation과 사용자가 Scheduling 동작 제어를 위해 Pod spec에 직접 지정하는 Annotation으로 구분된다.
+
+Scheduler Extender가 기록하는 Annotation:
+
+* **`hami.io/vgpu-devices-to-allocate`** : 할당 Phase 중간에 Scheduler가 선택한 vGPU를 임시로 기록하는 Field. 할당이 완료되면 아래 `vgpu-devices-allocated`로 옮겨지고 이 값은 비워진다.
+* **`hami.io/vgpu-devices-allocated`** : 할당된 vGPU 결과. `UUID,가속기Type,Memory크기(MiB),Core사용률(%)` 형식의 Record가 vGPU 1개당 1개 생성되며, Record는 `:`로 종결하고 Record 사이는 `;`로 구분한다. 초기 구현의 이름을 유지하고 있으며 다른 가속기는 `hami.io/[가속기]-devices-allocated` 형식을 쓴다.
+* **`hami.io/vgpu-node`** : vGPU가 할당된 Node 이름.
+* **`hami.io/bind-phase`** : Scheduling의 Bind 단계 상태 (`allocating`에서 `success`로 전환).
+* **`hami.io/bind-time`**, **`hami.io/vgpu-time`** : Bind 수행 시각 (Unix epoch).
+
+사용자가 지정하는 Annotation:
+
+* **`nvidia.com/use-gputype`** : 할당을 허용할 GPU Type 목록 (쉼표로 구분).
+* **`nvidia.com/nouse-gputype`** : 할당에서 제외할 GPU Type 목록.
+* **`nvidia.com/use-gpuuuid`**, **`nvidia.com/nouse-gpuuuid`** : 할당을 허용하거나 제외할 GPU의 UUID 목록.
+* **`nvidia.com/vgpu-mode`** : vGPU가 할당될 Mode를 고정 (`hami-core` 또는 `mig`). 생략하면 hami-scheduler가 두 Mode의 Node를 하나의 Pool로 취급한다.
+* **`hami.io/node-scheduler-policy`** : 해당 Pod의 Node Scheduling 정책 (`binpack` / `spread`).
+* **`hami.io/gpu-scheduler-policy`** : 해당 Pod의 Device Scheduling 정책 (`binpack` / `spread` / `mutex` / `topology-aware`, 쉼표로 조합 가능).
+
 ## 2. 참조
 
 * HAMi GitHub : [https://github.com/Project-HAMi/HAMi](https://github.com/Project-HAMi/HAMi)

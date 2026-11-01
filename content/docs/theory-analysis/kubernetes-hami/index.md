@@ -119,6 +119,59 @@ Device Plugin의 두 번째 역할은 hami-scheduler가 선택한 가속기를 �
 3. Device Plugin은 `Allocate()` 응답으로 할당할 가속기 정보와 격리 설정을 반환한다. 반환 내용은 격리 계층에 따라서 다른데, Library 수준은 격리 Library Mount와 제한값 환경 변수가, Driver/Hardware 수준은 가상화된 가속기 Device 참조가 반환된다.
 4. kubelet은 반환받은 설정을 반영하여 Container를 생성하며, 이후 Container가 가속기를 사용하면 격리 계층이 Memory 크기 제한과 Core 사용률 제한을 강제한다.
 
+### 1.4. HAMi Annotation 정리
+
+HAMi의 Device Plugin과 hami-scheduler는 Node와 Pod에 다수의 Annotation을 기록하거나 참조한다. 아래 YAML은 Node와 Pod에 설정되는 주요 Annotation을 가속기 중립 형태로 나열한다. 가속기별로 Suffix가 달라지며, NVIDIA GPU는 초기 구현의 이름을 유지하는 Legacy Suffix (`vgpu` 등) 를 사용한다.
+
+```yaml {caption="[File 1] Node에 설정되는 HAMi Annotation", linenos=table}
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    hami.io/node-[가속기]-register: '[{...가속기 상세 목록 JSON...}]'
+    hami.io/node-handshake: Requesting_<timestamp>
+    hami.io/node-handshake-[가속기]: Requesting_<timestamp>
+```
+
+[File 1]은 Device Plugin이 Node에 기록하는 Annotation을 나타내고 있다.
+
+* **`hami.io/node-[가속기]-register`** : 해당 Node의 가속기 상세 목록 (UUID, Memory 크기, Core 수, Chip Type, 동작 Mode, Health 등) 을 JSON 배열로 담는다. Device Plugin이 주기적으로 갱신하며, 가속기 Suffix는 Chip 종류에 따라 바뀐다.
+* **`hami.io/node-handshake`**, **`hami.io/node-handshake-[가속기]`** : Scheduler Extender가 가속기별로 Node 상태를 주기적으로 확인하는 Health check 표시. `Requesting_<timestamp>` 형태로 갱신된다.
+
+```yaml {caption="[File 2] Pod에 설정되는 HAMi Annotation", linenos=table}
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    # Scheduler Extender가 Scheduling 단계에서 기록
+    hami.io/[가속기]-devices-to-allocate: <할당 Phase 중간 상태>
+    hami.io/[가속기]-devices-allocated: <할당된 결과 레코드>
+    hami.io/vgpu-node: <Node 이름>
+    hami.io/bind-phase: success
+    hami.io/bind-time: "<Unix epoch>"
+    hami.io/vgpu-time: "<Unix epoch>"
+    # 사용자가 Scheduling 동작 제어를 위해 지정
+    hami.io/node-scheduler-policy: binpack
+    hami.io/gpu-scheduler-policy: spread
+```
+
+[File 2]는 Pod에 설정되는 HAMi Annotation을 나타내고 있다. Scheduler Extender가 Scheduling 단계에서 자동으로 기록하는 Annotation과 사용자가 Scheduling 동작 제어를 위해 Pod spec에 직접 지정하는 Annotation으로 구분된다.
+
+Scheduler Extender가 기록하는 Annotation:
+
+* **`hami.io/[가속기]-devices-to-allocate`** : 할당 Phase 중간에 Scheduler가 선택한 가속기를 임시로 기록하는 Field. 할당이 완료되면 비워진다.
+* **`hami.io/[가속기]-devices-allocated`** : Scheduler가 최종 선택한 가속기 할당 결과 (UUID, Type, Memory 크기, Core 사용률 등). 가속기 1개당 1개 Record가 생성된다.
+* **`hami.io/vgpu-node`** : 가속기가 할당된 Node 이름.
+* **`hami.io/bind-phase`** : Scheduling의 Bind 단계 상태.
+* **`hami.io/bind-time`**, **`hami.io/vgpu-time`** : Bind 수행 시각.
+
+사용자가 지정하는 Annotation:
+
+* **`hami.io/node-scheduler-policy`** : 해당 Pod의 Node Scheduling 정책 (`binpack` / `spread`).
+* **`hami.io/gpu-scheduler-policy`** : 해당 Pod의 Device Scheduling 정책 (`binpack` / `spread` 등 가속기별 지원 값).
+
+이 외에 Namespace 또는 Pod에 **`hami.io/webhook: ignore`** Label을 지정하면 HAMi Mutating Webhook이 해당 범위를 건너뛰어 `schedulerName`을 변경하지 않는다.
+
 ## 2. 참조
 
 * HAMi GitHub : [https://github.com/Project-HAMi/HAMi](https://github.com/Project-HAMi/HAMi)
