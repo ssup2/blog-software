@@ -19,9 +19,13 @@ HAMi 자체(이기종 AI 가속기 가상화 Middleware)에 포커스를 두고 
   개조식·상세는 1.3으로 일원화) ③ 1.3 할당 단계 3·4를 계층 중립으로 수정 (3: "격리 설정 반환, 내용은 계층에 따라 다름 —
   NVIDIA는 env+LD_PRELOAD" / 4: "격리 계층이 제한을 강제"). **Figure 1 재작도 시 세 번째 블록명도 "격리 Library" →
   "격리 계층"으로 변경 필요.**
-- 1장 구성: 1. 개요(요소 3종: hami-scheduler/Device Plugin/격리 계층, 지원 가속기 Table(격리 계층 열 포함), vGPU Pod 예시) /
+- 1장 구성: 1. 개요(요소 3종: hami-scheduler/Device Plugin/격리 계층, 지원 가속기 Table(격리 계층 열 포함)) /
   1.1 Device 등록 과정(부풀리기 + Node Annotation) / 1.2 Device Scheduling 과정(Webhook, Extender, 정책) /
-  1.3 Device 할당 과정(Pod Annotation 참조, 격리 Library 주입).
+  1.3 Device 할당 과정(Pod Annotation 참조, 격리 설정 반환).
+- **2026-11-01 NVIDIA 세부 축소** (사용자 피드백: 내용 중복, 벤더 중립 유지): ① 개요의 [File 1] vGPU Pod 예제 블록 제거
+  (kubernetes-hami-nvidia-gpu에 동일 예제가 존재) ② 1.3 Step 3의 NVIDIA 환경 변수 열거(`NVIDIA_VISIBLE_DEVICES`,
+  `CUDA_DEVICE_*`, `LD_PRELOAD`)를 "Library 수준은 Library Mount + 환경 변수, Driver/HW 수준은 가속기 Device 참조"로 중립화.
+  두 글 사이의 상호 "참조" 링크도 제거(이 글 참조 섹션에 이미 kubernetes-hami-nvidia-gpu 링크 없음, 반대편의 Kubernetes HAMi 링크는 제거).
 - 사실 관계는 2026-10-16 웹 리서치(HAMi master 소스 b385c82, charts/hami/values.yaml, 공식 docs) 기반. **사실 검증 필요 목록**:
   - CNCF 이력: Sandbox 2024-08, Incubating 2026-07 (TOC 통과 07-02, 발표 블로그 07-15). 최신 릴리스 v2.10.0 (2026-08-21).
   - [Table 1] 가속기별 Resource 이름 — v2.10.0 기준 14종 중 10종만 수록, Biren/Vastai(개수 전용)/Teco(검증 중)/원격 GPU는 생략.

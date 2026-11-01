@@ -32,24 +32,7 @@ draft: true
 
 [Table 1]은 HAMi가 지원하는 주요 가속기와 Resource 이름을 나타내고 있다 (v2.10.0 기준 14종 지원). 각 가속기는 개수를 요청하는 Resource와 함께 Memory 크기, Core 사용률을 요청하는 Resource를 제공하며, hami-scheduler가 인식할 가속기별 Resource 이름은 `hami-scheduler-device` ConfigMap에 정의된다. 각 가속기의 격리가 수행되는 계층도 [Table 1]에 함께 표시하였다.
 
-```yaml {caption="[File 1] vGPU를 요청하는 Pod 예제", linenos=table}
-apiVersion: v1
-kind: Pod
-metadata:
-  name: vgpu-pod
-spec:
-  containers:
-  - name: cuda
-    image: nvidia/cuda:12.4.0-base-ubuntu22.04
-    command: ["sleep", "infinity"]
-    resources:
-      limits:
-        nvidia.com/gpu: 1
-        nvidia.com/gpumem: 3000
-        nvidia.com/gpucores: 30
-```
-
-[File 1]은 NVIDIA GPU를 기준으로 3000MB의 Memory와 30%의 SM (Streaming Multiprocessor) 사용률을 갖는 하나의 **vGPU**를 요청하는 Pod의 예제를 나타내고 있다. 본 글에서는 NVIDIA GPU를 예시로 HAMi의 동작을 분석하지만, 등록·Scheduling·할당의 전체 흐름은 모든 가속기가 동일한 구조를 따른다.
+본 글에서는 NVIDIA GPU를 예시로 HAMi의 동작을 분석하지만, 등록·Scheduling·할당의 전체 흐름은 모든 가속기가 동일한 구조를 따른다.
 
 ### 1.1. Device 등록 과정
 
@@ -87,7 +70,7 @@ Device Plugin의 두 번째 역할은 hami-scheduler가 선택한 가속기를 �
 
 1. Pod가 Bind된 Node의 kubelet은 Device Plugin에게 `Allocate()` gRPC 요청을 전송한다.
 2. Device Plugin은 kube-apiserver를 통해서 해당 Pod의 Annotation을 조회하여, hami-scheduler가 선택한 가속기의 UUID와 Memory 크기, Core 사용률 제한 값을 파악한다. 일반적인 Device Plugin은 `Allocate()` 요청에 포함된 Device ID만으로 동작하지만, HAMi의 Device Plugin은 hami-scheduler의 가속기 선택 결과를 그대로 따라야 하기 때문에 Pod의 Annotation을 참조한다.
-3. Device Plugin은 `Allocate()` 응답으로 할당할 가속기 정보와 격리 설정을 반환한다. 반환 내용은 격리 계층에 따라서 다른데, Library 수준인 NVIDIA GPU는 `NVIDIA_VISIBLE_DEVICES`, `CUDA_DEVICE_MEMORY_LIMIT`, `CUDA_DEVICE_SM_LIMIT` 환경 변수와 함께 `libvgpu.so`를 우선 Load하는 `LD_PRELOAD` 환경 변수와 Library Mount 설정이 반환된다.
+3. Device Plugin은 `Allocate()` 응답으로 할당할 가속기 정보와 격리 설정을 반환한다. 반환 내용은 격리 계층에 따라서 다른데, Library 수준은 격리 Library Mount와 제한값 환경 변수가, Driver/Hardware 수준은 가상화된 가속기 Device 참조가 반환된다.
 4. kubelet은 반환받은 설정을 반영하여 Container를 생성하며, 이후 Container가 가속기를 사용하면 격리 계층이 Memory 크기 제한과 Core 사용률 제한을 강제한다.
 
 격리 방식은 격리가 수행되는 계층에 따라서 세 가지로 구분되며, 계층이 Hardware에 가까울수록 격리는 강해지지만 분할의 유연성은 줄어든다.

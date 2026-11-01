@@ -9,6 +9,8 @@ kubernetes-hami(HAMi 자체, 벤더 중립 구조) 문서의 NVIDIA 상세 글�
 - **2026-10-16 이론 초안 작성** (Claude 작성, 사용자 검토 전, frontmatter `draft: true`).
   index.en.md는 초안 확정 전이라 미작성.
 - **2026-10-18 Memory·SM 격리 실측 추가** (Claude): 1.1 Test 환경 구축을 신설하고 1.3(Memory·SM) 섹션에 Shell 블록 2개(2500MB OOM, matmul 중 SM 샘플링) 추가. 실측 환경은 kubernetes-hami-vllm-gpu-ubuntu-26.04 Record 글의 Cluster 재사용. `GPU_CORE_UTILIZATION_POLICY=force` 설정으로 유휴 Burst를 꺼서 vgpu-monitor Metric이 ~31%에 수렴하는 모습 확인. 호스트 nvidia-smi dmon은 Token Bucket Burst 특성으로 99/0 번갈아 나오는 것 함께 수록.
+- **2026-11-01 kubernetes-hami 글과의 상호 참조 제거** (사용자 피드백): 참조 섹션의 "Kubernetes HAMi" 자기 블로그 링크 제거.
+  kubernetes-hami 글에서는 중복되는 NVIDIA 세부(Pod 예제, 환경 변수 열거)가 축소된 상태이므로 양 글을 각각 독립적으로 읽는 걸 전제로 함.
 - 1장 구성: 1. 개요(hami-device-plugin/HAMi-core, vGPU Resource Table, Pod 예제) / 1.1 Test 환경 구축 / 1.2 vGPU 설정(Table 2) /
   1.3 Memory·SM 사용률 제한(HAMi-core, 정책 환경 변수, Monitor, 실측 Shell 2종) / 1.4 GPU 선택과 Scheduling 정책(Type/UUID Annotation,
   binpack/spread/mutex, Topology-aware) / 1.5 Dynamic MIG(Flexible MIG 예약 방식).

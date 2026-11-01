@@ -246,5 +246,4 @@ spec:
 * HAMi Scheduling 정책 : [https://project-hami.io/docs/userguide/nvidia-device/scheduling-policy](https://project-hami.io/docs/userguide/nvidia-device/scheduling-policy)
 * HAMi GPU Topology Scheduling : [https://project-hami.io/docs/developers/gpu-topology-scheduling](https://project-hami.io/docs/developers/gpu-topology-scheduling)
 * HAMi 설정 가이드 : [https://project-hami.io/docs/userguide/configure](https://project-hami.io/docs/userguide/configure)
-* Kubernetes HAMi : [https://ssup2.github.io/blog-software/docs/theory-analysis/kubernetes-hami/](https://ssup2.github.io/blog-software/docs/theory-analysis/kubernetes-hami/)
 * Kubernetes NVIDIA Device Plugin : [https://ssup2.github.io/blog-software/docs/theory-analysis/kubernetes-nvidia-device-plugin/](https://ssup2.github.io/blog-software/docs/theory-analysis/kubernetes-nvidia-device-plugin/)
