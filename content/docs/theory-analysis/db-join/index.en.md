@@ -171,15 +171,15 @@ Sort Merge Join, as can be inferred from the name, sorts data by join key and th
 [Figure 7] shows only the `Employees` table sorted by the `dept_id` column from the dataset in [Figure 1] for Sort Merge Join. `Departments.id` is already sorted by the Primary Key Clustered Index, so it maintains the same order as [Figure 1].
 
 ```text {caption="[Text 4] Sort Merge Join Process"}
-Engineering(10)  · Alice(10)      → O     →            `ptr_e++`
-Engineering(10)  · Bob(10)        → O     →            `ptr_e++`
-Engineering(10)  · Coral(20)      → X     → `ptr_d++`
-Marketing(20)    · Coral(20)      → O     →            `ptr_e++`
-Marketing(20)    · Eve(20)        → O     →            `ptr_e++`
-Marketing(20)    · Dave(30)       → X     → `ptr_d++`
-HR(30)           · Dave(30)       → O     →            `ptr_e++`
-HR(30)           · Ssup(NULL)     → X     → `ptr_d++`
-(Unassigned)40   · Ssup(NULL)     → X
+Engineering(10)  ,  Alice(10)      → O     →            `ptr_e++`
+Engineering(10)  ,  Bob(10)        → O     →            `ptr_e++`
+Engineering(10)  ,  Coral(20)      → X     → `ptr_d++`
+Marketing(20)    ,  Coral(20)      → O     →            `ptr_e++`
+Marketing(20)    ,  Eve(20)        → O     →            `ptr_e++`
+Marketing(20)    ,  Dave(30)       → X     → `ptr_d++`
+HR(30)           ,  Dave(30)       → O     →            `ptr_e++`
+HR(30)           ,  Ssup(NULL)     → X     → `ptr_d++`
+(Unassigned)40   ,  Ssup(NULL)     → X
 ```
 
 [Text 4] shows the merge phase of Sort Merge Join in [Figure 7]. Unlike Nested Loop Join, it does not traverse the entire Inner Table for each row of the Outer Table, and proceeds by reading forward with two pointers where `ptr_d` points to the current row of the `Departments` table and `ptr_e` points to the current row of the `Employees` table. When join keys match, the next Employee is examined with `ptr_e++`. When join keys differ, the next Department is examined with `ptr_d++`. The join ends when both pointers reach the end by moving pointers in this way.
@@ -222,7 +222,7 @@ The hash table is basically created in memory, and when memory is insufficient, 
 | Join Key Sort | Not required | Required | Not required |
 | Join Condition | Equality, Non-equality | Mainly Equality (`=`) | Equality (`=`) only |
 | Table Traversal | Inner repeated per Outer row | Each table once | Build table once + Probe table once |
-| I/O Pattern | Random I/O with Index Nested Loop | Sequential I/O in merge phase | Build·Probe Sequential Scan |
+| I/O Pattern | Random I/O with Index Nested Loop | Sequential I/O in merge phase | Build, Probe Sequential Scan |
 | Time Complexity | `O(N × M)` (improved with Index) | `O(N log N + M log M)` + `O(N + M)` | `O(N + M)` |
 | Additional Cost | Inner table index dependency | Sort, Spill | Hash table creation, Memory, Spill |
 | Favorable Cases | Small tables, well-indexed | Large scale, sorted input (Index Scan) usable | Large-scale Equality Join |

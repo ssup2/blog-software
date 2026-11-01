@@ -34,7 +34,7 @@ Each xDS Resource is configured dynamically through its corresponding xDS API. T
 ```yaml {caption="[Config 1] LDS Configuration", linenos=table}
 resources:
 
-# ── Listener 1 · single chain · HTTP · mTLS terminate ─────────────────
+# ── Listener 1 ,  single chain ,  HTTP ,  mTLS terminate ─────────────────
 - "@type": type.googleapis.com/envoy.config.listener.v3.Listener
   name: internal-listener                      # arbitrary string
   address:
@@ -70,7 +70,7 @@ resources:
           typed_config:
             "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
 
-# ── Listener 2 · two SNI chains · different SDS per chain ─────────────
+# ── Listener 2 ,  two SNI chains ,  different SDS per chain ─────────────
 - "@type": type.googleapis.com/envoy.config.listener.v3.Listener
   name: external-listener
   address:
@@ -129,7 +129,7 @@ resources:
 ```yaml {caption="[Config 2] RDS Configuration", linenos=table}
 resources:
  
-# ── Table 1 · read by internal-listener (RDS: internal-routes) ────────
+# ── Table 1 ,  read by internal-listener (RDS: internal-routes) ────────
 - "@type": type.googleapis.com/envoy.config.route.v3.RouteConfiguration
   name: internal-routes                        # arbitrary string
   virtual_hosts:
@@ -157,7 +157,7 @@ resources:
       route:
         cluster: ratings
  
-# ── Table 2 · read only by the web.com chain (RDS: external-routes) ───
+# ── Table 2 ,  read only by the web.com chain (RDS: external-routes) ───
 - "@type": type.googleapis.com/envoy.config.route.v3.RouteConfiguration
   name: external-routes
   virtual_hosts:
@@ -338,20 +338,20 @@ In contrast, with ECDS the Filter configuration is separated into an independent
 #### 1.1.7. ADS (Aggregated Discovery Service)
 
 ```yaml {caption="[Config 7] ADS Configuration", linenos=table}
-# ── 1 · Envoy → Server: CDS wildcard subscription ─────────────────────
+# ── 1 ,  Envoy → Server: CDS wildcard subscription ─────────────────────
 DiscoveryRequest:
   node: { id: envoy-node-1 }           # identity — sent once per stream
   type_url: "type.googleapis.com/envoy.config.cluster.v3.Cluster"
   resource_names: []                   # empty = wildcard (CDS/LDS subscribe like this)
  
-# ── 2 · Server → Envoy: every Cluster ─────────────────────────────────
+# ── 2 ,  Server → Envoy: every Cluster ─────────────────────────────────
 DiscoveryResponse:
   version_info: "v1"
   nonce: "n1"
   type_url: "type.googleapis.com/envoy.config.cluster.v3.Cluster"
   resources: [ ... ]                   # → [Config 3] CDS Configuration
  
-# ── 3 · Envoy → Server: ACK, then derived EDS subscription BY NAME ────
+# ── 3 ,  Envoy → Server: ACK, then derived EDS subscription BY NAME ────
 DiscoveryRequest:
   type_url: "type.googleapis.com/envoy.config.cluster.v3.Cluster"
   version_info: "v1"                   # ACK — echo version + nonce back
@@ -360,10 +360,10 @@ DiscoveryRequest:
   type_url: "type.googleapis.com/envoy.config.endpoint.v3.ClusterLoadAssignment"
   resource_names: [reviews-v1, reviews-v2, ratings, web, kafka]   # names came from CDS
 # ... the same pattern repeats — LDS (wildcard) → RDS / SDS / ECDS (by name):
-#     RDS: [internal-routes, external-routes]  ·  SDS: [internal-cert, internal-ca, web-cert, kafka-cert]
+#     RDS: [internal-routes, external-routes]  ,   SDS: [internal-cert, internal-ca, web-cert, kafka-cert]
 #     ECDS: [internal-wasm]
  
-# ── 4 · NACK: reject a broken update, keep the last good version ──────
+# ── 4 ,  NACK: reject a broken update, keep the last good version ──────
 DiscoveryRequest:
   type_url: "type.googleapis.com/envoy.config.listener.v3.Listener"
   version_info: "v1"                   # still the LAST GOOD version, not the broken one

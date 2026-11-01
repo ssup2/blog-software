@@ -1,17 +1,17 @@
 # kubernetes-nvidia-dra-driver 문서 작업 컨텍스트
 
-NVIDIA DRA Driver(kubernetes-sigs/dra-driver-nvidia-gpu)의 구조와 기능(GPU 등록·속성, 공유, Dynamic MIG, ComputeDomain)을 분석하는 문서.
+NVIDIA DRA Driver(kubernetes-sigs/dra-driver-nvidia-gpu)의 구조와 기능(GPU 등록, 속성, 공유, Dynamic MIG, ComputeDomain)을 분석하는 문서.
 kubernetes-dra(DRA 표준) 문서의 벤더 구현 글로, kubernetes-nvidia-device-plugin ↔ Device Plugin 표준의 관계와 같은 구도.
 kubernetes-hami-dra 문서와 같은 시기(2026-10-15)에 작성됨. 배경 글(kubernetes-dra)은 draft 상태 — 발행 시 상호 참조 링크 유지 여부 확인.
 
 ## 문서 구성 및 상태
 
 - **2026-10-15 이론 초안 작성** (Claude 작성, 사용자 검토 전, frontmatter `draft: true`). **실측 없음** — Shell 블록 없음,
-  File 1~3은 공식 문서·Helm template 기반. index.en.md는 초안 확정 전이라 미작성.
+  File 1~3은 공식 문서, Helm template 기반. index.en.md는 초안 확정 전이라 미작성.
 - 1장 구성: 1. 개요(Driver 2종, DeviceClass Table) / 1.1 GPU 등록과 속성(Attribute/Capacity Table, CEL 예제) /
   1.2 GPU 공유(Shared Claim, GpuConfig Opaque Config) / 1.3 MIG Instance 할당(Static/Dynamic MIG, KEP-4815) /
   1.4 ComputeDomain(IMEX) / 1.5 Device Plugin 비교(GPUCluster, DRAExtendedResource).
-- 초안의 사실 관계는 2026-10-15 웹 리서치(GitHub API로 릴리스 실측, main 브랜치 소스·Helm template, 공식 문서, GPU Operator 문서) 기반.
+- 초안의 사실 관계는 2026-10-15 웹 리서치(GitHub API로 릴리스 실측, main 브랜치 소스, Helm template, 공식 문서, GPU Operator 문서) 기반.
   **사실 검증 필요 목록**:
   - 프로젝트 이관: NVIDIA/k8s-dra-driver-gpu → kubernetes-sigs/dra-driver-nvidia-gpu (2026-03 CNCF 기증, 구 URL redirect),
     버전 체계 CalVer(v25.12.0) → SemVer(v0.4.0+), 최신 v0.5.1(2026-10-12).
@@ -39,7 +39,7 @@ kubernetes-hami-dra 문서와 같은 시기(2026-10-15)에 작성됨. 배경 글
 
 ## Test 계획 (미수행)
 
-- GPU 할당·공유·MIG 실측은 NVIDIA GPU Node 필요 (MIG는 Ampere+ MIG-capable, ComputeDomain은 MNNVL 환경이라 실측 현실성 낮음).
+- GPU 할당, 공유, MIG 실측은 NVIDIA GPU Node 필요 (MIG는 Ampere+ MIG-capable, ComputeDomain은 MNNVL 환경이라 실측 현실성 낮음).
 - 설치: `helm install dra-driver-nvidia-gpu oci://registry.k8s.io/dra-driver-nvidia/charts/dra-driver-nvidia-gpu
   --version 0.5.1 -n dra-driver-nvidia-gpu --create-namespace --set gpuResourcesEnabledOverride=true`
   (GPU Operator 관리 Driver 환경은 `--set nvidiaDriverRoot=/run/nvidia/driver`, Device Plugin 비활성화 필요).

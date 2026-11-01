@@ -175,7 +175,7 @@ STATUS: deployed
 ...
 ```
 
-**HAMi** (Heterogeneous AI computing Virtualization middleware)는 Nvidia Container Toolkit 위에서 GPU를 Pod간 Memory·Core 단위로 분할해 공유할 수 있게 하는 Scheduler Extension이다. `hami-scheduler`는 kube-scheduler Framework에 Webhook으로 끼어들어 GPU 요구량과 Memory 요구량을 함께 고려하고, `hami-device-plugin`은 각 GPU Node에서 가상화된 GPU 자원을 광고한다.
+**HAMi** (Heterogeneous AI computing Virtualization middleware)는 Nvidia Container Toolkit 위에서 GPU를 Pod간 Memory, Core 단위로 분할해 공유할 수 있게 하는 Scheduler Extension이다. `hami-scheduler`는 kube-scheduler Framework에 Webhook으로 끼어들어 GPU 요구량과 Memory 요구량을 함께 고려하고, `hami-device-plugin`은 각 GPU Node에서 가상화된 GPU 자원을 광고한다.
 
 ```shell
 $ kubectl -n kube-system get pods -l app.kubernetes.io/instance=hami -o wide
@@ -198,7 +198,7 @@ Capacity:
   pods:               110
 ```
 
-Node Capacity에 **`nvidia.com/gpu: 10`**이 광고된다. 물리 GPU 1장을 HAMi가 10개 Virtual Slot으로 분할하는 Default 설정이다. `nvidia.com/gpumem` (MiB)과 `nvidia.com/gpucores` (%)로 Slot별 Memory·Compute를 세분화해 요청할 수 있다.
+Node Capacity에 **`nvidia.com/gpu: 10`**이 광고된다. 물리 GPU 1장을 HAMi가 10개 Virtual Slot으로 분할하는 Default 설정이다. `nvidia.com/gpumem` (MiB)과 `nvidia.com/gpucores` (%)로 Slot별 Memory, Compute를 세분화해 요청할 수 있다.
 
 ## 7. vLLM Pod 배포
 

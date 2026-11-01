@@ -16,7 +16,7 @@ HAMi 자체(이기종 AI 가속기 가상화 Middleware)에 포커스를 두고 
 - **2026-10-31 Library 중심 구성 탈피** (사용자 피드백: Library 가상화 중심으로 나머지 기법이 끼어든 구성): ① 개요의 세 번째
   구성 요소를 "격리 Library"에서 **"격리 계층"**으로 일반화 (Library/Driver/Hardware 세 수준 명시, NVIDIA Library는 예시로 격하.
   "Component 3종" → "요소 3종") ② Table 1 문단의 세 계층 정의 문장을 "[Table 1]에 함께 표시" 한 줄로 축약 (정의는 개요
-  개조식·상세는 1.3으로 일원화) ③ 1.3 할당 단계 3·4를 계층 중립으로 수정 (3: "격리 설정 반환, 내용은 계층에 따라 다름 —
+  개조식, 상세는 1.3으로 일원화) ③ 1.3 할당 단계 3, 4를 계층 중립으로 수정 (3: "격리 설정 반환, 내용은 계층에 따라 다름 —
   NVIDIA는 env+LD_PRELOAD" / 4: "격리 계층이 제한을 강제"). **Figure 1 재작도 시 세 번째 블록명도 "격리 Library" →
   "격리 계층"으로 변경 필요.**
 - **2026-11-01 Annotation 절 해체** (사용자 피드백: 별도 절 대신 사용되는 절에 배치): "1.4 HAMi Annotation 정리"를 삭제하고
@@ -33,10 +33,10 @@ HAMi 자체(이기종 AI 가속기 가상화 Middleware)에 포커스를 두고 
 - **2026-11-01 벤더 맥락 전면 삭제** (사용자 피드백 "최대한 요 글에서는 vendor 관련 맥락은 삭제, 전반적인 컨셉정도만 명시"):
   ① ~~Table 1 제거~~ → **2026-11-01 사용자 요청으로 복원**. 표는 벤더 매트릭스지만 지원 범위를 한눈에 보여주는 가치가 있어 유지 ② 개요 Device Plugin
   bullet의 "NVIDIA GPU용 hami-device-plugin" 서술 → 벤더 중립 "가속기에 따라서 HAMi 포함/별도/제조사 Device Plugin 중 하나"
-  ③ 1.1 Figure 2 캡션 "NVIDIA GPU를 예시로"·"NVIDIA GPU는 NVML을 이용"·"NVIDIA GPU는 hami.io/node-nvidia-register"·
+  ③ 1.1 Figure 2 캡션 "NVIDIA GPU를 예시로", "NVIDIA GPU는 NVML을 이용", "NVIDIA GPU는 hami.io/node-nvidia-register", 
   "Cambricon MLU처럼" 삭제 ④ 1.2 Step 5 "NVIDIA GPU는 초기 구현의 이름 hami.io/vgpu-devices-allocated 유지" 삭제 ⑤ 1.3
   격리 수준 3분류의 Library(HAMi-core libvgpu.so / AMD libamvgpu.so), Driver(Cambricon sMLU), Hardware(Ascend 910B3 Template)
-  모든 벤더 예시 삭제 — 메커니즘만 서술 ⑥ 1.3 끝 "vCUDA·NVIDIA MPS·cGPU·qGPU·MIG·MxGPU" 산업 예시 삭제 ⑦ 참조 섹션에서
+  모든 벤더 예시 삭제 — 메커니즘만 서술 ⑥ 1.3 끝 "vCUDA, NVIDIA MPS, cGPU, qGPU, MIG, MxGPU" 산업 예시 삭제 ⑦ 참조 섹션에서
   Ascend/Cambricon/NVIDIA Device Plugin 벤더별 링크 제거, HAMi/Docs/지원 Device/CNCF 4개만 유지. 결과: 벤더 중립 Architecture
   분석과 공통 흐름(등록/Scheduling/할당) + 격리 계층 추상 설명만 남음.
 - 사실 관계는 2026-10-16 웹 리서치(HAMi master 소스 b385c82, charts/hami/values.yaml, 공식 docs) 기반. **사실 검증 필요 목록**:
@@ -51,24 +51,24 @@ HAMi 자체(이기종 AI 가속기 가상화 Middleware)에 포커스를 두고 
   - 정책 기본값: Node `binpack`, Device `spread` (values.yaml 기준). v2.10의 조합 정책(mutex 등)은 NVIDIA 글에서 다룸.
   - Webhook 동작: 등록된 모든 벤더 Resource 검사, `hami.io/webhook: ignore` Label 제외, privileged Container 거부 — 본문은 일부 생략.
   - 가속기별 Resource 등록은 `hami-scheduler-device` ConfigMap(`device-config.yaml`)에 정의, Helm `devices.<vendor>.enabled`로 활성화.
-  - 격리 방식 3분류 — **2026-10-31 웹 리서치로 검증·본문 1.3에 개조식 추가**. 분류 축은 사용자 피드백으로 "격리가 수행되는
+  - 격리 방식 3분류 — **2026-10-31 웹 리서치로 검증, 본문 1.3에 개조식 추가**. 분류 축은 사용자 피드백으로 "격리가 수행되는
     계층"(Library → Driver → Hardware, 아래로 갈수록 격리↑ 유연성↓)으로 재구성: ① API 가로채기(NVIDIA HAMi-core libvgpu.so,
     AMD libamvgpu.so — AMD 상세는 여전히 재확인 필요) ② Ascend vNPU Template: Project-HAMi/ascend-device-plugin의
-    ascend-device-configmap.yaml 기준 910B3(aiCore 20, 64GB)는 vir05_1c_16g(5core/16G)·vir10_3c_32g(10core/32G) 2종,
+    ascend-device-configmap.yaml 기준 910B3(aiCore 20, 64GB)는 vir05_1c_16g(5core/16G), vir10_3c_32g(10core/32G) 2종,
     hamiVnpuMode: template, 요청 Memory를 수용하는 최소 Template으로 올림. libvnpu.so 기반 soft 분할 Mode도 존재(본문 미기재)
     ③ Cambricon dynamic-smlu: 제조사 device plugin의 mode=dynamic-smlu, Driver(neuware ≥5.0) 수준 quota 제한,
-    min-dsmlu-unit=256MB, vmemory/vcore는 vmlu=1일 때만 유효(본문에는 Driver 제한·Instance 분할만 기재).
-    1.3 마지막 문단에 일반화 한 문장 추가: 세 계층은 HAMi 밖 기법에도 적용 — Library: vCUDA·NVIDIA MPS /
-    Driver: Alibaba cGPU·Tencent qGPU / Hardware: NVIDIA MIG·AMD MxGPU(SR-IOV). vGPU(Driver+HW 혼합)·MPS(Volta+ HW 지원)
-    같은 경계 사례는 본문 미기재. 근거: Alibaba cGPU docs(kernel driver, MB 단위·2%+), 비교 글(MIG 전용 GPC/L2/HBM,
+    min-dsmlu-unit=256MB, vmemory/vcore는 vmlu=1일 때만 유효(본문에는 Driver 제한, Instance 분할만 기재).
+    1.3 마지막 문단에 일반화 한 문장 추가: 세 계층은 HAMi 밖 기법에도 적용 — Library: vCUDA, NVIDIA MPS /
+    Driver: Alibaba cGPU, Tencent qGPU / Hardware: NVIDIA MIG, AMD MxGPU(SR-IOV). vGPU(Driver+HW 혼합), MPS(Volta+ HW 지원)
+    같은 경계 사례는 본문 미기재. 근거: Alibaba cGPU docs(kernel driver, MB 단위, 2%+), 비교 글(MIG 전용 GPC/L2/HBM,
     MxGPU 균등 VF 분할).
   - [Table 1]에 "격리 계층" 열 추가 (2026-10-31). 분류 근거와 확신도:
-    확실 — NVIDIA·AMD Library(HAMi 자체 Library), Ascend Hardware(vNPU Template), Cambricon Driver(sMLU),
-    Iluvatar Library(/etc/ld.so.preload로 libvgpu.so 주입·kernel launch token-bucket, 웹 리서치),
-    Kunlunxin Hardware(P800-OAM 1/4·1/2 고정 분할, 요청 Memory를 지원 규격으로 올림 — HAMi kunlun-vxpu-support.md),
+    확실 — NVIDIA, AMD Library(HAMi 자체 Library), Ascend Hardware(vNPU Template), Cambricon Driver(sMLU),
+    Iluvatar Library(/etc/ld.so.preload로 libvgpu.so 주입, kernel launch token-bucket, 웹 리서치),
+    Kunlunxin Hardware(P800-OAM 1/4, 1/2 고정 분할, 요청 Memory를 지원 규격으로 올림 — HAMi kunlun-vxpu-support.md),
     AWS Neuron Hardware(NeuronCore 물리 단위 연속 블록 할당 — dynamia v2.7 blog).
     **추정(재확인 필요)** — Hygon Driver(vDCU: hy-smi virtual로 가상 Device 생성, 격리 주체 명시 문서 못 찾음),
-    Moore Threads Driver(sGPU: kernel 수준 Elastic Virtualization으로 소개되나 공식 상세 없음), MetaX Driver(sGPU 명명·동작
+    Moore Threads Driver(sGPU: kernel 수준 Elastic Virtualization으로 소개되나 공식 상세 없음), MetaX Driver(sGPU 명명, 동작
     유사성 기반 추정).
 - Figure 1~4 (hami-architecture/hami-device-registration/hami-device-scheduling/hami-device-allocation.png)는
   2026-10-16에 matplotlib로 재생성한 **초안** — 사용자가 pptx 스타일로 다시 그릴 예정 (파일명 유지한 채 교체).

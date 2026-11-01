@@ -562,13 +562,13 @@ Port별 Outbound Listener의 HTTP Connection Manager에는 기본 HTTP Filter들
 
 * **`virtualInbound-blackhole` Chain** : 원래 목적지가 `15006` Port 자체인 요청을 `BlackHoleCluster`로 보내 차단한다. `virtualOutbound` Listener의 `virtualOutbound-blackhole` Network Filter Chain과 같은 역할이다.
 * **`virtualInbound-catchall-http` Chain** : 어느 Service도 노출하지 않는 Port로 들어온 HTTP 요청을 처리하는 Fallback이다. HTTP Connection Manager를 거치므로 HTTP 수준의 Metrics와 Access Log를 남긴 뒤, Route를 통해 `InboundPassthroughCluster`로 전달한다.
-  * **Sidecar mTLS용** : ALPN `istio-http/1.0`·`istio-http/1.1`·`istio-h2` Match로 Sidecar가 만든 mTLS 연결을 선별하며, TLS Termination을 수행한다.
-  * **Plaintext용** : `http/1.1`·`h2c` Match로 Plaintext HTTP 연결을 선별한다.
+  * **Sidecar mTLS용** : ALPN `istio-http/1.0`, `istio-http/1.1`, `istio-h2` Match로 Sidecar가 만든 mTLS 연결을 선별하며, TLS Termination을 수행한다.
+  * **Plaintext용** : `http/1.1`, `h2c` Match로 Plaintext HTTP 연결을 선별한다.
 * **`virtualInbound` Chain** : HTTP Catch-all에도 걸리지 않은 나머지 연결 전부를 처리하는 최종 Fallback이다. `tcp_proxy`가 TCP 수준 기록만 남기고 `InboundPassthroughCluster`로 전달한다. Plaintext용과 그 외 TLS용 Chain은 Match 조건이 `transport_protocol`뿐이라 어떤 연결이든 반드시 걸리며, 덕분에 `virtualInbound`에는 Port별 Outbound Listener와 달리 `default_filter_chain`이 없다.
-  * **Sidecar mTLS용** : ALPN `istio-peer-exchange`·`istio` Match로 Sidecar가 만든 mTLS TCP 연결을 선별하며, TLS Termination을 수행한다.
+  * **Sidecar mTLS용** : ALPN `istio-peer-exchange`, `istio` Match로 Sidecar가 만든 mTLS TCP 연결을 선별하며, TLS Termination을 수행한다.
   * **Plaintext용** : `transport_protocol: raw_buffer`만으로 매칭하여 나머지 Plaintext 연결 전부를 받는다.
   * **그 외 TLS용** : `transport_protocol: tls`만으로 매칭하며, App이 자체 처리하는 TLS처럼 Istio ALPN이 없는 TLS 연결을 Termination 없이 암호화된 채 그대로 통과시킨다.
-* **`tls` Chain** : `8080` Port로 들어온 Sidecar 간 mTLS 연결을 처리하는 Chain이며, Plaintext Chain과 함께 `0.0.0.0_8080`이라는 이름을 가진다. `transport_protocol: tls`와 `application_protocols` Match로 보내는 쪽 Sidecar가 만든 mTLS 연결을 선별한다. `application_protocols`에 나열된 값은 모두 Istio 전용 ALPN으로, `istio`는 Sidecar mTLS임을 알리는 기본 표식, `istio-peer-exchange`는 TCP 연결에서 Network Filter 버전 `istio.metadata_exchange`로 메타데이터를 교환할 수 있다는 표식, `istio-http/1.0`·`istio-http/1.1`·`istio-h2`는 mTLS 표식에 Tunnel 내부의 HTTP 버전을 함께 담은 값이다. App이 자체적으로 처리하는 TLS 연결은 표준 ALPN을 광고하므로 이 Chain에 매칭되지 않는다. 매칭된 연결은 `require_client_certificate` 설정에 따라 Client 인증서를 검증하며 TLS를 Termination한 뒤 요청을 처리한다.
+* **`tls` Chain** : `8080` Port로 들어온 Sidecar 간 mTLS 연결을 처리하는 Chain이며, Plaintext Chain과 함께 `0.0.0.0_8080`이라는 이름을 가진다. `transport_protocol: tls`와 `application_protocols` Match로 보내는 쪽 Sidecar가 만든 mTLS 연결을 선별한다. `application_protocols`에 나열된 값은 모두 Istio 전용 ALPN으로, `istio`는 Sidecar mTLS임을 알리는 기본 표식, `istio-peer-exchange`는 TCP 연결에서 Network Filter 버전 `istio.metadata_exchange`로 메타데이터를 교환할 수 있다는 표식, `istio-http/1.0`, `istio-http/1.1`, `istio-h2`는 mTLS 표식에 Tunnel 내부의 HTTP 버전을 함께 담은 값이다. App이 자체적으로 처리하는 TLS 연결은 표준 ALPN을 광고하므로 이 Chain에 매칭되지 않는다. 매칭된 연결은 `require_client_certificate` 설정에 따라 Client 인증서를 검증하며 TLS를 Termination한 뒤 요청을 처리한다.
 * **`raw_buffer` Chain** : Plaintext 연결을 처리하는 Chain이다. Istio의 mTLS Mode 기본값인 `PERMISSIVE`는 mTLS 연결과 Plaintext 연결을 모두 받아주는 Mode로, Sidecar가 없는 Pod처럼 mTLS를 사용할 수 없는 Client와의 통신도 끊기지 않도록 하기 위한 것이다. 그래서 `PERMISSIVE` Mode에서는 Port마다 mTLS용 `tls` Chain과 Plaintext용 `raw_buffer` Chain이 쌍으로 존재하며, mTLS 연결만 허용하는 `STRICT` Mode로 바꾸면 `raw_buffer` Chain이 제거된다.
 
 Catch-all Chain이 존재하는 이유는 Service에 선언되지 않은 Port로도 요청이 들어올 수 있기 때문이다. Service는 방화벽이 아니라서 Pod IP로는 App이 열어둔 어떤 Port로든 직접 접근할 수 있다. App이 열었지만 Service에 선언하지 않은 Port, Prometheus가 Pod IP로 직접 Scrape하는 Metrics Port, Headless Service를 통한 Pod 직접 통신 등이 그 예이다. Sidecar가 주입되어도 Kubernetes에서 가능하던 Pod 간 통신은 그대로 가능해야 하므로, istiod는 이런 요청을 차단하지 않고 App으로 통과시키는 Catch-all Chain을 만든다. Outbound에서 Mesh에 등록되지 않은 목적지로 향하는 요청을 `PassthroughCluster`로 통과시키는 것과 대칭 구조이다.
@@ -1153,7 +1153,7 @@ metadata:
 
 [Config 12]는 두 Worker Node에 부여한 Topology Label을 나타내고 있으며 (`region`은 공통, `zone`은 Node별로 상이), [Diff 12]는 Label 부여 후 `server-a` Pod를 재생성했을 때 `server-a` Cluster의 EDS 변화를 나타내고 있다. 비어 있던 Endpoint의 `locality`가 Pod가 위치한 `kind-worker` Node의 Label 값으로 채워지는데, istiod가 Endpoint를 등록할 때 Pod의 `nodeName`으로 Node를 찾아 Topology Label을 읽어 오기 때문이다. 이렇게 채워진 locality는 같은 Zone의 Endpoint를 우선하는 Locality Load Balancing과 Zone 간 Traffic 분배의 기반 값이 된다.
 
-주의할 점은 Node에 Label만 붙여서는 **이미 등록된 Endpoint에 소급 반영되지 않는다**는 것이다 (Label 부여 후 EDS의 diff가 0줄임을 실측으로 확인했다). Pod가 삭제·재생성되어 Endpoint가 다시 등록될 때 비로소 반영되며, [Diff 12]에서 Pod IP가 함께 변해 있는 것도 재생성 때문이다. Cloud 환경에서는 Cloud Provider가 Node 생성 시점에 Topology Label을 미리 붙여 두므로, Endpoint의 locality는 처음부터 채워진 상태로 등록된다.
+주의할 점은 Node에 Label만 붙여서는 **이미 등록된 Endpoint에 소급 반영되지 않는다**는 것이다 (Label 부여 후 EDS의 diff가 0줄임을 실측으로 확인했다). Pod가 삭제, 재생성되어 Endpoint가 다시 등록될 때 비로소 반영되며, [Diff 12]에서 Pod IP가 함께 변해 있는 것도 재생성 때문이다. Cloud 환경에서는 Cloud Provider가 Node 생성 시점에 Topology Label을 미리 붙여 두므로, Endpoint의 locality는 처음부터 채워진 상태로 등록된다.
 
 ### 1.3. Envoy Configuration with Istio Custom Resources
 

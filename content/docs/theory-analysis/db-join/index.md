@@ -171,15 +171,15 @@ Sort Merge Join은 이름에서 유추할 수 있듯이 Join Key 기준으로 Da
 [Figure 7]은 [Figure 1]의 Dataset에서 `Employees.dept_id` Column을 기준으로 `Employees` Table만 정렬한 상태를 나타내고 있다. `Departments.id`는 Primary Key Clustered Index에 의해 이미 정렬되어 있으므로 [Figure 1]과 동일한 순서를 유지한다.
 
 ```text {caption="[Text 4] Sort Merge Join Process"}
-Engineering(10)  · Alice(10)      → O     →            `ptr_e++`
-Engineering(10)  · Bob(10)        → O     →            `ptr_e++`
-Engineering(10)  · Coral(20)      → X     → `ptr_d++`
-Marketing(20)    · Coral(20)      → O     →            `ptr_e++`
-Marketing(20)    · Eve(20)        → O     →            `ptr_e++`
-Marketing(20)    · Dave(30)       → X     → `ptr_d++`
-HR(30)           · Dave(30)       → O     →            `ptr_e++`
-HR(30)           · Ssup(NULL)     → X     → `ptr_d++`
-(Unassigned)40   · Ssup(NULL)     → X
+Engineering(10)  ,  Alice(10)      → O     →            `ptr_e++`
+Engineering(10)  ,  Bob(10)        → O     →            `ptr_e++`
+Engineering(10)  ,  Coral(20)      → X     → `ptr_d++`
+Marketing(20)    ,  Coral(20)      → O     →            `ptr_e++`
+Marketing(20)    ,  Eve(20)        → O     →            `ptr_e++`
+Marketing(20)    ,  Dave(30)       → X     → `ptr_d++`
+HR(30)           ,  Dave(30)       → O     →            `ptr_e++`
+HR(30)           ,  Ssup(NULL)     → X     → `ptr_d++`
+(Unassigned)40   ,  Ssup(NULL)     → X
 ```
 
 [Text 4]는 [Figure 7]의 Sort Merge Join Merge 단계를 나타낸다. Nested Loop Join과 달리 Outer Table의 각 Row마다 Inner Table 전체를 순회하지 않고, `ptr_d`는 `Departments` Table의, `ptr_e`는 `Employees` Table의 현재 Row를 가리키는 두 Pointer로 앞에서부터 읽으며 진행한다. Join Key가 같으면 `ptr_e++`로 다음 Employee를 본다. Join Key가 다르면 `ptr_d++`로 다음 Department를 본다. 이런식으로 Pointer를 이동하면서 양쪽의 Pointer가 모두 끝에 도달하면 Join이 종료된다.
@@ -212,7 +212,7 @@ Hash Join은 Join Key에 Hash Function을 적용해 **Hash Table**을 만든 뒤
 
 [Text 5]는 [Figure 1]의 Dataset을 기준으로 `Departments` Table을 Build Table로, `Employees` Table을 Probe Table로 두는 경우를 가정하고 Hash Join을 수행하는 과정을 나타낸다. Build 단계에서 `Departments.id`를 Hash Key로 Hash Table을 만들고, Probe 단계에서 `Employees`의 각 Row마다 `dept_id`로 Hash Table을 조회한다. Build 단계에서만 Hash Table이 새로 생성되며, Probe Table은 별도로 만들지 않고 원본 Table을 한 번 스캔한다.
 
-Hash Table은 기본적으로 Memory에 생성되며, Memory가 부족하면 Sort Merge Join의 Spill과 유사하게 Disk의 Temporary 영역을 사용할 수 있다. Hash Join은 Build·Probe 각각 Table을 한 번씩 스캔하는 `O(N + M)`에 가깝지만, Hash Table 생성 비용과 Memory 사용량이 추가된다. Hash Join은 정렬 없이 Hash Lookup으로 매칭하므로 Equality Join에서 대용량 Table Join에 자주 선택되며, Optimizer는 통계 정보를 바탕으로 Build Table/Probe Table과 Hash Join 사용 여부를 결정한다.
+Hash Table은 기본적으로 Memory에 생성되며, Memory가 부족하면 Sort Merge Join의 Spill과 유사하게 Disk의 Temporary 영역을 사용할 수 있다. Hash Join은 Build, Probe 각각 Table을 한 번씩 스캔하는 `O(N + M)`에 가깝지만, Hash Table 생성 비용과 Memory 사용량이 추가된다. Hash Join은 정렬 없이 Hash Lookup으로 매칭하므로 Equality Join에서 대용량 Table Join에 자주 선택되며, Optimizer는 통계 정보를 바탕으로 Build Table/Probe Table과 Hash Join 사용 여부를 결정한다.
 
 #### 1.2.4. Join Algorithm Comparison
 
@@ -222,7 +222,7 @@ Hash Table은 기본적으로 Memory에 생성되며, Memory가 부족하면 Sor
 | Join Key 정렬 | 불필요 | 필요 | 불필요 |
 | Join 조건 | Equality, Non-equality | 주로 Equality (`=`) | Equality (`=`)만 |
 | Table 순회 | Outer Row마다 Inner 반복 탐색 | 양쪽 Table 각 1회 | Build Table 1회 + Probe Table 1회 |
-| I/O 패턴 | Index Nested Loop 시 Random I/O | Merge 단계 Sequential I/O | Build·Probe Sequential Scan |
+| I/O 패턴 | Index Nested Loop 시 Random I/O | Merge 단계 Sequential I/O | Build, Probe Sequential Scan |
 | 시간 복잡도 | `O(N × M)` (Index 시 개선) | `O(N log N + M log M)` + `O(N + M)` | `O(N + M)` |
 | 추가 비용 | Inner Table Index 의존 | Sort, Spill | Hash Table 생성, Memory, Spill |
 | 유리한 경우 | 소규모 Table, Index가 잘 갖춰진 경우 | 대용량, 정렬된 입력(Index Scan) 활용 가능 | 대용량 Equality Join |

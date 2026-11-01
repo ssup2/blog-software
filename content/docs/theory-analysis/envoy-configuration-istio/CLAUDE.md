@@ -8,7 +8,7 @@ Istio가 Envoy 설정을 어떻게 만드는지 실측으로 기록하는 문서
 - **1장 (Envoy Configuration with Istio)**: 완료. 장 도입부에 실험 환경 yaml([Config 1])과 Workload 설명
   (1.1~1.3이 공유하는 환경이라 장 바로 아래에 배치).
   - **1.1 (Default Configuration)**: 1.1.1 = Outbound 기본 설정(client Pod 발췌, 기본 HTTP Filter 목록 포함),
-    1.1.2 = Inbound 기본 설정(server-a Pod 발췌, listener_filters·Filter Chain·기본 HTTP Filter 목록 포함).
+    1.1.2 = Inbound 기본 설정(server-a Pod 발췌, listener_filters, Filter Chain, 기본 HTTP Filter 목록 포함).
     발췌는 envoy_configs/base/의 실측 dump 기반.
   - **1.2 (Envoy Configuration with Kubernetes Resources)**: 2026-09-24 신설.
     1.2.1 = Pod 증감(EDS만 변화, 무변화는 전체 dump diff 0으로 검증), 1.2.2 = Service 신규 Port(LDS/RDS/CDS 생성 + EDS의 targetPort 매핑),
@@ -32,7 +32,7 @@ Istio가 Envoy 설정을 어떻게 만드는지 실측으로 기록하는 문서
   구 환경 백업: envoy_configs/_backup/old-env/):
   - `server-a`, `server-b` (Service `8080` http Port) — 같은 Port를 노출하는 Service가 여럿일 때의 설정 확인용.
   - `server-c` (Service `9090` grpc Port) — 다른 Port를 노출하는 Service가 있을 때의 설정 확인용.
-    (mock-go-server 이미지는 8080 HTTP·9090 gRPC를 모두 수신한다.)
+    (mock-go-server 이미지는 8080 HTTP, 9090 gRPC를 모두 수신한다.)
   - `client` (app=client) — 보내는 쪽(outbound) 실험 대상. 자신은 아무 Port도 열지 않는다.
 - 1.3의 CR은 서버 중 **server-a만을 대상으로 적용**한다. Inbound CR은 `server-a` Pod에서,
   Outbound CR은 `client` Pod에서 diff를 관찰한다. server-b/server-c는 CR을 적용하지 않는 대조군이다.
@@ -66,7 +66,7 @@ Istio가 Envoy 설정을 어떻게 만드는지 실측으로 기록하는 문서
   멈춘 채 만료될 수 있다 (`istioctl proxy-config secret <pod>`의 VALID CERT가 false). 이 상태면
   Mesh 내 모든 요청이 503(UC, connection_termination)으로 실패하므로, 기능 실험 전에 인증서
   유효성을 확인하고 만료됐으면 해당 Pod를 재생성한다 (2026-09-25에 client/server-b/server-c 재생성으로 해결.
-  Pod 재생성 시 Bootstrap의 Pod IP·인증서 필드가 바뀌므로 저장된 base dump와 그 부분만 달라진다).
+  Pod 재생성 시 Bootstrap의 Pod IP, 인증서 필드가 바뀌므로 저장된 base dump와 그 부분만 달라진다).
 - ExternalName Service는 alias 모드(1.24 기본)라 대상이 Mesh 내부 Service면 그 VH의 domains에만
   별칭이 추가되고, 대상이 Mesh에 없는 외부 Host면 설정 변화가 아예 없다 (diff 0 실측).
 - Node Topology Label은 이미 등록된 Endpoint에 소급 반영되지 않는다 (Label 후 EDS diff 0 실측).
@@ -92,7 +92,7 @@ Istio가 Envoy 설정을 어떻게 만드는지 실측으로 기록하는 문서
 ## 폴더 구조
 
 - `index.md` — 문서 본문.
-- `index.en.md` — 영어 버전 (2026-09-25 작성, index.md 전체 번역. 코드 블록은 동일, 캡션·prose만 번역.
+- `index.en.md` — 영어 버전 (2026-09-25 작성, index.md 전체 번역. 코드 블록은 동일, 캡션, prose만 번역.
   이후 본문 수정 시 함께 갱신 필요).
 - `manifests/istio/<cr이름>/<cr이름>.yaml` — 1.3 예제 CR (전부 클러스터에 적용해 검증된 상태, 2026-09-24에 istio/ 하위로 이동).
   workloadentry는 ServiceEntry+WorkloadEntry 2개 리소스가 한 파일에 있음.
@@ -113,7 +113,7 @@ Istio가 Envoy 설정을 어떻게 만드는지 실측으로 기록하는 문서
   - `<cr이름>/<관찰pod>.yaml` — 해당 CR만 적용된 상태의 dump. diff는 `base/<같은 pod>.yaml`과 뜬다.
     예외: `virtualservice/virtualservice-gateway_istio-ingressgateway.yaml`은 Gateway+VS 적용 상태라
     `gateway/istio-ingressgateway.yaml`과 diff.
-  - 모든 dump는 정규화됨 (EndpointsConfigDump 섹션·last_updated·version_info 라인 제거).
+  - 모든 dump는 정규화됨 (EndpointsConfigDump 섹션, last_updated, version_info 라인 제거).
   - **주의**: 캡처 간 Listener/Cluster 순서가 뒤바뀔 수 있어 파일 전체 diff에는 재배열 노이즈가 섞인다.
     특정 리소스 이름으로 해당 부분만 발췌해서 비교할 것 (무변화 검증은 `diff <(sort a) <(sort b)`로 가능).
   - `capture.sh` — 1.3(CR) 재캡처 스크립트 (약 15분 소요). `_backup/old-env/`는 2026-08-17 이전의

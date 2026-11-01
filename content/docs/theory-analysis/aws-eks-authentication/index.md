@@ -159,5 +159,5 @@ AWS IAM Authenticator는 `aws eks get-token` 명령어를 수행한 Identity를 
 * 195. [Kubernetes] AWS IAM Authenticator 기초 사용 방법 및 EKS에서의 인증 원리 : [https://m.blog.naver.com/alice_k106/221967218283](https://m.blog.naver.com/alice_k106/221967218283)
 * AWS EKS authentication process analysis : [http://www.noobyard.com/article/p-ktxvpcyg-er.html](http://www.noobyard.com/article/p-ktxvpcyg-er.html)
 * saibotsivad/base64-url-cli: Simple command line wrapper for the base64-url module : [https://github.com/saibotsivad/base64-url-cli](https://github.com/saibotsivad/base64-url-cli)
-* aws-cli/awscli/customizations/eks/get_token.py at master · aws/aws-cli : [https://github.com/aws/aws-cli/blob/master/awscli/customizations/eks/get_token.py](https://github.com/aws/aws-cli/blob/master/awscli/customizations/eks/get_token.py)
-* boto3/docs/source/guide/s3-presigned-urls.rst at master · boto/boto3 : [https://github.com/boto/boto3/blob/master/docs/source/guide/s3-presigned-urls.rst](https://github.com/boto/boto3/blob/master/docs/source/guide/s3-presigned-urls.rst)
+* aws-cli/awscli/customizations/eks/get_token.py at master ,  aws/aws-cli : [https://github.com/aws/aws-cli/blob/master/awscli/customizations/eks/get_token.py](https://github.com/aws/aws-cli/blob/master/awscli/customizations/eks/get_token.py)
+* boto3/docs/source/guide/s3-presigned-urls.rst at master ,  boto/boto3 : [https://github.com/boto/boto3/blob/master/docs/source/guide/s3-presigned-urls.rst](https://github.com/boto/boto3/blob/master/docs/source/guide/s3-presigned-urls.rst)

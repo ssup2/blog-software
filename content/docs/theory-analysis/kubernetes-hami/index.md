@@ -13,9 +13,10 @@ draft: true
 
 * **hami-scheduler** : Deployment를 통해서 동작하며, 하나의 Pod 안에서 kube-scheduler Container와 Scheduler Extender Container가 함께 동작한다. Accelerator를 요청하는 Pod의 Scheduler를 hami-scheduler로 변경하는 Mutating Webhook도 Scheduler Extender가 함께 제공한다. 모든 종류의 Accelerator가 하나의 hami-scheduler를 공유하며, Accelerator별 Scheduling 동작은 hami-scheduler 내부의 Accelerator별 Package로 구현되어 있다.
 * **Device Plugin** : DaemonSet을 통해서 Accelerator가 존재하는 Node에서 동작하며, Accelerator를 kubelet에 등록하고 Container에 할당하는 역할을 수행한다.
-* **격리 계층** : 공유 할당된 Accelerator가 제한을 초과하여 사용되지 않도록 강제하는 계층이다. hami-scheduler가 선택한 Device와 제한 값을 Pod Annotation에 기록하고 Device Plugin이 이를 참조하여 할당하는 방식을 **HAMi Protocol**이라고 하며, HAMi Protocol을 따르는 Device Plugin은 다음의 두 가지 수준으로 격리를 수행한다. 계층이 Hardware에 가까울수록 격리는 강해지지만 분할의 유연성은 줄어든다.
+* **격리 계층** : 공유 할당된 Accelerator가 제한을 초과하여 사용되지 않도록 강제하는 계층이다. hami-scheduler가 선택한 Device와 제한 값을 Pod Annotation에 기록하고 Device Plugin이 이를 참조하여 할당하는 방식을 **HAMi Protocol**이라고 하며, 격리는 다음의 세 가지 수준으로 분류된다. 계층이 Hardware에 가까울수록 격리는 강해지지만 분할의 유연성은 줄어든다.
   * **Library 수준 격리** : Container에 주입된 격리 Library가 User 공간에서 Accelerator API 호출을 가로채서 Memory 할당과 Core 사용을 제한한다. 제한이 API 호출 시점에 이루어지기 때문에 Memory 크기와 Core 사용률을 임의의 값으로 지정할 수 있다.
-  * **Hardware 수준 격리** : Accelerator 자체를 Hardware 수준에서 분할하여 가상 Accelerator를 생성한다. Hardware는 제조사가 Chip마다 미리 정의한 가상화 Template 구성으로만 분할될 수 있기 때문에, Pod가 요청한 Memory 크기를 수용하는 가장 작은 Template이 선택되어 가상 Accelerator가 생성된다. 격리가 가장 확실한 대신 요청한 크기가 Template 크기로 올림되기 때문에 Template보다 세밀한 분할은 불가능하다.
+  * **Driver 수준 격리** : Accelerator Driver가 할당량을 직접 제한하여 Memory 크기와 Core 사용률을 강제한다. 제한을 Application이 아니라 Driver가 수행하기 때문에 별도의 Library 주입이 필요하지 않고, 하나의 물리 Accelerator를 할당량이 설정된 다수의 공유 Instance로 분할할 수 있다.
+  * **Hardware 수준 격리** : Accelerator 자체를 Hardware 수준에서 분할하여 가상 Accelerator를 생성한다. 분할 가능한 구성은 제조사가 Chip마다 미리 정의한 Template (고정된 Memory, Core 조합) 집합으로 한정되며, Pod에는 이 Template 중 하나가 할당된다. 격리가 가장 확실한 대신 Template보다 세밀한 분할은 불가능하다.
 
 {{< table caption="[Table 1] HAMi Protocol Device Plugin이 제공되는 주요 Accelerator" >}}
 | Accelerator | Resource 이름 | Memory / Core 제한 | 격리 계층 | Device Plugin |
@@ -26,7 +27,20 @@ draft: true
 | AMD GPU | `amd.com/gpu`, `amd.com/gpumem`, `amd.com/gpucores` | O / O | Library | HAMi 별도 |
 {{< /table >}}
 
-[Table 1]은 HAMi Protocol을 따르는 Device Plugin이 제공되는 주요 Accelerator와 Resource 이름, 격리 계층, Device Plugin 패키징을 나타내고 있다. 각 Accelerator는 개수를 요청하는 Resource와 함께 Memory 크기, Core 사용률을 요청하는 Resource를 제공하며, hami-scheduler가 인식할 Accelerator별 Resource 이름은 `hami-scheduler-device` ConfigMap에 정의된다. Device Plugin은 `HAMi 포함` (HAMi Helm Chart 기본 포함)과 `HAMi 별도` (Project-HAMi 저장소의 별도 Chart·Manifest) 두 가지 방식으로 배포되며, NVIDIA GPU 외에는 HAMi 설치와 별개로 각 Device Plugin을 설치해야 한다. 등록·Scheduling·할당의 전체 흐름은 모두 HAMi가 담당하며, 1.1~1.3절은 이 경우를 기준으로 분석한다.
+[Table 1]은 HAMi Protocol을 따르는 Device Plugin이 제공되는 주요 Accelerator와 Resource 이름, 격리 계층, Device Plugin 패키징을 나타내고 있다. 각 Accelerator는 개수를 요청하는 Resource와 함께 Memory 크기, Core 사용률을 요청하는 Resource를 제공하며, hami-scheduler가 인식할 Accelerator별 Resource 이름은 `hami-scheduler-device` ConfigMap에 정의된다. Device Plugin은 `HAMi 포함` (HAMi Helm Chart 기본 포함)과 `HAMi 별도` (Project-HAMi 저장소의 별도 Chart, Manifest) 두 가지 방식으로 배포되며, NVIDIA GPU 외에는 HAMi 설치와 별개로 각 Device Plugin을 설치해야 한다.
+
+{{< table caption="[Table 2] 제조사 Device Plugin으로 지원되는 주요 Accelerator" >}}
+| Accelerator | Resource 이름 | Memory / Core 제한 | 격리 계층 |
+|---|---|---|---|
+| Cambricon MLU | `cambricon.com/vmlu`, `cambricon.com/mlu.smlu.vmemory`, `cambricon.com/mlu.smlu.vcore` | O / O | Driver |
+| Hygon HCU | `hygon.com/hcunum`, `hygon.com/hcumem`, `hygon.com/hcucores` | O / O | Driver |
+| Iluvatar GPU | `iluvatar.ai/MR-V100-vgpu`, `iluvatar.ai/MR-V100.vMem`, `iluvatar.ai/MR-V100.vCore` | O / O | Library |
+| Moore Threads GPU | `mthreads.com/vgpu`, `mthreads.com/sgpu-memory`, `mthreads.com/sgpu-core` | O / O | Driver |
+| MetaX GPU | `metax-tech.com/sgpu`, `metax-tech.com/vmemory`, `metax-tech.com/vcore` | O / O | Driver |
+| AWS Neuron | `aws.amazon.com/neuron`, `aws.amazon.com/neuroncore` | X / O | Hardware |
+{{< /table >}}
+
+[Table 2]는 HAMi가 제조사 제공 Device Plugin을 그대로 이용하여 지원하는 주요 Accelerator를 나타내고 있다. Table 1의 HAMi Protocol Accelerator와 함께 HAMi 2.10.0은 총 14종을 지원한다. 제조사 Device Plugin 경로에서는 Device 선택과 격리 적용을 모두 벤더 Plugin이 담당하기 때문에, HAMi는 Scheduling에만 관여한다. 격리 계층은 Accelerator Driver가 담당하는 Driver 수준이 다수이며, 일부는 벤더 Library 주입 (Library 수준) 이나 Hardware 분할 (Hardware 수준) 도 함께 쓴다.
 
 ```shell {caption="[Shell 2] hami-scheduler-device ConfigMap 확인"}
 $ kubectl -n kube-system get configmap hami-scheduler-device -o jsonpath='{.data.device-config\.yaml}'
@@ -51,9 +65,7 @@ hygon:
 ...
 ```
 
-[Shell 2]는 `hami-scheduler-device` ConfigMap에 정의된 Accelerator별 Resource 이름 설정을 나타내고 있다. 각 Accelerator Section (`nvidia`, `cambricon`, `hygon` 등) 아래에 개수·Memory·Core Resource 이름이 정의되며, Device Plugin이 kubelet에 등록할 Resource 이름과 Scheduler Extender가 Pod의 요청에서 인식할 Resource 이름이 이 설정으로 통일된다. NVIDIA Section에는 `deviceSplitCount` (물리 Accelerator 1개의 분할 가능 vGPU 개수), `deviceMemoryScaling`·`deviceCoreScaling` (물리 Memory·Core 대비 할당 가능한 비율) 같은 Scheduler Extender 공통 설정도 함께 담긴다.
-
-HAMi는 이 외에도 제조사가 제공하는 Device Plugin을 그대로 이용하는 Accelerator를 지원하여 v2.10.0 기준으로 총 14종의 Accelerator를 지원한다. 다만 제조사 Device Plugin 경로에서는 Device 선택과 격리 적용을 모두 벤더 Plugin이 담당하기 때문에, HAMi는 Pod Annotation을 통한 Node Scheduling 정책 지정과 Mutating Webhook routing 수준에서만 개입한다.
+[Shell 2]는 `hami-scheduler-device` ConfigMap에 정의된 Accelerator별 Resource 이름 설정을 나타내고 있다. 각 Accelerator Section (`nvidia`, `cambricon`, `hygon` 등) 아래에 개수, Memory, Core Resource 이름이 정의되며, Device Plugin이 kubelet에 등록할 Resource 이름과 Scheduler Extender가 Pod의 요청에서 인식할 Resource 이름이 이 설정으로 통일된다. NVIDIA Section에는 `deviceSplitCount` (물리 Accelerator 1개의 분할 가능 vGPU 개수), `deviceMemoryScaling`, `deviceCoreScaling` (물리 Memory, Core 대비 할당 가능한 비율) 같은 Scheduler Extender 공통 설정도 함께 담긴다.
 
 ### 1.1. Device 등록 과정
 

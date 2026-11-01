@@ -7,9 +7,9 @@ Istio의 Gateway API Inference Extension 구현을 분석하는 문서. 본문 �
 
 - 1.1 Test 환경 구축: Shell 1(환경 구성), File 1(Test Workload — sim/EPP/Service/DestinationRule),
   File 2(Gateway/InferencePool/HTTPRoute — 2026-10-08에 gateway-namespace Namespace와 Gateway 추가됨),
-  Shell 2(Test Workload 목록 — Pod IP·Headless Shadow Service 포함),
+  Shell 2(Test Workload 목록 — Pod IP, Headless Shadow Service 포함),
   Shell 3(InferencePool 상태 — Accepted/ResolvedRefs Condition).
-  본문 [File 1]은 manifests/ 원본에서 sim의 env(`POD_NAME` 등)·resources, EPP의 probe·9003/9090 Port, RBAC을 축약한 버전.
+  본문 [File 1]은 manifests/ 원본에서 sim의 env(`POD_NAME` 등), resources, EPP의 probe, 9003/9090 Port, RBAC을 축약한 버전.
   재현은 manifests/ 원본 기준 (sim의 `POD_NAME` env가 없으면 응답의 `x-inference-pod` Header 값이 달라질 수 있음).
   1.2 InferencePool 변환: Shell 4(Shadow Cluster/Endpoint, 설명은 Shell 2의 Service 목록을 교차 참조).
   1.3 요청 처리 과정: Shell 5(ext-proc per-route 설정), Shell 6(curl 요청), Shell 7(Model Server /metrics — 2026-09-22 실측, vLLM Simulator는 cache_config_info/kv_cache_usage_perc/lora_requests_info/num_requests_running/num_requests_waiting 5종 노출), Shell 8(Override Host Policy).
@@ -20,28 +20,28 @@ Istio의 Gateway API Inference Extension 구현을 분석하는 문서. 본문 �
   ext-proc Filter, Override Host LB Policy의 상세 정의와 동작 설명은 1.3 요청 처리 과정의 도입 문단([Figure 3] 설명)으로 이동.
   Shell 2의 AGE 21m, Shell 3의 AGE 40m은 각각의 캡처 시점 값.
 - 본문 Shell 출력은 전부 실측 발췌. 초기 초안의 [File 1](ext-proc 설정 예시)은 창작이어서 Shell 3 실측으로 교체됨.
-- 실측으로 확인·수정된 사실:
+- 실측으로 확인, 수정된 사실:
   - Shadow Service Cluster의 Port는 Target Port가 아니라 **고정 가상 Port 54321** (초안의 `outbound|[Target Port]||` 서술을 수정함). Target Port는 Endpoint에 반영.
   - Shadow Service는 istiod 내부 개념이 아니라 **실제 Headless Service(ClusterIP: None, Port 54321)로 Kubernetes에 생성됨** (`kubectl get svc -n llm-namespace`로 확인 가능).
   - EPP가 반환한 Endpoint는 Header가 아니라 `envoy.lb` Dynamic Metadata의 `x-gateway-destination-endpoint` Key로 Override Host Policy가 참조. Fallback은 Round Robin.
-    Listener의 ext_proc Filter에 `metadataOptions.receivingNamespaces: [envoy.lb]`가 설정되어 EPP 응답의 Metadata가 수신됨 (2026-09-20 재검증에서 확인, 본문 도입부·1.2의 "Header로 반환" 서술을 Metadata로 수정함).
+    Listener의 ext_proc Filter에 `metadataOptions.receivingNamespaces: [envoy.lb]`가 설정되어 EPP 응답의 Metadata가 수신됨 (2026-09-20 재검증에서 확인, 본문 도입부, 1.2의 "Header로 반환" 서술을 Metadata로 수정함).
   - Shadow Service는 selector/Target Port가 InferencePool의 것으로 설정된 채 생성되며 ownerReference가 InferencePool로 걸려 있음. Endpoint 등록은 Service selector에 의한 표준 동작.
   - `FailOpen` → `failureModeAllow: true` 변환 확인.
   - v1.6부터 release image는 `epp`가 없고 `lwepp`(Lightweight EPP)만 존재 (registry.k8s.io/gateway-api-inference-extension/lwepp:v1.6.2, amd64 전용 — OrbStack Rosetta로 kind에서 실행됨).
 - Figure 1(istio-inference-gateway.png): 2026-10-08 사용자가 istiod 내부 구성 스타일(istio-gateway-api 문서 Figure 1과 동일 체계)로
-  재작성 — istiod Pod의 InferencePool Controller·Gateway API Controller·crdclient·Service Registry → PushContext →
+  재작성 — istiod Pod의 InferencePool Controller, Gateway API Controller, crdclient, Service Registry → PushContext →
   ConfigGenerator → DiscoveryServer 파이프라인, Inference Resources(InferencePool/InferenceObjective) Watch,
   llm Namespace의 model-a 단일 Model 구성(HTTPRoute/InferencePool/Headless Shadow Service/EPP),
   범례 6종(Configs/Watch/Create/Traffic/Select Endpoint/Get Metrics). 도입부를 5문단으로 재구성
-  (표준 정의+InferencePool Controller / 설정 파이프라인 / Model 구성 / Shadow Service / ext-proc·Override Host 요청 흐름).
+  (표준 정의+InferencePool Controller / 설정 파이프라인 / Model 구성 / Shadow Service / ext-proc, Override Host 요청 흐름).
   초기의 "요청 처리 과정" Figure는 본문에서 제거됨.
 - Figure 2(images/test-environment.png, 1.1)와 Figure 3(images/request-processing.png, 1.3)은 2026-10-08 사용자가 pptx 스타일로
   재작성 완료 (matplotlib 초안 대체). Figure 3는 Gateway Envoy 내부 구조 기준 — ingress-gateway Pod > Ingress envoy >
   Network Filters > HCM(HTTP Codec → Route Match(llm.ssup2.com) → Downstream HTTP Filters의 ext_proc → Router),
   istiod의 RDS Route Table 전달, Endpoint Picker Cluster(TLS via DestinationRule) → EPP Pod,
   Shadow Service Cluster(Override Host LB Policy) → Model Pod Upstream Connection, x-gateway-destination-endpoint
-  Request Header·envoy.lb Dynamic Metadata 두 채널 표현. 범례: RDS Config 검정/Traffic 빨강/Select Endpoint 파랑/Get Metrics 주황.
-  1.3 도입부를 이 구조 기준 3문단(RDS·Route Match 흐름 / ext-proc 정의·EPP Cluster / Override Host·Shadow Service Cluster)으로 재구성.
+  Request Header, envoy.lb Dynamic Metadata 두 채널 표현. 범례: RDS Config 검정/Traffic 빨강/Select Endpoint 파랑/Get Metrics 주황.
+  1.3 도입부를 이 구조 기준 3문단(RDS, Route Match 흐름 / ext-proc 정의, EPP Cluster / Override Host, Shadow Service Cluster)으로 재구성.
 
 ## Test 환경 (재현 방법)
 
@@ -52,7 +52,7 @@ Istio의 Gateway API Inference Extension 구현을 분석하는 문서. 본문 �
   → `manifests/epp/`(lwepp Deployment+Service+DestinationRule+RBAC) → `manifests/gateway.yaml` → `manifests/inferencepool.yaml` → `manifests/httproute.yaml`
 - Gateway: 2026-10-08부터 본문 [File 2]에 gateway-namespace Namespace + `gateway` Gateway를 포함 (문서 자체 완결성, 사용자 지시).
   `manifests/gateway.yaml`로도 추가됨. 실측 당시에는 istio-gateway-api 문서의 `gateway-namespace`/`gateway`(hostname `*.ssup2.com`,
-  gateway-options ConfigMap으로 ClusterIP·replicas 3 적용된 상태)를 재사용했으며, [File 2]의 Gateway에는 ConfigMap 참조가 없어서
+  gateway-options ConfigMap으로 ClusterIP, replicas 3 적용된 상태)를 재사용했으며, [File 2]의 Gateway에는 ConfigMap 참조가 없어서
   새로 적용하면 Service Type이 LoadBalancer(kind에서는 pending)로 생성되지만 port-forward 테스트에는 영향 없음. 요청 테스트는
   `kubectl -n gateway-namespace port-forward svc/gateway-istio 8080:80` 후 `curl -H "Host: llm.ssup2.com" http://127.0.0.1:8080/v1/completions -d '{"model": "reviews-1", ...}'`.
 - EPP는 기본으로 TLS(secure-serving)라서 DestinationRule(SIMPLE, insecureSkipVerify)이 없으면 ext-proc 연결이 실패한다.

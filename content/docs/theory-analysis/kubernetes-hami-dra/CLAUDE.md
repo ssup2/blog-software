@@ -9,7 +9,7 @@ kubernetes-hami-dra(이 글). HAMi-core 격리 상세는 kubernetes-hami-nvidia-
 ## 문서 구성 및 상태
 
 - **2026-10-15 이론 초안 작성** (Claude 작성, 사용자 검토 전, frontmatter `draft: true`). **실측 없음** — Shell 블록 없음,
-  File 1~2는 HAMi 문서·k8s-dra-driver 소스 기반. index.en.md는 초안 확정 전이라 미작성.
+  File 1~2는 HAMi 문서, k8s-dra-driver 소스 기반. index.en.md는 초안 확정 전이라 미작성.
 - 1장 구성: 1. 개요(Component 4종, Consumable Capacity Table, ResourceClaim 예제) / 1.1 vGPU 등록 과정(ResourceSlice,
   allowMultipleAllocations) / 1.2 vGPU Scheduling 과정(DynamicResources Plugin, Webhook 변환, 제약) /
   1.3 vGPU 할당 과정(NodePrepareResources, CDI, ld.so.preload) / 1.4 Device Plugin 방식 비교(Table 2).
@@ -24,7 +24,7 @@ kubernetes-hami-dra(이 글). HAMi-core 격리 상세는 kubernetes-hami-nvidia-
   - `DRAConsumableCapacity` Feature Gate: 1.34 Alpha, 1.35 Alpha 유지, 1.36 Beta 기본 활성 — 본문은 "1.34 Alpha 도입"만 서술.
   - webhook의 ResourceClaimTemplate 변환 모드(`webhook.config.resourceClaimTemplate: true`, Kueue 연동용)와 다중 vendor
     (`deviceVendors`) 지원 — 본문에서 생략함.
-  - Device Plugin 방식과 동시 운용 금지, binpack/spread·topology 정책 부재 — HAMi 블로그(does-kubernetes-dra-replace-hami) 기반.
+  - Device Plugin 방식과 동시 운용 금지, binpack/spread, topology 정책 부재 — HAMi 블로그(does-kubernetes-dra-replace-hami) 기반.
   - Ascend NPU용 DRA Driver(ascend-dra-driver) 존재, Hygon은 자체 Driver를 webhook으로 연동 — 본문은 Ascend만 언급.
 - Figure 1~4 (hami-dra-architecture/hami-dra-vgpu-registration/hami-dra-vgpu-scheduling/hami-dra-vgpu-allocation.png)는
   2026-10-15에 matplotlib로 생성한 **초안** — 사용자가 pptx 스타일로 다시 그릴 예정 (파일명 유지한 채 교체). images/images.pptx는 아직 없음.

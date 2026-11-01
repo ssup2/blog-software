@@ -186,6 +186,6 @@ Chain OUTPUT (policy ACCEPT 9161 packets, 1478K bytes)
 
 * Kubernetes Node Local DNS Cache : [https://povilasv.me/kubernetes-node-local-dns-cache/](https://povilasv.me/kubernetes-node-local-dns-cache/)
 * Using NodeLocal DNSCache in Kubernetes Clusters : [https://kubernetes.io/docs/tasks/administer-cluster/nodelocaldns/](https://kubernetes.io/docs/tasks/administer-cluster/nodelocaldns/)
-* kube-dns per node · kubernetes Issue #45363 : [https://github.com/kubernetes/kubernetes/issues/45363#issuecomment-443019910](https://github.com/kubernetes/kubernetes/issues/45363#issuecomment-443019910)
+* kube-dns per node ,  kubernetes Issue #45363 : [https://github.com/kubernetes/kubernetes/issues/45363#issuecomment-443019910](https://github.com/kubernetes/kubernetes/issues/45363#issuecomment-443019910)
 * Set up NodeLocal DNSCache (GKE) : [https://cloud.google.com/kubernetes-engine/docs/how-to/nodelocal-dns-cache](https://cloud.google.com/kubernetes-engine/docs/how-to/nodelocal-dns-cache)
 * colopl/k8s-local-dns : [https://github.com/colopl/k8s-local-dns](https://github.com/colopl/k8s-local-dns)

@@ -57,5 +57,5 @@ React에서는 [Figure 2]의 내용처럼 자식 Component가 부모 Component�
 
 * Getting Started with Redux : [https://redux.js.org/introduction/getting-started](https://redux.js.org/introduction/getting-started)
 * Redux 를 통한 React 어플리케이션 상태 관리 :: 1장. 카운터 만들기 : [https://velopert.com/3346](https://velopert.com/3346)
-* Docs need one or more diagrams · Issue #653 · reduxjs/redux : [https://github.com/reduxjs/redux/issues/653](https://github.com/reduxjs/redux/issues/653)
+* Docs need one or more diagrams ,  Issue #653 ,  reduxjs/redux : [https://github.com/reduxjs/redux/issues/653](https://github.com/reduxjs/redux/issues/653)
 * When and when not to use Redux : [https://blog.logrocket.com/](https://blog.logrocket.com/)

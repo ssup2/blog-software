@@ -63,4 +63,4 @@ etcd가 Defragmentation을 수행하는 동안에는 기능이 중지된다. 기
 
 * Maintenance : [https://etcd.io/docs/v3.4.0/op-guide/maintenance/](https://etcd.io/docs/v3.4.0/op-guide/maintenance/)
 * A Few Notes on etcd Maintenance : [https://blog.gojekengineering.com/a-few-notes-on-etcd-maintenance-c06440011cbe](https://blog.gojekengineering.com/a-few-notes-on-etcd-maintenance-c06440011cbe)
-* etcdserver: increase snapshot to 100,000 · etcd-io/etcd@c5a9d54 : [https://github.com/etcd-io/etcd/commit/c5a9d548358f64483b9fc1726f1a64722c4cdf6f](https://github.com/etcd-io/etcd/commit/c5a9d548358f64483b9fc1726f1a64722c4cdf6f)
+* etcdserver: increase snapshot to 100,000 ,  etcd-io/etcd@c5a9d54 : [https://github.com/etcd-io/etcd/commit/c5a9d548358f64483b9fc1726f1a64722c4cdf6f](https://github.com/etcd-io/etcd/commit/c5a9d548358f64483b9fc1726f1a64722c4cdf6f)

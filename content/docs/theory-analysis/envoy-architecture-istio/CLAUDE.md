@@ -9,11 +9,11 @@ CR별 Envoy 설정 변화(실측 diff)는 2026-08-09에 `envoy-configuration-ist
 ## 문서 구성 및 상태
 
 - **1장 (Envoy as Sidecar Proxy)**: 완료. Pod 내부 Traffic 흐름 + pilot-agent를 xDS Proxy로 두는 이유.
-  Metrics 수집(직접/병합)·DNS Lookup(Capture on/off)·Probe(Envoy/App)를 케이스별 하위 항목으로 서술 (2026-08-15, Figure 갱신 반영).
-- **2장 (Envoy as Ingress Gateway)**: 2026-08-16에 Ingress/Egress 통합 장에서 분리, Figure 2 추가. 공통 구조(router 모드) + Inbound Traffic 흐름 + status-port(외부 LB Health Check용)·`31400`·`15443` 설명.
+  Metrics 수집(직접/병합), DNS Lookup(Capture on/off), Probe(Envoy/App)를 케이스별 하위 항목으로 서술 (2026-08-15, Figure 갱신 반영).
+- **2장 (Envoy as Ingress Gateway)**: 2026-08-16에 Ingress/Egress 통합 장에서 분리, Figure 2 추가. 공통 구조(router 모드) + Inbound Traffic 흐름 + status-port(외부 LB Health Check용), `31400`, `15443` 설명.
   "빈 Envoy로 시작 + Gateway CR의 Listener 생성 + Port 결정 규칙(`targetPort` 번역, 실측 완료)" 문단은 2026-08-16에 본문에서 제거 — envoy-configuration-istio 문서로 옮길 후보.
-- **3장 (Envoy as Egress Gateway)**: 2026-08-16 분리, Figure 3 추가. ingress와 내부 구조 동일(실측: Deployment args·Envoy bootstrap/Listener/Cluster diff 0) + `ClusterIP`·Port 축소 + Outbound Traffic 흐름.
-  ingress/egress 차이는 노출 계층에만 존재: Service Type, Service Port 구성(ingress만 `15021` status-port·`31400`·`15443` 노출), containerPort 선언, Label.
+- **3장 (Envoy as Egress Gateway)**: 2026-08-16 분리, Figure 3 추가. ingress와 내부 구조 동일(실측: Deployment args, Envoy bootstrap/Listener/Cluster diff 0) + `ClusterIP`, Port 축소 + Outbound Traffic 흐름.
+  ingress/egress 차이는 노출 계층에만 존재: Service Type, Service Port 구성(ingress만 `15021` status-port, `31400`, `15443` 노출), containerPort 선언, Label.
   `31400`은 raw TCP 입구, `15443`은 SNI Passthrough 입구(Multi-cluster east-west). TCP Server는 Gateway CR만으로 Listener가 안 열리고 tcp VirtualService Route까지 있어야 열림(실측).
 - **4장 (참조)**: 2026-08-18에 제거 (빈 절이었음).
 

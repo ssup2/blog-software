@@ -159,6 +159,6 @@ In [File 3], you can see that the `ssup2` AWS IAM User is Mapped to EKS Cluster'
 * 195. [Kubernetes] Basic Usage of AWS IAM Authenticator and Authentication Principles in EKS : [https://m.blog.naver.com/alice_k106/221967218283](https://m.blog.naver.com/alice_k106/221967218283)
 * AWS EKS authentication process analysis : [http://www.noobyard.com/article/p-ktxvpcyg-er.html](http://www.noobyard.com/article/p-ktxvpcyg-er.html)
 * saibotsivad/base64-url-cli: Simple command line wrapper for the base64-url module : [https://github.com/saibotsivad/base64-url-cli](https://github.com/saibotsivad/base64-url-cli)
-* aws-cli/awscli/customizations/eks/get_token.py at master · aws/aws-cli : [https://github.com/aws/aws-cli/blob/master/awscli/customizations/eks/get_token.py](https://github.com/aws/aws-cli/blob/master/awscli/customizations/eks/get_token.py)
-* boto3/docs/source/guide/s3-presigned-urls.rst at master · boto/boto3 : [https://github.com/boto/boto3/blob/master/docs/source/guide/s3-presigned-urls.rst](https://github.com/boto/boto3/blob/master/docs/source/guide/s3-presigned-urls.rst)
+* aws-cli/awscli/customizations/eks/get_token.py at master ,  aws/aws-cli : [https://github.com/aws/aws-cli/blob/master/awscli/customizations/eks/get_token.py](https://github.com/aws/aws-cli/blob/master/awscli/customizations/eks/get_token.py)
+* boto3/docs/source/guide/s3-presigned-urls.rst at master ,  boto/boto3 : [https://github.com/boto/boto3/blob/master/docs/source/guide/s3-presigned-urls.rst](https://github.com/boto/boto3/blob/master/docs/source/guide/s3-presigned-urls.rst)
 

@@ -36,7 +36,7 @@ prometheus:
     scrapeConfigSelectorNilUsesHelmValues: false
 ```
 
-Chart 설치용 Values 파일이다. Grafana/Prometheus를 NodePort 30300·30900으로 노출하고, `serviceMonitorSelectorNilUsesHelmValues: false`로 외부에서 생성한 ServiceMonitor도 자동으로 Scrape 대상이 되게 한다.
+Chart 설치용 Values 파일이다. Grafana/Prometheus를 NodePort 30300, 30900으로 노출하고, `serviceMonitorSelectorNilUsesHelmValues: false`로 외부에서 생성한 ServiceMonitor도 자동으로 Scrape 대상이 되게 한다.
 
 ```shell
 $ helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
@@ -98,7 +98,7 @@ Prometheus Query API로 Pod 단위 vGPU Memory 사용량이 vLLM Pod로 올바�
 
 ## 4. DCGM Exporter 설치
 
-HAMi Exporter가 가상화·Pod 단위 Accounting에 특화되어 있다면, **NVIDIA DCGM Exporter**는 물리 GPU의 하드웨어 Telemetry (Temperature, Power, SM/Memory Clock, ECC/XID Error 등) 를 노출한다. 두 Exporter는 보완 관계로 함께 설치한다.
+HAMi Exporter가 가상화, Pod 단위 Accounting에 특화되어 있다면, **NVIDIA DCGM Exporter**는 물리 GPU의 하드웨어 Telemetry (Temperature, Power, SM/Memory Clock, ECC/XID Error 등) 를 노출한다. 두 Exporter는 보완 관계로 함께 설치한다.
 
 ```yaml {caption="[File 2] dcgm-values.yaml", linenos=table}
 serviceMonitor:
@@ -182,7 +182,7 @@ HAMi vGPU metrics /d/hami-vgpu-metrics/hami-vgpu-metrics
 NVIDIA DCGM Exporter Dashboard /d/Oxed_c6Wz/nvidia-dcgm-exporter-dashboard
 ```
 
-Grafana에 두 Dashboard가 등록된 것을 확인한다. 브라우저에서 `http://192.168.1.32:30300` → `admin/admin` 로그인 후 `HAMi vGPU metrics` 와 `NVIDIA DCGM Exporter Dashboard` 를 열면 GPU 사용률·VRAM·Pod별 vGPU 사용량·Temperature·Power 등 Panel이 실데이터로 표시된다.
+Grafana에 두 Dashboard가 등록된 것을 확인한다. 브라우저에서 `http://192.168.1.32:30300` → `admin/admin` 로그인 후 `HAMi vGPU metrics` 와 `NVIDIA DCGM Exporter Dashboard` 를 열면 GPU 사용률, VRAM, Pod별 vGPU 사용량, Temperature, Power 등 Panel이 실데이터로 표시된다.
 
 ## 6. 참조
 

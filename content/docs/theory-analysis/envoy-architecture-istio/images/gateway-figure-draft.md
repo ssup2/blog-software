@@ -73,6 +73,6 @@ Pod 내부는 두 Gateway가 완전히 동일 — Service 계층과 Traffic 방�
 
 ## 작도 포인트
 
-- **같게**: Pod 내부 전체(pilot-agent·Envoy·Socket 2개·기본 Listener `15021`/`15090`·Gateway CR Listener `8080`/`8443`), istiod→pilot-agent xDS 화살표. Figure 1과 달리 istio-init Container/iptables는 양쪽 다 없음.
+- **같게**: Pod 내부 전체(pilot-agent, Envoy, Socket 2개, 기본 Listener `15021`/`15090`, Gateway CR Listener `8080`/`8443`), istiod→pilot-agent xDS 화살표. Figure 1과 달리 istio-init Container/iptables는 양쪽 다 없음.
 - **다르게**: ① Traffic 방향, ② Service Type (`LoadBalancer` vs `ClusterIP`), ③ ingress에만 `status-port 15021` + LoadBalancer Health Check 화살표, ④ ingress에만 `31400`(tcp)/`15443`(tls) Port, ⑤ Label (`istio: ingressgateway` vs `istio: egressgateway`).
-- 한 장에 좌우 배치 + 가운데 Mesh 공유 구성이면 "구조 동일, 배치·방향만 차이" 메시지와 부합.
+- 한 장에 좌우 배치 + 가운데 Mesh 공유 구성이면 "구조 동일, 배치, 방향만 차이" 메시지와 부합.
