@@ -7,19 +7,17 @@ draft: true
 
 {{< figure caption="[Figure 1] HAMi Architecture" src="images/hami-architecture.png" width="900px" >}}
 
-**HAMi** (Heterogeneous AI Computing Virtualization Middleware)는 Kubernetes 환경에서 GPU, NPU 같은 AI Accelerator를 가상화하여 하나의 Accelerator를 다수의 Pod이 공유할 수 있도록 하는 CNCF의 Middleware이다. Kubernetes의 Device Plugin 방식은 Accelerator를 개수 단위로만 할당할 수 있지만, HAMi는 Device Plugin 방식 위에서 Memory 크기 제한과 연산 Core 사용률 제한을 제공하여 하나의 Accelerator를 조각 단위로 나누어 할당한다.
+**HAMi** (Heterogeneous AI Computing Virtualization Middleware)는 Kubernetes 환경에서 GPU, NPU 같은 AI Accelerator를 가상화하여 하나의 Accelerator를 다수의 Pod이 공유할 수 있도록 하는 Middleware이다. Kubernetes의 Device Plugin 방식은 Accelerator를 개수 단위로만 할당할 수 있지만, HAMi는 Device Plugin 방식 위에서 Memory 크기 제한과 연산 Core 사용률 제한을 제공하여 하나의 Accelerator를 다수의 Pod에 공유 할당할 수 있도록 만든다.
 
 [Figure 1]은 HAMi의 Architecture를 나타내고 있다. HAMi는 다음의 세 가지 요소로 구성된다.
 
 * **hami-scheduler** : Deployment를 통해서 동작하며, 하나의 Pod 안에서 kube-scheduler Container와 Scheduler Extender Container가 함께 동작한다. Accelerator를 요청하는 Pod의 Scheduler를 hami-scheduler로 변경하는 Mutating Webhook도 Scheduler Extender가 함께 제공한다. 모든 종류의 Accelerator가 하나의 hami-scheduler를 공유하며, Accelerator별 Scheduling 동작은 hami-scheduler 내부의 Accelerator별 Package로 구현되어 있다.
-* **Device Plugin** : DaemonSet을 통해서 Accelerator가 존재하는 Node에서 동작하며, Accelerator를 kubelet에 등록하고 Container에 할당하는 역할을 수행한다. Accelerator에 따라서 HAMi 설치에 포함된 Device Plugin, HAMi가 별도로 제공하는 Device Plugin, 또는 Accelerator 제조사가 제공하는 Device Plugin을 이용한다.
-* **격리 계층** : 조각 단위로 할당된 Accelerator가 제한을 초과하여 사용되지 않도록 강제하는 계층이다. HAMi 프로토콜 Device Plugin은 다음의 두 가지 수준으로 격리를 수행하며, 계층이 Hardware에 가까울수록 격리는 강해지지만 분할의 유연성은 줄어든다.
+* **Device Plugin** : DaemonSet을 통해서 Accelerator가 존재하는 Node에서 동작하며, Accelerator를 kubelet에 등록하고 Container에 할당하는 역할을 수행한다.
+* **격리 계층** : 공유 할당된 Accelerator가 제한을 초과하여 사용되지 않도록 강제하는 계층이다. hami-scheduler가 선택한 Device와 제한 값을 Pod Annotation에 기록하고 Device Plugin이 이를 참조하여 할당하는 방식을 **HAMi Protocol**이라고 하며, HAMi Protocol을 따르는 Device Plugin은 다음의 두 가지 수준으로 격리를 수행한다. 계층이 Hardware에 가까울수록 격리는 강해지지만 분할의 유연성은 줄어든다.
   * **Library 수준 격리** : Container에 주입된 격리 Library가 User 공간에서 Accelerator API 호출을 가로채서 Memory 할당과 Core 사용을 제한한다. 제한이 API 호출 시점에 이루어지기 때문에 Memory 크기와 Core 사용률을 임의의 값으로 지정할 수 있다.
   * **Hardware 수준 격리** : Accelerator 자체를 Hardware 수준에서 분할하여 가상 Accelerator를 생성한다. Hardware는 제조사가 Chip마다 미리 정의한 가상화 Template 구성으로만 분할될 수 있기 때문에, Pod가 요청한 Memory 크기를 수용하는 가장 작은 Template이 선택되어 가상 Accelerator가 생성된다. 격리가 가장 확실한 대신 요청한 크기가 Template 크기로 올림되기 때문에 Template보다 세밀한 분할은 불가능하다.
 
-이처럼 HAMi는 Scheduling 계층은 공통으로 유지하면서 격리 계층은 Accelerator별 구현에 위임하는 구조를 갖는다. 세 계층의 구분은 HAMi에 국한되지 않고 일반적인 Accelerator 가상화 기법에도 그대로 적용된다.
-
-{{< table caption="[Table 1] HAMi 프로토콜 Device Plugin이 제공되는 주요 Accelerator" >}}
+{{< table caption="[Table 1] HAMi Protocol Device Plugin이 제공되는 주요 Accelerator" >}}
 | Accelerator | Resource 이름 | Memory / Core 제한 | 격리 계층 | Device Plugin |
 |---|---|---|---|---|
 | NVIDIA GPU | `nvidia.com/gpu`, `nvidia.com/gpumem`, `nvidia.com/gpucores` | O / O | Library, Hardware | HAMi 포함 |
@@ -28,7 +26,7 @@ draft: true
 | AMD GPU | `amd.com/gpu`, `amd.com/gpumem`, `amd.com/gpucores` | O / O | Library | HAMi 별도 |
 {{< /table >}}
 
-[Table 1]은 HAMi 프로토콜을 따르는 Device Plugin이 제공되는 주요 Accelerator와 Resource 이름, 격리 계층, Device Plugin 패키징을 나타내고 있다. 각 Accelerator는 개수를 요청하는 Resource와 함께 Memory 크기, Core 사용률을 요청하는 Resource를 제공하며, hami-scheduler가 인식할 Accelerator별 Resource 이름은 `hami-scheduler-device` ConfigMap에 정의된다. Device Plugin은 `HAMi 포함` (HAMi Helm Chart 기본 포함)과 `HAMi 별도` (Project-HAMi 저장소의 별도 Chart·Manifest) 두 가지 방식으로 배포되며, NVIDIA GPU 외에는 HAMi 설치와 별개로 각 Device Plugin을 설치해야 한다. 등록·Scheduling·할당의 전체 흐름은 모두 HAMi가 담당하며, 1.1~1.3절은 이 경우를 기준으로 분석한다.
+[Table 1]은 HAMi Protocol을 따르는 Device Plugin이 제공되는 주요 Accelerator와 Resource 이름, 격리 계층, Device Plugin 패키징을 나타내고 있다. 각 Accelerator는 개수를 요청하는 Resource와 함께 Memory 크기, Core 사용률을 요청하는 Resource를 제공하며, hami-scheduler가 인식할 Accelerator별 Resource 이름은 `hami-scheduler-device` ConfigMap에 정의된다. Device Plugin은 `HAMi 포함` (HAMi Helm Chart 기본 포함)과 `HAMi 별도` (Project-HAMi 저장소의 별도 Chart·Manifest) 두 가지 방식으로 배포되며, NVIDIA GPU 외에는 HAMi 설치와 별개로 각 Device Plugin을 설치해야 한다. 등록·Scheduling·할당의 전체 흐름은 모두 HAMi가 담당하며, 1.1~1.3절은 이 경우를 기준으로 분석한다.
 
 HAMi는 이 외에도 제조사가 제공하는 Device Plugin을 그대로 이용하는 Accelerator를 지원하여 v2.10.0 기준으로 총 14종의 Accelerator를 지원한다. 다만 제조사 Device Plugin 경로에서는 Device 선택과 격리 적용을 모두 벤더 Plugin이 담당하기 때문에, HAMi는 Pod Annotation을 통한 Node Scheduling 정책 지정과 Mutating Webhook routing 수준에서만 개입한다.
 
