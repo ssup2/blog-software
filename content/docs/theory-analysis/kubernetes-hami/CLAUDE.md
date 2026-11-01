@@ -27,7 +27,7 @@ HAMi 자체(이기종 AI 가속기 가상화 Middleware)에 포커스를 두고 
   `CUDA_DEVICE_*`, `LD_PRELOAD`)를 "Library 수준은 Library Mount + 환경 변수, Driver/HW 수준은 가속기 Device 참조"로 중립화.
   두 글 사이의 상호 "참조" 링크도 제거(이 글 참조 섹션에 이미 kubernetes-hami-nvidia-gpu 링크 없음, 반대편의 Kubernetes HAMi 링크는 제거).
 - **2026-11-01 벤더 맥락 전면 삭제** (사용자 피드백 "최대한 요 글에서는 vendor 관련 맥락은 삭제, 전반적인 컨셉정도만 명시"):
-  ① **Table 1 (지원 가속기 매트릭스) 전체 제거** — 지원 수(14종)와 Resource 규칙만 한 문단으로 축약 ② 개요 Device Plugin
+  ① ~~Table 1 제거~~ → **2026-11-01 사용자 요청으로 복원**. 표는 벤더 매트릭스지만 지원 범위를 한눈에 보여주는 가치가 있어 유지 ② 개요 Device Plugin
   bullet의 "NVIDIA GPU용 hami-device-plugin" 서술 → 벤더 중립 "가속기에 따라서 HAMi 포함/별도/제조사 Device Plugin 중 하나"
   ③ 1.1 Figure 2 캡션 "NVIDIA GPU를 예시로"·"NVIDIA GPU는 NVML을 이용"·"NVIDIA GPU는 hami.io/node-nvidia-register"·
   "Cambricon MLU처럼" 삭제 ④ 1.2 Step 5 "NVIDIA GPU는 초기 구현의 이름 hami.io/vgpu-devices-allocated 유지" 삭제 ⑤ 1.3

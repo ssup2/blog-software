@@ -15,7 +15,22 @@ draft: true
 * **Device Plugin** : DaemonSet을 통해서 가속기가 존재하는 Node에서 동작하며, 가속기를 kubelet에 등록하고 Container에 할당하는 역할을 수행한다. 가속기에 따라서 HAMi 설치에 포함된 Device Plugin, HAMi가 별도로 제공하는 Device Plugin, 또는 가속기 제조사가 제공하는 Device Plugin을 이용한다.
 * **격리 계층** : 조각 단위로 할당된 가속기가 제한을 초과하여 사용되지 않도록 강제하는 계층이다. 가속기에 따라서 Container에 주입된 Library가 API 호출을 가로채는 Library 수준, Driver가 할당량을 제한하는 Driver 수준, 가속기 자체가 분할되는 Hardware 수준으로 구분된다.
 
-v2.10.0 기준 14종의 가속기를 지원하며, 각 가속기는 개수를 요청하는 Resource와 함께 Memory 크기, Core 사용률을 요청하는 Resource를 제공한다. hami-scheduler가 인식할 가속기별 Resource 이름은 `hami-scheduler-device` ConfigMap에 정의된다. 등록·Scheduling·할당의 전체 흐름은 모든 가속기가 동일한 구조를 따른다.
+{{< table caption="[Table 1] HAMi가 지원하는 주요 가속기" >}}
+| 가속기 | Resource 이름 | Memory / Core 제한 | 격리 계층 |
+|---|---|---|---|
+| NVIDIA GPU | `nvidia.com/gpu`, `nvidia.com/gpumem`, `nvidia.com/gpucores` | O / O | Library |
+| Huawei Ascend NPU | `huawei.com/Ascend910B3`, `huawei.com/Ascend910B3-memory` | O / O | Hardware |
+| Cambricon MLU | `cambricon.com/vmlu`, `cambricon.com/mlu.smlu.vmemory`, `cambricon.com/mlu.smlu.vcore` | O / O | Driver |
+| Hygon HCU | `hygon.com/hcunum`, `hygon.com/hcumem`, `hygon.com/hcucores` | O / O | Driver |
+| Iluvatar GPU | `iluvatar.ai/MR-V100-vgpu`, `iluvatar.ai/MR-V100.vMem`, `iluvatar.ai/MR-V100.vCore` | O / O | Library |
+| Moore Threads GPU | `mthreads.com/vgpu`, `mthreads.com/sgpu-memory`, `mthreads.com/sgpu-core` | O / O | Driver |
+| MetaX GPU | `metax-tech.com/sgpu`, `metax-tech.com/vmemory`, `metax-tech.com/vcore` | O / O | Driver |
+| Kunlunxin XPU | `kunlunxin.com/vxpu`, `kunlunxin.com/vxpu-memory` | O / X | Hardware |
+| AWS Neuron | `aws.amazon.com/neuron`, `aws.amazon.com/neuroncore` | X / O | Hardware |
+| AMD GPU | `amd.com/gpu`, `amd.com/gpumem`, `amd.com/gpucores` | O / O | Library |
+{{< /table >}}
+
+[Table 1]은 HAMi가 지원하는 주요 가속기와 Resource 이름을 나타내고 있다 (v2.10.0 기준 14종 지원). 각 가속기는 개수를 요청하는 Resource와 함께 Memory 크기, Core 사용률을 요청하는 Resource를 제공하며, hami-scheduler가 인식할 가속기별 Resource 이름은 `hami-scheduler-device` ConfigMap에 정의된다. 각 가속기의 격리가 수행되는 계층도 [Table 1]에 함께 표시하였다. 등록·Scheduling·할당의 전체 흐름은 모든 가속기가 동일한 구조를 따른다.
 
 ### 1.1. Device 등록 과정
 
