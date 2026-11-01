@@ -28,6 +28,31 @@ draft: true
 
 [Table 1]은 HAMi Protocol을 따르는 Device Plugin이 제공되는 주요 Accelerator와 Resource 이름, 격리 계층, Device Plugin 패키징을 나타내고 있다. 각 Accelerator는 개수를 요청하는 Resource와 함께 Memory 크기, Core 사용률을 요청하는 Resource를 제공하며, hami-scheduler가 인식할 Accelerator별 Resource 이름은 `hami-scheduler-device` ConfigMap에 정의된다. Device Plugin은 `HAMi 포함` (HAMi Helm Chart 기본 포함)과 `HAMi 별도` (Project-HAMi 저장소의 별도 Chart·Manifest) 두 가지 방식으로 배포되며, NVIDIA GPU 외에는 HAMi 설치와 별개로 각 Device Plugin을 설치해야 한다. 등록·Scheduling·할당의 전체 흐름은 모두 HAMi가 담당하며, 1.1~1.3절은 이 경우를 기준으로 분석한다.
 
+```shell {caption="[Shell 2] hami-scheduler-device ConfigMap 확인"}
+$ kubectl -n kube-system get configmap hami-scheduler-device -o jsonpath='{.data.device-config\.yaml}'
+nvidia:
+  resourceCountName: nvidia.com/gpu
+  resourceMemoryName: nvidia.com/gpumem
+  resourceMemoryPercentageName: nvidia.com/gpumem-percentage
+  resourceCoreName: nvidia.com/gpucores
+  resourcePriorityName: nvidia.com/priority
+  deviceSplitCount: 10
+  deviceMemoryScaling: 1
+  deviceCoreScaling: 1
+  ...
+cambricon:
+  resourceCountName: cambricon.com/vmlu
+  resourceMemoryName: cambricon.com/mlu.smlu.vmemory
+  resourceCoreName: cambricon.com/mlu.smlu.vcore
+hygon:
+  resourceCountName: hygon.com/dcunum
+  resourceMemoryName: hygon.com/dcumem
+  resourceCoreName: hygon.com/dcucores
+...
+```
+
+[Shell 2]는 `hami-scheduler-device` ConfigMap에 정의된 Accelerator별 Resource 이름 설정을 나타내고 있다. 각 Accelerator Section (`nvidia`, `cambricon`, `hygon` 등) 아래에 개수·Memory·Core Resource 이름이 정의되며, Device Plugin이 kubelet에 등록할 Resource 이름과 Scheduler Extender가 Pod의 요청에서 인식할 Resource 이름이 이 설정으로 통일된다. NVIDIA Section에는 `deviceSplitCount` (물리 Accelerator 1개의 분할 가능 vGPU 개수), `deviceMemoryScaling`·`deviceCoreScaling` (물리 Memory·Core 대비 할당 가능한 비율) 같은 Scheduler Extender 공통 설정도 함께 담긴다.
+
 HAMi는 이 외에도 제조사가 제공하는 Device Plugin을 그대로 이용하는 Accelerator를 지원하여 v2.10.0 기준으로 총 14종의 Accelerator를 지원한다. 다만 제조사 Device Plugin 경로에서는 Device 선택과 격리 적용을 모두 벤더 Plugin이 담당하기 때문에, HAMi는 Pod Annotation을 통한 Node Scheduling 정책 지정과 Mutating Webhook routing 수준에서만 개입한다.
 
 ### 1.1. Device 등록 과정
