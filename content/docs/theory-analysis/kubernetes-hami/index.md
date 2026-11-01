@@ -58,6 +58,42 @@ Device Plugin 방식에서는 Node 선택은 kube-scheduler가 수행하고 가�
 4. Scheduler Extender는 각 Node의 Annotation에 기록된 가속기 정보와 기존 할당 내역을 기반으로, 요청 조건을 만족하는 가속기가 존재하는 Node를 선별하고 Scheduling 정책에 따라 점수를 계산한다.
 5. Scheduler Extender는 선택된 가속기의 UUID와 Memory 크기, Core 사용률 제한 값을 Pod의 `hami.io/[가속기]-devices-allocated` 계열 Annotation에 기록하고, Pod를 선택된 Node에 Bind한다.
 
+```shell {caption="[Shell 1] HAMi Mutating Webhook Configuration 확인"}
+$ kubectl get mutatingwebhookconfigurations
+NAME           WEBHOOKS   AGE
+hami-webhook   1          14d
+
+$ kubectl get mutatingwebhookconfigurations hami-webhook -o yaml
+...
+webhooks:
+- name: vgpu.hami.io
+  clientConfig:
+    service:
+      name: hami-scheduler
+      namespace: kube-system
+      path: /webhook
+      port: 443
+  rules:
+  - apiGroups: [""]
+    apiVersions: [v1]
+    operations: [CREATE]
+    resources: [pods]
+  namespaceSelector:
+    matchExpressions:
+    - key: hami.io/webhook
+      operator: NotIn
+      values: [ignore]
+  objectSelector:
+    matchExpressions:
+    - key: hami.io/webhook
+      operator: NotIn
+      values: [ignore]
+  failurePolicy: Ignore
+  sideEffects: None
+```
+
+[Shell 1]은 HAMi 설치 시 생성되는 Mutating Webhook Configuration (`hami-webhook`) 을 나타내고 있다. `rules`에 Pod 생성 요청 (`CREATE pods`) 이 지정되어 있어 모든 Pod 생성이 webhook을 거치며, `clientConfig.service`가 가리키는 `hami-scheduler` Service의 `/webhook` 경로로 요청이 전달된다. hami-scheduler의 Scheduler Extender Container는 요청에 포함된 Pod가 등록된 모든 가속기 Resource 중 하나라도 요청하는지 검사하고, 요청하는 경우에만 Pod의 `schedulerName`을 `hami-scheduler`로 변경한다. `namespaceSelector`와 `objectSelector`는 `hami.io/webhook: ignore` Label이 붙은 Namespace와 Pod를 webhook 처리에서 제외하여 특정 범위를 건너뛸 수 있도록 한다.
+
 Scheduling 정책은 Node를 선택하는 Node Scheduling 정책과 Node 안에서 가속기를 선택하는 Device Scheduling 정책으로 구분된다. `binpack` 정책은 이미 할당량이 많은 Node나 가속기에 몰아서 할당하여 가속기 조각을 최소화하는 정책이고, `spread` 정책은 Node나 가속기에 고르게 분산하여 할당하는 정책이다. 기본 정책은 Helm 설정으로 지정하며 (Node는 `binpack`, Device는 `spread`가 기본값), Pod의 `hami.io/node-scheduler-policy`, `hami.io/gpu-scheduler-policy` Annotation을 통해서 Pod 단위로 변경할 수 있다.
 
 ### 1.3. Device 할당 과정
