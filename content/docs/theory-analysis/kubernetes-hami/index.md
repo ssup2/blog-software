@@ -35,7 +35,9 @@ draft: true
 | AMD GPU | `amd.com/gpu`, `amd.com/gpumem`, `amd.com/gpucores` | O / O | Library | HAMi 별도 |
 {{< /table >}}
 
-[Table 1]은 HAMi가 지원하는 주요 가속기와 Resource 이름, 격리 계층, Device Plugin 패키징을 나타내고 있다 (v2.10.0 기준 14종 지원). 각 가속기는 개수를 요청하는 Resource와 함께 Memory 크기, Core 사용률을 요청하는 Resource를 제공하며, hami-scheduler가 인식할 가속기별 Resource 이름은 `hami-scheduler-device` ConfigMap에 정의된다. Device Plugin은 `HAMi 포함` (HAMi Helm Chart 기본 포함), `HAMi 별도` (Project-HAMi 저장소의 별도 Chart·Manifest), `제조사` (제조사 제공 Device Plugin) 세 가지 방식으로 배포되며, NVIDIA GPU 외에는 HAMi 설치와 별개로 각 Device Plugin을 설치해야 한다. 등록·Scheduling·할당의 전체 흐름은 모든 가속기가 동일한 구조를 따른다.
+[Table 1]은 HAMi가 지원하는 주요 가속기와 Resource 이름, 격리 계층, Device Plugin 패키징을 나타내고 있다 (v2.10.0 기준 14종 지원). 각 가속기는 개수를 요청하는 Resource와 함께 Memory 크기, Core 사용률을 요청하는 Resource를 제공하며, hami-scheduler가 인식할 가속기별 Resource 이름은 `hami-scheduler-device` ConfigMap에 정의된다. Device Plugin은 `HAMi 포함` (HAMi Helm Chart 기본 포함), `HAMi 별도` (Project-HAMi 저장소의 별도 Chart·Manifest), `제조사` (제조사 제공 Device Plugin) 세 가지 방식으로 배포되며, NVIDIA GPU 외에는 HAMi 설치와 별개로 각 Device Plugin을 설치해야 한다.
+
+`HAMi 포함`과 `HAMi 별도`는 모두 HAMi 프로토콜을 따르는 Device Plugin이며, 등록·Scheduling·할당의 전체 흐름을 HAMi가 담당한다. 이어지는 1.1~1.3절은 이 경우를 기준으로 분석한다. 반면 `제조사` Device Plugin을 이용하는 가속기는 Device 선택과 격리 적용을 모두 벤더 Plugin이 담당하기 때문에, HAMi는 Pod Annotation을 통한 Node Scheduling 정책 지정과 Mutating Webhook routing 수준에서만 개입한다.
 
 ### 1.1. Device 등록 과정
 
@@ -51,8 +53,6 @@ Device Plugin의 첫 번째 역할은 Node에 존재하는 가속기를 부풀�
 
 kubelet의 Device Plugin 규격은 Device의 개수와 ID만 전달할 수 있기 때문에, 가속기의 Memory 크기 같은 상세 정보는 Device Plugin 규격으로는 전달할 수 없다. 따라서 Device Plugin은 상세 정보를 Node Annotation에 별도로 기록하며, 이후 Scheduler Extender가 이 Annotation을 참조하여 Scheduling을 수행한다. Annotation은 주기적으로 갱신되기 때문에 Node의 가속기 상태 변화도 Scheduler Extender에 반영된다.
 
-다만 상세 정보를 Node Annotation에 기록하는 흐름은 HAMi 프로토콜을 따르는 Device Plugin에만 해당한다. 제조사의 Device Plugin을 그대로 이용하는 가속기는 Annotation을 기록하지 않기 때문에, Scheduler Extender는 Node의 Capacity에 등록된 Resource 정보만을 참조하여 Scheduling을 수행한다.
-
 ### 1.2. Device Scheduling 과정
 
 {{< figure caption="[Figure 3] Device Scheduling Process" src="images/hami-device-scheduling.png" width="650px" >}}
@@ -65,9 +65,7 @@ Device Plugin 방식에서는 Node 선택은 kube-scheduler가 수행하고 가�
 4. Scheduler Extender는 각 Node의 Annotation에 기록된 가속기 정보와 기존 할당 내역을 기반으로, 요청 조건을 만족하는 가속기가 존재하는 Node를 선별하고 Scheduling 정책에 따라 점수를 계산한다.
 5. Scheduler Extender는 선택된 가속기의 UUID와 Memory 크기, Core 사용률 제한 값을 Pod의 `hami.io/[가속기]-devices-allocated` 계열 Annotation에 기록하고, Pod를 선택된 Node에 Bind한다.
 
-Scheduling 정책은 Node를 선택하는 Node Scheduling 정책과 Node 안에서 가속기를 선택하는 Device Scheduling 정책으로 구분되며, 모든 가속기에 공통으로 적용된다. `binpack` 정책은 이미 할당량이 많은 Node나 가속기에 몰아서 할당하여 가속기 조각을 최소화하는 정책이고, `spread` 정책은 Node나 가속기에 고르게 분산하여 할당하는 정책이다. 기본 정책은 Helm 설정으로 지정하며 (Node는 `binpack`, Device는 `spread`가 기본값), Pod의 `hami.io/node-scheduler-policy`, `hami.io/gpu-scheduler-policy` Annotation을 통해서 Pod 단위로 변경할 수 있다.
-
-제조사 Device Plugin을 이용하는 가속기는 Scheduler Extender가 Node 선택만 수행하고, Node 안에서 어떤 물리 가속기를 사용할지는 kubelet의 `Allocate()` 요청을 받은 제조사 Device Plugin이 결정한다. 따라서 Device Scheduling 정책과 특정 Device를 지정하는 Annotation은 Pod Annotation에 선택 결과를 기록하는 HAMi 프로토콜 Device Plugin에서만 동작한다.
+Scheduling 정책은 Node를 선택하는 Node Scheduling 정책과 Node 안에서 가속기를 선택하는 Device Scheduling 정책으로 구분된다. `binpack` 정책은 이미 할당량이 많은 Node나 가속기에 몰아서 할당하여 가속기 조각을 최소화하는 정책이고, `spread` 정책은 Node나 가속기에 고르게 분산하여 할당하는 정책이다. 기본 정책은 Helm 설정으로 지정하며 (Node는 `binpack`, Device는 `spread`가 기본값), Pod의 `hami.io/node-scheduler-policy`, `hami.io/gpu-scheduler-policy` Annotation을 통해서 Pod 단위로 변경할 수 있다.
 
 ### 1.3. Device 할당 과정
 
@@ -79,8 +77,6 @@ Device Plugin의 두 번째 역할은 hami-scheduler가 선택한 가속기를 �
 2. Device Plugin은 kube-apiserver를 통해서 해당 Pod의 Annotation을 조회하여, hami-scheduler가 선택한 가속기의 UUID와 Memory 크기, Core 사용률 제한 값을 파악한다. 일반적인 Device Plugin은 `Allocate()` 요청에 포함된 Device ID만으로 동작하지만, HAMi의 Device Plugin은 hami-scheduler의 가속기 선택 결과를 그대로 따라야 하기 때문에 Pod의 Annotation을 참조한다.
 3. Device Plugin은 `Allocate()` 응답으로 할당할 가속기 정보와 격리 설정을 반환한다. 반환 내용은 격리 계층에 따라서 다른데, Library 수준은 격리 Library Mount와 제한값 환경 변수가, Driver/Hardware 수준은 가상화된 가속기 Device 참조가 반환된다.
 4. kubelet은 반환받은 설정을 반영하여 Container를 생성하며, 이후 Container가 가속기를 사용하면 격리 계층이 Memory 크기 제한과 Core 사용률 제한을 강제한다.
-
-[Figure 4]의 흐름은 HAMi 프로토콜을 따르는 Device Plugin에만 적용된다. 제조사 Device Plugin을 이용하는 가속기는 Pod Annotation 참조 없이 kubelet의 `Allocate()` 요청만으로 Device 선택과 격리 설정 적용을 모두 Device Plugin 자체 로직으로 처리하며, HAMi는 Node 선택 단계까지만 관여하고 Allocation 단계에는 직접 개입하지 않는다.
 
 ## 2. 참조
 
