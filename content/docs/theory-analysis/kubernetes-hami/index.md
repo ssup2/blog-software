@@ -7,7 +7,7 @@ draft: true
 
 {{< figure caption="[Figure 1] HAMi Architecture" src="images/hami-architecture.png" width="900px" >}}
 
-**HAMi** (Heterogeneous AI Computing Virtualization Middleware)는 Kubernetes 환경에서 GPU, NPU 같은 AI 가속기를 가상화하여 하나의 가속기를 다수의 Pod이 공유할 수 있도록 하는 CNCF의 Middleware이다. Kubernetes의 Device Plugin 방식은 가속기를 개수 단위로만 할당할 수 있지만, HAMi는 Device Plugin 방식 위에서 Memory 크기 제한과 연산 Core 사용률 제한을 제공하여 하나의 가속기를 조각 단위로 나누어 할당한다. 2024년에 CNCF Sandbox Project로 채택되었고 2026년 7월에 Incubating Project로 승격되었다.
+**HAMi** (Heterogeneous AI Computing Virtualization Middleware)는 Kubernetes 환경에서 GPU, NPU 같은 AI 가속기를 가상화하여 하나의 가속기를 다수의 Pod이 공유할 수 있도록 하는 CNCF의 Middleware이다. Kubernetes의 Device Plugin 방식은 가속기를 개수 단위로만 할당할 수 있지만, HAMi는 Device Plugin 방식 위에서 Memory 크기 제한과 연산 Core 사용률 제한을 제공하여 하나의 가속기를 조각 단위로 나누어 할당한다.
 
 [Figure 1]은 HAMi의 Architecture를 나타내고 있다. HAMi는 다음의 세 가지 요소로 구성된다.
 
