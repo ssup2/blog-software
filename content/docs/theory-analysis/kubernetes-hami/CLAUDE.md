@@ -26,6 +26,15 @@ HAMi 자체(이기종 AI 가속기 가상화 Middleware)에 포커스를 두고 
   (kubernetes-hami-nvidia-gpu에 동일 예제가 존재) ② 1.3 Step 3의 NVIDIA 환경 변수 열거(`NVIDIA_VISIBLE_DEVICES`,
   `CUDA_DEVICE_*`, `LD_PRELOAD`)를 "Library 수준은 Library Mount + 환경 변수, Driver/HW 수준은 가속기 Device 참조"로 중립화.
   두 글 사이의 상호 "참조" 링크도 제거(이 글 참조 섹션에 이미 kubernetes-hami-nvidia-gpu 링크 없음, 반대편의 Kubernetes HAMi 링크는 제거).
+- **2026-11-01 벤더 맥락 전면 삭제** (사용자 피드백 "최대한 요 글에서는 vendor 관련 맥락은 삭제, 전반적인 컨셉정도만 명시"):
+  ① **Table 1 (지원 가속기 매트릭스) 전체 제거** — 지원 수(14종)와 Resource 규칙만 한 문단으로 축약 ② 개요 Device Plugin
+  bullet의 "NVIDIA GPU용 hami-device-plugin" 서술 → 벤더 중립 "가속기에 따라서 HAMi 포함/별도/제조사 Device Plugin 중 하나"
+  ③ 1.1 Figure 2 캡션 "NVIDIA GPU를 예시로"·"NVIDIA GPU는 NVML을 이용"·"NVIDIA GPU는 hami.io/node-nvidia-register"·
+  "Cambricon MLU처럼" 삭제 ④ 1.2 Step 5 "NVIDIA GPU는 초기 구현의 이름 hami.io/vgpu-devices-allocated 유지" 삭제 ⑤ 1.3
+  격리 수준 3분류의 Library(HAMi-core libvgpu.so / AMD libamvgpu.so), Driver(Cambricon sMLU), Hardware(Ascend 910B3 Template)
+  모든 벤더 예시 삭제 — 메커니즘만 서술 ⑥ 1.3 끝 "vCUDA·NVIDIA MPS·cGPU·qGPU·MIG·MxGPU" 산업 예시 삭제 ⑦ 참조 섹션에서
+  Ascend/Cambricon/NVIDIA Device Plugin 벤더별 링크 제거, HAMi/Docs/지원 Device/CNCF 4개만 유지. 결과: 벤더 중립 Architecture
+  분석과 공통 흐름(등록/Scheduling/할당) + 격리 계층 추상 설명만 남음.
 - 사실 관계는 2026-10-16 웹 리서치(HAMi master 소스 b385c82, charts/hami/values.yaml, 공식 docs) 기반. **사실 검증 필요 목록**:
   - CNCF 이력: Sandbox 2024-08, Incubating 2026-07 (TOC 통과 07-02, 발표 블로그 07-15). 최신 릴리스 v2.10.0 (2026-08-21).
   - [Table 1] 가속기별 Resource 이름 — v2.10.0 기준 14종 중 10종만 수록, Biren/Vastai(개수 전용)/Teco(검증 중)/원격 GPU는 생략.
