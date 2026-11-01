@@ -13,7 +13,12 @@ draft: true
 
 * **hami-scheduler** : Deployment를 통해서 동작하며, 하나의 Pod 안에서 kube-scheduler Container와 Scheduler Extender Container가 함께 동작한다. 가속기를 요청하는 Pod의 Scheduler를 hami-scheduler로 변경하는 Mutating Webhook도 Scheduler Extender가 함께 제공한다. 모든 종류의 가속기가 하나의 hami-scheduler를 공유하며, 가속기별 Scheduling 동작은 hami-scheduler 내부의 가속기별 Package로 구현되어 있다.
 * **Device Plugin** : DaemonSet을 통해서 가속기가 존재하는 Node에서 동작하며, 가속기를 kubelet에 등록하고 Container에 할당하는 역할을 수행한다. 가속기에 따라서 HAMi 설치에 포함된 Device Plugin, HAMi가 별도로 제공하는 Device Plugin, 또는 가속기 제조사가 제공하는 Device Plugin을 이용한다.
-* **격리 계층** : 조각 단위로 할당된 가속기가 제한을 초과하여 사용되지 않도록 강제하는 계층이다. 가속기에 따라서 Container에 주입된 Library가 API 호출을 가로채는 Library 수준, Driver가 할당량을 제한하는 Driver 수준, 가속기 자체가 분할되는 Hardware 수준으로 구분된다.
+* **격리 계층** : 조각 단위로 할당된 가속기가 제한을 초과하여 사용되지 않도록 강제하는 계층이다. 가속기에 따라서 다음의 세 가지 수준으로 구분되며, 계층이 Hardware에 가까울수록 격리는 강해지지만 분할의 유연성은 줄어든다.
+  * **Library 수준 격리** : Container에 주입된 격리 Library가 User 공간에서 가속기 API 호출을 가로채서 Memory 할당과 Core 사용을 제한한다. 제한이 API 호출 시점에 이루어지기 때문에 Memory 크기와 Core 사용률을 임의의 값으로 지정할 수 있다.
+  * **Driver 수준 격리** : 가속기 Driver가 할당량을 직접 제한하여 Memory 크기와 Core 사용률을 강제한다. 제한을 Application이 아니라 Driver가 수행하기 때문에 별도의 Library 주입이 필요하지 않고, 하나의 물리 가속기를 할당량이 설정된 다수의 공유 Instance로 분할할 수 있다.
+  * **Hardware 수준 격리** : 가속기 자체를 Hardware 수준에서 분할하여 가상 가속기를 생성한다. Hardware는 제조사가 Chip마다 미리 정의한 가상화 Template 구성으로만 분할될 수 있기 때문에, Pod가 요청한 Memory 크기를 수용하는 가장 작은 Template이 선택되어 가상 가속기가 생성된다. 격리가 가장 확실한 대신 요청한 크기가 Template 크기로 올림되기 때문에 Template보다 세밀한 분할은 불가능하다.
+
+이처럼 HAMi는 Scheduling 계층은 공통으로 유지하면서 격리 계층은 가속기별 구현에 위임하는 구조를 갖는다. 세 계층의 구분은 HAMi에 국한되지 않고 일반적인 가속기 가상화 기법에도 그대로 적용된다.
 
 {{< table caption="[Table 1] HAMi가 지원하는 주요 가속기" >}}
 | 가속기 | Resource 이름 | Memory / Core 제한 | 격리 계층 | Device Plugin |
@@ -76,14 +81,6 @@ Device Plugin의 두 번째 역할은 hami-scheduler가 선택한 가속기를 �
 4. kubelet은 반환받은 설정을 반영하여 Container를 생성하며, 이후 Container가 가속기를 사용하면 격리 계층이 Memory 크기 제한과 Core 사용률 제한을 강제한다.
 
 [Figure 4]의 흐름은 HAMi 프로토콜을 따르는 Device Plugin에만 적용된다. 제조사 Device Plugin을 이용하는 가속기는 Pod Annotation 참조 없이 kubelet의 `Allocate()` 요청만으로 Device 선택과 격리 설정 적용을 모두 Device Plugin 자체 로직으로 처리하며, HAMi는 Node 선택 단계까지만 관여하고 Allocation 단계에는 직접 개입하지 않는다.
-
-격리 방식은 격리가 수행되는 계층에 따라서 세 가지로 구분되며, 계층이 Hardware에 가까울수록 격리는 강해지지만 분할의 유연성은 줄어든다.
-
-* **Library 수준 격리** : Container에 주입된 격리 Library가 User 공간에서 가속기 API 호출을 가로채서 Memory 할당과 Core 사용을 제한한다. 제한이 API 호출 시점에 이루어지기 때문에 Memory 크기와 Core 사용률을 임의의 값으로 지정할 수 있다.
-* **Driver 수준 격리** : 가속기 Driver가 할당량을 직접 제한하여 Memory 크기와 Core 사용률을 강제한다. 제한을 Application이 아니라 Driver가 수행하기 때문에 별도의 Library 주입이 필요하지 않고, 하나의 물리 가속기를 할당량이 설정된 다수의 공유 Instance로 분할할 수 있다.
-* **Hardware 수준 격리** : 가속기 자체를 Hardware 수준에서 분할하여 가상 가속기를 생성한다. Hardware는 제조사가 Chip마다 미리 정의한 가상화 Template 구성으로만 분할될 수 있기 때문에, Pod가 요청한 Memory 크기를 수용하는 가장 작은 Template이 선택되어 가상 가속기가 생성된다. 격리가 가장 확실한 대신 요청한 크기가 Template 크기로 올림되기 때문에 Template보다 세밀한 분할은 불가능하다.
-
-이처럼 HAMi는 Scheduling 계층은 공통으로 유지하면서 격리 계층은 가속기별 구현에 위임하는 구조를 갖는다. 세 계층의 구분은 HAMi에 국한되지 않고 일반적인 가속기 가상화 기법에도 그대로 적용된다.
 
 ## 2. 참조
 
