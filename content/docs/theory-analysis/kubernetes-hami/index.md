@@ -20,24 +20,18 @@ draft: true
 
 이처럼 HAMi는 Scheduling 계층은 공통으로 유지하면서 격리 계층은 가속기별 구현에 위임하는 구조를 갖는다. 세 계층의 구분은 HAMi에 국한되지 않고 일반적인 가속기 가상화 기법에도 그대로 적용된다.
 
-{{< table caption="[Table 1] HAMi가 지원하는 주요 가속기" >}}
+{{< table caption="[Table 1] HAMi 프로토콜 Device Plugin이 제공되는 주요 가속기" >}}
 | 가속기 | Resource 이름 | Memory / Core 제한 | 격리 계층 | Device Plugin |
 |---|---|---|---|---|
 | NVIDIA GPU | `nvidia.com/gpu`, `nvidia.com/gpumem`, `nvidia.com/gpucores` | O / O | Library | HAMi 포함 |
 | Huawei Ascend NPU | `huawei.com/Ascend910B3`, `huawei.com/Ascend910B3-memory` | O / O | Hardware | HAMi 별도 |
-| Cambricon MLU | `cambricon.com/vmlu`, `cambricon.com/mlu.smlu.vmemory`, `cambricon.com/mlu.smlu.vcore` | O / O | Driver | 제조사 |
-| Hygon HCU | `hygon.com/hcunum`, `hygon.com/hcumem`, `hygon.com/hcucores` | O / O | Driver | 제조사 |
-| Iluvatar GPU | `iluvatar.ai/MR-V100-vgpu`, `iluvatar.ai/MR-V100.vMem`, `iluvatar.ai/MR-V100.vCore` | O / O | Library | 제조사 |
-| Moore Threads GPU | `mthreads.com/vgpu`, `mthreads.com/sgpu-memory`, `mthreads.com/sgpu-core` | O / O | Driver | 제조사 |
-| MetaX GPU | `metax-tech.com/sgpu`, `metax-tech.com/vmemory`, `metax-tech.com/vcore` | O / O | Driver | 제조사 |
 | Kunlunxin XPU | `kunlunxin.com/vxpu`, `kunlunxin.com/vxpu-memory` | O / X | Hardware | HAMi 별도 |
-| AWS Neuron | `aws.amazon.com/neuron`, `aws.amazon.com/neuroncore` | X / O | Hardware | 제조사 |
 | AMD GPU | `amd.com/gpu`, `amd.com/gpumem`, `amd.com/gpucores` | O / O | Library | HAMi 별도 |
 {{< /table >}}
 
-[Table 1]은 HAMi가 지원하는 주요 가속기와 Resource 이름, 격리 계층, Device Plugin 패키징을 나타내고 있다 (v2.10.0 기준 14종 지원). 각 가속기는 개수를 요청하는 Resource와 함께 Memory 크기, Core 사용률을 요청하는 Resource를 제공하며, hami-scheduler가 인식할 가속기별 Resource 이름은 `hami-scheduler-device` ConfigMap에 정의된다. Device Plugin은 `HAMi 포함` (HAMi Helm Chart 기본 포함), `HAMi 별도` (Project-HAMi 저장소의 별도 Chart·Manifest), `제조사` (제조사 제공 Device Plugin) 세 가지 방식으로 배포되며, NVIDIA GPU 외에는 HAMi 설치와 별개로 각 Device Plugin을 설치해야 한다.
+[Table 1]은 HAMi 프로토콜을 따르는 Device Plugin이 제공되는 주요 가속기와 Resource 이름, 격리 계층, Device Plugin 패키징을 나타내고 있다. 각 가속기는 개수를 요청하는 Resource와 함께 Memory 크기, Core 사용률을 요청하는 Resource를 제공하며, hami-scheduler가 인식할 가속기별 Resource 이름은 `hami-scheduler-device` ConfigMap에 정의된다. Device Plugin은 `HAMi 포함` (HAMi Helm Chart 기본 포함)과 `HAMi 별도` (Project-HAMi 저장소의 별도 Chart·Manifest) 두 가지 방식으로 배포되며, NVIDIA GPU 외에는 HAMi 설치와 별개로 각 Device Plugin을 설치해야 한다. 등록·Scheduling·할당의 전체 흐름은 모두 HAMi가 담당하며, 1.1~1.3절은 이 경우를 기준으로 분석한다.
 
-`HAMi 포함`과 `HAMi 별도`는 모두 HAMi 프로토콜을 따르는 Device Plugin이며, 등록·Scheduling·할당의 전체 흐름을 HAMi가 담당한다. 이어지는 1.1~1.3절은 이 경우를 기준으로 분석한다. 반면 `제조사` Device Plugin을 이용하는 가속기는 Device 선택과 격리 적용을 모두 벤더 Plugin이 담당하기 때문에, HAMi는 Pod Annotation을 통한 Node Scheduling 정책 지정과 Mutating Webhook routing 수준에서만 개입한다.
+HAMi는 이 외에도 제조사가 제공하는 Device Plugin을 그대로 이용하는 가속기를 지원하여 v2.10.0 기준으로 총 14종의 가속기를 지원한다. 다만 제조사 Device Plugin 경로에서는 Device 선택과 격리 적용을 모두 벤더 Plugin이 담당하기 때문에, HAMi는 Pod Annotation을 통한 Node Scheduling 정책 지정과 Mutating Webhook routing 수준에서만 개입한다.
 
 ### 1.1. Device 등록 과정
 
