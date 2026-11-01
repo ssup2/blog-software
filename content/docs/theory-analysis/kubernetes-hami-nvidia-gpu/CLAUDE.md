@@ -11,9 +11,18 @@ kubernetes-hami(HAMi 자체, 벤더 중립 구조) 문서의 NVIDIA 상세 글�
 - **2026-10-18 Memory·SM 격리 실측 추가** (Claude): 1.1 Test 환경 구축을 신설하고 1.3(Memory·SM) 섹션에 Shell 블록 2개(2500MB OOM, matmul 중 SM 샘플링) 추가. 실측 환경은 kubernetes-hami-vllm-gpu-ubuntu-26.04 Record 글의 Cluster 재사용. `GPU_CORE_UTILIZATION_POLICY=force` 설정으로 유휴 Burst를 꺼서 vgpu-monitor Metric이 ~31%에 수렴하는 모습 확인. 호스트 nvidia-smi dmon은 Token Bucket Burst 특성으로 99/0 번갈아 나오는 것 함께 수록.
 - **2026-11-01 kubernetes-hami 글과의 상호 참조 제거** (사용자 피드백): 참조 섹션의 "Kubernetes HAMi" 자기 블로그 링크 제거.
   kubernetes-hami 글에서는 중복되는 NVIDIA 세부(Pod 예제, 환경 변수 열거)가 축소된 상태이므로 양 글을 각각 독립적으로 읽는 걸 전제로 함.
-- 1장 구성: 1. 개요(hami-device-plugin/HAMi-core, vGPU Resource Table, Pod 예제) / 1.1 Test 환경 구축 / 1.2 vGPU 설정(Table 2) /
+- **2026-11-01 Annotation 절 해체** (사용자 피드백, kubernetes-hami 글과 동일 방침): "1.6 HAMi Annotation 정리"를 삭제하고
+  사용되는 절로 분배 — Pod Annotation(Extender 기록분: to-allocate/allocated/vgpu-node/bind-phase/bind-time)은
+  [File 3]으로 1.1 Test 환경(Shell 1 뒤)에 배치해 "Scheduler가 Annotation 기록 → Device Plugin이 읽어 env 주입" 체인 완성.
+  [File 3]의 Pod 이름·값은 Test Pod(hami-isolation-test) 요청(2000/30)에 맞춰 구성한 예제 (기존 1.6의 값은 qwen3 Pod 실측,
+  bind-time epoch은 그 캡처 값 유지). Node Annotation(node-nvidia-register, RTX 5060 Ti 실측 JSON)은 [File 4]로 1.2 vGPU
+  설정(Table 2 뒤)에 배치해 count=deviceSplitCount, mode=operatingmode 대응 명시. node-handshake는 kubernetes-hami 글 담당이라
+  이 글에서 제거, node-nvidia-score·use-gputype 계열·vgpu-mode·정책 Annotation은 1.4~1.5 기존 서술로 일원화(중복 나열 제거).
+  기존 File 3/4(GPU Type 예제, MIG 예제)는 File 5/6으로 재번호.
+- 1장 구성: 1. 개요(hami-device-plugin/HAMi-core, vGPU Resource Table, Pod 예제 [File 1]) / 1.1 Test 환경 구축([File 2],
+  [Shell 1], Pod Annotation [File 3]) / 1.2 vGPU 설정(Table 2, Node Annotation [File 4]) /
   1.3 Memory·SM 사용률 제한(HAMi-core, 정책 환경 변수, Monitor, 실측 Shell 2종) / 1.4 GPU 선택과 Scheduling 정책(Type/UUID Annotation,
-  binpack/spread/mutex, Topology-aware) / 1.5 Dynamic MIG(Flexible MIG 예약 방식).
+  binpack/spread/mutex, Topology-aware, [File 5]) / 1.5 Dynamic MIG(Flexible MIG 예약 방식, [File 6]).
 - 사실 관계는 2026-10-16 웹 리서치(HAMi master 소스 pkg/device/nvidia/device.go, charts/hami/values.yaml, HAMi-core README,
   공식 docs·릴리스 노트) 기반. **사실 검증 필요 목록**:
   - vGPU Resource: `nvidia.com/priority` (0 높음/1 낮음, 기본 1) — 같은 GPU에서 런타임 QoS로 동작(Scheduling 선점 아님).

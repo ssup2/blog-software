@@ -19,9 +19,13 @@ HAMi 자체(이기종 AI 가속기 가상화 Middleware)에 포커스를 두고 
   개조식·상세는 1.3으로 일원화) ③ 1.3 할당 단계 3·4를 계층 중립으로 수정 (3: "격리 설정 반환, 내용은 계층에 따라 다름 —
   NVIDIA는 env+LD_PRELOAD" / 4: "격리 계층이 제한을 강제"). **Figure 1 재작도 시 세 번째 블록명도 "격리 Library" →
   "격리 계층"으로 변경 필요.**
+- **2026-11-01 Annotation 절 해체** (사용자 피드백: 별도 절 대신 사용되는 절에 배치): "1.4 HAMi Annotation 정리"를 삭제하고
+  [File 1] Node Annotation(+register/handshake 개조식)은 1.1 마지막으로, [File 2] Pod Annotation(+Extender 기록/사용자 지정
+  개조식)은 1.2 마지막(정책 문단 뒤)으로 이동. 1.3 Step 2의 조회 대상을 `hami.io/[가속기]-devices-to-allocate` 계열로 명시.
+  1.4 끝의 `hami.io/webhook: ignore` 문장은 1.2 [Shell 1] 문단과 중복이라 제거. File 번호는 1→1.1, 2→1.2로 순서 유지.
 - 1장 구성: 1. 개요(요소 3종: hami-scheduler/Device Plugin/격리 계층, 지원 가속기 Table(격리 계층 열 포함)) /
-  1.1 Device 등록 과정(부풀리기 + Node Annotation) / 1.2 Device Scheduling 과정(Webhook, Extender, 정책) /
-  1.3 Device 할당 과정(Pod Annotation 참조, 격리 설정 반환).
+  1.1 Device 등록 과정(부풀리기 + Node Annotation [File 1]) / 1.2 Device Scheduling 과정(Webhook [Shell 1], Extender, 정책,
+  Pod Annotation [File 2]) / 1.3 Device 할당 과정(Pod Annotation 참조, 격리 설정 반환).
 - **2026-11-01 NVIDIA 세부 축소** (사용자 피드백: 내용 중복, 벤더 중립 유지): ① 개요의 [File 1] vGPU Pod 예제 블록 제거
   (kubernetes-hami-nvidia-gpu에 동일 예제가 존재) ② 1.3 Step 3의 NVIDIA 환경 변수 열거(`NVIDIA_VISIBLE_DEVICES`,
   `CUDA_DEVICE_*`, `LD_PRELOAD`)를 "Library 수준은 Library Mount + 환경 변수, Driver/HW 수준은 가속기 Device 참조"로 중립화.
