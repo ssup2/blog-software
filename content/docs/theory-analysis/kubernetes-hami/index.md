@@ -160,6 +160,42 @@ hami-scheduler-55cc79689-lv8l6   2/2     Running   0          14d   10.244.0.6  
 
 [Shell 1]은 HAMi 설치 시 생성되는 Mutating Webhook Configuration (`hami-webhook`) 과 webhook 대상이 되는 `hami-scheduler` Service를 나타내고 있다. `rules`에 Pod 생성 요청 (`CREATE pods`) 이 지정되어 있어 모든 Pod 생성이 webhook을 거치며, `clientConfig.service`가 가리키는 `hami-scheduler` Service의 `/webhook` 경로 (`443` Port) 로 요청이 전달된다. Service의 Endpoint (`10.244.0.6:443`) 는 `hami-scheduler-55cc79689-lv8l6` Pod의 IP와 일치하며, 이 Pod 안의 Scheduler Extender Container가 webhook 요청을 수신한다. Extender는 요청에 포함된 Pod가 등록된 모든 Accelerator Resource 중 하나라도 요청하는지 검사하고, 요청하는 경우에만 Pod의 `schedulerName`을 `hami-scheduler`로 변경한다. `namespaceSelector`와 `objectSelector`는 `hami.io/webhook: ignore` Label이 붙은 Namespace와 Pod를 webhook 처리에서 제외하여 특정 범위를 건너뛸 수 있도록 한다.
 
+```shell {caption="[Shell 3] hami-scheduler KubeSchedulerConfiguration 확인"}
+$ kubectl -n kube-system get configmap hami-scheduler -o jsonpath='{.data.config\.yaml}'
+apiVersion: kubescheduler.config.k8s.io/v1
+kind: KubeSchedulerConfiguration
+leaderElection:
+  leaderElect: true
+  resourceName: "hami-scheduler"
+  resourceNamespace: "kube-system"
+profiles:
+- schedulerName: hami-scheduler
+extenders:
+- urlPrefix: "https://127.0.0.1:443"
+  enableHTTPS: true
+  tlsConfig:
+    insecure: true
+  filterVerb: filter
+  bindVerb: bind
+  nodeCacheCapable: true
+  weight: 1
+  httpTimeout: 30s
+  managedResources:
+  - ignoredByScheduler: true
+    name: nvidia.com/gpu
+  - ignoredByScheduler: true
+    name: nvidia.com/gpumem
+  - ignoredByScheduler: true
+    name: nvidia.com/gpucores
+  - ignoredByScheduler: true
+    name: cambricon.com/vmlu
+  - ignoredByScheduler: true
+    name: hygon.com/dcunum
+  ...
+```
+
+[Shell 3]은 `hami-scheduler` ConfigMap에 저장된 KubeSchedulerConfiguration을 나타내고 있다. `profiles[0].schedulerName: hami-scheduler`로 Webhook이 지정하는 Scheduler 이름을 선언하고, `extenders`에 Scheduler Extender를 등록한다. `urlPrefix: https://127.0.0.1:443`은 Scheduler Extender의 접점이며, kube-scheduler와 Extender가 같은 Pod 안의 Sidecar Container로 동작하기 때문에 Loopback으로 호출된다. `filterVerb`와 `bindVerb`는 Scheduler Framework의 Filter와 Bind 단계에서 Extender를 호출하도록 지정하며, Extender는 Filter 단계에서 Accelerator 할당 가능한 Node를 걸러내고 Bind 단계에서 선택된 Accelerator 결과를 Pod Annotation에 기록한다. `managedResources`에 등록된 Accelerator Resource는 모두 `ignoredByScheduler: true`로 표시되어, kube-scheduler의 Default `NodeResourcesFit` Filter는 이 Resource들의 가용량을 집계하지 않고 전적으로 Extender에 위임한다.
+
 Scheduling 정책은 Node를 선택하는 Node Scheduling 정책과 Node 안에서 Accelerator를 선택하는 Device Scheduling 정책으로 구분된다. `binpack` 정책은 이미 할당량이 많은 Node나 Accelerator에 몰아서 할당하여 Accelerator 조각을 최소화하는 정책이고, `spread` 정책은 Node나 Accelerator에 고르게 분산하여 할당하는 정책이다. 기본 정책은 Helm 설정으로 지정하며 (Node는 `binpack`, Device는 `spread`가 기본값), Pod의 `hami.io/node-scheduler-policy`, `hami.io/gpu-scheduler-policy` Annotation을 통해서 Pod 단위로 변경할 수 있다.
 
 Scheduler Extender는 각 Node와 Accelerator에 대해 Pod가 요청한 Memory와 Core가 가용량 대비 얼마나 차지하는지를 기준으로 점수를 계산한다. `binpack` 정책은 할당 후 사용률이 높아지는 쪽에 가산점을 주어 Workload를 몰고 사용 중인 Node나 Accelerator 수를 줄이는 반면, `spread` 정책은 반대로 사용률이 낮게 유지되는 쪽에 가산점을 주어 Workload를 분산한다. 기본 조합 (Node `binpack` + Device `spread`) 은 Workload를 가능한 적은 Node에 몰아 Node 조각화를 줄이면서, Node 안에서는 Accelerator를 고르게 사용해 개별 Accelerator에 Hot-spot이 생기지 않게 한다. v2.10.0부터는 `hami.io/gpu-scheduler-policy` Annotation에 쉼표로 여러 정책을 연결해 함께 적용할 수 있다.
