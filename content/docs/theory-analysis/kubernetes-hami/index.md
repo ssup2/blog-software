@@ -217,7 +217,7 @@ metadata:
     hami.io/gpu-scheduler-policy: spread
 ```
 
-[File 2]는 Device Scheduling 과정에서 Pod에 설정되는 HAMi Annotation을 나타내고 있다. Scheduler Extender가 Scheduling 단계에서 자동으로 기록하는 Annotation과 사용자가 Scheduling 동작 제어를 위해 Pod spec에 직접 지정하는 Annotation으로 구분되며, Accelerator별로 Suffix가 달라진다. `vgpu-node`처럼 Accelerator Suffix 없이 `vgpu`가 들어간 이름은 NVIDIA 초기 구현의 이름을 공통 Annotation으로 유지한 것이다.
+[File 2]는 Device Scheduling 과정에서 Pod에 설정되는 HAMi Annotation을 나타내고 있다. Scheduler Extender가 Scheduling 단계에서 자동으로 기록하는 Annotation과 사용자가 Scheduling 동작 제어를 위해 Pod spec에 직접 지정하는 Annotation으로 구분되며, Accelerator별로 Suffix가 달라진다.
 
 Scheduler Extender가 기록하는 Annotation:
 
