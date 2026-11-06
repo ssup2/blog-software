@@ -6,6 +6,8 @@ kubernetes-hami(HAMi 자체, 벤더 중립 구조) 문서의 NVIDIA 상세 글�
 
 ## 문서 구성 및 상태
 
+- **2026-11-06 Time-slicing, MPS 서술 추가** (사용자 요청): 개요와 1.3 SM 문단 뒤에 추가. MPS 미지원 근거는 HAMi v2.10.0 plugin/mps.go(빈 구현), `MpsMode` 상수 미사용, Chart에 설정 없음.
+  Driver Time-slicing 위에서 동작한다는 서술은 일반 GPU 동작 기반으로 Context 전환을 직접 관측하지 않음. `website` 저장소 문서는 미확인.
 - **2026-11-06 1.6 GPU Health Check 추가** (사용자 요청, 소스 기반, 장애 동작 실측 없음): 근거는 HAMi v2.10.0 rm/health.go, plugin/server.go ListAndWatch,
   rm/devices.go GetPluginDevices, plugin/register.go(30초 주기), pkg/device/nvidia/device.go Fit(CardNotHealth). 무시 Xid 목록은 upstream과 동일.
   Allocatable 제외와 실행 중 Pod 유지는 Kubernetes 일반 동작 기반, Pod 재시작 후 복구는 Health 상태가 메모리에만 있다는 점에서 추정. Test Node는 정상 상태(`health:true`, Allocatable 10)이고

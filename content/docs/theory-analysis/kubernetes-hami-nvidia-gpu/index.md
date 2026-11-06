@@ -7,7 +7,7 @@ draft: true
 
 {{< figure caption="[Figure 1] HAMi NVIDIA GPU Architecture" src="images/hami-nvidia-architecture.png" width="900px" >}}
 
-**HAMi**는 NVIDIA GPU를 **vGPU** 단위로 가상화하여 하나의 GPU를 다수의 Pod이 공유할 수 있도록 지원한다. NVIDIA Device Plugin의 Time-slicing 기법도 하나의 GPU를 다수의 Pod에 할당할 수 있지만 Container별 Memory 크기 제한이나 연산 사용률 제한은 제공하지 않는 반면, HAMi는 CUDA API 호출을 가로채는 방식으로 Software Level에서 vGPU 단위의 Memory 크기 제한과 **SM** (Streaming Multiprocessor) 사용률 제한을 제공한다. 또한 MIG를 지원하는 GPU에서는 Workload의 요청에 따라서 MIG Instance를 동적으로 생성하는 Dynamic MIG 기능도 제공한다.
+**HAMi**는 NVIDIA GPU를 **vGPU** 단위로 가상화하여 하나의 GPU를 다수의 Pod이 공유할 수 있도록 지원한다. NVIDIA Device Plugin의 Time-slicing 기법도 하나의 GPU를 다수의 Pod에 할당할 수 있지만 Container별 Memory 크기 제한이나 연산 사용률 제한은 제공하지 않는 반면, HAMi는 CUDA API 호출을 가로채는 방식으로 Software Level에서 vGPU 단위의 Memory 크기 제한과 **SM** (Streaming Multiprocessor) 사용률 제한을 제공한다. 이 제한은 GPU의 Time-slicing 공유 위에서 동작하며, NVIDIA MPS 기반의 공유 기법은 제공하지 않는다. 또한 MIG를 지원하는 GPU에서는 Workload의 요청에 따라서 MIG Instance를 동적으로 생성하는 Dynamic MIG 기능도 제공한다.
 
 [Figure 1]은 HAMi의 NVIDIA GPU 지원 구성을 나타내고 있다. NVIDIA GPU 지원은 다음의 두 가지 Component가 담당한다.
 
@@ -183,6 +183,10 @@ OOM: CUDA out of memory
 [Shell 2]는 Memory 제한이 적용되는 모습을 나타내고 있다. `nvidia-smi`는 Pod 안에서 전체 Memory를 `2000 MiB`로 보고하여 HAMi-core가 `cuMemGetInfo()` 결과를 vGPU 크기로 치환한 것을 확인할 수 있다. 1200MB 할당은 제한 안이라 성공하지만, 2500MB 할당은 HAMi-core의 `Device 0 OOM 2636120064 / 2097152000` Log와 함께 거부되어 PyTorch는 `CUDA out of memory`를 반환한다. 로그의 `2097152000` Byte는 `2000 MiB`를 Byte로 환산한 값이다.
 
 SM 사용률 제한은 Kernel 실행 API를 가로채서 수행된다. `libvgpu.so`는 GPU의 사용률을 주기적으로 측정하면서 Token 기반으로 Kernel 실행 가능 여부를 관리하며, `cuLaunchKernel()` 같은 Kernel 실행 함수가 호출될 때 Token이 부족하면 Kernel 실행을 지연시켜 vGPU의 SM 사용률을 `CUDA_DEVICE_SM_LIMIT` 환경 변수에 설정된 제한 이하로 유지한다. 제한 동작은 `GPU_CORE_UTILIZATION_POLICY` 환경 변수로 변경할 수 있다.
+
+HAMi-core가 GPU의 시간을 직접 분할하는 것은 아니다. 하나의 GPU를 공유하는 Container들의 연산은 NVIDIA Driver와 GPU의 **Time-slicing**으로 번갈아 실행되며, `libvgpu.so`는 그 앞단에서 Kernel 실행을 지연시켜 사용률만 조절한다. 반면 Memory는 시간으로 나뉘지 않고 모든 Container의 Data가 GPU Memory에 동시에 상주하며, `libvgpu.so`는 할당량만 제한한다.
+
+여러 Process의 Kernel을 동시에 실행하는 **NVIDIA MPS** (Multi-Process Service) 기반의 공유는 지원하지 않는다. NVIDIA Device Plugin과 달리 hami-device-plugin에서는 MPS 관련 동작이 구현되어 있지 않으며, `operatingmode`로 선택할 수 있는 동작도 `hami-core`와 `mig` 두 가지이다.
 
 * `default` : GPU가 유휴 상태이면 제한을 초과하는 이용을 허용한다 (기본값).
 * `force` : 유휴 상태와 무관하게 항상 제한을 강제한다.
