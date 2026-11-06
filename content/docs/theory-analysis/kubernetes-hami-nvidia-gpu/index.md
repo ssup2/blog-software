@@ -14,6 +14,23 @@ draft: true
 * **hami-device-plugin** : DaemonSet을 통해서 GPU Node에서 동작하며, 하나의 Pod 안에서 vGPU를 kubelet에 등록하고 할당하는 Device Plugin Container와 vGPU의 사용량을 Metric으로 노출하는 vGPU Monitor Container가 함께 동작한다.
 * **HAMi-core** : Container 내부에 주입되는 `libvgpu.so` Library이며, CUDA Driver API 호출을 가로채서 vGPU의 Memory 크기 제한과 SM 사용률 제한을 수행한다.
 
+Container에는 세 종류의 Library가 필요하며, 종류마다 전달 방식이 다르다.
+
+* **CUDA SDK** (`libcudart.so` 등) : Container Image에 미리 포함되어 있어야 하며, 별도로 전달되지 않는다.
+* **NVIDIA Driver Library** (`libcuda.so`, `libnvidia-ml.so` 등) : **NVIDIA Container Toolkit**이 Host의 Library를 Container에 Mount한다. NVIDIA Device Plugin을 이용할 때와 동일한 방식이다.
+* **HAMi-core** (`libvgpu.so` 등) : hami-device-plugin이 Mount할 경로를 지정하면 Container Runtime이 Mount한다. HAMi에만 존재하는 방식이다.
+
+NVIDIA Driver Library의 경우 hami-device-plugin은 기본 설정 (`deviceListStrategy: envvar`) 에서 `Allocate()` 응답의 `NVIDIA_VISIBLE_DEVICES` 환경 변수로 할당할 GPU만 알려준다. Container가 생성될 때 NVIDIA Container Toolkit의 Runtime이 이 환경 변수를 읽어서 필요한 Library와 Device 목록을 CDI 명세로 즉석에서 생성하고 (`jit-cdi` Mode), 이를 Container 설정에 반영하여 Mount가 이루어진다.
+
+HAMi-core는 NVIDIA Container Toolkit이 알지 못하는 파일이기 때문에 hami-device-plugin이 별도로 처리한다. Mount의 원본은 Host에 존재해야 하므로, hami-device-plugin은 시작할 때 `postStart` Hook의 `vgpu-init.sh`로 Image 안의 `libvgpu.so`를 Host의 `/usr/local/vgpu` (Helm `global.gpuHookPath` 기본값 기준) 로 복사하고 `ld.so.preload`를 생성한다.
+
+이후 Pod가 생성되면 hami-device-plugin은 `Allocate()` 응답에 Mount할 Host 경로와 Container 경로를 담아 반환하고, kubelet이 이를 Container Runtime에 전달하여 Container 생성 시 Mount가 이루어진다. 즉 hami-device-plugin은 Mount 대상만 지정할 뿐 Mount를 직접 수행하지 않는다. 지정되는 Container 경로는 다음과 같다.
+
+* `/usr/local/vgpu/libvgpu.so` : Host의 HAMi-core Library가 읽기 전용으로 Mount되는 경로이다.
+* `/etc/ld.so.preload` : `libvgpu.so`를 먼저 Load하도록 지정하는 Host의 `/usr/local/vgpu/ld.so.preload`가 읽기 전용으로 Mount되는 경로이다. Container에 `CUDA_DISABLE_CONTROL=true` 환경 변수를 설정하면 Mount되지 않아 HAMi-core가 Load되지 않는다.
+* `/usr/local/vgpu` : HAMi-core의 공유 Cache 파일이 위치하는 경로이다. Host의 `/usr/local/vgpu/containers/<Pod UID>_<Container 이름>` Directory가 Container마다 생성되어 Mount된다.
+* `/tmp/vgpulock` : HAMi-core가 이용하는 Lock 파일 경로이다. Host의 같은 경로를 Mount하여 Node의 Container들이 공유한다.
+
 {{< table caption="[Table 1] HAMi가 제공하는 vGPU Resource 종류" >}}
 | Resource | 용도 |
 |---|---|

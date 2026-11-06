@@ -11,6 +11,9 @@ HAMi 자체(이기종 AI 가속기 가상화 Middleware)에 포커스를 두고 
 
 ## 문서 구성 및 상태
 
+- **2026-11-06 Library 전달 경로 추가** (사용자 요청, 소스 기반, 실측 없음): 1.3 단계 목록 뒤에 격리 Library(Allocate 응답 Mount 항목 →
+  kubelet → Container Runtime이 Bind Mount)와 Driver Library(벤더별: Runtime 확장 주입 또는 Mount 항목) 문단 추가. 벤더 중립 유지.
+  근거: HAMi v2.10.0 NVIDIA Allocate, ascend-device-plugin master eNPU Mount. AMD 등 다른 벤더 Plugin은 미확인.
 - **2026-10-16 재작성** (Claude 작성, 사용자 검토 전, frontmatter `draft: true`). **실측 없음** — Shell 블록 없음.
   index.en.md는 초안 확정 전이라 미작성.
 - **2026-10-31 Library 중심 구성 탈피** (사용자 피드백: Library 가상화 중심으로 나머지 기법이 끼어든 구성): ① 개요의 세 번째

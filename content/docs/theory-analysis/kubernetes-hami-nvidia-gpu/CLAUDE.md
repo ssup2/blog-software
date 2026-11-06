@@ -6,6 +6,17 @@ kubernetes-hami(HAMi 자체, 벤더 중립 구조) 문서의 NVIDIA 상세 글�
 
 ## 문서 구성 및 상태
 
+- **2026-11-06 Library 전달 경로 추가** (사용자 요청, 소스 기반, 같은 날 Test Node에서 실측 확인): 개요 Component 목록 뒤에 Driver Library
+  (NVIDIA Container Toolkit)와 HAMi-core 파일(Allocate 응답 Mount 항목) 경로 구분 추가. 근거: HAMi v2.10.0 plugin/server.go Allocate,
+  daemonsetnvidia.yaml postStart, docker/vgpu-init.sh, values.yaml(gpuHookPath, libPath, deviceListStrategy). `/tmp/vgpulock`의 용도는
+  이름과 Mount 설정 기반 서술로 HAMi-core 소스 재확인 필요. CDI Strategy 동작은 본문 생략.
+  같은 날 사용자 피드백으로 Library 3종 목록 + 경로별 문단으로 쉽게 재작성, Driver Library는 `jit-cdi` Mode로 명시
+  (Toolkit v1.20.1 internal/info/auto.go, internal/modifier/cdi.go 기반). `deviceListStrategy: cdi-*`의 CDI와는 별개.
+  Test Node 실측(qwen3 Pod의 containerd Bundle config.json, /proc/<pid>/mounts): Toolkit 1.20.1, `mode = "auto"`, CDI Annotation 없음,
+  legacy prestart Hook 없이 `nvidia-ctk hook` createContainer Hook 사용, Driver Library Mount와 `NVIDIA_VISIBLE_DEVICES=void` 확인 → jit-cdi와 일치.
+  HAMi Mount 4종과 Image 내 libcudart도 확인. `NVIDIA_VISIBLE_DEVICES=all`은 vLLM Image의 ENV, `=void`와 `NVIDIA_CTK_LIBCUDA_DIR`은 Toolkit이 생성하는 CDI
+  containerEdits. Plugin이 넘긴 GPU UUID 값이 `void`로 교체된 것은 환경 변수 위치 기반 추정. `/var/run/cdi/nvidia.yaml`은 Toolkit Package의
+  `nvidia-cdi-refresh.service`(`nvidia-ctk cdi generate`) 생성물이며, jit-cdi는 소스상 메모리에서 명세를 생성하므로 이 파일을 쓰지 않음.
 - **2026-10-16 이론 초안 작성** (Claude 작성, 사용자 검토 전, frontmatter `draft: true`).
   index.en.md는 초안 확정 전이라 미작성.
 - **2026-10-18 Memory, SM 격리 실측 추가** (Claude): 1.1 Test 환경 구축을 신설하고 1.3(Memory, SM) 섹션에 Shell 블록 2개(2500MB OOM, matmul 중 SM 샘플링) 추가. 실측 환경은 kubernetes-hami-vllm-gpu-ubuntu-26.04 Record 글의 Cluster 재사용. `GPU_CORE_UTILIZATION_POLICY=force` 설정으로 유휴 Burst를 꺼서 vgpu-monitor Metric이 ~31%에 수렴하는 모습 확인. 호스트 nvidia-smi dmon은 Token Bucket Burst 특성으로 99/0 번갈아 나오는 것 함께 수록.
