@@ -11,6 +11,12 @@ HAMi 자체(이기종 AI 가속기 가상화 Middleware)에 포커스를 두고 
 
 ## 문서 구성 및 상태
 
+- **2026-11-06 Health 상태 추가** (사용자 요청, 소스 기반): 1.1에 Unhealthy 전달 문단 추가, kubelet 규격 문장을 "ID와 Health 상태 같은 제한된 정보"로 수정.
+  Handshake bullet을 v2.10.0 pkg/device/devices.go CheckHealth 기준으로 정정 — 주기 갱신 아님. Test Node 실측: Allocatable 10에서 Timestamp가
+  2026-10-17에 멈춰 있음. Scheduler 제외는 여러 벤더 코드의 CardNotHealth로, vGPU 전체 Unhealthy는 NVIDIA 코드로 확인. 다른 벤더 Plugin의 Unhealthy 전달은 미확인.
+  같은 날 사용자 요청으로 감지 방식 추가 (벤더 중립 방침의 예외로 괄호에 벤더 이름 표기): NVIDIA는 NVML Event(rm/health.go), Ascend는 약 30초 주기 DCMI 조회와 양방향 갱신
+  (ascend-device-plugin internal/server/register.go, master), AMD는 DRM과 Metrics Exporter 조회(amd-device-plugin master, `pulse` 기본 0으로 Chart 설정 미확인, 복구 동작은 코드 일부만 확인).
+  Kunlun은 Scheduler 쪽 GetNodeDevices에서 `Health: true`로 고정되는 것만 확인해 본문 미기재. 제조사 Plugin(Table 2)은 개별 미확인.
 - **2026-11-06 Library 전달 경로 추가** (사용자 요청, 소스 기반, 실측 없음): 1.3 단계 목록 뒤에 격리 Library(Allocate 응답 Mount 항목 →
   kubelet → Container Runtime이 Bind Mount)와 Driver Library(벤더별: Runtime 확장 주입 또는 Mount 항목) 문단 추가. 벤더 중립 유지.
   근거: HAMi v2.10.0 NVIDIA Allocate, ascend-device-plugin master eNPU Mount. AMD 등 다른 벤더 Plugin은 미확인.

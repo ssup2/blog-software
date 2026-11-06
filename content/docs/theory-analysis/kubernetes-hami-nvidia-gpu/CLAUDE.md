@@ -6,6 +6,10 @@ kubernetes-hami(HAMi 자체, 벤더 중립 구조) 문서의 NVIDIA 상세 글�
 
 ## 문서 구성 및 상태
 
+- **2026-11-06 1.6 GPU Health Check 추가** (사용자 요청, 소스 기반, 장애 동작 실측 없음): 근거는 HAMi v2.10.0 rm/health.go, plugin/server.go ListAndWatch,
+  rm/devices.go GetPluginDevices, plugin/register.go(30초 주기), pkg/device/nvidia/device.go Fit(CardNotHealth). 무시 Xid 목록은 upstream과 동일.
+  Allocatable 제외와 실행 중 Pod 유지는 Kubernetes 일반 동작 기반, Pod 재시작 후 복구는 Health 상태가 메모리에만 있다는 점에서 추정. Test Node는 정상 상태(`health:true`, Allocatable 10)이고
+  현재 Plugin 로그에 `Using XIDs` 줄이 없어 Health Check 시작 여부는 미확인. DaemonSet에 `DP_*` 환경 변수 없음.
 - **2026-11-06 Library 전달 경로 추가** (사용자 요청, 소스 기반, 같은 날 Test Node에서 실측 확인): 개요 Component 목록 뒤에 Driver Library
   (NVIDIA Container Toolkit)와 HAMi-core 파일(Allocate 응답 Mount 항목) 경로 구분 추가. 근거: HAMi v2.10.0 plugin/server.go Allocate,
   daemonsetnvidia.yaml postStart, docker/vgpu-init.sh, values.yaml(gpuHookPath, libPath, deviceListStrategy). `/tmp/vgpulock`의 용도는

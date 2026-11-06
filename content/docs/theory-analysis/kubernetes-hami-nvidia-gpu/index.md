@@ -11,7 +11,7 @@ draft: true
 
 [Figure 1]은 HAMi의 NVIDIA GPU 지원 구성을 나타내고 있다. NVIDIA GPU 지원은 다음의 두 가지 Component가 담당한다.
 
-* **hami-device-plugin** : DaemonSet을 통해서 GPU Node에서 동작하며, 하나의 Pod 안에서 vGPU를 kubelet에 등록하고 할당하는 Device Plugin Container와 vGPU의 사용량을 Metric으로 노출하는 vGPU Monitor Container가 함께 동작한다.
+* **hami-device-plugin** : DaemonSet을 통해서 GPU Node에서 동작하며, 하나의 Pod 안에서 vGPU를 kubelet에 등록하고 GPU의 Health 상태를 확인하며 vGPU를 할당하는 Device Plugin Container와 vGPU의 사용량을 Metric으로 노출하는 vGPU Monitor Container가 함께 동작한다.
 * **HAMi-core** : Container 내부에 주입되는 `libvgpu.so` Library이며, CUDA Driver API 호출을 가로채서 vGPU의 Memory 크기 제한과 SM 사용률 제한을 수행한다.
 
 Container에는 세 종류의 Library가 필요하며, 종류마다 전달 방식이 다르다.
@@ -287,6 +287,21 @@ spec:
 [File 6]은 MIG Instance로 8000MB의 Memory를 요청하는 Pod의 예제를 나타내고 있으며, 요청을 수용할 수 있는 가장 작은 MIG Profile (예: A100의 `1g.10gb`)이 선택된다. `nvidia.com/vgpu-mode` Annotation은 vGPU가 할당될 모드를 고정하는 Annotation이며, 생략하면 hami-scheduler가 `mig` Node와 `hami-core` Node를 하나의 vGPU Pool로 취급하여 조건을 만족하는 Node를 자유롭게 선택한다.
 
 도입 초기의 Dynamic MIG는 `knownMigGeometries` 설정에 정의된 Geometry (Profile 조합) 단위로 GPU 전체의 MIG 구성을 전환하는 방식이었지만, v2.10.0의 Flexible MIG부터는 Profile 단위의 예약 방식으로 재구성되어 Node의 Cordon 없이 Workload별로 MIG Instance가 생성되고 회수된다. 단 HAMi가 MIG Instance의 생성과 제거를 단독으로 담당해야 하기 때문에, GPU Operator의 MIG Manager나 `mig-parted` 도구를 HAMi와 함께 운용할 수 없다.
+
+### 1.6. GPU Health Check
+
+hami-device-plugin은 NVIDIA Device Plugin의 Health Check 구현을 이어받아 NVML Event로 GPU 장애를 감지한다. **Xid** (NVIDIA Driver가 보고하는 GPU 오류 번호) Critical Error Event가 발생하면 해당 GPU를 `Unhealthy`로 표시하며, ECC Event도 구독하지만 `Unhealthy` 판정에는 이용하지 않는다. NVML Event 등록에 실패한 GPU도 `Unhealthy`로 표시되고, Event 대기 자체가 실패하면 모든 GPU가 `Unhealthy`로 표시된다.
+
+Xid `13`, `31`, `43`, `45`, `68`, `109`는 GPU 장애가 아닌 Application 오류로 간주되어 기본적으로 무시된다. `DP_DISABLE_HEALTHCHECKS` 환경 변수는 추가로 무시할 Xid 목록을 지정하거나 `all`로 Health Check 전체를 비활성화하며, `DP_ENABLE_HEALTHCHECKS` 환경 변수는 무시되는 Xid를 다시 활성화한다. 두 환경 변수는 Helm의 `devicePlugin.extraEnvs`로 지정할 수 있다.
+
+NVIDIA Device Plugin과 다른 점은 `Unhealthy` 결과가 다음의 두 가지 경로로 전달된다는 점이다.
+
+* **ListAndWatch 경로** : 물리 GPU 하나에서 만들어진 `deviceSplitCount`개의 vGPU가 모두 `Unhealthy`로 kubelet에 즉시 전달되고, kubelet은 이 vGPU들을 Node의 Allocatable에서 제외한다.
+* **Node Annotation 경로** : 30초 주기로 갱신되는 `hami.io/node-nvidia-register` Annotation의 `health` 값이 `false`로 변경되고, Scheduler Extender는 Filter 단계에서 해당 GPU를 할당 후보에서 제외한다.
+
+HAMi에서 Scheduling을 실제로 막는 것은 Node Annotation 경로이다. `nvidia.com/gpu` Resource는 `ignoredByScheduler: true`로 등록되어 kube-scheduler가 Allocatable을 확인하지 않기 때문이다.
+
+`Unhealthy`로 표시된 GPU를 `Healthy`로 되돌리는 경로는 존재하지 않기 때문에, GPU가 복구되어도 hami-device-plugin Pod를 재시작해야 다시 이용할 수 있다. 또한 Health Check는 GPU의 할당만 막을 뿐, 이미 해당 GPU를 이용 중인 Pod를 종료하지는 않는다.
 
 ## 2. 참조
 

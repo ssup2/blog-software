@@ -12,7 +12,7 @@ draft: true
 [Figure 1]은 HAMi의 Architecture를 나타내고 있다. HAMi는 다음의 세 가지 요소로 구성된다.
 
 * **hami-scheduler** : Deployment를 통해서 동작하며, 하나의 Pod 안에서 kube-scheduler Container와 Scheduler Extender Container가 함께 동작한다. Accelerator를 요청하는 Pod의 Scheduler를 hami-scheduler로 변경하는 Mutating Webhook도 Scheduler Extender가 함께 제공한다. 모든 종류의 Accelerator가 하나의 hami-scheduler를 공유하며, Accelerator별 Scheduling 동작은 hami-scheduler 내부의 Accelerator별 Package로 구현되어 있다.
-* **Device Plugin** : DaemonSet을 통해서 Accelerator가 존재하는 Node에서 동작하며, Accelerator를 kubelet에 등록하고 Container에 할당하는 역할을 수행한다.
+* **Device Plugin** : DaemonSet을 통해서 Accelerator가 존재하는 Node에서 동작하며, Accelerator를 kubelet에 등록하고 Health 상태를 확인하며 Container에 할당하는 역할을 수행한다.
 * **격리 계층** : 공유 할당된 Accelerator가 제한을 초과하여 사용되지 않도록 강제하는 계층이다. hami-scheduler가 선택한 Device와 제한 값을 Pod Annotation에 기록하고 Device Plugin이 이를 참조하여 할당하는 방식을 **HAMi Protocol**이라고 하며, 격리는 다음의 세 가지 수준으로 분류된다. 계층이 Hardware에 가까울수록 격리는 강해지지만 분할의 유연성은 줄어든다.
   * **Library 수준 격리** : Container에 주입된 격리 Library가 User 공간에서 Accelerator API 호출을 가로채서 Memory 할당과 Core 사용을 제한한다. 제한이 API 호출 시점에 이루어지기 때문에 Memory 크기와 Core 사용률을 임의의 값으로 지정할 수 있다.
   * **Driver 수준 격리** : 하드웨어 자체는 공유된 상태에서 Accelerator Driver가 각 Pod의 Memory 할당량과 Core 사용률을 추적하고 강제한다. 제한을 Application이 아니라 Driver가 수행하기 때문에 별도의 Library 주입이 필요하지 않고, 하나의 물리 Accelerator 위에 할당량이 설정된 다수의 Instance를 올릴 수 있다.
@@ -81,7 +81,11 @@ Device Plugin의 첫 번째 역할은 Node에 존재하는 Accelerator를 부풀
 4. kubelet은 전달받은 Accelerator 개수를 Node의 Allocatable/Capacity에 등록한다.
 5. Device Plugin은 Device Plugin 규격과 별도로 물리 Accelerator의 상세 정보를 `hami.io/node-[accelerator]-register` 계열의 Node Annotation에 기록한다.
 
-kubelet의 Device Plugin 규격은 Device의 개수와 ID만 전달할 수 있기 때문에, Accelerator의 Memory 크기 같은 상세 정보는 Device Plugin 규격으로는 전달할 수 없다. 따라서 Device Plugin은 상세 정보를 Node Annotation에 별도로 기록하며, 이후 Scheduler Extender가 이 Annotation을 참조하여 Scheduling을 수행한다. Annotation은 주기적으로 갱신되기 때문에 Node의 Accelerator 상태 변화도 Scheduler Extender에 반영된다.
+kubelet의 Device Plugin 규격은 Device의 ID와 Health 상태 같은 제한된 정보만 전달할 수 있기 때문에, Accelerator의 Memory 크기 같은 상세 정보는 Device Plugin 규격으로는 전달할 수 없다. 따라서 Device Plugin은 상세 정보를 Node Annotation에 별도로 기록하며, 이후 Scheduler Extender가 이 Annotation을 참조하여 Scheduling을 수행한다. Annotation은 주기적으로 갱신되기 때문에 Node의 Accelerator 상태 변화도 Scheduler Extender에 반영된다.
+
+Device Plugin은 등록 이후 Accelerator의 Health 상태도 관리한다. 장애 감지 방식은 Accelerator마다 다른데, **Event 방식** (NVIDIA GPU) 은 Driver가 보고하는 오류 Event를 구독하여 장애를 바로 감지하고, **Polling 방식** (Huawei Ascend NPU, AMD GPU) 은 제조사 관리 API 등으로 Health 상태를 주기적으로 조회한다. 복구 동작도 달라서 Event 방식은 `Unhealthy` 표시를 되돌리는 경로가 없어 Device Plugin 재시작이 필요한 반면, Polling 방식은 조회 결과가 정상으로 돌아오면 다시 이용할 수 있다. 제조사 Device Plugin을 이용하는 경우에는 제조사 Plugin의 구현을 따른다.
+
+Device Plugin이 장애를 감지하면 해당 물리 Accelerator에서 부풀려진 항목을 모두 `Unhealthy` 상태로 `ListAndWatch()`를 통해서 kubelet에 다시 전달하고, kubelet은 이 항목들을 Node의 Allocatable에서 제외한다. 또한 Node Annotation의 Health 값도 갱신되어 Scheduler Extender는 해당 Accelerator를 할당 후보에서 제외한다.
 
 Device Plugin이 kubelet에 등록하는 Accelerator 개수와 Node Annotation에 기록하는 가용량은 `hami-scheduler-device` ConfigMap의 Accelerator Section 설정으로 조정된다. **`deviceSplitCount`** (기본 `10`) 는 하나의 물리 Accelerator가 분할될 수 있는 최대 vGPU 수로, kubelet의 Allocatable/Capacity에 등록되는 Accelerator 개수는 `물리 개수 × deviceSplitCount` 가 된다. **`deviceMemoryScaling`** (기본 `1`) 과 **`deviceCoreScaling`** (기본 `1`) 은 물리 Memory와 Core 대비 할당 가능한 비율로, `1`보다 크면 Memory와 Core를 과할당할 수 있지만 모든 vGPU가 제한을 꽉 채워 쓸 경우 물리 Resource의 OOM이 발생할 수 있는 실험적 Option이다. Cluster 공통 설정은 이 ConfigMap에서 지정하고, Node 단위 재정의는 `hami-device-plugin` ConfigMap의 `nodeconfig` 목록에서 Node 이름과 함께 지정한다.
 
@@ -98,7 +102,7 @@ metadata:
 [File 1]은 Device 등록 과정에서 Node에 설정되는 HAMi Annotation을 나타내고 있다.
 
 * **`hami.io/node-[accelerator]-register`** : 해당 Node의 Accelerator 상세 목록 (UUID, Memory 크기, Core 수, Chip Type, 동작 Mode, Health 등) 을 JSON 배열로 담는다. Device Plugin이 주기적으로 갱신하며, Accelerator Suffix는 Chip 종류에 따라 바뀐다.
-* **`hami.io/node-handshake`**, **`hami.io/node-handshake-[accelerator]`** : Scheduler Extender가 Accelerator별로 Node 상태를 주기적으로 확인하는 Health check 표시이다. `Requesting_<timestamp>` 형태로 갱신된다.
+* **`hami.io/node-handshake`**, **`hami.io/node-handshake-[accelerator]`** : Scheduler Extender가 Accelerator별 Device Plugin의 동작 여부를 판단하는 데 이용하는 표시이다. Annotation이 없으면 Scheduler Extender가 `Requesting_<timestamp>`를 기록하며, 60초가 지난 뒤에도 Node의 Allocatable에 해당 Accelerator가 없으면 Scheduler Extender는 해당 Node의 Accelerator 정보를 제거한다. Allocatable에 Accelerator가 남아 있으면 Timestamp는 갱신되지 않는다.
 
 ### 1.2. Device Scheduling 과정
 
