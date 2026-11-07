@@ -144,7 +144,7 @@ MIG (Multi-Instance GPU) is a hardware-level virtualization technique that compl
 
 GPU Instance and Compute Instance can be configured in a 1:1 or 1:N ratio. When configured in a 1:N ratio, Compute Instances share and use the GPU Instance's Memory. When Compute Instance and GPU Instance are configured in a 1:1 ratio, Compute Instances are created using profiles in the form `[x]g.[x]gb`. Here, `[x]g` means the number of SM slices allocated to the Compute Instance, and `[x]gb` means the size of Memory allocated to the Compute Instance. Also, when Compute Instance and GPU Instance are configured in a 1:N ratio, Compute Instances are created using profiles in the form `[x]c.[x]g.[x]gb`. Here, `[x]c` means the number of SM slices allocated to the Compute Instance.
 
-In [Figure 7], you can see that the `4g.20gb` and `1g.5gb` GPU Instances are configured with Compute Instances in a 1:1 ratio, and the `2g.10gb` GPU Instance is configured with `1c.2g.10gb` Compute Instances in a 1:2 ratio. Containers can be allocated and use multiple Compute Instances simultaneously, but the allocated Compute Instances must operate on the same GPU Instance. In [Figure 7], Container B is allocated and uses two `1c.2g.10gb` Compute Instances, and both Compute Instances operate on one `2g.10gb` GPU Instance.
+In [Figure 7], you can see that the `4g.20gb` and `1g.5gb` GPU Instances are configured with Compute Instances in a 1:1 ratio, and the `2g.10gb` GPU Instance is configured with `1c.2g.10gb` Compute Instances in a 1:2 ratio. Multiple Compute Instances can be allocated to a container, but a single CUDA process can only use one Compute Instance per GPU Instance. In [Figure 7], Container B is allocated two `1c.2g.10gb` Compute Instances, but since both Compute Instances exist on the same `2g.10gb` GPU Instance, a single CUDA process uses only one of them. On drivers earlier than R570, a single CUDA process can only use one Compute Instance regardless of the GPU Instance.
 
 ```yaml {caption="[Config 3] NVIDIA Device Plugin MIG_STRATEGY Environment Variable", linenos=table}
     containers:
@@ -153,12 +153,14 @@ In [Figure 7], you can see that the `4g.20gb` and `1g.5gb` GPU Instances are con
           value: mixed
 ```
 
-When the NVIDIA Device Plugin's `MIG_STRATEGY` environment variable is set to `mixed` as in [Config 3], the NVIDIA Device Plugin registers `nvidia.com/gpu-[GPU Instance Profile Name]` resources on the node. For example, `nvidia.com/gpu-4g.20gb` resource is registered for the `4g.20gb` GPU Instance, and `nvidia.com/gpu-2g.10gb` resource is registered for the `2g.10gb` GPU Instance. And the count of that resource is registered as the number of Compute Instances. Therefore, based on [Figure 7], there is only 1 `nvidia.com/gpu-4g.20gb` resource and 2 `nvidia.com/gpu-2g.10gb` resources are registered.
+To use MIG, the NVIDIA Device Plugin's `MIG_STRATEGY` environment variable is set to `mixed` as in [Config 3]. When it is set to `mixed`, the NVIDIA Device Plugin registers instances as `nvidia.com/mig-[GPU Instance Profile Name]` resources, and the count of each resource equals the number of Compute Instances. Based on [Figure 7], 1 `nvidia.com/mig-4g.20gb` resource, 2 `nvidia.com/mig-2g.10gb` resources, and 1 `nvidia.com/mig-1g.5gb` resource are registered, and a Pod requests these resources to be allocated instances.
 
 To use the MIG technique, apps/containers need not only `/dev/nvidia[x]` device files connected to GPUs but also `/dev/nvidia-caps/nvidia-cap[x]` device files connected to GPU Instances and Compute Instances. Therefore, the NVIDIA Device Plugin also creates `/dev/nvidia-caps/nvidia-cap[x]` device files for containers in apps/containers.
 
-Currently, the Device Plugin does not provide Dynamic MIG functionality that dynamically creates GPU Instances and Compute Instances and allocates them to containers. Therefore, to use MIG, GPU Instances and Compute Instances must be created in advance and then allocated to containers. MIG Compute Instances are specified in the `NVIDIA_VISIBLE_DEVICES` environment variable in the form `MIG-[UUID]`.
+Currently, the Device Plugin does not provide Dynamic MIG functionality that dynamically creates GPU Instances and Compute Instances and allocates them to containers. Therefore, to use MIG, GPU Instances and Compute Instances must be created in advance and then allocated to containers. They can be created in advance either directly with the `nvidia-smi` command or through the MIG Manager of the GPU Operator. MIG Compute Instances are specified in the `NVIDIA_VISIBLE_DEVICES` environment variable in the form `MIG-[UUID]`.
 
 ## 2. References
 
 * NVIDIA MIG : [https://toss.tech/article/toss-securities-gpu-mig](https://toss.tech/article/toss-securities-gpu-mig)
+* MIG Support in Kubernetes : [https://docs.nvidia.com/datacenter/cloud-native/kubernetes/latest/index.html](https://docs.nvidia.com/datacenter/cloud-native/kubernetes/latest/index.html)
+* MIG Device Names : [https://docs.nvidia.com/datacenter/tesla/mig-user-guide/mig-device-names.html](https://docs.nvidia.com/datacenter/tesla/mig-user-guide/mig-device-names.html)

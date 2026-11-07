@@ -144,7 +144,7 @@ MIG (Multi-Instance GPU) 기법은 GPU의 SM과 Memory를 완전히 격리하여
 
 GPU Instance와 Compute Instance는 1:1 또는 1:N으로 구성될 수 있다. 1:N으로 구성된 경우에는 Compute Instance는 GPU Instance의 Memory를 공유하여 이용한다. Compute Instance와 GPU Instance가 1:1로 구성된 경우에는 `[x]g.[x]gb` 형태의 Profile을 이용하여 Compute Instance를 생성한다. 여기서 `[x]g`는 Compute Instance에 할당되는 SM Slice의 개수를 의미하며, `[x]gb`는 Compute Instance에 할당되는 Memory의 크기를 의미한다. 또한 Compute Instance와 GPU Instance가 1:N으로 구성된 경우에는 `[x]c.[x]g.[x]gb` 형태의 Profile을 이용하여 Compute Instance를 생성한다. 여기서 `[x]c`는 Compute Instance에 할당되는 SM Slice의 개수를 의미한다.
 
-[Figure 7]에서 `4g.20gb`, `1g.5gb` GPU Instance는 Compute Instance와 1:1로 구성되어 있고, `2g.10gb` GPU Instance는 `1c.2g.10gb` Compute Instance와 1:2으로 구성되어 있는것을 확인할 수 있다. Container에는 다수의 Compute Instance를 동시에 할당 받아 이용할 수 있지만, 할당 받은 Compute Instance는 반드시 동일 GPU Instance에서 동작해야 한다. [Figure 7]에서 Container B는 두개의 `1c.2g.10gb` Compute Instance를 할당 받아 이용하고 있는데, 두 Compute Instance가 하나의 `2g.10gb` GPU Instance에서 동작하기 때문이다.
+[Figure 7]에서 `4g.20gb`, `1g.5gb` GPU Instance는 Compute Instance와 1:1로 구성되어 있고, `2g.10gb` GPU Instance는 `1c.2g.10gb` Compute Instance와 1:2으로 구성되어 있는것을 확인할 수 있다. Container에는 다수의 Compute Instance를 할당할 수 있지만, 하나의 CUDA Process는 GPU Instance당 하나의 Compute Instance만 이용할 수 있다. [Figure 7]에서 Container B는 두개의 `1c.2g.10gb` Compute Instance를 할당받지만, 두 Compute Instance는 동일한 `2g.10gb` GPU Instance에 존재하기 때문에 하나의 CUDA Process는 이 중 하나만 이용한다. R570 미만의 Driver에서는 GPU Instance와 관계없이 하나의 CUDA Process가 하나의 Compute Instance만 이용할 수 있다.
 
 ```yaml {caption="[Config 3] NVIDIA Device Plugin MIG_STRATEGY Environment Variable", linenos=table}
     containers:
@@ -153,12 +153,14 @@ GPU Instance와 Compute Instance는 1:1 또는 1:N으로 구성될 수 있다. 1
           value: mixed
 ```
 
-[Config 3]과 같이 NVIDIA Device Plugin의 `MIG_STRATEGY` 환경 변수에 `mixed` 값을 설정하면 NVIDIA Device Plugin은 `nvidia.com/gpu-[GPU Instance Profile Name]` Resource를 Node에 등록한다. 에를들어 `4g.20gb` GPU Instance에는 `nvidia.com/gpu-4g.20gb` Resource가 등록되고, `2g.10gb` GPU Instance에는 `nvidia.com/gpu-2g.10gb` Resource가 등록된다. 그리고 해당 Resource의 개수는 Compute Instance의 개수가 등록된다. 따라서 [Figure 7]를 기준으로 `nvidia.com/gpu-4g.20gb` Resource는 1개만 존재하며 `nvidia.com/gpu-2g.10gb` Resource가 2개 등록된다.
+MIG를 이용하기 위해서는 [Config 3]과 같이 NVIDIA Device Plugin의 `MIG_STRATEGY` 환경 변수에 `mixed` 값을 설정한다. `mixed` 값을 설정하면 NVIDIA Device Plugin은 Instance를 `nvidia.com/mig-[GPU Instance Profile Name]` Resource로 등록하며, Resource의 개수는 Compute Instance의 개수와 같다. [Figure 7]을 기준으로 `nvidia.com/mig-4g.20gb` Resource는 1개, `nvidia.com/mig-2g.10gb` Resource는 2개, `nvidia.com/mig-1g.5gb` Resource는 1개가 등록되며, Pod는 이 Resource를 요청하여 Instance를 할당받는다.
 
 MIG 기법을 이용하기 위해서는 App/Container에서는 GPU와 연결되어 있는 `/dev/nvidia[x]` Device File 뿐만이 아니라, GPU Instance와 Compute Instance와 연결되어 있는 `/dev/nvidia-caps/nvidia-cap[x]` Device File도 필요하다. 따라서 NVIDIA Device Plugin은 Container에게 `/dev/nvidia-caps/nvidia-cap[x]` Device File도 App/Container에 생성한다.
 
-현재 Device Plugin에서는 동적으로 GPU Instance, Compute Instance를 생성하여 Container에게 할당하는 Dynamic MIG 기능을 제공하고 있지 않는다. 따라서 MIG를 이용하기 위해서는 미리 GPU Instance와 Compute Instance를 생성해 놓은 다음 Container에게 할당하는 방식으로 이용해야 한다. MIG Compute Instance는 `NVIDIA_VISIBLE_DEVICES` 환경 변수에 `MIG-[UUID]` 형태로 지정된다.
+현재 Device Plugin에서는 동적으로 GPU Instance, Compute Instance를 생성하여 Container에게 할당하는 Dynamic MIG 기능을 제공하고 있지 않는다. 따라서 MIG를 이용하기 위해서는 미리 GPU Instance와 Compute Instance를 생성해 놓은 다음 Container에게 할당하는 방식으로 이용해야 한다. 미리 생성하는 작업은 `nvidia-smi` 명령어로 직접 수행하거나 GPU Operator의 MIG Manager를 통해서 수행할 수 있다. MIG Compute Instance는 `NVIDIA_VISIBLE_DEVICES` 환경 변수에 `MIG-[UUID]` 형태로 지정된다.
 
 ## 2. 참조
 
 * NVIDIA MIG : [https://toss.tech/article/toss-securities-gpu-mig](https://toss.tech/article/toss-securities-gpu-mig)
+* MIG Support in Kubernetes : [https://docs.nvidia.com/datacenter/cloud-native/kubernetes/latest/index.html](https://docs.nvidia.com/datacenter/cloud-native/kubernetes/latest/index.html)
+* MIG Device Names : [https://docs.nvidia.com/datacenter/tesla/mig-user-guide/mig-device-names.html](https://docs.nvidia.com/datacenter/tesla/mig-user-guide/mig-device-names.html)
