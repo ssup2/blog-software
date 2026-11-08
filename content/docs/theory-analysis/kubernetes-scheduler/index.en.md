@@ -89,11 +89,11 @@ Since the **Mutating Admission** stage is performed after Defaulting, `scheduler
 
 ### 1.2. Scheduling Cycle
 
-**Scheduling Cycle** is a serial process that pops Pods one by one from the Scheduling Queue and decides a Node. kube-scheduler operates with the **Scheduling Framework** structure that divides the Scheduling process into Extension Points, and the basic features of kube-scheduler such as Resource checking and Affinity handling are also all implemented as built-in Plugins operating at each Extension Point.
+**Scheduling Cycle** is the process of deciding the Node on which a Pod will run. Pods without a decided Node are first stored in the **Scheduling Queue** and wait, and the Scheduling Cycle pops Pods one by one from the Queue and processes them serially. A popped Pod passes through **Extension Points** such as Filter and Score in order to decide the Node on which it will run, and then moves on to the Binding Cycle. A Pod for which no Node could be decided returns to the Scheduling Queue, and when a Cluster Event occurs afterward, **QueueingHint** determines whether to retry it.
 
 #### 1.2.1. Scheduling Queue
 
-Pods without a decided Node are first stored in the **Scheduling Queue**, and the Scheduling Queue is internally divided into three areas.
+As also shown in [Figure 1], the Scheduling Queue is internally divided into three areas.
 
 * **activeQ** : A priority Queue storing Pods waiting for Scheduling. The sort order is decided by the QueueSort Plugin, and the default Plugin `PrioritySort` sorts Pods so that Pods with a higher PriorityClass are processed first.
 * **backoffQ** : A Queue where Pods scheduled for retry wait during the Backoff time. It is an area to prevent repeatedly failing Pods from continuously occupying the serial Scheduling Cycle, and Pods move to activeQ after the Backoff time that increases exponentially with the number of failures (from 1 second up to 10 seconds by default) passes.
@@ -103,7 +103,19 @@ Pods that fail Scheduling are stored in unschedulablePods by default. A Pod for 
 
 However, not every failure goes through unschedulablePods. Cluster Events that occurred while Scheduling was in progress may have been missed by the Pod, so kube-scheduler records them separately, and when the Pod fails and returns to the Queue, the recorded Events are examined and, if a possibility of Scheduling has arisen, the Pod moves to backoffQ without going through unschedulablePods. Also, Pods that failed due to temporary errors such as kube-apiserver request errors move to backoffQ because they need retry regardless of Cluster changes, and there is also a safeguard where Pods that have stayed in unschedulablePods longer than a certain time (5 minutes by default) periodically move to backoffQ or activeQ even without an Event.
 
-#### 1.2.2. QueueingHint
+#### 1.2.2. Extension Point
+
+Extension Points are the points that kube-scheduler's **Scheduling Framework** opens at defined stages of the Scheduling Cycle to call Plugins, and the basic features of kube-scheduler such as Resource checking and Affinity handling are also all implemented as built-in Plugins called at each Extension Point. The Extension Points of the Scheduling Cycle are as follows.
+
+* **PreFilter** : Preprocesses the Pod's request information and checks preconditions before Filtering.
+* **Filter** : Checks whether each Node can run the Pod and excludes impossible Nodes. Representative Plugins are `NodeResourcesFit` which checks the Node's available Resources, `NodeAffinity` which checks Node Affinity, and `TaintToleration` which checks Taints and Tolerations.
+* **PostFilter** : Runs only when every Node has been rejected in Filtering. The default Plugin `DefaultPreemption` performs Preemption, which evicts lower-priority Pods to secure placement space.
+* **PreScore** : Receives the list of Nodes that passed Filtering before Scoring, and precomputes and stores information commonly needed for score calculation.
+* **Score** : Calculates the score of each Node, and selects the Node with the highest score summed with weights applied per Plugin. Representative Plugins are `NodeResourcesBalancedAllocation` which evaluates the balance of Resource utilization, and `ImageLocality` which evaluates whether the Node has the Container Image.
+* **Reserve** : Reflects the Resources the Pod will use on the selected Node in kube-scheduler's internal Cache in advance.
+* **Permit** : Approves, delays, or rejects the Pod's Bind right before Bind. It is used to implement Gang Scheduling, where multiple Pods must be placed together.
+
+#### 1.2.3. QueueingHint
 
 ```go {caption="[Code 2] QueueingHint implementation of the NodeAffinity Plugin (abbreviated)", linenos=table}
 // Register the cluster events NodeAffinity is interested in, with QueueingHintFns
@@ -127,29 +139,25 @@ func (pl *NodeAffinity) isSchedulableAfterNodeChange(logger klog.Logger, pod *v1
 }
 ```
 
-The relevance between an Event and a Pod is judged through the **QueueingHint** provided by each Plugin, and [Code 2] shows the QueueingHint implementation of the NodeAffinity Plugin in abbreviated form. Each Plugin registers the kinds of Cluster Events that can affect its judgment through `EventsToRegister()`, and provides a QueueingHintFn that judges whether to retry for each Event. When a Pod fails Scheduling, kube-scheduler records the names of the Plugins that rejected it together with the Pod, and when a Cluster Event occurs afterwards, it calls only the QueueingHintFns of the rejecting Plugins to receive a `Queue` or `QueueSkip` verdict.
+The relevance between a Pod stored in unschedulablePods and a Cluster Event is judged through the QueueingHint provided by each Plugin, and [Code 2] shows the QueueingHint implementation of the NodeAffinity Plugin in abbreviated form. Each Plugin registers the kinds of Cluster Events that can affect its judgment through `EventsToRegister()`, and provides a QueueingHintFn that judges whether to retry for each Event. When a Pod fails Scheduling, kube-scheduler records the names of the Plugins that rejected it together with the Pod, and when a Cluster Event occurs afterwards, it calls only the QueueingHintFns of the rejecting Plugins to receive a `Queue` or `QueueSkip` verdict.
 
 For example, when there is a Pod stored in unschedulablePods because no Node satisfies its Node Affinity condition and a new Node is added, the QueueingHintFn of the NodeAffinity Plugin examines whether the added Node's Labels satisfy the Pod's Node Affinity. If satisfied, the Pod moves to activeQ or backoffQ with a `Queue` verdict and Scheduling is retried, and if not, the Pod stays in unschedulablePods with a `QueueSkip` verdict. Before QueueingHint was introduced, Pod movement was decided only by the kind of Event, so Scheduling retries with no possibility of success were repeated, but QueueingHint examines even the content of the Event, so unnecessary retries are eliminated.
 
 QueueingHint was introduced as Alpha in Kubernetes 1.28 with the `SchedulerQueueingHints` Feature Gate, and after a period of being disabled by default due to the increased memory usage for Event judgment, it has been enabled by default since 1.32. Meanwhile, in the case of Plugins that reject Pods in the Pending state to wait for the operation of external Controllers, such as the DRA Plugin, the rejection is not a wrong judgment of kube-scheduler, so on a `Queue` verdict the Pod moves directly to activeQ without going through backoffQ to reduce the waiting time.
 
-#### 1.2.3. Extension Point
-
-The Extension Points of the Scheduling Cycle are as follows.
-
-* **PreFilter** : Preprocesses the Pod's request information and checks preconditions before Filtering.
-* **Filter** : Checks whether each Node can run the Pod and excludes impossible Nodes. Representative Plugins are `NodeResourcesFit` which checks the Node's available Resources, `NodeAffinity` which checks Node Affinity, and `TaintToleration` which checks Taints and Tolerations.
-* **PostFilter** : Runs only when every Node has been rejected in Filtering. The default Plugin `DefaultPreemption` performs Preemption, which evicts lower-priority Pods to secure placement space.
-* **PreScore** : Receives the list of Nodes that passed Filtering before Scoring, and precomputes and stores information commonly needed for score calculation.
-* **Score** : Calculates the score of each Node, and selects the Node with the highest score summed with weights applied per Plugin. Representative Plugins are `NodeResourcesBalancedAllocation` which evaluates the balance of Resource utilization, and `ImageLocality` which evaluates whether the Node has the Container Image.
-* **Reserve** : Reflects the Resources the Pod will use on the selected Node in kube-scheduler's internal Cache in advance.
-* **Permit** : Approves, delays, or rejects the Pod's Bind right before Bind. It is used to implement Gang Scheduling, where multiple Pods must be placed together.
-
 ### 1.3. Binding Cycle
 
-**Binding Cycle** is the process of Binding a Pod to the Node decided by the Scheduling Cycle. Since Bind is a slow operation that sends a request to kube-apiserver and waits for the response, kube-scheduler separates the Binding Cycle into a separate Goroutine to perform it asynchronously, and starts the Scheduling of the next Pod immediately without waiting for the Bind to complete.
+**Binding Cycle** is the process of Binding a Pod to the Node decided by the Scheduling Cycle. The Binding Cycle is performed **asynchronously**, separated from the Scheduling Cycle, and the Pod is Bound to the Node by passing through **Extension Points** such as PreBind, Bind, and PostBind in order. For a Pod that fails during the Binding Cycle, the Resources reflected at the Reserve stage are rolled back and the Pod then returns to the Scheduling Queue.
 
-This asynchronous structure creates a risk of Resources being placed in duplicate. A Node's remaining Resources are calculated by excluding the requests of the Pods whose `spec.nodeName` is set to that Node, but a Pod whose Bind has not finished does not have `spec.nodeName` yet and is missing from this calculation, so the next Pod being Scheduled in the meantime can take the same Resources again. kube-scheduler reflects the Resources the Pod will use in its internal Cache in advance at the Reserve stage of the Scheduling Cycle, and the Scheduling of the next Pod judges based on this Cache, so the decided placement is included in the calculation even before the Bind finishes and duplicate placement is prevented. The Extension Points of the Binding Cycle are as follows.
+#### 1.3.1. Asynchronous Binding
+
+Since Bind is a slow operation that sends a request to kube-apiserver and waits for the response, kube-scheduler separates the Binding Cycle into a separate Goroutine to perform it asynchronously, and starts the Scheduling of the next Pod immediately without waiting for the Bind to complete.
+
+This asynchronous structure creates a risk of Resources being placed in duplicate. A Node's remaining Resources are calculated by excluding the requests of the Pods whose `spec.nodeName` is set to that Node, but a Pod whose Bind has not finished does not have `spec.nodeName` yet and is missing from this calculation, so the next Pod being Scheduled in the meantime can take the same Resources again. kube-scheduler reflects the Resources the Pod will use in its internal Cache in advance at the Reserve stage of the Scheduling Cycle, and the Scheduling of the next Pod judges based on this Cache, so the decided placement is included in the calculation even before the Bind finishes and duplicate placement is prevented.
+
+#### 1.3.2. Extension Point
+
+Like the Scheduling Cycle, the Binding Cycle also has Extension Points that the Scheduling Framework opens at defined stages to call Plugins, and they are as follows.
 
 * **PreBind** : Performs preparation work needed before Bind. The representative Plugin is `VolumeBinding`, which Attaches Volumes to the Node.
 * **Bind** : Sends a Binding request to kube-apiserver to set the Pod's `spec.nodeName`. The set Node information is recorded in etcd through kube-apiserver, and the kubelet of that Node detects it and runs the Pod.
@@ -179,7 +187,26 @@ type ScorePlugin interface {
 }
 ```
 
-The **Scheduling Framework Plugin** method implements Custom Plugins and registers them at Extension Points, and [Code 3] shows the Plugin Interfaces defined by the Scheduling Framework in abbreviated form. Every Plugin implements the `Plugin` Interface, which returns its name, as the base, and additionally implements the Interfaces corresponding to the Extension Points where it operates, such as `FilterPlugin`, `ScorePlugin`, and `PermitPlugin`. Since Custom Plugins operate in the same way as built-in Plugins, they can implement every Extension Point and even QueueingHint.
+As the name suggests, the **Scheduling Framework Plugin** method is a method of building Plugins directly using the Extension Points provided by the Scheduling Framework. To operate as a Plugin, the Interfaces provided by the Scheduling Framework must be implemented, and [Code 3] shows these Interfaces in abbreviated form. Every Plugin implements the `Plugin` Interface, which returns its name, as the base, and must additionally implement the following Interfaces corresponding to the Extension Points where it operates.
+
+{{< table caption="[Table 1] Plugin Interface by Extension Point" >}}
+| Extension Point | Interface | Methods to Implement |
+|---|---|---|
+| PreEnqueue | `PreEnqueuePlugin` | `PreEnqueue()` |
+| QueueSort | `QueueSortPlugin` | `Less()` |
+| PreFilter | `PreFilterPlugin` | `PreFilter()`, `PreFilterExtensions()` |
+| Filter | `FilterPlugin` | `Filter()` |
+| PostFilter | `PostFilterPlugin` | `PostFilter()` |
+| PreScore | `PreScorePlugin` | `PreScore()` |
+| Score | `ScorePlugin` | `Score()`, `ScoreExtensions()` |
+| Reserve | `ReservePlugin` | `Reserve()`, `Unreserve()` |
+| Permit | `PermitPlugin` | `Permit()` |
+| PreBind | `PreBindPlugin` | `PreBindPreFlight()`, `PreBind()` |
+| Bind | `BindPlugin` | `Bind()` |
+| PostBind | `PostBindPlugin` | `PostBind()` |
+{{< /table >}}
+
+Since Custom Plugins operate in the same way as built-in Plugins, they can implement every Extension Point in [Table 1], and they can also implement QueueingHint through `EventsToRegister()` of the `EnqueueExtensions` Interface.
 
 ```go {caption="[Code 4] Implementation and registration example of a Custom Filter Plugin", linenos=table}
 const Name = "ExampleFilter"
@@ -208,9 +235,7 @@ func main() {
 }
 ```
 
-[Code 4] shows an implementation and registration example of a Custom Filter Plugin that excludes Nodes with the Maintenance Label set. `Filter()` is called per Node in the Filtering stage and returns a `Success` or `Unschedulable` Status, and the implemented Plugin must be registered with `app.WithPlugin()` and kube-scheduler must be rebuilt. In the rebuilt kube-scheduler, at which Extension Point the Plugin is enabled is designated by specifying the Plugin name in the `plugins` setting of the KubeSchedulerConfiguration's Profile.
-
-The scheduler-plugins Project, the official Kubernetes Plugin collection, uses this method, and the Coscheduling Plugin of scheduler-plugins, which implements Gang Scheduling, is a representative example that uses the QueueSort and Permit Extension Points together.
+[Code 4] shows an implementation and registration example of a Custom Filter Plugin that excludes Nodes with the Maintenance Label set. `Filter()` is called per Node in the Filtering stage and returns a `Success` or `Unschedulable` Status to determine whether the Node passes. The implemented Plugin must be registered with `app.WithPlugin()`, and kube-scheduler must be rebuilt. After that, the Plugin can be used only after the Extension Point at which it is enabled is specified along with the Plugin name in the `plugins` setting of the KubeSchedulerConfiguration's Profile. The **scheduler-plugins** Project, the official Kubernetes Plugin collection, uses this method.
 
 #### 1.4.2. Scheduler Extender
 

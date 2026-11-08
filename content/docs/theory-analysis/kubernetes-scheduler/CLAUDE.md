@@ -26,12 +26,18 @@ kubernetes-hami 문서의 배경 글 (HAMi의 Scheduler Extender 방식 이해 �
 - 1장 구성: 1. 개요(Figure 1 Architecture + 4개 절 요약 개조식) /
   1.1 Scheduler 지정(Profile File 1, 다중 Profile File 2 — 공식 문서의 no-scoring-scheduler 예제 기반(PreScore/Score
   `disabled: '*'` 문법 재확인 필요), Pod Defaulting File 3, SetDefaults_PodSpec Code 1, Defaulting vs Mutating Admission) /
-  1.2 Scheduling Cycle(Scheduling Framework 소개와 Custom Plugin) /
-  1.2.1 Scheduling Queue(3영역과 실패, 재이동 경로) / 1.2.2 QueueingHint(Code 2, 시나리오, 버전 이력, Pending backoff 생략) /
-  1.2.3 Extension Point(PreFilter~Permit 목록) /
-  1.3 Binding Cycle(PreBind/Bind/PostBind — 도입부를 2026-10-27 사용자 피드백으로 2문단 재구성:
-  ① Bind는 느린 작업 → Goroutine 분리, 다음 Pod Scheduling 즉시 시작, ② 중복 배치 위험의 원리(남은 Resource는
-  nodeName 설정된 Pod 요청량 제외로 계산 → Bind 전 Pod는 집계 누락)와 Reserve의 Cache 선반영으로 방지) /
+  1.2 Scheduling Cycle(Queue 저장 → 직렬 처리 → Extension Point → Binding Cycle, 실패 시 Queue 복귀와 QueueingHint 재시도
+  흐름 요약 — 2026-11-08 사용자 요청으로 재작성) /
+  1.2.1 Scheduling Queue(3영역과 실패, 재이동 경로) /
+  1.2.2 Extension Point(Scheduling Framework 소개 + PreFilter~Permit 목록) /
+  1.2.3 QueueingHint(Code 2, 시나리오, 버전 이력, Pending backoff 생략)
+  — 2026-11-08 사용자 요청으로 Extension Point와 QueueingHint 순서 교체, Scheduling Framework 문장을 1.2 도입부에서 1.2.2로 이동 /
+  1.3 Binding Cycle(2026-11-08 사용자 요청으로 1.2와 같은 형태로 재구성: 도입부는 비동기 수행 → Extension Point 통과 →
+  실패 시 Reserve 되돌림(Unreserve) 후 Queue 복귀 흐름 요약, 하위 제목 키워드 bold) /
+  1.3.1 비동기 Binding(2026-10-27 피드백으로 구성한 2문단: ① Bind는 느린 작업 → Goroutine 분리, 다음 Pod Scheduling 즉시
+  시작, ② 중복 배치 위험의 원리(남은 Resource는 nodeName 설정된 Pod 요청량 제외로 계산 → Bind 전 Pod는 집계 누락)와
+  Reserve의 Cache 선반영으로 방지) /
+  1.3.2 Extension Point(PreBind/Bind/PostBind, 2026-11-07 분리) /
   1.4 Scheduler 확장 — 2026-10-26 사용자 피드백으로 하위 항목 분리 후 Custom Scheduler 항목(1.4.3)은 다시 제거
   (메커니즘이 1.1과 중복): 1.4.1 Scheduling Framework Plugin(1.2에 있던 Custom Plugin 문단 이동) /
   1.4.2 Scheduler Extender(File 4, 4 Verb와 Figure 1 강조 대응, managedResources, 마지막 문단에 Custom Scheduler 병용, HAMi 사례).
@@ -66,8 +72,8 @@ kubernetes-hami 문서의 배경 글 (HAMi의 Scheduler Extender 방식 이해 �
     CycleState/NodeInfo/Status가 fwk interface 타입으로 변경됐는지 확인 필요. [Code 4]의 등록 패턴
     (cmd/kube-scheduler/app의 NewSchedulerCommand + WithPlugin, New 함수 시그니처)도 재확인 필요.
   - PostFilter 기본 Plugin `DefaultPreemption`, QueueSort 기본 Plugin `PrioritySort` 확인.
-  - Extender Verb 4종 (KubeSchedulerConfiguration 필드명 filterVerb/prioritizeVerb/bindVerb/preemptVerb),
-    Coscheduling의 이용 Extension Point(QueueSort+Permit) 재확인 필요.
+  - Extender Verb 4종 (KubeSchedulerConfiguration 필드명 filterVerb/prioritizeVerb/bindVerb/preemptVerb) 재확인 필요.
+    Coscheduling 문장은 2026-11-07 사용자 요청으로 본문에서 삭제.
   - KubeSchedulerConfiguration API Version (kubescheduler.config.k8s.io/v1) 확인.
 
 ## Test 계획 (미수행)
