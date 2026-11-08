@@ -6,12 +6,15 @@ title: Kubernetes Scheduler
 
 {{< figure caption="[Figure 1] kube-scheduler Architecture" src="images/scheduler-architecture.png" width="1000px" >}}
 
-**Kubernetes Scheduler** (kube-scheduler)는 생성된 Pod를 어느 Node에서 실행할지 결정하는 Control Plane Component이다. [Figure 1]은 kube-scheduler의 Architecture를 나타내고 있으며, 전체 동작은 다음의 네 부분으로 구분된다.
+**Kubernetes Scheduler** (kube-scheduler)는 생성된 Pod를 어느 Node에서 실행할지 결정하는 Control Plane Component이다. [Figure 1]은 kube-scheduler의 Architecture를 나타내고 있으며, 전체 동작은 다음의 다섯 부분으로 구분된다.
 
 * **Scheduler 지정** : Pod가 생성될 때 kube-apiserver의 Defaulting과 Mutating Admission 과정에서 해당 Pod를 담당할 Scheduler의 이름이 결정된다.
-* **Scheduling Cycle** : Node가 결정되지 않은 Pod는 Informer의 Watch를 통해서 감지되어 Scheduling Queue에 저장되며, Scheduling Cycle이 Queue에서 Pod를 하나씩 꺼내서 Scheduling Framework Plugin을 통해서 Node를 결정한다.
+* **Scheduling Queue** : Node가 결정되지 않은 Pod는 Informer의 Watch를 통해서 감지되어 Scheduling Queue에 저장되며, Scheduling에 실패한 Pod도 Scheduling Queue로 돌아와서 재시도를 대기한다.
+* **Scheduling Cycle** : Scheduling Queue에서 Pod를 하나씩 꺼내서 Scheduling Framework Plugin을 통해서 Node를 결정한다.
 * **Binding Cycle** : 결정된 Node로 Pod를 Bind하여 `spec.nodeName`을 설정하며, Goroutine을 통해서 비동기로 수행된다.
 * **Scheduler 확장** : Scheduling 동작은 kube-scheduler에 포함되는 Scheduling Framework Plugin과 HTTP Webhook 기반의 Scheduler Extender를 통해서 확장할 수 있으며, 별도로 배포되는 Custom Scheduler와 함께 이용되기도 한다.
+
+**Extension Point**는 kube-scheduler의 **Scheduling Framework**가 Scheduling Queue부터 Binding Cycle까지의 정해진 단계에서 Plugin을 호출하도록 열어 둔 지점이며, Resource 검사나 Affinity 처리 같은 kube-scheduler의 기본 기능도 모두 각 Extension Point에서 호출되는 내장 Plugin으로 구현되어 있다.
 
 ### 1.1. Scheduler 지정
 
@@ -87,15 +90,15 @@ Defaulting은 [Figure 1]의 Scheduler Assignment 영역과 같이 kube-apiserver
 
 Defaulting 이후에는 **Mutating Admission** 단계가 수행되기 때문에, Mutating Admission Webhook이 Pod를 전달받는 시점에는 `schedulerName`이 이미 `default-scheduler`로 채워져 있다. 따라서 특정 Pod를 Custom Scheduler로 보내려는 Middleware는 채워진 `schedulerName`을 Mutating Webhook에서 자신의 Scheduler 이름으로 덮어쓰는 방식으로 동작하며, `schedulerName`은 생성 후에는 변경할 수 없는 필드이기 때문에 이러한 변경은 생성 시점에만 가능하다.
 
-### 1.2. Scheduling Cycle
+### 1.2. Scheduling Queue
 
-**Scheduling Cycle**은 Pod를 실행할 Node를 결정하는 과정이다. Node가 결정되지 않은 Pod는 먼저 **Scheduling Queue**에 저장되어 대기하며, Scheduling Cycle은 Queue에서 Pod를 하나씩 꺼내서 직렬로 처리한다. 꺼낸 Pod는 Filter, Score 같은 **Extension Point**를 순서대로 거치면서 실행될 Node가 결정되고, 이후에 Binding Cycle로 넘어간다. Node를 결정하지 못한 Pod는 Scheduling Queue로 돌아가며, 이후 Cluster Event가 발생하면 **QueueingHint**를 통해서 재시도 여부가 판단된다.
+**Scheduling Queue**는 Node가 결정되지 않은 Pod가 Scheduling을 대기하는 Queue이다. Scheduling Queue는 PreEnqueue, QueueSort 같은 **Extension Point**를 통해서 Pod가 Scheduling을 시작할 준비가 되었는지와 Pod를 꺼내는 순서를 결정하며, Scheduling Cycle은 이 순서대로 Pod를 하나씩 꺼내서 처리한다. Scheduling에 실패한 Pod는 다시 Scheduling Queue로 돌아오며, 이후 Cluster Event가 발생하면 **QueueingHint**를 통해서 재시도 여부가 판단된다.
 
-#### 1.2.1. Scheduling Queue
+#### 1.2.1. Queue 구조
 
 Scheduling Queue는 [Figure 1]에서도 나타나 있는 것처럼 내부적으로 세 가지 영역으로 구분된다.
 
-* **activeQ** : Scheduling을 대기하는 Pod가 저장되는 우선순위 Queue이다. 정렬 순서는 QueueSort Plugin이 결정하며, 기본 Plugin인 `PrioritySort`는 PriorityClass가 높은 Pod를 먼저 처리하도록 정렬한다.
+* **activeQ** : Scheduling을 대기하는 Pod가 저장되는 우선순위 Queue이다.
 * **backoffQ** : 재시도가 예정된 Pod가 Backoff 시간 동안 대기하는 Queue이다. 반복해서 실패하는 Pod가 직렬 구조의 Scheduling Cycle을 계속 점유하는 것을 막기 위한 영역이며, 실패 횟수에 따라서 지수적으로 증가하는 Backoff 시간 (기본 1초에서 최대 10초)이 지나면 activeQ로 이동한다.
 * **unschedulablePods** : Cluster의 상태가 변하지 않는 한 재시도해도 같은 결과가 나오는 Pod가 저장되는 영역이다. 시간이 지나면 벗어나는 backoffQ와 다르게, Scheduling 가능성이 생기는 Cluster Event가 발생해야 벗어난다.
 
@@ -105,15 +108,10 @@ Scheduling에 실패한 Pod는 기본적으로 unschedulablePods에 저장된다
 
 #### 1.2.2. Extension Point
 
-Extension Point는 kube-scheduler의 **Scheduling Framework**가 Scheduling Cycle의 정해진 단계에서 Plugin을 호출하도록 열어 둔 지점이며, Resource 검사나 Affinity 처리 같은 kube-scheduler의 기본 기능도 모두 각 Extension Point에서 호출되는 내장 Plugin으로 구현되어 있다. Scheduling Cycle의 Extension Point는 다음과 같다.
+Scheduling Queue의 Extension Point는 다음과 같다.
 
-* **PreFilter** : Filtering 전에 Pod의 요청 정보를 전처리하고 사전 조건을 검사한다.
-* **Filter** : 각 Node가 Pod를 실행할 수 있는지 검사하여 불가능한 Node를 제외한다. Node의 가용 Resource를 검사하는 `NodeResourcesFit`, Node Affinity를 검사하는 `NodeAffinity`, Taint와 Toleration을 검사하는 `TaintToleration` Plugin이 대표적이다.
-* **PostFilter** : 모든 Node가 Filtering에서 탈락한 경우에만 실행된다. 기본 Plugin인 `DefaultPreemption`은 우선순위가 낮은 Pod를 축출하여 배치 공간을 확보하는 Preemption을 수행한다.
-* **PreScore** : Scoring 전에 Filtering을 통과한 Node 목록을 전달받아, 점수 계산에 공통으로 필요한 정보를 미리 계산하여 저장한다.
-* **Score** : 각 Node의 점수를 계산하고, Plugin마다 가중치를 적용해 합산한 점수가 가장 높은 Node를 선택한다. Resource 사용률의 균형을 평가하는 `NodeResourcesBalancedAllocation`, Container Image 보유 여부를 평가하는 `ImageLocality` Plugin이 대표적이다.
-* **Reserve** : 선택된 Node에 Pod가 사용할 Resource를 kube-scheduler 내부 Cache에 미리 반영한다.
-* **Permit** : Bind 직전에 Pod의 Bind를 승인, 지연 또는 거부한다. 다수의 Pod가 함께 배치되어야 하는 Gang Scheduling 구현에 이용된다.
+* **PreEnqueue** : Pod가 activeQ에 들어가기 전에 Scheduling을 시작할 준비가 되었는지 검사하며, 통과하지 못한 Pod는 activeQ에 들어가지 못하고 unschedulablePods에서 대기한다. Pod의 `spec.schedulingGates`가 모두 제거되기 전까지 Scheduling을 막는 `SchedulingGates` Plugin이 대표적이다.
+* **QueueSort** : activeQ에 저장된 Pod의 처리 순서를 결정한다. 기본 Plugin인 `PrioritySort`는 PriorityClass가 높은 Pod를 먼저 처리하도록 정렬한다.
 
 #### 1.2.3. QueueingHint
 
@@ -145,29 +143,45 @@ unschedulablePods에 저장된 Pod와 Cluster Event의 연관성은 각 Plugin�
 
 QueueingHint는 Kubernetes 1.28에 `SchedulerQueueingHints` Feature Gate와 함께 Alpha로 도입되었고, Event 판단을 위한 메모리 사용량 증가 문제로 한동안 기본 비활성화를 거친 뒤에 1.32부터 기본 활성화되었다. 한편 DRA Plugin처럼 외부 Controller의 동작을 기다리기 위해서 Pod를 Pending 상태로 거부하는 Plugin의 경우에는, 거부가 kube-scheduler의 잘못된 판단이 아니기 때문에 `Queue` 판정 시 backoffQ를 거치지 않고 activeQ로 바로 이동하여 대기 시간을 줄인다.
 
-### 1.3. Binding Cycle
+### 1.3. Scheduling Cycle
 
-**Binding Cycle**은 Scheduling Cycle이 결정한 Node로 Pod를 Bind하는 과정이다. Binding Cycle은 Scheduling Cycle과 분리되어 **비동기**로 수행되며, PreBind, Bind, PostBind 같은 **Extension Point**를 순서대로 거치면서 Pod가 Node에 Bind된다. Binding Cycle 도중 실패한 Pod는 Reserve 단계에서 반영한 Resource가 되돌려진 다음 Scheduling Queue로 돌아간다.
+**Scheduling Cycle**은 Pod를 실행할 Node를 결정하는 과정이다. Scheduling Cycle은 Scheduling Queue에서 Pod를 하나씩 꺼내서 직렬로 처리하며, 꺼낸 Pod는 Filter, Score 같은 **Extension Point**를 순서대로 거치면서 실행될 Node가 결정되고 이후에 Binding Cycle로 넘어간다. Node를 결정하지 못한 Pod는 Scheduling Queue로 돌아간다.
 
-#### 1.3.1. 비동기 Binding
+#### 1.3.1. Extension Point
 
-Bind는 kube-apiserver에 요청을 전송하고 응답을 기다리는 느린 작업이기 때문에, kube-scheduler는 Binding Cycle을 별도의 Goroutine으로 분리하여 비동기로 수행하고 Bind의 완료를 기다리지 않고 다음 Pod의 Scheduling을 바로 시작한다.
+Scheduling Cycle의 Extension Point는 다음과 같다.
+
+* **PreFilter** : Filtering 전에 Pod의 요청 정보를 전처리하고 사전 조건을 검사한다.
+* **Filter** : 각 Node가 Pod를 실행할 수 있는지 검사하여 불가능한 Node를 제외한다. Node의 가용 Resource를 검사하는 `NodeResourcesFit`, Node Affinity를 검사하는 `NodeAffinity`, Taint와 Toleration을 검사하는 `TaintToleration` Plugin이 대표적이다.
+* **PostFilter** : 모든 Node가 Filtering에서 탈락한 경우에만 실행된다. 기본 Plugin인 `DefaultPreemption`은 우선순위가 낮은 Pod를 축출하여 배치 공간을 확보하는 Preemption을 수행한다.
+* **PreScore** : Scoring 전에 Filtering을 통과한 Node 목록을 전달받아, 점수 계산에 공통으로 필요한 정보를 미리 계산하여 저장한다.
+* **Score** : 각 Node의 점수를 계산하고, Plugin마다 가중치를 적용해 합산한 점수가 가장 높은 Node를 선택한다. Resource 사용률의 균형을 평가하는 `NodeResourcesBalancedAllocation`, Container Image 보유 여부를 평가하는 `ImageLocality` Plugin이 대표적이다.
+* **Reserve** : 선택된 Node에 Pod가 사용할 Resource를 kube-scheduler 내부 Cache에 미리 반영한다.
+* **Permit** : Bind 직전에 Pod의 Bind를 승인, 지연 또는 거부한다. 다수의 Pod가 함께 배치되어야 하는 Gang Scheduling 구현에 이용된다.
+
+### 1.4. Binding Cycle
+
+**Binding Cycle**은 Scheduling Cycle이 결정한 Node로 Pod를 Bind하는 과정이다. Binding Cycle은 Scheduling Cycle과 분리되어 **비동기**로 수행되며, PreBind, Bind, PostBind 같은 **Extension Point**를 순서대로 거치면서 Pod가 Node에 Bind된다. Binding Cycle 도중 실패한 Pod는 Scheduling Cycle의 Reserve 단계에서 반영한 Resource가 되돌려진 다음 Scheduling Queue로 돌아간다.
+
+#### 1.4.1. 비동기 Binding
+
+Binding Cycle을 비동기로 수행하는 이유는 Bind가 kube-apiserver에 요청을 전송하고 응답을 기다리는 느린 작업이기 때문이다. kube-scheduler는 Binding Cycle을 별도의 Goroutine에서 수행하고, Bind의 완료를 기다리지 않고 다음 Pod의 Scheduling을 바로 시작한다.
 
 이러한 비동기 구조에서는 Resource가 중복으로 배치될 위험이 생긴다. Node의 남은 Resource는 해당 Node에 `spec.nodeName`이 설정된 Pod들의 요청량을 제외하여 계산되는데, Bind가 끝나지 않은 Pod는 아직 `spec.nodeName`이 없어서 이 집계에서 누락되고, 그 사이에 Scheduling되는 다음 Pod가 같은 Resource를 다시 차지할 수 있기 때문이다. kube-scheduler는 Scheduling Cycle의 Reserve 단계에서 해당 Pod가 사용할 Resource를 내부 Cache에 미리 반영해 두고 다음 Pod의 Scheduling은 이 Cache를 기준으로 판단하기 때문에, Bind가 끝나기 전에도 결정된 배치가 집계에 포함되어 중복 배치가 방지된다.
 
-#### 1.3.2. Extension Point
+#### 1.4.2. Extension Point
 
-Binding Cycle에도 Scheduling Cycle과 동일하게 Scheduling Framework가 정해진 단계에서 Plugin을 호출하도록 열어 둔 Extension Point가 존재하며, 다음과 같다.
+Binding Cycle의 Extension Point는 다음과 같다.
 
 * **PreBind** : Bind 전에 필요한 준비 작업을 수행한다. Volume을 Node에 Attach하는 `VolumeBinding` Plugin이 대표적이다.
 * **Bind** : kube-apiserver에 Binding 요청을 전송하여 Pod의 `spec.nodeName`을 설정한다. 설정된 Node 정보는 kube-apiserver를 통해서 etcd에 기록되며, 해당 Node의 kubelet이 이를 감지하여 Pod를 실행한다.
 * **PostBind** : Bind 완료 후 정리 작업을 수행한다.
 
-### 1.4. Scheduler 확장
+### 1.5. Scheduler 확장
 
 kube-scheduler의 Scheduling 동작은 Scheduling Framework Plugin과 Scheduler Extender 두 가지 방법으로 확장할 수 있다.
 
-#### 1.4.1. Scheduling Framework Plugin
+#### 1.5.1. Scheduling Framework Plugin
 
 ```go {caption="[Code 3] Scheduling Framework의 Plugin Interface (축약)", linenos=table}
 // pkg/scheduler/framework/interface.go
@@ -189,21 +203,21 @@ type ScorePlugin interface {
 
 **Scheduling Framework Plugin** 방식은 이름에서 알 수 있는 것처럼 Scheduling Framework에서 제공하는 Extension Point를 이용하여 직접 Plugin을 구성하는 방법이다. Plugin으로 동작하기 위해서는 Scheduling Framework가 제공하는 Interface를 구현해야 하며, [Code 3]은 이 Interface를 축약하여 나타내고 있다. 모든 Plugin은 이름을 반환하는 `Plugin` Interface를 기본으로 구현하고, 동작할 Extension Point에 해당하는 다음의 Interface를 추가로 구현해야 한다.
 
-{{< table caption="[Table 1] Extension Point별 Plugin Interface" >}}
-| Extension Point | Interface | 구현 Method |
-|---|---|---|
-| PreEnqueue | `PreEnqueuePlugin` | `PreEnqueue()` |
-| QueueSort | `QueueSortPlugin` | `Less()` |
-| PreFilter | `PreFilterPlugin` | `PreFilter()`, `PreFilterExtensions()` |
-| Filter | `FilterPlugin` | `Filter()` |
-| PostFilter | `PostFilterPlugin` | `PostFilter()` |
-| PreScore | `PreScorePlugin` | `PreScore()` |
-| Score | `ScorePlugin` | `Score()`, `ScoreExtensions()` |
-| Reserve | `ReservePlugin` | `Reserve()`, `Unreserve()` |
-| Permit | `PermitPlugin` | `Permit()` |
-| PreBind | `PreBindPlugin` | `PreBindPreFlight()`, `PreBind()` |
-| Bind | `BindPlugin` | `Bind()` |
-| PostBind | `PostBindPlugin` | `PostBind()` |
+{{< table caption="[Table 1] Extension Point별 단계와 Plugin Interface" >}}
+| Extension Point | 단계 | Interface | 구현 Method |
+|---|---|---|---|
+| PreEnqueue | Scheduling Queue | `PreEnqueuePlugin` | `PreEnqueue()` |
+| QueueSort | Scheduling Queue | `QueueSortPlugin` | `Less()` |
+| PreFilter | Scheduling Cycle | `PreFilterPlugin` | `PreFilter()`, `PreFilterExtensions()` |
+| Filter | Scheduling Cycle | `FilterPlugin` | `Filter()` |
+| PostFilter | Scheduling Cycle | `PostFilterPlugin` | `PostFilter()` |
+| PreScore | Scheduling Cycle | `PreScorePlugin` | `PreScore()` |
+| Score | Scheduling Cycle | `ScorePlugin` | `Score()`, `ScoreExtensions()` |
+| Reserve | Scheduling Cycle | `ReservePlugin` | `Reserve()`, `Unreserve()` |
+| Permit | Scheduling Cycle | `PermitPlugin` | `Permit()` |
+| PreBind | Binding Cycle | `PreBindPlugin` | `PreBindPreFlight()`, `PreBind()` |
+| Bind | Binding Cycle | `BindPlugin` | `Bind()` |
+| PostBind | Binding Cycle | `PostBindPlugin` | `PostBind()` |
 {{< /table >}}
 
 Custom Plugin은 내장 Plugin과 동일한 방식으로 동작하기 때문에 [Table 1]의 모든 Extension Point를 구현할 수 있으며, `EnqueueExtensions` Interface의 `EventsToRegister()`를 통해서 QueueingHint도 구현할 수 있다.
@@ -237,7 +251,7 @@ func main() {
 
 [Code 4]는 Maintenance Label이 설정된 Node를 제외하는 Custom Filter Plugin의 구현과 등록 예제를 나타내고 있다. `Filter()`는 Filtering 단계에서 Node마다 호출되며, `Success` 또는 `Unschedulable` Status를 반환하여 해당 Node의 통과 여부를 결정한다. 구현한 Plugin은 `app.WithPlugin()`으로 등록한 다음 kube-scheduler를 다시 빌드해야 한다. 이후에 Plugin을 활성화할 Extension Point를 KubeSchedulerConfiguration의 Profile에 있는 `plugins` 설정에 Plugin 이름과 함께 지정해야 이용할 수 있다. Kubernetes 공식 Plugin 모음인 **scheduler-plugins** Project가 이 방식을 이용한다.
 
-#### 1.4.2. Scheduler Extender
+#### 1.5.2. Scheduler Extender
 
 ```yaml {caption="[File 4] Scheduler Extender 설정 예제", linenos=table}
 apiVersion: kubescheduler.config.k8s.io/v1
@@ -253,7 +267,7 @@ extenders:
     ignoredByScheduler: true
 ```
 
-**Scheduler Extender**는 kube-scheduler의 재빌드 없이 Scheduling 동작을 확장하는 HTTP Webhook 방식의 확장 지점이며, [File 4]와 같이 KubeSchedulerConfiguration의 `extenders`에 Webhook 서버를 등록하여 이용한다. Extender는 Node를 선별하는 `filter`, Node의 점수를 계산하는 `prioritize`, Bind를 대신 수행하는 `bind`, Preemption의 축출 대상 선정에 개입하는 `preempt` 네 가지 Verb를 제공하며, kube-scheduler는 각 단계에서 명시된 URL로 HTTP 요청을 전송하여 Extender의 판단을 반영한다. [Figure 1]에서 강조된 Filter, PostFilter, Score, Bind가 네 가지 Verb에 대응하는 Extension Point이다.
+**Scheduler Extender**는 kube-scheduler의 재빌드 없이 Scheduling 동작을 확장하는 HTTP Webhook 기반의 확장 방법이며, [File 4]와 같이 KubeSchedulerConfiguration의 `extenders`에 Webhook 서버를 등록하여 이용한다. Extender는 Node를 선별하는 `filter`, Node의 점수를 계산하는 `prioritize`, Bind를 대신 수행하는 `bind`, Preemption의 축출 대상 선정에 개입하는 `preempt` 네 가지 Verb를 제공하며, kube-scheduler는 각 단계에서 명시된 URL로 HTTP 요청을 전송하여 Extender의 판단을 반영한다. [Figure 1]에서 강조된 Filter, PostFilter, Score, Bind가 네 가지 Verb에 대응하는 Extension Point이다.
 
 Scheduling Framework Plugin 방식과 다르게 개입 지점이 이 네 곳으로 제한되기 때문에 Reserve나 Permit 같은 나머지 Extension Point에는 개입할 수 없고, 모든 판단이 HTTP 왕복을 거치기 때문에 Scheduling 지연이 커진다. `managedResources`에는 Extender가 담당하는 Resource를 명시하며, 해당 Resource를 요청하는 Pod에만 Extender가 호출된다. `ignoredByScheduler`가 `true`로 설정되어 있으면 해당 Resource는 kube-scheduler의 기본 Resource 검사에서 제외되어 Extender가 할당 가능 여부를 전담한다.
 
