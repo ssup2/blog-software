@@ -80,16 +80,15 @@ func SetDefaults_PodSpec(obj *v1.PodSpec) {
 
 Defaulting은 [Figure 1]의 Scheduler Assignment 영역과 같이 kube-apiserver가 요청 Body를 객체로 Decode한 직후에 API 버전마다 등록된 Defaulting 함수로 비어 있는 필드를 채우는 단계이며, [Code 1]은 Pod의 Defaulting 함수를 축약하여 나타내고 있다. `SetDefaults_PodSpec()`은 `restartPolicy`, `dnsPolicy` 같은 다른 필드의 기본값과 함께 비어 있는 `schedulerName`에 `DefaultSchedulerName` 상수의 값인 `default-scheduler`를 설정한다.
 
-Defaulting 이후에는 **Mutating Admission** 단계가 수행되기 때문에, Mutating Admission Webhook이 Pod를 전달받는 시점에는 `schedulerName`이 이미 `default-scheduler`로 채워져 있다. 따라서 특정 Pod를 Custom Scheduler로 보내려는 Middleware는 채워진 `schedulerName`을 Mutating Webhook에서 자신의 Scheduler 이름으로 덮어쓰는 방식으로 동작하며, `schedulerName`은 생성 후에는 변경할 수 없는 필드이기 때문에 이러한 변경은 생성 시점에만 가능하다.
+Defaulting 이후에는 **Mutating Admission** 단계가 수행되기 때문에, Mutating Admission Webhook이 Pod를 전달받는 시점에는 `schedulerName`이 이미 `default-scheduler`로 채워져 있다. 따라서 특정 Pod를 Custom Scheduler가 담당하도록 만들려면 Mutating Webhook에서 채워진 `schedulerName`을 Custom Scheduler의 이름으로 덮어써야 하며, `schedulerName`은 생성 후에는 변경할 수 없는 필드이기 때문에 이러한 변경은 생성 시점에만 가능하다.
 
 ## 2. kube-scheduler
 
-**kube-scheduler**는 Kubernetes의 기본 Scheduler이며, [Figure 1]의 kube-scheduler 영역과 같이 **Scheduling Framework**를 기반으로 동작한다. **Extension Point**는 Scheduling Framework가 Scheduling Queue부터 Binding Cycle까지의 정해진 단계에서 Plugin을 호출하도록 열어 둔 지점이며, Resource 검사나 Affinity 처리 같은 kube-scheduler의 기본 기능도 모두 각 Extension Point에서 호출되는 내장 Plugin으로 구현되어 있다. kube-scheduler의 동작은 다음의 네 부분으로 구분된다.
+**kube-scheduler**는 Kubernetes의 기본 Scheduler이며, [Figure 1]의 kube-scheduler 영역과 같이 **Scheduling Framework**를 기반으로 동작한다. **Extension Point**는 Scheduling Framework가 Scheduling Queue부터 Binding Cycle까지의 정해진 단계에서 Plugin을 호출하도록 열어 둔 지점이며, Resource 검사나 Affinity 처리 같은 kube-scheduler의 기본 기능도 모두 각 Extension Point에서 호출되는 내장 Plugin으로 구현되어 있다. 또한 직접 구현한 Plugin이나 외부 Webhook도 Extension Point에 연결하여 Scheduling 동작을 확장할 수 있다. kube-scheduler의 동작은 다음의 세 부분으로 구분된다.
 
 * **Scheduling Queue** : Node가 결정되지 않은 Pod는 Informer의 Watch를 통해서 감지되어 Scheduling Queue에 저장되며, Scheduling에 실패한 Pod도 Scheduling Queue로 돌아와서 재시도를 대기한다.
 * **Scheduling Cycle** : Scheduling Queue에서 Pod를 하나씩 꺼내서 Scheduling Framework Plugin을 통해서 Node를 결정한다.
 * **Binding Cycle** : 결정된 Node로 Pod를 Bind하여 `spec.nodeName`을 설정하며, Goroutine을 통해서 비동기로 수행된다.
-* **Scheduler 확장** : Scheduling 동작은 kube-scheduler에 포함되는 Scheduling Framework Plugin과 HTTP Webhook 기반의 Scheduler Extender를 통해서 확장할 수 있으며, 별도로 배포되는 Custom Scheduler와 함께 이용되기도 한다.
 
 ### 2.1. Scheduling Queue
 
@@ -180,7 +179,7 @@ Binding Cycle의 Extension Point는 다음과 같다.
 
 ### 2.4. Scheduler 확장
 
-kube-scheduler의 Scheduling 동작은 Scheduling Framework Plugin과 Scheduler Extender 두 가지 방법으로 확장할 수 있다.
+kube-scheduler의 Scheduling 동작은 Extension Point에 확장 기능을 연결하여 확장할 수 있으며, 연결 방법에 따라서 kube-scheduler 내부에 Plugin을 추가하는 **Scheduling Framework Plugin** 방식과 외부 HTTP Webhook 서버를 호출하는 **Scheduler Extender** 방식으로 구분된다. Scheduling Framework Plugin 방식은 모든 Extension Point를 이용할 수 있고 함수 호출로 동작하여 빠르지만 kube-scheduler를 다시 빌드해야 한다. 반면에 Scheduler Extender 방식은 kube-scheduler의 재빌드 없이 설정만으로 이용할 수 있지만, 개입할 수 있는 Extension Point가 일부로 제한되고 HTTP 왕복에 따른 지연이 발생한다.
 
 #### 2.4.1. Scheduling Framework Plugin
 
@@ -202,7 +201,7 @@ type ScorePlugin interface {
 }
 ```
 
-**Scheduling Framework Plugin** 방식은 이름에서 알 수 있는 것처럼 Scheduling Framework에서 제공하는 Extension Point를 이용하여 직접 Plugin을 구성하는 방법이다. Plugin으로 동작하기 위해서는 Scheduling Framework가 제공하는 Interface를 구현해야 하며, [Code 3]은 이 Interface를 축약하여 나타내고 있다. 모든 Plugin은 이름을 반환하는 `Plugin` Interface를 기본으로 구현하고, 동작할 Extension Point에 해당하는 다음의 Interface를 추가로 구현해야 한다.
+Scheduling Framework Plugin 방식은 이름에서 알 수 있는 것처럼 Scheduling Framework에서 제공하는 Extension Point를 이용하여 직접 Plugin을 구성하는 방법이다. Plugin으로 동작하기 위해서는 Scheduling Framework가 제공하는 Interface를 구현해야 하며, [Code 3]은 이 Interface를 축약하여 나타내고 있다. 모든 Plugin은 이름을 반환하는 `Plugin` Interface를 기본으로 구현하고, 동작할 Extension Point에 해당하는 다음의 Interface를 추가로 구현해야 한다.
 
 {{< table caption="[Table 1] Extension Point별 단계와 Plugin Interface" >}}
 | Extension Point | 단계 | Interface | 구현 Method |
@@ -268,9 +267,9 @@ extenders:
     ignoredByScheduler: true
 ```
 
-**Scheduler Extender**는 kube-scheduler의 재빌드 없이 Scheduling 동작을 확장하는 HTTP Webhook 기반의 확장 방법이며, [File 4]와 같이 KubeSchedulerConfiguration의 `extenders`에 Webhook 서버를 등록하여 이용한다. Extender는 Node를 선별하는 `filter`, Node의 점수를 계산하는 `prioritize`, Bind를 대신 수행하는 `bind`, Preemption의 축출 대상 선정에 개입하는 `preempt` 네 가지 Verb를 제공하며, kube-scheduler는 각 단계에서 명시된 URL로 HTTP 요청을 전송하여 Extender의 판단을 반영한다. [Figure 1]에서 강조된 Filter, PostFilter, Score, Bind가 네 가지 Verb에 대응하는 Extension Point이다.
+Scheduler Extender는 kube-scheduler의 재빌드 없이 Scheduling 동작을 확장하는 HTTP Webhook 기반의 확장 방법이며, [File 4]와 같이 KubeSchedulerConfiguration의 `extenders`에 Webhook 서버를 등록하여 이용한다. Extender는 Node를 선별하는 `filter`, Node의 점수를 계산하는 `prioritize`, Bind를 대신 수행하는 `bind`, Preemption의 축출 대상 선정에 개입하는 `preempt` 네 가지 Verb를 제공하며, kube-scheduler는 각 단계에서 명시된 URL로 HTTP 요청을 전송하여 Extender의 판단을 반영한다. [Figure 1]에서 강조된 Filter, PostFilter, Score, Bind가 네 가지 Verb에 대응하는 Extension Point이다.
 
-Scheduling Framework Plugin 방식과 다르게 개입 지점이 이 네 곳으로 제한되기 때문에 Reserve나 Permit 같은 나머지 Extension Point에는 개입할 수 없고, 모든 판단이 HTTP 왕복을 거치기 때문에 Scheduling 지연이 커진다. `managedResources`에는 Extender가 담당하는 Resource를 명시하며, 해당 Resource를 요청하는 Pod에만 Extender가 호출된다. `ignoredByScheduler`가 `true`로 설정되어 있으면 해당 Resource는 kube-scheduler의 기본 Resource 검사에서 제외되어 Extender가 할당 가능 여부를 전담한다.
+개입 지점이 이 네 곳으로 제한되기 때문에 Reserve나 Permit 같은 나머지 Extension Point에는 개입할 수 없다. `managedResources`에는 Extender가 담당하는 Resource를 명시하며, 해당 Resource를 요청하는 Pod에만 Extender가 호출된다. `ignoredByScheduler`가 `true`로 설정되어 있으면 해당 Resource는 kube-scheduler의 기본 Resource 검사에서 제외되어 Extender가 할당 가능 여부를 전담한다.
 
 Scheduler Extender는 별도로 배포되는 Custom Scheduler와 함께 이용되기도 한다. GPU 공유 Middleware인 HAMi의 hami-scheduler가 대표적인 예이며, kube-scheduler와 Scheduler Extender를 하나의 Pod로 배포하고 Mutating Webhook을 통해서 vGPU Pod의 `spec.schedulerName`을 hami-scheduler로 변경하는 방식으로 동작한다.
 

@@ -80,16 +80,15 @@ func SetDefaults_PodSpec(obj *v1.PodSpec) {
 
 Defaulting is the stage where kube-apiserver fills empty fields with the Defaulting functions registered per API version right after Decoding the request Body into an object, as shown in the Scheduler Assignment area of [Figure 1], and [Code 1] shows the Pod's Defaulting function in abbreviated form. `SetDefaults_PodSpec()` sets `default-scheduler`, the value of the `DefaultSchedulerName` constant, to the empty `schedulerName`, together with the default values of other fields such as `restartPolicy` and `dnsPolicy`.
 
-Since the **Mutating Admission** stage is performed after Defaulting, `schedulerName` is already filled with `default-scheduler` at the time a Mutating Admission Webhook receives the Pod. Therefore, Middleware that wants to send specific Pods to a Custom Scheduler operates by overwriting the filled `schedulerName` with its own Scheduler name in the Mutating Webhook, and since `schedulerName` is a field that cannot be changed after creation, such a change is possible only at creation time.
+Since the **Mutating Admission** stage is performed after Defaulting, `schedulerName` is already filled with `default-scheduler` at the time a Mutating Admission Webhook receives the Pod. Therefore, to make a Custom Scheduler responsible for specific Pods, the filled `schedulerName` must be overwritten with the Custom Scheduler's name in a Mutating Webhook, and since `schedulerName` is a field that cannot be changed after creation, such a change is possible only at creation time.
 
 ## 2. kube-scheduler
 
-**kube-scheduler** is the default Scheduler of Kubernetes, and as shown in the kube-scheduler area of [Figure 1], it operates based on the **Scheduling Framework**. **Extension Points** are the points that the Scheduling Framework opens at defined stages from the Scheduling Queue to the Binding Cycle to call Plugins, and the basic features of kube-scheduler such as Resource checking and Affinity handling are also all implemented as built-in Plugins called at each Extension Point. The operation of kube-scheduler is divided into the following four parts.
+**kube-scheduler** is the default Scheduler of Kubernetes, and as shown in the kube-scheduler area of [Figure 1], it operates based on the **Scheduling Framework**. **Extension Points** are the points that the Scheduling Framework opens at defined stages from the Scheduling Queue to the Binding Cycle to call Plugins, and the basic features of kube-scheduler such as Resource checking and Affinity handling are also all implemented as built-in Plugins called at each Extension Point. The Scheduling behavior can also be extended by connecting self-implemented Plugins or external Webhooks to Extension Points. The operation of kube-scheduler is divided into the following three parts.
 
 * **Scheduling Queue** : Pods without a decided Node are detected through the Informer's Watch and stored in the Scheduling Queue, and Pods that failed Scheduling also return to the Scheduling Queue and wait for retry.
 * **Scheduling Cycle** : Pops Pods from the Scheduling Queue one by one and decides a Node through Scheduling Framework Plugins.
 * **Binding Cycle** : Binds the Pod to the decided Node by setting `spec.nodeName`, and is performed asynchronously through a Goroutine.
-* **Scheduler Extension** : The Scheduling behavior can be extended through Scheduling Framework Plugins included in kube-scheduler and the HTTP Webhook based Scheduler Extender, and they are also used together with separately deployed Custom Schedulers.
 
 ### 2.1. Scheduling Queue
 
@@ -180,7 +179,7 @@ The Extension Points of the Binding Cycle are as follows.
 
 ### 2.4. Scheduler Extension
 
-The Scheduling behavior of kube-scheduler can be extended in two ways: Scheduling Framework Plugins and the Scheduler Extender.
+The Scheduling behavior of kube-scheduler can be extended by connecting extensions to Extension Points, and depending on the connection method, it is divided into the **Scheduling Framework Plugin** method, which adds Plugins inside kube-scheduler, and the **Scheduler Extender** method, which calls an external HTTP Webhook server. The Scheduling Framework Plugin method can use all Extension Points and is fast because it operates through function calls, but kube-scheduler must be rebuilt. On the other hand, the Scheduler Extender method can be used only through configuration without rebuilding kube-scheduler, but the Extension Points it can intervene in are limited to some, and latency occurs due to HTTP round trips.
 
 #### 2.4.1. Scheduling Framework Plugin
 
@@ -202,7 +201,7 @@ type ScorePlugin interface {
 }
 ```
 
-As the name suggests, the **Scheduling Framework Plugin** method is a method of building Plugins directly using the Extension Points provided by the Scheduling Framework. To operate as a Plugin, the Interfaces provided by the Scheduling Framework must be implemented, and [Code 3] shows these Interfaces in abbreviated form. Every Plugin implements the `Plugin` Interface, which returns its name, as the base, and must additionally implement the following Interfaces corresponding to the Extension Points where it operates.
+As the name suggests, the Scheduling Framework Plugin method is a method of building Plugins directly using the Extension Points provided by the Scheduling Framework. To operate as a Plugin, the Interfaces provided by the Scheduling Framework must be implemented, and [Code 3] shows these Interfaces in abbreviated form. Every Plugin implements the `Plugin` Interface, which returns its name, as the base, and must additionally implement the following Interfaces corresponding to the Extension Points where it operates.
 
 {{< table caption="[Table 1] Stage and Plugin Interface by Extension Point" >}}
 | Extension Point | Stage | Interface | Methods to Implement |
@@ -268,9 +267,9 @@ extenders:
     ignoredByScheduler: true
 ```
 
-**Scheduler Extender** is an HTTP Webhook based extension method that extends the Scheduling behavior without rebuilding kube-scheduler, and it is used by registering a Webhook server in the `extenders` of KubeSchedulerConfiguration as shown in [File 4]. The Extender provides four Verbs: `filter` which selects Nodes, `prioritize` which calculates Node scores, `bind` which performs Bind on behalf of kube-scheduler, and `preempt` which intervenes in selecting the eviction targets of Preemption, and kube-scheduler sends HTTP requests to the specified URL at each stage to reflect the Extender's judgment. Filter, PostFilter, Score, and Bind highlighted in [Figure 1] are the Extension Points corresponding to the four Verbs.
+Scheduler Extender is an HTTP Webhook based extension method that extends the Scheduling behavior without rebuilding kube-scheduler, and it is used by registering a Webhook server in the `extenders` of KubeSchedulerConfiguration as shown in [File 4]. The Extender provides four Verbs: `filter` which selects Nodes, `prioritize` which calculates Node scores, `bind` which performs Bind on behalf of kube-scheduler, and `preempt` which intervenes in selecting the eviction targets of Preemption, and kube-scheduler sends HTTP requests to the specified URL at each stage to reflect the Extender's judgment. Filter, PostFilter, Score, and Bind highlighted in [Figure 1] are the Extension Points corresponding to the four Verbs.
 
-Unlike the Scheduling Framework Plugin method, the intervention points are limited to these four, so it cannot intervene in the remaining Extension Points such as Reserve or Permit, and since every judgment goes through an HTTP round trip, the Scheduling latency increases. `managedResources` specifies the Resources the Extender is responsible for, and the Extender is called only for Pods requesting those Resources. If `ignoredByScheduler` is set to `true`, the Resource is excluded from kube-scheduler's basic Resource checking, and the Extender takes full charge of judging whether allocation is possible.
+Since the intervention points are limited to these four, it cannot intervene in the remaining Extension Points such as Reserve or Permit. `managedResources` specifies the Resources the Extender is responsible for, and the Extender is called only for Pods requesting those Resources. If `ignoredByScheduler` is set to `true`, the Resource is excluded from kube-scheduler's basic Resource checking, and the Extender takes full charge of judging whether allocation is possible.
 
 The Scheduler Extender is also used together with separately deployed Custom Schedulers. hami-scheduler of HAMi, a GPU sharing Middleware, is a representative example, and it operates by deploying kube-scheduler and the Scheduler Extender as a single Pod and changing the `spec.schedulerName` of vGPU Pods to hami-scheduler through a Mutating Webhook.
 

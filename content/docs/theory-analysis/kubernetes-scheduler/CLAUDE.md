@@ -33,7 +33,7 @@ kubernetes-hami 문서의 배경 글 (HAMi의 Scheduler Extender 방식 이해 �
   `disabled: '*'` 문법 재확인 필요), Pod Defaulting File 3, SetDefaults_PodSpec Code 1, Defaulting vs Mutating Admission) /
   2. kube-scheduler(도입: kube-scheduler 정의(bold) → Scheduling Framework 기반 → Extension Point 정의 "Scheduling Framework가
   Scheduling Queue부터 Binding Cycle까지 정해진 단계에서 Plugin을 호출하도록 열어 둔 지점" + 내장 Plugin 문장 → 4개 부분
-  요약 개조식(Queue/Scheduling Cycle/Binding Cycle/확장)) /
+  요약 개조식(Queue/Scheduling Cycle/Binding Cycle — 확장은 동작 단계가 아니고 2.4 도입부와 중복이라 2026-11-08 개조식에서 제거)) /
   2.1 Scheduling Queue(도입: 대기 Queue → Extension Point로 준비 여부/순서 결정 → 실패 시 복귀와 QueueingHint, 하위 제목
   키워드 bold) / 2.1.1 Queue 구조(3영역, 실패, 재이동 경로) /
   2.1.2 Extension Point(PreEnqueue, QueueSort — activeQ/unschedulablePods 용어로 서술) /
@@ -44,7 +44,9 @@ kubernetes-hami 문서의 배경 글 (HAMi의 Scheduler Extender 방식 이해 �
   2.3.1 비동기 Binding(① 비동기 이유: Bind는 느린 작업 → 별도 Goroutine, 다음 Pod Scheduling 즉시 시작, ② 중복 배치 위험의
   원리(남은 Resource는 nodeName 설정된 Pod 요청량 제외로 계산 → Bind 전 Pod는 집계 누락)와 Reserve의 Cache 선반영으로 방지) /
   2.3.2 Extension Point(PreBind/Bind/PostBind) /
-  2.4 Scheduler 확장 — 2026-10-26 사용자 피드백으로 하위 항목 분리 후 Custom Scheduler 항목은 다시 제거
+  2.4 Scheduler 확장(2026-11-08 도입부 확장: Extension Point에 확장 기능 연결 → Plugin 방식(모든 Extension Point, 빠름, 재빌드)
+  vs Extender 방식(재빌드 없음, 일부 Extension Point, HTTP 지연) 비교. 2장 도입부에도 확장 가능 한 문장 추가, 2.4.2의 HTTP 지연
+  문장은 도입부와 중복이라 제거) — 2026-10-26 사용자 피드백으로 하위 항목 분리 후 Custom Scheduler 항목은 다시 제거
   (메커니즘이 1.1과 중복): 2.4.1 Scheduling Framework Plugin(Code 3, Table 1 Extension Point/단계/Interface/Method, Code 4) /
   2.4.2 Scheduler Extender(File 4, 4 Verb와 Figure 1 강조 대응, managedResources, 마지막 문단에 Custom Scheduler 병용, HAMi 사례) /
   3. 참조.
