@@ -58,6 +58,8 @@ kubernetes-hami 문서의 배경 글 (HAMi의 Scheduler Extender 방식 이해 �
   kube-scheduler(Queue 3영역과 requeue 경로, Scheduling Cycle 2행, Binding Cycle) + Scheduler Extender HTTP Server
   (POST /filter /preempt /prioritize /bind) + Custom Scheduler(스택). olive 강조 = Filter/PostFilter/Score/Bind
   (Extender 4 Verb 대응, 본문 2.4.2에 의미 명시).
+- **표기 컨벤션** (2026-11-08 사용자 요청): Extension Point 이름(`PreEnqueue`~`PostBind`)은 개조식 선두, Table 1, 본문 모두
+  `code`로 표기. Queue 영역 이름(`activeQ`, `backoffQ`, `unschedulablePods`)도 동일. 단 동작으로서의 Bind("Pod를 Bind하는", "Bind가 끝나기 전")와 Filtering/Scoring, figure/code 캡션은 일반 텍스트.
 - **사실 검증 필요 목록** (문서, 기억 기반 초안):
   - Pod `spec.schedulerName`의 Defaulting 주체/위치: kube-apiserver의 API Defaulting
     (pkg/apis/core/v1/defaults.go의 SetDefaults_PodSpec, v1.DefaultSchedulerName = "default-scheduler") — 소스 재확인 필요.
@@ -75,6 +77,17 @@ kubernetes-hami 문서의 배경 글 (HAMi의 Scheduler Extender 방식 이해 �
     determineSchedulingHintForInFlightPod가 거부 Plugin의 QueueingHintFn으로 검사 — 전부 QueueSkip이면 unschedulablePods,
     Queue면 backoffQ(Backoff 만료 시 activeQ), Pending Plugin의 Queue면 activeQ 직행. 일시적 오류(rejectorPlugins 없음)는
     backoffQ 확인. 본문 1.2.1을 이 동작으로 수정함.
+  - **실패 경로 2026-11-08 v1.37.2 소스로 검증** (pkg/scheduler/schedule_one.go, backend/queue/scheduling_queue.go,
+    framework/types.go): unschedulablePods 여부는 실패 단계가 아니라 거부(Unschedulable/UnschedulableAndUnresolvable)로
+    `UnschedulablePlugins`가 기록됐는지로 결정(`determineSchedulingHintForInFlightPod`: 기록 없으면 queueAfterBackoff).
+    거부 → unschedulablePods: PreFilter, Filter(PostFilter Preemption 후 Unschedulable 반환), Reserve(assumeAndReserve),
+    Permit(RunPermitPlugins + Binding Cycle의 WaitOnPermit), PreEnqueue(gated, moveToActiveQ).
+    backoffQ: PreScore/Score(prioritizeNodes가 AsError로 반환), PreBind/Bind(소스 주석 "Permit is the last one"), 일시적 오류.
+    본문 반영(사용자 피드백: 2.1.1에서 정의 전 Extension Point 이름이 나와 혼동): 2.1.1은 원리(거부 → unschedulablePods,
+    오류 → backoffQ)만 서술하고, 단계별 경로는 2.2.1 목록 뒤 문단(PreFilter/Filter/Reserve/Permit 거부, PreScore/Score 오류)과
+    2.3 도입부(WaitOnPermit 거부 vs PreBind/Bind 실패, 둘 다 Reserve 되돌림)에 둠. Figure 1의 PreScore→unschedulablePods 화살표는 소스와 불일치(→ backoffQ가 맞음),
+    Reserve/Permit→unschedulablePods 화살표 누락 — 사용자에게 수정 제안함.
+    v1.37.2에서는 내부 구조 이름이 unschedulablePods → unschedulableEntities(PodGroup 지원)로 바뀜 — 본문은 옛 이름 사용.
   - QueueingHint 버전 이력: 1.28 Alpha 도입, 메모리 문제로 기본 비활성화 전환 후 1.32부터 기본 활성화 — release note 재확인 필요.
   - Pending 상태로 거부된 Pod의 재입장 시 backoffQ 생략 (DRA Plugin 사례) — scheduling framework 문서 기반, 재확인 필요.
   - [Code 2]는 NodeAffinity의 EventsToRegister/QueueingHintFn **축약** (실제 upstream은 UpdateNodeTaint ActionType, util.As 변환
