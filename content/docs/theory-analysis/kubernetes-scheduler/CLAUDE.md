@@ -50,16 +50,20 @@ kubernetes-hami 문서의 배경 글 (HAMi의 Scheduler Extender 방식 이해 �
   (메커니즘이 1.1과 중복): 2.4.1 Scheduling Framework Plugin(Code 3, Table 1 Extension Point/단계/Interface/Method, Code 4) /
   2.4.2 Scheduler Extender(File 4, 4 Verb와 Figure 1 강조 대응, managedResources, 마지막 문단에 Custom Scheduler 병용, HAMi 사례) /
   3. 참조.
-- Figure 1에는 아직 PreEnqueue/QueueSort가 없음: 제안 배치는 Informer→activeQ 화살표 위 PreEnqueue 박스
-  (+ unschedulablePods로 Failure 화살표), activeQ에 QueueSort 부제.
-- **Figure 1(scheduler-architecture.png)은 2026-10-26에 사용자가 pptx로 직접 그린 그림** (images/images.pptx 원본).
-  구성: 범례(Main Scheduling Flow/Failure & Requeue/Custom Scheduler Flow/Extender HTTP Call) + Scheduler Assignment
+- **Figure 1(scheduler-architecture.png)은 사용자가 pptx로 직접 그린 그림** (images/images.pptx 원본, 2026-10-26 최초,
+  2026-11-08 사용자가 갱신). 캡션 "Kubernetes Scheduler Architecture".
+  구성: 범례(Main Scheduling Flow/Failure & Requeue/Custom Scheduler Flow/Extender HTTP Call + 색상 2종: 회색-olive =
+  Scheduling Framework Extension Point, 살구색 = Extension Point with Scheduler Extender) + Scheduler Assignment
   (apiserver: Decoding+Defaulting → Mutating → Validating → Create/Update etcd, Custom Scheduler Mutating Webhook Server) +
-  kube-scheduler(Queue 3영역과 requeue 경로, Scheduling Cycle 2행, Binding Cycle) + Scheduler Extender HTTP Server
-  (POST /filter /preempt /prioritize /bind) + Custom Scheduler(스택). olive 강조 = Filter/PostFilter/Score/Bind
-  (Extender 4 Verb 대응, 본문 2.4.2에 의미 명시).
+  kube-scheduler(Scheduling Queue: Informer → PreEnqueue → activeQ (QueueSort) ← backoffQ ← unschedulableEntities,
+  Scheduling Cycle 2행, Binding Cycle) + Scheduler Extender HTTP Server (POST /filter /preempt /prioritize /bind) +
+  Custom Scheduler(스택). 살구색 = Filter/PostFilter/Score/Bind (Extender 4 Verb 대응, 본문 2.4.2에 의미 명시).
+  Binding Cycle 맨 앞에 흰색(비 Extension Point) "Wait on Permit" 박스 — Permit의 Wait 결과를 기다리는 WaitOnPermit 단계.
+  Failure 화살표는 Extension Point별이 아니라 Cycle 단위: Scheduling Cycle → unschedulableEntities(거부)와 backoffQ(오류),
+  Binding Cycle → unschedulableEntities(WaitOnPermit 거부/Timeout)와 backoffQ(PreBind/Bind 실패), PreEnqueue →
+  unschedulableEntities(gated) — 본문 2.1.1/2.1.2/2.2.1/2.3 서술과 일치. 2.2.1 Permit 항목에서 Wait on Permit을 참조.
 - **표기 컨벤션** (2026-11-08 사용자 요청): Extension Point 이름(`PreEnqueue`~`PostBind`)은 개조식 선두, Table 1, 본문 모두
-  `code`로 표기. Queue 영역 이름(`activeQ`, `backoffQ`, `unschedulablePods`)도 동일. 단 동작으로서의 Bind("Pod를 Bind하는", "Bind가 끝나기 전")와 Filtering/Scoring, figure/code 캡션은 일반 텍스트.
+  `code`로 표기. Queue 영역 이름(`activeQ`, `backoffQ`, `unschedulableEntities`)도 동일. 단 동작으로서의 Bind("Pod를 Bind하는", "Bind가 끝나기 전")와 Filtering/Scoring, figure/code 캡션은 일반 텍스트.
 - **사실 검증 필요 목록** (문서, 기억 기반 초안):
   - Pod `spec.schedulerName`의 Defaulting 주체/위치: kube-apiserver의 API Defaulting
     (pkg/apis/core/v1/defaults.go의 SetDefaults_PodSpec, v1.DefaultSchedulerName = "default-scheduler") — 소스 재확인 필요.
@@ -87,11 +91,16 @@ kubernetes-hami 문서의 배경 글 (HAMi의 Scheduler Extender 방식 이해 �
     오류 → backoffQ)만 서술하고, 단계별 경로는 2.2.1 목록 뒤 문단(PreFilter/Filter/Reserve/Permit 거부, PreScore/Score 오류)과
     2.3 도입부(WaitOnPermit 거부 vs PreBind/Bind 실패, 둘 다 Reserve 되돌림)에 둠. Figure 1의 PreScore→unschedulablePods 화살표는 소스와 불일치(→ backoffQ가 맞음),
     Reserve/Permit→unschedulablePods 화살표 누락 — 사용자에게 수정 제안함.
-    v1.37.2에서는 내부 구조 이름이 unschedulablePods → unschedulableEntities(PodGroup 지원)로 바뀜 — 본문은 옛 이름 사용.
+    v1.37.0에서 내부 구조 이름이 unschedulablePods → unschedulableEntities로 바뀜(v1.35.0/v1.36.0은 unschedulablePods,
+    PodGroup 멤버도 함께 관리). 2026-11-08 사용자 결정으로 본문은 `unschedulableEntities`로 변경하고 개조식에 1.36까지 옛 이름 명시.
   - QueueingHint 버전 이력: 1.28 Alpha 도입, 메모리 문제로 기본 비활성화 전환 후 1.32부터 기본 활성화 — release note 재확인 필요.
   - Pending 상태로 거부된 Pod의 재입장 시 backoffQ 생략 (DRA Plugin 사례) — scheduling framework 문서 기반, 재확인 필요.
   - [Code 2]는 NodeAffinity의 EventsToRegister/QueueingHintFn **축약** (실제 upstream은 UpdateNodeTaint ActionType, util.As 변환
     포함). framework package 타입 이름(ClusterEventWithHint, QueueingHintFn)의 최신 위치(fwk package 이동 여부) 확인 필요.
+  - **[Code 3], [Code 4] 2026-11-08 v1.37.2 기준으로 수정**: Interface 위치는 staging/src/k8s.io/kube-scheduler/framework/interface.go
+    (import 별칭 `fwk`), CycleState/NodeInfo는 interface 값 타입(포인터 아님), Score는 nodeName string 대신 nodeInfo NodeInfo.
+    Code 4는 fwk.CycleState/fwk.NodeInfo/fwk.NewStatus/fwk.Handle/fwk.Plugin으로 수정, PluginFactory 시그니처와
+    app.NewSchedulerCommand(app.WithPlugin(...)) 패턴은 v1.37.2 server.go/registry.go에서 확인. 아래 옛 메모는 이력.
   - [Code 3]은 pkg/scheduler/framework/interface.go의 Plugin/FilterPlugin/ScorePlugin Interface **축약** — 최신 버전에서
     CycleState/NodeInfo/Status가 fwk interface 타입으로 변경됐는지 확인 필요. [Code 4]의 등록 패턴
     (cmd/kube-scheduler/app의 NewSchedulerCommand + WithPlugin, New 함수 시그니처)도 재확인 필요.

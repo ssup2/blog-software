@@ -100,19 +100,19 @@ Scheduling Queue는 [Figure 1]에서도 나타나 있는 것처럼 내부적으�
 
 * `activeQ` : Scheduling을 대기하는 Pod가 저장되는 우선순위 Queue이다.
 * `backoffQ` : 재시도가 예정된 Pod가 Backoff 시간 동안 대기하는 Queue이다. 반복해서 실패하는 Pod가 직렬 구조의 Scheduling Cycle을 계속 점유하는 것을 막기 위한 영역이며, 실패 횟수에 따라서 지수적으로 증가하는 Backoff 시간 (기본 1초에서 최대 10초)이 지나면 `activeQ`로 이동한다.
-* `unschedulablePods` : Cluster의 상태가 변하지 않는 한 재시도해도 같은 결과가 나오는 Pod가 저장되는 영역이다. 시간이 지나면 벗어나는 `backoffQ`와 다르게, Scheduling 가능성이 생기는 Cluster Event가 발생해야 벗어난다.
+* `unschedulableEntities` : Cluster의 상태가 변하지 않는 한 재시도해도 같은 결과가 나오는 Pod가 저장되는 영역이다. 시간이 지나면 벗어나는 `backoffQ`와 다르게, Scheduling 가능성이 생기는 Cluster Event가 발생해야 벗어난다. Kubernetes 1.36까지는 `unschedulablePods`라는 이름이었다.
 
-Scheduling에 실패한 Pod는 실패 원인에 따라서 서로 다른 영역으로 이동한다. Plugin이 Pod를 거부하여 실패한 경우에는 kube-scheduler가 거부한 Plugin을 Pod와 함께 기록하고 Pod를 `unschedulablePods`에 저장한다. 반면에 Plugin 실행 중 발생한 오류나 kube-apiserver 요청 오류 같은 일시적인 오류로 실패한 Pod는 Cluster의 변화와 무관하게 재시도가 필요하기 때문에 `unschedulablePods`를 거치지 않고 `backoffQ`로 이동한다.
+Scheduling에 실패한 Pod는 실패 원인에 따라서 서로 다른 영역으로 이동한다. Plugin이 Pod를 거부하여 실패한 경우에는 kube-scheduler가 거부한 Plugin을 Pod와 함께 기록하고 Pod를 `unschedulableEntities`에 저장한다. 반면에 Plugin 실행 중 발생한 오류나 kube-apiserver 요청 오류 같은 일시적인 오류로 실패한 Pod는 Cluster의 변화와 무관하게 재시도가 필요하기 때문에 `unschedulableEntities`를 거치지 않고 `backoffQ`로 이동한다.
 
-거부된 Pod는 Cluster의 상태가 변하지 않는 한 몇 번을 재시도해도 같은 결과가 나오기 때문에, Node 추가나 Pod 삭제 같은 Cluster Event가 발생하여 Scheduling 가능성이 생겼을 때만 `unschedulablePods`에서 벗어난다. 벗어나는 시점에 Backoff 시간이 남아 있으면 `backoffQ`를 거쳐서 `activeQ`로 이동하고 이미 지났으면 `activeQ`로 바로 이동하기 때문에, `backoffQ`는 `unschedulablePods`에서 `activeQ`로 돌아가는 길목의 완충 구간으로 동작한다.
+거부된 Pod는 Cluster의 상태가 변하지 않는 한 몇 번을 재시도해도 같은 결과가 나오기 때문에, Node 추가나 Pod 삭제 같은 Cluster Event가 발생하여 Scheduling 가능성이 생겼을 때만 `unschedulableEntities`에서 벗어난다. 벗어나는 시점에 Backoff 시간이 남아 있으면 `backoffQ`를 거쳐서 `activeQ`로 이동하고 이미 지났으면 `activeQ`로 바로 이동하기 때문에, `backoffQ`는 `unschedulableEntities`에서 `activeQ`로 돌아가는 길목의 완충 구간으로 동작한다.
 
-또한 거부된 Pod라도 항상 `unschedulablePods`를 거치는 것은 아니다. Scheduling이 진행되는 동안 발생한 Cluster Event는 해당 Pod가 놓쳤을 가능성이 있기 때문에 kube-scheduler가 따로 기록해 두고, Pod가 실패하여 Queue로 돌아오는 시점에 기록된 Event를 검사하여 Scheduling 가능성이 생긴 경우에는 `unschedulablePods`를 거치지 않고 `backoffQ`로 이동한다. 그리고 `unschedulablePods`에 일정 시간 (기본 5분) 이상 머문 Pod는 Event가 발생하지 않아도 주기적으로 `backoffQ`나 `activeQ`로 이동하는 안전장치도 존재한다.
+또한 거부된 Pod라도 항상 `unschedulableEntities`를 거치는 것은 아니다. Scheduling이 진행되는 동안 발생한 Cluster Event는 해당 Pod가 놓쳤을 가능성이 있기 때문에 kube-scheduler가 따로 기록해 두고, Pod가 실패하여 Queue로 돌아오는 시점에 기록된 Event를 검사하여 Scheduling 가능성이 생긴 경우에는 `unschedulableEntities`를 거치지 않고 `backoffQ`로 이동한다. 그리고 `unschedulableEntities`에 일정 시간 (기본 5분) 이상 머문 Pod는 Event가 발생하지 않아도 주기적으로 `backoffQ`나 `activeQ`로 이동하는 안전장치도 존재한다.
 
 #### 2.1.2. Extension Point
 
 Scheduling Queue의 Extension Point는 다음과 같다.
 
-* `PreEnqueue` : Pod가 `activeQ`에 들어가기 전에 Scheduling을 시작할 준비가 되었는지 검사하며, 통과하지 못한 Pod는 `activeQ`에 들어가지 못하고 `unschedulablePods`에서 대기한다. Pod의 `spec.schedulingGates`가 모두 제거되기 전까지 Scheduling을 막는 `SchedulingGates` Plugin이 대표적이다.
+* `PreEnqueue` : Pod가 `activeQ`에 들어가기 전에 Scheduling을 시작할 준비가 되었는지 검사하며, 통과하지 못한 Pod는 `activeQ`에 들어가지 못하고 `unschedulableEntities`에서 대기한다. Pod의 `spec.schedulingGates`가 모두 제거되기 전까지 Scheduling을 막는 `SchedulingGates` Plugin이 대표적이다.
 * `QueueSort` : `activeQ`에 저장된 Pod의 처리 순서를 결정한다. 기본 Plugin인 `PrioritySort`는 PriorityClass가 높은 Pod를 먼저 처리하도록 정렬한다.
 
 #### 2.1.3. QueueingHint
@@ -139,9 +139,9 @@ func (pl *NodeAffinity) isSchedulableAfterNodeChange(logger klog.Logger, pod *v1
 }
 ```
 
-`unschedulablePods`에 저장된 Pod와 Cluster Event의 연관성은 각 Plugin이 제공하는 QueueingHint를 통해서 판단되며, [Code 2]는 NodeAffinity Plugin의 QueueingHint 구현을 축약하여 나타내고 있다. 각 Plugin은 자신의 판단 결과에 영향을 줄 수 있는 Cluster Event의 종류를 `EventsToRegister()`를 통해서 등록하고, Event마다 재시도 여부를 판단하는 QueueingHintFn을 함께 제공한다. kube-scheduler는 Pod가 Scheduling에 실패하면 거부한 Plugin의 이름을 Pod와 함께 기록해두고, 이후 Cluster Event가 발생하면 거부했던 Plugin의 QueueingHintFn만 호출하여 `Queue` 또는 `QueueSkip` 판정을 받는다.
+`unschedulableEntities`에 저장된 Pod와 Cluster Event의 연관성은 각 Plugin이 제공하는 QueueingHint를 통해서 판단되며, [Code 2]는 NodeAffinity Plugin의 QueueingHint 구현을 축약하여 나타내고 있다. 각 Plugin은 자신의 판단 결과에 영향을 줄 수 있는 Cluster Event의 종류를 `EventsToRegister()`를 통해서 등록하고, Event마다 재시도 여부를 판단하는 QueueingHintFn을 함께 제공한다. kube-scheduler는 Pod가 Scheduling에 실패하면 거부한 Plugin의 이름을 Pod와 함께 기록해두고, 이후 Cluster Event가 발생하면 거부했던 Plugin의 QueueingHintFn만 호출하여 `Queue` 또는 `QueueSkip` 판정을 받는다.
 
-예를 들어 Node Affinity 조건을 만족하는 Node가 없어서 `unschedulablePods`에 저장된 Pod가 있을 때 새로운 Node가 추가되면, NodeAffinity Plugin의 QueueingHintFn은 추가된 Node의 Label이 Pod의 Node Affinity를 만족하는지 검사한다. 만족하면 `Queue` 판정으로 Pod가 `activeQ`나 `backoffQ`로 이동하여 Scheduling이 재시도되고, 만족하지 않으면 `QueueSkip` 판정으로 Pod는 `unschedulablePods`에 그대로 남는다. QueueingHint가 도입되기 전에는 Event의 종류만으로 Pod의 이동을 결정했기 때문에 성공 가능성이 없는 Scheduling 재시도가 반복되었지만, QueueingHint는 Event의 내용까지 검사하기 때문에 불필요한 재시도가 제거된다.
+예를 들어 Node Affinity 조건을 만족하는 Node가 없어서 `unschedulableEntities`에 저장된 Pod가 있을 때 새로운 Node가 추가되면, NodeAffinity Plugin의 QueueingHintFn은 추가된 Node의 Label이 Pod의 Node Affinity를 만족하는지 검사한다. 만족하면 `Queue` 판정으로 Pod가 `activeQ`나 `backoffQ`로 이동하여 Scheduling이 재시도되고, 만족하지 않으면 `QueueSkip` 판정으로 Pod는 `unschedulableEntities`에 그대로 남는다. QueueingHint가 도입되기 전에는 Event의 종류만으로 Pod의 이동을 결정했기 때문에 성공 가능성이 없는 Scheduling 재시도가 반복되었지만, QueueingHint는 Event의 내용까지 검사하기 때문에 불필요한 재시도가 제거된다.
 
 QueueingHint는 Kubernetes 1.28에 `SchedulerQueueingHints` Feature Gate와 함께 Alpha로 도입되었고, Event 판단을 위한 메모리 사용량 증가 문제로 한동안 기본 비활성화를 거친 뒤에 1.32부터 기본 활성화되었다. 한편 DRA Plugin처럼 외부 Controller의 동작을 기다리기 위해서 Pod를 Pending 상태로 거부하는 Plugin의 경우에는, 거부가 kube-scheduler의 잘못된 판단이 아니기 때문에 `Queue` 판정 시 `backoffQ`를 거치지 않고 `activeQ`로 바로 이동하여 대기 시간을 줄인다.
 
@@ -159,13 +159,13 @@ Scheduling Cycle의 Extension Point는 다음과 같다.
 * `PreScore` : Scoring 전에 Filtering을 통과한 Node 목록을 전달받아, 점수 계산에 공통으로 필요한 정보를 미리 계산하여 저장한다.
 * `Score` : 각 Node의 점수를 계산하고, Plugin마다 가중치를 적용해 합산한 점수가 가장 높은 Node를 선택한다. Resource 사용률의 균형을 평가하는 `NodeResourcesBalancedAllocation`, Container Image 보유 여부를 평가하는 `ImageLocality` Plugin이 대표적이다.
 * `Reserve` : 선택된 Node에 Pod가 사용할 Resource를 kube-scheduler 내부 Cache에 미리 반영한다.
-* `Permit` : Bind 직전에 Pod의 Bind를 승인, 지연 또는 거부한다. 다수의 Pod가 함께 배치되어야 하는 Gang Scheduling 구현에 이용된다.
+* `Permit` : Bind 직전에 Pod의 Bind를 승인, 지연 또는 거부한다. 지연된 Pod는 [Figure 1]의 Wait on Permit과 같이 Binding Cycle 시작 시점에서 승인을 기다리며, 다수의 Pod가 함께 배치되어야 하는 Gang Scheduling 구현에 이용된다.
 
-`PreFilter`, `Filter`, `Reserve`, `Permit` 단계에서 Plugin이 Pod를 거부하면 Pod는 `unschedulablePods`로 이동하며, 모든 Node가 Filtering에서 탈락한 경우에는 `PostFilter` 단계의 Preemption 시도를 거친 뒤에 이동한다. 반면에 `PreScore`, `Score` 단계는 Pod를 거부하지 않고 Node의 점수만 계산하기 때문에, 이 단계에서 발생한 실패는 오류로 처리되어 Pod가 `backoffQ`로 이동한다.
+`PreFilter`, `Filter`, `Reserve`, `Permit` 단계에서 Plugin이 Pod를 거부하면 Pod는 `unschedulableEntities`로 이동하며, 모든 Node가 Filtering에서 탈락한 경우에는 `PostFilter` 단계의 Preemption 시도를 거친 뒤에 이동한다. 반면에 `PreScore`, `Score` 단계는 Pod를 거부하지 않고 Node의 점수만 계산하기 때문에, 이 단계에서 발생한 실패는 오류로 처리되어 Pod가 `backoffQ`로 이동한다.
 
 ### 2.3. Binding Cycle
 
-**Binding Cycle**은 Scheduling Cycle이 결정한 Node로 Pod를 Bind하는 과정이다. Binding Cycle은 Scheduling Cycle과 분리되어 **비동기**로 수행되며, `PreBind`, `Bind`, `PostBind` 같은 **Extension Point**를 순서대로 거치면서 Pod가 Node에 Bind된다. Binding Cycle 시작 시점에 `Permit` 승인을 기다리던 Pod가 거부되면 `unschedulablePods`로 이동하지만, kube-scheduler는 `Permit`까지의 거부만 Scheduling 불가로 판단하기 때문에 `PreBind`, `Bind` 단계에서 실패한 Pod는 `backoffQ`로 이동한다. 두 경우 모두 Scheduling Cycle의 `Reserve` 단계에서 반영한 Resource는 되돌려진다.
+**Binding Cycle**은 Scheduling Cycle이 결정한 Node로 Pod를 Bind하는 과정이다. Binding Cycle은 Scheduling Cycle과 분리되어 **비동기**로 수행되며, `PreBind`, `Bind`, `PostBind` 같은 **Extension Point**를 순서대로 거치면서 Pod가 Node에 Bind된다. Binding Cycle 시작 시점에 `Permit` 승인을 기다리던 Pod가 거부되면 `unschedulableEntities`로 이동하지만, kube-scheduler는 `Permit`까지의 거부만 Scheduling 불가로 판단하기 때문에 `PreBind`, `Bind` 단계에서 실패한 Pod는 `backoffQ`로 이동한다. 두 경우 모두 Scheduling Cycle의 `Reserve` 단계에서 반영한 Resource는 되돌려진다.
 
 #### 2.3.1. 비동기 Binding
 
@@ -188,19 +188,19 @@ kube-scheduler의 Scheduling 동작은 Extension Point에서 직접 구현한 �
 #### 2.4.1. Scheduling Framework Plugin
 
 ```go {caption="[Code 3] Scheduling Framework의 Plugin Interface (축약)", linenos=table}
-// pkg/scheduler/framework/interface.go
+// staging/src/k8s.io/kube-scheduler/framework/interface.go
 type Plugin interface {
 	Name() string
 }
 
 type FilterPlugin interface {
 	Plugin
-	Filter(ctx context.Context, state *CycleState, pod *v1.Pod, nodeInfo *NodeInfo) *Status
+	Filter(ctx context.Context, state CycleState, pod *v1.Pod, nodeInfo NodeInfo) *Status
 }
 
 type ScorePlugin interface {
 	Plugin
-	Score(ctx context.Context, state *CycleState, pod *v1.Pod, nodeName string) (int64, *Status)
+	Score(ctx context.Context, state CycleState, pod *v1.Pod, nodeInfo NodeInfo) (int64, *Status)
 	ScoreExtensions() ScoreExtensions
 }
 ```
@@ -234,15 +234,15 @@ type ExampleFilter struct{}
 func (pl *ExampleFilter) Name() string { return Name }
 
 // Called per node, excludes nodes under maintenance
-func (pl *ExampleFilter) Filter(ctx context.Context, state *framework.CycleState,
-	pod *v1.Pod, nodeInfo *framework.NodeInfo) *framework.Status {
+func (pl *ExampleFilter) Filter(ctx context.Context, state fwk.CycleState,
+	pod *v1.Pod, nodeInfo fwk.NodeInfo) *fwk.Status {
 	if nodeInfo.Node().Labels["example.io/maintenance"] == "true" {
-		return framework.NewStatus(framework.Unschedulable, "node under maintenance")
+		return fwk.NewStatus(fwk.Unschedulable, "node under maintenance")
 	}
-	return framework.NewStatus(framework.Success)
+	return fwk.NewStatus(fwk.Success)
 }
 
-func New(_ context.Context, _ runtime.Object, _ framework.Handle) (framework.Plugin, error) {
+func New(_ context.Context, _ runtime.Object, _ fwk.Handle) (fwk.Plugin, error) {
 	return &ExampleFilter{}, nil
 }
 

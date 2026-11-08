@@ -100,19 +100,19 @@ As also shown in [Figure 1], the Scheduling Queue is internally divided into thr
 
 * `activeQ` : A priority Queue storing Pods waiting for Scheduling.
 * `backoffQ` : A Queue where Pods scheduled for retry wait during the Backoff time. It is an area to prevent repeatedly failing Pods from continuously occupying the serial Scheduling Cycle, and Pods move to `activeQ` after the Backoff time that increases exponentially with the number of failures (from 1 second up to 10 seconds by default) passes.
-* `unschedulablePods` : An area storing Pods that would get the same result even if retried unless the Cluster's state changes. Unlike `backoffQ`, which Pods leave as time passes, Pods leave this area only when a Cluster Event that creates a possibility of Scheduling occurs.
+* `unschedulableEntities` : An area storing Pods that would get the same result even if retried unless the Cluster's state changes. Unlike `backoffQ`, which Pods leave as time passes, Pods leave this area only when a Cluster Event that creates a possibility of Scheduling occurs. It was named `unschedulablePods` up to Kubernetes 1.36.
 
-A Pod that fails Scheduling moves to a different area depending on the cause of the failure. When it failed because a Plugin rejected the Pod, kube-scheduler records the rejecting Plugin together with the Pod and stores the Pod in `unschedulablePods`. On the other hand, a Pod that failed due to an error during Plugin execution or a temporary error such as a kube-apiserver request error needs retry regardless of Cluster changes, so it moves to `backoffQ` without going through `unschedulablePods`.
+A Pod that fails Scheduling moves to a different area depending on the cause of the failure. When it failed because a Plugin rejected the Pod, kube-scheduler records the rejecting Plugin together with the Pod and stores the Pod in `unschedulableEntities`. On the other hand, a Pod that failed due to an error during Plugin execution or a temporary error such as a kube-apiserver request error needs retry regardless of Cluster changes, so it moves to `backoffQ` without going through `unschedulableEntities`.
 
-A rejected Pod gets the same result no matter how many times it is retried unless the Cluster's state changes, so it leaves `unschedulablePods` only when a Cluster Event such as Node addition or Pod deletion occurs and creates a possibility of Scheduling. At the time of leaving, if the Backoff time remains, the Pod moves to `activeQ` via `backoffQ`, and if it has already passed, the Pod moves directly to `activeQ`, so `backoffQ` acts as a buffer section on the way back from `unschedulablePods` to `activeQ`.
+A rejected Pod gets the same result no matter how many times it is retried unless the Cluster's state changes, so it leaves `unschedulableEntities` only when a Cluster Event such as Node addition or Pod deletion occurs and creates a possibility of Scheduling. At the time of leaving, if the Backoff time remains, the Pod moves to `activeQ` via `backoffQ`, and if it has already passed, the Pod moves directly to `activeQ`, so `backoffQ` acts as a buffer section on the way back from `unschedulableEntities` to `activeQ`.
 
-Also, even a rejected Pod does not always go through `unschedulablePods`. Cluster Events that occurred while Scheduling was in progress may have been missed by the Pod, so kube-scheduler records them separately, and when the Pod fails and returns to the Queue, the recorded Events are examined and, if a possibility of Scheduling has arisen, the Pod moves to `backoffQ` without going through `unschedulablePods`. In addition, there is a safeguard where Pods that have stayed in `unschedulablePods` longer than a certain time (5 minutes by default) periodically move to `backoffQ` or `activeQ` even without an Event.
+Also, even a rejected Pod does not always go through `unschedulableEntities`. Cluster Events that occurred while Scheduling was in progress may have been missed by the Pod, so kube-scheduler records them separately, and when the Pod fails and returns to the Queue, the recorded Events are examined and, if a possibility of Scheduling has arisen, the Pod moves to `backoffQ` without going through `unschedulableEntities`. In addition, there is a safeguard where Pods that have stayed in `unschedulableEntities` longer than a certain time (5 minutes by default) periodically move to `backoffQ` or `activeQ` even without an Event.
 
 #### 2.1.2. Extension Point
 
 The Extension Points of the Scheduling Queue are as follows.
 
-* `PreEnqueue` : Checks whether the Pod is ready to start Scheduling before it enters `activeQ`, and a Pod that does not pass cannot enter `activeQ` and waits in `unschedulablePods`. A representative example is the `SchedulingGates` Plugin, which blocks Scheduling until all of the Pod's `spec.schedulingGates` are removed.
+* `PreEnqueue` : Checks whether the Pod is ready to start Scheduling before it enters `activeQ`, and a Pod that does not pass cannot enter `activeQ` and waits in `unschedulableEntities`. A representative example is the `SchedulingGates` Plugin, which blocks Scheduling until all of the Pod's `spec.schedulingGates` are removed.
 * `QueueSort` : Decides the processing order of Pods stored in `activeQ`. The default Plugin `PrioritySort` sorts Pods so that Pods with a higher PriorityClass are processed first.
 
 #### 2.1.3. QueueingHint
@@ -139,9 +139,9 @@ func (pl *NodeAffinity) isSchedulableAfterNodeChange(logger klog.Logger, pod *v1
 }
 ```
 
-The relevance between a Pod stored in `unschedulablePods` and a Cluster Event is judged through the QueueingHint provided by each Plugin, and [Code 2] shows the QueueingHint implementation of the NodeAffinity Plugin in abbreviated form. Each Plugin registers the kinds of Cluster Events that can affect its judgment through `EventsToRegister()`, and provides a QueueingHintFn that judges whether to retry for each Event. When a Pod fails Scheduling, kube-scheduler records the names of the Plugins that rejected it together with the Pod, and when a Cluster Event occurs afterwards, it calls only the QueueingHintFns of the rejecting Plugins to receive a `Queue` or `QueueSkip` verdict.
+The relevance between a Pod stored in `unschedulableEntities` and a Cluster Event is judged through the QueueingHint provided by each Plugin, and [Code 2] shows the QueueingHint implementation of the NodeAffinity Plugin in abbreviated form. Each Plugin registers the kinds of Cluster Events that can affect its judgment through `EventsToRegister()`, and provides a QueueingHintFn that judges whether to retry for each Event. When a Pod fails Scheduling, kube-scheduler records the names of the Plugins that rejected it together with the Pod, and when a Cluster Event occurs afterwards, it calls only the QueueingHintFns of the rejecting Plugins to receive a `Queue` or `QueueSkip` verdict.
 
-For example, when there is a Pod stored in `unschedulablePods` because no Node satisfies its Node Affinity condition and a new Node is added, the QueueingHintFn of the NodeAffinity Plugin examines whether the added Node's Labels satisfy the Pod's Node Affinity. If satisfied, the Pod moves to `activeQ` or `backoffQ` with a `Queue` verdict and Scheduling is retried, and if not, the Pod stays in `unschedulablePods` with a `QueueSkip` verdict. Before QueueingHint was introduced, Pod movement was decided only by the kind of Event, so Scheduling retries with no possibility of success were repeated, but QueueingHint examines even the content of the Event, so unnecessary retries are eliminated.
+For example, when there is a Pod stored in `unschedulableEntities` because no Node satisfies its Node Affinity condition and a new Node is added, the QueueingHintFn of the NodeAffinity Plugin examines whether the added Node's Labels satisfy the Pod's Node Affinity. If satisfied, the Pod moves to `activeQ` or `backoffQ` with a `Queue` verdict and Scheduling is retried, and if not, the Pod stays in `unschedulableEntities` with a `QueueSkip` verdict. Before QueueingHint was introduced, Pod movement was decided only by the kind of Event, so Scheduling retries with no possibility of success were repeated, but QueueingHint examines even the content of the Event, so unnecessary retries are eliminated.
 
 QueueingHint was introduced as Alpha in Kubernetes 1.28 with the `SchedulerQueueingHints` Feature Gate, and after a period of being disabled by default due to the increased memory usage for Event judgment, it has been enabled by default since 1.32. Meanwhile, in the case of Plugins that reject Pods in the Pending state to wait for the operation of external Controllers, such as the DRA Plugin, the rejection is not a wrong judgment of kube-scheduler, so on a `Queue` verdict the Pod moves directly to `activeQ` without going through `backoffQ` to reduce the waiting time.
 
@@ -159,13 +159,13 @@ The Extension Points of the Scheduling Cycle are as follows.
 * `PreScore` : Receives the list of Nodes that passed Filtering before Scoring, and precomputes and stores information commonly needed for score calculation.
 * `Score` : Calculates the score of each Node, and selects the Node with the highest score summed with weights applied per Plugin. Representative Plugins are `NodeResourcesBalancedAllocation` which evaluates the balance of Resource utilization, and `ImageLocality` which evaluates whether the Node has the Container Image.
 * `Reserve` : Reflects the Resources the Pod will use on the selected Node in kube-scheduler's internal Cache in advance.
-* `Permit` : Approves, delays, or rejects the Pod's Bind right before Bind. It is used to implement Gang Scheduling, where multiple Pods must be placed together.
+* `Permit` : Approves, delays, or rejects the Pod's Bind right before Bind. A delayed Pod waits for approval at the start of the Binding Cycle, as shown in Wait on Permit of [Figure 1], and it is used to implement Gang Scheduling, where multiple Pods must be placed together.
 
-When a Plugin rejects the Pod at the `PreFilter`, `Filter`, `Reserve`, or `Permit` stage, the Pod moves to `unschedulablePods`, and when every Node is rejected in Filtering, it moves after going through the Preemption attempt of the `PostFilter` stage. On the other hand, the `PreScore` and `Score` stages do not reject Pods and only calculate Node scores, so a failure at these stages is handled as an error and the Pod moves to `backoffQ`.
+When a Plugin rejects the Pod at the `PreFilter`, `Filter`, `Reserve`, or `Permit` stage, the Pod moves to `unschedulableEntities`, and when every Node is rejected in Filtering, it moves after going through the Preemption attempt of the `PostFilter` stage. On the other hand, the `PreScore` and `Score` stages do not reject Pods and only calculate Node scores, so a failure at these stages is handled as an error and the Pod moves to `backoffQ`.
 
 ### 2.3. Binding Cycle
 
-**Binding Cycle** is the process of Binding a Pod to the Node decided by the Scheduling Cycle. The Binding Cycle is performed **asynchronously**, separated from the Scheduling Cycle, and the Pod is Bound to the Node by passing through **Extension Points** such as `PreBind`, `Bind`, and `PostBind` in order. A Pod waiting for `Permit` approval that is rejected at the start of the Binding Cycle moves to `unschedulablePods`, but since kube-scheduler regards only rejections up to `Permit` as unschedulable, a Pod that failed at the `PreBind` or `Bind` stage moves to `backoffQ`. In both cases, the Resources reflected at the `Reserve` stage of the Scheduling Cycle are rolled back.
+**Binding Cycle** is the process of Binding a Pod to the Node decided by the Scheduling Cycle. The Binding Cycle is performed **asynchronously**, separated from the Scheduling Cycle, and the Pod is Bound to the Node by passing through **Extension Points** such as `PreBind`, `Bind`, and `PostBind` in order. A Pod waiting for `Permit` approval that is rejected at the start of the Binding Cycle moves to `unschedulableEntities`, but since kube-scheduler regards only rejections up to `Permit` as unschedulable, a Pod that failed at the `PreBind` or `Bind` stage moves to `backoffQ`. In both cases, the Resources reflected at the `Reserve` stage of the Scheduling Cycle are rolled back.
 
 #### 2.3.1. Asynchronous Binding
 
@@ -188,19 +188,19 @@ The Scheduling behavior of kube-scheduler can be extended by having self-impleme
 #### 2.4.1. Scheduling Framework Plugin
 
 ```go {caption="[Code 3] Plugin Interfaces of the Scheduling Framework (abbreviated)", linenos=table}
-// pkg/scheduler/framework/interface.go
+// staging/src/k8s.io/kube-scheduler/framework/interface.go
 type Plugin interface {
 	Name() string
 }
 
 type FilterPlugin interface {
 	Plugin
-	Filter(ctx context.Context, state *CycleState, pod *v1.Pod, nodeInfo *NodeInfo) *Status
+	Filter(ctx context.Context, state CycleState, pod *v1.Pod, nodeInfo NodeInfo) *Status
 }
 
 type ScorePlugin interface {
 	Plugin
-	Score(ctx context.Context, state *CycleState, pod *v1.Pod, nodeName string) (int64, *Status)
+	Score(ctx context.Context, state CycleState, pod *v1.Pod, nodeInfo NodeInfo) (int64, *Status)
 	ScoreExtensions() ScoreExtensions
 }
 ```
@@ -234,15 +234,15 @@ type ExampleFilter struct{}
 func (pl *ExampleFilter) Name() string { return Name }
 
 // Called per node, excludes nodes under maintenance
-func (pl *ExampleFilter) Filter(ctx context.Context, state *framework.CycleState,
-	pod *v1.Pod, nodeInfo *framework.NodeInfo) *framework.Status {
+func (pl *ExampleFilter) Filter(ctx context.Context, state fwk.CycleState,
+	pod *v1.Pod, nodeInfo fwk.NodeInfo) *fwk.Status {
 	if nodeInfo.Node().Labels["example.io/maintenance"] == "true" {
-		return framework.NewStatus(framework.Unschedulable, "node under maintenance")
+		return fwk.NewStatus(fwk.Unschedulable, "node under maintenance")
 	}
-	return framework.NewStatus(framework.Success)
+	return fwk.NewStatus(fwk.Success)
 }
 
-func New(_ context.Context, _ runtime.Object, _ framework.Handle) (framework.Plugin, error) {
+func New(_ context.Context, _ runtime.Object, _ fwk.Handle) (fwk.Plugin, error) {
 	return &ExampleFilter{}, nil
 }
 
