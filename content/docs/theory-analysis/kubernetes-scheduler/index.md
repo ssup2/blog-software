@@ -87,7 +87,7 @@ Defaulting 이후에는 **Mutating Admission** 단계가 수행되기 때문에,
 **kube-scheduler**는 Kubernetes의 기본 Scheduler이며, [Figure 1]의 kube-scheduler 영역과 같이 **Scheduling Framework**를 기반으로 동작한다. **Extension Point**는 Scheduling Framework가 Scheduling Queue부터 Binding Cycle까지의 정해진 단계에서 Plugin을 호출하도록 열어 둔 지점이며, Resource 검사나 Affinity 처리 같은 kube-scheduler의 기본 기능도 모두 각 Extension Point에서 호출되는 내장 Plugin으로 구현되어 있다. 또한 직접 구현한 Plugin이나 외부 Webhook도 Extension Point에 연결하여 **Scheduling 동작을 확장**할 수 있다. kube-scheduler의 동작은 다음의 세 부분으로 구분된다.
 
 * **Scheduling Queue** : Node가 결정되지 않은 Pod는 Informer의 Watch를 통해서 감지되어 Scheduling Queue에 저장되며, Scheduling에 실패한 Pod도 Scheduling Queue로 돌아와서 재시도를 대기한다.
-* **Scheduling Cycle** : Scheduling Queue에서 Pod를 하나씩 꺼내서 Scheduling Framework Plugin을 통해서 Node를 결정한다.
+* **Scheduling Cycle** : Scheduling Queue에서 Pod를 하나씩 꺼내서 Extension Point의 Plugin을 거치면서 Node를 결정한다.
 * **Binding Cycle** : 결정된 Node로 Pod를 Bind하여 `spec.nodeName`을 설정하며, Goroutine을 통해서 비동기로 수행된다.
 
 ### 2.1. Scheduling Queue
@@ -119,10 +119,10 @@ Scheduling Queue의 Extension Point는 다음과 같다.
 
 ```go {caption="[Code 2] NodeAffinity Plugin의 QueueingHint 구현 (축약)", linenos=table}
 // Register the cluster events NodeAffinity is interested in, with QueueingHintFns
-func (pl *NodeAffinity) EventsToRegister(_ context.Context) ([]framework.ClusterEventWithHint, error) {
-	return []framework.ClusterEventWithHint{
+func (pl *NodeAffinity) EventsToRegister(_ context.Context) ([]fwk.ClusterEventWithHint, error) {
+	return []fwk.ClusterEventWithHint{
 		{
-			Event:          framework.ClusterEvent{Resource: framework.Node, ActionType: framework.Add | framework.UpdateNodeLabel},
+			Event:          fwk.ClusterEvent{Resource: fwk.Node, ActionType: fwk.Add | fwk.UpdateNodeLabel},
 			QueueingHintFn: pl.isSchedulableAfterNodeChange,
 		},
 	}, nil
@@ -130,20 +130,20 @@ func (pl *NodeAffinity) EventsToRegister(_ context.Context) ([]framework.Cluster
 
 // Called on Node Add/Update events to decide whether to retry the Pod
 func (pl *NodeAffinity) isSchedulableAfterNodeChange(logger klog.Logger, pod *v1.Pod,
-	oldObj, newObj interface{}) (framework.QueueingHint, error) {
+	oldObj, newObj interface{}) (fwk.QueueingHint, error) {
 	node := newObj.(*v1.Node)
 	if matchesNodeAffinity(pod, node) {
-		return framework.Queue, nil
+		return fwk.Queue, nil
 	}
-	return framework.QueueSkip, nil
+	return fwk.QueueSkip, nil
 }
 ```
 
-`unschedulableEntities`에 저장된 Pod와 Cluster Event의 연관성은 각 Plugin이 제공하는 QueueingHint를 통해서 판단되며, [Code 2]는 NodeAffinity Plugin의 QueueingHint 구현을 축약하여 나타내고 있다. 각 Plugin은 자신의 판단 결과에 영향을 줄 수 있는 Cluster Event의 종류를 `EventsToRegister()`를 통해서 등록하고, Event마다 재시도 여부를 판단하는 QueueingHintFn을 함께 제공한다. kube-scheduler는 Pod가 Scheduling에 실패하면 거부한 Plugin의 이름을 Pod와 함께 기록해두고, 이후 Cluster Event가 발생하면 거부했던 Plugin의 QueueingHintFn만 호출하여 `Queue` 또는 `QueueSkip` 판정을 받는다.
+`unschedulableEntities`에 저장된 Pod와 Cluster Event의 연관성은 각 Plugin이 제공하는 QueueingHint를 통해서 판단되며, [Code 2]는 NodeAffinity Plugin의 QueueingHint 구현을 축약하여 나타내고 있다. 각 Plugin은 자신의 판단 결과에 영향을 줄 수 있는 Cluster Event의 종류를 `EventsToRegister()`를 통해서 등록하고, Event마다 재시도 여부를 판단하는 QueueingHintFn을 함께 제공한다. kube-scheduler는 Cluster Event가 발생하면 Pod와 함께 기록해 둔 거부 Plugin의 QueueingHintFn만 호출하여 `Queue` 또는 `QueueSkip` 판정을 받는다.
 
 예를 들어 Node Affinity 조건을 만족하는 Node가 없어서 `unschedulableEntities`에 저장된 Pod가 있을 때 새로운 Node가 추가되면, NodeAffinity Plugin의 QueueingHintFn은 추가된 Node의 Label이 Pod의 Node Affinity를 만족하는지 검사한다. 만족하면 `Queue` 판정으로 Pod가 `activeQ`나 `backoffQ`로 이동하여 Scheduling이 재시도되고, 만족하지 않으면 `QueueSkip` 판정으로 Pod는 `unschedulableEntities`에 그대로 남는다. QueueingHint가 도입되기 전에는 Event의 종류만으로 Pod의 이동을 결정했기 때문에 성공 가능성이 없는 Scheduling 재시도가 반복되었지만, QueueingHint는 Event의 내용까지 검사하기 때문에 불필요한 재시도가 제거된다.
 
-QueueingHint는 Kubernetes 1.28에 `SchedulerQueueingHints` Feature Gate와 함께 Alpha로 도입되었고, Event 판단을 위한 메모리 사용량 증가 문제로 한동안 기본 비활성화를 거친 뒤에 1.32부터 기본 활성화되었다. 한편 DRA Plugin처럼 외부 Controller의 동작을 기다리기 위해서 Pod를 Pending 상태로 거부하는 Plugin의 경우에는, 거부가 kube-scheduler의 잘못된 판단이 아니기 때문에 `Queue` 판정 시 `backoffQ`를 거치지 않고 `activeQ`로 바로 이동하여 대기 시간을 줄인다.
+DRA Plugin처럼 외부 Controller의 동작을 기다리기 위해서 Pod를 Pending 상태로 거부하는 Plugin의 경우에는, 거부가 kube-scheduler의 잘못된 판단이 아니기 때문에 `Queue` 판정 시 `backoffQ`를 거치지 않고 `activeQ`로 바로 이동하여 대기 시간을 줄인다.
 
 ### 2.2. Scheduling Cycle
 
@@ -205,7 +205,7 @@ type ScorePlugin interface {
 }
 ```
 
-Scheduling Framework Plugin 방식은 이름에서 알 수 있는 것처럼 Scheduling Framework에서 제공하는 Extension Point를 이용하여 직접 Plugin을 구성하는 방법이다. Plugin으로 동작하기 위해서는 Scheduling Framework가 제공하는 Interface를 구현해야 하며, [Code 3]은 이 Interface를 축약하여 나타내고 있다. 모든 Plugin은 이름을 반환하는 `Plugin` Interface를 기본으로 구현하고, 동작할 Extension Point에 해당하는 다음의 Interface를 추가로 구현해야 한다.
+Scheduling Framework Plugin으로 동작하기 위해서는 Scheduling Framework가 제공하는 Interface를 구현해야 하며, [Code 3]은 이 Interface를 축약하여 나타내고 있다. 모든 Plugin은 이름을 반환하는 `Plugin` Interface를 기본으로 구현하고, 동작할 Extension Point에 해당하는 다음의 Interface를 추가로 구현해야 한다.
 
 {{< table caption="[Table 1] Extension Point별 단계와 Plugin Interface" >}}
 | Extension Point | 단계 | Interface | 구현 Method |
@@ -271,7 +271,7 @@ extenders:
     ignoredByScheduler: true
 ```
 
-Scheduler Extender는 kube-scheduler의 재빌드 없이 Scheduling 동작을 확장하는 HTTP Webhook 기반의 확장 방법이며, [File 4]와 같이 KubeSchedulerConfiguration의 `extenders`에 Webhook 서버를 등록하여 이용한다. Extender는 Node를 선별하는 `filter`, Node의 점수를 계산하는 `prioritize`, Bind를 대신 수행하는 `bind`, Preemption의 축출 대상 선정에 개입하는 `preempt` 네 가지 Verb를 제공하며, kube-scheduler는 각 단계에서 명시된 URL로 HTTP 요청을 전송하여 Extender의 판단을 반영한다. [Figure 1]에서 강조된 `Filter`, `PostFilter`, `Score`, `Bind`가 네 가지 Verb에 대응하는 Extension Point이다.
+Scheduler Extender는 [File 4]와 같이 KubeSchedulerConfiguration의 `extenders`에 Webhook 서버를 등록하여 이용한다. Extender는 Node를 선별하는 `filter`, Node의 점수를 계산하는 `prioritize`, Bind를 대신 수행하는 `bind`, Preemption의 축출 대상 선정에 개입하는 `preempt` 네 가지 Verb를 제공하며, kube-scheduler는 각 단계에서 명시된 URL로 HTTP 요청을 전송하여 Extender의 판단을 반영한다. [Figure 1]에서 Scheduler Extender와 연동되는 Extension Point로 표시된 `Filter`, `PostFilter`, `Score`, `Bind`가 네 가지 Verb에 대응하는 Extension Point이다.
 
 개입 지점이 이 네 곳으로 제한되기 때문에 `Reserve`나 `Permit` 같은 나머지 Extension Point에는 개입할 수 없다. `managedResources`에는 Extender가 담당하는 Resource를 명시하며, 해당 Resource를 요청하는 Pod에만 Extender가 호출된다. `ignoredByScheduler`가 `true`로 설정되어 있으면 해당 Resource는 kube-scheduler의 기본 Resource 검사에서 제외되어 Extender가 할당 가능 여부를 전담한다.
 
@@ -282,5 +282,6 @@ Scheduler Extender는 별도로 배포되는 Custom Scheduler와 함께 이용�
 * Kubernetes Scheduler : [https://kubernetes.io/docs/concepts/scheduling-eviction/kube-scheduler/](https://kubernetes.io/docs/concepts/scheduling-eviction/kube-scheduler/)
 * Kubernetes Scheduling Framework : [https://kubernetes.io/docs/concepts/scheduling-eviction/scheduling-framework/](https://kubernetes.io/docs/concepts/scheduling-eviction/scheduling-framework/)
 * Kubernetes Scheduler Configuration : [https://kubernetes.io/docs/reference/scheduling/config/](https://kubernetes.io/docs/reference/scheduling/config/)
+* Pod Scheduling Readiness : [https://kubernetes.io/docs/concepts/scheduling-eviction/pod-scheduling-readiness/](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-scheduling-readiness/)
 * Scheduler Extender Design : [https://github.com/kubernetes/design-proposals-archive/blob/main/scheduling/scheduler_extender.md](https://github.com/kubernetes/design-proposals-archive/blob/main/scheduling/scheduler_extender.md)
 * scheduler-plugins : [https://github.com/kubernetes-sigs/scheduler-plugins](https://github.com/kubernetes-sigs/scheduler-plugins)

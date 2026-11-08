@@ -87,7 +87,7 @@ Since the **Mutating Admission** stage is performed after Defaulting, `scheduler
 **kube-scheduler** is the default Scheduler of Kubernetes, and as shown in the kube-scheduler area of [Figure 1], it operates based on the **Scheduling Framework**. **Extension Points** are the points that the Scheduling Framework opens at defined stages from the Scheduling Queue to the Binding Cycle to call Plugins, and the basic features of kube-scheduler such as Resource checking and Affinity handling are also all implemented as built-in Plugins called at each Extension Point. The **Scheduling behavior can also be extended** by connecting self-implemented Plugins or external Webhooks to Extension Points. The operation of kube-scheduler is divided into the following three parts.
 
 * **Scheduling Queue** : Pods without a decided Node are detected through the Informer's Watch and stored in the Scheduling Queue, and Pods that failed Scheduling also return to the Scheduling Queue and wait for retry.
-* **Scheduling Cycle** : Pops Pods from the Scheduling Queue one by one and decides a Node through Scheduling Framework Plugins.
+* **Scheduling Cycle** : Pops Pods from the Scheduling Queue one by one and decides a Node by passing through the Plugins of Extension Points.
 * **Binding Cycle** : Binds the Pod to the decided Node by setting `spec.nodeName`, and is performed asynchronously through a Goroutine.
 
 ### 2.1. Scheduling Queue
@@ -119,10 +119,10 @@ The Extension Points of the Scheduling Queue are as follows.
 
 ```go {caption="[Code 2] QueueingHint implementation of the NodeAffinity Plugin (abbreviated)", linenos=table}
 // Register the cluster events NodeAffinity is interested in, with QueueingHintFns
-func (pl *NodeAffinity) EventsToRegister(_ context.Context) ([]framework.ClusterEventWithHint, error) {
-	return []framework.ClusterEventWithHint{
+func (pl *NodeAffinity) EventsToRegister(_ context.Context) ([]fwk.ClusterEventWithHint, error) {
+	return []fwk.ClusterEventWithHint{
 		{
-			Event:          framework.ClusterEvent{Resource: framework.Node, ActionType: framework.Add | framework.UpdateNodeLabel},
+			Event:          fwk.ClusterEvent{Resource: fwk.Node, ActionType: fwk.Add | fwk.UpdateNodeLabel},
 			QueueingHintFn: pl.isSchedulableAfterNodeChange,
 		},
 	}, nil
@@ -130,20 +130,20 @@ func (pl *NodeAffinity) EventsToRegister(_ context.Context) ([]framework.Cluster
 
 // Called on Node Add/Update events to decide whether to retry the Pod
 func (pl *NodeAffinity) isSchedulableAfterNodeChange(logger klog.Logger, pod *v1.Pod,
-	oldObj, newObj interface{}) (framework.QueueingHint, error) {
+	oldObj, newObj interface{}) (fwk.QueueingHint, error) {
 	node := newObj.(*v1.Node)
 	if matchesNodeAffinity(pod, node) {
-		return framework.Queue, nil
+		return fwk.Queue, nil
 	}
-	return framework.QueueSkip, nil
+	return fwk.QueueSkip, nil
 }
 ```
 
-The relevance between a Pod stored in `unschedulableEntities` and a Cluster Event is judged through the QueueingHint provided by each Plugin, and [Code 2] shows the QueueingHint implementation of the NodeAffinity Plugin in abbreviated form. Each Plugin registers the kinds of Cluster Events that can affect its judgment through `EventsToRegister()`, and provides a QueueingHintFn that judges whether to retry for each Event. When a Pod fails Scheduling, kube-scheduler records the names of the Plugins that rejected it together with the Pod, and when a Cluster Event occurs afterwards, it calls only the QueueingHintFns of the rejecting Plugins to receive a `Queue` or `QueueSkip` verdict.
+The relevance between a Pod stored in `unschedulableEntities` and a Cluster Event is judged through the QueueingHint provided by each Plugin, and [Code 2] shows the QueueingHint implementation of the NodeAffinity Plugin in abbreviated form. Each Plugin registers the kinds of Cluster Events that can affect its judgment through `EventsToRegister()`, and provides a QueueingHintFn that judges whether to retry for each Event. When a Cluster Event occurs, kube-scheduler calls only the QueueingHintFns of the rejecting Plugins recorded together with the Pod to receive a `Queue` or `QueueSkip` verdict.
 
 For example, when there is a Pod stored in `unschedulableEntities` because no Node satisfies its Node Affinity condition and a new Node is added, the QueueingHintFn of the NodeAffinity Plugin examines whether the added Node's Labels satisfy the Pod's Node Affinity. If satisfied, the Pod moves to `activeQ` or `backoffQ` with a `Queue` verdict and Scheduling is retried, and if not, the Pod stays in `unschedulableEntities` with a `QueueSkip` verdict. Before QueueingHint was introduced, Pod movement was decided only by the kind of Event, so Scheduling retries with no possibility of success were repeated, but QueueingHint examines even the content of the Event, so unnecessary retries are eliminated.
 
-QueueingHint was introduced as Alpha in Kubernetes 1.28 with the `SchedulerQueueingHints` Feature Gate, and after a period of being disabled by default due to the increased memory usage for Event judgment, it has been enabled by default since 1.32. Meanwhile, in the case of Plugins that reject Pods in the Pending state to wait for the operation of external Controllers, such as the DRA Plugin, the rejection is not a wrong judgment of kube-scheduler, so on a `Queue` verdict the Pod moves directly to `activeQ` without going through `backoffQ` to reduce the waiting time.
+In the case of Plugins that reject Pods in the Pending state to wait for the operation of external Controllers, such as the DRA Plugin, the rejection is not a wrong judgment of kube-scheduler, so on a `Queue` verdict the Pod moves directly to `activeQ` without going through `backoffQ` to reduce the waiting time.
 
 ### 2.2. Scheduling Cycle
 
@@ -205,7 +205,7 @@ type ScorePlugin interface {
 }
 ```
 
-As the name suggests, the Scheduling Framework Plugin method is a method of building Plugins directly using the Extension Points provided by the Scheduling Framework. To operate as a Plugin, the Interfaces provided by the Scheduling Framework must be implemented, and [Code 3] shows these Interfaces in abbreviated form. Every Plugin implements the `Plugin` Interface, which returns its name, as the base, and must additionally implement the following Interfaces corresponding to the Extension Points where it operates.
+To operate as a Scheduling Framework Plugin, the Interfaces provided by the Scheduling Framework must be implemented, and [Code 3] shows these Interfaces in abbreviated form. Every Plugin implements the `Plugin` Interface, which returns its name, as the base, and must additionally implement the following Interfaces corresponding to the Extension Points where it operates.
 
 {{< table caption="[Table 1] Stage and Plugin Interface by Extension Point" >}}
 | Extension Point | Stage | Interface | Methods to Implement |
@@ -271,7 +271,7 @@ extenders:
     ignoredByScheduler: true
 ```
 
-Scheduler Extender is an HTTP Webhook based extension method that extends the Scheduling behavior without rebuilding kube-scheduler, and it is used by registering a Webhook server in the `extenders` of KubeSchedulerConfiguration as shown in [File 4]. The Extender provides four Verbs: `filter` which selects Nodes, `prioritize` which calculates Node scores, `bind` which performs Bind on behalf of kube-scheduler, and `preempt` which intervenes in selecting the eviction targets of Preemption, and kube-scheduler sends HTTP requests to the specified URL at each stage to reflect the Extender's judgment. `Filter`, `PostFilter`, `Score`, and `Bind` highlighted in [Figure 1] are the Extension Points corresponding to the four Verbs.
+Scheduler Extender is used by registering a Webhook server in the `extenders` of KubeSchedulerConfiguration as shown in [File 4]. The Extender provides four Verbs: `filter` which selects Nodes, `prioritize` which calculates Node scores, `bind` which performs Bind on behalf of kube-scheduler, and `preempt` which intervenes in selecting the eviction targets of Preemption, and kube-scheduler sends HTTP requests to the specified URL at each stage to reflect the Extender's judgment. `Filter`, `PostFilter`, `Score`, and `Bind`, marked in [Figure 1] as Extension Points with Scheduler Extender, are the Extension Points corresponding to the four Verbs.
 
 Since the intervention points are limited to these four, it cannot intervene in the remaining Extension Points such as `Reserve` or `Permit`. `managedResources` specifies the Resources the Extender is responsible for, and the Extender is called only for Pods requesting those Resources. If `ignoredByScheduler` is set to `true`, the Resource is excluded from kube-scheduler's basic Resource checking, and the Extender takes full charge of judging whether allocation is possible.
 
@@ -282,5 +282,6 @@ The Scheduler Extender is also used together with separately deployed Custom Sch
 * Kubernetes Scheduler : [https://kubernetes.io/docs/concepts/scheduling-eviction/kube-scheduler/](https://kubernetes.io/docs/concepts/scheduling-eviction/kube-scheduler/)
 * Kubernetes Scheduling Framework : [https://kubernetes.io/docs/concepts/scheduling-eviction/scheduling-framework/](https://kubernetes.io/docs/concepts/scheduling-eviction/scheduling-framework/)
 * Kubernetes Scheduler Configuration : [https://kubernetes.io/docs/reference/scheduling/config/](https://kubernetes.io/docs/reference/scheduling/config/)
+* Pod Scheduling Readiness : [https://kubernetes.io/docs/concepts/scheduling-eviction/pod-scheduling-readiness/](https://kubernetes.io/docs/concepts/scheduling-eviction/pod-scheduling-readiness/)
 * Scheduler Extender Design : [https://github.com/kubernetes/design-proposals-archive/blob/main/scheduling/scheduler_extender.md](https://github.com/kubernetes/design-proposals-archive/blob/main/scheduling/scheduler_extender.md)
 * scheduler-plugins : [https://github.com/kubernetes-sigs/scheduler-plugins](https://github.com/kubernetes-sigs/scheduler-plugins)

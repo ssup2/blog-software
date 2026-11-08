@@ -93,7 +93,9 @@ kubernetes-hami 문서의 배경 글 (HAMi의 Scheduler Extender 방식 이해 �
     Reserve/Permit→unschedulablePods 화살표 누락 — 사용자에게 수정 제안함.
     v1.37.0에서 내부 구조 이름이 unschedulablePods → unschedulableEntities로 바뀜(v1.35.0/v1.36.0은 unschedulablePods,
     PodGroup 멤버도 함께 관리). 2026-11-08 사용자 결정으로 본문은 `unschedulableEntities`로 변경하고 개조식에 1.36까지 옛 이름 명시.
-  - QueueingHint 버전 이력: 1.28 Alpha 도입, 메모리 문제로 기본 비활성화 전환 후 1.32부터 기본 활성화 — release note 재확인 필요.
+  - QueueingHint 버전 이력은 2026-11-09 사용자 요청으로 본문에서 삭제. 참고(v1.34/v1.36 kube_features.go): 1.28 Beta 기본 비활성,
+    1.32 Beta 기본 활성, 1.34 GA LockToDefault, v1.37에서 Gate 제거. [Code 2]도 v1.37.2 기준 fwk 패키지로 수정.
+  - backoffQ 1초~10초, unschedulableEntities 체류 상한 5분은 v1.37.2 기본값과 일치 확인(2026-11-09).
   - Pending 상태로 거부된 Pod의 재입장 시 backoffQ 생략 (DRA Plugin 사례) — scheduling framework 문서 기반, 재확인 필요.
   - [Code 2]는 NodeAffinity의 EventsToRegister/QueueingHintFn **축약** (실제 upstream은 UpdateNodeTaint ActionType, util.As 변환
     포함). framework package 타입 이름(ClusterEventWithHint, QueueingHintFn)의 최신 위치(fwk package 이동 여부) 확인 필요.
