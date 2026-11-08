@@ -66,11 +66,11 @@ spec:
 ```go {caption="[Code 1] Pod's Defaulting function (abbreviated)", linenos=table}
 // pkg/apis/core/v1/defaults.go
 func SetDefaults_PodSpec(obj *v1.PodSpec) {
-	if obj.RestartPolicy == "" {
-		obj.RestartPolicy = v1.RestartPolicyAlways
-	}
 	if obj.DNSPolicy == "" {
 		obj.DNSPolicy = v1.DNSClusterFirst
+	}
+	if obj.RestartPolicy == "" {
+		obj.RestartPolicy = v1.RestartPolicyAlways
 	}
 	if obj.SchedulerName == "" {
 		obj.SchedulerName = v1.DefaultSchedulerName // "default-scheduler"
@@ -78,7 +78,7 @@ func SetDefaults_PodSpec(obj *v1.PodSpec) {
 }
 ```
 
-Defaulting is the stage where kube-apiserver fills empty fields with the Defaulting functions registered per API version right after Decoding the request Body into an object, as shown in the Scheduler Assignment area of [Figure 1], and [Code 1] shows the Pod's Defaulting function in abbreviated form. `SetDefaults_PodSpec()` sets `default-scheduler`, the value of the `DefaultSchedulerName` constant, to the empty `schedulerName`, together with the default values of other fields such as `restartPolicy` and `dnsPolicy`.
+Defaulting is the stage where kube-apiserver fills empty fields with the Defaulting functions registered per API version right after Decoding the request Body into an object, as shown in the Scheduler Assignment area of [Figure 1], and [Code 1] shows the Pod's Defaulting function in abbreviated form. `SetDefaults_PodSpec()` sets `default-scheduler`, the value of the `DefaultSchedulerName` constant, to the empty `schedulerName`, together with the default values of other fields such as `dnsPolicy` and `restartPolicy`.
 
 Since the **Mutating Admission** stage is performed after Defaulting, `schedulerName` is already filled with `default-scheduler` at the time a Mutating Admission Webhook receives the Pod. Therefore, to make a Custom Scheduler responsible for specific Pods, the filled `schedulerName` must be overwritten with the Custom Scheduler's name in a Mutating Webhook, and since `schedulerName` is a field that cannot be changed after creation, such a change is possible only at creation time.
 

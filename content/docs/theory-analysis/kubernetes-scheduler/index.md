@@ -66,11 +66,11 @@ spec:
 ```go {caption="[Code 1] Pod의 Defaulting 함수 (축약)", linenos=table}
 // pkg/apis/core/v1/defaults.go
 func SetDefaults_PodSpec(obj *v1.PodSpec) {
-	if obj.RestartPolicy == "" {
-		obj.RestartPolicy = v1.RestartPolicyAlways
-	}
 	if obj.DNSPolicy == "" {
 		obj.DNSPolicy = v1.DNSClusterFirst
+	}
+	if obj.RestartPolicy == "" {
+		obj.RestartPolicy = v1.RestartPolicyAlways
 	}
 	if obj.SchedulerName == "" {
 		obj.SchedulerName = v1.DefaultSchedulerName // "default-scheduler"
@@ -78,7 +78,7 @@ func SetDefaults_PodSpec(obj *v1.PodSpec) {
 }
 ```
 
-Defaulting은 [Figure 1]의 Scheduler Assignment 영역과 같이 kube-apiserver가 요청 Body를 객체로 Decode한 직후에 API 버전마다 등록된 Defaulting 함수로 비어 있는 필드를 채우는 단계이며, [Code 1]은 Pod의 Defaulting 함수를 축약하여 나타내고 있다. `SetDefaults_PodSpec()`은 `restartPolicy`, `dnsPolicy` 같은 다른 필드의 기본값과 함께 비어 있는 `schedulerName`에 `DefaultSchedulerName` 상수의 값인 `default-scheduler`를 설정한다.
+Defaulting은 [Figure 1]의 Scheduler Assignment 영역과 같이 kube-apiserver가 요청 Body를 객체로 Decode한 직후에 API 버전마다 등록된 Defaulting 함수로 비어 있는 필드를 채우는 단계이며, [Code 1]은 Pod의 Defaulting 함수를 축약하여 나타내고 있다. `SetDefaults_PodSpec()`은 `dnsPolicy`, `restartPolicy` 같은 다른 필드의 기본값과 함께 비어 있는 `schedulerName`에 `DefaultSchedulerName` 상수의 값인 `default-scheduler`를 설정한다.
 
 Defaulting 이후에는 **Mutating Admission** 단계가 수행되기 때문에, Mutating Admission Webhook이 Pod를 전달받는 시점에는 `schedulerName`이 이미 `default-scheduler`로 채워져 있다. 따라서 특정 Pod를 Custom Scheduler가 담당하도록 만들려면 Mutating Webhook에서 채워진 `schedulerName`을 Custom Scheduler의 이름으로 덮어써야 하며, `schedulerName`은 생성 후에는 변경할 수 없는 필드이기 때문에 이러한 변경은 생성 시점에만 가능하다.
 
