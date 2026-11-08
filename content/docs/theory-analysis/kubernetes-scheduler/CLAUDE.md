@@ -23,28 +23,31 @@ kubernetes-hami 문서의 배경 글 (HAMi의 Scheduler Extender 방식 이해 �
   Code 1: Defaulting 동작(Decode 직후, SetDefaults_PodSpec) → 마지막: Mutating Admission 동작(이미 채워진 값을 Middleware가
   덮어씀, immutable)" 역할로 분리해 "kube-apiserver가 채운다/Defaulting이 먼저다" 반복 제거. Defaulting bold는 File 3 문단,
   Mutating Admission bold는 마지막 문단으로 이동.
-- 1장 구성 (2026-11-08 사용자 요청으로 Scheduling Queue를 Scheduling Cycle에서 독립 절로 분리 — 공식 문서상 Scheduling Cycle은
-  Queue에서 Pod를 꺼낸 시점부터이고 Figure 1에서도 별도 영역이라 그림과 1:1 대응. 같은 날 Extension Point 정의 위치를
-  여러 차례 옮긴 끝에 Queue~Binding에 걸친 개념이므로 개요로 올림):
-  1. 개요(Figure 1 Architecture + 5개 부분 요약 개조식(지정/Queue/Scheduling Cycle/Binding Cycle/확장) +
-  Extension Point 정의 문단 "Scheduling Framework가 Scheduling Queue부터 Binding Cycle까지 정해진 단계에서 Plugin을 호출하도록
-  열어 둔 지점" + 내장 Plugin 문장) /
+- 문서 구성 (2026-11-08 사용자 요청으로 2개 장으로 재구성: 1장은 Kubernetes 수준의 Scheduler 배정, 2장은 kube-scheduler
+  내부 동작 — Figure 1의 Scheduler Assignment 영역/kube-scheduler 영역과 대응. 같은 날 Scheduling Queue를 Scheduling Cycle에서
+  독립 절로 분리(공식 문서상 Scheduling Cycle은 Queue에서 Pod를 꺼낸 시점부터)하고, Extension Point 정의 위치를 여러 차례
+  옮긴 끝에 2장 도입부로 확정):
+  1. Kubernetes Scheduler(Figure 1 "Kubernetes Scheduler Architecture" + 정의, 담당 Scheduler는 Defaulting/Mutating Admission에서
+  결정되고 미지정 시 kube-scheduler가 담당 — 다수 Scheduler 운영은 1.1과 중복이라 도입부에서 뺌) /
   1.1 Scheduler 지정(Profile File 1, 다중 Profile File 2 — 공식 문서의 no-scoring-scheduler 예제 기반(PreScore/Score
   `disabled: '*'` 문법 재확인 필요), Pod Defaulting File 3, SetDefaults_PodSpec Code 1, Defaulting vs Mutating Admission) /
-  1.2 Scheduling Queue(도입: 대기 Queue → Extension Point로 준비 여부/순서 결정 → 실패 시 복귀와 QueueingHint, 하위 제목
-  키워드 bold) / 1.2.1 Queue 구조(3영역, 실패, 재이동 경로) /
-  1.2.2 Extension Point(PreEnqueue, QueueSort — activeQ/unschedulablePods 용어로 서술) /
-  1.2.3 QueueingHint(Code 2, 시나리오, 버전 이력, Pending backoff 생략) /
-  1.3 Scheduling Cycle(도입: Queue에서 꺼내 직렬 처리 → Extension Point → Binding Cycle, 실패 시 Queue 복귀) /
-  1.3.1 Extension Point(PreFilter~Permit) /
-  1.4 Binding Cycle(도입: 비동기 수행 → Extension Point 통과 → 실패 시 Reserve 되돌림(Unreserve) 후 Queue 복귀) /
-  1.4.1 비동기 Binding(2026-10-27 피드백으로 구성한 2문단: ① Bind는 느린 작업 → Goroutine 분리, 다음 Pod Scheduling 즉시
-  시작, ② 중복 배치 위험의 원리(남은 Resource는 nodeName 설정된 Pod 요청량 제외로 계산 → Bind 전 Pod는 집계 누락)와
-  Reserve의 Cache 선반영으로 방지) /
-  1.4.2 Extension Point(PreBind/Bind/PostBind) /
-  1.5 Scheduler 확장 — 2026-10-26 사용자 피드백으로 하위 항목 분리 후 Custom Scheduler 항목은 다시 제거
-  (메커니즘이 1.1과 중복): 1.5.1 Scheduling Framework Plugin(Code 3, Table 1 Extension Point별 Interface, Code 4) /
-  1.5.2 Scheduler Extender(File 4, 4 Verb와 Figure 1 강조 대응, managedResources, 마지막 문단에 Custom Scheduler 병용, HAMi 사례).
+  2. kube-scheduler(도입: kube-scheduler 정의(bold) → Scheduling Framework 기반 → Extension Point 정의 "Scheduling Framework가
+  Scheduling Queue부터 Binding Cycle까지 정해진 단계에서 Plugin을 호출하도록 열어 둔 지점" + 내장 Plugin 문장 → 4개 부분
+  요약 개조식(Queue/Scheduling Cycle/Binding Cycle/확장)) /
+  2.1 Scheduling Queue(도입: 대기 Queue → Extension Point로 준비 여부/순서 결정 → 실패 시 복귀와 QueueingHint, 하위 제목
+  키워드 bold) / 2.1.1 Queue 구조(3영역, 실패, 재이동 경로) /
+  2.1.2 Extension Point(PreEnqueue, QueueSort — activeQ/unschedulablePods 용어로 서술) /
+  2.1.3 QueueingHint(Code 2, 시나리오, 버전 이력, Pending backoff 생략) /
+  2.2 Scheduling Cycle(도입: Queue에서 꺼내 직렬 처리 → Extension Point → Binding Cycle, 실패 시 Queue 복귀) /
+  2.2.1 Extension Point(PreFilter~Permit) /
+  2.3 Binding Cycle(도입: 비동기 수행 → Extension Point 통과 → 실패 시 Scheduling Cycle의 Reserve 되돌림(Unreserve) 후 Queue 복귀) /
+  2.3.1 비동기 Binding(① 비동기 이유: Bind는 느린 작업 → 별도 Goroutine, 다음 Pod Scheduling 즉시 시작, ② 중복 배치 위험의
+  원리(남은 Resource는 nodeName 설정된 Pod 요청량 제외로 계산 → Bind 전 Pod는 집계 누락)와 Reserve의 Cache 선반영으로 방지) /
+  2.3.2 Extension Point(PreBind/Bind/PostBind) /
+  2.4 Scheduler 확장 — 2026-10-26 사용자 피드백으로 하위 항목 분리 후 Custom Scheduler 항목은 다시 제거
+  (메커니즘이 1.1과 중복): 2.4.1 Scheduling Framework Plugin(Code 3, Table 1 Extension Point/단계/Interface/Method, Code 4) /
+  2.4.2 Scheduler Extender(File 4, 4 Verb와 Figure 1 강조 대응, managedResources, 마지막 문단에 Custom Scheduler 병용, HAMi 사례) /
+  3. 참조.
 - Figure 1에는 아직 PreEnqueue/QueueSort가 없음: 제안 배치는 Informer→activeQ 화살표 위 PreEnqueue 박스
   (+ unschedulablePods로 Failure 화살표), activeQ에 QueueSort 부제.
 - **Figure 1(scheduler-architecture.png)은 2026-10-26에 사용자가 pptx로 직접 그린 그림** (images/images.pptx 원본).
@@ -52,7 +55,7 @@ kubernetes-hami 문서의 배경 글 (HAMi의 Scheduler Extender 방식 이해 �
   (apiserver: Decoding+Defaulting → Mutating → Validating → Create/Update etcd, Custom Scheduler Mutating Webhook Server) +
   kube-scheduler(Queue 3영역과 requeue 경로, Scheduling Cycle 2행, Binding Cycle) + Scheduler Extender HTTP Server
   (POST /filter /preempt /prioritize /bind) + Custom Scheduler(스택). olive 강조 = Filter/PostFilter/Score/Bind
-  (Extender 4 Verb 대응, 본문 1.5.2에 의미 명시).
+  (Extender 4 Verb 대응, 본문 2.4.2에 의미 명시).
 - **사실 검증 필요 목록** (문서, 기억 기반 초안):
   - Pod `spec.schedulerName`의 Defaulting 주체/위치: kube-apiserver의 API Defaulting
     (pkg/apis/core/v1/defaults.go의 SetDefaults_PodSpec, v1.DefaultSchedulerName = "default-scheduler") — 소스 재확인 필요.
