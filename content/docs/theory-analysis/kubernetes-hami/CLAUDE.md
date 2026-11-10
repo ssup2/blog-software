@@ -11,6 +11,26 @@ HAMi 자체(이기종 AI 가속기 가상화 Middleware)에 포커스를 두고 
 
 ## 문서 구성 및 상태
 
+- **2026-11-11 HAMi v2.11.0 기준으로 전환** (사용자 요청): Test Node(192.168.1.32, kubeadm v1.34.12)의 HAMi를 Chart 2.10.0 → 2.11.0으로
+  upgrade(values `prometheus.enabled=true` 유지, 최종 revision 5, qwen3 Pod 무중단)하고 [Shell 1], [Shell 2], [Shell 3]을 재실측으로 교체.
+  v2.11.0 변화: ① hami-scheduler HTTP Listener 분리 — `--http_bind=0.0.0.0:9443`(`/webhook`, `/refit`, Probe, Service 443 → 9443)와
+  `--extender-bind=127.0.0.1:9444`(`/filter`, `/bind`, Loopback 전용 — 호출자 미인증이라 분리), Extender `urlPrefix: https://127.0.0.1:9444`
+  ② `hami-scheduler` Service NodePort → ClusterIP(443/TCP, 31993/TCP — 31993은 Metric Port 9395로 연결)
+  ③ Webhook rules에 `UPDATE` 추가 — 생성 후 `hami.io/` 할당 Annotation 변경 방지(pkg/scheduler/webhook.go handleUpdate)
+  ④ device-config Section 13종(nvidia, cambricon, hygon, metax, enflame, mthreads, iluvatars, kunlun, awsneuron, amd, vastai, biren, vnpus)
+  — 본문의 "2.10.0 총 14종" 문장을 "2.11.0 ConfigMap 13종 설정"으로 교체. Hygon은 `hcunum/hcumem/hcucores`(옛 Shell 2의 dcunum은 오기였음).
+  같은 날 사용자 요청으로 1.3에 **NUMA Refit** 과정 추가 (v2.11.0 소스 기반, 실측 없음 — Test Node는 기본값이라 비활성): Device Plugin이
+  표준 `GetPreferredAllocation()` 처리 중 Annotation GPU가 Topology Manager 허용 목록에 없으면 hami-scheduler `/refit`(9443, Device Plugin
+  ServiceAccount Token 인증) 호출 → 허용 GPU 안에서 동일 정책으로 재선택, Annotation/할당 내역 갱신 후 반환. Kubernetes 표준 API 아님(HAMi 자체
+  프로토콜). Helm `devicePlugin.numaRefit.enabled: false` 기본, `devices.nvidia.enableNumaTopology` + Node `enablegetpreferredallocation` +
+  Pod `hami.io/numa-alignment`(best-effort/strict) 필요, NVIDIA만(MIG 제외), Issue #2080. 근거: pkg/device/numa_refit.go,
+  pkg/scheduler/numa_refit.go(fitInRestrictedDevices), nvinternal/plugin/server.go(GetPreferredAllocation → tryNumaRefit), charts values.yaml.
+  벤더 중립 방침의 예외로 "현재 NVIDIA GPU만 지원"을 본문에 명시.
+  이어서 사용자 요청으로 `#### 1.3.1. NUMA Refit`으로 분리하고 배경 문단 추가: Guaranteed Pod의 CPU는 Bind 이후 kubelet CPU Manager가
+  결정하고 kube-apiserver에 공개되지 않아 hami-scheduler가 Scheduling 시점에 CPU의 NUMA를 알 수 없음(근거: Issue #2080 실측 — CPU NUMA 0,
+  Scheduler 선택 GPU NUMA 14). hami-scheduler가 재선택하는 이유(할당 내역 관리, 과할당 방지)는 둘째 문단으로 이동.
+  **미해결**: 1.2 Step 3의 "Filter/Score 단계에서 Extender 호출" — Extender 설정은 `filterVerb`, `bindVerb`만 있고 `prioritizeVerb` 없음.
+  점수 계산은 Filter 처리 안에서 수행되는 것으로 보이나 소스 미확인, 사용자에게 보고함.
 - **2026-11-06 Health 상태 추가** (사용자 요청, 소스 기반): 1.1에 Unhealthy 전달 문단 추가, kubelet 규격 문장을 "ID와 Health 상태 같은 제한된 정보"로 수정.
   Handshake bullet을 v2.10.0 pkg/device/devices.go CheckHealth 기준으로 정정 — 주기 갱신 아님. Test Node 실측: Allocatable 10에서 Timestamp가
   2026-10-17에 멈춰 있음. Scheduler 제외는 여러 벤더 코드의 CardNotHealth로, vGPU 전체 Unhealthy는 NVIDIA 코드로 확인. 다른 벤더 Plugin의 Unhealthy 전달은 미확인.

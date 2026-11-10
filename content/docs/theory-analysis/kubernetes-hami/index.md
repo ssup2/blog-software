@@ -40,7 +40,7 @@ draft: true
 | AWS Neuron | `aws.amazon.com/neuron`, `aws.amazon.com/neuroncore` | X / O | Hardware |
 {{< /table >}}
 
-[Table 2]는 HAMi가 제조사 제공 Device Plugin을 그대로 이용하여 지원하는 주요 Accelerator를 나타내고 있다. Table 1의 HAMi Protocol Accelerator와 함께 HAMi 2.10.0은 총 14종을 지원한다. Table 2의 Resource 이름은 모두 벤더 Device Plugin이 kubelet에 등록하는 자체 이름이며, HAMi는 `hami-scheduler-device` ConfigMap에 이 이름들을 등록해 두어 Mutating Webhook과 Scheduler Extender가 Pod의 요청을 인식하도록만 한다.
+[Table 2]는 HAMi가 제조사 제공 Device Plugin을 그대로 이용하여 지원하는 주요 Accelerator를 나타내고 있다. HAMi 2.11.0의 `hami-scheduler-device` ConfigMap에는 [Table 1], [Table 2]의 Accelerator를 포함하여 총 13종의 Accelerator 설정이 정의되어 있다. Table 2의 Resource 이름은 모두 벤더 Device Plugin이 kubelet에 등록하는 자체 이름이며, HAMi는 `hami-scheduler-device` ConfigMap에 이 이름들을 등록해 두어 Mutating Webhook과 Scheduler Extender가 Pod의 요청을 인식하도록만 한다.
 
 제조사 Device Plugin을 쓸 때는 Device 선택과 격리 적용을 모두 벤더 Plugin이 담당하기 때문에, HAMi는 Scheduling에만 관여한다. 격리 계층은 Accelerator Driver가 담당하는 Driver 수준이 다수이며, 일부는 벤더 Library 주입 (Library 수준) 이나 Hardware 분할 (Hardware 수준) 도 함께 쓴다. 이 경우 HAMi가 제공하는 가치는 Pod Annotation 기반의 Scheduling 정책 지정과 여러 벤더를 하나의 Scheduler로 통합 운영하는 수준에 그치며, HAMi의 핵심 가치는 HAMi Protocol을 이용할 때 나타난다.
 
@@ -52,6 +52,7 @@ nvidia:
   resourceMemoryPercentageName: nvidia.com/gpumem-percentage
   resourceCoreName: nvidia.com/gpucores
   resourcePriorityName: nvidia.com/priority
+  ...
   deviceSplitCount: 10
   deviceMemoryScaling: 1
   deviceCoreScaling: 1
@@ -61,9 +62,10 @@ cambricon:
   resourceMemoryName: cambricon.com/mlu.smlu.vmemory
   resourceCoreName: cambricon.com/mlu.smlu.vcore
 hygon:
-  resourceCountName: hygon.com/dcunum
-  resourceMemoryName: hygon.com/dcumem
-  resourceCoreName: hygon.com/dcucores
+  resourceCountName: hygon.com/hcunum
+  resourceMemoryName: hygon.com/hcumem
+  resourceCoreName: hygon.com/hcucores
+  memoryFactor: 1
 ...
 ```
 
@@ -118,8 +120,9 @@ Device Plugin 방식에서는 Node 선택은 kube-scheduler가 수행하고 Acce
 
 ```shell {caption="[Shell 1] HAMi Mutating Webhook Configuration과 대상 hami-scheduler Service 확인"}
 $ kubectl get mutatingwebhookconfigurations
-NAME           WEBHOOKS   AGE
-hami-webhook   1          14d
+NAME                                   WEBHOOKS   AGE
+hami-webhook                           1          24d
+monitoring-kube-prometheus-admission   1          23d
 
 $ kubectl get mutatingwebhookconfigurations hami-webhook -o yaml
 ...
@@ -134,7 +137,7 @@ webhooks:
   rules:
   - apiGroups: [""]
     apiVersions: [v1]
-    operations: [CREATE]
+    operations: [CREATE, UPDATE]
     resources: [pods]
   namespaceSelector:
     matchExpressions:
@@ -150,19 +153,21 @@ webhooks:
   sideEffects: None
 
 $ kubectl -n kube-system get svc hami-scheduler
-NAME             TYPE       CLUSTER-IP     EXTERNAL-IP   PORT(S)                         AGE
-hami-scheduler   NodePort   10.97.57.101   <none>        443:31998/TCP,31993:31993/TCP   14d
+NAME             TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)             AGE
+hami-scheduler   ClusterIP   10.97.57.101   <none>        443/TCP,31993/TCP   24d
 
 $ kubectl -n kube-system get endpoints hami-scheduler
-NAME             ENDPOINTS                        AGE
-hami-scheduler   10.244.0.6:443,10.244.0.6:9395   14d
+NAME             ENDPOINTS                           AGE
+hami-scheduler   10.244.0.24:9443,10.244.0.24:9395   24d
 
 $ kubectl -n kube-system get pods -l app.kubernetes.io/component=hami-scheduler -o wide
-NAME                             READY   STATUS    RESTARTS   AGE   IP           NODE
-hami-scheduler-55cc79689-lv8l6   2/2     Running   0          14d   10.244.0.6   gpu
+NAME                              READY   STATUS    RESTARTS   AGE     IP            NODE
+hami-scheduler-6d94b4bd6f-dsbg6   2/2     Running   0          3m40s   10.244.0.24   gpu
 ```
 
-[Shell 1]은 HAMi 설치 시 생성되는 Mutating Webhook Configuration (`hami-webhook`) 과 webhook 대상이 되는 `hami-scheduler` Service를 나타내고 있다. `rules`에 Pod 생성 요청 (`CREATE pods`) 이 지정되어 있어 모든 Pod 생성이 webhook을 거치며, `clientConfig.service`가 가리키는 `hami-scheduler` Service의 `/webhook` 경로 (`443` Port) 로 요청이 전달된다. Service의 Endpoint (`10.244.0.6:443`) 는 `hami-scheduler-55cc79689-lv8l6` Pod의 IP와 일치하며, 이 Pod 안의 Scheduler Extender Container가 webhook 요청을 수신한다. Extender는 요청에 포함된 Pod가 등록된 모든 Accelerator Resource 중 하나라도 요청하는지 검사하고, 요청하는 경우에만 Pod의 `schedulerName`을 `hami-scheduler`로 변경한다. `namespaceSelector`와 `objectSelector`는 `hami.io/webhook: ignore` Label이 붙은 Namespace와 Pod를 webhook 처리에서 제외하여 특정 범위를 건너뛸 수 있도록 한다.
+[Shell 1]은 HAMi 설치 시 생성되는 Mutating Webhook Configuration (`hami-webhook`) 과 webhook 대상이 되는 `hami-scheduler` Service를 나타내고 있다. `rules`에 Pod 생성과 수정 요청 (`CREATE`, `UPDATE` pods) 이 지정되어 있어 Pod 요청이 webhook을 거치며, `clientConfig.service`가 가리키는 `hami-scheduler` Service의 `/webhook` 경로 (`443` Port) 로 요청이 전달된다. Service의 `443` Port는 Pod의 `9443` Port로 연결되며, Endpoint (`10.244.0.24:9443`) 는 `hami-scheduler-6d94b4bd6f-dsbg6` Pod의 IP와 일치하고 이 Pod 안의 Scheduler Extender Container가 webhook 요청을 수신한다. 함께 보이는 `9395` Port는 hami-scheduler가 Prometheus Metric을 제공하는 Port이다.
+
+Extender는 요청에 포함된 Pod가 등록된 모든 Accelerator Resource 중 하나라도 요청하는지 검사하고, 요청하는 경우에만 Pod의 `schedulerName`을 `hami-scheduler`로 변경한다. `UPDATE` 요청에서는 Pod 생성 이후에 HAMi의 할당 Annotation (`hami.io/` 계열) 이 다른 주체에 의해서 변경되지 않도록 검사한다. `namespaceSelector`와 `objectSelector`는 `hami.io/webhook: ignore` Label이 붙은 Namespace와 Pod를 webhook 처리에서 제외하여 특정 범위를 건너뛸 수 있도록 한다.
 
 ```shell {caption="[Shell 3] hami-scheduler KubeSchedulerConfiguration 확인"}
 $ kubectl -n kube-system get configmap hami-scheduler -o jsonpath='{.data.config\.yaml}'
@@ -175,7 +180,7 @@ leaderElection:
 profiles:
 - schedulerName: hami-scheduler
 extenders:
-- urlPrefix: "https://127.0.0.1:443"
+- urlPrefix: "https://127.0.0.1:9444"
   enableHTTPS: true
   tlsConfig:
     insecure: true
@@ -192,13 +197,19 @@ extenders:
   - ignoredByScheduler: true
     name: nvidia.com/gpucores
   - ignoredByScheduler: true
+    name: nvidia.com/gpumem-percentage
+  - ignoredByScheduler: true
+    name: nvidia.com/priority
+  - ignoredByScheduler: true
     name: cambricon.com/vmlu
   - ignoredByScheduler: true
-    name: hygon.com/dcunum
+    name: hygon.com/hcunum
   ...
 ```
 
-[Shell 3]은 `hami-scheduler` ConfigMap에 저장된 KubeSchedulerConfiguration을 나타내고 있다. `profiles[0].schedulerName: hami-scheduler`로 Webhook이 지정하는 Scheduler 이름을 선언하고, `extenders`에 Scheduler Extender를 등록한다. `urlPrefix: https://127.0.0.1:443`은 Scheduler Extender의 접점이며, kube-scheduler와 Extender가 같은 Pod 안의 Sidecar Container로 동작하기 때문에 Loopback으로 호출된다. `filterVerb`와 `bindVerb`는 Scheduler Framework의 Filter와 Bind 단계에서 Extender를 호출하도록 지정하며, Extender는 Filter 단계에서 Accelerator 할당 가능한 Node를 걸러내고 Bind 단계에서 선택된 Accelerator 결과를 Pod Annotation에 기록한다. `managedResources`에 등록된 Accelerator Resource는 모두 `ignoredByScheduler: true`로 표시되어, kube-scheduler의 Default `NodeResourcesFit` Filter는 이 Resource들의 가용량을 집계하지 않고 전적으로 Extender에 위임한다.
+[Shell 3]은 `hami-scheduler` ConfigMap에 저장된 KubeSchedulerConfiguration을 나타내고 있다. `profiles[0].schedulerName: hami-scheduler`로 Webhook이 지정하는 Scheduler 이름을 선언하고, `extenders`에 Scheduler Extender를 등록한다. `urlPrefix: https://127.0.0.1:9444`는 Scheduler Extender의 접점이며, kube-scheduler와 Extender가 같은 Pod 안의 Sidecar Container로 동작하기 때문에 Loopback으로 호출된다. Extender의 `/filter`, `/bind` 경로는 호출자를 인증하지 않기 때문에, Service로 공개되는 Webhook Port (`9443`) 와 분리된 Loopback 전용 Port (`9444`) 에서만 제공된다.
+
+`filterVerb`와 `bindVerb`는 Scheduler Framework의 Filter와 Bind 단계에서 Extender를 호출하도록 지정하며, Extender는 Filter 단계에서 Accelerator 할당 가능한 Node를 걸러내고 Bind 단계에서 선택된 Accelerator 결과를 Pod Annotation에 기록한다. `managedResources`에 등록된 Accelerator Resource는 모두 `ignoredByScheduler: true`로 표시되어, kube-scheduler의 Default `NodeResourcesFit` Filter는 이 Resource들의 가용량을 집계하지 않고 전적으로 Extender에 위임한다.
 
 Scheduling 정책은 Node를 선택하는 Node Scheduling 정책과 Node 안에서 Accelerator를 선택하는 Device Scheduling 정책으로 구분된다. `binpack` 정책은 이미 할당량이 많은 Node나 Accelerator에 몰아서 할당하여 Accelerator 조각을 최소화하는 정책이고, `spread` 정책은 Node나 Accelerator에 고르게 분산하여 할당하는 정책이다. 기본 정책은 Helm 설정으로 지정하며 (Node는 `binpack`, Device는 `spread`가 기본값), Pod의 `hami.io/node-scheduler-policy`, `hami.io/gpu-scheduler-policy` Annotation을 통해서 Pod 단위로 변경할 수 있다.
 
@@ -250,6 +261,19 @@ Device Plugin의 두 번째 역할은 hami-scheduler가 선택한 Accelerator를
 Library 수준 격리에서 Container에 전달되는 Library는 격리 Library와 Accelerator Driver Library로 나뉘며, 전달 경로가 서로 다르다. 격리 Library는 Device Plugin이 `Allocate()` 응답의 Mount 항목에 Node의 Host 경로와 Container 경로를 지정하여 전달하며, kubelet이 이 항목을 Container Runtime에 넘겨 Container 생성 시 Bind Mount가 이루어진다. 즉 Device Plugin은 Mount를 직접 수행하지 않고 Mount 대상만 지정한다. 반면 Accelerator Driver Library의 전달 방식은 Accelerator마다 달라서, 제조사의 Container Runtime 확장이 주입하거나 Device Plugin이 같은 Mount 항목으로 전달한다.
 
 Device Plugin이 `Allocate()` 응답으로 반환하는 Container 설정은 `hami-scheduler-device` ConfigMap의 Accelerator Section 설정으로 세부 조정할 수 있다. **`defaultMemory`**, **`defaultCores`**, **`defaultGPUNum`** 은 Pod가 Memory, Core, 개수 요청을 생략했을 때 적용되는 기본값이며 (각각 `0`, `0`, `1`), `0`은 "제한을 두지 않고 물리 전체를 허용"으로 해석된다. **`overwriteEnv`** (기본 `false`) 는 Container 환경 변수 주입 시 Pod spec에 이미 지정된 환경 변수를 덮어쓸지 여부를 결정하고, **`runtimeClassName`** 은 Allocation 결과 Container에 적용할 RuntimeClass이며 비어 있으면 Kubernetes의 Default RuntimeClass가 쓰인다.
+
+#### 1.3.1. NUMA Refit
+
+kubelet의 **Topology Manager**는 CPU와 Accelerator를 같은 NUMA Node에 배치하기 위해서 할당에 이용할 수 있는 Accelerator 범위를 제한한다. 그런데 Guaranteed Pod에 할당할 CPU는 Pod가 Node에 Bind된 이후에 kubelet의 CPU Manager가 Node의 상태를 보고 결정하며, 이 정보는 kube-apiserver에 공개되지 않는다. 따라서 hami-scheduler는 Scheduling 시점에 Pod의 CPU가 어느 NUMA Node에 배치될지 알 수 없고, hami-scheduler가 Pod Annotation에 기록한 Accelerator가 Topology Manager가 허용한 범위에 없는 상황이 발생할 수 있다.
+
+**NUMA Refit**은 이 경우 Device Plugin이 hami-scheduler에게 허용된 범위 안에서 Accelerator를 다시 선택하도록 요청하는 기능이며, HAMi 2.11.0에 추가되었고 현재 NVIDIA GPU만 지원하며 기본적으로 비활성화되어 있다. kubelet이 직접 Accelerator를 선택하지 않고 hami-scheduler가 다시 선택하는 이유는 Accelerator별 Memory, Core 할당 내역을 hami-scheduler가 관리하기 때문이며, kubelet이 임의로 선택하면 할당 내역과 실제 할당이 어긋나서 이후 Scheduling에서 과할당이 발생할 수 있다. NUMA Refit 과정은 다음과 같다.
+
+1. kubelet은 `Allocate()` 요청 전에 Device Plugin에게 `GetPreferredAllocation()` gRPC 요청을 전송하며, 요청에는 Topology Manager가 허용한 Accelerator 목록이 포함된다.
+2. Device Plugin은 Pod Annotation에 기록된 Accelerator가 허용 목록에 없으면, hami-scheduler의 `/refit` Endpoint로 Pod 정보와 허용된 물리 Accelerator 목록을 전송한다.
+3. hami-scheduler는 허용된 Accelerator 안에서만 Scheduling 단계와 동일한 정책으로 Accelerator를 다시 선택하고, 선택 결과를 Pod Annotation과 할당 내역에 반영한 뒤 Device Plugin에 반환한다.
+4. Device Plugin은 다시 선택된 Accelerator를 `GetPreferredAllocation()` 응답으로 kubelet에 반환하며, 이후 `Allocate()` 과정은 갱신된 Pod Annotation을 기준으로 진행된다.
+
+NUMA Refit을 이용하려면 Helm의 `devicePlugin.numaRefit.enabled`와 NUMA Topology 관련 설정을 활성화하고, Pod의 `hami.io/numa-alignment` Annotation에 `best-effort` 또는 `strict` Mode를 지정해야 한다. `strict` Mode에서는 Refit에 실패하면 Pod의 할당이 실패하고, `best-effort` Mode에서는 kubelet이 직접 Accelerator를 선택한다. `/refit` Endpoint는 Webhook과 같은 `9443` Port에서 제공되며, `/filter`, `/bind`와 다르게 Device Plugin의 ServiceAccount Token으로 호출자를 인증한다.
 
 ## 2. 참조
 

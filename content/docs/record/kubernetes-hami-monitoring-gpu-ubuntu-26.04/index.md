@@ -9,7 +9,7 @@ title: Kubernetes HAMi Monitoring 구성 / GPU Ubuntu 26.04 환경
 * `192.168.1.32` 단일 Server (Control-plane + Worker 겸용)
 * Ubuntu 26.04 LTS 64bit, root user
 * Nvidia RTX 5060 Ti GPU 16GB
-* Kubernetes v1.34.12 (kubeadm) + HAMi Chart 2.10.0
+* Kubernetes v1.34.12 (kubeadm) + HAMi Chart 2.11.0
 * Software
   * **Helm** : v3
   * **kube-prometheus-stack** : Chart 92.10.1
@@ -60,30 +60,32 @@ Grafana/Prometheus Service가 각 NodePort로 노출되었는지 확인한다.
 
 ## 3. HAMi Exporter 연동
 
-HAMi 2.x는 Metrics Exporter를 자체 포함하고 Helm Chart에 ServiceMonitor Template도 들어 있다. HAMi 설치 시 `prometheus.enabled=true`를 지정하면 Chart가 `hami-device-plugin-metrics-monitor`, `hami-scheduler-metrics-monitor` ServiceMonitor를 자동 생성한다. 다만 Chart Template에는 `honorLabels` 설정이 없어서 그대로 두면 Prometheus Operator의 Default Relabeling이 Metric에 심어진 `namespace`/`pod`/`container` Label을 Scrape 대상 Pod(`hami-device-plugin`)의 값으로 덮어쓰고 vLLM Pod 단위 사용량이 보이지 않는다.
+HAMi 2.x는 Metrics Exporter를 자체 포함하고 Helm Chart에 ServiceMonitor Template도 들어 있다. HAMi 설치 시 `prometheus.enabled=true`를 지정하면 Chart가 `hami-device-plugin-metrics-monitor`, `hami-scheduler-metrics-monitor` ServiceMonitor를 자동 생성한다. 두 ServiceMonitor에는 `honorLabels: true`가 설정되어 있으며, 이 Option은 Prometheus Scrape Config의 `honor_labels`를 활성화해 Metric 본문의 Label을 Target Discovery Label보다 우선시한다. 이 설정이 없으면 Prometheus Operator의 Default Relabeling이 Metric에 심어진 `namespace`/`pod`/`container` Label을 Scrape 대상 Pod(`hami-device-plugin`)의 값으로 덮어쓰고 vLLM Pod 단위 사용량이 보이지 않는다.
 
 ```shell
-$ helm upgrade hami hami-charts/hami --version 2.10.0 \
+$ helm upgrade hami hami-charts/hami --version 2.11.0 \
     --reuse-values \
     --set prometheus.enabled=true \
     -n kube-system
 Release "hami" has been upgraded. Happy Helming!
 $ kubectl -n kube-system get servicemonitor
 NAME                                 AGE
-hami-device-plugin-metrics-monitor   7s
-hami-scheduler-metrics-monitor       7s
+hami-device-plugin-metrics-monitor   10s
+hami-scheduler-metrics-monitor       10s
 ```
 
 HAMi Chart를 Upgrade하여 ServiceMonitor를 생성한다. HAMi 설치 시점에 `--set prometheus.enabled=true`를 미리 넣었다면 이 단계는 생략해도 된다.
 
 ```shell
-$ kubectl -n kube-system patch servicemonitor hami-device-plugin-metrics-monitor \
-    --type=json -p='[{"op":"add","path":"/spec/endpoints/0/honorLabels","value":true}]'
-$ kubectl -n kube-system patch servicemonitor hami-scheduler-metrics-monitor \
-    --type=json -p='[{"op":"add","path":"/spec/endpoints/0/honorLabels","value":true}]'
+$ kubectl -n kube-system get servicemonitor hami-device-plugin-metrics-monitor \
+    -o jsonpath='{.spec.endpoints[0].honorLabels}'
+true
+$ kubectl -n kube-system get servicemonitor hami-scheduler-metrics-monitor \
+    -o jsonpath='{.spec.endpoints[0].honorLabels}'
+true
 ```
 
-생성된 두 ServiceMonitor에 `honorLabels: true`를 Patch로 주입한다. 이 Option은 Prometheus Scrape Config의 `honor_labels`를 활성화해 Metric 본문의 Label을 Target Discovery Label보다 우선시한다.
+생성된 두 ServiceMonitor에 `honorLabels: true`가 설정되어 있는지 확인한다.
 
 ```shell
 $ curl -s 'http://192.168.1.32:30900/api/v1/query?query=hami_container_device_memory_bytes' \
@@ -91,7 +93,7 @@ $ curl -s 'http://192.168.1.32:30900/api/v1/query?query=hami_container_device_me
 import json,sys
 for r in json.load(sys.stdin)["data"]["result"]:
     m=r["metric"]; print(f"{m[\"namespace\"]}/{m[\"pod\"]}/{m[\"container\"]} = {int(r[\"value\"][1])/2**30:.2f} GiB")'
-default/qwen3-14b-awq-84dfd5c495-nw9rg/vllm = 12.08 GiB
+default/qwen3-14b-awq-84dfd5c495-tgrmb/vllm = 12.08 GiB
 ```
 
 Prometheus Query API로 Pod 단위 vGPU Memory 사용량이 vLLM Pod로 올바르게 attribute되는지 확인한다.

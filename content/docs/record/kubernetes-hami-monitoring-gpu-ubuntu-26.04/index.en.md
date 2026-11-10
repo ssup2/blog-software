@@ -9,7 +9,7 @@ The installation and runtime environment is as follows. A Kubernetes Single-node
 * `192.168.1.32` single Server (Control-plane + Worker combined)
 * Ubuntu 26.04 LTS 64bit, root user
 * Nvidia RTX 5060 Ti GPU 16GB
-* Kubernetes v1.34.12 (kubeadm) + HAMi Chart 2.10.0
+* Kubernetes v1.34.12 (kubeadm) + HAMi Chart 2.11.0
 * Software
   * **Helm** : v3
   * **kube-prometheus-stack** : Chart 92.10.1
@@ -60,30 +60,32 @@ Confirm that the Grafana and Prometheus Services are exposed on their NodePorts.
 
 ## 3. HAMi Exporter Integration
 
-HAMi 2.x embeds its own Metrics Exporters, and the Helm Chart ships ServiceMonitor templates. Setting `prometheus.enabled=true` at install time makes the Chart create the `hami-device-plugin-metrics-monitor` and `hami-scheduler-metrics-monitor` ServiceMonitors automatically. However, the Chart templates do not set `honorLabels`, so the Prometheus Operator's default relabeling overwrites the `namespace`/`pod`/`container` Labels embedded in each metric with the scrape target Pod (`hami-device-plugin`), hiding per-Pod vGPU usage of a vLLM Pod.
+HAMi 2.x embeds its own Metrics Exporters, and the Helm Chart ships ServiceMonitor templates. Setting `prometheus.enabled=true` at install time makes the Chart create the `hami-device-plugin-metrics-monitor` and `hami-scheduler-metrics-monitor` ServiceMonitors automatically. Both ServiceMonitors set `honorLabels: true`, which surfaces Prometheus's `honor_labels` scrape setting so the metric body labels win over target discovery labels. Without this setting, the Prometheus Operator's default relabeling overwrites the `namespace`/`pod`/`container` Labels embedded in each metric with the scrape target Pod (`hami-device-plugin`), hiding per-Pod vGPU usage of a vLLM Pod.
 
 ```shell
-$ helm upgrade hami hami-charts/hami --version 2.10.0 \
+$ helm upgrade hami hami-charts/hami --version 2.11.0 \
     --reuse-values \
     --set prometheus.enabled=true \
     -n kube-system
 Release "hami" has been upgraded. Happy Helming!
 $ kubectl -n kube-system get servicemonitor
 NAME                                 AGE
-hami-device-plugin-metrics-monitor   7s
-hami-scheduler-metrics-monitor       7s
+hami-device-plugin-metrics-monitor   10s
+hami-scheduler-metrics-monitor       10s
 ```
 
 Upgrade the HAMi Chart so the ServiceMonitors are created. If `--set prometheus.enabled=true` is passed at the initial `helm install` time, this upgrade step can be skipped.
 
 ```shell
-$ kubectl -n kube-system patch servicemonitor hami-device-plugin-metrics-monitor \
-    --type=json -p='[{"op":"add","path":"/spec/endpoints/0/honorLabels","value":true}]'
-$ kubectl -n kube-system patch servicemonitor hami-scheduler-metrics-monitor \
-    --type=json -p='[{"op":"add","path":"/spec/endpoints/0/honorLabels","value":true}]'
+$ kubectl -n kube-system get servicemonitor hami-device-plugin-metrics-monitor \
+    -o jsonpath='{.spec.endpoints[0].honorLabels}'
+true
+$ kubectl -n kube-system get servicemonitor hami-scheduler-metrics-monitor \
+    -o jsonpath='{.spec.endpoints[0].honorLabels}'
+true
 ```
 
-Patch `honorLabels: true` into both ServiceMonitors. This surfaces Prometheus's `honor_labels` scrape setting so the metric body labels win over target discovery labels.
+Confirm that `honorLabels: true` is set on both created ServiceMonitors.
 
 ```shell
 $ curl -s 'http://192.168.1.32:30900/api/v1/query?query=hami_container_device_memory_bytes' \
@@ -91,7 +93,7 @@ $ curl -s 'http://192.168.1.32:30900/api/v1/query?query=hami_container_device_me
 import json,sys
 for r in json.load(sys.stdin)["data"]["result"]:
     m=r["metric"]; print(f"{m[\"namespace\"]}/{m[\"pod\"]}/{m[\"container\"]} = {int(r[\"value\"][1])/2**30:.2f} GiB")'
-default/qwen3-14b-awq-84dfd5c495-nw9rg/vllm = 12.08 GiB
+default/qwen3-14b-awq-84dfd5c495-tgrmb/vllm = 12.08 GiB
 ```
 
 Query the Prometheus API to confirm per-Pod vGPU Memory usage is attributed to the vLLM Pod correctly.
