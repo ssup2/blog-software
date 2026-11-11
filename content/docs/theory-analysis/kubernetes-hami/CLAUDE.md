@@ -29,8 +29,15 @@ HAMi 자체(이기종 AI 가속기 가상화 Middleware)에 포커스를 두고 
   이어서 사용자 요청으로 `#### 1.3.1. NUMA Refit`으로 분리하고 배경 문단 추가: Guaranteed Pod의 CPU는 Bind 이후 kubelet CPU Manager가
   결정하고 kube-apiserver에 공개되지 않아 hami-scheduler가 Scheduling 시점에 CPU의 NUMA를 알 수 없음(근거: Issue #2080 실측 — CPU NUMA 0,
   Scheduler 선택 GPU NUMA 14). hami-scheduler가 재선택하는 이유(할당 내역 관리, 과할당 방지)는 둘째 문단으로 이동.
-  **미해결**: 1.2 Step 3의 "Filter/Score 단계에서 Extender 호출" — Extender 설정은 `filterVerb`, `bindVerb`만 있고 `prioritizeVerb` 없음.
-  점수 계산은 Filter 처리 안에서 수행되는 것으로 보이나 소스 미확인, 사용자에게 보고함.
+- **2026-11-12 구성 변경** (사용자 요청): `### 1.1. Scheduler 선택 과정` 신설 → 기존 1.1~1.3은 1.2~1.4, NUMA Refit은 1.4.1.
+  Webhook [Shell]과 설명 문단을 1.1로 이동하고 Annotation 보호 문단 추가(v2.11.0 pkg/scheduler/webhook.go: CREATE 시
+  scheduler-owned Annotation(`hami.io/vgpu-node`, `bind-time`, `bind-phase`, 벤더별 devices-to-allocate/allocated) 사전 지정 거부,
+  UPDATE 시 SubjectAccessReview로 nodes patch 권한 + `schedulerName == hami-scheduler`인 경우만 변경 허용. 변경 대상은
+  `default-scheduler` Pod만 — `--force-overwrite-default-scheduler` 기본 true). Shell 번호를 등장 순서로 재정렬:
+  ConfigMap = Shell 1, Webhook = Shell 2, KubeSchedulerConfiguration = Shell 3.
+  같은 작업에서 1.3 단계 목록 정정(이전 미해결 항목 해소): Extender는 Filter 단계에서만 호출, Filter 안에서 점수 계산 후
+  `devices-allocated`/`vgpu-node` Annotation 기록 + Node 하나 반환(scheduler.go Filter), Bind 단계에서 `bind-phase: allocating`,
+  `bind-time` 기록 후 Bind(scheduler.go Bind). [Shell 3] 설명 문단에도 `prioritizeVerb` 부재 이유 한 문장 추가.
 - **2026-11-06 Health 상태 추가** (사용자 요청, 소스 기반): 1.1에 Unhealthy 전달 문단 추가, kubelet 규격 문장을 "ID와 Health 상태 같은 제한된 정보"로 수정.
   Handshake bullet을 v2.10.0 pkg/device/devices.go CheckHealth 기준으로 정정 — 주기 갱신 아님. Test Node 실측: Allocatable 10에서 Timestamp가
   2026-10-17에 멈춰 있음. Scheduler 제외는 여러 벤더 코드의 CardNotHealth로, vGPU 전체 Unhealthy는 NVIDIA 코드로 확인. 다른 벤더 Plugin의 Unhealthy 전달은 미확인.
