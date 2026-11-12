@@ -29,6 +29,10 @@ HAMi 자체(이기종 AI 가속기 가상화 Middleware)에 포커스를 두고 
   이어서 사용자 요청으로 `#### 1.3.1. NUMA Refit`으로 분리하고 배경 문단 추가: Guaranteed Pod의 CPU는 Bind 이후 kubelet CPU Manager가
   결정하고 kube-apiserver에 공개되지 않아 hami-scheduler가 Scheduling 시점에 CPU의 NUMA를 알 수 없음(근거: Issue #2080 실측 — CPU NUMA 0,
   Scheduler 선택 GPU NUMA 14). hami-scheduler가 재선택하는 이유(할당 내역 관리, 과할당 방지)는 둘째 문단으로 이동.
+- **2026-11-13 Component 명칭 통일** (사용자 요청): 본문 서술의 `hami-scheduler` → **HAMi Scheduler**, HAMi Protocol을 따르는
+  Device Plugin → **HAMi Device Plugin**. 코드 표기(`hami-scheduler` Service/ConfigMap/`schedulerName` 값, Shell 출력)는 그대로 둠.
+  일반 개념인 "Device Plugin 방식", "kubelet의 Device Plugin 규격/Unix Domain Socket", "제조사/벤더 Device Plugin", "일반적인 Device Plugin",
+  [Table 1]/[Table 2] 캡션, 열 이름, 패키징 설명(개요 Table 문단)은 일반 명칭 유지.
 - **2026-11-12 격리 Library 설치 경로 추가** (사용자 요청, v2.11.0 소스 기반, 실측 없음): 1.4 Library 전달 문단에 설치 과정 추가 후
   2문단으로 분할. Device Plugin DaemonSet이 Host `/usr/local/vgpu`(Helm `devicePlugin.libPath`)를 hostPath로 Mount → `postStart`의
   `vgpu-init.sh`가 Image의 `/k8s-vgpu/lib/nvidia/`를 MD5 비교 후 복사, `ld.so.preload`는 경로에 맞게 재생성 → `Allocate()` Mounts로
