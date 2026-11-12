@@ -124,9 +124,7 @@ hami-scheduler-6d94b4bd6f-dsbg6   2/2     Running   0          3m40s   10.244.0.
 
 [Shell 2]는 HAMi 설치 시 생성되는 Mutating Webhook Configuration (`hami-webhook`) 과 Webhook 대상이 되는 `hami-scheduler` Service를 나타내고 있다. `rules`에 Pod 생성과 수정 요청 (`CREATE`, `UPDATE` pods) 이 지정되어 있어 Pod 요청이 Webhook을 거치며, `clientConfig.service`가 가리키는 `hami-scheduler` Service의 `/webhook` 경로 (`443` Port) 로 요청이 전달된다. Service의 `443` Port는 Pod의 `9443` Port로 연결되며, Endpoint (`10.244.0.24:9443`) 는 `hami-scheduler-6d94b4bd6f-dsbg6` Pod의 IP와 일치하고 이 Pod 안의 Scheduler Extender Container가 Webhook 요청을 수신한다. 함께 보이는 `9395` Port는 HAMi Scheduler가 Prometheus Metric을 제공하는 Port이다.
 
-Webhook은 Pod 생성 요청에서 Pod가 등록된 모든 Accelerator Resource 중 하나라도 요청하는지 검사하고, 요청하는 경우에만 Pod의 `schedulerName`을 `hami-scheduler`로 변경한다. `schedulerName`이 `default-scheduler`인 Pod (`schedulerName`을 지정하지 않은 경우 포함) 만 변경 대상이며, 다른 Scheduler가 지정된 Pod는 그대로 둔다. `namespaceSelector`와 `objectSelector`는 `hami.io/webhook: ignore` Label이 붙은 Namespace와 Pod를 Webhook 처리에서 제외한다.
-
-또한 Webhook은 HAMi Scheduler가 기록하는 할당 Annotation (`hami.io/[accelerator]-devices-allocated` 계열, `hami.io/vgpu-node`, `hami.io/bind-phase` 등) 을 다른 주체가 설정하거나 수정하지 못하도록 막는다. HAMi Device Plugin은 이 Annotation에 기록된 Accelerator와 제한 값을 그대로 따라서 할당하기 때문에, 사용자가 Annotation을 직접 지정하면 HAMi Scheduler의 할당 내역에 없는 Memory와 Core를 할당받을 수 있기 때문이다. 따라서 Pod 생성 요청에 할당 Annotation이 포함되어 있으면 거부하고, Pod 수정 요청에서는 Node 수정 권한을 가진 HAMi Component (HAMi Scheduler, HAMi Device Plugin) 의 변경만 허용한다.
+Webhook은 Pod 생성 요청에서 Pod가 `hami-scheduler-device` ConfigMap에 등록된 Accelerator Resource ([Table 1], [Table 2] 등) 중 하나라도 요청하는지 검사하고, 요청하는 경우에만 Pod의 `schedulerName`을 `hami-scheduler`로 변경한다. `schedulerName`이 `default-scheduler`인 Pod (`schedulerName`을 지정하지 않은 경우 포함) 만 변경 대상이며, 다른 Scheduler가 지정된 Pod는 그대로 둔다. `UPDATE` 요청은 HAMi Scheduler가 기록한 할당 Annotation이 다른 주체에 의해서 변경되지 않도록 검사하는 데 이용된다. `namespaceSelector`와 `objectSelector`는 `hami.io/webhook: ignore` Label이 붙은 Namespace와 Pod를 Webhook 처리에서 제외한다.
 
 ### 1.2. Device 등록 과정
 
@@ -252,6 +250,8 @@ Scheduler Extender가 기록하는 Annotation:
 
 * **`hami.io/node-scheduler-policy`** : 해당 Pod의 Node Scheduling 정책 (`binpack` / `spread`).
 * **`hami.io/gpu-scheduler-policy`** : 해당 Pod의 Device Scheduling 정책 (`binpack` / `spread` 등 Accelerator별 지원 값).
+
+Mutating Webhook은 HAMi Scheduler가 기록하는 할당 Annotation (`hami.io/[accelerator]-devices-to-allocate`, `hami.io/[accelerator]-devices-allocated` 계열, `hami.io/vgpu-node`, `hami.io/bind-phase`, `hami.io/bind-time`) 을 다른 주체가 설정하거나 수정하지 못하도록 막는다. HAMi Device Plugin은 이 Annotation에 기록된 Accelerator와 제한 값을 그대로 따라서 할당하기 때문에, 사용자가 Annotation을 직접 지정하면 HAMi Scheduler의 할당 내역에 없는 Memory와 Core를 할당받을 수 있기 때문이다. 따라서 Pod 생성 요청에 할당 Annotation이 포함되어 있으면 거부하고, Pod 수정 요청에서는 Node 수정 권한을 가진 HAMi Component (HAMi Scheduler, HAMi Device Plugin) 의 변경만 허용한다.
 
 ### 1.4. Device 할당 과정
 

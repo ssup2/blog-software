@@ -29,6 +29,10 @@ HAMi 자체(이기종 AI 가속기 가상화 Middleware)에 포커스를 두고 
   이어서 사용자 요청으로 `#### 1.3.1. NUMA Refit`으로 분리하고 배경 문단 추가: Guaranteed Pod의 CPU는 Bind 이후 kubelet CPU Manager가
   결정하고 kube-apiserver에 공개되지 않아 hami-scheduler가 Scheduling 시점에 CPU의 NUMA를 알 수 없음(근거: Issue #2080 실측 — CPU NUMA 0,
   Scheduler 선택 GPU NUMA 14). hami-scheduler가 재선택하는 이유(할당 내역 관리, 과할당 방지)는 둘째 문단으로 이동.
+- **2026-11-13 Annotation 보호 문단 이동** (사용자 요청): 1.1 끝의 Annotation 보호 문단을 1.3 [File 2] Annotation 목록 바로 뒤로 이동
+  (Annotation 정의 뒤에 보호 이유가 오도록). 1.1에는 `UPDATE` 용도 한 문장만 남김. 보호 대상 목록은 schedulerOwnedAnnotationKeys() 기준으로
+  정확히 나열(`devices-to-allocate`, `devices-allocated`, `vgpu-node`, `bind-phase`, `bind-time` — `vgpu-time`은 보호 대상 아님).
+  같은 날 1.1 Webhook 검사 대상 문장을 "`hami-scheduler-device` ConfigMap에 등록된 Accelerator Resource ([Table 1], [Table 2] 등)"로 수정.
 - **2026-11-13 Component 명칭 통일** (사용자 요청): 본문 서술의 `hami-scheduler` → **HAMi Scheduler**, HAMi Protocol을 따르는
   Device Plugin → **HAMi Device Plugin**. 코드 표기(`hami-scheduler` Service/ConfigMap/`schedulerName` 값, Shell 출력)는 그대로 둠.
   일반 개념인 "Device Plugin 방식", "kubelet의 Device Plugin 규격/Unix Domain Socket", "제조사/벤더 Device Plugin", "일반적인 Device Plugin",
