@@ -29,6 +29,11 @@ HAMi 자체(이기종 AI 가속기 가상화 Middleware)에 포커스를 두고 
   이어서 사용자 요청으로 `#### 1.3.1. NUMA Refit`으로 분리하고 배경 문단 추가: Guaranteed Pod의 CPU는 Bind 이후 kubelet CPU Manager가
   결정하고 kube-apiserver에 공개되지 않아 hami-scheduler가 Scheduling 시점에 CPU의 NUMA를 알 수 없음(근거: Issue #2080 실측 — CPU NUMA 0,
   Scheduler 선택 GPU NUMA 14). hami-scheduler가 재선택하는 이유(할당 내역 관리, 과할당 방지)는 둘째 문단으로 이동.
+- **2026-11-12 격리 Library 설치 경로 추가** (사용자 요청, v2.11.0 소스 기반, 실측 없음): 1.4 Library 전달 문단에 설치 과정 추가 후
+  2문단으로 분할. Device Plugin DaemonSet이 Host `/usr/local/vgpu`(Helm `devicePlugin.libPath`)를 hostPath로 Mount → `postStart`의
+  `vgpu-init.sh`가 Image의 `/k8s-vgpu/lib/nvidia/`를 MD5 비교 후 복사, `ld.so.preload`는 경로에 맞게 재생성 → `Allocate()` Mounts로
+  `libvgpu.so`(RO)와 `/etc/ld.so.preload`를 Container에 Bind Mount(nvinternal/plugin/server.go). 주입은 `LD_PRELOAD` 환경 변수가 아니라
+  `/etc/ld.so.preload` 파일 방식 — 아래 2026-10-31 기록의 "env+LD_PRELOAD"는 부정확. 벤더 중립 방침의 예외로 "NVIDIA GPU는" 명시.
 - **2026-11-12 구성 변경** (사용자 요청): `### 1.1. Scheduler 선택 과정` 신설 → 기존 1.1~1.3은 1.2~1.4, NUMA Refit은 1.4.1.
   Webhook [Shell]과 설명 문단을 1.1로 이동하고 Annotation 보호 문단 추가(v2.11.0 pkg/scheduler/webhook.go: CREATE 시
   scheduler-owned Annotation(`hami.io/vgpu-node`, `bind-time`, `bind-phase`, 벤더별 devices-to-allocate/allocated) 사전 지정 거부,
