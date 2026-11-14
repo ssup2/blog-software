@@ -87,3 +87,13 @@ kubernetes-hami(HAMi 자체, 벤더 중립 구조) 문서의 NVIDIA 상세 글�
 
 - `index.md` — 문서 본문 (ko 초안).
 - `images/` — Figure 3종 (matplotlib 초안 2종 + 분리 전 글에서 이동한 hami-core-isolation.png).
+
+## 2026-11-14 [Table 3] 추가
+
+- 사용자 요청으로 1.2의 [File 4] 설명 문단을 [Table 3] "NVIDIA GPU의 Node Register Annotation 값"으로 대체 (kubernetes-hami 글의
+  벤더 중립 [Table 3]과 짝). 근거: HAMi v2.11.0 nvinternal/plugin/register.go — count=DeviceSplitCount, devmem=MiB×DeviceMemoryScaling,
+  devcore=100×DeviceCoreScaling(MIG는 100), type=NormalizeDeviceModel(`NVIDIA` 접두사), numa=sysfs, mode=operatingMode, health.
+  기존 문단의 "Core 수 (`devcore`)"는 부정확(실제는 %)이라 수정됨. `index`, `numa` 0 생략(omitempty), devmem이 표기 용량보다 작은 점
+  ([File 4] 16311 MiB) 한 문장 추가.
+- 같은 날 kubernetes-hami 글에서 옮겨 온 내용으로 [Table 2] 설명 문단 보강 후 2문단 분할: Allocatable = 물리 GPU 개수 × `deviceSplitCount`,
+  `deviceCoreScaling` > 1이면 SM 사용률 초과 할당 가능.

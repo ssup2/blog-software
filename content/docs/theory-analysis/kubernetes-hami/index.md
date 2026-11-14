@@ -18,8 +18,10 @@ draft: true
   * **Driver 수준 격리** : 하드웨어 자체는 공유된 상태에서 Accelerator Driver가 각 Pod의 Memory 할당량과 Core 사용률을 추적하고 강제한다. 제한을 Application이 아니라 Driver가 수행하기 때문에 별도의 Library 주입이 필요하지 않고, 하나의 물리 Accelerator 위에 할당량이 설정된 다수의 Instance를 올릴 수 있다.
   * **Hardware 수준 격리** : 하드웨어 자체가 물리적으로 분할되어 각 Partition이 독립된 Memory와 Core를 갖는 가상 Accelerator가 생성된다. 분할 가능한 구성은 제조사가 Chip마다 미리 정의한 Template (고정된 Memory와 Core 조합) 집합으로 한정되며, Pod에는 이 Template 중 하나가 할당된다. 격리가 가장 확실한 대신 Template보다 세밀한 분할은 불가능하다.
 
+[Figure 1]의 Node에는 물리 Accelerator가 2개 존재하며, HAMi 설정의 분할 개수 (`deviceSplitCount`) 가 2로 지정되어 있기 때문에 Node의 Allocatable/Capacity에는 4개의 Accelerator가 등록된다. 즉 물리 Accelerator 하나를 최대 2개의 Container가 나눠 쓸 수 있다. Pod A는 Accelerator 2개를 Core 사용률과 Memory 80%로, Pod B는 Accelerator 1개를 Core 사용률과 Memory 20%로 요청하여, Accelerator 1은 Pod A와 Pod B가 함께 사용한다.
+
 {{< table caption="[Table 1] HAMi Protocol Device Plugin이 제공되는 주요 Accelerator" >}}
-| Accelerator | Resource 이름 | Memory / Core 제한 | 격리 계층 | Device Plugin |
+| Accelerator | Accelerator Resource 이름 | Memory / Core 제한 | 격리 계층 | Device Plugin |
 |---|---|---|---|---|
 | NVIDIA GPU | `nvidia.com/gpu`, `nvidia.com/gpumem`, `nvidia.com/gpucores` | O / O | Library, Hardware | HAMi 포함 |
 | Huawei Ascend NPU | `huawei.com/Ascend910B3`, `huawei.com/Ascend910B3-memory` | O / O | Hardware | HAMi 별도 |
@@ -27,10 +29,12 @@ draft: true
 | AMD GPU | `amd.com/gpu`, `amd.com/gpumem`, `amd.com/gpucores` | O / O | Library | HAMi 별도 |
 {{< /table >}}
 
-[Table 1]은 HAMi Protocol을 따르는 Device Plugin이 제공되는 주요 Accelerator와 Resource 이름, 격리 계층, Device Plugin 패키징을 나타내고 있다. 각 Accelerator는 개수를 요청하는 Resource와 함께 Memory 크기, Core 사용률을 요청하는 Resource를 제공하며, HAMi Scheduler가 인식할 Accelerator별 Resource 이름은 `hami-scheduler-device` ConfigMap에 정의된다. Device Plugin은 `HAMi 포함` (HAMi Helm Chart 기본 포함)과 `HAMi 별도` (Project-HAMi 저장소의 별도 Chart, Manifest) 두 가지 방식으로 배포되며, NVIDIA GPU 외에는 HAMi 설치와 별개로 각 Device Plugin을 설치해야 한다.
+[Table 1]은 HAMi Protocol을 따르는 Device Plugin이 제공되는 주요 Accelerator와 Accelerator Resource 이름, 격리 계층, Device Plugin 패키징을 나타내고 있다. Accelerator Resource 이름은 Pod가 `resources`에 Accelerator를 요청할 때 이용하는 Kubernetes Extended Resource의 이름이며, 각 Accelerator는 개수를 요청하는 Resource와 함께 Memory 크기, Core 사용률을 요청하는 Resource를 제공한다. 이 중에서 개수를 요청하는 Resource (예: `nvidia.com/gpu`) 는 HAMi Device Plugin이 kubelet에 등록하기 때문에 Node의 Allocatable에 나타나지만, Memory 크기와 Core 사용률을 요청하는 Resource는 Node에 등록되지 않고 HAMi Scheduler만 인식하여 Scheduling에 활용한다.
+
+HAMi Scheduler는 `hami-scheduler-device` ConfigMap에 정의된 Accelerator별 Resource 이름을 기준으로 동작한다. Mutating Webhook은 이 이름으로 Accelerator를 요청하는 Pod를 판별하고, Scheduler Extender는 Pod가 요청한 개수, Memory 크기, Core 사용률을 읽어 Accelerator를 선택한다. Device Plugin은 `HAMi 포함` (HAMi Helm Chart 기본 포함)과 `HAMi 별도` (Project-HAMi 저장소의 별도 Chart, Manifest) 두 가지 방식으로 배포되며, NVIDIA GPU 외에는 HAMi 설치와 별개로 각 Device Plugin을 설치해야 한다.
 
 {{< table caption="[Table 2] 제조사 Device Plugin으로 지원되는 주요 Accelerator" >}}
-| Accelerator | Resource 이름 | Memory / Core 제한 | 격리 계층 |
+| Accelerator | Accelerator Resource 이름 | Memory / Core 제한 | 격리 계층 |
 |---|---|---|---|
 | Cambricon MLU | `cambricon.com/vmlu`, `cambricon.com/mlu.smlu.vmemory`, `cambricon.com/mlu.smlu.vcore` | O / O | Driver |
 | Hygon HCU | `hygon.com/hcunum`, `hygon.com/hcumem`, `hygon.com/hcucores` | O / O | Driver |
@@ -40,7 +44,7 @@ draft: true
 | AWS Neuron | `aws.amazon.com/neuron`, `aws.amazon.com/neuroncore` | X / O | Hardware |
 {{< /table >}}
 
-[Table 2]는 HAMi가 제조사 제공 Device Plugin을 그대로 이용하여 지원하는 주요 Accelerator를 나타내고 있다. HAMi 2.11.0의 `hami-scheduler-device` ConfigMap에는 [Table 1], [Table 2]의 Accelerator를 포함하여 총 13종의 Accelerator 설정이 정의되어 있다. Table 2의 Resource 이름은 모두 벤더 Device Plugin이 kubelet에 등록하는 자체 이름이며, HAMi는 `hami-scheduler-device` ConfigMap에 이 이름들을 등록해 두어 Mutating Webhook과 Scheduler Extender가 Pod의 요청을 인식하도록만 한다.
+[Table 2]는 HAMi가 제조사 제공 Device Plugin을 그대로 이용하여 지원하는 주요 Accelerator를 나타내고 있다. HAMi 2.11.0 기준으로 `hami-scheduler-device` ConfigMap에는 [Table 1], [Table 2]의 Accelerator를 포함하여 총 13종의 Accelerator 설정이 정의되어 있다. Table 2의 Resource 이름은 모두 벤더 Device Plugin이 kubelet에 등록하는 자체 이름이며, HAMi는 `hami-scheduler-device` ConfigMap에 이 이름들을 등록해 두어 Mutating Webhook과 Scheduler Extender가 Pod의 요청을 인식하도록만 한다.
 
 제조사 Device Plugin을 쓸 때는 Device 선택과 격리 적용을 모두 벤더 Plugin이 담당하기 때문에, HAMi는 Scheduling에만 관여한다. 격리 계층은 Accelerator Driver가 담당하는 Driver 수준이 다수이며, 일부는 벤더 Library 주입 (Library 수준) 이나 Hardware 분할 (Hardware 수준) 도 함께 쓴다. 이 경우 HAMi가 제공하는 가치는 Pod Annotation 기반의 Scheduling 정책 지정과 여러 벤더를 하나의 Scheduler로 통합 운영하는 수준에 그치며, HAMi의 핵심 가치는 HAMi Protocol을 이용할 때 나타난다.
 
@@ -69,7 +73,7 @@ hygon:
 ...
 ```
 
-[Shell 1]은 `hami-scheduler-device` ConfigMap에 정의된 Accelerator별 Resource 이름 설정을 나타내고 있다. 각 Accelerator Section (`nvidia`, `cambricon`, `hygon` 등) 아래에 개수, Memory, Core Resource 이름이 정의되며, HAMi Device Plugin이 kubelet에 등록할 Resource 이름과 Scheduler Extender가 Pod의 요청에서 인식할 Resource 이름이 이 설정으로 통일된다. NVIDIA Section에는 `deviceSplitCount` (물리 Accelerator 1개의 분할 가능 vGPU 개수), `deviceMemoryScaling`, `deviceCoreScaling` (물리 Memory, Core 대비 할당 가능한 비율) 같은 Scheduler Extender 공통 설정도 함께 담긴다.
+[Shell 1]은 `hami-scheduler-device` ConfigMap에 정의된 Accelerator별 Resource 이름 설정을 나타내고 있다. 각 Accelerator Section (`nvidia`, `cambricon`, `hygon` 등) 아래에 개수, Memory, Core Resource 이름이 정의되며, HAMi Device Plugin이 kubelet에 등록할 Resource 이름과 Scheduler Extender가 Pod의 요청에서 인식할 Resource 이름이 이 설정으로 통일된다. 각 Section에는 Resource 이름 외에도 물리 Accelerator 하나의 분할 개수 같은 Accelerator별 설정이 함께 담기며, 설정 항목은 Accelerator마다 다르다.
 
 ### 1.1. Scheduler 선택 과정
 
@@ -132,11 +136,13 @@ Webhook은 Pod 생성 요청에서 Pod가 `hami-scheduler-device` ConfigMap에 �
 
 HAMi Device Plugin의 첫 번째 역할은 Node에 존재하는 Accelerator를 부풀려서 Kubernetes에 등록하는 역할이다. [Figure 2]는 Device 등록 과정을 나타내고 있다.
 
-1. HAMi Device Plugin이 DaemonSet을 통해서 Accelerator Node에서 동작을 시작하며, Accelerator의 UUID, Memory 크기, Core 개수, Type 정보를 파악한다.
-2. HAMi Device Plugin은 kubelet의 Device Plugin Unix Domain Socket을 통해서 `Register()` gRPC 요청을 전송하여 자신을 kubelet에 등록한다.
-3. kubelet은 HAMi Device Plugin에게 `ListAndWatch()` gRPC 요청을 전송하여 Accelerator 목록을 수신한다. 이때 HAMi Device Plugin은 물리 Accelerator의 개수를 `deviceSplitCount` 설정의 배수만큼 부풀려서 전달한다. 예를 들어 물리 Accelerator가 4개 존재하고 `deviceSplitCount`가 10으로 설정되어 있으면 40개의 Accelerator가 전달되며, 하나의 물리 Accelerator를 최대 10개의 Container에 할당할 수 있다는 의미가 된다.
-4. kubelet은 전달받은 Accelerator 개수를 Node의 Allocatable/Capacity에 등록한다.
-5. HAMi Device Plugin은 Device Plugin 규격과 별도로 물리 Accelerator의 상세 정보를 `hami.io/node-[accelerator]-register` 계열의 Node Annotation에 기록한다.
+1. HAMi Device Plugin이 `hami-device-plugin` DaemonSet을 통해서 Accelerator Node에서 동작을 시작하며, 분할 개수 같은 Accelerator별 설정을 읽고 Node의 Accelerator를 탐색하여 UUID, Memory 크기, Core 개수, Type 정보를 파악한다.
+2. HAMi Device Plugin은 `/var/lib/kubelet/device-plugins/` 디렉터리에 자신의 Unix Domain Socket을 생성하고 gRPC Server를 시작한다. Socket 파일 이름은 Device Plugin마다 다르며, NVIDIA GPU는 `nvidia-gpu.sock`을 이용한다.
+3. HAMi Device Plugin은 kubelet의 Unix Domain Socket (`/var/lib/kubelet/device-plugins/kubelet.sock`) 을 통해서 `Register()` gRPC 요청을 전송하여 자신을 kubelet에 등록한다. 요청에는 Resource 이름과 2단계에서 생성한 Socket 파일 이름이 포함된다.
+4. HAMi Device Plugin은 등록 이후 Accelerator의 Health 상태 확인을 시작한다.
+5. kubelet은 전달받은 Socket을 통해서 HAMi Device Plugin에게 `ListAndWatch()` gRPC 요청을 전송하여 Accelerator 목록을 수신한다. 이때 HAMi Device Plugin은 물리 Accelerator의 개수를 분할 개수 설정의 배수만큼 부풀려서 전달한다. 예를 들어 물리 Accelerator가 2개 존재하고 분할 개수가 2로 설정되어 있으면 4개의 Accelerator가 전달되며, 하나의 물리 Accelerator를 최대 2개의 Container에 할당할 수 있다는 의미가 된다.
+6. kubelet은 전달받은 Accelerator 개수를 kube-apiserver를 통해서 Node의 Allocatable/Capacity에 반영한다.
+7. HAMi Device Plugin은 Device Plugin 규격과 별도로 물리 Accelerator의 상세 정보를 `hami.io/node-[accelerator]-register` 계열의 Node Annotation에 기록한다.
 
 kubelet의 Device Plugin 규격은 Device의 ID와 Health 상태 같은 제한된 정보만 전달할 수 있기 때문에, Accelerator의 Memory 크기 같은 상세 정보는 Device Plugin 규격으로는 전달할 수 없다. 따라서 HAMi Device Plugin은 상세 정보를 Node Annotation에 별도로 기록하며, 이후 Scheduler Extender가 이 Annotation을 참조하여 Scheduling을 수행한다. Annotation은 주기적으로 갱신되기 때문에 Node의 Accelerator 상태 변화도 Scheduler Extender에 반영된다.
 
@@ -144,22 +150,37 @@ HAMi Device Plugin은 등록 이후 Accelerator의 Health 상태도 관리한다
 
 HAMi Device Plugin이 장애를 감지하면 해당 물리 Accelerator에서 부풀려진 항목을 모두 `Unhealthy` 상태로 `ListAndWatch()`를 통해서 kubelet에 다시 전달하고, kubelet은 이 항목들을 Node의 Allocatable에서 제외한다. 또한 Node Annotation의 Health 값도 갱신되어 Scheduler Extender는 해당 Accelerator를 할당 후보에서 제외한다.
 
-HAMi Device Plugin이 kubelet에 등록하는 Accelerator 개수와 Node Annotation에 기록하는 가용량은 `hami-scheduler-device` ConfigMap의 Accelerator Section 설정으로 조정된다. **`deviceSplitCount`** (기본 `10`) 는 하나의 물리 Accelerator가 분할될 수 있는 최대 vGPU 수로, kubelet의 Allocatable/Capacity에 등록되는 Accelerator 개수는 `물리 개수 × deviceSplitCount` 가 된다. **`deviceMemoryScaling`** (기본 `1`) 과 **`deviceCoreScaling`** (기본 `1`) 은 물리 Memory와 Core 대비 할당 가능한 비율로, `1`보다 크면 Memory와 Core를 과할당할 수 있지만 모든 vGPU가 제한을 꽉 채워 쓸 경우 물리 Resource의 OOM이 발생할 수 있는 실험적 Option이다. Cluster 공통 설정은 이 ConfigMap에서 지정하고, Node 단위 재정의는 `hami-device-plugin` ConfigMap의 `nodeconfig` 목록에서 Node 이름과 함께 지정한다.
+HAMi Device Plugin이 kubelet에 등록하는 Accelerator 개수와 Node Annotation에 기록하는 가용량은 Accelerator별 설정으로 조정된다. 분할 개수 외에도 물리 Memory, Core 대비 할당 가능한 비율 같은 설정이 있으며, 설정 이름과 지정 위치는 Accelerator마다 다르다. 예를 들어 NVIDIA GPU와 Huawei Ascend NPU는 `hami-scheduler-device` ConfigMap의 `deviceSplitCount`로, AMD GPU는 AMD Device Plugin의 옵션으로 분할 개수를 지정한다.
 
 ```yaml {caption="[File 1] Node에 설정되는 HAMi Annotation", linenos=table}
 apiVersion: v1
 kind: Node
 metadata:
   annotations:
-    hami.io/node-[accelerator]-register: '[{...accelerator details JSON array...}]'
-    hami.io/node-handshake: Requesting_<timestamp>
-    hami.io/node-handshake-[accelerator]: Requesting_<timestamp>
+    hami.io/node-nvidia-register: '[{"id":"GPU-8f2c5d1e-...","count":2,"devmem":81920,"devcore":100,"type":"NVIDIA A100-SXM4-80GB","mode":"hami-core","health":true},{"id":"GPU-3b71a9c4-...","index":1,"count":2,"devmem":81920,"devcore":100,"type":"NVIDIA A100-SXM4-80GB","numa":1,"mode":"hami-core","health":true}]'
 ```
 
-[File 1]은 Device 등록 과정에서 Node에 설정되는 HAMi Annotation을 나타내고 있다.
+[File 1]은 Device 등록 과정에서 HAMi Device Plugin이 Node에 기록하는 `hami.io/node-[accelerator]-register` 계열 Annotation의 예시를 나타내고 있다. 하나의 Annotation에 Node의 물리 Accelerator 목록이 담기며, Accelerator Suffix는 Accelerator 종류에 따라 바뀐다. 값은 대부분 JSON 배열로 기록되지만 일부 Accelerator는 쉼표로 구분된 문자열을 이용한다. 물리 Accelerator별로 기록되는 항목은 [Table 3]과 같다.
 
-* **`hami.io/node-[accelerator]-register`** : 해당 Node의 Accelerator 상세 목록 (UUID, Memory 크기, Core 수, Chip Type, 동작 Mode, Health 등) 을 JSON 배열로 담는다. HAMi Device Plugin이 주기적으로 갱신하며, Accelerator Suffix는 Chip 종류에 따라 바뀐다.
-* **`hami.io/node-handshake`**, **`hami.io/node-handshake-[accelerator]`** : Scheduler Extender가 Accelerator별 HAMi Device Plugin의 동작 여부를 판단하는 데 이용하는 표시이다. Annotation이 없으면 Scheduler Extender가 `Requesting_<timestamp>`를 기록하며, 60초가 지난 뒤에도 Node의 Allocatable에 해당 Accelerator가 없으면 Scheduler Extender는 해당 Node의 Accelerator 정보를 제거한다. Allocatable에 Accelerator가 남아 있으면 Timestamp는 갱신되지 않는다.
+{{< table caption="[Table 3] Node Register Annotation의 Accelerator별 항목" >}}
+| 항목 | 의미 | 예시 값 |
+|---|---|---|
+| `id` | 물리 Accelerator의 고유 ID (UUID 등) | `"GPU-3b71a9c4-..."` : Driver가 부여한 GPU UUID |
+| `index` | Node 안에서의 Accelerator 번호 | `0` : Node의 첫 번째 GPU, `1` : Node의 두 번째 GPU |
+| `count` | 물리 Accelerator 하나를 나눠 쓸 수 있는 최대 개수 | `2` : 최대 2개의 Container가 나눠 사용 가능 |
+| `devmem` | 할당 가능한 Memory 크기 (MiB) | `81920` : 80GiB의 Memory 할당 가능 |
+| `devcore` | 할당 가능한 Core 양 | `100` : Core 사용률 100%까지 할당 가능 |
+| `type` | Accelerator 모델 | `"NVIDIA A100-SXM4-80GB"` : GPU 모델 이름 |
+| `numa` | Accelerator가 연결된 NUMA Node | `1` : NUMA Node 1에 연결 |
+| `mode` | Accelerator의 동작 Mode | `"hami-core"` : 격리 Library로 공유, `"mig"` : MIG Instance로 분할, `"mps"` : NVIDIA MPS로 공유, `"enpu"` : Ascend NPU의 eNPU로 분할 |
+| `health` | Accelerator의 Health 상태 | `true` : 정상 상태 |
+{{< /table >}}
+
+[File 1]과 [Table 3]의 예시 값은 NVIDIA GPU 2개가 존재하고 분할 개수가 2인 Node를 기준으로 하며, 첫 번째 GPU는 `index`와 `numa`가 `0`이기 때문에 생략되어 있다.
+
+[Table 3]의 항목 이름은 HAMi Device Plugin들이 HAMi의 공통 구조를 이용하기 때문에 모든 Accelerator에서 동일하지만, 값을 채우는 방식은 Accelerator마다 다르다. 예를 들어 `devcore`에는 Core 사용률 (%) 을 기록하는 Accelerator와 실제 Core 개수를 기록하는 Accelerator가 있으며, `numa`와 `mode`는 일부 Accelerator에서만 의미 있는 값이 기록된다. JSON 형식에서는 값이 0이거나 비어 있는 항목은 생략된다.
+
+HAMi Scheduler는 Node의 Allocatable에 해당 Accelerator 개수가 0보다 큰 경우에만 HAMi Device Plugin이 동작 중인 것으로 판단하며, Annotation 값이 이전과 달라진 경우에만 Accelerator 목록을 다시 읽는다. 이전 버전에서 HAMi Device Plugin의 동작 여부 확인에 이용하던 `hami.io/node-handshake` 계열 Annotation은 HAMi 2.11.0에서 이용되지 않으며, HAMi Scheduler가 Node에서 발견하면 삭제한다.
 
 ### 1.3. Device Scheduling 과정
 

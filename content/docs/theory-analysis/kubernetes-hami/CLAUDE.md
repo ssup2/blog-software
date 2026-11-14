@@ -29,6 +29,28 @@ HAMi 자체(이기종 AI 가속기 가상화 Middleware)에 포커스를 두고 
   이어서 사용자 요청으로 `#### 1.3.1. NUMA Refit`으로 분리하고 배경 문단 추가: Guaranteed Pod의 CPU는 Bind 이후 kubelet CPU Manager가
   결정하고 kube-apiserver에 공개되지 않아 hami-scheduler가 Scheduling 시점에 CPU의 NUMA를 알 수 없음(근거: Issue #2080 실측 — CPU NUMA 0,
   Scheduler 선택 GPU NUMA 14). hami-scheduler가 재선택하는 이유(할당 내역 관리, 과할당 방지)는 둘째 문단으로 이동.
+- **2026-11-14 분할 개수 설정 벤더 중립화** (사용자 요청): `deviceSplitCount`는 NVIDIA 전용이 아님 — HAMi 2.11.0 Chart device-configmap의
+  `nvidia.deviceSplitCount`, `vnpus.deviceSplitCount`(Ascend, hami-core/ENPU Mode, 기본 10), AMD는 Plugin 옵션 `splitCount`(기본 10, gfx12+는 2,
+  amd-device-plugin plugin.go splitCountFor). 본문 1.2 단계 1, 5와 [File 1] 기준 문장은 "분할 개수 (설정)"으로 일반화, 1.2 끝 설정 문단은
+  "Accelerator별 설정, 이름과 위치가 다름 + NVIDIA/Ascend는 `deviceSplitCount`, AMD는 Plugin 옵션" 예시로 축약하고 scaling 기본값,
+  과할당, OOM, nodeconfig 세부는 kubernetes-hami-nvidia-gpu 1.2로 이동. [Shell 1] 설명의 NVIDIA Section 설정 나열도 일반 문장으로 교체
+  ([Shell 1] 출력의 `deviceSplitCount` 줄은 실측이라 유지). Figure 1, 2의 `deviceSplitCount: 2` 박스는 NVIDIA/Ascend 공통이라 유지.
+- **2026-11-14 [File 1] 재작성 + [Table 3] 추가** (사용자 요청, v2.11.0 소스 기반): [File 1]에서 handshake 2줄 제거, register 값을
+  축약 예시로 교체. 벤더 중립 [Table 3] (Register Annotation 항목: id, index, count, devmem, devcore, type, numa, mode, health) 추가.
+  근거: 공통 구조체 pkg/device/devices.go `DeviceInfo`(json tag, omitempty) — Ascend(ascend-device-plugin register.go), AMD도 같은 구조체 사용.
+  값은 벤더별로 다름: devcore NVIDIA 100×scaling(%) vs AMD CU 개수, Ascend numa 항상 0, type은 Ascend commonWord.
+  인코딩: NVIDIA/AMD/Ascend/Biren/Vastai는 JSON(UnMarshalNodeDevices), Hygon/Iluvatar는 쉼표 구분(DecodeNodeDevices).
+  **handshake 폐기 확인**: v2.11.0 `device.CheckHealth`는 `RemoveObsoleteHandshake`로 `hami.io/node-handshake*`를 삭제하고,
+  Allocatable 개수 > 0 + register Annotation 변경 여부로만 판단 → 옛 handshake bullet(Requesting_, 60초)을 대체 문단으로 교체.
+  참고: 별도 저장소 dcu-vgpu-device-plugin(master)은 `hami.io/node-dcu-register`(쉼표 형식) + `hami.io/node-handshake-dcu`("Reported …")를
+  30초마다 함께 patch하지만, v2.11.0 Hygon은 `hami.io/node-hcu-register`를 읽음(키 불일치 — 구버전 Plugin으로 판단, 본문 미기재).
+- **2026-11-14 1.2 등록 단계 재작성** (사용자가 Figure 2를 pptx 스타일로 재작도, 소스 기반): 단계 재구성 — ① Accelerator 탐색
+  ② `/var/lib/kubelet/device-plugins/`에 Socket 생성 + gRPC Server 시작 (NVIDIA `nvidia-gpu.sock`) ③ `kubelet.sock`으로 `Register()`
+  (Resource 이름 + Socket 파일 이름) ④ Health 확인 시작(그림 재수정 반영, 7단계로 확장) ⑤ 해당 Socket으로 `ListAndWatch()`, 부풀림 예시를 Figure 1, 2와 맞춰 물리 2개 × split 2 = 4로 변경
+  ⑥ kubelet이 kube-apiserver에 Allocatable/Capacity 반영 ⑦ Node Annotation 기록(그림에는 없음). 근거: nvinternal/plugin/server.go Start()의 순서
+  (deviceInventory → Serve → Register → CheckHealth goroutine → WatchAndRegister), getPluginSocketPath.
+  Socket 이름 규칙 조사(본문 미기재): Kubernetes는 디렉터리만 규정, Register의 Endpoint는 파일 이름. NVIDIA `nvidia-<resource>.sock`,
+  Ascend `<commonWord>.sock`, AMD/Biren은 kubevirt device-plugin-manager의 `<ResourceNamespace>_<PluginName>` (확장자 없음, dpm/plugin.go:54).
 - **2026-11-13 Annotation 보호 문단 이동** (사용자 요청): 1.1 끝의 Annotation 보호 문단을 1.3 [File 2] Annotation 목록 바로 뒤로 이동
   (Annotation 정의 뒤에 보호 이유가 오도록). 1.1에는 `UPDATE` 용도 한 문장만 남김. 보호 대상 목록은 schedulerOwnedAnnotationKeys() 기준으로
   정확히 나열(`devices-to-allocate`, `devices-allocated`, `vgpu-node`, `bind-phase`, `bind-time` — `vgpu-time`은 보호 대상 아님).
