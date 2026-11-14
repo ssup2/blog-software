@@ -29,6 +29,16 @@ HAMi 자체(이기종 AI 가속기 가상화 Middleware)에 포커스를 두고 
   이어서 사용자 요청으로 `#### 1.3.1. NUMA Refit`으로 분리하고 배경 문단 추가: Guaranteed Pod의 CPU는 Bind 이후 kubelet CPU Manager가
   결정하고 kube-apiserver에 공개되지 않아 hami-scheduler가 Scheduling 시점에 CPU의 NUMA를 알 수 없음(근거: Issue #2080 실측 — CPU NUMA 0,
   Scheduler 선택 GPU NUMA 14). hami-scheduler가 재선택하는 이유(할당 내역 관리, 과할당 방지)는 둘째 문단으로 이동.
+- **2026-11-15 1.3 단계에서 Webhook 제거** (사용자 요청, 1.2와 중복): 1.3을 4단계로 축소 — ① kube-scheduler가 `schedulerName: hami-scheduler`
+  Pod의 Scheduling 시작 + Filter에서 Extender 호출 ② Node/Accelerator 선택 ③ Annotation 기록 + Node 하나 반환 ④ Bind.
+  이어서 사용자 요청으로 Claude가 Figure 3을 새로 작도(SVG → headless Chrome PNG 1150×700, Figure 1/2 스타일, 소스 파일은 남기지 않음,
+  사용자가 pptx로 재작도 가능)하고 1.3을 그림에 맞춰 7단계로 재작성: ① Watch pod(`schedulerName: hami-scheduler`) ② `/filter` 호출
+  ③ Node Annotation 읽고 Node/Accelerator 선택 ④ Pod Annotation(`devices-allocated`, `vgpu-node`) 기록 ⑤ Node 하나 반환 ⑥ `/bind` 호출
+  ⑦ `bind-phase: allocating` 기록 + Bind. 근거: v2.11.0 scheduler.go Filter(AssignedNodeAnnotations 등 patch), Bind(DeviceBindPhase
+  allocating, BindTimeAnnotations). Figure 3 width 650px → 900px, 도입 문단에 "[Figure 1]의 Scheduler Extender 경로에 해당" 추가.
+- **2026-11-15 1.1과 1.2 순서 교체** (사용자 요청): 시간 순서(설치 시 등록 → Pod 생성 시 Webhook → Scheduling → 할당)에 맞춰
+  1.1 Device 등록 과정, 1.2 Scheduler 선택 과정으로 교체. Figure/File/Shell/Table 번호는 등장 순서가 그대로 유지되어 재번호 불필요
+  (Shell 1 개요 → Figure 2, File 1, Table 3 → Shell 2 → Figure 3 …).
 - **2026-11-15 handshake/존재 판단 문단 삭제** (사용자 요청): [Table 3] 뒤의 "HAMi Scheduler는 Allocatable > 0이면 Plugin 동작 중으로 판단,
   Annotation 변경 시에만 재조회, 옛 `hami.io/node-handshake` 계열은 2.11.0에서 미사용·발견 시 삭제" 문단 제거 (근거는 2026-11-14 기록에 유지).
   본문에 handshake 언급은 더 이상 없음.
