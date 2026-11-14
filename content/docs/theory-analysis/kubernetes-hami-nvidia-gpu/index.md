@@ -162,7 +162,7 @@ metadata:
 | `devcore` | `100` × `deviceCoreScaling` (SM 사용률 %, MIG Mode는 `100`) |
 | `type` | NVML로 조회한 GPU 모델 이름 (`NVIDIA` 접두사로 정규화) |
 | `numa` | sysfs로 조회한 GPU의 NUMA Node |
-| `mode` | `operatingmode` 값 (`hami-core`, `mig`, `mps`) |
+| `mode` | `operatingmode` 값 (`hami-core`, `mig`, `remote`) |
 | `health` | GPU Health Check 결과 |
 {{< /table >}}
 

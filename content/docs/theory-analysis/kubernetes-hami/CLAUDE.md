@@ -29,6 +29,17 @@ HAMi 자체(이기종 AI 가속기 가상화 Middleware)에 포커스를 두고 
   이어서 사용자 요청으로 `#### 1.3.1. NUMA Refit`으로 분리하고 배경 문단 추가: Guaranteed Pod의 CPU는 Bind 이후 kubelet CPU Manager가
   결정하고 kube-apiserver에 공개되지 않아 hami-scheduler가 Scheduling 시점에 CPU의 NUMA를 알 수 없음(근거: Issue #2080 실측 — CPU NUMA 0,
   Scheduler 선택 GPU NUMA 14). hami-scheduler가 재선택하는 이유(할당 내역 관리, 과할당 방지)는 둘째 문단으로 이동.
+- **2026-11-15 handshake/존재 판단 문단 삭제** (사용자 요청): [Table 3] 뒤의 "HAMi Scheduler는 Allocatable > 0이면 Plugin 동작 중으로 판단,
+  Annotation 변경 시에만 재조회, 옛 `hami.io/node-handshake` 계열은 2.11.0에서 미사용·발견 시 삭제" 문단 제거 (근거는 2026-11-14 기록에 유지).
+  본문에 handshake 언급은 더 이상 없음.
+- **2026-11-15 [Table 3] 정리** (사용자 요청): 표 아래 "예시 값은 NVIDIA GPU 2개, 분할 개수 2 기준" 문장 삭제. `mode` 예시에서 `"mps"` 제거 —
+  v2.11.0에서 `nvidia.MpsMode = "mps"`는 pkg/device/nvidia/device.go:73에 상수로만 정의되고 사용처 없음. Chart values.yaml의 `operatingmode`
+  허용 값은 `hami-core`, `mig`, `remote`(Lupine 원격 GPU). cmd/device-plugin/nvidia/main.go의 MPS 분기는 upstream NVIDIA Plugin의
+  `sharing.mps` 설정 경로라 HAMi `mode` 값과 무관. kubernetes-hami-nvidia-gpu [Table 3]의 `mode` 값도 `mps` → `remote`로 수정.
+- **2026-11-15 1.2 세부 문단 3개 삭제** (사용자 요청, 등록 흐름 중심으로 단순화): ① 장애 감지 방식 문단(Event 방식 NVIDIA / Polling 방식
+  Ascend, AMD, 복구 동작 차이 — 근거는 아래 2026-11-06 기록) ② 장애 시 동작 문단 → 4단계에 한 문장으로 흡수(`Unhealthy` 재전달 +
+  Annotation `health` 갱신) ③ Accelerator별 설정 문단(NVIDIA/Ascend `deviceSplitCount`, AMD Plugin 옵션 `splitCount`, Memory/Core 비율 설정).
+  NVIDIA Health 세부는 kubernetes-hami-nvidia-gpu 1.6에 있음. 1.2 본문에 Event/Polling 구분은 더 이상 없음.
 - **2026-11-14 분할 개수 설정 벤더 중립화** (사용자 요청): `deviceSplitCount`는 NVIDIA 전용이 아님 — HAMi 2.11.0 Chart device-configmap의
   `nvidia.deviceSplitCount`, `vnpus.deviceSplitCount`(Ascend, hami-core/ENPU Mode, 기본 10), AMD는 Plugin 옵션 `splitCount`(기본 10, gfx12+는 2,
   amd-device-plugin plugin.go splitCountFor). 본문 1.2 단계 1, 5와 [File 1] 기준 문장은 "분할 개수 (설정)"으로 일반화, 1.2 끝 설정 문단은
