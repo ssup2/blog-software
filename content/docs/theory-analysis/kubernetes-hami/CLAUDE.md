@@ -29,6 +29,19 @@ HAMi 자체(이기종 AI 가속기 가상화 Middleware)에 포커스를 두고 
   이어서 사용자 요청으로 `#### 1.3.1. NUMA Refit`으로 분리하고 배경 문단 추가: Guaranteed Pod의 CPU는 Bind 이후 kubelet CPU Manager가
   결정하고 kube-apiserver에 공개되지 않아 hami-scheduler가 Scheduling 시점에 CPU의 NUMA를 알 수 없음(근거: Issue #2080 실측 — CPU NUMA 0,
   Scheduler 선택 GPU NUMA 14). hami-scheduler가 재선택하는 이유(할당 내역 관리, 과할당 방지)는 둘째 문단으로 이동.
+- **2026-11-15 1.5 재구성** (사용자 요청): 제목 "Mutating Webhook 검증 동작" → "Pod 검증". 도입 문단에 [Figure 1]의 Mutating Webhook
+  경로가 `UPDATE`에도 이용된다는 점 명시. 거부 항목 3개(할당 Annotation 보호, nodeName 지정, privileged) 개조식 + 보호 이유 문단 +
+  "검증이 적용되지 않는 경우" 문단(ignore Label, `failurePolicy: Ignore`)으로 분리. 1.2 [Shell 2] 설명에서는 `UPDATE` 언급 제거,
+  첫 문장을 "[Figure 1]의 Mutating Webhook 경로에 이용되는 …"으로 수정. 1.2 제목은 "HAMi Scheduler 지정", 1.1 끝에 제조사 Plugin 위임 문장 추가.
+- **2026-11-15 절 제목 정리** (사용자 요청): 제목에서 "과정" 제거, "Device" → "Accelerator" (1.1 Accelerator 등록, 1.2 Scheduler 선택,
+  1.3 Accelerator Scheduling, 1.4 Accelerator 할당). Figure 2~4 캡션과 각 절 도입 문장, [File 1]/[File 2] 설명도 함께 변경.
+  1.1/1.4 도입 문장은 "X는 HAMi Device Plugin이 수행하며, …" 형태로 통일. HAMi 용어인 "Device Scheduling 정책"(Node/Device 정책 구분,
+  `hami.io/gpu-scheduler-policy`)과 이미지 파일명(hami-device-*.png)은 유지.
+- **2026-11-15 `### 1.5. Mutating Webhook 검증 동작` 신설** (사용자 요청): 1.2의 `UPDATE`/ignore Label 문장과 1.3 끝 Annotation 보호 문단을
+  1.5로 모으고 검증 항목 추가 — 할당 Annotation 보호, `spec.nodeName` 사전 지정 거부("pod has node assigned"), privileged Container 거부
+  (Accelerator 요청 Pod 한정), ignore Label 제외, `failurePolicy: Ignore`(Chart `scheduler.admissionWebhook.failurePolicy`). 근거:
+  v2.11.0 pkg/scheduler/webhook.go Handle/handleUpdate. privileged 거부 이유("모든 Device 접근")와 nodeName 거부 이유는 코드 주석이 아닌
+  추론 문장이므로 필요 시 재검토.
 - **2026-11-15 1.3 단계에서 Webhook 제거** (사용자 요청, 1.2와 중복): 1.3을 4단계로 축소 — ① kube-scheduler가 `schedulerName: hami-scheduler`
   Pod의 Scheduling 시작 + Filter에서 Extender 호출 ② Node/Accelerator 선택 ③ Annotation 기록 + Node 하나 반환 ④ Bind.
   이어서 사용자 요청으로 Claude가 Figure 3을 새로 작도(SVG → headless Chrome PNG 1150×700, Figure 1/2 스타일, 소스 파일은 남기지 않음,

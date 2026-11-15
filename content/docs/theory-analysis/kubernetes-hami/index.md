@@ -75,11 +75,11 @@ hygon:
 
 [Shell 1]은 `hami-scheduler-device` ConfigMap에 정의된 Accelerator별 Resource 이름 설정을 나타내고 있다. 각 Accelerator Section (`nvidia`, `cambricon`, `hygon` 등) 아래에 개수, Memory, Core Resource 이름이 정의되며, HAMi Device Plugin이 kubelet에 등록할 Resource 이름과 Scheduler Extender가 Pod의 요청에서 인식할 Resource 이름이 이 설정으로 통일된다. 각 Section에는 Resource 이름 외에도 물리 Accelerator 하나의 분할 개수 같은 Accelerator별 설정이 함께 담기며, 설정 항목은 Accelerator마다 다르다.
 
-### 1.1. Device 등록 과정
+### 1.1. Accelerator 등록
 
-{{< figure caption="[Figure 2] Device Registration Process" src="images/hami-device-registration.png" width="650px" >}}
+{{< figure caption="[Figure 2] Accelerator Registration Process" src="images/hami-device-registration.png" width="600px" >}}
 
-HAMi Device Plugin의 첫 번째 역할은 Node에 존재하는 Accelerator를 부풀려서 Kubernetes에 등록하는 역할이다. [Figure 2]는 Device 등록 과정을 나타내고 있다.
+Accelerator 등록은 HAMi Device Plugin이 수행하며, Node에 존재하는 물리 Accelerator를 분할 개수만큼 부풀려서 Kubernetes에 등록한다. [Figure 2]는 Accelerator 등록 과정을 나타내고 있다.
 
 1. HAMi Device Plugin이 `hami-device-plugin` DaemonSet을 통해서 Accelerator Node에서 동작을 시작하며, 분할 개수 (`deviceSplitCount`) 같은 Accelerator별 설정을 읽고 Node의 Accelerator를 탐색하여 UUID, Memory 크기, Core 개수, Type 정보를 파악한다.
 2. HAMi Device Plugin은 `/var/lib/kubelet/device-plugins/` 디렉터리에 자신의 Unix Domain Socket을 생성하고 gRPC Server를 시작한다. Socket 파일 이름은 Device Plugin마다 다르며, NVIDIA GPU는 `nvidia-gpu.sock`을 이용한다.
@@ -99,7 +99,7 @@ metadata:
     hami.io/node-nvidia-register: '[{"id":"GPU-8f2c5d1e-...","count":2,"devmem":81920,"devcore":100,"type":"NVIDIA A100-SXM4-80GB","mode":"hami-core","health":true},{"id":"GPU-3b71a9c4-...","index":1,"count":2,"devmem":81920,"devcore":100,"type":"NVIDIA A100-SXM4-80GB","numa":1,"mode":"hami-core","health":true}]'
 ```
 
-[File 1]은 Device 등록 과정에서 HAMi Device Plugin이 Node에 기록하는 `hami.io/node-[accelerator]-register` 계열 Annotation의 예시를 나타내고 있다. 하나의 Annotation에 Node의 물리 Accelerator 목록이 담기며, Accelerator Suffix는 Accelerator 종류에 따라 바뀐다. 값은 대부분 JSON 배열로 기록되지만 일부 Accelerator는 쉼표로 구분된 문자열을 이용한다. 물리 Accelerator별로 기록되는 항목은 [Table 3]과 같다.
+[File 1]은 Accelerator 등록 과정에서 HAMi Device Plugin이 Node에 기록하는 `hami.io/node-[accelerator]-register` 계열 Annotation의 예시를 나타내고 있다. 하나의 Annotation에 Node의 물리 Accelerator 목록이 담기며, Accelerator Suffix는 Accelerator 종류에 따라 바뀐다. 값은 대부분 JSON 배열로 기록되지만 일부 Accelerator는 쉼표로 구분된 문자열을 이용한다. 물리 Accelerator별로 기록되는 항목은 [Table 3]과 같다.
 
 {{< table caption="[Table 3] Node Register Annotation의 Accelerator별 항목" >}}
 | 항목 | 의미 | 예시 값 |
@@ -117,7 +117,9 @@ metadata:
 
 [Table 3]의 항목 이름은 HAMi Device Plugin들이 HAMi의 공통 구조를 이용하기 때문에 모든 Accelerator에서 동일하지만, 값을 채우는 방식은 Accelerator마다 다르다. 예를 들어 `devcore`에는 Core 사용률 (%) 을 기록하는 Accelerator와 실제 Core 개수를 기록하는 Accelerator가 있으며, `numa`와 `mode`는 일부 Accelerator에서만 의미 있는 값이 기록된다. JSON 형식에서는 값이 0이거나 비어 있는 항목은 생략된다.
 
-### 1.2. Scheduler 선택 과정
+제조사 Device Plugin을 이용하는 Accelerator ([Table 2]) 는 Accelerator 등록을 각 제조사 Device Plugin에 위임하며, HAMi Scheduler는 제조사 Device Plugin이 등록한 정보를 참조한다.
+
+### 1.2. HAMi Scheduler 지정
 
 Accelerator를 요청하는 Pod는 Accelerator별 할당 내역을 관리하는 HAMi Scheduler가 Scheduling해야 한다. HAMi는 사용자가 Pod마다 `schedulerName`을 직접 지정하지 않아도 되도록, HAMi Scheduler의 **Mutating Webhook**이 Pod 생성 요청을 가로채서 Pod의 Scheduler를 HAMi Scheduler로 변경한다.
 
@@ -168,17 +170,17 @@ NAME                              READY   STATUS    RESTARTS   AGE     IP       
 hami-scheduler-6d94b4bd6f-dsbg6   2/2     Running   0          3m40s   10.244.0.24   gpu
 ```
 
-[Shell 2]는 HAMi 설치 시 생성되는 Mutating Webhook Configuration (`hami-webhook`) 과 Webhook 대상이 되는 `hami-scheduler` Service를 나타내고 있으며, [Figure 1]의 Mutating Webhook 경로를 구성하는 설정에 해당한다. `rules`에 Pod 생성과 수정 요청 (`CREATE`, `UPDATE` pods) 이 지정되어 있어 Pod 요청이 Webhook을 거치며, `clientConfig.service`가 가리키는 `hami-scheduler` Service의 `/webhook` 경로 (`443` Port) 로 요청이 전달된다.
+[Shell 2]는 [Figure 1]의 Mutating Webhook 경로에 이용되는 Mutating Webhook Configuration (`hami-webhook`) 과 Webhook 요청을 수신하는 `hami-scheduler` Service를 나타내고 있다. `rules`에 따라서 Pod 생성 요청 (`CREATE`) 이 Webhook을 거치며, `clientConfig.service`가 가리키는 `hami-scheduler` Service의 `/webhook` 경로 (`443` Port) 로 요청이 전달된다.
 
 Service의 `443` Port는 `hami-scheduler` Pod의 `9443` Port로 연결되며, 이 Pod 안의 Scheduler Extender Container (`vgpu-scheduler-extender`) 가 Webhook 요청을 수신한다. Endpoint (`10.244.0.24:9443`) 도 `hami-scheduler-6d94b4bd6f-dsbg6` Pod의 IP와 일치한다. 함께 보이는 `9395` Port는 [Figure 1]의 Metrics 경로와 같이 Service의 `31993` Port를 통해서 HAMi Scheduler가 Prometheus Metric을 제공하는 Port이다.
 
-Webhook은 Pod 생성 요청에서 Pod가 `hami-scheduler-device` ConfigMap에 등록된 Accelerator Resource ([Table 1], [Table 2] 등) 중 하나라도 요청하는지 검사하고, 요청하는 경우에만 Pod의 `schedulerName`을 `hami-scheduler`로 변경한다. `schedulerName`이 `default-scheduler`인 Pod (`schedulerName`을 지정하지 않은 경우 포함) 만 변경 대상이며, 다른 Scheduler가 지정된 Pod는 그대로 둔다. `UPDATE` 요청은 HAMi Scheduler가 기록한 할당 Annotation이 다른 주체에 의해서 변경되지 않도록 검사하는 데 이용된다. `namespaceSelector`와 `objectSelector`는 `hami.io/webhook: ignore` Label이 붙은 Namespace와 Pod를 Webhook 처리에서 제외한다.
+Webhook은 Pod 생성 요청에서 Pod가 `hami-scheduler-device` ConfigMap에 등록된 Accelerator Resource ([Table 1], [Table 2] 등) 중 하나라도 요청하는지 검사하고, 요청하는 경우에만 Pod의 `schedulerName`을 `hami-scheduler`로 변경한다. `schedulerName`이 `default-scheduler`인 Pod (`schedulerName`을 지정하지 않은 경우 포함) 만 변경 대상이며, 다른 Scheduler가 지정된 Pod는 그대로 둔다.
 
-### 1.3. Device Scheduling 과정
+### 1.3. Accelerator Scheduling
 
-{{< figure caption="[Figure 3] Device Scheduling Process" src="images/hami-device-scheduling.png" width="900px" >}}
+{{< figure caption="[Figure 3] Accelerator Scheduling Process" src="images/hami-device-scheduling.png" width="900px" >}}
 
-Device Plugin 방식에서는 Node 선택은 kube-scheduler가 수행하고 Accelerator 선택은 각 Node의 Device Plugin이 수행하지만, HAMi 환경에서는 HAMi Scheduler가 Node 선택뿐만 아니라 Accelerator 선택까지 수행한다. Memory 크기와 Core 사용률 조건을 만족하는 Accelerator를 선택하기 위해서는 Node 전체의 Accelerator 할당 상태를 알아야 하기 때문이다. [Figure 3]은 Device Scheduling 과정을 나타내고 있으며, [Figure 1]의 Scheduler Extender 경로에 해당한다.
+Device Plugin 방식에서는 Node 선택은 kube-scheduler가 수행하고 Accelerator 선택은 각 Node의 Device Plugin이 수행하지만, HAMi 환경에서는 HAMi Scheduler가 Node 선택뿐만 아니라 Accelerator 선택까지 수행한다. Memory 크기와 Core 사용률 조건을 만족하는 Accelerator를 선택하기 위해서는 Node 전체의 Accelerator 할당 상태를 알아야 하기 때문이다. [Figure 3]은 Accelerator Scheduling 과정을 나타내고 있으며, [Figure 1]의 Scheduler Extender 경로에 해당한다.
 
 1. HAMi Scheduler 내부의 kube-scheduler는 kube-apiserver를 Watch하여 `schedulerName`이 `hami-scheduler`인 Pod를 Scheduling 대상으로 가져온다.
 2. kube-scheduler는 Filter 단계에서 Scheduler Extender의 `/filter` Endpoint를 호출한다.
@@ -251,7 +253,7 @@ metadata:
     hami.io/gpu-scheduler-policy: spread
 ```
 
-[File 2]는 Device Scheduling 과정에서 Pod에 설정되는 HAMi Annotation을 나타내고 있다. Scheduler Extender가 Scheduling 단계에서 자동으로 기록하는 Annotation과 사용자가 Scheduling 동작 제어를 위해 Pod spec에 직접 지정하는 Annotation으로 구분되며, Accelerator별로 Suffix가 달라진다.
+[File 2]는 Accelerator Scheduling 과정에서 Pod에 설정되는 HAMi Annotation을 나타내고 있다. Scheduler Extender가 Scheduling 단계에서 자동으로 기록하는 Annotation과 사용자가 Scheduling 동작 제어를 위해 Pod spec에 직접 지정하는 Annotation으로 구분되며, Accelerator별로 Suffix가 달라진다.
 
 Scheduler Extender가 기록하는 Annotation:
 
@@ -266,13 +268,11 @@ Scheduler Extender가 기록하는 Annotation:
 * **`hami.io/node-scheduler-policy`** : 해당 Pod의 Node Scheduling 정책 (`binpack` / `spread`).
 * **`hami.io/gpu-scheduler-policy`** : 해당 Pod의 Device Scheduling 정책 (`binpack` / `spread` 등 Accelerator별 지원 값).
 
-Mutating Webhook은 HAMi Scheduler가 기록하는 할당 Annotation (`hami.io/[accelerator]-devices-to-allocate`, `hami.io/[accelerator]-devices-allocated` 계열, `hami.io/vgpu-node`, `hami.io/bind-phase`, `hami.io/bind-time`) 을 다른 주체가 설정하거나 수정하지 못하도록 막는다. HAMi Device Plugin은 이 Annotation에 기록된 Accelerator와 제한 값을 그대로 따라서 할당하기 때문에, 사용자가 Annotation을 직접 지정하면 HAMi Scheduler의 할당 내역에 없는 Memory와 Core를 할당받을 수 있기 때문이다. 따라서 Pod 생성 요청에 할당 Annotation이 포함되어 있으면 거부하고, Pod 수정 요청에서는 Node 수정 권한을 가진 HAMi Component (HAMi Scheduler, HAMi Device Plugin) 의 변경만 허용한다.
+### 1.4. Accelerator 할당
 
-### 1.4. Device 할당 과정
+{{< figure caption="[Figure 4] Accelerator Allocation Process" src="images/hami-device-allocation.png" width="650px" >}}
 
-{{< figure caption="[Figure 4] Device Allocation Process" src="images/hami-device-allocation.png" width="650px" >}}
-
-HAMi Device Plugin의 두 번째 역할은 HAMi Scheduler가 선택한 Accelerator를 실제로 Container에 할당하는 역할이다. [Figure 4]는 Device 할당 과정을 나타내고 있다.
+Accelerator 할당도 HAMi Device Plugin이 수행하며, HAMi Scheduler가 선택한 Accelerator를 실제로 Container에 할당한다. [Figure 4]는 Accelerator 할당 과정을 나타내고 있다.
 
 1. Pod가 Bind된 Node의 kubelet은 HAMi Device Plugin에게 `Allocate()` gRPC 요청을 전송한다.
 2. HAMi Device Plugin은 kube-apiserver를 통해서 해당 Pod의 `hami.io/[accelerator]-devices-to-allocate` 계열 Annotation을 조회하여, HAMi Scheduler가 선택한 Accelerator의 UUID와 Memory 크기, Core 사용률 제한 값을 파악한다. 일반적인 Device Plugin은 `Allocate()` 요청에 포함된 Device ID만으로 동작하지만, HAMi Device Plugin은 HAMi Scheduler의 Accelerator 선택 결과를 그대로 따라야 하기 때문에 Pod의 Annotation을 참조한다.
@@ -297,6 +297,18 @@ kubelet의 **Topology Manager**는 CPU와 Accelerator를 같은 NUMA Node에 배
 4. HAMi Device Plugin은 다시 선택된 Accelerator를 `GetPreferredAllocation()` 응답으로 kubelet에 반환하며, 이후 `Allocate()` 과정은 갱신된 Pod Annotation을 기준으로 진행된다.
 
 NUMA Refit을 이용하려면 Helm의 `devicePlugin.numaRefit.enabled`와 NUMA Topology 관련 설정을 활성화하고, Pod의 `hami.io/numa-alignment` Annotation에 `best-effort` 또는 `strict` Mode를 지정해야 한다. `strict` Mode에서는 Refit에 실패하면 Pod의 할당이 실패하고, `best-effort` Mode에서는 kubelet이 직접 Accelerator를 선택한다. `/refit` Endpoint는 Webhook과 같은 `9443` Port에서 제공되며, `/filter`, `/bind`와 다르게 HAMi Device Plugin의 ServiceAccount Token으로 호출자를 인증한다.
+
+### 1.5. Pod 검증
+
+[Figure 1]의 Mutating Webhook 경로는 Pod 생성 요청뿐만 아니라 Pod 수정 (`UPDATE`) 요청에도 이용된다. Mutating Webhook은 HAMi Scheduler를 지정하는 것 외에도, HAMi Scheduler의 할당 내역을 거치지 않고 Accelerator를 할당받으려는 Pod 요청을 다음과 같이 거부한다.
+
+* **할당 Annotation 보호** : HAMi Scheduler가 기록하는 할당 Annotation (`hami.io/[accelerator]-devices-to-allocate`, `hami.io/[accelerator]-devices-allocated`, `hami.io/vgpu-node`, `hami.io/bind-phase`, `hami.io/bind-time`) 이 포함된 Pod 생성 요청을 거부하고, Pod 수정 요청에서는 Node 수정 권한을 가진 HAMi Component (HAMi Scheduler, HAMi Device Plugin) 의 변경만 허용한다.
+* **Node 직접 지정 거부** : Accelerator를 요청하면서 `spec.nodeName`이 미리 지정된 Pod를 거부한다. Scheduler를 거치지 않으면 할당 Annotation이 기록되지 않기 때문이다.
+* **Privileged Container 거부** : Accelerator를 요청하는 Pod에 privileged Container가 포함되어 있으면 거부한다. privileged Container는 Node의 모든 Device에 접근할 수 있기 때문이다.
+
+할당 Annotation을 보호하는 이유는 HAMi Device Plugin이 이 Annotation에 기록된 Accelerator와 제한 값을 그대로 따라서 할당하기 때문이다. 사용자가 할당 Annotation을 직접 지정할 수 있다면 HAMi Scheduler의 할당 내역에 없는 Memory와 Core를 할당받을 수 있다.
+
+반면 Webhook 검증이 적용되지 않는 경우도 있다. [Shell 2]의 `namespaceSelector`와 `objectSelector`에 따라서 `hami.io/webhook: ignore` Label이 붙은 Namespace와 Pod는 Webhook 처리에서 제외되며, `failurePolicy`가 `Ignore`로 설정되어 있기 때문에 Webhook이 응답하지 않으면 Pod는 HAMi Scheduler 지정과 검증 없이 그대로 생성된다.
 
 ## 2. 참조
 
