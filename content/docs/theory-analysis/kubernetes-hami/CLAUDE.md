@@ -29,6 +29,13 @@ HAMi 자체(이기종 AI 가속기 가상화 Middleware)에 포커스를 두고 
   이어서 사용자 요청으로 `#### 1.3.1. NUMA Refit`으로 분리하고 배경 문단 추가: Guaranteed Pod의 CPU는 Bind 이후 kubelet CPU Manager가
   결정하고 kube-apiserver에 공개되지 않아 hami-scheduler가 Scheduling 시점에 CPU의 NUMA를 알 수 없음(근거: Issue #2080 실측 — CPU NUMA 0,
   Scheduler 선택 GPU NUMA 14). hami-scheduler가 재선택하는 이유(할당 내역 관리, 과할당 방지)는 둘째 문단으로 이동.
+- **2026-11-15 Figure 3, 4 재작도 + 1.3/1.4 단계 재작성** (사용자 요청: 사용되는 Annotation 모두 표현). Claude가 SVG → headless Chrome PNG로 작도
+  (Figure 3 1400×720, Figure 4 1300×720, width 900px, 소스 미보관). YAML 줄 끝 `(N)`으로 단계 번호 표시. 근거(v2.11.0):
+  Filter(scheduler.go) — `vgpu-node`(AssignedNode), `vgpu-time`(AssignedTime), PatchAnnotations로 `devices-to-allocate`(InRequestDevices)와
+  `devices-allocated`(SupportDevices) 동일 값 기록. Bind — acquireNodeLocks(Node `hami.io/mutex.lock`, 값에 Pod ns/name) → `bind-phase: allocating`,
+  `bind-time` → Bind. Allocate(nvinternal/plugin) — GetPendingPod가 Node `mutex.lock`에서 Pod 조회 → `devices-to-allocate` decode →
+  patchErasedAnnotation(할당 마친 항목 삭제) → podAllocationTrySuccess(모두 지워지면 `bind-phase: success` + ReleaseNodeLock) → 응답 반환.
+  1.3은 8단계, 1.4는 7단계. [File 2] bullet 정정: `vgpu-time`은 Bind 시각이 아니라 선택(Filter) 시각, `bind-phase` 값 3종, `devices-to-allocate` 의미.
 - **2026-11-15 1.5 재구성** (사용자 요청): 제목 "Mutating Webhook 검증 동작" → "Pod 검증". 도입 문단에 [Figure 1]의 Mutating Webhook
   경로가 `UPDATE`에도 이용된다는 점 명시. 거부 항목 3개(할당 Annotation 보호, nodeName 지정, privileged) 개조식 + 보호 이유 문단 +
   "검증이 적용되지 않는 경우" 문단(ignore Label, `failurePolicy: Ignore`)으로 분리. 1.2 [Shell 2] 설명에서는 `UPDATE` 언급 제거,
