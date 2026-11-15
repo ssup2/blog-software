@@ -89,7 +89,7 @@ Accelerator 등록은 HAMi Device Plugin이 수행하며, Node에 존재하는 �
 6. kubelet은 전달받은 Accelerator 개수를 kube-apiserver를 통해서 Node의 Allocatable/Capacity에 반영한다.
 7. HAMi Device Plugin은 Device Plugin 규격과 별도로 물리 Accelerator의 상세 정보를 `hami.io/node-[accelerator]-register` Node Annotation에 기록한다.
 
-kubelet의 Device Plugin 규격은 Device의 ID와 Health 상태 같은 제한된 정보만 전달할 수 있기 때문에, Accelerator의 Memory 크기 같은 상세 정보는 Device Plugin 규격으로는 전달할 수 없다. 따라서 HAMi Device Plugin은 상세 정보를 Node Annotation (`hami.io/node-[accelerator]-register`) 에 별도로 기록하며, 이후 Scheduler Extender가 이 Annotation을 참조하여 Scheduling을 수행한다. Annotation은 주기적으로 갱신되기 때문에 Node의 Accelerator 상태 변화도 Scheduler Extender에 반영된다.
+kubelet의 Device Plugin 규격은 Device의 ID와 Health 상태 같은 제한된 정보만 전달할 수 있기 때문에, Accelerator의 Memory 크기 같은 상세 정보는 Device Plugin 규격으로는 전달할 수 없다. 따라서 HAMi Device Plugin은 상세 정보를 `hami.io/node-[accelerator]-register` Node Annotation에 별도로 기록하며, 이후 Scheduler Extender가 이 Annotation을 참조하여 Scheduling을 수행한다. Annotation은 주기적으로 갱신되기 때문에 Node의 Accelerator 상태 변화도 Scheduler Extender에 반영된다.
 
 ```yaml {caption="[File 1] Node에 설정되는 HAMi Annotation", linenos=table}
 apiVersion: v1
@@ -184,12 +184,12 @@ Device Plugin 방식에서는 Node 선택은 kube-scheduler가 수행하고 Acce
 
 1. HAMi Scheduler 내부의 kube-scheduler는 kube-apiserver를 Watch하여 `schedulerName`이 `hami-scheduler`인 Pod를 Scheduling 대상으로 가져온다.
 2. kube-scheduler는 Filter 단계에서 Scheduler Extender의 `/filter` Endpoint를 호출한다.
-3. Scheduler Extender는 각 Node의 Node Annotation (`hami.io/node-[accelerator]-register`) 에 기록된 Accelerator 정보를 조회한다.
+3. Scheduler Extender는 각 Node의 `hami.io/node-[accelerator]-register` Annotation에 기록된 Accelerator 정보를 조회한다.
 4. Scheduler Extender는 조회한 Accelerator 정보와 기존 할당 내역을 기반으로 요청 조건을 만족하는 Accelerator가 존재하는 Node를 선별하고, Scheduling 정책에 따라 점수를 계산하여 가장 높은 점수의 Node와 Accelerator를 선택한다.
 5. Scheduler Extender는 선택 결과를 Pod Annotation에 기록한다. 선택된 Accelerator의 UUID와 Memory 크기, Core 사용률 제한 값은 `hami.io/[accelerator]-devices-to-allocate`와 `hami.io/[accelerator]-devices-allocated` Annotation에, 선택된 Node 이름과 선택 시각은 `hami.io/vgpu-node`와 `hami.io/vgpu-time` Annotation에 기록된다.
 6. Scheduler Extender는 `/filter` 응답으로 선택된 Node 하나만 kube-scheduler에 반환한다.
-7. kube-scheduler는 Bind 단계에서 Scheduler Extender의 `/bind` Endpoint를 호출한다.
-8. Scheduler Extender는 Node Annotation (`hami.io/mutex.lock`) 에 해당 Pod를 기록하여 Node를 Lock한다. Lock은 HAMi Device Plugin이 해당 Pod의 Accelerator 할당을 완료할 때까지 유지되어, 같은 Node에서 다른 Pod의 할당이 동시에 진행되지 않도록 한다.
+7. kube-scheduler는 Bind 단계에서 선택된 Node 이름과 함께 Scheduler Extender의 `/bind` Endpoint를 호출하며, Scheduler Extender는 전달받은 Node가 Filter 단계에서 선택한 Node와 같은지 확인한다.
+8. Scheduler Extender는 `hami.io/mutex.lock` Node Annotation에 해당 Pod를 기록하여 Node를 Lock한다. Lock은 HAMi Device Plugin이 해당 Pod의 Accelerator 할당을 완료할 때까지 유지되어, 같은 Node에서 다른 Pod의 할당이 동시에 진행되지 않도록 한다. 다른 Pod의 Lock이 이미 걸려 있으면 Bind는 실패하며, Pod는 kube-scheduler에 의해서 다시 Scheduling Queue에 들어가 이후에 다시 Scheduling된다.
 9. Scheduler Extender는 Pod의 `hami.io/bind-phase` Annotation을 `allocating`으로, `hami.io/bind-time` Annotation을 Bind 시각으로 기록한다.
 10. Scheduler Extender는 kube-apiserver의 Binding API를 호출하여 Pod의 `spec.nodeName`에 선택된 Node 이름을 설정한다.
 
@@ -272,6 +272,16 @@ Scheduler Extender가 기록하는 Annotation:
 * **`hami.io/node-scheduler-policy`** : 해당 Pod의 Node Scheduling 정책 (`binpack` / `spread`).
 * **`hami.io/gpu-scheduler-policy`** : 해당 Pod의 Device Scheduling 정책 (`binpack` / `spread` 등 Accelerator별 지원 값).
 
+```yaml {caption="[File 3] Node에 설정되는 Lock Annotation", linenos=table}
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    hami.io/mutex.lock: "2026-11-15T16:42:07.123456789+09:00,default,qwen3-14b-awq-84dfd5c495-tgrmb"
+```
+
+[File 3]은 Bind 단계에서 Node에 설정되는 `hami.io/mutex.lock` Node Annotation의 예시를 나타내고 있다. Lock 시각, Lock을 건 Pod의 Namespace, Pod 이름이 쉼표로 구분되어 기록되며, HAMi Device Plugin은 이 Namespace와 Pod 이름으로 할당 대상 Pod를 찾는다.
+
 ### 1.4. Accelerator 할당
 
 {{< figure caption="[Figure 4] Accelerator Allocation Process" src="images/hami-device-allocation.png" width="900px" >}}
@@ -279,10 +289,10 @@ Scheduler Extender가 기록하는 Annotation:
 Accelerator 할당도 HAMi Device Plugin이 수행하며, HAMi Scheduler가 선택한 Accelerator를 실제로 Container에 할당한다. [Figure 4]는 Accelerator 할당 과정을 나타내고 있다.
 
 1. Pod가 Bind된 Node의 kubelet은 HAMi Device Plugin에게 `Allocate()` gRPC 요청을 전송한다.
-2. HAMi Device Plugin은 Node Annotation (`hami.io/mutex.lock`) 에 기록된 Pod를 할당 대상 Pod로 판단한다. `Allocate()` 요청에는 Device ID만 포함되고 Pod 정보는 포함되지 않기 때문이다.
+2. HAMi Device Plugin은 `hami.io/mutex.lock` Node Annotation에 기록된 Pod를 할당 대상 Pod로 판단한다. `Allocate()` 요청에는 Device ID만 포함되고 Pod 정보는 포함되지 않기 때문이다.
 3. HAMi Device Plugin은 해당 Pod의 `hami.io/[accelerator]-devices-to-allocate` Annotation을 조회하여, HAMi Scheduler가 선택한 Accelerator의 UUID와 Memory 크기, Core 사용률 제한 값을 파악한다. 일반적인 Device Plugin은 `Allocate()` 요청에 포함된 Device ID만으로 동작하지만, HAMi Device Plugin은 HAMi Scheduler의 Accelerator 선택 결과를 그대로 따라야 하기 때문에 Pod의 Annotation을 참조한다.
 4. HAMi Device Plugin은 할당을 마친 Container의 항목을 `hami.io/[accelerator]-devices-to-allocate` Annotation에서 지운다.
-5. 모든 항목이 지워지면 HAMi Device Plugin은 Pod의 `hami.io/bind-phase` Annotation을 `success`로 변경하고, Node Annotation (`hami.io/mutex.lock`) 의 Lock을 해제한다.
+5. 모든 항목이 지워지면 HAMi Device Plugin은 Pod의 `hami.io/bind-phase` Annotation을 `success`로 변경하고, `hami.io/mutex.lock` Node Annotation의 Lock을 해제한다.
 6. HAMi Device Plugin은 `Allocate()` 응답으로 할당할 Accelerator 정보와 격리 설정을 반환한다. 반환 내용은 격리 계층에 따라서 다른데, Library 수준은 격리 Library Mount와 제한값 환경 변수가, Driver/Hardware 수준은 가상화된 Accelerator Device 참조가 반환된다.
 7. kubelet은 반환받은 설정을 반영하여 Container를 생성하며, 이후 Container가 Accelerator를 사용하면 격리 계층이 Memory 크기 제한과 Core 사용률 제한을 강제한다.
 

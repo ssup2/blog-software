@@ -29,6 +29,18 @@ HAMi 자체(이기종 AI 가속기 가상화 Middleware)에 포커스를 두고 
   이어서 사용자 요청으로 `#### 1.3.1. NUMA Refit`으로 분리하고 배경 문단 추가: Guaranteed Pod의 CPU는 Bind 이후 kubelet CPU Manager가
   결정하고 kube-apiserver에 공개되지 않아 hami-scheduler가 Scheduling 시점에 CPU의 NUMA를 알 수 없음(근거: Issue #2080 실측 — CPU NUMA 0,
   Scheduler 선택 GPU NUMA 14). hami-scheduler가 재선택하는 이유(할당 내역 관리, 과할당 방지)는 둘째 문단으로 이동.
+- **2026-11-15 Lock 설명 축소** (사용자 요청): 1.3 Lock 상세 문단 2개(만료 5분, 대기 중 Pod 보호, 삭제 Pod 해제) 삭제 → 8단계에
+  "Lock이 이미 걸려 있으면 Bind 실패, kube-scheduler가 다시 Queue에 넣어 재Scheduling" 한 문장만 추가. Lock 예시는 1.3 끝(Pod Annotation
+  File 뒤)으로 옮겨 [File 3], Pod Annotation은 다시 [File 2]. 아래 두 항목의 Lock 세부 근거는 기록으로만 유지.
+- **2026-11-15 [File 2] Lock Annotation 예시 추가** (사용자 요청): 1.3 Lock 문단 앞에 `hami.io/mutex.lock` 예시 File 삽입, 기존 [File 2]
+  (Pod Annotation)는 [File 3]으로 재번호. 값 형식은 `<RFC3339Nano 시각>,<namespace>,<pod>` (nodelock.go GenerateNodeLockKeyByPod) —
+  예시 값은 형식에 맞춘 작성 예(Pod 이름은 Test Node의 qwen3 Pod 이름 차용), 실측 아님.
+- **2026-11-15 Node Lock 동작 문단 추가** (사용자 요청, 1.3 단계 목록 뒤): 근거 v2.11.0 pkg/util/nodelock/nodelock.go LockNode —
+  Lock 값에 시각과 Pod ns/name, 다른 Pod가 유효 Lock 보유 시 ErrNodeLockContention → Bind 실패 → kube-scheduler 재시도. 만료는
+  `NodeLockTimeout`(기본 5분, Chart `scheduler.nodeLockExpire` → env `HAMI_NODELOCK_EXPIRE`). 만료돼도 보유 Pod가 아직 할당 대기 중이면
+  넘기지 않음(issue #3096, podAwaitingAllocation), 보유 Pod가 없으면(NotFound) 즉시 해제 후 획득. PodGroup의 NodeLockRetryTimeout 재시도와
+  같은 Pod의 다중 벤더 Lock 재진입은 본문 미기재. 같은 날 7단계에 `/bind` 요청의 Node와 Filter 선택 Node 일치 확인(verifyBindTarget) 추가,
+  "Node Annotation (`x`)" 표기를 "`x` Node Annotation"으로 통일.
 - **2026-11-15 Figure 3 사용자 재작도 반영** (pptx 스타일): 최종 10단계 (사용자가 9단계 묶음안을 거쳐 다시 10단계로 확정) — 1.3을 10단계로 재작성 — ③ Node Annotation 조회와 ④ 선택을 분리, ⑥ `/filter` 응답으로
   Node 반환, ⑧ Lock, ⑨ `bind-phase`/`bind-time`, ⑩ Binding API로 `spec.nodeName` 설정(Extender의 `s.kubeClient...Pods().Bind()`).
   사용자 그림 검토 시 지적: 8번 중복(Lock과 nodeName), nodeName 화살표가 kube-scheduler에서 출발(실제는 bindVerb 설정으로 Extender가
