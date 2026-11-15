@@ -42,6 +42,7 @@ ssup2의 개인 기술 블로그 (Hugo 기반). 글은 `content/docs/` 아래 Ma
 - 동어반복 지양: 필드를 같은 이름의 단어로 설명하지 않는다 ("`listeners`에는 Listener를 정의한다" 대신 "`listeners`에는 Traffic을 수신하는 진입점을 정의한다"처럼 역할로 풀어서 설명한다).
 - 관계 방향 명확화: Resource 간 참조를 설명할 때 담당 주체와 방향이 드러나게 쓴다 (예: "Gateway가 이용할 GatewayClass" 대신 "Gateway의 생성과 관리를 담당할 GatewayClass").
 - 개념 관계 명시: 타입:인스턴스 같은 Resource 간 관계는 정의 문장에서 명시한다 (예: "Gateway는 GatewayClass의 인스턴스에 해당한다").
+- 괄호 최소화: 기본값, 예시, 보충 설명을 괄호로 끼워 넣지 않고 문장으로 풀어 쓴다 (예: "기본 정책은 Helm 설정으로 지정하며 (Node는 `binpack`…)" 대신 "…지정하며, Node Scheduling 정책은 `binpack`이, Device Scheduling 정책은 `spread`가 기본값이다."). 영문 원어 병기나 짧은 식별자 표기처럼 괄호가 꼭 필요한 경우만 남긴다.
 - 중의적 용어 한정: 문맥상 여러 의미로 읽힐 수 있는 용어는 한정어를 붙인다 (Envoy Cluster와 혼동될 수 있는 "Cluster"는 "Kubernetes Cluster"로 명시).
 
 ### 표기

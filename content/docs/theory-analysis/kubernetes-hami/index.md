@@ -89,14 +89,14 @@ Accelerator 등록은 HAMi Device Plugin이 수행하며, Node에 존재하는 �
 6. kubelet은 전달받은 Accelerator 개수를 kube-apiserver를 통해서 Node의 Allocatable/Capacity에 반영한다.
 7. HAMi Device Plugin은 Device Plugin 규격과 별도로 물리 Accelerator의 상세 정보를 `hami.io/node-[accelerator]-register` Node Annotation에 기록한다.
 
-kubelet의 Device Plugin 규격은 Device의 ID와 Health 상태 같은 제한된 정보만 전달할 수 있기 때문에, Accelerator의 Memory 크기 같은 상세 정보는 Device Plugin 규격으로는 전달할 수 없다. 따라서 HAMi Device Plugin은 상세 정보를 `hami.io/node-[accelerator]-register` Node Annotation에 별도로 기록하며, 이후 Scheduler Extender가 이 Annotation을 참조하여 Scheduling을 수행한다. Annotation은 주기적으로 갱신되기 때문에 Node의 Accelerator 상태 변화도 Scheduler Extender에 반영된다.
+kubelet의 Device Plugin 규격은 Device의 ID와 Health 상태 같은 제한된 정보만 전달할 수 있기 때문에, Accelerator의 Memory 크기 같은 상세 정보는 Device Plugin 규격으로는 전달할 수 없다. 즉 Node의 Allocatable에는 Accelerator 개수만 등록되고, Accelerator의 Memory 크기와 Core 사용률은 등록되지 않는다. 따라서 HAMi Device Plugin은 상세 정보를 `hami.io/node-[accelerator]-register` Node Annotation에 별도로 기록하며, 이후 Scheduler Extender가 이 Annotation을 참조하여 Scheduling을 수행한다. Annotation은 주기적으로 갱신되기 때문에 Node의 Accelerator 상태 변화도 Scheduler Extender에 반영된다.
 
 ```yaml {caption="[File 1] Node에 설정되는 HAMi Annotation", linenos=table}
 apiVersion: v1
 kind: Node
 metadata:
   annotations:
-    hami.io/node-nvidia-register: '[{"id":"GPU-8f2c5d1e-...","count":2,"devmem":81920,"devcore":100,"type":"NVIDIA A100-SXM4-80GB","mode":"hami-core","health":true},{"id":"GPU-3b71a9c4-...","index":1,"count":2,"devmem":81920,"devcore":100,"type":"NVIDIA A100-SXM4-80GB","numa":1,"mode":"hami-core","health":true}]'
+    hami.io/node-[accelerator]-register: '[{"id":"[UUID-1]","count":2,"devmem":81920,"devcore":100,"type":"[Type]","mode":"hami-core","health":true},{"id":"[UUID-2]","index":1,"count":2,"devmem":81920,"devcore":100,"type":"[Type]","numa":1,"mode":"hami-core","health":true}]'
 ```
 
 [File 1]은 Accelerator 등록 과정에서 HAMi Device Plugin이 Node에 기록하는 `hami.io/node-[accelerator]-register` 계열 Annotation의 예시를 나타내고 있다. 하나의 Annotation에 Node의 물리 Accelerator 목록이 담기며, Accelerator Suffix는 Accelerator 종류에 따라 바뀐다. 값은 대부분 JSON 배열로 기록되지만 일부 Accelerator는 쉼표로 구분된 문자열을 이용한다. 물리 Accelerator별로 기록되는 항목은 [Table 3]과 같다.
@@ -193,6 +193,37 @@ Device Plugin 방식에서는 Node 선택은 kube-scheduler가 수행하고 Acce
 9. Scheduler Extender는 Pod의 `hami.io/bind-phase` Annotation을 `allocating`으로, `hami.io/bind-time` Annotation을 Bind 시각으로 기록한다.
 10. Scheduler Extender는 kube-apiserver의 Binding API를 호출하여 Pod의 `spec.nodeName`에 선택된 Node 이름을 설정한다.
 
+```yaml {caption="[File 2] Pod에 설정되는 HAMi Annotation", linenos=table}
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    hami.io/[accelerator]-devices-to-allocate: "[UUID-1],[Type],65536,80:[UUID-2],[Type],65536,80:;"
+    hami.io/[accelerator]-devices-allocated: "[UUID-1],[Type],65536,80:[UUID-2],[Type],65536,80:;"
+    hami.io/vgpu-node: gpu-node
+    hami.io/vgpu-time: "1794728526"
+    hami.io/bind-phase: allocating
+    hami.io/bind-time: "1794728527"
+```
+
+```yaml {caption="[File 3] Node에 설정되는 Lock Annotation", linenos=table}
+apiVersion: v1
+kind: Node
+metadata:
+  annotations:
+    hami.io/mutex.lock: "2026-11-15T16:42:07.123456789+09:00,default,qwen3-14b-awq-84dfd5c495-tgrmb"
+```
+
+[File 2]는 Accelerator Scheduling 과정에서 Scheduler Extender가 Pod에 기록하는 HAMi Annotation을, [File 3]은 Bind 단계에서 Node에 기록하는 `hami.io/mutex.lock` Node Annotation의 예시를 나타내고 있다. Pod Annotation의 `[accelerator]` 부분은 Accelerator별로 달라지며 (예: NVIDIA GPU는 `vgpu`, AMD GPU는 `amd`), [File 2]는 [Figure 1]의 Pod A처럼 Accelerator 2개를 Memory와 Core 사용률 80%로 할당받도록 Scheduling이 완료되고, 아직 Accelerator 할당은 진행되지 않은 상태를 나타낸다. Lock Annotation에는 Lock 시각, Lock을 건 Pod의 Namespace, Pod 이름이 쉼표로 구분되어 기록된다. 각 Annotation의 의미는 다음과 같다.
+
+* **`hami.io/[accelerator]-devices-to-allocate`** : 아직 Container에 할당되지 않은 Accelerator 목록. Scheduling 직후에는 `hami.io/[accelerator]-devices-allocated`와 같은 값이 기록되며, HAMi Device Plugin이 Container에 할당할 때마다 할당을 마친 항목을 지워서 Accelerator 할당 과정이 완료되면 비워진다.
+* **`hami.io/[accelerator]-devices-allocated`** : Scheduler가 최종 선택한 Accelerator 할당 결과. Container별로 할당된 Accelerator 정보가 기록되며, Accelerator 하나의 정보는 `UUID,Type,Memory,Core` 형식이며, Type은 HAMi가 Accelerator 종류를 구분하는 이름 (예: NVIDIA GPU는 `NVIDIA`, AMD GPU는 `AMD`), Memory는 MiB 단위의 크기, Core는 % 단위의 사용률이다. 같은 Container에 할당된 Accelerator 정보는 `:`로 이어지고, 각 Container의 끝은 `;`로 구분된다. Container 이름은 기록되지 않으며, 각 `;` 구간은 Pod spec의 Container 순서 (Init Container 먼저, 이후 일반 Container) 와 대응한다. [File 2]는 하나의 Container에 Accelerator 2개가 할당된 경우이다.
+* **`hami.io/vgpu-node`** : Accelerator가 할당된 Node 이름.
+* **`hami.io/vgpu-time`** : Scheduler Extender가 Node와 Accelerator를 선택한 시각 (Unix Epoch Time, 초 단위).
+* **`hami.io/bind-phase`** : 할당 진행 상태 (`allocating`, `success`, `failed`).
+* **`hami.io/bind-time`** : Bind 수행 시각 (Unix Epoch Time, 초 단위).
+* **`hami.io/mutex.lock`** : Node의 Lock 상태. HAMi Device Plugin은 이 Annotation에 기록된 Namespace와 Pod 이름으로 할당 대상 Pod를 찾는다.
+
 ```shell {caption="[Shell 3] HAMi Scheduler KubeSchedulerConfiguration 확인"}
 $ kubectl -n kube-system get configmap hami-scheduler -o jsonpath='{.data.config\.yaml}'
 apiVersion: kubescheduler.config.k8s.io/v1
@@ -202,19 +233,19 @@ leaderElection:
   resourceName: "hami-scheduler"
   resourceNamespace: "kube-system"
 profiles:
-- schedulerName: hami-scheduler
+- schedulerName: hami-scheduler           # Schedules only Pods with schedulerName: hami-scheduler
 extenders:
-- urlPrefix: "https://127.0.0.1:9444"
+- urlPrefix: "https://127.0.0.1:9444"     # Scheduler Extender endpoint (loopback only)
   enableHTTPS: true
   tlsConfig:
     insecure: true
-  filterVerb: filter
-  bindVerb: bind
+  filterVerb: filter                      # Calls /filter in the Filter phase
+  bindVerb: bind                          # Calls /bind in the Bind phase
   nodeCacheCapable: true
   weight: 1
   httpTimeout: 30s
-  managedResources:
-  - ignoredByScheduler: true
+  managedResources:                       # Accelerator Resources handled by the Extender
+  - ignoredByScheduler: true              # Not counted by NodeResourcesFit
     name: nvidia.com/gpu
   - ignoredByScheduler: true
     name: nvidia.com/gpumem
@@ -231,56 +262,31 @@ extenders:
   ...
 ```
 
-[Shell 3]은 `hami-scheduler` ConfigMap에 저장된 KubeSchedulerConfiguration을 나타내고 있다. `profiles[0].schedulerName: hami-scheduler`로 Webhook이 지정하는 Scheduler 이름을 선언하고, `extenders`에 Scheduler Extender를 등록한다. `urlPrefix: https://127.0.0.1:9444`는 Scheduler Extender의 접점이며, kube-scheduler와 Extender가 같은 Pod 안의 Sidecar Container로 동작하기 때문에 Loopback으로 호출된다. Extender의 `/filter`, `/bind` 경로는 호출자를 인증하지 않기 때문에, Service로 공개되는 Webhook Port (`9443`) 와 분리된 Loopback 전용 Port (`9444`) 에서만 제공된다.
+[Shell 3]은 `hami-scheduler` ConfigMap에 저장된 KubeSchedulerConfiguration을 나타내고 있다. `profiles[0].schedulerName: hami-scheduler`는 HAMi Scheduler 내부의 kube-scheduler가 `schedulerName`이 `hami-scheduler`인 Pod만 Scheduling하도록 지정하며, Mutating Webhook이 Pod의 `schedulerName`을 변경하는 값도 바로 이 이름이다. `extenders`에는 Scheduler Extender가 등록된다. `urlPrefix: https://127.0.0.1:9444`는 Scheduler Extender의 접점이며, kube-scheduler와 Extender가 같은 Pod 안의 Sidecar Container로 동작하기 때문에 Loopback으로 호출된다. Extender의 `/filter`, `/bind` 경로는 호출자를 인증하지 않기 때문에, Service로 공개되는 Webhook Port (`9443`) 와 분리된 Loopback 전용 Port (`9444`) 에서만 제공된다.
 
-`filterVerb`와 `bindVerb`는 Scheduler Framework의 Filter와 Bind 단계에서 Extender를 호출하도록 지정하며, Extender는 Filter 단계에서 Node와 Accelerator를 선택하여 결과를 Pod Annotation에 기록하고 Bind 단계에서 Pod를 선택된 Node에 Bind한다. `prioritizeVerb`가 없는 이유는 점수 계산이 Filter 단계 안에서 수행되어 Node 하나만 반환되기 때문이다. `managedResources`에 등록된 Accelerator Resource는 모두 `ignoredByScheduler: true`로 표시되어, kube-scheduler의 Default `NodeResourcesFit` Filter는 이 Resource들의 가용량을 집계하지 않고 전적으로 Extender에 위임한다.
+`filterVerb`와 `bindVerb`는 Scheduler Framework의 Filter와 Bind 단계에서 Extender를 호출하도록 지정한다. kube-scheduler의 Extender 설정에는 Node 점수 계산을 맡기는 `prioritizeVerb`와 Preemption 판단을 맡기는 `preemptVerb`도 있지만 HAMi는 이용하지 않는다. `prioritizeVerb`가 필요 없는 이유는 Scheduler Extender가 Filter 단계에서 이미 Scheduling 정책에 따라 점수를 계산하여 가장 적합한 Node 하나만 남기기 때문이다. `preemptVerb`가 설정되지 않았기 때문에 kube-scheduler의 Preemption은 Scheduler Extender의 판단 없이 수행된다.
 
-Scheduling 정책은 Node를 선택하는 Node Scheduling 정책과 Node 안에서 Accelerator를 선택하는 Device Scheduling 정책으로 구분된다. `binpack` 정책은 이미 할당량이 많은 Node나 Accelerator에 몰아서 할당하여 Accelerator 조각을 최소화하는 정책이고, `spread` 정책은 Node나 Accelerator에 고르게 분산하여 할당하는 정책이다. 기본 정책은 Helm 설정으로 지정하며 (Node는 `binpack`, Device는 `spread`가 기본값), Pod의 `hami.io/node-scheduler-policy`, `hami.io/gpu-scheduler-policy` Annotation을 통해서 Pod 단위로 변경할 수 있다.
+`managedResources`에는 Scheduler Extender가 관리하는 Accelerator Resource가 등록된다. kube-scheduler는 기본적으로 `NodeResourcesFit` Filter Plugin에서 Pod가 요청한 Resource와 Node의 Allocatable을 비교하여 Resource가 부족한 Node를 걸러낸다. 그런데 Accelerator의 Memory 크기와 Core 사용률을 요청하는 Resource는 Node의 Allocatable에 등록되지 않기 때문에, kube-scheduler가 그대로 비교하면 모든 Node가 Resource 부족으로 탈락한다. 따라서 `ignoredByScheduler: true`로 kube-scheduler가 이 Resource들을 비교하지 않도록 하고, Accelerator의 가용량 확인은 Accelerator별 할당 내역을 알고 있는 Scheduler Extender가 담당한다.
 
-Scheduler Extender는 각 Node와 Accelerator에 대해 Pod가 요청한 Memory와 Core가 가용량 대비 얼마나 차지하는지를 기준으로 점수를 계산한다. `binpack` 정책은 할당 후 사용률이 높아지는 쪽에 가산점을 주어 Workload를 몰고 사용 중인 Node나 Accelerator 수를 줄이는 반면, `spread` 정책은 반대로 사용률이 낮게 유지되는 쪽에 가산점을 주어 Workload를 분산한다. 기본 조합 (Node `binpack` + Device `spread`) 은 Workload를 가능한 적은 Node에 몰아 Node 조각화를 줄이면서, Node 안에서는 Accelerator를 고르게 사용해 개별 Accelerator에 Hot-spot이 생기지 않게 한다. v2.10.0부터는 `hami.io/gpu-scheduler-policy` Annotation에 쉼표로 여러 정책을 연결해 함께 적용할 수 있다.
+#### 1.3.1. Scheduling 정책
 
-```yaml {caption="[File 2] Pod에 설정되는 HAMi Annotation", linenos=table}
+```yaml {caption="[File 4] Scheduling 정책을 지정하는 Pod Annotation", linenos=table}
 apiVersion: v1
 kind: Pod
 metadata:
   annotations:
-    # Recorded by the Scheduler Extender during scheduling
-    hami.io/[accelerator]-devices-to-allocate: <intermediate state of allocation phase>
-    hami.io/[accelerator]-devices-allocated: <allocated device records>
-    hami.io/vgpu-node: <node name>
-    hami.io/bind-phase: success
-    hami.io/bind-time: "<Unix epoch>"
-    hami.io/vgpu-time: "<Unix epoch>"
-    # Specified by the user to control scheduling behavior
     hami.io/node-scheduler-policy: binpack
     hami.io/gpu-scheduler-policy: spread
 ```
 
-[File 2]는 Accelerator Scheduling 과정에서 Pod에 설정되는 HAMi Annotation을 나타내고 있다. Scheduler Extender가 Scheduling 단계에서 자동으로 기록하는 Annotation과 사용자가 Scheduling 동작 제어를 위해 Pod spec에 직접 지정하는 Annotation으로 구분되며, Accelerator별로 Suffix가 달라진다.
+[File 4]는 Pod 단위로 Scheduling 정책을 지정하는 Annotation을 나타내고 있다. Scheduling 정책은 Node를 선택하는 **Node Scheduling 정책**과 Node 안에서 Accelerator를 선택하는 **Device Scheduling 정책**으로 구분된다. `binpack` 정책은 이미 할당량이 많은 Node나 Accelerator에 몰아서 할당하여 Accelerator 조각을 최소화하는 정책이고, `spread` 정책은 Node나 Accelerator에 고르게 분산하여 할당하는 정책이다. 기본 정책은 Helm 설정으로 지정하며, Pod에 이 Annotation을 지정하면 해당 Pod에만 다른 정책을 적용할 수 있다. 각 Annotation의 의미는 다음과 같다.
 
-Scheduler Extender가 기록하는 Annotation:
+* **`hami.io/node-scheduler-policy`** : 해당 Pod의 Node Scheduling 정책. `binpack` 또는 `spread`를 지정하며, Helm 설정의 기본값은 `binpack`이다.
+* **`hami.io/gpu-scheduler-policy`** : 해당 Pod의 Device Scheduling 정책. `binpack`, `spread` 등 Accelerator별로 지원하는 값을 지정하며, Helm 설정의 기본값은 `spread`이다.
 
-* **`hami.io/[accelerator]-devices-to-allocate`** : 아직 Container에 할당되지 않은 Accelerator 목록. HAMi Device Plugin이 Container에 할당할 때마다 할당을 마친 항목을 지우며, 모두 지워지면 할당이 완료된 것으로 판단한다.
-* **`hami.io/[accelerator]-devices-allocated`** : Scheduler가 최종 선택한 Accelerator 할당 결과 (UUID, Type, Memory 크기, Core 사용률 등). Accelerator 1개당 1개 Record가 생성된다.
-* **`hami.io/vgpu-node`** : Accelerator가 할당된 Node 이름.
-* **`hami.io/vgpu-time`** : Scheduler Extender가 Node와 Accelerator를 선택한 시각.
-* **`hami.io/bind-phase`** : 할당 진행 상태 (`allocating`, `success`, `failed`).
-* **`hami.io/bind-time`** : Bind 수행 시각.
+Node Scheduling 정책 `binpack`과 Device Scheduling 정책 `spread`의 기본 조합은 Workload를 가능한 적은 Node에 몰아 Node 조각화를 줄이면서, Node 안에서는 Accelerator를 고르게 사용해 개별 Accelerator에 Hot-spot이 생기지 않게 한다. v2.10.0부터는 `hami.io/gpu-scheduler-policy` Annotation에 쉼표로 여러 정책을 연결해 함께 적용할 수 있다.
 
-사용자가 지정하는 Annotation:
-
-* **`hami.io/node-scheduler-policy`** : 해당 Pod의 Node Scheduling 정책 (`binpack` / `spread`).
-* **`hami.io/gpu-scheduler-policy`** : 해당 Pod의 Device Scheduling 정책 (`binpack` / `spread` 등 Accelerator별 지원 값).
-
-```yaml {caption="[File 3] Node에 설정되는 Lock Annotation", linenos=table}
-apiVersion: v1
-kind: Node
-metadata:
-  annotations:
-    hami.io/mutex.lock: "2026-11-15T16:42:07.123456789+09:00,default,qwen3-14b-awq-84dfd5c495-tgrmb"
-```
-
-[File 3]은 Bind 단계에서 Node에 설정되는 `hami.io/mutex.lock` Node Annotation의 예시를 나타내고 있다. Lock 시각, Lock을 건 Pod의 Namespace, Pod 이름이 쉼표로 구분되어 기록되며, HAMi Device Plugin은 이 Namespace와 Pod 이름으로 할당 대상 Pod를 찾는다.
+Scheduler Extender는 각 Node와 Accelerator에 대해 Pod가 요청한 Memory와 Core가 가용량 대비 얼마나 차지하는지를 기준으로 점수를 계산한다. `binpack` 정책은 할당 후 사용률이 높아지는 쪽에 가산점을 주어 Workload를 몰고 사용 중인 Node나 Accelerator 수를 줄이는 반면, `spread` 정책은 반대로 사용률이 낮게 유지되는 쪽에 가산점을 주어 Workload를 분산한다.
 
 ### 1.4. Accelerator 할당
 

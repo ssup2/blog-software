@@ -29,6 +29,26 @@ HAMi 자체(이기종 AI 가속기 가상화 Middleware)에 포커스를 두고 
   이어서 사용자 요청으로 `#### 1.3.1. NUMA Refit`으로 분리하고 배경 문단 추가: Guaranteed Pod의 CPU는 Bind 이후 kubelet CPU Manager가
   결정하고 kube-apiserver에 공개되지 않아 hami-scheduler가 Scheduling 시점에 CPU의 NUMA를 알 수 없음(근거: Issue #2080 실측 — CPU NUMA 0,
   Scheduler 선택 GPU NUMA 14). hami-scheduler가 재선택하는 이유(할당 내역 관리, 과할당 방지)는 둘째 문단으로 이동.
+- **2026-11-16 Pod `devices-*` 값 형식 보강**: Type 값 = 벤더 Device 타입 상수(v2.11.0 — NVIDIA `NVIDIA`, AMD `AMD`, Cambricon `MLU`,
+  Hygon `HCU`, Mthreads `Mthreads`, Ascend는 `CommonWord()` Chip 이름). Container 매핑은 이름 없이 `;` 구간 순서(Init Container 먼저) —
+  popNextContainerDevices. 형식 표기는 공백 없이 `UUID,Type,Memory,Core`.
+- **2026-11-16 [File 1], [File 2] 자리 표시 방식으로 통일** (사용자 선택): 키는 `hami.io/node-[accelerator]-register`,
+  `hami.io/[accelerator]-devices-*`, 값의 UUID/Type은 `[UUID-1]`, `[UUID-2]`, `[Type]`. 근거: v2.11.0 Pod `devices-*` 키 이름만 벤더별
+  (NVIDIA `vgpu`, AMD `amd`, Cambricon `cambricon-mlu`, Hygon `hcu`, Ascend `<commonWord>`, Kunlun은 `hami.io/kunlun-allocated` 하나뿐),
+  값은 공통 EncodePodSingleDevice. `vgpu-node`, `vgpu-time`, `bind-phase`, `bind-time`, `mutex.lock`은 pkg/util 공통 상수라 모든 벤더 동일.
+  [Table 3]의 예시 값 열은 사용자 요청으로 넣은 NVIDIA 구체 값 유지.
+- **2026-11-16 [File 2] 예시 값 구체화** (사용자 요청, 실측 아님): 형식 근거 v2.11.0 pkg/device/devices.go EncodeContainerDevices
+  (`UUID,Type,Usedmem,Usedcores` + `:`; Slots>1이면 5번째 필드) / EncodePodSingleDevice(Container 끝 `;`), Type은 NVIDIA `"NVIDIA"`.
+  할당 완료 후 `devices-to-allocate`는 patchErasedAnnotation으로 빈 Container만 남아 `";"`. 이후 사용자 요청으로 예시를 Scheduling 완료 +
+  할당 전 상태로 변경(`devices-to-allocate` = `devices-allocated` 동일 값, `bind-phase: allocating`). 예시는 Figure 1 Pod A(GPU 2개 × 80%,
+  A100 80GB → 65536 MiB), UUID는 [File 1]과 동일, Node `gpu-node`(Figure 1), 시각은 2026-11-15 16:42:07 KST epoch.
+- **2026-11-16 [File 2], [File 3] 연속 배치** (사용자 요청): 두 File을 붙이고 설명을 한 문단 + 하나의 bullet 목록으로 통합
+  (`hami.io/mutex.lock` bullet 추가). 기존 [File 3] 단독 설명 문단은 통합 문단으로 흡수.
+- **2026-11-16 `#### 1.3.1. Scheduling 정책` 신설** (사용자 요청): `hami.io/node-scheduler-policy`, `hami.io/gpu-scheduler-policy`를 [File 2]와
+  bullet에서 제거하고 1.3.1로 이동. 구성: 정책 정의 문단 → [File 4] 정책 Annotation 예시 + bullet → 점수 계산 문단. [File 2]는 Scheduler
+  Extender가 기록하는 Annotation만 남김(주석 줄 제거).
+- **2026-11-15 1.3 순서 재배치** (사용자 요청): 단계 목록 → [File 2] Pod Annotation(+bullet) → [File 3] Lock Annotation →
+  [Shell 3] KubeSchedulerConfiguration(+2문단) → Scheduling 정책 2문단. Annotation Key를 먼저 보여 주고 설정 설명이 뒤따르도록 함.
 - **2026-11-15 Lock 설명 축소** (사용자 요청): 1.3 Lock 상세 문단 2개(만료 5분, 대기 중 Pod 보호, 삭제 Pod 해제) 삭제 → 8단계에
   "Lock이 이미 걸려 있으면 Bind 실패, kube-scheduler가 다시 Queue에 넣어 재Scheduling" 한 문장만 추가. Lock 예시는 1.3 끝(Pod Annotation
   File 뒤)으로 옮겨 [File 3], Pod Annotation은 다시 [File 2]. 아래 두 항목의 Lock 세부 근거는 기록으로만 유지.
