@@ -29,6 +29,10 @@ HAMi 자체(이기종 AI 가속기 가상화 Middleware)에 포커스를 두고 
   이어서 사용자 요청으로 `#### 1.3.1. NUMA Refit`으로 분리하고 배경 문단 추가: Guaranteed Pod의 CPU는 Bind 이후 kubelet CPU Manager가
   결정하고 kube-apiserver에 공개되지 않아 hami-scheduler가 Scheduling 시점에 CPU의 NUMA를 알 수 없음(근거: Issue #2080 실측 — CPU NUMA 0,
   Scheduler 선택 GPU NUMA 14). hami-scheduler가 재선택하는 이유(할당 내역 관리, 과할당 방지)는 둘째 문단으로 이동.
+- **2026-11-15 Figure 3 사용자 재작도 반영** (pptx 스타일): 최종 10단계 (사용자가 9단계 묶음안을 거쳐 다시 10단계로 확정) — 1.3을 10단계로 재작성 — ③ Node Annotation 조회와 ④ 선택을 분리, ⑥ `/filter` 응답으로
+  Node 반환, ⑧ Lock, ⑨ `bind-phase`/`bind-time`, ⑩ Binding API로 `spec.nodeName` 설정(Extender의 `s.kubeClient...Pods().Bind()`).
+  사용자 그림 검토 시 지적: 8번 중복(Lock과 nodeName), nodeName 화살표가 kube-scheduler에서 출발(실제는 bindVerb 설정으로 Extender가
+  Binding API 호출), 순서는 Lock → bind Annotation → Binding이므로 nodeName은 10번, "accelector" 오타, "gpu annotations" 벤더 표현.
 - **2026-11-15 Figure 3, 4 재작도 + 1.3/1.4 단계 재작성** (사용자 요청: 사용되는 Annotation 모두 표현). Claude가 SVG → headless Chrome PNG로 작도
   (Figure 3 1400×720, Figure 4 1300×720, width 900px, 소스 미보관). YAML 줄 끝 `(N)`으로 단계 번호 표시. 근거(v2.11.0):
   Filter(scheduler.go) — `vgpu-node`(AssignedNode), `vgpu-time`(AssignedTime), PatchAnnotations로 `devices-to-allocate`(InRequestDevices)와
