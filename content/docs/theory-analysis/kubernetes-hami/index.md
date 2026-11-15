@@ -300,11 +300,11 @@ NUMA Refit을 이용하려면 Helm의 `devicePlugin.numaRefit.enabled`와 NUMA T
 
 ### 1.5. Pod 검증
 
-[Figure 1]의 Mutating Webhook 경로는 Pod 생성 요청뿐만 아니라 Pod 수정 (`UPDATE`) 요청에도 이용된다. Mutating Webhook은 HAMi Scheduler를 지정하는 것 외에도, HAMi Scheduler의 할당 내역을 거치지 않고 Accelerator를 할당받으려는 Pod 요청을 다음과 같이 거부한다.
+[Figure 1]의 Mutating Webhook 경로는 Pod 생성 (`CREATE`) 요청뿐만 아니라 Pod 수정 (`UPDATE`) 요청에도 이용된다. Mutating Webhook은 HAMi Scheduler를 지정하는 것 외에도, HAMi Scheduler의 할당 내역을 거치지 않고 Accelerator를 할당받으려는 Pod 요청을 다음과 같이 거부한다.
 
-* **할당 Annotation 보호** : HAMi Scheduler가 기록하는 할당 Annotation (`hami.io/[accelerator]-devices-to-allocate`, `hami.io/[accelerator]-devices-allocated`, `hami.io/vgpu-node`, `hami.io/bind-phase`, `hami.io/bind-time`) 이 포함된 Pod 생성 요청을 거부하고, Pod 수정 요청에서는 Node 수정 권한을 가진 HAMi Component (HAMi Scheduler, HAMi Device Plugin) 의 변경만 허용한다.
-* **Node 직접 지정 거부** : Accelerator를 요청하면서 `spec.nodeName`이 미리 지정된 Pod를 거부한다. Scheduler를 거치지 않으면 할당 Annotation이 기록되지 않기 때문이다.
-* **Privileged Container 거부** : Accelerator를 요청하는 Pod에 privileged Container가 포함되어 있으면 거부한다. privileged Container는 Node의 모든 Device에 접근할 수 있기 때문이다.
+* **할당 Annotation 보호** : HAMi Scheduler가 기록하는 할당 Annotation (`hami.io/[accelerator]-devices-to-allocate`, `hami.io/[accelerator]-devices-allocated`, `hami.io/vgpu-node`, `hami.io/bind-phase`, `hami.io/bind-time`) 이 포함된 Pod 생성 (`CREATE`) 요청을 거부하고, Pod 수정 (`UPDATE`) 요청에서는 Node 수정 권한을 가진 HAMi Component (HAMi Scheduler, HAMi Device Plugin) 의 변경만 허용한다.
+* **Node 직접 지정 거부** : Pod 생성 (`CREATE`) 요청에서 Accelerator를 요청하면서 `spec.nodeName`이 미리 지정된 Pod를 거부한다. Scheduler를 거치지 않으면 할당 Annotation이 기록되지 않기 때문이다.
+* **Privileged Container 거부** : Pod 생성 (`CREATE`) 요청에서 Accelerator를 요청하는 Pod에 privileged Container가 포함되어 있으면 거부한다. privileged Container는 Node의 모든 Device에 접근할 수 있기 때문이다.
 
 할당 Annotation을 보호하는 이유는 HAMi Device Plugin이 이 Annotation에 기록된 Accelerator와 제한 값을 그대로 따라서 할당하기 때문이다. 사용자가 할당 Annotation을 직접 지정할 수 있다면 HAMi Scheduler의 할당 내역에 없는 Memory와 Core를 할당받을 수 있다.
 
