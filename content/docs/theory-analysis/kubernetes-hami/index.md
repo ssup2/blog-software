@@ -95,6 +95,7 @@ kubelet의 Device Plugin 규격은 Device의 ID와 Health 상태 같은 제한�
 apiVersion: v1
 kind: Node
 metadata:
+  name: gpu-node
   annotations:
     hami.io/node-[accelerator]-register: '[{"id":"[UUID-1]","count":2,"devmem":81920,"devcore":100,"type":"[Type]","mode":"hami-core","health":true},{"id":"[UUID-2]","index":1,"count":2,"devmem":81920,"devcore":100,"type":"[Type]","numa":1,"mode":"hami-core","health":true}]'
 ```
@@ -197,6 +198,8 @@ Device Plugin 방식에서는 Node 선택은 kube-scheduler가 수행하고 Acce
 apiVersion: v1
 kind: Pod
 metadata:
+  name: poda
+  namespace: default
   annotations:
     hami.io/[accelerator]-devices-to-allocate: "[UUID-1],[Type],65536,80:[UUID-2],[Type],65536,80:;"
     hami.io/[accelerator]-devices-allocated: "[UUID-1],[Type],65536,80:[UUID-2],[Type],65536,80:;"
@@ -210,8 +213,9 @@ metadata:
 apiVersion: v1
 kind: Node
 metadata:
+  name: gpu-node
   annotations:
-    hami.io/mutex.lock: "2026-11-15T16:42:07.123456789+09:00,default,qwen3-14b-awq-84dfd5c495-tgrmb"
+    hami.io/mutex.lock: "2026-11-15T16:42:07.123456789+09:00,default,poda"
 ```
 
 [File 2]는 Accelerator Scheduling 과정에서 Scheduler Extender가 Pod에 기록하는 HAMi Annotation을, [File 3]은 Bind 단계에서 Node에 기록하는 `hami.io/mutex.lock` Node Annotation의 예시를 나타내고 있다. Pod Annotation의 `[accelerator]` 부분은 Accelerator별로 달라지며 (예: NVIDIA GPU는 `vgpu`, AMD GPU는 `amd`), [File 2]는 [Figure 1]의 Pod A처럼 Accelerator 2개를 Memory와 Core 사용률 80%로 할당받도록 Scheduling이 완료되고, 아직 Accelerator 할당은 진행되지 않은 상태를 나타낸다. Lock Annotation에는 Lock 시각, Lock을 건 Pod의 Namespace, Pod 이름이 쉼표로 구분되어 기록된다. 각 Annotation의 의미는 다음과 같다.
@@ -222,7 +226,7 @@ metadata:
 * **`hami.io/vgpu-time`** : Scheduler Extender가 Node와 Accelerator를 선택한 시각 (Unix Epoch Time, 초 단위).
 * **`hami.io/bind-phase`** : 할당 진행 상태 (`allocating`, `success`, `failed`).
 * **`hami.io/bind-time`** : Bind 수행 시각 (Unix Epoch Time, 초 단위).
-* **`hami.io/mutex.lock`** : Node의 Lock 상태. HAMi Device Plugin은 이 Annotation에 기록된 Namespace와 Pod 이름으로 할당 대상 Pod를 찾는다.
+* **`hami.io/mutex.lock`** : Node의 Lock 상태. 값은 `LockTime,Namespace,Pod` 형식이며, LockTime은 Scheduler Extender가 Bind 단계에서 Lock을 건 시각을 나노초 단위의 RFC3339 형식으로 기록한 값이고, Namespace와 Pod는 Lock을 건 Pod를 나타낸다. Annotation이 존재하는 동안 다른 Pod는 같은 Node에 Bind될 수 없으며, HAMi Device Plugin은 이 Namespace와 Pod 이름으로 할당 대상 Pod를 찾는다. Accelerator 할당이 완료되면 Annotation은 Node에서 삭제된다.
 
 ```shell {caption="[Shell 3] HAMi Scheduler KubeSchedulerConfiguration 확인"}
 $ kubectl -n kube-system get configmap hami-scheduler -o jsonpath='{.data.config\.yaml}'
