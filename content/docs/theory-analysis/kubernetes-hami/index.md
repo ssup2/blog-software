@@ -5,9 +5,20 @@ draft: true
 
 ## 1. Kubernetes HAMi
 
-{{< figure caption="[Figure 1] HAMi Architecture" src="images/hami-architecture.png" width="1000px" >}}
+**HAMi** (Heterogeneous AI Computing Virtualization Middleware)는 Kubernetes 환경에서 GPU, NPU 같은 AI Accelerator를 가상화하여 하나의 Accelerator를 다수의 Pod이 공유할 수 있도록 하는 Middleware이다. HAMi는 Kubernetes의 Device Plugin 방식 위에서 Memory 크기 제한과 연산 Core 사용률 제한을 제공하여 하나의 Accelerator를 다수의 Pod에 공유 할당할 수 있도록 만든다.
 
-**HAMi** (Heterogeneous AI Computing Virtualization Middleware)는 Kubernetes 환경에서 GPU, NPU 같은 AI Accelerator를 가상화하여 하나의 Accelerator를 다수의 Pod이 공유할 수 있도록 하는 Middleware이다. Kubernetes의 Device Plugin 방식은 Accelerator를 개수 단위로만 할당할 수 있지만, HAMi는 Device Plugin 방식 위에서 Memory 크기 제한과 연산 Core 사용률 제한을 제공하여 하나의 Accelerator를 다수의 Pod에 공유 할당할 수 있도록 만든다.
+{{< table caption="[Table 1] Device Plugin 방식의 한계와 HAMi의 해결 방식" >}}
+| Device Plugin 방식의 한계 | HAMi의 해결 방식 |
+|---|---|
+| Accelerator를 정수 개수의 Resource로만 다루어 Memory 크기나 Core 사용률을 요청할 수 없다. | Accelerator 개수를 부풀려 등록하고, Memory 크기와 Core 사용률은 별도의 Resource로 요청한다. |
+| kube-scheduler는 Node별 Accelerator 개수만 알고, 개별 Accelerator에 남은 Memory 크기와 Core 사용률은 알 수 없다. | HAMi Device Plugin이 Accelerator의 상세 정보를 Node Annotation에 기록하고, HAMi Scheduler가 이를 참조한다. |
+| Accelerator 선택을 Bind 이후 kubelet과 Device Plugin이 수행하여, Cluster 전체의 할당 내역을 반영할 수 없다. | HAMi Scheduler가 Node와 Accelerator를 함께 선택하고, 선택 결과를 Pod Annotation으로 HAMi Device Plugin에 전달한다. |
+| Accelerator를 나눠 쓰더라도 각 Pod의 사용량을 제한하는 수단이 없다. | 격리 계층이 Memory 크기와 Core 사용률 제한을 강제한다. |
+{{< /table >}}
+
+[Table 1]은 Kubernetes의 Device Plugin 방식으로 Accelerator를 공유할 때의 한계와 HAMi의 해결 방식을 나타내고 있다. HAMi는 HAMi Scheduler가 Accelerator 선택까지 수행하고 그 결과를 HAMi Device Plugin에 전달하는 구조와 격리 계층을 통해서 이 한계를 해결한다.
+
+{{< figure caption="[Figure 1] HAMi Architecture" src="images/hami-architecture.png" width="1000px" >}}
 
 [Figure 1]은 HAMi의 Architecture를 나타내고 있다. HAMi는 다음의 세 가지 요소로 구성된다.
 
@@ -20,7 +31,7 @@ draft: true
 
 [Figure 1]의 Node에는 물리 Accelerator가 2개 존재하며, HAMi 설정의 분할 개수 (`deviceSplitCount`) 가 2로 지정되어 있기 때문에 Node의 Allocatable/Capacity에는 4개의 Accelerator가 등록된다. 즉 물리 Accelerator 하나를 최대 2개의 Container가 나눠 쓸 수 있다. Pod A는 Accelerator 2개를 Core 사용률과 Memory 80%로, Pod B는 Accelerator 1개를 Core 사용률과 Memory 20%로 요청하여, Accelerator 1은 Pod A와 Pod B가 함께 사용한다.
 
-{{< table caption="[Table 1] HAMi Protocol Device Plugin이 제공되는 주요 Accelerator" >}}
+{{< table caption="[Table 2] HAMi Protocol Device Plugin이 제공되는 주요 Accelerator" >}}
 | Accelerator | Accelerator Resource 이름 | Memory / Core 제한 | 격리 계층 | Device Plugin |
 |---|---|---|---|---|
 | NVIDIA GPU | `nvidia.com/gpu`, `nvidia.com/gpumem`, `nvidia.com/gpucores` | O / O | Library, Hardware | HAMi 포함 |
@@ -29,11 +40,11 @@ draft: true
 | AMD GPU | `amd.com/gpu`, `amd.com/gpumem`, `amd.com/gpucores` | O / O | Library | HAMi 별도 |
 {{< /table >}}
 
-[Table 1]은 HAMi Protocol을 따르는 Device Plugin이 제공되는 주요 Accelerator와 Accelerator Resource 이름, 격리 계층, Device Plugin 패키징을 나타내고 있다. Accelerator Resource 이름은 Pod가 `resources`에 Accelerator를 요청할 때 이용하는 Kubernetes Extended Resource의 이름이며, 각 Accelerator는 개수를 요청하는 Resource와 함께 Memory 크기, Core 사용률을 요청하는 Resource를 제공한다. 이 중에서 개수를 요청하는 Resource (예: `nvidia.com/gpu`) 는 HAMi Device Plugin이 kubelet에 등록하기 때문에 Node의 Allocatable에 나타나지만, Memory 크기와 Core 사용률을 요청하는 Resource는 Node에 등록되지 않고 HAMi Scheduler만 인식하여 Scheduling에 활용한다.
+[Table 2]는 HAMi Protocol을 따르는 Device Plugin이 제공되는 주요 Accelerator와 Accelerator Resource 이름, 격리 계층, Device Plugin 패키징을 나타내고 있다. Accelerator Resource 이름은 Pod가 `resources`에 Accelerator를 요청할 때 이용하는 Kubernetes Extended Resource의 이름이며, 각 Accelerator는 개수를 요청하는 Resource와 함께 Memory 크기, Core 사용률을 요청하는 Resource를 제공한다. 이 중에서 개수를 요청하는 Resource (예: `nvidia.com/gpu`) 는 HAMi Device Plugin이 kubelet에 등록하기 때문에 Node의 Allocatable에 나타나지만, Memory 크기와 Core 사용률을 요청하는 Resource는 Node에 등록되지 않고 HAMi Scheduler만 인식하여 Scheduling에 활용한다.
 
 HAMi Scheduler는 `hami-scheduler-device` ConfigMap에 정의된 Accelerator별 Resource 이름을 기준으로 동작한다. Mutating Webhook은 이 이름으로 Accelerator를 요청하는 Pod를 판별하고, Scheduler Extender는 Pod가 요청한 개수, Memory 크기, Core 사용률을 읽어 Accelerator를 선택한다. Device Plugin은 `HAMi 포함` (HAMi Helm Chart 기본 포함)과 `HAMi 별도` (Project-HAMi 저장소의 별도 Chart, Manifest) 두 가지 방식으로 배포되며, NVIDIA GPU 외에는 HAMi 설치와 별개로 각 Device Plugin을 설치해야 한다.
 
-{{< table caption="[Table 2] 제조사 Device Plugin으로 지원되는 주요 Accelerator" >}}
+{{< table caption="[Table 3] 제조사 Device Plugin으로 지원되는 주요 Accelerator" >}}
 | Accelerator | Accelerator Resource 이름 | Memory / Core 제한 | 격리 계층 |
 |---|---|---|---|
 | Cambricon MLU | `cambricon.com/vmlu`, `cambricon.com/mlu.smlu.vmemory`, `cambricon.com/mlu.smlu.vcore` | O / O | Driver |
@@ -44,7 +55,7 @@ HAMi Scheduler는 `hami-scheduler-device` ConfigMap에 정의된 Accelerator별 
 | AWS Neuron | `aws.amazon.com/neuron`, `aws.amazon.com/neuroncore` | X / O | Hardware |
 {{< /table >}}
 
-[Table 2]는 HAMi가 제조사 제공 Device Plugin을 그대로 이용하여 지원하는 주요 Accelerator를 나타내고 있다. HAMi 2.11.0 기준으로 `hami-scheduler-device` ConfigMap에는 [Table 1], [Table 2]의 Accelerator를 포함하여 총 13종의 Accelerator 설정이 정의되어 있다. Table 2의 Resource 이름은 모두 벤더 Device Plugin이 kubelet에 등록하는 자체 이름이며, HAMi는 `hami-scheduler-device` ConfigMap에 이 이름들을 등록해 두어 Mutating Webhook과 Scheduler Extender가 Pod의 요청을 인식하도록만 한다.
+[Table 3]은 HAMi가 제조사 제공 Device Plugin을 그대로 이용하여 지원하는 주요 Accelerator를 나타내고 있다. HAMi 2.11.0 기준으로 `hami-scheduler-device` ConfigMap에는 [Table 2], [Table 3]의 Accelerator를 포함하여 총 13종의 Accelerator 설정이 정의되어 있다. Table 2의 Resource 이름은 모두 벤더 Device Plugin이 kubelet에 등록하는 자체 이름이며, HAMi는 `hami-scheduler-device` ConfigMap에 이 이름들을 등록해 두어 Mutating Webhook과 Scheduler Extender가 Pod의 요청을 인식하도록만 한다.
 
 제조사 Device Plugin을 쓸 때는 Device 선택과 격리 적용을 모두 벤더 Plugin이 담당하기 때문에, HAMi는 Scheduling에만 관여한다. 격리 계층은 Accelerator Driver가 담당하는 Driver 수준이 다수이며, 일부는 벤더 Library 주입 (Library 수준) 이나 Hardware 분할 (Hardware 수준) 도 함께 쓴다. 이 경우 HAMi가 제공하는 가치는 Pod Annotation 기반의 Scheduling 정책 지정과 여러 벤더를 하나의 Scheduler로 통합 운영하는 수준에 그치며, HAMi의 핵심 가치는 HAMi Protocol을 이용할 때 나타난다.
 
@@ -100,9 +111,9 @@ metadata:
     hami.io/node-[accelerator]-register: '[{"id":"[UUID-1]","count":2,"devmem":81920,"devcore":100,"type":"[Type]","mode":"hami-core","health":true},{"id":"[UUID-2]","index":1,"count":2,"devmem":81920,"devcore":100,"type":"[Type]","numa":1,"mode":"hami-core","health":true}]'
 ```
 
-[File 1]은 Accelerator 등록 과정에서 HAMi Device Plugin이 Node에 기록하는 `hami.io/node-[accelerator]-register` 계열 Annotation의 예시를 나타내고 있다. 하나의 Annotation에 Node의 물리 Accelerator 목록이 담기며, Accelerator Suffix는 Accelerator 종류에 따라 바뀐다. 값은 대부분 JSON 배열로 기록되지만 일부 Accelerator는 쉼표로 구분된 문자열을 이용한다. 물리 Accelerator별로 기록되는 항목은 [Table 3]과 같다.
+[File 1]은 Accelerator 등록 과정에서 HAMi Device Plugin이 Node에 기록하는 `hami.io/node-[accelerator]-register` 계열 Annotation의 예시를 나타내고 있다. 하나의 Annotation에 Node의 물리 Accelerator 목록이 담기며, Accelerator Suffix는 Accelerator 종류에 따라 바뀐다. 값은 대부분 JSON 배열로 기록되지만 일부 Accelerator는 쉼표로 구분된 문자열을 이용한다. 물리 Accelerator별로 기록되는 항목은 [Table 4]와 같다.
 
-{{< table caption="[Table 3] Node Register Annotation의 Accelerator별 항목" >}}
+{{< table caption="[Table 4] Node Register Annotation의 Accelerator별 항목" >}}
 | 항목 | 의미 | 예시 값 |
 |---|---|---|
 | `id` | 물리 Accelerator의 고유 ID (UUID 등) | `"GPU-3b71a9c4-..."` : Driver가 부여한 GPU UUID |
@@ -116,9 +127,9 @@ metadata:
 | `health` | Accelerator의 Health 상태 | `true` : 정상 상태 |
 {{< /table >}}
 
-[Table 3]의 항목 이름은 HAMi Device Plugin들이 HAMi의 공통 구조를 이용하기 때문에 모든 Accelerator에서 동일하지만, 값을 채우는 방식은 Accelerator마다 다르다. 예를 들어 `devcore`에는 Core 사용률 (%) 을 기록하는 Accelerator와 실제 Core 개수를 기록하는 Accelerator가 있으며, `numa`와 `mode`는 일부 Accelerator에서만 의미 있는 값이 기록된다. JSON 형식에서는 값이 0이거나 비어 있는 항목은 생략된다.
+[Table 4]의 항목 이름은 HAMi Device Plugin들이 HAMi의 공통 구조를 이용하기 때문에 모든 Accelerator에서 동일하지만, 값을 채우는 방식은 Accelerator마다 다르다. 예를 들어 `devcore`에는 Core 사용률 (%) 을 기록하는 Accelerator와 실제 Core 개수를 기록하는 Accelerator가 있으며, `numa`와 `mode`는 일부 Accelerator에서만 의미 있는 값이 기록된다. JSON 형식에서는 값이 0이거나 비어 있는 항목은 생략된다.
 
-제조사 Device Plugin을 이용하는 Accelerator ([Table 2]) 는 Accelerator 등록을 각 제조사 Device Plugin에 위임하며, HAMi Scheduler는 제조사 Device Plugin이 등록한 정보를 참조한다.
+제조사 Device Plugin을 이용하는 Accelerator ([Table 3]) 는 Accelerator 등록을 각 제조사 Device Plugin에 위임하며, HAMi Scheduler는 제조사 Device Plugin이 등록한 정보를 참조한다.
 
 ### 1.2. HAMi Scheduler 지정
 
@@ -175,13 +186,13 @@ hami-scheduler-6d94b4bd6f-dsbg6   2/2     Running   0          3m40s   10.244.0.
 
 Service의 `443` Port는 `hami-scheduler` Pod의 `9443` Port로 연결되며, 이 Pod 안의 Scheduler Extender Container (`vgpu-scheduler-extender`) 가 Webhook 요청을 수신한다. Endpoint (`10.244.0.24:9443`) 도 `hami-scheduler-6d94b4bd6f-dsbg6` Pod의 IP와 일치한다. 함께 보이는 `9395` Port는 [Figure 1]의 Metrics 경로와 같이 Service의 `31993` Port를 통해서 HAMi Scheduler가 Prometheus Metric을 제공하는 Port이다.
 
-Webhook은 Pod 생성 요청에서 Pod가 `hami-scheduler-device` ConfigMap에 등록된 Accelerator Resource ([Table 1], [Table 2] 등) 중 하나라도 요청하는지 검사하고, 요청하는 경우에만 Pod의 `schedulerName`을 `hami-scheduler`로 변경한다. `schedulerName`이 `default-scheduler`인 Pod (`schedulerName`을 지정하지 않은 경우 포함) 만 변경 대상이며, 다른 Scheduler가 지정된 Pod는 그대로 둔다.
+Webhook은 Pod 생성 요청에서 Pod가 `hami-scheduler-device` ConfigMap에 등록된 Accelerator Resource ([Table 2], [Table 3] 등) 중 하나라도 요청하는지 검사하고, 요청하는 경우에만 Pod의 `schedulerName`을 `hami-scheduler`로 변경한다. `schedulerName`이 `default-scheduler`인 Pod (`schedulerName`을 지정하지 않은 경우 포함) 만 변경 대상이며, 다른 Scheduler가 지정된 Pod는 그대로 둔다.
 
 ### 1.3. Accelerator Scheduling
 
 {{< figure caption="[Figure 3] Accelerator Scheduling Process" src="images/hami-device-scheduling.png" width="900px" >}}
 
-Device Plugin 방식에서는 Node 선택은 kube-scheduler가 수행하고 Accelerator 선택은 각 Node의 Device Plugin이 수행하지만, HAMi 환경에서는 HAMi Scheduler가 Node 선택뿐만 아니라 Accelerator 선택까지 수행한다. Memory 크기와 Core 사용률 조건을 만족하는 Accelerator를 선택하기 위해서는 Node 전체의 Accelerator 할당 상태를 알아야 하기 때문이다. [Figure 3]은 Accelerator Scheduling 과정을 나타내고 있으며, [Figure 1]의 Scheduler Extender 경로에 해당한다.
+[Figure 3]은 Accelerator Scheduling 과정을 나타내고 있으며, [Figure 1]의 Scheduler Extender 경로에 해당한다.
 
 1. HAMi Scheduler 내부의 kube-scheduler는 kube-apiserver를 Watch하여 `schedulerName`이 `hami-scheduler`인 Pod를 Scheduling 대상으로 가져온다.
 2. kube-scheduler는 Filter 단계에서 Scheduler Extender의 `/filter` Endpoint를 호출한다.

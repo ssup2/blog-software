@@ -29,6 +29,11 @@ HAMi 자체(이기종 AI 가속기 가상화 Middleware)에 포커스를 두고 
   이어서 사용자 요청으로 `#### 1.3.1. NUMA Refit`으로 분리하고 배경 문단 추가: Guaranteed Pod의 CPU는 Bind 이후 kubelet CPU Manager가
   결정하고 kube-apiserver에 공개되지 않아 hami-scheduler가 Scheduling 시점에 CPU의 NUMA를 알 수 없음(근거: Issue #2080 실측 — CPU NUMA 0,
   Scheduler 선택 GPU NUMA 14). hami-scheduler가 재선택하는 이유(할당 내역 관리, 과할당 방지)는 둘째 문단으로 이동.
+- **2026-11-17 한계 문단을 [Table 1]로 전환** (사용자 요청): "Device Plugin 방식의 한계 | HAMi의 해결 방식" 4행 표 + 설명 문단.
+  기존 Table 1~3은 Table 2~4로 재번호(본문 참조 모두 갱신).
+- **2026-11-17 개요에 Device Plugin 방식 한계 문단 추가** (사용자 요청): 첫 문단 뒤에 한계 4가지(정수 개수 Resource, kube-scheduler는
+  Node별 개수만 인지, Accelerator 선택이 Bind 이후 kubelet/Device Plugin에서 일어나 Cluster 할당 내역 미반영, 사용량 제한 수단 없음)와
+  HAMi의 해결 구조를 서술. 첫 문단의 "개수 단위로만 할당할 수 있지만" 문구는 중복이라 제거, 1.3 도입의 Device Plugin 비교 2문장 삭제.
 - **2026-11-17 예시 값 원칙** (사용자 합의): 벤더마다 달라지는 값(`[accelerator]` 키, `[UUID-N]`, `[Type]`)만 자리 표시, 벤더 무관 값은
   Figure 1과 맞춘 실제 값 — Node `gpu-node`, Pod `poda`(Namespace `default`), Pod A 할당량 GPU 2개 × 80%. [File 3] Lock 값은
   `…,default,poda`. `hami.io/mutex.lock` bullet에 값 형식, Lock 동안 Bind 불가, 할당 완료 시 삭제(ReleaseNodeLock이 `null` patch) 보강.
