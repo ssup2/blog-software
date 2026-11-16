@@ -12,151 +12,153 @@ HAMi 2.11.0이 노출하는 Prometheus Metric을 정리한다. HAMi의 Metric은
 
 ### 1.1. HAMi Scheduler Metrics
 
-HAMi Scheduler가 노출하는 Metric이다. HAMi Scheduler는 등록된 모든 Accelerator의 할당 내역을 관리하기 때문에, Accelerator 종류와 관계없이 같은 이름의 Metric을 노출하며 Accelerator 종류는 `device_type` Label로 구분된다. 모든 Metric에는 `zone="vGPU"` Label이 붙으며, 여기서 vGPU는 NVIDIA의 vGPU 제품이 아니라 HAMi가 하나의 Accelerator를 나누어 할당하는 단위를 의미한다.
-
-#### 1.1.1. Node Allocation Metrics
-
-HAMi Scheduler의 할당 내역을 기준으로 물리 Accelerator별 할당 상태를 나타내는 Metric이다.
-
-{{< table caption="[Table 1] HAMi Scheduler Node Allocation Metrics" >}}
-| Metric | Description | Metric Type | Value Unit |
-|---|---|---|---|
-| `hami_gpu_memory_limit_bytes` | Accelerator의 할당 가능한 Memory 크기 | Gauge | Byte |
-| `hami_gpu_memory_allocated_bytes` | Accelerator에 할당된 Memory 크기 | Gauge | Byte |
-| `hami_node_gpu_memory_allocated_ratio` | Accelerator의 할당 가능한 Memory 대비 할당된 Memory 비율 | Gauge | Ratio (0 ~ 1) |
-| `hami_gpu_core_limit_ratio` | Accelerator의 할당 가능한 Core 사용률 | Gauge | Percentage (0 ~ 100) |
-| `hami_gpu_core_allocated_ratio` | Accelerator에 할당된 Core 사용률 | Gauge | Percentage (0 ~ 100) |
-| `hami_gpu_shared_count` | Accelerator를 공유하는 Container 개수 | Gauge | |
-| `hami_node_gpu_overview` | Accelerator에 할당된 Memory 크기. Core 사용률과 Memory 크기 한도를 Label로 함께 제공 | Gauge | Byte |
-| `hami_node_gpu_mig_instance_info` | 생성된 MIG Instance의 정보. 값은 항상 `1` | Gauge | |
+{{< table caption="[Table 1] HAMi Scheduler Metric의 공통 Label" >}}
+| Label | Description | 예시 |
+|---|---|---|
+| `zone` | 모든 Metric에 붙는 고정 값. vGPU는 NVIDIA의 vGPU 제품이 아니라 HAMi가 하나의 Accelerator를 나누어 할당하는 단위를 의미 | `vGPU` |
+| `node` | Accelerator가 위치한 Node 이름 | `gpu-node` |
+| `device_uuid` | Accelerator의 UUID | `GPU-034026c4-...` |
+| `device_index` | Node 안에서의 Accelerator 번호 | `0` |
+| `device_type` | HAMi Device Plugin이 Node Annotation에 등록한 Accelerator 모델 이름 | `NVIDIA GeForce RTX 5060 Ti`, `Ascend910B3` |
+| `namespace` | Accelerator를 할당받은 Pod의 Namespace | `default` |
+| `pod` | Accelerator를 할당받은 Pod 이름 | `poda` |
 {{</ table >}}
 
-[Table 1]의 Memory 값은 HAMi Device Plugin이 Node Annotation에 등록한 Memory 크기와 Pod Annotation에 기록된 할당량을 Byte로 환산한 값이다. 따라서 Memory 과할당 비율인 `deviceMemoryScaling`을 1보다 크게 설정하면 `hami_gpu_memory_limit_bytes`는 물리 Memory보다 크게 나타난다. AMD GPU의 Core 값은 물리 CU 개수가 아니라 100을 기준으로 환산한 사용률로 노출된다. `hami_node_gpu_mig_instance_info`는 MIG Mode로 동작하는 Accelerator에서만 노출된다.
+[Table 1]은 HAMi Scheduler Metric에 공통으로 붙는 Label을 나타내고 있다. HAMi Scheduler는 등록된 모든 Accelerator의 할당 내역을 관리하기 때문에, Accelerator 종류와 관계없이 같은 이름의 Metric을 노출하며 Accelerator 종류는 Label로 구분된다. `node`, `device_uuid`, `device_index`, `device_type`은 Accelerator 단위 Metric에, `namespace`와 `pod`는 Pod 단위 Metric에 붙는다. 특정 Metric에만 붙는 Label은 각 Metric 표의 추가 Label 열에 나타낸다.
+
+#### 1.1.1. Accelerator Allocation Metrics
+
+{{< table caption="[Table 2] HAMi Scheduler Accelerator Allocation Metrics" >}}
+| Metric | Description | Metric Type | Value Unit | 추가 Label |
+|---|---|---|---|---|
+| `hami_gpu_memory_limit_bytes` | Node Annotation에 등록된 Accelerator의 할당 가능한 Memory 크기. `deviceMemoryScaling`이 1보다 크면 물리 Memory보다 크게 나타남 | Gauge | Byte |  |
+| `hami_gpu_memory_allocated_bytes` | Accelerator에 할당된 Memory 크기. Pod Annotation에 기록된 할당량의 합 | Gauge | Byte | `device_cores`: 할당 가능한 Core 사용률 (예: `100`) |
+| `hami_node_gpu_memory_allocated_ratio` | Accelerator의 할당 가능한 Memory 대비 할당된 Memory 비율 | Gauge | Ratio (0 ~ 1) |  |
+| `hami_gpu_core_limit_ratio` | Accelerator의 할당 가능한 Core 사용률. AMD GPU는 물리 CU 개수를 100 기준으로 환산한 값 | Gauge | Percentage (0 ~ 100) |  |
+| `hami_gpu_core_allocated_ratio` | Accelerator에 할당된 Core 사용률. AMD GPU는 물리 CU 개수를 100 기준으로 환산한 값 | Gauge | Percentage (0 ~ 100) |  |
+| `hami_gpu_shared_count` | Accelerator를 공유하는 Container 개수 | Gauge | |  |
+| `hami_node_gpu_overview` | Accelerator에 할당된 Memory 크기. Core 사용률과 Memory 크기 한도를 Label로 함께 제공 | Gauge | Byte | `device_cores`: 할당 가능한 Core 사용률 (예: `100`), `device_memory_limit`: 할당 가능한 Memory 크기 MiB (예: `16311`) |
+| `hami_node_gpu_mig_instance_info` | 생성된 MIG Instance의 정보. MIG Mode로 동작하는 Accelerator에서만 노출되며 값은 항상 `1` | Gauge | | `mig_uuid`, `profile` (예: `1g.10gb`), `gpu_instance_id`, `compute_instance_id`, `placement_start`, `placement_size` |
+{{</ table >}}
+
+[Table 2]는 HAMi Scheduler의 할당 내역을 기준으로 한 물리 Accelerator별 할당 상태 Metric을 나타내고 있다.
 
 #### 1.1.2. Pod Allocation Metrics
 
-HAMi Scheduler가 Pod에 할당한 Accelerator의 양을 나타내는 Metric이다. Pod에 할당된 Accelerator마다 하나씩 노출된다.
-
-{{< table caption="[Table 2] HAMi Scheduler Pod Allocation Metrics" >}}
+{{< table caption="[Table 3] HAMi Scheduler Pod Allocation Metrics" >}}
 | Metric | Description | Metric Type | Value Unit |
 |---|---|---|---|
 | `hami_vgpu_memory_allocated_bytes` | Pod에 할당된 Accelerator Memory 크기 | Gauge | Byte |
 | `hami_vgpu_core_allocated_ratio` | Pod에 할당된 Accelerator Core 사용률 | Gauge | Percentage (0 ~ 100) |
 {{</ table >}}
 
-[Table 2]의 Metric에는 Container를 구분하는 Label이 없다. HAMi Scheduler는 Pod 단위로 합산된 할당 내역만 관리하기 때문이다.
+[Table 3]은 HAMi Scheduler가 Pod에 할당한 Accelerator의 양을 나타내고 있으며, Pod에 할당된 Accelerator마다 하나씩 노출된다. [Table 3]의 Metric에는 Container를 구분하는 Label이 없는데, HAMi Scheduler는 Pod 단위로 합산된 할당 내역만 관리하기 때문이다.
 
 #### 1.1.3. Quota Metrics
 
-HAMi의 Resource Quota 사용량을 나타내는 Metric이다.
-
-{{< table caption="[Table 3] HAMi Scheduler Quota Metrics" >}}
-| Metric | Description | Metric Type | Value Unit |
-|---|---|---|---|
-| `hami_resource_quota_used` | Resource Quota의 사용량 | Gauge | |
-| `hami_resource_quota_limit` | Resource Quota의 한도 | Gauge | |
+{{< table caption="[Table 4] HAMi Scheduler Quota Metrics" >}}
+| Metric | Description | Metric Type | Value Unit | 추가 Label |
+|---|---|---|---|---|
+| `hami_resource_quota_used` | Namespace에서 사용 중인 Accelerator의 Memory 크기 또는 Core 사용률 | Gauge | MiB 또는 Percentage | `quota_name`: 제한하는 Resource 이름 (예: `nvidia.com/gpumem`) |
+| `hami_resource_quota_limit` | ResourceQuota에 설정된 Accelerator의 Memory 크기 또는 Core 사용률 한도. 한도가 설정된 Resource만 노출 | Gauge | MiB 또는 Percentage | `quota_name`: 제한하는 Resource 이름 (예: `nvidia.com/gpumem`) |
 {{</ table >}}
 
-`hami_resource_quota_limit`은 한도가 설정된 Resource Quota만 노출된다.
+[Table 4]는 Kubernetes의 ResourceQuota로 Namespace별 Accelerator 사용량을 제한할 때, HAMi Scheduler가 집계하는 사용량과 한도를 나타내고 있다. HAMi Scheduler는 ResourceQuota의 `spec.hard`에서 `limits.nvidia.com/gpumem`, `limits.nvidia.com/gpucores`처럼 `limits.` 접두사가 붙은 Accelerator의 Memory 크기, Core 사용률 Resource를 읽고, Scheduling할 때 Namespace의 사용량에 Pod의 요청량을 더한 값이 한도를 넘으면 Pod에 Accelerator를 할당하지 않는다.
 
-#### 1.1.4. Remote GPU Metrics
+Metric 값의 단위는 `quota_name`이 Memory Resource이면 MiB, Core Resource이면 Percentage이다. 한 Namespace에 같은 Resource를 제한하는 ResourceQuota가 여러 개이면 그중 가장 작은 한도가 적용된다.
 
-네트워크를 통해서 GPU를 제공하는 Lupine Server의 GPU를 나타내는 Metric이다. Remote GPU 기능을 설정한 경우에만 노출되며, GPU를 보유한 Server 기준으로 한 번씩 노출된다.
-
-{{< table caption="[Table 4] HAMi Scheduler Remote GPU Metrics" >}}
-| Metric | Description | Metric Type | Value Unit |
-|---|---|---|---|
-| `hami_remote_gpu_memory_limit_bytes` | Remote GPU의 Memory 크기 | Gauge | Byte |
-| `hami_remote_gpu_allocated` | Remote GPU의 할당 여부. Pod가 점유하면 `1`, 비어 있으면 `0` | Gauge | |
-| `hami_remote_gpu_overview` | Remote GPU에 할당된 Memory 크기. Core와 Memory 크기를 Label로 함께 제공 | Gauge | Byte |
-{{</ table >}}
-
-Remote GPU는 GPU 단위로 통째로 할당되기 때문에 `hami_remote_gpu_overview`의 값은 GPU 전체 Memory 크기 또는 `0`이다.
-
-#### 1.1.5. State Metrics
-
-HAMi Scheduler의 상태와 할당 결과를 나타내는 Metric이다.
+#### 1.1.4. State Metrics
 
 {{< table caption="[Table 5] HAMi Scheduler State Metrics" >}}
-| Metric | Description | Metric Type | Value Unit |
-|---|---|---|---|
-| `hami_scheduler_is_leader` | HAMi Scheduler Instance의 Leader 여부. Leader이면 `1`, 아니면 `0` | Gauge | |
-| `hami_scheduler_cache_synced` | HAMi Scheduler 내부 Node, Accelerator Cache의 동기화 완료 여부. 완료되었으면 `1`, 아니면 `0` | Gauge | |
-| `hami_scheduler_allocations_total` | 성공한 Accelerator 할당 횟수 | Counter | |
-| `hami_scheduler_allocation_failures_total` | 실패한 Accelerator 할당 횟수 | Counter | |
-| `hami_scheduler_bind_rollbacks_total` | Bind 실패로 예약된 Accelerator를 해제한 횟수 | Counter | |
+| Metric | Description | Metric Type | Value Unit | 추가 Label |
+|---|---|---|---|---|
+| `hami_scheduler_is_leader` | HAMi Scheduler Instance의 Leader 여부. Leader이면 `1`, 아니면 `0` | Gauge | |  |
+| `hami_scheduler_cache_synced` | HAMi Scheduler 내부 Node, Accelerator Cache의 동기화 완료 여부. 완료되었으면 `1`, 아니면 `0` | Gauge | |  |
+| `hami_scheduler_allocations_total` | 성공한 Accelerator 할당 횟수 | Counter | | `phase` (예: `filter`), `device_type`: Accelerator 종류 (예: `NVIDIA`), `failure_reason`: 항상 `none` |
+| `hami_scheduler_allocation_failures_total` | 실패한 Accelerator 할당 횟수 | Counter | | `phase` (예: `filter`, `bind`), `device_type`: Accelerator 종류 (예: `NVIDIA`), `failure_reason` (예: `no_fit`, `lookup`, `identity`, `lock`, `annotation_patch`, `bind`, `internal`) |
+| `hami_scheduler_bind_rollbacks_total` | Bind 실패로 예약된 Accelerator를 해제한 횟수 | Counter | | `phase` (예: `bind`), `device_type`: Accelerator 종류 (예: `NVIDIA`), `failure_reason`: `lock`, `annotation_patch`, `bind` 중 하나 |
 {{</ table >}}
 
-`phase` Label은 할당이 수행된 단계를 나타내며 `filter` 또는 `bind` 값을 갖는다. `failure_reason` Label은 실패 원인을 나타내며 `none`, `no_fit`, `lookup`, `identity`, `lock`, `annotation_patch`, `bind`, `internal` 중 하나의 값을 갖는다. 성공한 할당은 `failure_reason="none"`으로 기록된다.
+[Table 5]는 HAMi Scheduler의 상태와 할당 결과 Metric을 나타내고 있다.
 
 ### 1.2. HAMi Device Plugin NVIDIA Metrics
 
-HAMi Device Plugin의 `vgpu-monitor` Container가 노출하는 Metric이다. `vgpu-monitor` Container는 NVIDIA GPU용 HAMi Device Plugin DaemonSet에만 포함되며, NVML과 격리 Library의 Shared Memory를 통해서 사용량을 수집하기 때문에 **NVIDIA GPU 전용** Metric이다.
+{{< table caption="[Table 6] HAMi Device Plugin NVIDIA Metric의 공통 Label" >}}
+| Label | Description | 예시 |
+|---|---|---|
+| `zone` | 모든 Metric에 붙는 고정 값 | `vGPU` |
+| `node` | GPU가 위치한 Node 이름 | `gpu-node` |
+| `device_uuid` | GPU의 UUID | `GPU-034026c4-...` |
+| `device_index` | Node 안에서의 GPU 번호 | `0` |
+| `device_type` | NVML로 조회한 GPU 모델 이름 | `NVIDIA GeForce RTX 5060 Ti` |
+| `namespace` | GPU를 할당받은 Pod의 Namespace | `default` |
+| `pod` | GPU를 할당받은 Pod 이름 | `poda` |
+| `container` | GPU를 할당받은 Container 이름 | `container` |
+| `vdevice_index` | Container에 할당된 GPU 중의 번호 | `0` |
+{{</ table >}}
+
+[Table 6]은 HAMi Device Plugin NVIDIA Metric에 공통으로 붙는 Label을 나타내고 있다. `node`, `device_index`, `device_type`은 Host GPU Metric에, `namespace`, `pod`, `container`, `vdevice_index`는 Container Metric에 붙는다. 특정 Metric에만 붙는 Label은 각 Metric 표의 추가 Label 열에 나타낸다.
+
+HAMi Device Plugin NVIDIA Metric은 HAMi Device Plugin의 `vgpu-monitor` Container가 노출한다. `vgpu-monitor` Container는 NVIDIA GPU용 HAMi Device Plugin DaemonSet에만 포함되며, NVML과 격리 Library의 Shared Memory를 통해서 사용량을 수집하기 때문에 **NVIDIA GPU 전용** Metric이다.
 
 #### 1.2.1. Host GPU Metrics
 
-vGPU monitor가 NVML을 통해서 조회한 Node의 물리 GPU 상태를 나타내는 Metric이다. GPU가 지원하지 않는 항목은 노출되지 않는다.
-
-{{< table caption="[Table 6] NVIDIA GPU Host Metrics" >}}
-| Metric | Description | Metric Type | Value Unit |
-|---|---|---|---|
-| `hami_host_gpu_memory_used_bytes` | GPU에서 사용 중인 Memory 크기 | Gauge | Byte |
-| `hami_host_gpu_utilization_ratio` | GPU Core 사용률 | Gauge | Percentage (0 ~ 100) |
-| `hami_host_gpu_memory_controller_utilization_ratio` | GPU Memory Controller 사용률 | Gauge | Percentage (0 ~ 100) |
-| `hami_host_gpu_temperature_celsius` | GPU 온도 | Gauge | °C |
-| `hami_host_gpu_power_usage_watts` | GPU 전력 소모량 | Gauge | Watt |
-| `hami_host_gpu_ecc_errors_total` | GPU의 누적 ECC Error 개수 | Counter | |
-| `hami_host_gpu_unknown_process_count` | GPU에서 동작 중이지만 HAMi가 할당한 Container와 연결되지 않은 Process 개수 | Gauge | |
+{{< table caption="[Table 7] NVIDIA GPU Host Metrics" >}}
+| Metric | Description | Metric Type | Value Unit | 추가 Label |
+|---|---|---|---|---|
+| `hami_host_gpu_memory_used_bytes` | GPU에서 사용 중인 Memory 크기 | Gauge | Byte |  |
+| `hami_host_gpu_utilization_ratio` | GPU Core 사용률 | Gauge | Percentage (0 ~ 100) |  |
+| `hami_host_gpu_memory_controller_utilization_ratio` | GPU Memory Controller 사용률 | Gauge | Percentage (0 ~ 100) |  |
+| `hami_host_gpu_temperature_celsius` | GPU 온도 | Gauge | °C |  |
+| `hami_host_gpu_power_usage_watts` | GPU 전력 소모량 | Gauge | Watt |  |
+| `hami_host_gpu_ecc_errors_total` | GPU의 누적 ECC Error 개수 | Counter | | `error_type`: ECC Error 종류 (예: `corrected`, `uncorrected`) |
+| `hami_host_gpu_unknown_process_count` | GPU에서 동작 중이지만 HAMi가 할당한 Container와 연결되지 않은 Process 개수. vGPU monitor에 `HAMI_MONITOR_UNKNOWN_PROCESSES=true`가 설정된 경우에만 노출 | Gauge | |  |
 {{</ table >}}
 
-`hami_host_gpu_ecc_errors_total`의 `error_type` Label은 `corrected` 또는 `uncorrected` 값을 갖는다. `hami_host_gpu_unknown_process_count`는 vGPU monitor에 `HAMI_MONITOR_UNKNOWN_PROCESSES=true` 환경 변수가 설정된 경우에만 노출된다.
+[Table 7]은 vGPU monitor가 NVML을 통해서 조회한 Node의 물리 GPU 상태 Metric을 나타내고 있다. GPU가 지원하지 않는 항목은 노출되지 않는다.
 
 #### 1.2.2. Container Metrics
 
-Container가 실제로 사용하는 GPU의 양을 나타내는 Metric이며, Container에 할당된 GPU마다 하나씩 노출된다. 격리 Library가 주입된 Container는 격리 Library가 Shared Memory에 기록한 사용량을 vGPU monitor가 읽어서 노출한다. 반면 GPU를 통째로 할당받거나 MIG Instance를 할당받은 Container에는 기본값이 `true`인 Helm의 `devicePlugin.monitor.disableHAMiCoreForWholeGPU` 설정에 따라 격리 Library가 주입되지 않으며, vGPU monitor가 NVML로 조회한 값으로 Metric을 대신 만들어 노출한다. 이때 MIG Instance의 SM 사용률은 vGPU monitor에 내장된 DCGM으로 조회한다.
-
-{{< table caption="[Table 7] NVIDIA GPU Container Metrics" >}}
-| Metric | Description | Metric Type | Value Unit |
-|---|---|---|---|
-| `hami_vgpu_memory_used_bytes` | Container가 사용 중인 Accelerator Memory 크기 | Gauge | Byte |
-| `hami_vgpu_memory_limit_bytes` | Container의 Accelerator Memory 한도 | Gauge | Byte |
-| `hami_vgpu_memory_context_bytes` | Container가 사용 중인 Memory 중 Context 크기 | Gauge | Byte |
-| `hami_vgpu_memory_module_bytes` | Container가 사용 중인 Memory 중 Module 크기 | Gauge | Byte |
-| `hami_vgpu_memory_buffer_bytes` | Container가 사용 중인 Memory 중 Buffer 크기 | Gauge | Byte |
-| `hami_container_device_utilization_ratio` | Container의 SM 사용률. Container 안 Process들의 SM 사용률 합계 | Gauge | Percentage |
-| `hami_container_last_kernel_elapsed_seconds` | Container에서 마지막 Kernel이 실행된 이후 경과 시간 | Gauge | Second |
-| `hami_mig_device_info` | Container에 할당된 MIG Instance의 정보. 값은 항상 `1` | Gauge | |
+{{< table caption="[Table 8] NVIDIA GPU Container Metrics" >}}
+| Metric | Description | Metric Type | Value Unit | 추가 Label |
+|---|---|---|---|---|
+| `hami_vgpu_memory_used_bytes` | Container가 사용 중인 Accelerator Memory 크기 | Gauge | Byte |  |
+| `hami_vgpu_memory_limit_bytes` | Container의 Accelerator Memory 한도 | Gauge | Byte |  |
+| `hami_vgpu_memory_context_bytes` | Container의 Process가 CUDA Primary Context를 생성하면서 사용한 Memory 크기 | Gauge | Byte |  |
+| `hami_vgpu_memory_module_bytes` | Module 용도로 정의된 Memory 크기. 격리 Library가 값을 기록하지 않아 항상 `0` | Gauge | Byte |  |
+| `hami_vgpu_memory_buffer_bytes` | Application이 CUDA Memory 할당 API로 할당한 Memory 크기 | Gauge | Byte |  |
+| `hami_container_device_utilization_ratio` | Container의 SM 사용률. Container 안 Process들의 SM 사용률 합계 | Gauge | Percentage |  |
+| `hami_container_last_kernel_elapsed_seconds` | Container에서 마지막 Kernel이 실행된 이후 경과 시간. Kernel이 한 번 이상 실행된 이후부터 노출 | Gauge | Second |  |
+| `hami_mig_device_info` | Container에 할당된 MIG Instance의 정보. Pod Annotation에 MIG 할당 정보가 기록된 경우에만 노출되며 값은 항상 `1` | Gauge | | `mig_uuid`, `profile` (예: `1g.10gb`), `gpu_instance_id`, `compute_instance_id` |
 {{</ table >}}
 
-[Table 7]의 Metric은 HAMi Scheduler가 할당한 양이 아니라 Container가 실제로 사용하는 양을 나타낸다. `hami_vgpu_memory_limit_bytes`는 격리 Library에 설정된 Container의 Memory 한도이고, `hami_vgpu_memory_used_bytes`는 그 한도 안에서 실제로 사용 중인 양이다. GPU를 통째로 할당받은 Container는 GPU 전체 Memory 크기가 한도로 노출되며, Memory의 Context, Module, Buffer 크기는 `0`으로 노출되고 마지막 Kernel 경과 시간은 노출되지 않는다. `vdevice_index` Label은 Container에 할당된 Accelerator 중 몇 번째인지를 나타낸다. `hami_container_last_kernel_elapsed_seconds`는 Kernel이 한 번 이상 실행된 이후부터 노출되며, `hami_mig_device_info`는 Pod Annotation에 MIG 할당 정보가 기록된 경우에만 노출된다.
+[Table 8]은 Container가 실제로 사용하는 GPU의 양을 나타내고 있으며, Container에 할당된 GPU마다 하나씩 노출된다. HAMi Scheduler가 할당한 양이 아니라 실제 사용량이라는 점이 [Table 3]과 다르다. `hami_vgpu_memory_limit_bytes`는 격리 Library에 설정된 Container의 Memory 한도이고, `hami_vgpu_memory_used_bytes`는 그 한도 안에서 실제로 사용 중인 양이다.
+
+격리 Library가 주입된 Container는 격리 Library가 Shared Memory에 기록한 사용량을 vGPU monitor가 읽어서 노출한다. 반면 GPU를 통째로 할당받거나 MIG Instance를 할당받은 Container에는 기본값이 `true`인 Helm의 `devicePlugin.monitor.disableHAMiCoreForWholeGPU` 설정에 따라 격리 Library가 주입되지 않으며, vGPU monitor가 NVML로 조회한 값으로 Metric을 대신 만들어 노출한다. 이때 MIG Instance의 SM 사용률은 vGPU monitor에 내장된 DCGM으로 조회한다. GPU를 통째로 할당받은 Container는 GPU 전체 Memory 크기가 한도로 노출되며, Memory의 Context, Module, Buffer 크기는 `0`으로 노출되고 마지막 Kernel 경과 시간은 노출되지 않는다.
 
 #### 1.2.3. State Metrics
 
-vGPU monitor의 Metric 수집 상태를 나타내는 Metric이다.
-
-{{< table caption="[Table 8] NVIDIA GPU vGPU monitor State Metrics" >}}
+{{< table caption="[Table 9] NVIDIA GPU vGPU monitor State Metrics" >}}
 | Metric | Description | Metric Type | Value Unit |
 |---|---|---|---|
-| `hami_vgpumonitor_collect_success` | 마지막 Metric 수집의 성공 여부. 모두 성공하면 `1`, 일부라도 실패하면 `0` | Gauge | |
+| `hami_vgpumonitor_collect_success` | 마지막 Metric 수집의 성공 여부. 모두 성공하면 `1`, 일부라도 실패하면 `0`. vGPU monitor는 일부 수집에 실패해도 HTTP 응답은 정상으로 반환하기 때문에 수집 실패는 이 Metric으로 확인 | Gauge | |
 {{</ table >}}
 
-vGPU monitor는 일부 Metric 수집에 실패해도 HTTP 응답은 정상으로 반환하기 때문에, 수집 실패는 `hami_vgpumonitor_collect_success`로 확인해야 한다.
+[Table 9]는 vGPU monitor의 Metric 수집 상태를 나타내고 있다.
 
 ### 1.3. Build Info Metrics
 
-HAMi Scheduler와 vGPU monitor가 공통으로 노출하는 Build 정보 Metric이다.
-
-{{< table caption="[Table 9] Build Info Metrics" >}}
+{{< table caption="[Table 10] Build Info Metrics" >}}
 | Metric | Description | Metric Type | Value Unit |
 |---|---|---|---|
 | `hami_build_info` | HAMi의 Build 정보. 값은 항상 `1` | Gauge | |
 {{</ table >}}
 
+[Table 10]은 HAMi Scheduler와 vGPU monitor가 공통으로 노출하는 Build 정보 Metric을 나타내고 있다.
+
 ### 1.4. Legacy Metrics
 
-Helm의 `legacyMetrics` 설정을 `true`로 지정하면 HAMi Scheduler와 vGPU monitor는 현재 Metric과 함께 이전 이름의 Metric도 노출한다. 기본값은 `false`이며, 이전 버전 기준으로 작성된 Dashboard를 계속 이용할 때 활성화한다.
-
-{{< table caption="[Table 10] Legacy Metric과 현재 Metric의 대응" >}}
+{{< table caption="[Table 11] Legacy Metric과 현재 Metric의 대응" >}}
 | Component | Legacy Metric | 현재 Metric |
 |---|---|---|
 | HAMi Scheduler | `GPUDeviceMemoryLimit` | `hami_gpu_memory_limit_bytes` |
@@ -179,6 +181,8 @@ Helm의 `legacyMetrics` 설정을 `true`로 지정하면 HAMi Scheduler와 vGPU 
 | vGPU monitor | `Device_last_kernel_of_container` | `hami_container_last_kernel_elapsed_seconds` |
 | vGPU monitor | `MigInfo` | `hami_mig_device_info` |
 {{</ table >}}
+
+[Table 11]은 Legacy Metric과 현재 Metric의 대응을 나타내고 있다. Helm의 `legacyMetrics` 설정을 `true`로 지정하면 HAMi Scheduler와 vGPU monitor는 현재 Metric과 함께 이전 이름의 Metric도 노출한다. 기본값은 `false`이며, 이전 버전 기준으로 작성된 Dashboard를 계속 이용할 때 활성화한다.
 
 Legacy Metric은 Label 이름도 `nodeid`, `deviceuuid`, `podnamespace` 같은 이전 이름을 이용한다. 또한 `GPUDeviceCoreLimit`, `GPUDeviceCoreAllocated`, `vGPUCoreAllocated`는 AMD GPU의 Core 값을 사용률로 환산하지 않고 그대로 노출한다.
 
