@@ -47,7 +47,7 @@ spec:
 
 ### 1.1. Test 환경 구축
 
-Test는 [Kubernetes HAMi 설치 및 vLLM 모델 서빙](https://ssup2.github.io/blog-software/docs/record/kubernetes-hami-vllm-gpu-ubuntu-26.04/) 글에서 구축한 환경을 기반으로 수행한다. `192.168.1.32` 단일 Server에 Nvidia RTX 5060 Ti 16GB GPU 1장이 장착되어 있으며, Kubernetes v1.34.12와 HAMi 2.10.0이 설치되어 있다. 이후 Shell/File 블록은 모두 이 환경에서의 실측 결과이다.
+Test는 [Kubernetes HAMi 설치 및 vLLM 모델 서빙](https://ssup2.github.io/blog-software/docs/record/kubernetes-hami-vllm-gpu-ubuntu-26.04/) 글에서 구축한 환경을 기반으로 수행한다. `192.168.1.32` 단일 Server에 Nvidia RTX 5060 Ti 16GB GPU 1장이 장착되어 있으며, Kubernetes v1.34.12와 HAMi 2.11.0이 설치되어 있다. 이후 Shell/File 블록은 모두 이 환경에서의 실측 결과이다.
 
 ```yaml {caption="[File 2] hami-isolation-test.yaml", linenos=table}
 apiVersion: v1
@@ -75,7 +75,7 @@ pod/hami-isolation-test created
 
 $ kubectl exec hami-isolation-test -- env | grep -E 'CUDA_DEVICE|GPU_CORE' | sort
 CUDA_DEVICE_MEMORY_LIMIT_0=2000m
-CUDA_DEVICE_MEMORY_SHARED_CACHE=/usr/local/vgpu/6edc4a8e-f839-4dce-a451-4751001f6576.cache
+CUDA_DEVICE_MEMORY_SHARED_CACHE=/usr/local/vgpu/usage.cache
 CUDA_DEVICE_SM_LIMIT=30
 GPU_CORE_UTILIZATION_POLICY=force
 
@@ -83,7 +83,7 @@ $ kubectl exec hami-isolation-test -- cat /etc/ld.so.preload
 /usr/local/vgpu/libvgpu.so
 ```
 
-[File 2]는 2000MiB Memory와 30% SM 사용률로 제한된 vGPU 하나를 요청하는 Pod 예제이다. `GPU_CORE_UTILIZATION_POLICY=force`로 유휴 상태에서도 SM 사용률 제한을 강제하며, 이미지는 CUDA 13.0 PyTorch가 포함된 vLLM 공식 이미지를 재활용한다.
+[File 2]는 2000MiB Memory와 30% SM 사용률로 제한된 vGPU 하나를 요청하는 Pod 예제이다. `GPU_CORE_UTILIZATION_POLICY=force`로 유휴 상태에서도 SM 사용률 제한을 강제하며, 이미지는 CUDA 13.0 PyTorch가 포함된 vLLM 공식 이미지를 재활용한다. Test Node의 GPU를 이용하는 다른 Workload는 측정 동안 중지하였다.
 
 [Shell 1]은 Pod 생성 후 Container 안의 환경 변수와 Preload 설정을 나타내고 있다. HAMi Device Plugin이 `nvidia.com/gpumem`, `nvidia.com/gpucores` 요청에 맞춰 `CUDA_DEVICE_MEMORY_LIMIT_0`과 `CUDA_DEVICE_SM_LIMIT`을 주입하였고, `/etc/ld.so.preload` 파일에 `libvgpu.so`가 등록된 것을 확인할 수 있다.
 
@@ -97,8 +97,8 @@ metadata:
     hami.io/vgpu-devices-allocated: GPU-034026c4-...,NVIDIA,2000,30:;
     hami.io/vgpu-node: gpu
     hami.io/bind-phase: success
-    hami.io/bind-time: "1792334371"
-    hami.io/vgpu-time: "1792334371"
+    hami.io/bind-time: "1795279541"
+    hami.io/vgpu-time: "1795279541"
 ```
 
 [File 3]은 Test Pod에 기록된 HAMi Annotation을 나타내고 있다. NVIDIA GPU는 Annotation 이름의 Accelerator 부분에 초기 구현의 이름인 `vgpu`를 이용하기 때문에 `hami.io/vgpu-devices-allocated` 같은 이름을 쓰며, Accelerator 종류를 나타내는 Type에는 `NVIDIA`가 기록된다. 할당이 완료되었기 때문에 `hami.io/vgpu-devices-to-allocate`에는 Container 구분자만 남아 있고 `hami.io/bind-phase`는 `success`이다. HAMi Device Plugin은 `Allocate()` 시점에 이 Annotation을 읽어서 할당할 GPU와 제한 값을 파악하며, 그 결과가 [Shell 1]의 환경 변수로 주입된 것이다.
@@ -176,7 +176,42 @@ HAMi-core는 NVIDIA Container Toolkit이 알지 못하는 파일이기 때문에
 
 HAMi-core는 `LD_PRELOAD` 환경 변수가 아니라 `/etc/ld.so.preload` 파일로 주입된다. `LD_PRELOAD` 환경 변수는 물려받은 Process에만 적용되기 때문에 App이 자식 Process를 생성하면서 환경 변수를 정리하면 격리가 끊기지만, `/etc/ld.so.preload` 파일은 동적 링커가 모든 Process의 시작 시점에 항상 읽기 때문에 Container 안의 모든 Process에 환경 변수와 무관하게 적용된다.
 
+```yaml {caption="[File 5] hami-wholegpu-test.yaml", linenos=table}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hami-wholegpu-test
+spec:
+  containers:
+  - name: cuda
+    image: vllm/vllm-openai:latest
+    command: ["sleep", "infinity"]
+    resources:
+      limits:
+        nvidia.com/gpu: 1
+```
+
+```shell {caption="[Shell 2] GPU 전체를 할당받은 Container의 HAMi-core 비활성화 확인"}
+$ kubectl apply -f hami-wholegpu-test.yaml
+pod/hami-wholegpu-test created
+
+$ kubectl get pod hami-wholegpu-test -o jsonpath='{.metadata.annotations.hami\.io/vgpu-devices-allocated}'
+GPU-034026c4-1e0d-1fa0-1b54-9e6030439007,NVIDIA,16311,100:;
+
+$ kubectl exec hami-wholegpu-test -- env | grep -E 'CUDA_DEVICE|CUDA_DISABLE|GPU_CORE' | sort
+CUDA_DEVICE_MEMORY_LIMIT_0=16311m
+CUDA_DEVICE_MEMORY_SHARED_CACHE=/usr/local/vgpu/usage.cache
+CUDA_DEVICE_SM_LIMIT=100
+CUDA_DISABLE_CONTROL=true
+
+$ kubectl exec hami-wholegpu-test -- sh -c 'cat /etc/ld.so.preload 2>&1; ls /usr/local/vgpu 2>&1'
+cat: /etc/ld.so.preload: No such file or directory
+libvgpu.so
+```
+
 다만 GPU를 통째로 할당받는 Container에는 HAMi-core가 주입되지 않는다. Container가 할당받은 모든 GPU의 Memory 전체를 요청하고 SM 사용률을 요청하지 않거나 `100`으로 요청하면, HAMi Device Plugin은 `/etc/ld.so.preload`를 Mount하는 대신 `CUDA_DISABLE_CONTROL=true` 환경 변수를 주입하여 HAMi-core의 제한을 끈다. 이는 기본값이 `true`인 Helm의 `devicePlugin.monitor.disableHAMiCoreForWholeGPU` 설정에 따른 동작이며, `deviceMemoryScaling`과 `deviceCoreScaling`이 모두 1인 Node에서만 적용된다. `nvidia.com/gpumem`을 생략한 Pod도 GPU Memory 전체를 요청한 것으로 처리되기 때문에 이 동작의 대상이 되며, 이 경우 `vgpu-monitor`는 NVML로 조회한 GPU 전체의 사용량을 Container의 Metric으로 노출한다.
+
+[File 5]는 `nvidia.com/gpu`만 요청하는 Pod이며, [Shell 2]와 같이 GPU의 Memory 전체인 `16311` MiB와 SM 사용률 `100`이 할당된다. `CUDA_DISABLE_CONTROL=true`가 주입되고 `/etc/ld.so.preload`는 Mount되지 않기 때문에, `libvgpu.so` 파일은 Container에 존재하지만 Load되지 않는다.
 
 ### 1.4. Memory, SM 사용률 제한
 
@@ -186,7 +221,7 @@ vGPU의 Memory 크기 제한과 SM 사용률 제한은 Container 내부의 HAMi-
 
 Memory 크기 제한은 Memory 할당 API를 가로채서 수행된다. `libvgpu.so`는 `cuMemAlloc()` 같은 Memory 할당 함수가 호출될 때마다 Container의 GPU Memory 사용량을 추적하며, 사용량이 `CUDA_DEVICE_MEMORY_LIMIT` 환경 변수에 설정된 제한을 초과하면 CUDA의 OOM (Out of Memory) Error를 반환한다. 또한 `cuMemGetInfo()` 같은 Memory 조회 함수는 물리 GPU의 Memory 크기 대신 vGPU의 Memory 크기를 반환하도록 가로채지기 때문에, App과 `nvidia-smi` 명령어는 vGPU의 Memory 크기를 전체 Memory 크기로 인식한다.
 
-```shell {caption="[Shell 2] vGPU Memory 제한 확인"}
+```shell {caption="[Shell 3] vGPU Memory 제한 확인"}
 $ kubectl exec hami-isolation-test -- nvidia-smi --query-gpu=memory.total --format=csv
 memory.total [MiB]
 2000 MiB
@@ -195,6 +230,8 @@ $ kubectl exec hami-isolation-test -- python3 -c '
 import torch
 x = torch.empty(1_200_000_000, dtype=torch.uint8, device="cuda")
 print(f"alloc OK, used {torch.cuda.memory_allocated()/2**20:.0f} MiB")'
+[HAMI-core Msg(69:124674156162752:multiprocess_memory_limit.c:855)]: Cleanup on exit for PID 69
+[HAMI-core Msg(69:124674156162752:multiprocess_memory_limit.c:891)]: Exit cleanup complete for PID 69
 alloc OK, used 1144 MiB
 
 $ kubectl exec hami-isolation-test -- python3 -c '
@@ -203,12 +240,14 @@ try:
     x = torch.empty(2_500_000_000, dtype=torch.uint8, device="cuda")
 except RuntimeError as e:
     print("OOM:", str(e).split(".")[0])'
-[HAMI-core ERROR (pid:108 thread=129979401103168 allocator.c:52)]: Device 0 OOM 2636120064 / 2097152000
-[W1018 14:14:14.593824388 CUDACachingAllocator.cpp:3933] memory allocation failed with OOM on device 0 while trying to allocate 2501902336 bytes (free: 1962934272, total: 2097152000).
+[HAMI-core ERROR (pid:105 thread=128301757093696 allocator.c:40)]: Device 0 OOM 2636120064 / 2097152000
+[W1121 16:50:16.966628263 CUDACachingAllocator.cpp:3934] memory allocation failed with OOM on device 0 while trying to allocate 2501902336 bytes (free: 1962934272, total: 2097152000).
+[HAMI-core ERROR (pid:105 thread=128301757093696 allocator.c:40)]: Device 0 OOM 2636120064 / 2097152000
+[W1121 16:50:16.970781125 CUDACachingAllocator.cpp:3934] memory allocation failed with OOM on device 0 while trying to allocate 2501902336 bytes (free: 1962934272, total: 2097152000).
 OOM: CUDA out of memory
 ```
 
-[Shell 2]는 Memory 제한이 적용되는 모습을 나타내고 있다. `nvidia-smi`는 Pod 안에서 전체 Memory를 `2000 MiB`로 보고하여 HAMi-core가 `cuMemGetInfo()` 결과를 vGPU 크기로 치환한 것을 확인할 수 있다. 1200MB 할당은 제한 안이라 성공하지만, 2500MB 할당은 HAMi-core의 `Device 0 OOM 2636120064 / 2097152000` Log와 함께 거부되어 PyTorch는 `CUDA out of memory`를 반환한다. 로그의 `2097152000` Byte는 `2000 MiB`를 Byte로 환산한 값이다.
+[Shell 3]은 Memory 제한이 적용되는 모습을 나타내고 있다. `nvidia-smi`는 Pod 안에서 전체 Memory를 `2000 MiB`로 보고하여 HAMi-core가 `cuMemGetInfo()` 결과를 vGPU 크기로 치환한 것을 확인할 수 있다. 1200MB 할당은 제한 안이라 성공하지만, 2500MB 할당은 HAMi-core의 `Device 0 OOM 2636120064 / 2097152000` Log와 함께 거부되어 PyTorch는 `CUDA out of memory`를 반환한다. 로그의 `2097152000` Byte는 `2000 MiB`를 Byte로 환산한 값이다.
 
 SM 사용률 제한은 Kernel 실행 API를 가로채서 수행된다. `libvgpu.so`는 GPU의 사용률을 주기적으로 측정하면서 Token 기반으로 Kernel 실행 가능 여부를 관리하며, `cuLaunchKernel()` 같은 Kernel 실행 함수가 호출될 때 Token이 부족하면 Kernel 실행을 지연시켜 vGPU의 SM 사용률을 `CUDA_DEVICE_SM_LIMIT` 환경 변수에 설정된 제한 이하로 유지한다. 제한 동작은 `GPU_CORE_UTILIZATION_POLICY` 환경 변수로 다음과 같이 변경할 수 있다.
 
@@ -216,7 +255,7 @@ SM 사용률 제한은 Kernel 실행 API를 가로채서 수행된다. `libvgpu.
 * `force` : 유휴 상태와 무관하게 항상 제한을 강제한다.
 * `disable` : SM 사용률 제한을 수행하지 않는다.
 
-```shell {caption="[Shell 3] SM 사용률 제한 확인"}
+```shell {caption="[Shell 4] SM 사용률 제한 확인"}
 $ kubectl exec hami-isolation-test -- python3 -c '
 import torch, time
 a = torch.randn(2048, 2048, device="cuda"); b = torch.randn(2048, 2048, device="cuda")
@@ -229,24 +268,24 @@ $ for i in 1 2 3; do
       | python3 -c 'import json,sys;r=json.load(sys.stdin)["data"]["result"];print([(e["metric"]["pod"], e["value"][1]) for e in r])'
     sleep 5
   done
-[('hami-isolation-test', '31')]
-[('hami-isolation-test', '31')]
-[('hami-isolation-test', '31')]
+[('hami-isolation-test', '32')]
+[('hami-isolation-test', '32')]
+[('hami-isolation-test', '32')]
 
 $ nvidia-smi dmon -s u -c 10 -o T | awk 'NR>2 {print $1, "sm="$3"%"}'
-23:38:16 sm=45%
-23:38:17 sm=0%
-23:38:18 sm=70%
-23:38:19 sm=0%
-23:38:20 sm=49%
-23:38:21 sm=0%
-23:38:22 sm=99%
-23:38:23 sm=11%
-23:38:24 sm=99%
-23:38:25 sm=11%
+01:51:12 sm=38%
+01:51:13 sm=37%
+01:51:14 sm=26%
+01:51:15 sm=12%
+01:51:16 sm=34%
+01:51:17 sm=39%
+01:51:18 sm=27%
+01:51:19 sm=19%
+01:51:20 sm=37%
+01:51:21 sm=38%
 ```
 
-[Shell 3]은 Pod 안에서 matmul을 지속적으로 수행하는 동안의 SM 사용률을 두 Source에서 샘플링한 결과이다. `vgpu-monitor`가 시간 평균으로 노출하는 `hami_container_device_utilization_ratio` Metric은 `31`로 요청한 30% 제한에 수렴하는 반면, Host의 `nvidia-smi dmon`은 99%와 0% 사이를 1초 단위로 번갈아 보여준다. HAMi-core가 Token Bucket 방식으로 짧은 Burst 뒤에 Kernel 실행을 지연시켜 평균을 제한값에 맞추기 때문에, 순간 샘플링에서는 Burst 구간의 높은 값과 Pause 구간의 0%가 교차한다.
+[Shell 4]는 Pod 안에서 matmul을 지속적으로 수행하는 동안의 SM 사용률을 두 Source에서 샘플링한 결과이다. `vgpu-monitor`가 노출하는 `hami_container_device_utilization_ratio` Metric은 `32`로 요청한 30% 제한에 수렴하며, Host의 `nvidia-smi dmon`도 1초 단위 샘플에서 12%와 39% 사이를 오가며 제한값 근처에 머문다. HAMi-core가 Kernel 실행을 지연시켜 사용률을 조절하기 때문에, 순간 샘플은 제한값 위아래로 변동하지만 평균은 제한값에 맞춰진다.
 
 HAMi-core가 GPU의 시간을 직접 분할하는 것은 아니다. 하나의 GPU를 공유하는 Container들의 연산은 NVIDIA Driver와 GPU의 **Time-slicing**으로 번갈아 실행되며, `libvgpu.so`는 그 앞단에서 Kernel 실행을 지연시켜 사용률만 조절한다. 반면 Memory는 시간으로 나뉘지 않고 모든 Container의 Data가 GPU Memory에 동시에 상주하며, `libvgpu.so`는 할당량만 제한한다.
 
@@ -264,7 +303,7 @@ HAMi는 Pod Annotation을 통해서 vGPU가 배치될 물리 GPU를 제어하는
 * `nvidia.com/nouse-gputype` : 할당에서 제외할 GPU Type 목록
 * `nvidia.com/use-gpuuuid`, `nvidia.com/nouse-gpuuuid` : 할당을 허용하거나 제외할 GPU의 UUID 목록
 
-```yaml {caption="[File 5] GPU Type과 Scheduling 정책을 지정하는 Pod 예제", linenos=table}
+```yaml {caption="[File 6] GPU Type과 Scheduling 정책을 지정하는 Pod 예제", linenos=table}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -283,7 +322,7 @@ spec:
         nvidia.com/gpumem: 3000
 ```
 
-[File 5]는 A100 GPU에서 `binpack` 정책으로 vGPU를 할당받는 Pod의 예제를 나타내고 있다. NVIDIA GPU의 Device Scheduling 정책에는 `binpack`, `spread` 외에도 물리 GPU를 공유 없이 전용으로 요구하는 `mutex` 정책이 있으며, v2.10.0부터는 정책을 쉼표로 연결하여 조합할 수 있다.
+[File 6]은 A100 GPU에서 `binpack` 정책으로 vGPU를 할당받는 Pod의 예제를 나타내고 있다. NVIDIA GPU의 Device Scheduling 정책에는 `binpack`, `spread` 외에도 물리 GPU를 공유 없이 전용으로 요구하는 `mutex` 정책이 있으며, v2.10.0부터는 정책을 쉼표로 연결하여 조합할 수 있다.
 
 다수의 GPU를 요청하는 Workload를 위한 Topology 기반의 GPU 선택도 v2.7.0부터 제공된다. HAMi Device Plugin에 `ENABLE_TOPOLOGY_SCORE` 환경 변수를 활성화하면 NVML을 통해서 GPU 쌍 사이의 연결 방식 (NVLink, PCIe) 을 점수화하여 Node의 `hami.io/node-nvidia-score` Annotation에 기록하고, Pod의 `hami.io/gpu-scheduler-policy` Annotation에 `topology-aware`를 명시하면 NVLink로 연결된 GPU 집합을 우선적으로 선택하여 GPU 간 통신 성능을 보장한다.
 
@@ -298,7 +337,7 @@ spec:
 3. HAMi Device Plugin은 Pod의 Annotation에서 예약된 Profile과 위치를 조회한다.
 4. HAMi Device Plugin은 예약된 Profile의 GPU Instance와 Compute Instance를 NVML을 통해서 동적으로 생성하여 Container에 할당하고, Pod가 종료되면 생성했던 MIG Instance를 회수한다.
 
-```yaml {caption="[File 6] MIG 모드를 지정하는 Pod 예제", linenos=table}
+```yaml {caption="[File 7] MIG 모드를 지정하는 Pod 예제", linenos=table}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -316,7 +355,7 @@ spec:
         nvidia.com/gpumem: 8000
 ```
 
-[File 6]은 MIG Instance로 8000MiB의 Memory를 요청하는 Pod의 예제를 나타내고 있으며, 요청을 수용할 수 있는 가장 작은 MIG Profile (예: A100의 `1g.10gb`)이 선택된다. `nvidia.com/vgpu-mode` Annotation은 vGPU가 할당될 모드를 고정하는 Annotation이며, 생략하면 HAMi Scheduler가 `mig` Node와 `hami-core` Node를 하나의 vGPU Pool로 취급하여 조건을 만족하는 Node를 자유롭게 선택한다.
+[File 7]은 MIG Instance로 8000MiB의 Memory를 요청하는 Pod의 예제를 나타내고 있으며, 요청을 수용할 수 있는 가장 작은 MIG Profile (예: A100의 `1g.10gb`)이 선택된다. `nvidia.com/vgpu-mode` Annotation은 vGPU가 할당될 모드를 고정하는 Annotation이며, 생략하면 HAMi Scheduler가 `mig` Node와 `hami-core` Node를 하나의 vGPU Pool로 취급하여 조건을 만족하는 Node를 자유롭게 선택한다.
 
 도입 초기의 Dynamic MIG는 `knownMigGeometries` 설정에 정의된 Geometry (Profile 조합) 단위로 GPU 전체의 MIG 구성을 전환하는 방식이었지만, v2.10.0의 Flexible MIG부터는 Profile 단위의 예약 방식으로 재구성되어 Node의 Cordon 없이 Workload별로 MIG Instance가 생성되고 회수된다. 단 HAMi가 MIG Instance의 생성과 제거를 단독으로 담당해야 하기 때문에, GPU Operator의 MIG Manager나 `mig-parted` 도구를 HAMi와 함께 운용할 수 없다.
 

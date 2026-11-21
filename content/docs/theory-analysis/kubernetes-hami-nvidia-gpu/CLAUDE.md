@@ -6,6 +6,13 @@ kubernetes-hami(HAMi 자체, 벤더 중립 구조) 문서의 NVIDIA 상세 글�
 
 ## 문서 구성 및 상태
 
+- **2026-11-22 HAMi 2.11.0 재실측** (사용자 허락으로 qwen3 Deployment를 replicas 0으로 내렸다가 1로 복구, 재기동 Ready 확인):
+  [Shell 1] Cache 경로가 `/usr/local/vgpu/usage.cache`로 변경(2.10.0은 UUID.cache), [File 3] epoch 1795279541, [Shell 3] Memory OOM 로그
+  (allocator.c:40, OOM 줄 2회, HAMi-core Cleanup Msg 출력), [Shell 4] Metric 32, `nvidia-smi dmon` 12~39%로 2.10.0의 99/0 교차 패턴이 사라져
+  Token Bucket Burst 설명을 "제한값 위아래 변동, 평균은 제한값" 서술로 교체(원인은 미조사). 1.1 버전 2.11.0으로, 측정 중 다른 Workload 중지 명시.
+  whole GPU 실측 추가: `manifests/hami-wholegpu-test.yaml`(`nvidia.com/gpu: 1`만) → allocated `...,NVIDIA,16311,100:;`, `CUDA_DISABLE_CONTROL=true`,
+  `CUDA_DEVICE_SM_LIMIT=100`, `/etc/ld.so.preload` 없음, `/usr/local/vgpu/libvgpu.so`는 Mount됨 → 1.3에 [File 5] + [Shell 2] 추가.
+  번호 이동: File 5, 6 → 6, 7, Shell 2, 3 → 3, 4. 측정 스크립트는 남기지 않음(Shell 블록 명령과 동일, SM 측정은 부하 시작 후 40초 대기 후 샘플).
 - **2026-11-22 전면 재검토** (사용자 요청: 발행된 kubernetes-hami 글과 중복 제거, NVIDIA 특화 내용 위주). 변경:
   ① 중복 삭제 — [File 3] 아래 Pod Annotation 6종 일반 설명 목록(오류 3개 포함: to-allocate가 allocated로 "옮겨짐", Record 사이 `;`,
   vgpu-time = Bind 시각)을 NVIDIA 특유 사항(키의 `vgpu`, Type `NVIDIA`, 완료 후 `;;`, `success`) 한 문단으로 교체, [Table 2] 문단의
@@ -91,7 +98,7 @@ kubernetes-hami(HAMi 자체, 벤더 중립 구조) 문서의 NVIDIA 상세 글�
 
 ## Test 수행 상태
 
-- Memory, SM 격리 (1.1, 1.3): **완료 (2026-10-18)** — `manifests/hami-isolation-test.yaml` 재현 파일 보관.
+- Memory, SM 격리 (1.1, 1.4): **완료 (2026-10-18), 2026-11-22 2.11.0 재실측** — `manifests/hami-isolation-test.yaml` 재현 파일 보관.
   - RTX 5060 Ti 1장 (Blackwell) 환경이라 nvidia-smi 안에서 `LD_PRELOAD` 환경 변수는 안 보였고 `/etc/ld.so.preload` 파일 주입 방식 확인. 본문도 이에 맞춰 수정.
   - `CUDA_DEVICE_MEMORY_LIMIT_0=2000m` (단위: MiB), `CUDA_DEVICE_SM_LIMIT=30` 둘 다 Container 내 환경 변수로 주입.
 - 미수행:
