@@ -19,18 +19,17 @@ title: Kubernetes HAMi
 
 {{< figure caption="[Figure 1] HAMi Architecture" src="images/hami-architecture.png" width="1000px" >}}
 
-[Figure 1]은 HAMi의 Architecture를 나타내고 있다. HAMi는 다음의 세 가지 요소로 구성된다.
+[Figure 1]은 HAMi의 Architecture를 나타내고 있다. HAMi의 구성 요소와 Monitoring은 다음과 같다.
 
-* **HAMi Scheduler** : `hami-scheduler` Deployment를 통해서 동작하며, 하나의 Pod 안에서 kube-scheduler Container와 Scheduler Extender Container가 함께 동작한다. Accelerator를 요청하는 Pod의 Scheduler를 HAMi Scheduler로 변경하는 Mutating Webhook도 Scheduler Extender가 함께 제공한다. 모든 종류의 Accelerator가 하나의 HAMi Scheduler를 공유하며, Accelerator별 Scheduling 동작은 HAMi Scheduler 내부의 Accelerator별 Package로 구현되어 있다.
-* **HAMi Device Plugin** : `hami-device-plugin` DaemonSet을 통해서 Accelerator가 존재하는 Node에서 동작하며, Accelerator를 kubelet에 등록하고, Accelerator의 Health 상태를 확인하며, Accelerator를 Container에 할당하는 역할을 수행한다.
+* **HAMi Scheduler** : `hami-scheduler` Deployment를 통해서 동작하며, 하나의 Pod 안에서 kube-scheduler Container와 Scheduler Extender Container가 함께 동작한다. [Figure 1]의 **Scheduler Extender** 경로와 같이 kube-scheduler는 같은 Pod 안의 Scheduler Extender를 Loopback (`9444` Port) 으로 호출한다. Accelerator를 요청하는 Pod의 Scheduler를 HAMi Scheduler로 변경하는 Mutating Webhook도 Scheduler Extender가 함께 제공하며, [Figure 1]의 **Mutating Webhook** 경로와 같이 kube-apiserver가 `hami-scheduler` Service를 통해서 이를 호출한다. 모든 종류의 Accelerator가 하나의 HAMi Scheduler를 공유하며, Accelerator별 Scheduling 동작은 HAMi Scheduler 내부의 Accelerator별 Package로 구현되어 있다.
+* **HAMi Device Plugin** : `hami-device-plugin` DaemonSet을 통해서 Accelerator가 존재하는 Node에서 동작하며, Accelerator를 kubelet에 등록하고, Accelerator의 Health 상태를 확인하며, Accelerator를 Container에 할당하는 역할을 수행한다. NUMA 정렬 때문에 HAMi Scheduler가 선택한 Accelerator를 할당할 수 없으면, [Figure 1]의 **Device Plugin Refit** 경로와 같이 HAMi Scheduler에게 Accelerator를 다시 선택하도록 요청한다.
 * **격리 계층** : 공유 할당된 Accelerator가 제한을 초과하여 사용되지 않도록 강제하는 계층이다. HAMi Scheduler가 선택한 Device와 제한 값을 Pod Annotation에 기록하고 HAMi Device Plugin이 이를 참조하여 할당하는 방식을 **HAMi Protocol**이라고 하며, 격리는 다음의 세 가지 수준으로 분류된다. 계층이 Hardware에 가까울수록 격리는 강해지지만 분할의 유연성은 줄어든다.
-  * **Library 수준 격리** : Container에 주입된 격리 Library가 User 공간에서 Accelerator API 호출을 가로채서 Memory 할당과 Core 사용을 제한한다. 제한이 API 호출 시점에 이루어지기 때문에 Memory 크기와 Core 사용률을 임의의 값으로 지정할 수 있다.
+  * **Library 수준 격리** : Container에 주입된 격리 Library가 User 공간에서 Accelerator API 호출을 가로채서 Memory 할당과 Core 사용을 제한한다. 제한이 API 호출 시점에 이루어지기 때문에 Memory 크기와 Core 사용률을 임의의 값으로 지정할 수 있다. 격리 Library는 HAMi Device Plugin이 시작될 때 [Figure 1]의 **Copy**를 통해서 Node에 설치되고, Pod에 Accelerator가 할당되면 [Figure 1]의 **Bind Mount**를 통해서 Container에 전달된다.
   * **Driver 수준 격리** : 하드웨어 자체는 공유된 상태에서 Accelerator Driver가 각 Pod의 Memory 할당량과 Core 사용률을 추적하고 강제한다. 제한을 Application이 아니라 Driver가 수행하기 때문에 별도의 Library 주입이 필요하지 않고, 하나의 물리 Accelerator 위에 할당량이 설정된 다수의 Instance를 올릴 수 있다.
   * **Hardware 수준 격리** : 하드웨어 자체가 물리적으로 분할되어 각 Partition이 독립된 Memory와 Core를 갖는 가상 Accelerator가 생성된다. 분할 가능한 구성은 제조사가 Chip마다 미리 정의한 Template (고정된 Memory와 Core 조합) 집합으로 한정되며, Pod에는 이 Template 중 하나가 할당된다. 격리가 가장 확실한 대신 Template보다 세밀한 분할은 불가능하다.
+* **Monitoring** : [Figure 1]의 **Metrics** 경로와 같이 HAMi Scheduler는 `9395` Port에서 Accelerator별, Pod별 할당 내역을, HAMi Device Plugin의 `vgpu-monitor` Container는 `9394` Port에서 GPU 상태와 Container별 실제 GPU 사용량을 Prometheus Metric으로 제공한다. `vgpu-monitor` Container는 NVIDIA GPU용 HAMi Device Plugin에만 포함되기 때문에 실제 사용량 Metric은 NVIDIA GPU에서만 제공된다.
 
 [Figure 1]의 Node에는 물리 Accelerator가 2개 존재하며, HAMi 설정의 분할 개수 (`deviceSplitCount`) 가 2로 지정되어 있기 때문에 Node의 Allocatable/Capacity에는 4개의 Accelerator가 등록된다. 즉 물리 Accelerator 하나를 최대 2개의 Container가 나눠 쓸 수 있다. Pod A는 Accelerator 2개를 Core 사용률과 Memory 80%로, Pod B는 Accelerator 1개를 Core 사용률과 Memory 20%로 요청하여, Accelerator 1은 Pod A와 Pod B가 함께 사용한다.
-
-Library 수준 격리에서 격리 Library는 HAMi Device Plugin Image에 포함되어 있으며, HAMi Device Plugin이 시작될 때 [Figure 1]에 표현된 것처럼 Copy를 통해서 Node의 Host Directory에 설치된다. 이후 Pod에 Accelerator가 할당되면 설치된 격리 Library는 [Figure 1]에 표현된 것처럼 Bind Mount를 통해서 Container에 전달된다.
 
 {{< table caption="[Table 2] HAMi Protocol Device Plugin이 제공되는 주요 Accelerator" >}}
 | Accelerator | Accelerator Resource 이름 | Memory / Core 제한 | 격리 계층 | Device Plugin |

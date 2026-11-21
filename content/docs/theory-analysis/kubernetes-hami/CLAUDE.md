@@ -11,6 +11,15 @@ HAMi 자체(이기종 AI 가속기 가상화 Middleware)에 포커스를 두고 
 
 ## 문서 구성 및 상태
 
+- **2026-11-22 Figure 1 경로를 구성 요소 설명에 녹임** (사용자 요청, KR/EN 동시): HAMi Scheduler bullet에 Scheduler Extender 경로(Loopback 9444)와
+  Mutating Webhook 경로(kube-apiserver → hami-scheduler Service), HAMi Device Plugin bullet에 Device Plugin Refit 경로(NUMA 정렬로 재선택 요청),
+  Library 수준 격리에 Copy/Bind Mount 둘 다 [Figure 1] 명시. Metrics 경로는 Monitoring bullet에 기존 반영.
+- **2026-11-22 개요 정리** (사용자 요청, KR/EN 동시): 격리 Library Copy/Bind Mount 문단을 "Library 수준 격리" bullet 끝 한 문장으로 축약,
+  Metrics 문단을 구성 요소 목록의 `* **Monitoring**` bullet로 축약(Service Port 31993/31992는 그림에 있어 생략). 목록 도입 문장
+  "세 가지 요소로 구성된다" → "HAMi의 구성 요소와 Monitoring은 다음과 같다".
+- **2026-11-22 개요에 Metrics 경로 문단 추가** (사용자 요청, KR/EN 동시): Figure 1의 Metrics 경로 설명 — HAMi Scheduler `9395`(할당 내역,
+  Service `31993`), HAMi Device Plugin `vgpu-monitor` `9394`(GPU 상태, Container 실제 사용량, `hami-device-plugin-monitor` NodePort `31992`),
+  vgpu-monitor는 NVIDIA용 DaemonSet에만 존재. 근거는 kubernetes-hami-metrics/CLAUDE.md.
 - **2026-11-22 발행** (사용자 요청): `draft: true` 제거, 영문본 `index.en.md` 작성. 영문본은 한글본과 섹션 9개, Figure 5개(src/width 동일),
   Table 4개, Shell/File 7개(내용 바이트 동일), 목록 항목 53개, Bold 33개를 1:1로 맞춤. 이후 한글본 수정 시 영문본도 함께 수정할 것.
   발행 직전 한글본 [Table 3] 설명의 "Table 2의 Resource 이름"(표 번호 변경 후 남은 오류)을 "[Table 3]의 Resource 이름"으로 정정.
