@@ -59,13 +59,11 @@ HAMi 2.11.0이 노출하는 Prometheus Metric을 정리한다. HAMi의 Metric은
 {{< table caption="[Table 4] HAMi Scheduler Quota Metrics" >}}
 | Metric | Description | Metric Type | Value Unit | 추가 Label |
 |---|---|---|---|---|
-| `hami_resource_quota_used` | Namespace에서 사용 중인 Accelerator의 Memory 크기 또는 Core 사용률 | Gauge | MiB 또는 Percentage | `quota_name`: 제한하는 Resource 이름 (예: `nvidia.com/gpumem`) |
-| `hami_resource_quota_limit` | ResourceQuota에 설정된 Accelerator의 Memory 크기 또는 Core 사용률 한도. 한도가 설정된 Resource만 노출 | Gauge | MiB 또는 Percentage | `quota_name`: 제한하는 Resource 이름 (예: `nvidia.com/gpumem`) |
+| `hami_resource_quota_used` | Namespace에서 사용 중인 Accelerator의 Memory 크기 또는 Core 사용률 | Gauge | MiB (Memory) 또는 Percentage (Core) | `quota_name`: 제한하는 Resource 이름 (예: `nvidia.com/gpumem`) |
+| `hami_resource_quota_limit` | ResourceQuota에 설정된 Accelerator의 Memory 크기 또는 Core 사용률 한도. 한도가 설정된 Resource만 노출되며, 같은 Resource를 제한하는 ResourceQuota가 여러 개이면 가장 작은 한도 | Gauge | MiB (Memory) 또는 Percentage (Core) | `quota_name`: 제한하는 Resource 이름 (예: `nvidia.com/gpumem`) |
 {{</ table >}}
 
 [Table 4]는 Kubernetes의 ResourceQuota로 Namespace별 Accelerator 사용량을 제한할 때, HAMi Scheduler가 집계하는 사용량과 한도를 나타내고 있다. HAMi Scheduler는 ResourceQuota의 `spec.hard`에서 `limits.nvidia.com/gpumem`, `limits.nvidia.com/gpucores`처럼 `limits.` 접두사가 붙은 Accelerator의 Memory 크기, Core 사용률 Resource를 읽고, Scheduling할 때 Namespace의 사용량에 Pod의 요청량을 더한 값이 한도를 넘으면 Pod에 Accelerator를 할당하지 않는다.
-
-Metric 값의 단위는 `quota_name`이 Memory Resource이면 MiB, Core Resource이면 Percentage이다. 한 Namespace에 같은 Resource를 제한하는 ResourceQuota가 여러 개이면 그중 가장 작은 한도가 적용된다.
 
 #### 1.1.4. State Metrics
 
@@ -123,18 +121,18 @@ HAMi Device Plugin NVIDIA Metric은 HAMi Device Plugin의 `vgpu-monitor` Contain
 | Metric | Description | Metric Type | Value Unit | 추가 Label |
 |---|---|---|---|---|
 | `hami_vgpu_memory_used_bytes` | Container가 사용 중인 Accelerator Memory 크기 | Gauge | Byte |  |
-| `hami_vgpu_memory_limit_bytes` | Container의 Accelerator Memory 한도 | Gauge | Byte |  |
-| `hami_vgpu_memory_context_bytes` | Container의 Process가 CUDA Primary Context를 생성하면서 사용한 Memory 크기 | Gauge | Byte |  |
+| `hami_vgpu_memory_limit_bytes` | 격리 Library에 설정된 Container의 Memory 한도. GPU를 통째로 할당받은 Container는 GPU 전체 Memory 크기 | Gauge | Byte |  |
+| `hami_vgpu_memory_context_bytes` | Container의 Process가 CUDA Primary Context를 생성하면서 사용한 Memory 크기. GPU를 통째로 할당받은 Container는 `0` | Gauge | Byte |  |
 | `hami_vgpu_memory_module_bytes` | Module 용도로 정의된 Memory 크기. 격리 Library가 값을 기록하지 않아 항상 `0` | Gauge | Byte |  |
-| `hami_vgpu_memory_buffer_bytes` | Application이 CUDA Memory 할당 API로 할당한 Memory 크기 | Gauge | Byte |  |
+| `hami_vgpu_memory_buffer_bytes` | Application이 CUDA Memory 할당 API로 할당한 Memory 크기. GPU를 통째로 할당받은 Container는 `0` | Gauge | Byte |  |
 | `hami_container_device_utilization_ratio` | Container의 SM 사용률. Container 안 Process들의 SM 사용률 합계 | Gauge | Percentage |  |
-| `hami_container_last_kernel_elapsed_seconds` | Container에서 마지막 Kernel이 실행된 이후 경과 시간. Kernel이 한 번 이상 실행된 이후부터 노출 | Gauge | Second |  |
+| `hami_container_last_kernel_elapsed_seconds` | Container에서 마지막 Kernel이 실행된 이후 경과 시간. Kernel이 한 번 이상 실행된 이후부터 노출되며, GPU를 통째로 할당받은 Container는 노출되지 않음 | Gauge | Second |  |
 | `hami_mig_device_info` | Container에 할당된 MIG Instance의 정보. Pod Annotation에 MIG 할당 정보가 기록된 경우에만 노출되며 값은 항상 `1` | Gauge | | `mig_uuid`, `profile` (예: `1g.10gb`), `gpu_instance_id`, `compute_instance_id` |
 {{</ table >}}
 
-[Table 8]은 Container가 실제로 사용하는 GPU의 양을 나타내고 있으며, Container에 할당된 GPU마다 하나씩 노출된다. HAMi Scheduler가 할당한 양이 아니라 실제 사용량이라는 점이 [Table 3]과 다르다. `hami_vgpu_memory_limit_bytes`는 격리 Library에 설정된 Container의 Memory 한도이고, `hami_vgpu_memory_used_bytes`는 그 한도 안에서 실제로 사용 중인 양이다.
+[Table 8]은 Container가 실제로 사용하는 GPU의 양을 나타내고 있으며, Container에 할당된 GPU마다 하나씩 노출된다. HAMi Scheduler가 할당한 양이 아니라 실제 사용량이라는 점이 [Table 3]과 다르다.
 
-격리 Library가 주입된 Container는 격리 Library가 Shared Memory에 기록한 사용량을 vGPU monitor가 읽어서 노출한다. 반면 GPU를 통째로 할당받거나 MIG Instance를 할당받은 Container에는 기본값이 `true`인 Helm의 `devicePlugin.monitor.disableHAMiCoreForWholeGPU` 설정에 따라 격리 Library가 주입되지 않으며, vGPU monitor가 NVML로 조회한 값으로 Metric을 대신 만들어 노출한다. 이때 MIG Instance의 SM 사용률은 vGPU monitor에 내장된 DCGM으로 조회한다. GPU를 통째로 할당받은 Container는 GPU 전체 Memory 크기가 한도로 노출되며, Memory의 Context, Module, Buffer 크기는 `0`으로 노출되고 마지막 Kernel 경과 시간은 노출되지 않는다.
+격리 Library가 주입된 Container는 격리 Library가 Shared Memory에 기록한 사용량을 vGPU monitor가 읽어서 노출한다. 반면 GPU를 통째로 할당받거나 MIG Instance를 할당받은 Container에는 기본값이 `true`인 Helm의 `devicePlugin.monitor.disableHAMiCoreForWholeGPU` 설정에 따라 격리 Library가 주입되지 않으며, vGPU monitor가 NVML로 조회한 값으로 Metric을 대신 만들어 노출한다. 이때 MIG Instance의 SM 사용률은 vGPU monitor에 내장된 DCGM으로 조회한다.
 
 #### 1.2.3. State Metrics
 

@@ -80,6 +80,10 @@ Metric Type | Value Unit" 표)을 따르되, HAMi는 Label이 중요해서 Label
 - 2026-11-17 사용자 요청: 모든 절에서 표 앞 도입 문단을 없애고 표 아래 "[Table N]은 …를 나타내고 있다" 문단으로 시작하도록 재배치
   (저장소 규칙: 코드 블록/표 앞 도입 문단 금지). 1.2.2는 2문단(사용량 의미 / 격리 Library 유무에 따른 수집 방식)으로 재구성.
 
+- 2026-11-21 추가 가독성 개선: [Table 4] 단위(Value Unit "MiB (Memory) 또는 Percentage (Core)")와 여러 ResourceQuota 최소 한도 규칙을
+  행으로 이동하고 둘째 문단 삭제. [Table 8]의 limit 정의, whole GPU 시 limit=GPU 전체, context/buffer=0, last kernel 미노출을 각 행으로 이동.
+  문단에는 표 전체 설명(실제 사용량 vs 할당량, 수집 방식)만 남김.
+
 ## 미확인 / 주의
 
 - `hami_container_device_utilization_ratio`: 값은 pkg/monitor/nvidia/v1/spec.go DeviceSmUtil의 활성 Process smUtil **합계**. 개별 smUtil은

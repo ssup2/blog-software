@@ -5,18 +5,18 @@ draft: true
 
 ## 1. Kubernetes HAMi
 
-**HAMi** (Heterogeneous AI Computing Virtualization Middleware)는 Kubernetes 환경에서 GPU, NPU 같은 AI Accelerator를 가상화하여 하나의 Accelerator를 다수의 Pod이 공유할 수 있도록 하는 Middleware이다. HAMi는 Kubernetes의 Device Plugin 방식 위에서 Memory 크기 제한과 연산 Core 사용률 제한을 제공하여 하나의 Accelerator를 다수의 Pod에 공유 할당할 수 있도록 만든다.
+**HAMi** (Heterogeneous AI Computing Virtualization Middleware)는 Kubernetes 환경에서 GPU, NPU 같은 AI Accelerator를 가상화하여 하나의 Accelerator를 다수의 Pod이 공유할 수 있도록 하는 Middleware이다. HAMi는 Kubernetes의 **Device Plugin** 방식 위에서 Memory 크기 제한과 연산 Core 사용률 제한을 제공하여 하나의 Accelerator를 다수의 Pod에 공유 할당할 수 있도록 만든다.
 
 {{< table caption="[Table 1] Device Plugin 방식의 한계와 HAMi의 해결 방식" >}}
-| Device Plugin 방식의 한계 | HAMi의 해결 방식 |
-|---|---|
-| Accelerator를 정수 개수의 Resource로만 다루어 Memory 크기나 Core 사용률을 요청할 수 없다. | Accelerator 개수를 부풀려 등록하고, Memory 크기와 Core 사용률은 별도의 Resource로 요청한다. |
-| kube-scheduler는 Node별 Accelerator 개수만 알고, 개별 Accelerator에 남은 Memory 크기와 Core 사용률은 알 수 없다. | HAMi Device Plugin이 Accelerator의 상세 정보를 Node Annotation에 기록하고, HAMi Scheduler가 이를 참조한다. |
-| Accelerator 선택을 Bind 이후 kubelet과 Device Plugin이 수행하여, Cluster 전체의 할당 내역을 반영할 수 없다. | HAMi Scheduler가 Node와 Accelerator를 함께 선택하고, 선택 결과를 Pod Annotation으로 HAMi Device Plugin에 전달한다. |
-| Accelerator를 나눠 쓰더라도 각 Pod의 사용량을 제한하는 수단이 없다. | 격리 계층이 Memory 크기와 Core 사용률 제한을 강제한다. |
+| 단계 | Device Plugin 방식의 한계 | HAMi의 해결 방식 |
+|---|---|---|
+| Resource 요청 | Accelerator를 정수 개수의 Resource로만 다루어 Memory 크기나 Core 사용률을 요청할 수 없다. | Accelerator 개수를 부풀려 등록하고, Memory 크기와 Core 사용률은 별도의 Resource로 요청한다. |
+| Node 선택 | kube-scheduler는 Node별 Accelerator 개수만 알고, 개별 Accelerator에 남은 Memory 크기와 Core 사용률은 알 수 없다. | HAMi Device Plugin이 Accelerator의 상세 정보를 Node Annotation에 기록하고, HAMi Scheduler가 이를 참조한다. |
+| Accelerator 선택 | 어떤 Accelerator를 할당할지는 Pod가 Node에 Bind된 이후 kubelet이 Device ID 기준으로 결정하기 때문에, Pod가 요청한 Memory 크기와 Core 사용률을 만족하는 Accelerator가 선택된다는 보장이 없다. | HAMi Scheduler가 Node와 Accelerator를 함께 선택하고, 선택 결과를 Pod Annotation으로 HAMi Device Plugin에 전달한다. |
+| Accelerator 사용 | Accelerator를 나눠 쓰더라도 각 Pod의 사용량을 제한하는 수단이 없다. | 격리 계층이 Memory 크기와 Core 사용률 제한을 강제한다. |
 {{< /table >}}
 
-[Table 1]은 Kubernetes의 Device Plugin 방식으로 Accelerator를 공유할 때의 한계와 HAMi의 해결 방식을 나타내고 있다. HAMi는 HAMi Scheduler가 Accelerator 선택까지 수행하고 그 결과를 HAMi Device Plugin에 전달하는 구조와 격리 계층을 통해서 이 한계를 해결한다.
+다만 Device Plugin 규격은 Device의 ID와 Health 상태 같은 제한된 정보만 주고받도록 정해져 있어 직접 확장할 수 없기 때문에, HAMi는 Device Plugin 규격은 그대로 따르면서 그 제약을 우회하는 방식을 이용한다. [Table 1]은 Kubernetes의 Device Plugin 방식으로 Accelerator를 공유할 때의 한계와 HAMi의 해결 방식을 나타내고 있다. HAMi는 HAMi Scheduler가 Accelerator 선택까지 수행하고 그 결과를 Annotation으로 HAMi Device Plugin에 전달하는 구조와 격리 계층을 통해서 이 한계를 해결한다.
 
 {{< figure caption="[Figure 1] HAMi Architecture" src="images/hami-architecture.png" width="1000px" >}}
 
