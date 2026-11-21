@@ -6,6 +6,22 @@ kubernetes-hami(HAMi 자체, 벤더 중립 구조) 문서의 NVIDIA 상세 글�
 
 ## 문서 구성 및 상태
 
+- **2026-11-22 전면 재검토** (사용자 요청: 발행된 kubernetes-hami 글과 중복 제거, NVIDIA 특화 내용 위주). 변경:
+  ① 중복 삭제 — [File 3] 아래 Pod Annotation 6종 일반 설명 목록(오류 3개 포함: to-allocate가 allocated로 "옮겨짐", Record 사이 `;`,
+  vgpu-time = Bind 시각)을 NVIDIA 특유 사항(키의 `vgpu`, Type `NVIDIA`, 완료 후 `;;`, `success`) 한 문단으로 교체, [Table 2] 문단의
+  Allocatable 부풀림 원리, [File 4] 문단의 Scheduler 참조 설명, 1.4 binpack/spread 정의, 1.6 Health의 ListAndWatch/Annotation 두 경로 +
+  ignoredByScheduler 문단, 1.3 끝 Port 31992/31993 문장 삭제.
+  ② 오류 정정 — [File 1] "gpumem 생략 시 제한 없는 vGPU" → 물리 Memory 전체 요청 = 전용 할당(defaultMemory 0), `operatingmode`에
+  `remote`(Lupine GPU server, Chart values.yaml:390) 추가, MPS 문단 "두 가지" 문구 수정. MiB 단위로 통일(Table 1, File 1, File 2, File 6 설명).
+  ③ 명칭 — 서술의 hami-device-plugin/hami-scheduler → HAMi Device Plugin/HAMi Scheduler, Container는 `device-plugin`/`vgpu-monitor`.
+  ④ 구성 — 개요의 Library 3종 + Mount 경로 + ld.so.preload 원리(구 [Shell 1] 문단)를 신설 `### 1.3. HAMi-core 주입`으로 이동,
+  이후 1.4 Memory, SM 사용률 제한 / 1.5 GPU 선택 / 1.6 Dynamic MIG / 1.7 GPU Health Check. Figure/Table/File/Shell 번호는 등장 순서 그대로.
+  ⑤ 추가 — 1.3 끝 whole GPU 문단: v2.11.0 nvinternal/plugin/server.go wholeGPUDisableHAMiCoreAllowed(env DISABLE_HAMI_CORE_FOR_WHOLE_GPU
+  && DeviceMemoryScaling == 1 && DeviceCoreScaling == 1), isWholeGPUAllocation(모든 GPU Usedmem == 전체 MiB, Usedcores 0 또는 100) →
+  ld.so.preload 대신 `CUDA_DISABLE_CONTROL=true`. Chart `devicePlugin.monitor.disableHAMiCoreForWholeGPU: true`(values.yaml:340), env는
+  device-plugin, vgpu-monitor 두 Container 모두. Metric 합성은 kubernetes-hami-metrics/CLAUDE.md의 wholegpu.go 근거.
+  ⑥ 재실측 시도 실패 — Test Node는 HAMi 2.11.0(Helm revision 5)이지만 qwen3 Pod가 GPU Memory 15000/16311 MiB를 점유해 2000 MiB Test Pod가
+  `CardInsufficientMemory`로 Pending → Pod 삭제. qwen3는 건드리지 않음. 1.1의 "HAMi 2.10.0"과 Shell 1~3, File 3은 2026-10-18 2.10.0 실측 그대로 유지.
 - **2026-11-06 Time-slicing, MPS 서술 추가** (사용자 요청): 개요와 1.3 SM 문단 뒤에 추가. MPS 미지원 근거는 HAMi v2.10.0 plugin/mps.go(빈 구현), `MpsMode` 상수 미사용, Chart에 설정 없음.
   Driver Time-slicing 위에서 동작한다는 서술은 일반 GPU 동작 기반으로 Context 전환을 직접 관측하지 않음. `website` 저장소 문서는 미확인.
 - **2026-11-06 1.6 GPU Health Check 추가** (사용자 요청, 소스 기반, 장애 동작 실측 없음): 근거는 HAMi v2.10.0 rm/health.go, plugin/server.go ListAndWatch,
