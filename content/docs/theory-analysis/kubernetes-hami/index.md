@@ -10,10 +10,10 @@ draft: true
 {{< table caption="[Table 1] Device Plugin 방식의 한계와 HAMi의 해결 방식" >}}
 | 단계 | Device Plugin 방식의 한계 | HAMi의 해결 방식 |
 |---|---|---|
-| Resource 요청 | Accelerator를 정수 개수의 Resource로만 다루어 Memory 크기나 Core 사용률을 요청할 수 없다. | Accelerator 개수를 부풀려 등록하고, Memory 크기와 Core 사용률은 별도의 Resource로 요청한다. |
-| Node 선택 | kube-scheduler는 Node별 Accelerator 개수만 알고, 개별 Accelerator에 남은 Memory 크기와 Core 사용률은 알 수 없다. | HAMi Device Plugin이 Accelerator의 상세 정보를 Node Annotation에 기록하고, HAMi Scheduler가 이를 참조한다. |
-| Accelerator 선택 | 어떤 Accelerator를 할당할지는 Pod가 Node에 Bind된 이후 kubelet이 Device ID 기준으로 결정하기 때문에, Pod가 요청한 Memory 크기와 Core 사용률을 만족하는 Accelerator가 선택된다는 보장이 없다. | HAMi Scheduler가 Node와 Accelerator를 함께 선택하고, 선택 결과를 Pod Annotation으로 HAMi Device Plugin에 전달한다. |
-| Accelerator 사용 | Accelerator를 나눠 쓰더라도 각 Pod의 사용량을 제한하는 수단이 없다. | 격리 계층이 Memory 크기와 Core 사용률 제한을 강제한다. |
+| **Resource 요청** | Accelerator를 정수 개수의 Resource로만 다루어 Memory 크기나 Core 사용률을 요청할 수 없다. | Accelerator 개수를 부풀려 등록하고, Memory 크기와 Core 사용률은 별도의 Resource로 요청한다. |
+| **Node 선택** | kube-scheduler는 Node별 Accelerator 개수만 알고, 개별 Accelerator에 남은 Memory 크기와 Core 사용률은 알 수 없다. | HAMi Device Plugin이 Accelerator의 상세 정보를 Node Annotation에 기록하고, HAMi Scheduler가 이를 참조한다. |
+| **Accelerator 선택** | 어떤 Accelerator를 할당할지는 Pod가 Node에 Bind된 이후 kubelet이 Device ID 기준으로 결정하기 때문에, Pod가 요청한 Memory 크기와 Core 사용률을 만족하는 Accelerator가 선택된다는 보장이 없다. | HAMi Scheduler가 Node와 Accelerator를 함께 선택하고, 선택 결과를 Pod Annotation으로 HAMi Device Plugin에 전달한다. |
+| **Accelerator 사용** | Accelerator를 나눠 쓰더라도 각 Pod의 사용량을 제한하는 수단이 없다. | 격리 계층이 Memory 크기와 Core 사용률 제한을 강제한다. |
 {{< /table >}}
 
 다만 Device Plugin 규격은 Device의 ID와 Health 상태 같은 제한된 정보만 주고받도록 정해져 있어 직접 확장할 수 없기 때문에, HAMi는 Device Plugin 규격은 그대로 따르면서 그 제약을 우회하는 방식을 이용한다. [Table 1]은 Kubernetes의 Device Plugin 방식으로 Accelerator를 공유할 때의 한계와 HAMi의 해결 방식을 나타내고 있다. HAMi는 HAMi Scheduler가 Accelerator 선택까지 수행하고 그 결과를 Annotation으로 HAMi Device Plugin에 전달하는 구조와 격리 계층을 통해서 이 한계를 해결한다.
@@ -30,6 +30,8 @@ draft: true
   * **Hardware 수준 격리** : 하드웨어 자체가 물리적으로 분할되어 각 Partition이 독립된 Memory와 Core를 갖는 가상 Accelerator가 생성된다. 분할 가능한 구성은 제조사가 Chip마다 미리 정의한 Template (고정된 Memory와 Core 조합) 집합으로 한정되며, Pod에는 이 Template 중 하나가 할당된다. 격리가 가장 확실한 대신 Template보다 세밀한 분할은 불가능하다.
 
 [Figure 1]의 Node에는 물리 Accelerator가 2개 존재하며, HAMi 설정의 분할 개수 (`deviceSplitCount`) 가 2로 지정되어 있기 때문에 Node의 Allocatable/Capacity에는 4개의 Accelerator가 등록된다. 즉 물리 Accelerator 하나를 최대 2개의 Container가 나눠 쓸 수 있다. Pod A는 Accelerator 2개를 Core 사용률과 Memory 80%로, Pod B는 Accelerator 1개를 Core 사용률과 Memory 20%로 요청하여, Accelerator 1은 Pod A와 Pod B가 함께 사용한다.
+
+Library 수준 격리에서 격리 Library는 HAMi Device Plugin Image에 포함되어 있으며, HAMi Device Plugin이 시작될 때 [Figure 1]에 표현된 것처럼 Copy를 통해서 Node의 Host Directory에 설치된다. 이후 Pod에 Accelerator가 할당되면 설치된 격리 Library는 [Figure 1]에 표현된 것처럼 Bind Mount를 통해서 Container에 전달된다.
 
 {{< table caption="[Table 2] HAMi Protocol Device Plugin이 제공되는 주요 Accelerator" >}}
 | Accelerator | Accelerator Resource 이름 | Memory / Core 제한 | 격리 계층 | Device Plugin |
@@ -93,7 +95,7 @@ hygon:
 Accelerator 등록은 HAMi Device Plugin이 수행하며, Node에 존재하는 물리 Accelerator를 분할 개수만큼 부풀려서 Kubernetes에 등록한다. [Figure 2]는 Accelerator 등록 과정을 나타내고 있다.
 
 1. HAMi Device Plugin이 `hami-device-plugin` DaemonSet을 통해서 Accelerator Node에서 동작을 시작하며, 분할 개수 (`deviceSplitCount`) 같은 Accelerator별 설정을 읽고 Node의 Accelerator를 탐색하여 UUID, Memory 크기, Core 개수, Type 정보를 파악한다.
-2. HAMi Device Plugin은 `/var/lib/kubelet/device-plugins/` 디렉터리에 자신의 Unix Domain Socket을 생성하고 gRPC Server를 시작한다. Socket 파일 이름은 Device Plugin마다 다르며, NVIDIA GPU는 `nvidia-gpu.sock`을 이용한다.
+2. HAMi Device Plugin은 `/var/lib/kubelet/device-plugins/` Directory에 자신의 Unix Domain Socket을 생성하고 gRPC Server를 시작한다. Socket 파일 이름은 Device Plugin마다 다르며, NVIDIA GPU는 `nvidia-gpu.sock`을 이용한다.
 3. HAMi Device Plugin은 kubelet의 Unix Domain Socket (`/var/lib/kubelet/device-plugins/kubelet.sock`) 을 통해서 `Register()` gRPC 요청을 전송하여 Plugin 자신을 kubelet에 등록한다. 요청에는 Resource 이름과 2단계에서 생성한 Socket 파일 이름이 포함된다.
 4. HAMi Device Plugin은 등록 이후 Accelerator의 Health 상태 확인을 시작한다. 장애를 감지하면 해당 물리 Accelerator에서 부풀려진 항목을 `Unhealthy` 상태로 kubelet에 다시 전달하고, Node Annotation의 `health` 값도 갱신하여 해당 Accelerator가 할당 후보에서 제외되도록 한다.
 5. kubelet은 전달받은 Socket을 통해서 HAMi Device Plugin에게 `ListAndWatch()` gRPC 요청을 전송하여 Accelerator 목록을 수신한다. 이때 HAMi Device Plugin은 물리 Accelerator의 개수를 분할 개수 설정 (`deviceSplitCount`) 의 배수만큼 부풀려서 전달한다. 예를 들어 물리 Accelerator가 2개 존재하고 분할 개수가 2로 설정되어 있으면 4개의 Accelerator가 전달되며, 하나의 물리 Accelerator를 최대 2개의 Container에 할당할 수 있다는 의미가 된다.
@@ -312,27 +314,27 @@ Accelerator 할당도 HAMi Device Plugin이 수행하며, HAMi Scheduler가 선�
 1. Pod가 Bind된 Node의 kubelet은 HAMi Device Plugin에게 `Allocate()` gRPC 요청을 전송한다.
 2. HAMi Device Plugin은 `hami.io/mutex.lock` Node Annotation에 기록된 Pod를 할당 대상 Pod로 판단한다. `Allocate()` 요청에는 Device ID만 포함되고 Pod 정보는 포함되지 않기 때문이다.
 3. HAMi Device Plugin은 해당 Pod의 `hami.io/[accelerator]-devices-to-allocate` Annotation을 조회하여, HAMi Scheduler가 선택한 Accelerator의 UUID와 Memory 크기, Core 사용률 제한 값을 파악한다. 일반적인 Device Plugin은 `Allocate()` 요청에 포함된 Device ID만으로 동작하지만, HAMi Device Plugin은 HAMi Scheduler의 Accelerator 선택 결과를 그대로 따라야 하기 때문에 Pod의 Annotation을 참조한다.
-4. HAMi Device Plugin은 할당을 마친 Container의 항목을 `hami.io/[accelerator]-devices-to-allocate` Annotation에서 지운다.
-5. 모든 항목이 지워지면 HAMi Device Plugin은 Pod의 `hami.io/bind-phase` Annotation을 `success`로 변경하고, `hami.io/mutex.lock` Node Annotation의 Lock을 해제한다.
-6. HAMi Device Plugin은 `Allocate()` 응답으로 할당할 Accelerator 정보와 격리 설정을 반환한다. 반환 내용은 격리 계층에 따라서 다른데, Library 수준은 격리 Library Mount와 제한값 환경 변수가, Driver/Hardware 수준은 가상화된 Accelerator Device 참조가 반환된다.
-7. kubelet은 반환받은 설정을 반영하여 Container를 생성하며, 이후 Container가 Accelerator를 사용하면 격리 계층이 Memory 크기 제한과 Core 사용률 제한을 강제한다.
+4. HAMi Device Plugin은 할당을 마친 Container의 항목을 `hami.io/[accelerator]-devices-to-allocate` Annotation에서 지운다. 모든 항목이 지워지면 Annotation에는 `;;`처럼 Container 구분자만 남는다.
+5. 모든 항목이 지워지면 HAMi Device Plugin은 Pod의 `hami.io/bind-phase` Annotation을 `success`로 변경한다.
+6. HAMi Device Plugin은 `hami.io/mutex.lock` Node Annotation을 삭제하여 Node의 Lock을 해제한다.
+7. HAMi Device Plugin은 `Allocate()` 응답으로 할당할 Accelerator 정보와 격리 설정을 반환한다. 반환 내용은 격리 계층에 따라서 다른데, Library 수준은 **격리 Library Mount**와 **제한값 환경 변수**가, Driver/Hardware 수준은 **가상화된 Accelerator Device 참조**가 반환된다.
+8. kubelet은 반환받은 설정을 Pod의 Container에 반영하여 Pod를 생성하며, 이후 Container가 Accelerator를 사용하면 격리 계층이 Memory 크기 제한과 Core 사용률 제한을 강제한다.
 
-Library 수준 격리에서 Container에 전달되는 Library는 격리 Library와 Accelerator Driver Library로 나뉘며, 전달 경로가 서로 다르다. 격리 Library는 HAMi Device Plugin Image에 포함되어 있으며, HAMi Device Plugin Container가 시작될 때 Node의 Host 디렉터리 (NVIDIA GPU는 `/usr/local/vgpu`) 로 복사되어 설치된다. 이후 HAMi Device Plugin은 `Allocate()` 응답의 Mount 항목에 Host 경로와 Container 경로를 지정하여 격리 Library를 전달하며, kubelet이 이 항목을 Container Runtime에 넘겨 Container 생성 시 Bind Mount가 이루어진다. 즉 HAMi Device Plugin은 Mount를 직접 수행하지 않고 Mount 대상만 지정한다.
-
-NVIDIA GPU의 HAMi Device Plugin은 격리 Library와 함께 `/etc/ld.so.preload` 파일도 같은 방식으로 Mount한다. Dynamic Linker는 Process 시작 시 이 파일에 기록된 Library를 가장 먼저 적재하기 때문에, Application을 수정하지 않아도 격리 Library가 Accelerator API 호출을 가로챌 수 있다. Accelerator Driver Library의 전달 방식은 격리 Library와 다르게 Accelerator마다 달라서, 제조사의 Container Runtime 확장이 주입하거나 HAMi Device Plugin이 같은 Mount 항목으로 전달한다.
-
-HAMi Device Plugin이 `Allocate()` 응답으로 반환하는 Container 설정은 `hami-scheduler-device` ConfigMap의 Accelerator Section 설정으로 세부 조정할 수 있다. **`defaultMemory`**, **`defaultCores`**, **`defaultGPUNum`** 은 Pod가 Memory, Core, 개수 요청을 생략했을 때 적용되는 기본값이며 (각각 `0`, `0`, `1`), `0`은 "제한을 두지 않고 물리 전체를 허용"으로 해석된다. **`overwriteEnv`** (기본 `false`) 는 Container 환경 변수 주입 시 Pod spec에 이미 지정된 환경 변수를 덮어쓸지 여부를 결정하고, **`runtimeClassName`** 은 Allocation 결과 Container에 적용할 RuntimeClass이며 비어 있으면 Kubernetes의 Default RuntimeClass가 쓰인다.
+Library 수준 격리에서 HAMi Device Plugin은 [Figure 1]의 Copy 과정을 통해서 Node의 Host Directory에 설치된 격리 Library의 Host 경로와 Container 경로를 `Allocate()` 응답의 Mount 항목에 지정하며, kubelet이 이 항목을 Container Runtime에 넘겨 Container 생성 시 [Figure 1]의 Bind Mount가 이루어진다. 즉 HAMi Device Plugin은 Mount를 직접 수행하지 않고 Mount 대상만 지정한다. 반면 Accelerator Driver Library는 Accelerator마다 전달 방식이 달라서, 제조사의 Container Runtime 확장이 주입하거나 HAMi Device Plugin이 같은 Mount 항목으로 전달한다.
 
 #### 1.4.1. NUMA Refit
 
-kubelet의 **Topology Manager**는 CPU와 Accelerator를 같은 NUMA Node에 배치하기 위해서 할당에 이용할 수 있는 Accelerator 범위를 제한한다. 그런데 Guaranteed Pod에 할당할 CPU는 Pod가 Node에 Bind된 이후에 kubelet의 CPU Manager가 Node의 상태를 보고 결정하며, 이 정보는 kube-apiserver에 공개되지 않는다. 따라서 HAMi Scheduler는 Scheduling 시점에 Pod의 CPU가 어느 NUMA Node에 배치될지 알 수 없고, HAMi Scheduler가 Pod Annotation에 기록한 Accelerator가 Topology Manager가 허용한 범위에 없는 상황이 발생할 수 있다.
+{{< figure caption="[Figure 5] NUMA Refit Process" src="images/hami-numa-refit.png" width="900px" >}}
 
-**NUMA Refit**은 이 경우 HAMi Device Plugin이 HAMi Scheduler에게 허용된 범위 안에서 Accelerator를 다시 선택하도록 요청하는 기능이며, HAMi 2.11.0에 추가되었고 현재 NVIDIA GPU만 지원하며 기본적으로 비활성화되어 있다. kubelet이 직접 Accelerator를 선택하지 않고 HAMi Scheduler가 다시 선택하는 이유는 Accelerator별 Memory, Core 할당 내역을 HAMi Scheduler가 관리하기 때문이며, kubelet이 임의로 선택하면 할당 내역과 실제 할당이 어긋나서 이후 Scheduling에서 과할당이 발생할 수 있다. NUMA Refit 과정은 다음과 같다.
+kubelet의 **Topology Manager**는 `single-numa-node` 같은 정책이 설정되면 CPU와 Accelerator를 같은 NUMA Node에 배치하기 위해서 할당에 이용할 수 있는 Accelerator 범위를 제한한다. kubelet의 CPU Manager는 `static` 정책일 때 Guaranteed QoS이면서 CPU를 정수로 요청한 Container에 특정 NUMA Node의 CPU를 전용으로 할당하는데, 이 CPU는 Pod가 Node에 Bind된 이후에 kubelet이 Node의 상태를 보고 결정하며 kube-apiserver에 공개되지 않는다. 따라서 HAMi Scheduler는 Scheduling 시점에 Pod의 CPU가 어느 NUMA Node에 배치될지 알 수 없고, HAMi Scheduler가 Pod Annotation에 기록한 Accelerator가 Topology Manager가 허용한 범위에 없는 상황이 발생할 수 있다.
 
-1. kubelet은 `Allocate()` 요청 전에 HAMi Device Plugin에게 `GetPreferredAllocation()` gRPC 요청을 전송하며, 요청에는 Topology Manager가 허용한 Accelerator 목록이 포함된다.
+**NUMA Refit**은 이 경우 HAMi Device Plugin이 HAMi Scheduler에게 허용된 범위 안에서 Accelerator를 다시 선택하도록 요청하는 기능이며, HAMi 2.11.0에 추가되었고 현재 NVIDIA GPU만 지원하며 기본적으로 비활성화되어 있다. kubelet이 직접 Accelerator를 선택하지 않고 HAMi Scheduler가 다시 선택하는 이유는 Accelerator별 Memory, Core 할당 내역을 HAMi Scheduler가 관리하기 때문이며, kubelet이 임의로 선택하면 할당 내역과 실제 할당이 어긋나서 이후 Scheduling에서 과할당이 발생할 수 있다. NUMA Refit은 [Figure 4]의 1번 `Allocate()` 요청보다 먼저, kubelet이 할당할 Accelerator를 고르는 단계에서 수행된다. [Figure 5]는 NUMA Refit 과정을 나타내고 있다.
+
+1. kubelet은 `Allocate()` 요청 전에 HAMi Device Plugin에게 Kubernetes Device Plugin 규격의 표준 API인 `GetPreferredAllocation()` gRPC 요청을 전송하며, 요청에는 Topology Manager가 허용한 Accelerator 목록이 포함된다.
 2. HAMi Device Plugin은 Pod Annotation에 기록된 Accelerator가 허용 목록에 없으면, HAMi Scheduler의 `/refit` Endpoint로 Pod 정보와 허용된 물리 Accelerator 목록을 전송한다.
-3. HAMi Scheduler는 허용된 Accelerator 안에서만 Scheduling 단계와 동일한 정책으로 Accelerator를 다시 선택하고, 선택 결과를 Pod Annotation과 할당 내역에 반영한 뒤 HAMi Device Plugin에 반환한다.
-4. HAMi Device Plugin은 다시 선택된 Accelerator를 `GetPreferredAllocation()` 응답으로 kubelet에 반환하며, 이후 `Allocate()` 과정은 갱신된 Pod Annotation을 기준으로 진행된다.
+3. HAMi Scheduler는 허용된 Accelerator 안에서만 Scheduling 단계와 동일한 정책으로 Accelerator를 다시 선택하고, 선택 결과를 Pod Annotation과 할당 내역에 반영한다.
+4. HAMi Scheduler는 다시 선택된 Accelerator를 HAMi Device Plugin에 반환한다.
+5. HAMi Device Plugin은 다시 선택된 Accelerator를 `GetPreferredAllocation()` 응답으로 kubelet에 반환하며, 이후 `Allocate()` 과정은 갱신된 Pod Annotation을 기준으로 진행된다.
 
 NUMA Refit을 이용하려면 Helm의 `devicePlugin.numaRefit.enabled`와 NUMA Topology 관련 설정을 활성화하고, Pod의 `hami.io/numa-alignment` Annotation에 `best-effort` 또는 `strict` Mode를 지정해야 한다. `strict` Mode에서는 Refit에 실패하면 Pod의 할당이 실패하고, `best-effort` Mode에서는 kubelet이 직접 Accelerator를 선택한다. `/refit` Endpoint는 Webhook과 같은 `9443` Port에서 제공되며, `/filter`, `/bind`와 다르게 HAMi Device Plugin의 ServiceAccount Token으로 호출자를 인증한다.
 

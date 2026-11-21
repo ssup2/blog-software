@@ -34,6 +34,24 @@ HAMi 자체(이기종 AI 가속기 가상화 Middleware)에 포커스를 두고 
 - **2026-11-17 개요에 Device Plugin 방식 한계 문단 추가** (사용자 요청): 첫 문단 뒤에 한계 4가지(정수 개수 Resource, kube-scheduler는
   Node별 개수만 인지, Accelerator 선택이 Bind 이후 kubelet/Device Plugin에서 일어나 Cluster 할당 내역 미반영, 사용량 제한 수단 없음)와
   HAMi의 해결 구조를 서술. 첫 문단의 "개수 단위로만 할당할 수 있지만" 문구는 중복이라 제거, 1.3 도입의 Device Plugin 비교 2문장 삭제.
+- **2026-11-21 [Figure 5] NUMA Refit 그림 추가** (사용자 요청, Claude 초안): images/hami-numa-refit.png(SVG → headless Chrome, 1310×700,
+  Figure 3/4 스타일, 소스 미보관). 1.4.1 맨 앞 배치, 단계 5개로 분리(③ 재선택 + Annotation 갱신 ④ Device Plugin에 반환 ⑤ GPA 응답).
+  실행 시점 문장 "[Figure 4]의 1번 Allocate()보다 먼저"와 1단계 "Kubernetes Device Plugin 규격의 표준 API인 GetPreferredAllocation()" 추가.
+- **2026-11-21 1.4.1 배경 문단 조건 명시** (사용자 요청, 소스 확인 후): HAMi 코드(numa_refit*.go, plugin server.go)는 QoS를 직접 검사하지 않고
+  Topology Manager 허용 목록에 선택 GPU가 없으면 동작. Guaranteed 조건은 Kubernetes CPU Manager `static` 정책(Guaranteed + 정수 CPU에 전용
+  CPU 할당) 동작이며 Issue #2080 재현 환경(CPU Manager static, Topology Manager single-numa-node, Guaranteed QoS + 8 whole CPUs)과 일치.
+  본문에 `static` 정책과 정수 CPU 조건, Topology Manager `single-numa-node` 예시를 명시.
+- **2026-11-21 1.4 설정 문단 삭제** (사용자 지적): "`Allocate()` 응답으로 반환하는 Container 설정은 … defaultMemory/defaultCores/defaultGPUNum,
+  overwriteEnv, runtimeClassName으로 조정" 문단은 사실과 다름 — v2.11.0 pkg/device/nvidia/device.go 확인 결과 runtimeClassName, defaultGPUNum,
+  overwriteEnv(GPU 미요청 Container에 `NVIDIA_VISIBLE_DEVICES=none` 주입)는 Mutating Webhook(MutateAdmission), defaultMemory/defaultCores는
+  HAMi Scheduler(GenerateResourceRequests)에서 적용. 벤더 설정이라 kubernetes-hami-nvidia-gpu [Table 3]으로 이동.
+- **2026-11-21 격리 Library 전달 경로를 개요로 이동** (사용자 요청): 1.4의 2문단(Library 전달 경로, NVIDIA `/usr/local/vgpu`,
+  `/etc/ld.so.preload`)을 삭제하고, 개요의 [Figure 1] 예시 문단 뒤에 벤더 중립 문단 하나로 이동 — Figure 1의 Copy/Bind Mount 화살표와 연결.
+  NVIDIA 전용 세부(`/usr/local/vgpu`, `ld.so.preload` Mount, Dynamic Linker 선적재)는 본문에서 제외 — 근거는 아래 2026-11-12 기록에 유지.
+- **2026-11-21 Figure 4 사용자 재작도 + 1.4 8단계로 재작성**: ⑤ `bind-phase: success` ⑥ `mutex.lock` 삭제(Lock 해제) ⑦ `Allocate()` 응답 반환
+  ⑧ kubelet이 Pod 생성(Device Manager는 Pod Admission 시 Container별 Allocate, 응답은 Container 생성 시 적용). 할당 완료 후
+  `devices-to-allocate` 실측 값은 `;;` — DecodePodDevices가 끝 `;` 뒤 빈 구간도 Container로 보존(주석 "Do NOT skip empty"), 재인코딩 시
+  빈 구간마다 `;` → Container 1개 Pod도 `;;`. (Claude가 처음에 `;`라고 잘못 판단했다가 사용자 실측으로 정정.)
 - **2026-11-17 예시 값 원칙** (사용자 합의): 벤더마다 달라지는 값(`[accelerator]` 키, `[UUID-N]`, `[Type]`)만 자리 표시, 벤더 무관 값은
   Figure 1과 맞춘 실제 값 — Node `gpu-node`, Pod `poda`(Namespace `default`), Pod A 할당량 GPU 2개 × 80%. [File 3] Lock 값은
   `…,default,poda`. `hami.io/mutex.lock` bullet에 값 형식, Lock 동안 Bind 불가, 할당 완료 시 삭제(ReleaseNodeLock이 `null` patch) 보강.

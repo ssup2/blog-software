@@ -97,3 +97,8 @@ kubernetes-hami(HAMi 자체, 벤더 중립 구조) 문서의 NVIDIA 상세 글�
   ([File 4] 16311 MiB) 한 문장 추가.
 - 같은 날 kubernetes-hami 글에서 옮겨 온 내용으로 [Table 2] 설명 문단 보강 후 2문단 분할: Allocatable = 물리 GPU 개수 × `deviceSplitCount`,
   `deviceCoreScaling` > 1이면 SM 사용률 초과 할당 가능.
+
+- 2026-11-21 kubernetes-hami 글 1.4에서 옮긴 설정을 정정하여 1.2에 [Table 3] "Pod 요청을 보정하는 vGPU 설정" 추가(기존 [Table 3] → [Table 4]).
+  근거 v2.11.0 pkg/device/nvidia/device.go: MutateAdmission — runtimeClassName(spec.runtimeClassName이 nil일 때), defaultGPUNum(Memory/Core만
+  요청 시 개수 보충), overwriteEnv(GPU 미요청 Container에 `NVIDIA_VISIBLE_DEVICES=none`, Pod/Container별 OverwriteEnvDecision 우선);
+  GenerateResourceRequests — defaultMemory(0이면 mempnum=100 즉 전체), defaultCores. 기본값은 Test Node ConfigMap 실측(0, 0, 1, false, "").

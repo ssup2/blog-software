@@ -141,6 +141,18 @@ metadata:
 
 `deviceMemoryScaling`을 1보다 크게 설정하면 물리 Memory보다 많은 Memory를 할당하는 초과 할당이 가능한데, vGPU별 Memory 제한은 유지되지만 모든 vGPU가 제한값까지 Memory를 이용하면 물리 GPU의 OOM이 발생할 수 있는 실험적인 기능이다. `deviceCoreScaling`도 1보다 크게 설정하면 물리 SM보다 많은 SM 사용률을 할당할 수 있다.
 
+{{< table caption="[Table 3] Pod 요청을 보정하는 vGPU 설정" >}}
+| 설정 | 적용 위치 | 동작 (기본값) |
+|---|---|---|
+| `defaultGPUNum` | Mutating Webhook | Container가 GPU Memory나 SM 사용률만 요청하고 GPU 개수를 요청하지 않으면 `nvidia.com/gpu`를 이 값으로 채운다 (`1`) |
+| `defaultMemory` | HAMi Scheduler | Container가 GPU Memory를 요청하지 않았을 때 적용할 Memory 크기 (MiB). `0`이면 GPU Memory 전체를 요청한 것으로 처리한다 (`0`) |
+| `defaultCores` | HAMi Scheduler | Container가 SM 사용률을 요청하지 않았을 때 적용할 SM 사용률 (`0`) |
+| `overwriteEnv` | Mutating Webhook | `true`이면 GPU를 요청하지 않은 Container에 `NVIDIA_VISIBLE_DEVICES=none` 환경 변수를 넣어 GPU가 보이지 않도록 한다 (`false`) |
+| `runtimeClassName` | Mutating Webhook | GPU를 요청하는 Pod에 RuntimeClass가 지정되지 않았으면 Pod의 `spec.runtimeClassName`에 이 값을 넣는다 (`""`) |
+{{< /table >}}
+
+[Table 3]은 Pod의 요청을 보정하는 vGPU 설정을 나타내고 있다. [Table 3]의 설정은 HAMi Device Plugin의 `Allocate()` 응답과는 관계없이, Pod 생성 시 Mutating Webhook이 Pod spec을 변경하거나 Scheduling 시 HAMi Scheduler가 요청량을 계산할 때 적용된다. `runtimeClassName`이 비어 있으면 Kubernetes의 Default RuntimeClass가 이용된다.
+
 ```yaml {caption="[File 4] vGPU 설정이 반영된 Node Annotation", linenos=table}
 apiVersion: v1
 kind: Node
@@ -150,9 +162,9 @@ metadata:
     hami.io/node-nvidia-register: '[{"id":"GPU-034026c4-...","count":10,"devmem":16311,"devcore":100,"type":"NVIDIA GeForce RTX 5060 Ti","mode":"hami-core","health":true}]'
 ```
 
-[File 4]는 hami-device-plugin이 GPU Node에 주기적으로 기록하는 `hami.io/node-nvidia-register` Annotation을 나타내고 있다. 해당 Node의 GPU 목록을 JSON 배열로 담으며, 각 항목에는 [Table 3]과 같이 [Table 2]의 설정이 반영된 값이 기록된다. hami-scheduler는 이 Annotation을 참조하여 각 Node의 vGPU 할당 가능 여부를 판단한다.
+[File 4]는 hami-device-plugin이 GPU Node에 주기적으로 기록하는 `hami.io/node-nvidia-register` Annotation을 나타내고 있다. 해당 Node의 GPU 목록을 JSON 배열로 담으며, 각 항목에는 [Table 4]와 같이 [Table 2]의 설정이 반영된 값이 기록된다. hami-scheduler는 이 Annotation을 참조하여 각 Node의 vGPU 할당 가능 여부를 판단한다.
 
-{{< table caption="[Table 3] NVIDIA GPU의 Node Register Annotation 값" >}}
+{{< table caption="[Table 4] NVIDIA GPU의 Node Register Annotation 값" >}}
 | 항목 | NVIDIA GPU에서 기록되는 값 |
 |---|---|
 | `id` | NVML로 조회한 GPU UUID |
