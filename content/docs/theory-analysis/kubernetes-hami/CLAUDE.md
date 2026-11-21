@@ -7,10 +7,13 @@ HAMi 자체(이기종 AI 가속기 가상화 Middleware)에 포커스를 두고 
 - kubernetes-hami-nvidia-gpu — NVIDIA GPU 기능 (vGPU 설정, HAMi-core 격리, GPU 선택, Dynamic MIG)
 - kubernetes-hami-dra — HAMi의 DRA 구현
 
-세 글 모두 draft 상태. 분리 전 글(2026-10-09 초안)의 HAMi-core 격리 섹션과 vGPU Resource Table은 kubernetes-hami-nvidia-gpu로 이동함.
+이 글은 2026-11-22 발행(영문본 포함), 나머지 두 글은 draft 상태. 분리 전 글(2026-10-09 초안)의 HAMi-core 격리 섹션과 vGPU Resource Table은 kubernetes-hami-nvidia-gpu로 이동함.
 
 ## 문서 구성 및 상태
 
+- **2026-11-22 발행** (사용자 요청): `draft: true` 제거, 영문본 `index.en.md` 작성. 영문본은 한글본과 섹션 9개, Figure 5개(src/width 동일),
+  Table 4개, Shell/File 7개(내용 바이트 동일), 목록 항목 53개, Bold 33개를 1:1로 맞춤. 이후 한글본 수정 시 영문본도 함께 수정할 것.
+  발행 직전 한글본 [Table 3] 설명의 "Table 2의 Resource 이름"(표 번호 변경 후 남은 오류)을 "[Table 3]의 Resource 이름"으로 정정.
 - **2026-11-11 HAMi v2.11.0 기준으로 전환** (사용자 요청): Test Node(192.168.1.32, kubeadm v1.34.12)의 HAMi를 Chart 2.10.0 → 2.11.0으로
   upgrade(values `prometheus.enabled=true` 유지, 최종 revision 5, qwen3 Pod 무중단)하고 [Shell 1], [Shell 2], [Shell 3]을 재실측으로 교체.
   v2.11.0 변화: ① hami-scheduler HTTP Listener 분리 — `--http_bind=0.0.0.0:9443`(`/webhook`, `/refit`, Probe, Service 443 → 9443)와
@@ -34,6 +37,7 @@ HAMi 자체(이기종 AI 가속기 가상화 Middleware)에 포커스를 두고 
 - **2026-11-17 개요에 Device Plugin 방식 한계 문단 추가** (사용자 요청): 첫 문단 뒤에 한계 4가지(정수 개수 Resource, kube-scheduler는
   Node별 개수만 인지, Accelerator 선택이 Bind 이후 kubelet/Device Plugin에서 일어나 Cluster 할당 내역 미반영, 사용량 제한 수단 없음)와
   HAMi의 해결 구조를 서술. 첫 문단의 "개수 단위로만 할당할 수 있지만" 문구는 중복이라 제거, 1.3 도입의 Device Plugin 비교 2문장 삭제.
+- **2026-11-22 [Figure 5] 사용자 재작도 반영**: 6단계(⑥ Allocate()는 Figure 4의 1번과 같음)로 본문도 6단계로 확장.
 - **2026-11-21 [Figure 5] NUMA Refit 그림 추가** (사용자 요청, Claude 초안): images/hami-numa-refit.png(SVG → headless Chrome, 1310×700,
   Figure 3/4 스타일, 소스 미보관). 1.4.1 맨 앞 배치, 단계 5개로 분리(③ 재선택 + Annotation 갱신 ④ Device Plugin에 반환 ⑤ GPA 응답).
   실행 시점 문장 "[Figure 4]의 1번 Allocate()보다 먼저"와 1단계 "Kubernetes Device Plugin 규격의 표준 API인 GetPreferredAllocation()" 추가.

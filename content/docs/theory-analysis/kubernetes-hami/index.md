@@ -1,6 +1,5 @@
 ---
 title: Kubernetes HAMi
-draft: true
 ---
 
 ## 1. Kubernetes HAMi
@@ -57,7 +56,7 @@ HAMi Scheduler는 `hami-scheduler-device` ConfigMap에 정의된 Accelerator별 
 | AWS Neuron | `aws.amazon.com/neuron`, `aws.amazon.com/neuroncore` | X / O | Hardware |
 {{< /table >}}
 
-[Table 3]은 HAMi가 제조사 제공 Device Plugin을 그대로 이용하여 지원하는 주요 Accelerator를 나타내고 있다. HAMi 2.11.0 기준으로 `hami-scheduler-device` ConfigMap에는 [Table 2], [Table 3]의 Accelerator를 포함하여 총 13종의 Accelerator 설정이 정의되어 있다. Table 2의 Resource 이름은 모두 벤더 Device Plugin이 kubelet에 등록하는 자체 이름이며, HAMi는 `hami-scheduler-device` ConfigMap에 이 이름들을 등록해 두어 Mutating Webhook과 Scheduler Extender가 Pod의 요청을 인식하도록만 한다.
+[Table 3]은 HAMi가 제조사 제공 Device Plugin을 그대로 이용하여 지원하는 주요 Accelerator를 나타내고 있다. HAMi 2.11.0 기준으로 `hami-scheduler-device` ConfigMap에는 [Table 2], [Table 3]의 Accelerator를 포함하여 총 13종의 Accelerator 설정이 정의되어 있다. [Table 3]의 Resource 이름은 모두 벤더 Device Plugin이 kubelet에 등록하는 자체 이름이며, HAMi는 `hami-scheduler-device` ConfigMap에 이 이름들을 등록해 두어 Mutating Webhook과 Scheduler Extender가 Pod의 요청을 인식하도록만 한다.
 
 제조사 Device Plugin을 쓸 때는 Device 선택과 격리 적용을 모두 벤더 Plugin이 담당하기 때문에, HAMi는 Scheduling에만 관여한다. 격리 계층은 Accelerator Driver가 담당하는 Driver 수준이 다수이며, 일부는 벤더 Library 주입 (Library 수준) 이나 Hardware 분할 (Hardware 수준) 도 함께 쓴다. 이 경우 HAMi가 제공하는 가치는 Pod Annotation 기반의 Scheduling 정책 지정과 여러 벤더를 하나의 Scheduler로 통합 운영하는 수준에 그치며, HAMi의 핵심 가치는 HAMi Protocol을 이용할 때 나타난다.
 
@@ -324,7 +323,7 @@ Library 수준 격리에서 HAMi Device Plugin은 [Figure 1]의 Copy 과정을 �
 
 #### 1.4.1. NUMA Refit
 
-{{< figure caption="[Figure 5] NUMA Refit Process" src="images/hami-numa-refit.png" width="900px" >}}
+{{< figure caption="[Figure 5] NUMA Refit Process" src="images/hami-numa-refit.png" width="600px" >}}
 
 kubelet의 **Topology Manager**는 `single-numa-node` 같은 정책이 설정되면 CPU와 Accelerator를 같은 NUMA Node에 배치하기 위해서 할당에 이용할 수 있는 Accelerator 범위를 제한한다. kubelet의 CPU Manager는 `static` 정책일 때 Guaranteed QoS이면서 CPU를 정수로 요청한 Container에 특정 NUMA Node의 CPU를 전용으로 할당하는데, 이 CPU는 Pod가 Node에 Bind된 이후에 kubelet이 Node의 상태를 보고 결정하며 kube-apiserver에 공개되지 않는다. 따라서 HAMi Scheduler는 Scheduling 시점에 Pod의 CPU가 어느 NUMA Node에 배치될지 알 수 없고, HAMi Scheduler가 Pod Annotation에 기록한 Accelerator가 Topology Manager가 허용한 범위에 없는 상황이 발생할 수 있다.
 
@@ -334,7 +333,8 @@ kubelet의 **Topology Manager**는 `single-numa-node` 같은 정책이 설정되
 2. HAMi Device Plugin은 Pod Annotation에 기록된 Accelerator가 허용 목록에 없으면, HAMi Scheduler의 `/refit` Endpoint로 Pod 정보와 허용된 물리 Accelerator 목록을 전송한다.
 3. HAMi Scheduler는 허용된 Accelerator 안에서만 Scheduling 단계와 동일한 정책으로 Accelerator를 다시 선택하고, 선택 결과를 Pod Annotation과 할당 내역에 반영한다.
 4. HAMi Scheduler는 다시 선택된 Accelerator를 HAMi Device Plugin에 반환한다.
-5. HAMi Device Plugin은 다시 선택된 Accelerator를 `GetPreferredAllocation()` 응답으로 kubelet에 반환하며, 이후 `Allocate()` 과정은 갱신된 Pod Annotation을 기준으로 진행된다.
+5. HAMi Device Plugin은 다시 선택된 Accelerator를 `GetPreferredAllocation()` 응답으로 kubelet에 반환한다.
+6. kubelet은 반환받은 Accelerator로 [Figure 4]의 1번과 같이 `Allocate()` 요청을 전송하며, 이후 할당 과정은 갱신된 Pod Annotation을 기준으로 진행된다.
 
 NUMA Refit을 이용하려면 Helm의 `devicePlugin.numaRefit.enabled`와 NUMA Topology 관련 설정을 활성화하고, Pod의 `hami.io/numa-alignment` Annotation에 `best-effort` 또는 `strict` Mode를 지정해야 한다. `strict` Mode에서는 Refit에 실패하면 Pod의 할당이 실패하고, `best-effort` Mode에서는 kubelet이 직접 Accelerator를 선택한다. `/refit` Endpoint는 Webhook과 같은 `9443` Port에서 제공되며, `/filter`, `/bind`와 다르게 HAMi Device Plugin의 ServiceAccount Token으로 호출자를 인증한다.
 
