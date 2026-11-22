@@ -6,6 +6,31 @@ kubernetes-hami(HAMi 자체, 벤더 중립 구조) 문서의 NVIDIA 상세 글�
 
 ## 문서 구성 및 상태
 
+- **2026-11-22 `#### 1.3.3. 우선순위` 추가** (사용자 요청, 소스 기반, 실측 없음). 근거: HAMi v2.11.0 pkg/device/nvidia/device.go MutateAdmission
+  (limits의 `nvidia.com/priority` → env `CUDA_TASK_PRIORITY`), cmd/vGPUmonitor/feedback.go Observe(5초 ticker, recent_kernel 감소 후 >0인 Container를
+  GPU UUID/priority별 집계, CheckBlocking: 더 작은 priority 활성 시 recent_kernel=-1, CheckPriority: 더 작은 priority 활성 또는 같은 priority 2개 이상이면
+  utilization_switch=1), HAMi-core main multiprocess_memory_limit.c(초기 priority=1, env로 덮어씀, set_env_utilization_switch: force=1, disable=2가 switch 무시),
+  multiprocess_utilization_watcher.c rate_limiter(sm_limit 0 또는 ≥100이면 즉시 return → 활동 표시도 안 함, recent_kernel<0이면 sleep(1) 반복, switch 0이면
+  Token 차감 없이 통과). 1.3.2 `default` bullet을 Switch 동작 기준으로 수정. HAMi-core는 main 기준(v2.11.0 Image 커밋 미대조).
+- **2026-11-22 MIG Mode 하위 절 분리 + Figure 1 Mode별 Resource** (사용자 요청): 1.4를 도입(Dynamic MIG, Flexible MIG, MIG Manager 병행 불가) /
+  1.4.1 MIG Profile 선택([File 6]) / 1.4.2 MIG Instance 할당([Figure 3] 4단계)으로 분리. 근거 v2.11.0(clone): pkg/device/nvidia/device.go
+  AddResourceUsage(MIG는 selectMigCandidate(…, ctr.Usedmem, preference) 후 Usedmem/Usedcores를 Profile 값으로 덮어씀), Fit에서 memreq 해석 후
+  CustomFilterRule(실패 시 CardMigTopologyInfeasible), mig_preference.go(`nvidia.com/mig-profile-preference`: Allowlist Profile 이름 또는 Slice 접두사,
+  선호 Profile을 Memory 순 후보 앞으로 배치), Chart values.yaml migProfileAllowlist(A100 80GB: 1g.10gb, 2g.20gb, 3g.40gb, 4g.40gb, 7g.79gb),
+  Scaling 2종은 mig에 미적용, deviceSplitCount 대신 MIG Instance 수가 공유 제한(values 주석). examples/nvidia/dynamic_mig_example.yaml 주석
+  "gpumem 8000 → A100-80GB에서 1g.10gb" → [File 6] 예시 근거 확보(기존 '추정' 해소). 1단계의 "Memory 크기와 SM 사용률 요청" 서술은 오류라 정정,
+  [Table 1] 문단과 HAMi Scheduler bullet에 MIG는 gpucores 미이용/Memory 기준 명시. 참고: `nvidia.com/mig-<profile>` Resource는 upstream
+  migStrategy(mixed, 기본 none) 경로라 HAMi MIG Mode와 별개 — 본문 미기재.
+  [Figure 1] HAMi Scheduler 박스를 Mode별로 분리: HAMi-core(gpu, gpumem(-percentage), gpucores) / MIG(gpu, gpumem(-percentage),
+  Annotation mig-profile-preference). [Figure 3]은 아직 matplotlib 초안이라 1단계 문구 확인 필요.
+- **2026-11-22 두 Mode 중심 재구성** (사용자 요청): 개요를 `operatingmode`의 HAMi-core Mode / MIG Mode 두 방식 비교 bullet로 재작성
+  (16GiB 예시, Memory 크기 제한, SM 사용률 제한 bold는 HAMi-core Mode bullet로 이동), 구성 요소에 **HAMi Scheduler** 추가(NVIDIA Resource +
+  node-nvidia-register 비교로 Node/GPU 선택, MIG는 Profile과 위치), [Table 1] 문단에 Scheduler의 Resource 해석 문장 추가.
+  목차: 1.3 HAMi-core Mode(1.3.1 HAMi-core 주입, 1.3.2 Memory, SM 사용률 제한) / 1.4 MIG Mode(구 1.6 Dynamic MIG) / 1.5 GPU 선택 /
+  1.6 GPU Health Check. File 6(GPU 선택) ↔ File 7(MIG) 번호 교환. 1.2에 `operatingmode` 역할 + `remote`는 다루지 않는다는 문장.
+  [Figure 1] Claude 초안 재작도(SVG → headless Chrome 1400×820, 소스 미보관): HAMi Scheduler(NVIDIA GPU Resource 4종, Mode별 선택 기준),
+  Node A `hami-core`(Pod A 4096/30, Pod B 8192/50, GPU 16GiB Memory/SM 막대, Time-slicing), Node B `mig`(Pod C 8000 → 1g.10gb,
+  Pod D 30000 → 3g.40gb, A100 80GB). Pod C/D의 Profile 대응은 "최소 수용 Profile" 가정의 예시(실측 아님). 사용자가 pptx로 재작도 예정.
 - **2026-11-22 HAMi 2.11.0 재실측** (사용자 허락으로 qwen3 Deployment를 replicas 0으로 내렸다가 1로 복구, 재기동 Ready 확인):
   [Shell 1] Cache 경로가 `/usr/local/vgpu/usage.cache`로 변경(2.10.0은 UUID.cache), [File 3] epoch 1795279541, [Shell 3] Memory OOM 로그
   (allocator.c:40, OOM 줄 2회, HAMi-core Cleanup Msg 출력), [Shell 4] Metric 32, `nvidia-smi dmon` 12~39%로 2.10.0의 99/0 교차 패턴이 사라져

@@ -5,26 +5,30 @@ draft: true
 
 ## 1. Kubernetes HAMi NVIDIA GPU
 
+**HAMi**는 하나의 NVIDIA GPU를 다수의 Pod이 공유할 수 있도록 지원한다. NVIDIA Device Plugin의 Time-slicing 기법도 하나의 GPU를 다수의 Pod에 할당할 수 있지만, 모든 Pod가 GPU의 Memory와 연산 자원을 제한 없이 함께 이용하기 때문에 하나의 Pod가 Memory를 모두 차지하거나 연산을 독점할 수 있다. 반면 HAMi는 GPU를 Pod에 나누어 할당하는 **vGPU**라는 단위를 이용하며, Node의 `operatingmode` 설정에 따라서 다음의 두 가지 방식으로 GPU를 나눈다.
+
+* **HAMi-core Mode** : 하나의 GPU를 Time-slicing으로 공유하면서 Pod마다 Memory 크기와 연산 비율을 나누어 할당한다. 각 Pod에는 할당받은 크기를 넘어서 Memory를 할당할 수 없도록 하는 **Memory 크기 제한**과, GPU의 연산 장치인 SM (Streaming Multiprocessor) 의 사용률을 할당받은 비율 이하로 유지하는 **SM 사용률 제한**이 적용된다. 이 제한은 CUDA API 호출을 가로채는 방식으로 Software Level에서 이루어지기 때문에, Memory 크기와 SM 사용률을 임의의 값으로 지정할 수 있다.
+* **MIG Mode** : MIG를 지원하는 GPU를 Hardware Level에서 독립된 Memory와 SM을 갖는 MIG Instance로 분할하여 Pod에 할당한다. 요청에 따라서 MIG Instance를 동적으로 생성하는 **Dynamic MIG** 기능을 이용하며, 격리가 확실한 대신 NVIDIA가 GPU 모델별로 정의한 Memory와 SM 조합인 **MIG Profile** 단위로만 나눌 수 있다.
+
 {{< figure caption="[Figure 1] HAMi NVIDIA GPU Architecture" src="images/hami-nvidia-architecture.png" width="900px" >}}
 
-**HAMi**는 NVIDIA GPU를 **vGPU** 단위로 가상화하여 하나의 GPU를 다수의 Pod이 공유할 수 있도록 지원한다. NVIDIA Device Plugin의 Time-slicing 기법도 하나의 GPU를 다수의 Pod에 할당할 수 있지만 Container별 Memory 크기 제한이나 연산 사용률 제한은 제공하지 않는 반면, HAMi는 CUDA API 호출을 가로채는 방식으로 Software Level에서 vGPU 단위의 Memory 크기 제한과 **SM** (Streaming Multiprocessor) 사용률 제한을 제공한다. 이 제한은 GPU의 Time-slicing 공유 위에서 동작하며, NVIDIA MPS 기반의 공유 기법은 제공하지 않는다. 또한 MIG를 지원하는 GPU에서는 Workload의 요청에 따라서 MIG Instance를 동적으로 생성하는 Dynamic MIG 기능도 제공한다.
+[Figure 1]은 HAMi의 NVIDIA GPU 지원 구성을 나타내고 있다. Node A는 HAMi-core Mode로 Pod A와 Pod B가 GPU 하나를 Memory 크기와 SM 사용률을 나누어 공유하며, Node B는 MIG Mode로 Pod C와 Pod D가 각각 별도의 MIG Instance를 할당받는다. NVIDIA MPS 기반의 공유 기법은 두 Mode 모두 제공하지 않는다. NVIDIA GPU 지원은 다음의 세 가지 요소가 담당한다.
 
-[Figure 1]은 HAMi의 NVIDIA GPU 지원 구성을 나타내고 있다. NVIDIA GPU 지원은 다음의 두 가지 요소가 담당한다.
-
-* **HAMi Device Plugin** : `hami-device-plugin` DaemonSet을 통해서 GPU Node에서 동작하며, 하나의 Pod 안에서 vGPU를 kubelet에 등록하고 GPU의 Health 상태를 확인하며 vGPU를 할당하는 `device-plugin` Container와, GPU와 vGPU의 사용량을 Metric으로 노출하는 `vgpu-monitor` Container가 함께 동작한다.
-* **HAMi-core** : Container 내부에 주입되는 `libvgpu.so` Library이며, CUDA Driver API 호출을 가로채서 vGPU의 Memory 크기 제한과 SM 사용률 제한을 수행한다.
+* **HAMi Scheduler** : Pod가 요청한 [Table 1]의 NVIDIA GPU Resource와 각 Node의 `hami.io/node-nvidia-register` Annotation에 기록된 GPU 정보를 비교하여 vGPU를 배치할 Node와 GPU를 선택한다. HAMi-core Mode Node에서는 남은 Memory 크기와 SM 사용률이 충분한 GPU를 선택하며, MIG Mode Node에서는 요청한 Memory 크기를 수용하는 MIG Profile과 생성할 위치까지 선택한다.
+* **HAMi Device Plugin** : `hami-device-plugin` DaemonSet을 통해서 GPU Node에서 동작하며, 하나의 Pod 안에서 vGPU를 kubelet에 등록하고 GPU의 Health 상태를 확인하며 vGPU를 할당하는 `device-plugin` Container와, GPU와 vGPU의 사용량을 Metric으로 노출하는 `vgpu-monitor` Container가 함께 동작한다. MIG Mode Node에서는 MIG Instance의 생성과 회수도 담당한다.
+* **HAMi-core** : HAMi-core Mode에서 Container 내부에 주입되는 `libvgpu.so` Library이며, CUDA Driver API 호출을 가로채서 vGPU의 Memory 크기 제한과 SM 사용률 제한을 수행한다.
 
 {{< table caption="[Table 1] HAMi가 제공하는 vGPU Resource 종류" >}}
-| Resource | 용도 |
-|---|---|
-| `nvidia.com/gpu` | Container에 할당할 vGPU의 개수 |
-| `nvidia.com/gpumem` | 각 vGPU에 할당할 Memory의 크기 (MiB 단위) |
-| `nvidia.com/gpumem-percentage` | 물리 GPU Memory 대비 각 vGPU에 할당할 Memory의 비율 (%) |
-| `nvidia.com/gpucores` | 각 vGPU가 이용할 수 있는 SM 사용률 (%) |
-| `nvidia.com/priority` | vGPU Workload의 우선순위 (`0` 높음, `1` 낮음. 기본값 `1`) |
+| Resource | 용도 | HAMi-core Mode | MIG Mode |
+|---|---|---|---|
+| `nvidia.com/gpu` | Container에 할당할 vGPU의 개수 | O | O |
+| `nvidia.com/gpumem` | 각 vGPU에 할당할 Memory의 크기 (MiB 단위) | O | O |
+| `nvidia.com/gpumem-percentage` | 물리 GPU Memory 대비 각 vGPU에 할당할 Memory의 비율 (%). 예를 들어 `50`을 지정하면 16GiB GPU에서는 8GiB, 80GiB GPU에서는 40GiB가 할당되어 GPU의 Memory 크기와 관계없이 같은 비율을 요청할 수 있다 | O | O |
+| `nvidia.com/gpucores` | 각 vGPU가 이용할 수 있는 SM 사용률 (%). 예를 들어 `30`을 지정하면 SM 사용률이 평균 30% 이하로 제한되며, `100`을 지정하면 물리 GPU 전체를 전용으로 할당받는다. 지정하지 않으면 SM 사용률을 제한하지 않는다 | O | X |
+| `nvidia.com/priority` | 같은 GPU를 공유하는 vGPU Workload 사이의 우선순위로, `0`이 높고 `1`이 낮으며 기본값은 `1`이다. 예를 들어 `0`인 Workload가 GPU를 이용하는 동안에는 `1`인 Workload의 Kernel 실행이 일시 중지된다. `nvidia.com/gpucores`를 1~99로 지정하여 SM 사용률 제한이 적용되는 Workload에만 동작한다 | O | X |
 {{< /table >}}
 
-[Table 1]은 HAMi가 제공하는 vGPU Resource의 종류를 나타내고 있다. NVIDIA Device Plugin과 동일하게 `nvidia.com/gpu` Resource로 GPU의 개수를 요청하지만, HAMi에서는 물리 GPU가 아닌 vGPU의 개수를 의미한다. `nvidia.com/gpucores`에 100을 명시하면 물리 GPU 전체를 전용으로 할당받으며, `nvidia.com/priority`가 다른 두 Workload가 하나의 GPU를 공유하면 높은 우선순위의 Workload가 동작하는 동안 낮은 우선순위의 Workload의 연산이 제한된다.
+[Table 1]은 HAMi가 제공하는 vGPU Resource의 종류를 나타내고 있으며, 두 Mode 모두 같은 Resource로 vGPU를 요청하지만, MIG Mode에서는 Memory 크기만으로 MIG Profile을 선택하고 HAMi-core가 주입되지 않기 때문에 `nvidia.com/gpucores`와 `nvidia.com/priority`를 이용하지 않는다. HAMi Scheduler는 `nvidia.com/gpu`로 vGPU의 개수를, `nvidia.com/gpumem` 또는 `nvidia.com/gpumem-percentage`로 각 vGPU의 Memory 크기를, `nvidia.com/gpucores`로 SM 사용률을 파악하여 각 GPU의 남은 용량과 비교한다. NVIDIA Device Plugin과 동일하게 `nvidia.com/gpu` Resource로 GPU의 개수를 요청하지만, HAMi에서는 물리 GPU가 아닌 vGPU의 개수를 의미한다.
 
 ```yaml {caption="[File 1] vGPU를 요청하는 Pod 예제", linenos=table}
 apiVersion: v1
@@ -114,9 +118,9 @@ metadata:
 | `operatingmode` | Node의 vGPU 동작 모드. `hami-core`, `mig`, `remote` 중 하나 (`hami-core`) |
 {{< /table >}}
 
-[Table 2]는 NVIDIA GPU의 주요 vGPU 설정을 나타내고 있다. Cluster 공통 설정은 `hami-scheduler-device` ConfigMap의 `nvidia` Section에 정의하며, Node 단위의 재정의는 `hami-device-plugin` ConfigMap의 `nodeconfig` 목록에 Node 이름과 함께 정의한다. NVIDIA GPU에서는 물리 GPU 개수 × `deviceSplitCount`개의 `nvidia.com/gpu`가 Node의 Allocatable에 등록된다. `operatingmode`의 `remote`는 네트워크를 통해서 다른 Server의 GPU를 이용하는 Mode이다.
+[Table 2]는 NVIDIA GPU의 주요 vGPU 설정을 나타내고 있다. Cluster 공통 설정은 `hami-scheduler-device` ConfigMap의 `nvidia` Section에 정의하며, Node 단위의 재정의는 `hami-device-plugin` ConfigMap의 `nodeconfig` 목록에 Node 이름과 함께 정의한다. NVIDIA GPU에서는 물리 GPU 개수 × `deviceSplitCount`개의 `nvidia.com/gpu`가 Node의 Allocatable에 등록된다. `operatingmode`는 Node가 HAMi-core Mode와 MIG Mode 중 어느 방식으로 GPU를 나눌지 결정하며, `remote`는 네트워크를 통해서 다른 Server의 GPU를 이용하는 Mode로 이 글에서는 다루지 않는다.
 
-`deviceMemoryScaling`을 1보다 크게 설정하면 물리 Memory보다 많은 Memory를 할당하는 초과 할당이 가능한데, vGPU별 Memory 제한은 유지되지만 모든 vGPU가 제한값까지 Memory를 이용하면 물리 GPU의 OOM이 발생할 수 있는 실험적인 기능이다. `deviceCoreScaling`도 1보다 크게 설정하면 물리 SM보다 많은 SM 사용률을 할당할 수 있다.
+`deviceMemoryScaling`을 1보다 크게 설정하면 물리 Memory보다 많은 Memory를 할당하는 초과 할당이 가능한데, vGPU별 Memory 제한은 유지되지만 모든 vGPU가 제한값까지 Memory를 이용하면 물리 GPU의 OOM이 발생할 수 있는 실험적인 기능이다. `deviceCoreScaling`도 1보다 크게 설정하면 물리 SM보다 많은 SM 사용률을 할당할 수 있다. 두 Scaling 설정은 MIG Mode에는 적용되지 않으며, MIG Mode에서는 `deviceSplitCount` 대신 GPU가 수용할 수 있는 MIG Instance의 개수가 공유할 수 있는 Container 수를 제한한다.
 
 {{< table caption="[Table 3] Pod 요청을 보정하는 vGPU 설정" >}}
 | 설정 | 적용 위치 | 동작 (기본값) |
@@ -157,7 +161,11 @@ metadata:
 
 [File 4]의 첫 번째 GPU처럼 `index`와 `numa`가 `0`인 경우에는 JSON에서 생략된다. `devmem`은 Driver가 보고하는 물리 Memory 크기이기 때문에 GPU의 표기 용량보다 조금 작은 값이 기록된다.
 
-### 1.3. HAMi-core 주입
+### 1.3. HAMi-core Mode
+
+HAMi-core Mode는 `operatingmode`가 `hami-core`인 Node에서 동작하며, HAMi Device Plugin이 Container에 HAMi-core를 주입하고 HAMi-core가 Memory 크기 제한과 SM 사용률 제한을 수행한다.
+
+#### 1.3.1. HAMi-core 주입
 
 Container에는 세 종류의 Library가 필요하며, 종류마다 전달 방식이 다르다.
 
@@ -213,7 +221,7 @@ libvgpu.so
 
 [File 5]는 `nvidia.com/gpu`만 요청하는 Pod이며, [Shell 2]와 같이 GPU의 Memory 전체인 `16311` MiB와 SM 사용률 `100`이 할당된다. `CUDA_DISABLE_CONTROL=true`가 주입되고 `/etc/ld.so.preload`는 Mount되지 않기 때문에, `libvgpu.so` 파일은 Container에 존재하지만 Load되지 않는다.
 
-### 1.4. Memory, SM 사용률 제한
+#### 1.3.2. Memory, SM 사용률 제한
 
 {{< figure caption="[Figure 2] HAMi-core Isolation" src="images/hami-core-isolation.png" width="700px" >}}
 
@@ -251,7 +259,7 @@ OOM: CUDA out of memory
 
 SM 사용률 제한은 Kernel 실행 API를 가로채서 수행된다. `libvgpu.so`는 GPU의 사용률을 주기적으로 측정하면서 Token 기반으로 Kernel 실행 가능 여부를 관리하며, `cuLaunchKernel()` 같은 Kernel 실행 함수가 호출될 때 Token이 부족하면 Kernel 실행을 지연시켜 vGPU의 SM 사용률을 `CUDA_DEVICE_SM_LIMIT` 환경 변수에 설정된 제한 이하로 유지한다. 제한 동작은 `GPU_CORE_UTILIZATION_POLICY` 환경 변수로 다음과 같이 변경할 수 있다.
 
-* `default` : GPU가 유휴 상태이면 제한을 초과하는 이용을 허용한다 (기본값).
+* `default` : 기본값이며, 같은 GPU를 이용하는 다른 Container가 없으면 제한을 초과하는 이용을 허용한다. 제한의 적용 여부는 `vgpu-monitor`가 주기적으로 판단한다.
 * `force` : 유휴 상태와 무관하게 항상 제한을 강제한다.
 * `disable` : SM 사용률 제한을 수행하지 않는다.
 
@@ -295,6 +303,60 @@ vGPU를 할당받은 App Container의 사용량 정보는 HAMi-core가 **Shared 
 
 Cache 파일은 HAMi Device Plugin이 hostPath Volume으로 App Container에 Mount한 경로에 생성되기 때문에 Container 밖에서도 같은 파일을 읽을 수 있으며, `vgpu-monitor`는 Node에 존재하는 vGPU Container들의 Cache 파일을 주기적으로 읽어서 Container별 Memory 사용량과 SM 사용률을 Metric으로 노출한다. 이처럼 HAMi의 제한은 CUDA API 가로채기를 통한 Software Level의 제한이기 때문에 별도의 Hardware 지원 없이 모든 NVIDIA GPU에서 이용할 수 있지만, MIG 같은 Hardware Level의 격리보다는 격리 수준이 낮다.
 
+#### 1.3.3. 우선순위
+
+HAMi-core Mode에서는 같은 GPU를 공유하는 Container 사이에 **우선순위**를 지정하여, 높은 우선순위의 Container가 GPU를 이용하는 동안 낮은 우선순위의 Container의 Kernel 실행을 멈출 수 있다. 우선순위는 Container의 `resources.limits`에 `nvidia.com/priority: 0`과 같이 Resource로 지정하며, 값이 작을수록 우선순위가 높다. Mutating Webhook은 이 값을 Container의 `CUDA_TASK_PRIORITY` 환경 변수로 변환하고, HAMi-core는 시작할 때 이 값을 Shared Memory Region에 기록한다. 우선순위를 지정하지 않은 Container는 `1`로 기록된다. 우선순위는 다음의 과정으로 적용된다.
+
+1. HAMi-core는 Kernel 실행 함수가 호출될 때마다 Shared Memory Region에 최근 Kernel을 실행하였다는 표시를 남긴다.
+2. `vgpu-monitor`는 5초 주기로 Node의 모든 vGPU Container의 Shared Memory Region을 읽어서, GPU별, 우선순위별로 최근 Kernel을 실행한 Container의 수를 집계한다.
+3. `vgpu-monitor`는 같은 GPU에서 더 높은 우선순위의 Container가 Kernel을 실행 중이면, 낮은 우선순위의 Container의 Shared Memory Region에 Blocking 상태를 기록한다.
+4. Blocking 상태가 기록된 Container의 HAMi-core는 Kernel 실행 함수가 호출되면 Blocking 상태가 해제될 때까지 1초 간격으로 대기하며, 높은 우선순위의 Container가 더 이상 Kernel을 실행하지 않으면 `vgpu-monitor`가 Blocking 상태를 해제한다.
+
+`vgpu-monitor`는 같은 주기에 각 Container의 SM 사용률 제한 적용 여부도 결정한다. 같은 GPU에서 더 높은 우선순위의 Container나 같은 우선순위의 다른 Container가 Kernel을 실행 중이면 SM 사용률 제한을 적용하고, 그렇지 않으면 제한을 해제하여 GPU를 혼자 이용하는 Container가 제한을 초과하여 이용할 수 있도록 한다. 이것이 `GPU_CORE_UTILIZATION_POLICY`가 `default`일 때의 동작이며, `force`와 `disable`은 이 결정과 무관하게 각각 항상 제한을 적용하거나 적용하지 않는다.
+
+우선순위는 SM 사용률 제한이 `1`부터 `99` 사이인 Container에만 동작한다. HAMi-core는 `nvidia.com/gpucores`를 지정하지 않았거나 `100`으로 지정한 Container에서는 Kernel 실행 시 우선순위 처리를 건너뛰기 때문에, 이러한 Container는 다른 Container의 Kernel 실행을 멈추지 않으며 자신도 멈춰지지 않는다.
+
+### 1.4. MIG Mode
+
+MIG Mode는 `operatingmode`가 `mig`인 Node에서 동작하며, vGPU 요청에 따라서 MIG Instance를 동적으로 생성하여 할당하는 Dynamic MIG 기능을 이용한다. HAMi-core의 Software Level 제한과 다르게 MIG는 GPU의 SM과 Memory를 Hardware Level에서 격리하기 때문에 더 높은 격리 수준을 제공하며, Pod는 HAMi-core Mode와 동일한 vGPU Resource로 MIG Instance를 요청한다.
+
+Dynamic MIG는 v2.5.0에서 도입되었다. 도입 초기에는 `knownMigGeometries` 설정에 정의된 Geometry (Profile 조합) 단위로 GPU 전체의 MIG 구성을 전환하는 방식이었지만, v2.10.0의 Flexible MIG부터는 Profile 단위의 예약 방식으로 재구성되어 Node의 Cordon 없이 Workload별로 MIG Instance가 생성되고 회수된다. 단 HAMi가 MIG Instance의 생성과 제거를 단독으로 담당해야 하기 때문에, GPU Operator의 MIG Manager나 `mig-parted` 도구를 HAMi와 함께 운용할 수 없다.
+
+#### 1.4.1. MIG Profile 선택
+
+```yaml {caption="[File 6] MIG Mode를 지정하는 Pod 예제", linenos=table}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mig-pod
+  annotations:
+    nvidia.com/vgpu-mode: "mig"
+spec:
+  containers:
+  - name: cuda
+    image: nvidia/cuda:12.4.0-base-ubuntu22.04
+    command: ["sleep", "infinity"]
+    resources:
+      limits:
+        nvidia.com/gpu: 1
+        nvidia.com/gpumem: 8000
+```
+
+[File 6]은 MIG Instance로 8000MiB의 Memory를 요청하는 Pod의 예제를 나타내고 있다. HAMi Scheduler는 `migProfileAllowlist` 설정에 GPU 모델별로 정의된 MIG Profile 중에서, Pod가 `nvidia.com/gpumem` 또는 `nvidia.com/gpumem-percentage`로 요청한 Memory 크기를 수용하는 가장 작은 Profile을 선택한다. 예를 들어 A100 80GB GPU에는 `1g.10gb`, `2g.20gb`, `3g.40gb`, `4g.40gb`, `7g.79gb` Profile이 정의되어 있어 [File 6]의 Pod에는 `1g.10gb`가 선택된다.
+
+MIG Profile은 Memory 크기만으로 선택되기 때문에 `nvidia.com/gpucores` 요청은 이용되지 않으며, 할당 내역에는 요청 값 대신 선택된 Profile의 Memory 크기와 Core 값이 기록된다. 특정 Profile을 선호하는 경우에는 Pod의 `nvidia.com/mig-profile-preference` Annotation에 `migProfileAllowlist`에 정의된 Profile 이름이나 `4g` 같은 Slice 접두사를 지정하며, 지정한 Profile이 Memory 크기를 수용하면 더 작은 Profile보다 먼저 선택된다. `nvidia.com/vgpu-mode` Annotation은 vGPU가 할당될 Mode를 고정하는 Annotation이며, 생략하면 HAMi Scheduler가 `mig` Node와 `hami-core` Node를 하나의 vGPU Pool로 취급하여 조건을 만족하는 Node를 자유롭게 선택한다.
+
+#### 1.4.2. MIG Instance 할당
+
+{{< figure caption="[Figure 3] Dynamic MIG Allocation Process" src="images/hami-nvidia-dynamic-mig.png" width="650px" >}}
+
+[Figure 3]은 Dynamic MIG의 할당 과정을 나타내고 있다.
+
+1. HAMi Scheduler는 [File 6]과 같이 선택한 MIG Profile과 함께 생성할 물리 위치까지 예약하여 Pod의 Annotation에 기록한다.
+2. Pod가 Bind된 Node의 kubelet은 HAMi Device Plugin에게 `Allocate()` gRPC 요청을 전송한다.
+3. HAMi Device Plugin은 Pod의 Annotation에서 예약된 Profile과 위치를 조회한다.
+4. HAMi Device Plugin은 예약된 Profile의 GPU Instance와 Compute Instance를 NVML을 통해서 동적으로 생성하여 Container에 할당하고, Pod가 종료되면 생성했던 MIG Instance를 회수한다.
+
 ### 1.5. GPU 선택
 
 HAMi는 Pod Annotation을 통해서 vGPU가 배치될 물리 GPU를 제어하는 기능을 제공한다. 다음의 Annotation을 통해서 GPU의 Type과 UUID를 지정하거나 제외할 수 있다.
@@ -303,7 +365,7 @@ HAMi는 Pod Annotation을 통해서 vGPU가 배치될 물리 GPU를 제어하는
 * `nvidia.com/nouse-gputype` : 할당에서 제외할 GPU Type 목록
 * `nvidia.com/use-gpuuuid`, `nvidia.com/nouse-gpuuuid` : 할당을 허용하거나 제외할 GPU의 UUID 목록
 
-```yaml {caption="[File 6] GPU Type과 Scheduling 정책을 지정하는 Pod 예제", linenos=table}
+```yaml {caption="[File 7] GPU Type과 Scheduling 정책을 지정하는 Pod 예제", linenos=table}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -322,44 +384,11 @@ spec:
         nvidia.com/gpumem: 3000
 ```
 
-[File 6]은 A100 GPU에서 `binpack` 정책으로 vGPU를 할당받는 Pod의 예제를 나타내고 있다. NVIDIA GPU의 Device Scheduling 정책에는 `binpack`, `spread` 외에도 물리 GPU를 공유 없이 전용으로 요구하는 `mutex` 정책이 있으며, v2.10.0부터는 정책을 쉼표로 연결하여 조합할 수 있다.
+[File 7]은 A100 GPU에서 `binpack` 정책으로 vGPU를 할당받는 Pod의 예제를 나타내고 있다. NVIDIA GPU의 Device Scheduling 정책에는 `binpack`, `spread` 외에도 물리 GPU를 공유 없이 전용으로 요구하는 `mutex` 정책이 있으며, v2.10.0부터는 정책을 쉼표로 연결하여 조합할 수 있다.
 
 다수의 GPU를 요청하는 Workload를 위한 Topology 기반의 GPU 선택도 v2.7.0부터 제공된다. HAMi Device Plugin에 `ENABLE_TOPOLOGY_SCORE` 환경 변수를 활성화하면 NVML을 통해서 GPU 쌍 사이의 연결 방식 (NVLink, PCIe) 을 점수화하여 Node의 `hami.io/node-nvidia-score` Annotation에 기록하고, Pod의 `hami.io/gpu-scheduler-policy` Annotation에 `topology-aware`를 명시하면 NVLink로 연결된 GPU 집합을 우선적으로 선택하여 GPU 간 통신 성능을 보장한다.
 
-### 1.6. Dynamic MIG
-
-{{< figure caption="[Figure 3] Dynamic MIG Allocation Process" src="images/hami-nvidia-dynamic-mig.png" width="650px" >}}
-
-**Dynamic MIG**는 vGPU 요청에 따라서 MIG Instance를 동적으로 생성하여 할당하는 기능이며 v2.5.0에서 도입되었다. HAMi-core의 Software Level 제한과 다르게 MIG는 GPU의 SM과 Memory를 Hardware Level에서 격리하기 때문에 더 높은 격리 수준을 제공한다. Node의 `operatingmode` 설정을 `mig`로 지정하면 해당 Node의 GPU는 HAMi-core 대신 MIG Instance 단위로 할당되며, Pod는 `hami-core` 모드와 동일한 vGPU Resource로 MIG Instance를 요청한다. [Figure 3]은 Dynamic MIG의 할당 과정을 나타내고 있다.
-
-1. HAMi Scheduler는 Pod의 Memory 크기와 SM 사용률 요청을 만족하는 MIG Profile을 `migProfileAllowlist` 설정에 정의된 Profile 중에서 선택하고, Profile과 함께 생성할 물리 위치까지 예약하여 Pod의 Annotation에 기록한다.
-2. Pod가 Bind된 Node의 kubelet은 HAMi Device Plugin에게 `Allocate()` gRPC 요청을 전송한다.
-3. HAMi Device Plugin은 Pod의 Annotation에서 예약된 Profile과 위치를 조회한다.
-4. HAMi Device Plugin은 예약된 Profile의 GPU Instance와 Compute Instance를 NVML을 통해서 동적으로 생성하여 Container에 할당하고, Pod가 종료되면 생성했던 MIG Instance를 회수한다.
-
-```yaml {caption="[File 7] MIG 모드를 지정하는 Pod 예제", linenos=table}
-apiVersion: v1
-kind: Pod
-metadata:
-  name: mig-pod
-  annotations:
-    nvidia.com/vgpu-mode: "mig"
-spec:
-  containers:
-  - name: cuda
-    image: nvidia/cuda:12.4.0-base-ubuntu22.04
-    command: ["sleep", "infinity"]
-    resources:
-      limits:
-        nvidia.com/gpu: 1
-        nvidia.com/gpumem: 8000
-```
-
-[File 7]은 MIG Instance로 8000MiB의 Memory를 요청하는 Pod의 예제를 나타내고 있으며, 요청을 수용할 수 있는 가장 작은 MIG Profile (예: A100의 `1g.10gb`)이 선택된다. `nvidia.com/vgpu-mode` Annotation은 vGPU가 할당될 모드를 고정하는 Annotation이며, 생략하면 HAMi Scheduler가 `mig` Node와 `hami-core` Node를 하나의 vGPU Pool로 취급하여 조건을 만족하는 Node를 자유롭게 선택한다.
-
-도입 초기의 Dynamic MIG는 `knownMigGeometries` 설정에 정의된 Geometry (Profile 조합) 단위로 GPU 전체의 MIG 구성을 전환하는 방식이었지만, v2.10.0의 Flexible MIG부터는 Profile 단위의 예약 방식으로 재구성되어 Node의 Cordon 없이 Workload별로 MIG Instance가 생성되고 회수된다. 단 HAMi가 MIG Instance의 생성과 제거를 단독으로 담당해야 하기 때문에, GPU Operator의 MIG Manager나 `mig-parted` 도구를 HAMi와 함께 운용할 수 없다.
-
-### 1.7. GPU Health Check
+### 1.6. GPU Health Check
 
 HAMi Device Plugin은 NVIDIA Device Plugin의 Health Check 구현을 이어받아 NVML Event로 GPU 장애를 감지한다. **Xid** (NVIDIA Driver가 보고하는 GPU 오류 번호) Critical Error Event가 발생하면 해당 GPU를 `Unhealthy`로 표시하며, ECC Event도 구독하지만 `Unhealthy` 판정에는 이용하지 않는다. NVML Event 등록에 실패한 GPU도 `Unhealthy`로 표시되고, Event 대기 자체가 실패하면 모든 GPU가 `Unhealthy`로 표시된다.
 
