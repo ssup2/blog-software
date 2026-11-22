@@ -118,7 +118,7 @@ metadata:
 | `operatingmode` | Node의 vGPU 동작 모드. `hami-core`, `mig`, `remote` 중 하나 (`hami-core`) |
 {{< /table >}}
 
-[Table 2]는 NVIDIA GPU의 주요 vGPU 설정을 나타내고 있다. Cluster 공통 설정은 `hami-scheduler-device` ConfigMap의 `nvidia` Section에 정의하며, Node 단위의 재정의는 `hami-device-plugin` ConfigMap의 `nodeconfig` 목록에 Node 이름과 함께 정의한다. NVIDIA GPU에서는 물리 GPU 개수 × `deviceSplitCount`개의 `nvidia.com/gpu`가 Node의 Allocatable에 등록된다. `operatingmode`는 Node가 HAMi-core Mode와 MIG Mode 중 어느 방식으로 GPU를 나눌지 결정하며, `remote`는 네트워크를 통해서 다른 Server의 GPU를 이용하는 Mode로 이 글에서는 다루지 않는다.
+[Table 2]는 NVIDIA GPU의 주요 vGPU 설정을 나타내고 있다. Cluster 공통 설정은 `hami-scheduler-device` ConfigMap의 `nvidia` Section에 정의하며, Node 단위의 재정의는 `hami-device-plugin` ConfigMap의 `nodeconfig` 목록에 Node 이름과 함께 정의한다. NVIDIA GPU에서는 물리 GPU 개수 × `deviceSplitCount`개의 `nvidia.com/gpu`가 Node의 Allocatable에 등록된다. `operatingmode`는 Node가 HAMi-core Mode와 MIG Mode 중 어느 방식으로 GPU를 나눌지 결정하며, `remote`는 네트워크를 통해서 다른 Server의 GPU를 이용하는 Mode로 이 글에서는 다루지 않는다. `operatingmode`는 `nodeconfig`에서 Node 이름이나 `nodelabelselector`로 Node 단위로 지정하기 때문에 하나의 Cluster에서 Node마다 다른 Mode를 혼용할 수 있지만, 하나의 Node 안에서 GPU마다 다른 Mode를 지정할 수는 없다. 설정과 Node Label은 HAMi Device Plugin이 시작할 때 읽기 때문에, 변경 후에는 해당 Node의 HAMi Device Plugin을 재시작해야 한다.
 
 `deviceMemoryScaling`을 1보다 크게 설정하면 물리 Memory보다 많은 Memory를 할당하는 초과 할당이 가능한데, vGPU별 Memory 제한은 유지되지만 모든 vGPU가 제한값까지 Memory를 이용하면 물리 GPU의 OOM이 발생할 수 있는 실험적인 기능이다. `deviceCoreScaling`도 1보다 크게 설정하면 물리 SM보다 많은 SM 사용률을 할당할 수 있다. 두 Scaling 설정은 MIG Mode에는 적용되지 않으며, MIG Mode에서는 `deviceSplitCount` 대신 GPU가 수용할 수 있는 MIG Instance의 개수가 공유할 수 있는 Container 수를 제한한다.
 
@@ -388,6 +388,8 @@ MIG Mode는 `operatingmode`가 `mig`인 Node에서 동작하며, vGPU 요청에 
 
 Dynamic MIG는 v2.5.0에서 도입되었다. 도입 초기에는 `knownMigGeometries` 설정에 정의된 Geometry (Profile 조합) 단위로 GPU 전체의 MIG 구성을 전환하는 방식이었지만, v2.10.0의 Flexible MIG부터는 Profile 단위의 예약 방식으로 재구성되어 Node의 Cordon 없이 Workload별로 MIG Instance가 생성되고 회수된다. 단 HAMi가 MIG Instance의 생성과 제거를 단독으로 담당해야 하기 때문에, GPU Operator의 MIG Manager나 `mig-parted` 도구를 HAMi와 함께 운용할 수 없다.
 
+NVIDIA Device Plugin은 시작할 때 이미 생성된 MIG Instance를 조회하여 kubelet에 Device로 등록하기 때문에, MIG 구성을 변경하면 Device Plugin을 재시작해야 변경된 Device 목록이 반영된다. 반면 HAMi Device Plugin은 MIG Mode에서도 부모 GPU를 기준으로 만든 vGPU를 kubelet에 등록하고 MIG Instance는 `Allocate()` 처리 중에 생성하여 그 UUID를 Container에 전달하기 때문에, MIG Instance가 생성되고 회수되어도 Device Plugin을 재시작할 필요가 없다. 다만 GPU의 MIG Mode가 꺼져 있으면 HAMi Device Plugin이 첫 할당 시점에 MIG Mode를 직접 켜는데, A100 같은 Ampere GPU는 MIG Mode 변경에 GPU Reset이나 VM 재부팅이 필요할 수 있어 이 경우 할당이 실패한다. 따라서 Ampere GPU에서는 `nvidia-smi -mig 1` 명령어로 MIG Mode를 미리 켜고 GPU Reset까지 완료해 두는 것이 안전하다.
+
 #### 1.4.1. MIG Profile 선택
 
 ```yaml {caption="[File 8] MIG Mode를 지정하는 Pod 예제", linenos=table}
@@ -412,16 +414,22 @@ spec:
 
 MIG Profile은 Memory 크기만으로 선택되기 때문에 `nvidia.com/gpucores` 요청은 이용되지 않으며, 할당 내역에는 요청 값 대신 선택된 Profile의 Memory 크기와 Core 값이 기록된다. 특정 Profile을 선호하는 경우에는 Pod의 `nvidia.com/mig-profile-preference` Annotation에 `migProfileAllowlist`에 정의된 Profile 이름이나 `4g` 같은 Slice 접두사를 지정하며, 지정한 Profile이 Memory 크기를 수용하면 더 작은 Profile보다 먼저 선택된다. `nvidia.com/vgpu-mode` Annotation은 vGPU가 할당될 Mode를 고정하는 Annotation이며, 생략하면 HAMi Scheduler가 `mig` Node와 `hami-core` Node를 하나의 vGPU Pool로 취급하여 조건을 만족하는 Node를 자유롭게 선택한다.
 
+MIG Instance는 GPU의 Memory Slice 위에 생성되며, MIG Profile마다 생성할 수 있는 시작 위치가 정해져 있다. 예를 들어 A100 40GB GPU는 8개의 Slice를 가지며, `1g.5gb`는 0부터 6까지, `2g.10gb`는 0, 2, 4, `3g.20gb`는 0, 4에서 시작할 수 있고, `4g.20gb`와 `7g.40gb`는 0에서만 시작할 수 있다. 따라서 먼저 생성된 MIG Instance의 위치가 이후에 생성할 수 있는 MIG Profile을 제한한다.
+
+HAMi Scheduler는 HAMi Device Plugin이 NVML로 조회하여 등록한 위치 목록 중에서, GPU를 두 절반으로 나누어 작은 Profile은 한쪽 절반의 바깥쪽부터 채우고 다른 절반은 절반 크기의 Profile을 위해 비워 두는 방향으로 위치를 선택한다. 예를 들어 빈 A100 40GB GPU에 `1g.5gb`나 `2g.10gb`를 먼저 생성하면 위치 0에 배치되기 때문에 이후에도 위치 4에 `3g.20gb`를 생성할 수 있지만, 위치 0에서만 시작할 수 있는 `4g.20gb`는 생성할 수 없다.
+
 #### 1.4.2. MIG Instance 할당
 
 {{< figure caption="[Figure 3] Dynamic MIG Allocation Process" src="images/hami-nvidia-dynamic-mig.png" width="900px" >}}
 
 [Figure 3]은 Dynamic MIG의 할당 과정을 나타내고 있다.
 
-1. HAMi Scheduler는 [File 8]과 같이 선택한 MIG Profile과 함께 생성할 물리 위치까지 예약하여 Pod의 Annotation에 기록한다.
+1. HAMi Scheduler는 [File 8]과 같이 선택한 MIG Profile과 함께 생성할 물리 위치까지 예약하여 Pod의 `hami.io/vgpu-mig-allocations` Annotation에 기록한다.
 2. Pod가 Bind된 Node의 kubelet은 HAMi Device Plugin에게 `Allocate()` gRPC 요청을 전송한다.
 3. HAMi Device Plugin은 Pod의 Annotation에서 예약된 Profile과 위치를 조회한다.
-4. HAMi Device Plugin은 예약된 Profile의 GPU Instance와 Compute Instance를 NVML을 통해서 동적으로 생성하여 Container에 할당하고, Pod가 종료되면 생성했던 MIG Instance를 회수한다.
+4. HAMi Device Plugin은 예약된 Profile의 GPU Instance와 Compute Instance를 NVML을 통해서 동적으로 생성하여 Container에 할당한다. 같은 위치에 같은 크기의 Idle 상태 MIG Instance가 있으면 새로 생성하지 않고 재사용한다.
+
+Pod가 종료되어도 MIG Instance는 바로 제거되지 않는다. 같은 Profile이 다시 요청될 때 MIG Instance를 제거하고 다시 생성하는 Overhead를 줄이기 위해서이며, 재사용되는 MIG Instance는 MIG UUID도 그대로 유지된다. HAMi Device Plugin은 5초 주기로 실행 중인 Pod의 `hami.io/vgpu-mig-allocations` Annotation과 자신이 관리하는 MIG Instance를 비교하여, 이용하는 Pod가 없는 MIG Instance를 Idle 상태로 전환한다. 반면 HAMi Scheduler는 종료되지 않은 Pod의 Annotation만으로 MIG Instance의 위치를 계산하기 때문에 Idle 상태의 MIG Instance가 차지한 위치를 빈 공간으로 간주하며, 새로 예약된 위치가 Idle 상태의 MIG Instance와 겹치면 HAMi Device Plugin은 겹치는 MIG Instance를 오래 이용되지 않은 순서대로 제거한 후 새로운 MIG Instance를 생성한다.
 
 ### 1.5. GPU 선택
 

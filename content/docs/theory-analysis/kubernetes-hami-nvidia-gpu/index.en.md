@@ -118,7 +118,7 @@ metadata:
 | `operatingmode` | vGPU operating Mode of the Node. One of `hami-core`, `mig`, `remote` (`hami-core`) |
 {{< /table >}}
 
-[Table 2] shows the major vGPU settings of NVIDIA GPU. Cluster-wide settings are defined in the `nvidia` Section of the `hami-scheduler-device` ConfigMap, and per-Node overrides are defined with the Node name in the `nodeconfig` list of the `hami-device-plugin` ConfigMap. For NVIDIA GPU, the number of physical GPUs × `deviceSplitCount` of `nvidia.com/gpu` is registered in the Node's Allocatable. `operatingmode` decides whether the Node divides GPUs in HAMi-core Mode or MIG Mode, and `remote` is a Mode that uses GPUs of other Servers over the network, which this post does not cover.
+[Table 2] shows the major vGPU settings of NVIDIA GPU. Cluster-wide settings are defined in the `nvidia` Section of the `hami-scheduler-device` ConfigMap, and per-Node overrides are defined with the Node name in the `nodeconfig` list of the `hami-device-plugin` ConfigMap. For NVIDIA GPU, the number of physical GPUs × `deviceSplitCount` of `nvidia.com/gpu` is registered in the Node's Allocatable. `operatingmode` decides whether the Node divides GPUs in HAMi-core Mode or MIG Mode, and `remote` is a Mode that uses GPUs of other Servers over the network, which this post does not cover. Since `operatingmode` is specified per Node in `nodeconfig` by Node name or `nodelabelselector`, different Nodes in one Cluster can use different Modes, but different Modes cannot be specified for GPUs within one Node. Since HAMi Device Plugin reads the settings and Node Labels when it starts, the HAMi Device Plugin on the Node must be restarted after changing them.
 
 Setting `deviceMemoryScaling` above 1 enables over-allocation, allocating more Memory than the physical Memory. The per-vGPU Memory limit is maintained, but it is an experimental feature that can cause physical GPU OOM if all vGPUs use Memory up to their limits. Setting `deviceCoreScaling` above 1 also allows allocating more SM utilization than the physical SMs. The two Scaling settings do not apply to MIG Mode, and in MIG Mode, the number of MIG Instances a GPU can hold limits the number of Containers that can share it instead of `deviceSplitCount`.
 
@@ -388,6 +388,8 @@ MIG Mode operates on Nodes whose `operatingmode` is `mig` and uses the Dynamic M
 
 Dynamic MIG was introduced in v2.5.0. Initially, it switched the MIG configuration of the entire GPU in units of Geometries (Profile combinations) defined in the `knownMigGeometries` setting, but since Flexible MIG in v2.10.0, it has been restructured into a per-Profile reservation method, so MIG Instances are created and reclaimed per Workload without cordoning the Node. However, since HAMi must be solely responsible for creating and removing MIG Instances, GPU Operator's MIG Manager or the `mig-parted` tool cannot be operated together with HAMi.
 
+Since NVIDIA Device Plugin looks up already created MIG Instances when it starts and registers them with kubelet as Devices, the Device Plugin must be restarted after the MIG configuration changes for the changed Device list to be reflected. In contrast, HAMi Device Plugin registers vGPUs based on the parent GPU with kubelet even in MIG Mode, and creates MIG Instances while handling `Allocate()` and passes their UUIDs to the Container, so the Device Plugin does not need to be restarted when MIG Instances are created and reclaimed. However, if the GPU's MIG Mode is off, HAMi Device Plugin turns MIG Mode on by itself at the first allocation, and since Ampere GPUs such as A100 may require a GPU Reset or VM reboot to change MIG Mode, the allocation fails in that case. Therefore, on Ampere GPUs, it is safer to turn on MIG Mode in advance with the `nvidia-smi -mig 1` command and complete the GPU Reset.
+
 #### 1.4.1. MIG Profile Selection
 
 ```yaml {caption="[File 8] Example Pod specifying MIG Mode", linenos=table}
@@ -412,16 +414,22 @@ spec:
 
 Since MIG Profiles are selected by Memory size only, the `nvidia.com/gpucores` request is not used, and the Memory size and Core value of the selected Profile are recorded in the allocation history instead of the requested values. To prefer a specific Profile, specify a Profile name defined in `migProfileAllowlist` or a Slice prefix such as `4g` in the Pod's `nvidia.com/mig-profile-preference` Annotation, and if the specified Profile covers the Memory size, it is selected before smaller Profiles. The `nvidia.com/vgpu-mode` Annotation fixes the Mode in which the vGPU is allocated, and if omitted, HAMi Scheduler treats `mig` Nodes and `hami-core` Nodes as one vGPU Pool and freely selects a Node that satisfies the conditions.
 
+MIG Instances are created on the GPU's Memory Slices, and the start positions at which each MIG Profile can be created are fixed. For example, the A100 40GB GPU has 8 Slices, and `1g.5gb` can start from 0 to 6, `2g.10gb` at 0, 2, 4, `3g.20gb` at 0, 4, and `4g.20gb` and `7g.40gb` only at 0. Therefore, the positions of MIG Instances created first limit the MIG Profiles that can be created afterward.
+
+From the position list that HAMi Device Plugin queries through NVML and registers, HAMi Scheduler selects positions by dividing the GPU into two halves, filling one half with small Profiles from its outer edge and keeping the other half free for half-size Profiles. For example, if `1g.5gb` or `2g.10gb` is created first on an empty A100 40GB GPU, it is placed at position 0, so `3g.20gb` can still be created at position 4 afterward, but `4g.20gb`, which can start only at position 0, cannot be created.
+
 #### 1.4.2. MIG Instance Allocation
 
 {{< figure caption="[Figure 3] Dynamic MIG Allocation Process" src="images/hami-nvidia-dynamic-mig.png" width="900px" >}}
 
 [Figure 3] shows the Dynamic MIG allocation process.
 
-1. HAMi Scheduler reserves the MIG Profile selected as in [File 8] together with the physical position to create it, and records them in the Pod's Annotation.
+1. HAMi Scheduler reserves the MIG Profile selected as in [File 8] together with the physical position to create it, and records them in the Pod's `hami.io/vgpu-mig-allocations` Annotation.
 2. kubelet on the Node to which the Pod is bound sends an `Allocate()` gRPC request to HAMi Device Plugin.
 3. HAMi Device Plugin looks up the reserved Profile and position from the Pod's Annotation.
-4. HAMi Device Plugin dynamically creates the GPU Instance and Compute Instance of the reserved Profile through NVML and allocates them to the Container, and reclaims the created MIG Instance when the Pod terminates.
+4. HAMi Device Plugin dynamically creates the GPU Instance and Compute Instance of the reserved Profile through NVML and allocates them to the Container. If an Idle MIG Instance of the same size exists at the same position, it reuses it instead of creating a new one.
+
+MIG Instances are not removed immediately when the Pod terminates. This reduces the overhead of removing and recreating MIG Instances when the same Profile is requested again, and a reused MIG Instance keeps the same MIG UUID. Every 5 seconds, HAMi Device Plugin compares the `hami.io/vgpu-mig-allocations` Annotations of running Pods with the MIG Instances it manages, and switches MIG Instances used by no Pod to the Idle state. In contrast, HAMi Scheduler calculates MIG Instance positions only from the Annotations of Pods that have not terminated, so it regards the positions occupied by Idle MIG Instances as free space, and when a newly reserved position overlaps Idle MIG Instances, HAMi Device Plugin removes the overlapping MIG Instances in order of least recent use and then creates the new MIG Instance.
 
 ### 1.5. GPU Selection
 

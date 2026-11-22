@@ -6,6 +6,28 @@ kubernetes-hami(HAMi 자체, 벤더 중립 구조) 문서의 NVIDIA 상세 글�
 
 ## 문서 구성 및 상태
 
+- **2026-11-22 Idle 캐시 이유 1문장 추가** (KR/EN): 근거 HAMi Issue #2834(즉시 제거 시 같은 Profile 재요청에 불필요한 Overhead), 병합 PR #3128
+  (2026-10-10, 같은 Profile·위치 요청에 기존 Instance와 MIG UUID 재사용, Idle도 CDI 항목 유지). 미병합 PR #2910의 "~1.5s → 0ms"와 Idle TTL은 본문 미기재
+  (측정 근거 없음, v2.11.0에 TTL 없음).
+- **2026-11-22 MIG 위치 선택 + Idle 수명 주기** (사용자 요청, KR/EN 동시, 소스 기반·A100 실측 없음):
+  1.4.1에 2문단 추가 — A100 40GB Placement 테이블(NVIDIA MIG User Guide `nvidia-smi mig -lgipp`: 1g {0..6}:1, 2g {0,2,4}:2, 3g {0,4}:4,
+  4g {0}:4, 7g {0}:8)과 HAMi 위치 선택(pkg/device/nvidia/mig_topology.go migRegions/migReservedRegion/score: 두 절반, Placement가 적은 쪽을
+  절반 크기 Profile용으로 예약, 작은 Profile은 다른 절반 바깥쪽부터). mig_topology_test.go TestSelectMigPlacementPacksEachHalfSeparately로
+  확인: 1g×4 → 0,1,2,3 / 1g→3g→1g → 0,4,1 / 2g×3→1g → 0,2,4,6. 따라서 첫 1g/2g 이후 3g(위치 4)는 가능, 4g는 불가.
+  1.4.2 4단계 정정("Pod 종료 시 회수"는 오류): plugin/migmgr.go — server.go runMigAnnotationReconciler(5s) → ReconcileActiveAllocations가
+  Pod 없는 Instance를 Idle로 캐시, EnsureAllocation이 같은 위치·Slice 크기 Idle 재사용(compatibleIdleAllocationLocked), 겹치는 Idle은
+  LastUsed 오래된 순 제거(reclaimBlockingIdle), Active와 겹치면 오류. Scheduler가 Idle을 빈 공간으로 보는 근거(사용자 요청으로 코드 확인):
+  scheduler.go의 MigAllocationsInUse는 podManager.ListPodsInfo() Pod의 `hami.io/vgpu-mig-allocations`(mig_allocations.go 상수)로만 구성,
+  종료 Pod는 onAddPod/onUpdatePod의 IsPodInTerminatedState → removePodAllocation으로 제외, 그 외 쓰기는 AddResourceUsage뿐.
+  1단계에 Annotation Key 명시. [Figure 3] Annotation Key와 4번 문구(Idle 유지·재사용·필요 시 회수) 수정.
+- **2026-11-22 [Figure 1]에 Node Annotation 추가** (사용자 요청): 각 Node에 `hami.io/node-nvidia-register` 박스(축약 값: id, count 10, mode)와
+  HAMi Scheduler로 향하는 "Read GPU info" 점선 화살표 추가, `operatingmode` 표기를 Node 제목 옆으로 이동, 캔버스 1400×880. 본문 변경 없음
+  (HAMi Scheduler bullet에 이미 Annotation 참조 서술 있음).
+- **2026-11-22 operatingmode 혼용 + MIG 재시작 문단** (사용자 요청, KR/EN 동시, 소스 기반·A100 실측 없음): 1.2에 Node 단위 지정(name/nodelabelselector),
+  Cluster 내 Node별 혼용 가능, Node 내 GPU별 불가, 변경 시 Plugin 재시작(Chart values.yaml nodeConfiguration 주석) 문장 추가.
+  1.4 도입에 upstream(시작 시 MIG Instance를 Device로 등록 → 재구성 시 재시작) vs HAMi(rm/devices.go GetPluginDevices: 부모 GPU `<UUID>-<n>` 등록,
+  plugin/util.go → migMgr.EnsureAllocation으로 Allocate 중 GI/CI 생성 후 MIG UUID 전달, CDI는 EnsureDynamicMIGDevice) 비교 + Ampere MIG Mode 사전 활성화
+  (migmgr.go ensureMigModeEnabled/SetMigMode, ERROR_RESET_REQUIRED → errMigModeNeedsReset) 문단 추가. 이전 UNVERIFIED "MIG Mode 사전 활성화 필요 여부" 해소.
 - **2026-11-22 남은 작업 일괄 처리** (사용자 요청 "모두 작업해줘"):
   ① 1.3.3 우선순위 실측(qwen3 replicas 0 → 1 복구): `manifests/hami-priority-high.yaml`, `hami-priority-low.yaml`(gpumem 2000, gpucores 50, priority 0/1),
   `manifests/matmul-rate.py`. 결과: `CUDA_TASK_PRIORITY` 주입 확인, low 단독 ~880 matmul/s(gpucores 50이지만 default 정책 Switch off로 무제한),

@@ -11,6 +11,13 @@ HAMi 자체(이기종 AI 가속기 가상화 Middleware)에 포커스를 두고 
 
 ## 문서 구성 및 상태
 
+- **2026-11-22 1.1 5단계에 부풀림 이유 1문장 추가, 기존 "물리 2개 × 분할 2 = 4개" 예시 문장 삭제** (사용자 요청, KR/EN 동시): kubelet Device Manager는 Device ID를 Container에 독점 할당 →
+  공유하려면 공유 Container 수만큼 서로 다른 ID 필요(HAMi `<UUID>-<n>`, NVIDIA Device Plugin Time-slicing도 `<UUID>::<n>` Replica). 일반 Kubernetes 동작 기반.
+- **2026-11-22 [Figure 1] 예시 문단에 분할 개수 상한 1문장 추가** (분할 개수 1 예시 문장은 사용자 요청으로 제거) (사용자 요청, KR/EN 동시): 분할 개수 = Accelerator당 Container 수 상한,
+  Memory/Core 여유와 무관하게 상한 도달 시 할당 불가, 1이면 Allocatable = 물리 개수 → 공유 불가. 근거: kubelet은 등록된 Device ID 수만큼만 할당
+  (GetPluginDevices: 물리 GPU당 deviceSplitCount개 ID), Scheduler는 pkg/device/nvidia/device.go:1065 `dev.Count <= dev.Used` → CardTimeSlicingExhausted
+  (NVIDIA 코드로 확인, 다른 벤더 Fit은 미확인이나 Allocatable 제한은 Device Plugin 공통). 같은 날 1.1에 넣었던 "기본값 10 근거 없음 / 시작 시에만
+  설정 읽음(SIGHUP, Pod·kubelet 재시작)" 2문단은 사용자 요청으로 롤백(근거: cmd/device-plugin/nvidia/main.go startPlugins, fsnotify는 kubelet Socket만 감시).
 - **2026-11-22 Figure 1 경로를 구성 요소 설명에 녹임** (사용자 요청, KR/EN 동시): HAMi Scheduler bullet에 Scheduler Extender 경로(Loopback 9444)와
   Mutating Webhook 경로(kube-apiserver → hami-scheduler Service), HAMi Device Plugin bullet에 Device Plugin Refit 경로(NUMA 정렬로 재선택 요청),
   Library 수준 격리에 Copy/Bind Mount 둘 다 [Figure 1] 명시. Metrics 경로는 Monitoring bullet에 기존 반영.

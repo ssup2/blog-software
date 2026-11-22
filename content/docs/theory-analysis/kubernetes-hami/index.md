@@ -29,7 +29,7 @@ title: Kubernetes HAMi
   * **Hardware 수준 격리** : 하드웨어 자체가 물리적으로 분할되어 각 Partition이 독립된 Memory와 Core를 갖는 가상 Accelerator가 생성된다. 분할 가능한 구성은 제조사가 Chip마다 미리 정의한 Template (고정된 Memory와 Core 조합) 집합으로 한정되며, Pod에는 이 Template 중 하나가 할당된다. 격리가 가장 확실한 대신 Template보다 세밀한 분할은 불가능하다.
 * **Monitoring** : [Figure 1]의 **Metrics** 경로와 같이 HAMi Scheduler는 `9395` Port에서 Accelerator별, Pod별 할당 내역을, HAMi Device Plugin의 `vgpu-monitor` Container는 `9394` Port에서 GPU 상태와 Container별 실제 GPU 사용량을 Prometheus Metric으로 제공한다. `vgpu-monitor` Container는 NVIDIA GPU용 HAMi Device Plugin에만 포함되기 때문에 실제 사용량 Metric은 NVIDIA GPU에서만 제공된다.
 
-[Figure 1]의 Node에는 물리 Accelerator가 2개 존재하며, HAMi 설정의 분할 개수 (`deviceSplitCount`) 가 2로 지정되어 있기 때문에 Node의 Allocatable/Capacity에는 4개의 Accelerator가 등록된다. 즉 물리 Accelerator 하나를 최대 2개의 Container가 나눠 쓸 수 있다. Pod A는 Accelerator 2개를 Core 사용률과 Memory 80%로, Pod B는 Accelerator 1개를 Core 사용률과 Memory 20%로 요청하여, Accelerator 1은 Pod A와 Pod B가 함께 사용한다.
+[Figure 1]의 Node에는 물리 Accelerator가 2개 존재하며, HAMi 설정의 분할 개수 (`deviceSplitCount`) 가 2로 지정되어 있기 때문에 Node의 Allocatable/Capacity에는 4개의 Accelerator가 등록된다. 즉 물리 Accelerator 하나를 최대 2개의 Container가 나눠 쓸 수 있다. Pod A는 Accelerator 2개를 Core 사용률과 Memory 80%로, Pod B는 Accelerator 1개를 Core 사용률과 Memory 20%로 요청하여, Accelerator 1은 Pod A와 Pod B가 함께 사용한다. 분할 개수는 하나의 물리 Accelerator를 공유할 수 있는 Container 수의 상한이기 때문에, Memory와 Core에 여유가 남아 있어도 분할 개수만큼 Container가 할당된 Accelerator에는 더 이상 Container를 할당할 수 없다.
 
 {{< table caption="[Table 2] HAMi Protocol Device Plugin이 제공되는 주요 Accelerator" >}}
 | Accelerator | Accelerator Resource 이름 | Memory / Core 제한 | 격리 계층 | Device Plugin |
@@ -96,7 +96,7 @@ Accelerator 등록은 HAMi Device Plugin이 수행하며, Node에 존재하는 �
 2. HAMi Device Plugin은 `/var/lib/kubelet/device-plugins/` Directory에 자신의 Unix Domain Socket을 생성하고 gRPC Server를 시작한다. Socket 파일 이름은 Device Plugin마다 다르며, NVIDIA GPU는 `nvidia-gpu.sock`을 이용한다.
 3. HAMi Device Plugin은 kubelet의 Unix Domain Socket (`/var/lib/kubelet/device-plugins/kubelet.sock`) 을 통해서 `Register()` gRPC 요청을 전송하여 Plugin 자신을 kubelet에 등록한다. 요청에는 Resource 이름과 2단계에서 생성한 Socket 파일 이름이 포함된다.
 4. HAMi Device Plugin은 등록 이후 Accelerator의 Health 상태 확인을 시작한다. 장애를 감지하면 해당 물리 Accelerator에서 부풀려진 항목을 `Unhealthy` 상태로 kubelet에 다시 전달하고, Node Annotation의 `health` 값도 갱신하여 해당 Accelerator가 할당 후보에서 제외되도록 한다.
-5. kubelet은 전달받은 Socket을 통해서 HAMi Device Plugin에게 `ListAndWatch()` gRPC 요청을 전송하여 Accelerator 목록을 수신한다. 이때 HAMi Device Plugin은 물리 Accelerator의 개수를 분할 개수 설정 (`deviceSplitCount`) 의 배수만큼 부풀려서 전달한다. 예를 들어 물리 Accelerator가 2개 존재하고 분할 개수가 2로 설정되어 있으면 4개의 Accelerator가 전달되며, 하나의 물리 Accelerator를 최대 2개의 Container에 할당할 수 있다는 의미가 된다.
+5. kubelet은 전달받은 Socket을 통해서 HAMi Device Plugin에게 `ListAndWatch()` gRPC 요청을 전송하여 Accelerator 목록을 수신한다. 이때 HAMi Device Plugin은 물리 Accelerator의 개수를 분할 개수 설정 (`deviceSplitCount`) 의 배수만큼 부풀려서 전달한다. kubelet은 하나의 Device ID를 한 번에 하나의 Container에만 할당하기 때문에, 하나의 물리 Accelerator를 여러 Container가 공유하려면 서로 다른 Device ID가 공유할 Container 수만큼 필요하기 때문이다.
 6. kubelet은 전달받은 Accelerator 개수를 kube-apiserver를 통해서 Node의 Allocatable/Capacity에 반영한다.
 7. HAMi Device Plugin은 Device Plugin 규격과 별도로 물리 Accelerator의 상세 정보를 `hami.io/node-[accelerator]-register` Node Annotation에 기록한다.
 
