@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hami-priority-high
+spec:
+  containers:
+  - name: cuda
+    image: vllm/vllm-openai:latest
+    command: ["sleep", "infinity"]
+    resources:
+      limits:
+        nvidia.com/gpu: 1
+        nvidia.com/gpumem: 2000
+        nvidia.com/gpucores: 50
+        nvidia.com/priority: 0
+  restartPolicy: Never

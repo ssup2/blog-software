@@ -6,6 +6,19 @@ kubernetes-hami(HAMi 자체, 벤더 중립 구조) 문서의 NVIDIA 상세 글�
 
 ## 문서 구성 및 상태
 
+- **2026-11-22 남은 작업 일괄 처리** (사용자 요청 "모두 작업해줘"):
+  ① 1.3.3 우선순위 실측(qwen3 replicas 0 → 1 복구): `manifests/hami-priority-high.yaml`, `hami-priority-low.yaml`(gpumem 2000, gpucores 50, priority 0/1),
+  `manifests/matmul-rate.py`. 결과: `CUDA_TASK_PRIORITY` 주입 확인, low 단독 ~880 matmul/s(gpucores 50이지만 default 정책 Switch off로 무제한),
+  high 실행 중 low는 ~45초 출력 없음(Blocking), high ~875/s(같은 priority 다른 Container 없어 제한 해제), 종료 후 low 복귀 → 소스 분석과 일치.
+  [File 6], [File 7], [Shell 5] 추가, 기존 File 6, 7 → 8, 9. Shell 5의 두 명령 출력은 시각순 정렬(본문 명시).
+  `force` bullet과 [File 2] 문단의 "유휴 상태" 표현을 "같은 GPU를 이용하는 다른 Container 유무"로 정정.
+  ② [Figure 2] 재작도(SVG → headless Chrome 1300×760, 소스 미보관): 기존 matplotlib 초안의 오류("via LD_PRELOAD", App → CUDA Library →
+  libvgpu.so 순서) 수정 — App → HAMi-core(ld.so.preload) → libcuda.so → GPU, Shared Memory Region(usage.cache)과 vgpu-monitor의 양방향
+  (사용량 읽기 → Metrics, Blocking/Switch 쓰기 5초). [Figure 3] 재작도(1300×700): ① Scheduler가 최소 수용 Profile + 위치 예약 → Pod Annotation
+  ② kubelet Allocate() ③ Device Plugin이 Annotation 조회 ④ NVML로 GI/CI 생성(Pod 종료 시 회수). Pod Annotation 표기는 개념 표기(실제 Key 미확인).
+  두 그림 width 900px로 통일.
+  ③ `index.en.md` 작성(`draft: true` 유지 — 한글본도 draft라 영문만 공개되는 것 방지). 섹션 13, Table 4, Figure 3(src/width 동일), 코드 블록 14개
+  (캡션 제외 바이트 동일), 목록 33, Bold 20을 1:1로 맞춤. 자기 블로그 링크는 영문본 존재하는 글이라 `/en/` 경로 사용.
 - **2026-11-22 `#### 1.3.3. 우선순위` 추가** (사용자 요청, 소스 기반, 실측 없음). 근거: HAMi v2.11.0 pkg/device/nvidia/device.go MutateAdmission
   (limits의 `nvidia.com/priority` → env `CUDA_TASK_PRIORITY`), cmd/vGPUmonitor/feedback.go Observe(5초 ticker, recent_kernel 감소 후 >0인 Container를
   GPU UUID/priority별 집계, CheckBlocking: 더 작은 priority 활성 시 recent_kernel=-1, CheckPriority: 더 작은 priority 활성 또는 같은 priority 2개 이상이면
@@ -133,8 +146,9 @@ kubernetes-hami(HAMi 자체, 벤더 중립 구조) 문서의 NVIDIA 상세 글�
 
 ## 폴더 구조
 
-- `index.md` — 문서 본문 (ko 초안).
-- `images/` — Figure 3종 (matplotlib 초안 2종 + 분리 전 글에서 이동한 hami-core-isolation.png).
+- `index.md`, `index.en.md` — 문서 본문 (둘 다 draft).
+- `manifests/` — hami-isolation-test, hami-wholegpu-test, hami-priority-high/low, matmul-rate.py.
+- `images/` — Figure 3종, 2026-11-22 모두 Claude SVG 초안으로 교체(사용자 pptx 재작도 가능, SVG 소스 미보관).
 
 ## 2026-11-14 [Table 3] 추가
 

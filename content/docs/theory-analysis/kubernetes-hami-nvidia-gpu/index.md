@@ -87,7 +87,7 @@ $ kubectl exec hami-isolation-test -- cat /etc/ld.so.preload
 /usr/local/vgpu/libvgpu.so
 ```
 
-[File 2]는 2000MiB Memory와 30% SM 사용률로 제한된 vGPU 하나를 요청하는 Pod 예제이다. `GPU_CORE_UTILIZATION_POLICY=force`로 유휴 상태에서도 SM 사용률 제한을 강제하며, 이미지는 CUDA 13.0 PyTorch가 포함된 vLLM 공식 이미지를 재활용한다. Test Node의 GPU를 이용하는 다른 Workload는 측정 동안 중지하였다.
+[File 2]는 2000MiB Memory와 30% SM 사용률로 제한된 vGPU 하나를 요청하는 Pod 예제이다. `GPU_CORE_UTILIZATION_POLICY=force`로 같은 GPU를 이용하는 다른 Container가 없어도 SM 사용률 제한을 강제하며, 이미지는 CUDA 13.0 PyTorch가 포함된 vLLM 공식 이미지를 재활용한다. Test Node의 GPU를 이용하는 다른 Workload는 측정 동안 중지하였다.
 
 [Shell 1]은 Pod 생성 후 Container 안의 환경 변수와 Preload 설정을 나타내고 있다. HAMi Device Plugin이 `nvidia.com/gpumem`, `nvidia.com/gpucores` 요청에 맞춰 `CUDA_DEVICE_MEMORY_LIMIT_0`과 `CUDA_DEVICE_SM_LIMIT`을 주입하였고, `/etc/ld.so.preload` 파일에 `libvgpu.so`가 등록된 것을 확인할 수 있다.
 
@@ -223,7 +223,7 @@ libvgpu.so
 
 #### 1.3.2. Memory, SM 사용률 제한
 
-{{< figure caption="[Figure 2] HAMi-core Isolation" src="images/hami-core-isolation.png" width="700px" >}}
+{{< figure caption="[Figure 2] HAMi-core Isolation" src="images/hami-core-isolation.png" width="900px" >}}
 
 vGPU의 Memory 크기 제한과 SM 사용률 제한은 Container 내부의 HAMi-core (`libvgpu.so`)가 수행한다. [Figure 2]는 HAMi-core의 제한 동작을 나타내고 있다. `libvgpu.so`는 CUDA Driver API와 같은 이름의 함수들을 정의한 Library이며, 동적 링커는 같은 이름의 함수가 여러 Library에 존재하면 먼저 Load된 Library의 함수에 호출을 연결하기 때문에, `/etc/ld.so.preload`에 등록되어 CUDA Library보다 먼저 Load되는 `libvgpu.so`의 함수가 App의 CUDA Driver API 호출을 대신 받는다. `libvgpu.so`는 전달받은 호출이 제한 조건을 만족하는지 검사한 후 실제 CUDA Library의 함수로 전달하기 때문에, App과 CUDA Library를 수정하지 않고 모든 호출에 개입할 수 있다.
 
@@ -260,7 +260,7 @@ OOM: CUDA out of memory
 SM 사용률 제한은 Kernel 실행 API를 가로채서 수행된다. `libvgpu.so`는 GPU의 사용률을 주기적으로 측정하면서 Token 기반으로 Kernel 실행 가능 여부를 관리하며, `cuLaunchKernel()` 같은 Kernel 실행 함수가 호출될 때 Token이 부족하면 Kernel 실행을 지연시켜 vGPU의 SM 사용률을 `CUDA_DEVICE_SM_LIMIT` 환경 변수에 설정된 제한 이하로 유지한다. 제한 동작은 `GPU_CORE_UTILIZATION_POLICY` 환경 변수로 다음과 같이 변경할 수 있다.
 
 * `default` : 기본값이며, 같은 GPU를 이용하는 다른 Container가 없으면 제한을 초과하는 이용을 허용한다. 제한의 적용 여부는 `vgpu-monitor`가 주기적으로 판단한다.
-* `force` : 유휴 상태와 무관하게 항상 제한을 강제한다.
+* `force` : 같은 GPU를 이용하는 다른 Container의 유무와 무관하게 항상 제한을 강제한다.
 * `disable` : SM 사용률 제한을 수행하지 않는다.
 
 ```shell {caption="[Shell 4] SM 사용률 제한 확인"}
@@ -316,6 +316,72 @@ HAMi-core Mode에서는 같은 GPU를 공유하는 Container 사이에 **우선�
 
 우선순위는 SM 사용률 제한이 `1`부터 `99` 사이인 Container에만 동작한다. HAMi-core는 `nvidia.com/gpucores`를 지정하지 않았거나 `100`으로 지정한 Container에서는 Kernel 실행 시 우선순위 처리를 건너뛰기 때문에, 이러한 Container는 다른 Container의 Kernel 실행을 멈추지 않으며 자신도 멈춰지지 않는다.
 
+```yaml {caption="[File 6] hami-priority-high.yaml", linenos=table}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hami-priority-high
+spec:
+  containers:
+  - name: cuda
+    image: vllm/vllm-openai:latest
+    command: ["sleep", "infinity"]
+    resources:
+      limits:
+        nvidia.com/gpu: 1
+        nvidia.com/gpumem: 2000
+        nvidia.com/gpucores: 50
+        nvidia.com/priority: 0
+  restartPolicy: Never
+```
+
+```python {caption="[File 7] matmul-rate.py", linenos=table}
+import sys, time, torch
+dur = float(sys.argv[1])
+a = torch.randn(2048, 2048, device="cuda"); b = torch.randn(2048, 2048, device="cuda")
+start = time.time(); last = start; n = 0
+while time.time() - start < dur:
+    c = a @ b; torch.cuda.synchronize(); n += 1
+    now = time.time()
+    if now - last >= 5:
+        print(f"{time.strftime('%H:%M:%S')} {n / (now - last):.0f} matmul/s", flush=True)
+        last = now; n = 0
+```
+
+```shell {caption="[Shell 5] 우선순위에 따른 Kernel 실행 Blocking 확인"}
+$ kubectl apply -f hami-priority-high.yaml -f hami-priority-low.yaml
+pod/hami-priority-high created
+pod/hami-priority-low created
+
+$ for p in high low; do echo "$p: $(kubectl exec hami-priority-$p -- env | grep -E 'CUDA_TASK_PRIORITY|CUDA_DEVICE_SM_LIMIT' | sort | tr '\n' ' ')"; done
+high: CUDA_DEVICE_SM_LIMIT=50 CUDA_TASK_PRIORITY=0
+low: CUDA_DEVICE_SM_LIMIT=50 CUDA_TASK_PRIORITY=1
+
+$ for p in high low; do kubectl cp matmul-rate.py hami-priority-$p:/tmp/matmul-rate.py; done
+
+$ kubectl exec hami-priority-low -- python3 /tmp/matmul-rate.py 95 | sed 's/^/low  /' &
+$ sleep 30; kubectl exec hami-priority-high -- python3 /tmp/matmul-rate.py 30 | sed 's/^/high /'
+low  11:19:58 882 matmul/s
+low  11:20:03 889 matmul/s
+low  11:20:08 886 matmul/s
+low  11:20:13 883 matmul/s
+low  11:20:18 881 matmul/s
+high 11:20:28 869 matmul/s
+high 11:20:33 878 matmul/s
+high 11:20:38 877 matmul/s
+high 11:20:43 877 matmul/s
+high 11:20:48 874 matmul/s
+low  11:21:03 85 matmul/s
+low  11:21:08 881 matmul/s
+low  11:21:13 878 matmul/s
+low  11:21:18 876 matmul/s
+low  11:21:23 876 matmul/s
+```
+
+[File 6]은 우선순위 `0`으로 50%의 SM 사용률을 요청하는 Pod이며, `hami-priority-low` Pod는 이름과 `nvidia.com/priority: 1`만 다르다. [File 7]은 2048 × 2048 행렬 곱셈을 반복하면서 5초마다 초당 실행 횟수를 출력하는 Script이다. [Shell 5]는 두 Pod를 같은 GPU에 생성하고, 낮은 우선순위의 Pod가 Script를 실행하는 도중에 높은 우선순위의 Pod가 30초 동안 Script를 실행한 결과이며, 두 명령어의 출력은 시각 순서로 정렬하였다. Test 동안 GPU를 이용하는 다른 Workload는 중지하였다.
+
+[Shell 5]에서 `CUDA_TASK_PRIORITY` 환경 변수에 각 Pod의 우선순위가 주입된 것을 확인할 수 있다. 낮은 우선순위의 Pod는 혼자 GPU를 이용하는 동안 SM 사용률 제한이 50%임에도 초당 약 880회를 실행하는데, 같은 GPU를 이용하는 다른 Container가 없어 `default` 정책에 따라서 제한이 해제되었기 때문이다. 높은 우선순위의 Pod가 실행을 시작하면 낮은 우선순위의 Pod는 Blocking되어 약 45초 동안 출력이 없으며, 이 동안 높은 우선순위의 Pod는 같은 우선순위의 다른 Container가 없기 때문에 제한 없이 초당 약 875회를 실행한다. 11:21:03의 `85 matmul/s`는 Blocking 전후를 포함한 약 45초 구간의 평균값이며, 높은 우선순위의 Pod가 종료된 후 `vgpu-monitor`의 다음 주기에 Blocking이 해제되어 낮은 우선순위의 Pod는 다시 초당 약 880회를 실행한다.
+
 ### 1.4. MIG Mode
 
 MIG Mode는 `operatingmode`가 `mig`인 Node에서 동작하며, vGPU 요청에 따라서 MIG Instance를 동적으로 생성하여 할당하는 Dynamic MIG 기능을 이용한다. HAMi-core의 Software Level 제한과 다르게 MIG는 GPU의 SM과 Memory를 Hardware Level에서 격리하기 때문에 더 높은 격리 수준을 제공하며, Pod는 HAMi-core Mode와 동일한 vGPU Resource로 MIG Instance를 요청한다.
@@ -324,7 +390,7 @@ Dynamic MIG는 v2.5.0에서 도입되었다. 도입 초기에는 `knownMigGeomet
 
 #### 1.4.1. MIG Profile 선택
 
-```yaml {caption="[File 6] MIG Mode를 지정하는 Pod 예제", linenos=table}
+```yaml {caption="[File 8] MIG Mode를 지정하는 Pod 예제", linenos=table}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -342,17 +408,17 @@ spec:
         nvidia.com/gpumem: 8000
 ```
 
-[File 6]은 MIG Instance로 8000MiB의 Memory를 요청하는 Pod의 예제를 나타내고 있다. HAMi Scheduler는 `migProfileAllowlist` 설정에 GPU 모델별로 정의된 MIG Profile 중에서, Pod가 `nvidia.com/gpumem` 또는 `nvidia.com/gpumem-percentage`로 요청한 Memory 크기를 수용하는 가장 작은 Profile을 선택한다. 예를 들어 A100 80GB GPU에는 `1g.10gb`, `2g.20gb`, `3g.40gb`, `4g.40gb`, `7g.79gb` Profile이 정의되어 있어 [File 6]의 Pod에는 `1g.10gb`가 선택된다.
+[File 8]은 MIG Instance로 8000MiB의 Memory를 요청하는 Pod의 예제를 나타내고 있다. HAMi Scheduler는 `migProfileAllowlist` 설정에 GPU 모델별로 정의된 MIG Profile 중에서, Pod가 `nvidia.com/gpumem` 또는 `nvidia.com/gpumem-percentage`로 요청한 Memory 크기를 수용하는 가장 작은 Profile을 선택한다. 예를 들어 A100 80GB GPU에는 `1g.10gb`, `2g.20gb`, `3g.40gb`, `4g.40gb`, `7g.79gb` Profile이 정의되어 있어 [File 8]의 Pod에는 `1g.10gb`가 선택된다.
 
 MIG Profile은 Memory 크기만으로 선택되기 때문에 `nvidia.com/gpucores` 요청은 이용되지 않으며, 할당 내역에는 요청 값 대신 선택된 Profile의 Memory 크기와 Core 값이 기록된다. 특정 Profile을 선호하는 경우에는 Pod의 `nvidia.com/mig-profile-preference` Annotation에 `migProfileAllowlist`에 정의된 Profile 이름이나 `4g` 같은 Slice 접두사를 지정하며, 지정한 Profile이 Memory 크기를 수용하면 더 작은 Profile보다 먼저 선택된다. `nvidia.com/vgpu-mode` Annotation은 vGPU가 할당될 Mode를 고정하는 Annotation이며, 생략하면 HAMi Scheduler가 `mig` Node와 `hami-core` Node를 하나의 vGPU Pool로 취급하여 조건을 만족하는 Node를 자유롭게 선택한다.
 
 #### 1.4.2. MIG Instance 할당
 
-{{< figure caption="[Figure 3] Dynamic MIG Allocation Process" src="images/hami-nvidia-dynamic-mig.png" width="650px" >}}
+{{< figure caption="[Figure 3] Dynamic MIG Allocation Process" src="images/hami-nvidia-dynamic-mig.png" width="900px" >}}
 
 [Figure 3]은 Dynamic MIG의 할당 과정을 나타내고 있다.
 
-1. HAMi Scheduler는 [File 6]과 같이 선택한 MIG Profile과 함께 생성할 물리 위치까지 예약하여 Pod의 Annotation에 기록한다.
+1. HAMi Scheduler는 [File 8]과 같이 선택한 MIG Profile과 함께 생성할 물리 위치까지 예약하여 Pod의 Annotation에 기록한다.
 2. Pod가 Bind된 Node의 kubelet은 HAMi Device Plugin에게 `Allocate()` gRPC 요청을 전송한다.
 3. HAMi Device Plugin은 Pod의 Annotation에서 예약된 Profile과 위치를 조회한다.
 4. HAMi Device Plugin은 예약된 Profile의 GPU Instance와 Compute Instance를 NVML을 통해서 동적으로 생성하여 Container에 할당하고, Pod가 종료되면 생성했던 MIG Instance를 회수한다.
@@ -365,7 +431,7 @@ HAMi는 Pod Annotation을 통해서 vGPU가 배치될 물리 GPU를 제어하는
 * `nvidia.com/nouse-gputype` : 할당에서 제외할 GPU Type 목록
 * `nvidia.com/use-gpuuuid`, `nvidia.com/nouse-gpuuuid` : 할당을 허용하거나 제외할 GPU의 UUID 목록
 
-```yaml {caption="[File 7] GPU Type과 Scheduling 정책을 지정하는 Pod 예제", linenos=table}
+```yaml {caption="[File 9] GPU Type과 Scheduling 정책을 지정하는 Pod 예제", linenos=table}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -384,7 +450,7 @@ spec:
         nvidia.com/gpumem: 3000
 ```
 
-[File 7]은 A100 GPU에서 `binpack` 정책으로 vGPU를 할당받는 Pod의 예제를 나타내고 있다. NVIDIA GPU의 Device Scheduling 정책에는 `binpack`, `spread` 외에도 물리 GPU를 공유 없이 전용으로 요구하는 `mutex` 정책이 있으며, v2.10.0부터는 정책을 쉼표로 연결하여 조합할 수 있다.
+[File 9]는 A100 GPU에서 `binpack` 정책으로 vGPU를 할당받는 Pod의 예제를 나타내고 있다. NVIDIA GPU의 Device Scheduling 정책에는 `binpack`, `spread` 외에도 물리 GPU를 공유 없이 전용으로 요구하는 `mutex` 정책이 있으며, v2.10.0부터는 정책을 쉼표로 연결하여 조합할 수 있다.
 
 다수의 GPU를 요청하는 Workload를 위한 Topology 기반의 GPU 선택도 v2.7.0부터 제공된다. HAMi Device Plugin에 `ENABLE_TOPOLOGY_SCORE` 환경 변수를 활성화하면 NVML을 통해서 GPU 쌍 사이의 연결 방식 (NVLink, PCIe) 을 점수화하여 Node의 `hami.io/node-nvidia-score` Annotation에 기록하고, Pod의 `hami.io/gpu-scheduler-policy` Annotation에 `topology-aware`를 명시하면 NVLink로 연결된 GPU 집합을 우선적으로 선택하여 GPU 간 통신 성능을 보장한다.
 
