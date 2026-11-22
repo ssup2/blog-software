@@ -11,6 +11,11 @@ HAMi 자체(이기종 AI 가속기 가상화 Middleware)에 포커스를 두고 
 
 ## 문서 구성 및 상태
 
+- **2026-11-22 상한 문단에 운영 권고 + 기본값 추가** (사용자 요청, KR/EN): 기본값 10은 Chart values.yaml `devices.nvidia.deviceSplitCount`, `vnpus.deviceSplitCount` 기준(AMD는 Plugin 옵션 `splitCount` 기본 10, gfx12+는 2라 본문 미기재).
+- **2026-11-22 분할 개수 서술 방향 정리** (사용자 요청, KR/EN 동시): "분할 개수 = 물리 Accelerator 하나를 동시에 할당받을 수 있는 Container 최대 개수"를
+  정의로 먼저 두고, 부풀림은 "Device Plugin 규격의 제약(kubelet Device ID 독점 할당) 때문"으로 서술. 변경: [Table 1] Resource 요청 행, [Figure 1] 예시 문단
+  (정의 → 4개 등록은 규격 제약), 상한 문단 축약, [Shell 1] 문단, 1.1 도입, 5단계(물리 Accelerator마다 분할 개수만큼 Device ID 생성). 근거 Fit 검사
+  (pkg/device/nvidia/device.go: CardTimeSlicingExhausted, CardInsufficientMemory/Core, ExclusiveDeviceAllocateConflict, CardComputeUnitsExhausted).
 - **2026-11-22 1.1 5단계에 부풀림 이유 1문장 추가, 기존 "물리 2개 × 분할 2 = 4개" 예시 문장 삭제** (사용자 요청, KR/EN 동시): kubelet Device Manager는 Device ID를 Container에 독점 할당 →
   공유하려면 공유 Container 수만큼 서로 다른 ID 필요(HAMi `<UUID>-<n>`, NVIDIA Device Plugin Time-slicing도 `<UUID>::<n>` Replica). 일반 Kubernetes 동작 기반.
 - **2026-11-22 [Figure 1] 예시 문단에 분할 개수 상한 1문장 추가** (분할 개수 1 예시 문장은 사용자 요청으로 제거) (사용자 요청, KR/EN 동시): 분할 개수 = Accelerator당 Container 수 상한,
