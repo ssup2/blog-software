@@ -60,8 +60,8 @@ kubernetes-hami(HAMi 자체, 벤더 중립 구조) 문서의 NVIDIA 상세 글�
   plugin/util.go → migMgr.EnsureAllocation으로 Allocate 중 GI/CI 생성 후 MIG UUID 전달, CDI는 EnsureDynamicMIGDevice) 비교 + Ampere MIG Mode 사전 활성화
   (migmgr.go ensureMigModeEnabled/SetMigMode, ERROR_RESET_REQUIRED → errMigModeNeedsReset) 문단 추가. 이전 UNVERIFIED "MIG Mode 사전 활성화 필요 여부" 해소.
 - **2026-11-22 남은 작업 일괄 처리** (사용자 요청 "모두 작업해줘"):
-  ① 1.3.3 우선순위 실측(qwen3 replicas 0 → 1 복구): `manifests/hami-priority-high.yaml`, `hami-priority-low.yaml`(gpumem 2000, gpucores 50, priority 0/1),
-  `manifests/matmul-rate.py`. 결과: `CUDA_TASK_PRIORITY` 주입 확인, low 단독 ~880 matmul/s(gpucores 50이지만 default 정책 Switch off로 무제한),
+  ① 1.3.3 우선순위 실측(qwen3 replicas 0 → 1 복구): `manifests/hami-core/hami-priority-high.yaml`, `hami-priority-low.yaml`(gpumem 2000, gpucores 50, priority 0/1),
+  `manifests/hami-core/matmul-rate.py`. 결과: `CUDA_TASK_PRIORITY` 주입 확인, low 단독 ~880 matmul/s(gpucores 50이지만 default 정책 Switch off로 무제한),
   high 실행 중 low는 ~45초 출력 없음(Blocking), high ~875/s(같은 priority 다른 Container 없어 제한 해제), 종료 후 low 복귀 → 소스 분석과 일치.
   [File 6], [File 7], [Shell 5] 추가, 기존 File 6, 7 → 8, 9. Shell 5의 두 명령 출력은 시각순 정렬(본문 명시).
   `force` bullet과 [File 2] 문단의 "유휴 상태" 표현을 "같은 GPU를 이용하는 다른 Container 유무"로 정정.
@@ -101,7 +101,7 @@ kubernetes-hami(HAMi 자체, 벤더 중립 구조) 문서의 NVIDIA 상세 글�
   [Shell 1] Cache 경로가 `/usr/local/vgpu/usage.cache`로 변경(2.10.0은 UUID.cache), [File 3] epoch 1795279541, [Shell 3] Memory OOM 로그
   (allocator.c:40, OOM 줄 2회, HAMi-core Cleanup Msg 출력), [Shell 4] Metric 32, `nvidia-smi dmon` 12~39%로 2.10.0의 99/0 교차 패턴이 사라져
   Token Bucket Burst 설명을 "제한값 위아래 변동, 평균은 제한값" 서술로 교체(원인은 미조사). 1.1 버전 2.11.0으로, 측정 중 다른 Workload 중지 명시.
-  whole GPU 실측 추가: `manifests/hami-wholegpu-test.yaml`(`nvidia.com/gpu: 1`만) → allocated `...,NVIDIA,16311,100:;`, `CUDA_DISABLE_CONTROL=true`,
+  whole GPU 실측 추가: `manifests/hami-core/hami-wholegpu-test.yaml`(`nvidia.com/gpu: 1`만) → allocated `...,NVIDIA,16311,100:;`, `CUDA_DISABLE_CONTROL=true`,
   `CUDA_DEVICE_SM_LIMIT=100`, `/etc/ld.so.preload` 없음, `/usr/local/vgpu/libvgpu.so`는 Mount됨 → 1.3에 [File 5] + [Shell 2] 추가.
   번호 이동: File 5, 6 → 6, 7, Shell 2, 3 → 3, 4. 측정 스크립트는 남기지 않음(Shell 블록 명령과 동일, SM 측정은 부하 시작 후 40초 대기 후 샘플).
 - **2026-11-22 전면 재검토** (사용자 요청: 발행된 kubernetes-hami 글과 중복 제거, NVIDIA 특화 내용 위주). 변경:
@@ -189,7 +189,7 @@ kubernetes-hami(HAMi 자체, 벤더 중립 구조) 문서의 NVIDIA 상세 글�
 
 ## Test 수행 상태
 
-- Memory, SM 격리 (1.1, 1.4): **완료 (2026-10-18), 2026-11-22 2.11.0 재실측** — `manifests/hami-isolation-test.yaml` 재현 파일 보관.
+- Memory, SM 격리 (1.1, 1.4): **완료 (2026-10-18), 2026-11-22 2.11.0 재실측** — `manifests/hami-core/hami-isolation-test.yaml` 재현 파일 보관.
   - RTX 5060 Ti 1장 (Blackwell) 환경이라 nvidia-smi 안에서 `LD_PRELOAD` 환경 변수는 안 보였고 `/etc/ld.so.preload` 파일 주입 방식 확인. 본문도 이에 맞춰 수정.
   - `CUDA_DEVICE_MEMORY_LIMIT_0=2000m` (단위: MiB), `CUDA_DEVICE_SM_LIMIT=30` 둘 다 Container 내 환경 변수로 주입.
 - 미수행:
@@ -218,8 +218,8 @@ kubernetes-hami(HAMi 자체, 벤더 중립 구조) 문서의 NVIDIA 상세 글�
 ## 폴더 구조
 
 - `index.md`, `index.en.md` — 문서 본문 (둘 다 draft).
-- `manifests/` — hami-isolation-test, hami-wholegpu-test, hami-priority-high/low, matmul-rate.py.
-- `manifests/mig/` — Dynamic MIG Test: `mig-config8.yaml`(2g ×2 + 3g), `mig-config9.yaml`(1g ×2), `capture.sh`(단계별 Log·상태 수집, `KUBE_CONTEXT` 필요).
+- `manifests/hami-core/` — HAMi-core Mode(1.3) 재현: hami-isolation-test, hami-wholegpu-test, hami-priority-high/low, matmul-rate.py.
+- `manifests/mig/` — MIG Mode(1.4) 재현: `mig-config8.yaml`(2g ×2 + 3g), `mig-config9.yaml`(1g ×2), `capture.sh`(단계별 Log·상태 수집, `KUBE_CONTEXT` 필요).
   (초기 warmup/gpu-admin manifest는 NodeOverlay·userData 자동화로 불필요해져 삭제)
 - `dumps/mig/<step>/` — 단계별 수집 결과. step0-provision(Karpenter gpumem 거부), step1-mig-enable-pending(Ampere MIG pending 실측),
   step2-mig-enable-fix(수동 reset 거부·reboot 진단), step3-config8·step4-config9(MIG Instance 생성/전환), step5-automated(end-to-end 자동화).
