@@ -1,0 +1,24 @@
+# Karpenter는 HAMi의 nvidia.com/gpumem 확장 Resource를 알지 못해서
+# gpumem을 요청하는 Pod만으로는 Node를 프로비저닝하지 않는다.
+# GPU Resource 없이 nodeSelector와 tolerations만으로 Node 프로비저닝을 유도하는 placeholder Pod.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mig-node-warmup
+spec:
+  nodeSelector:
+    group: gpu-a100-hami
+  tolerations:
+  - key: group
+    operator: Equal
+    value: gpu-a100-hami
+    effect: NoSchedule
+  - key: nvidia.com/gpu
+    operator: Exists
+    effect: NoSchedule
+  containers:
+  - name: pause
+    image: registry.k8s.io/pause:3.10
+    resources:
+      requests:
+        cpu: 100m

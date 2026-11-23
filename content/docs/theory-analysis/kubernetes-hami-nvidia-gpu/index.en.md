@@ -390,6 +390,24 @@ Dynamic MIG was introduced in v2.5.0. Initially, it switched the MIG configurati
 
 Since NVIDIA Device Plugin looks up already created MIG Instances when it starts and registers them with kubelet as Devices, the Device Plugin must be restarted after the MIG configuration changes for the changed Device list to be reflected. In contrast, HAMi Device Plugin registers vGPUs based on the parent GPU with kubelet even in MIG Mode, and creates MIG Instances while handling `Allocate()` and passes their UUIDs to the Container, so the Device Plugin does not need to be restarted when MIG Instances are created and reclaimed. However, if the GPU's MIG Mode is off, HAMi Device Plugin turns MIG Mode on by itself at the first allocation, and since Ampere GPUs such as A100 may require a GPU Reset or VM reboot to change MIG Mode, the allocation fails in that case. Therefore, on Ampere GPUs, it is safer to turn on MIG Mode in advance with the `nvidia-smi -mig 1` command and complete the GPU Reset.
 
+The behavior of MIG Mode is verified in a separate environment from 1.1. An EKS p4d.24xlarge Node with 8 A100-SXM4-40GB GPUs is used, and the Node Group the Node belongs to has the `group=gpu-a100-hami` Label and Taint, with `operatingmode` set to `mig` by matching this Label in `nodeconfig`. The default `migProfileAllowlist` for the A100 40GB GPU defines the `1g.5gb`, `2g.10gb`, `3g.20gb`, `4g.20gb`, and `7g.40gb` Profiles.
+
+The Node is provisioned by Karpenter, and Karpenter does not know HAMi's extended Resources such as `nvidia.com/gpumem`, so Node creation does not start only with Pods requesting them (`no instance type has enough resources`). Therefore the Node was first created with a placeholder Pod that has only the nodeSelector without GPU Resources.
+
+```shell {caption="[Shell 6] MIG Instance allocation failing on a Node with MIG Mode disabled"}
+$ kubectl describe pod mig-2g-a
+...
+  Normal   Scheduled                 3m15s  hami-scheduler  Successfully assigned default/mig-2g-a to ip-10-210-126-83.ap-northeast-2.compute.internal
+  Warning  UnexpectedAdmissionError  3m15s  kubelet         Allocate failed due to rpc error: code = Unknown desc = resolve allocated NVIDIA devices: gpu 7 MIG enable is pending (current=0 pending=1): MIG mode change requires a GPU reset or VM reboot. Manual operator action may be needed: try nvidia-smi --gpu-reset, or reboot the VM if the hypervisor does not allow GPU reset. ...
+
+$ kubectl logs -n addon-hami ds/hami-device-plugin -c device-plugin | grep 'MIG enable is pending' | tail -1
+I1123 15:06:11.062891   39735 server.go:918] "periodic MIG reconciliation skipped" err="restore MIG instances during initialization: gpu 0 MIG enable is pending (current=0 pending=1): MIG mode change requires a GPU reset or VM reboot. ..."
+```
+
+[Shell 6] shows the result of applying a Pod requesting a MIG Instance on a Node booted with MIG Mode disabled. Binding by HAMi Scheduler succeeds, but the Pod is rejected at kubelet's `Allocate()` as HAMi Device Plugin fails while enabling MIG Mode. HAMi Device Plugin sets MIG Mode to the pending state with NVML's `SetMigMode` but cannot perform the GPU Reset itself, because it and `vgpu-monitor` hold NVML Handles, and on NVSwitch systems Fabric Manager must be stopped and all GPUs must be reset together.
+
+In this Test, the issue was resolved by adding a Script to the Node Group's userData that enables MIG Mode of all GPUs with `nvidia-smi -mig 1` at boot time when no Process is using the GPUs. Since the Hopper generation, switching MIG Mode does not require a GPU Reset, so this pre-activation is needed only for the Ampere generation.
+
 #### 1.4.1. MIG Profile Selection
 
 ```yaml {caption="[File 8] Example Pod specifying MIG Mode", linenos=table}
@@ -430,8 +448,6 @@ From the position list that HAMi Device Plugin queries through NVML and register
 4. HAMi Device Plugin dynamically creates the GPU Instance and Compute Instance of the reserved Profile through NVML and allocates them to the Container. If an Idle MIG Instance of the same size exists at the same position, it reuses it instead of creating a new one.
 
 MIG Instances are not removed immediately when the Pod terminates. This reduces the overhead of removing and recreating MIG Instances when the same Profile is requested again, and a reused MIG Instance keeps the same MIG UUID. Every 5 seconds, HAMi Device Plugin compares the `hami.io/vgpu-mig-allocations` Annotations of running Pods with the MIG Instances it manages, and switches MIG Instances used by no Pod to the Idle state. In contrast, HAMi Scheduler calculates MIG Instance positions only from the Annotations of Pods that have not terminated, so it regards the positions occupied by Idle MIG Instances as free space, and when a newly reserved position overlaps Idle MIG Instances, HAMi Device Plugin removes the overlapping MIG Instances in order of least recent use and then creates the new MIG Instance.
-
-The behavior of MIG Mode is verified in a separate environment from 1.1. An EKS p4d.24xlarge Node with 8 A100-SXM4-40GB GPUs is used, and the Node Group the Node belongs to has the `group=gpu-a100-hami` Label and Taint, with `operatingmode` set to `mig` by matching this Label in `nodeconfig`. The default `migProfileAllowlist` for the A100 40GB GPU defines the `1g.5gb`, `2g.10gb`, `3g.20gb`, `4g.20gb`, and `7g.40gb` Profiles.
 
 ```yaml {caption="[File 10] mig-config8.yaml (the mig-2g-b Pod differing only in name and the nodeSelector and tolerations of mig-3g are omitted)", linenos=table}
 apiVersion: v1

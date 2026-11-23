@@ -1,0 +1,4 @@
+NAME       READY   STATUS                   RESTARTS   AGE    IP       NODE                                               NOMINATED NODE   READINESS GATES
+mig-2g-a   0/1     ContainerStatusUnknown   0          7m5s   <none>   ip-10-210-126-83.ap-northeast-2.compute.internal   <none>           <none>
+mig-2g-b   0/1     ContainerStatusUnknown   0          7m5s   <none>   ip-10-210-126-83.ap-northeast-2.compute.internal   <none>           <none>
+mig-3g     0/1     ContainerStatusUnknown   0          7m5s   <none>   ip-10-210-126-83.ap-northeast-2.compute.internal   <none>           <none>

@@ -1,0 +1,92 @@
+Name:             mig-2g-a
+Namespace:        default
+Priority:         0
+Service Account:  default
+Node:             ip-10-210-126-83.ap-northeast-2.compute.internal/10.210.126.83
+Start Time:       Tue, 24 Nov 2026 00:03:06 +0900
+Labels:           hami.io/vgpu-node=ip-10-210-126-83.ap-northeast-2.compute.internal
+Annotations:      hami.io/bind-phase: failed
+                  hami.io/bind-time: 1795446185
+                  hami.io/gpu-scheduler-policy: binpack
+                  hami.io/vgpu-devices-allocated: GPU-cdf1e5bc-833c-3fe8-5d40-dff578418428,NVIDIA,9984,29:;
+                  hami.io/vgpu-devices-to-allocate: GPU-cdf1e5bc-833c-3fe8-5d40-dff578418428,NVIDIA,9984,29:;
+                  hami.io/vgpu-mig-allocations:
+                    [{"containerIndex":0,"deviceIndex":0,"gpuUUID":"GPU-cdf1e5bc-833c-3fe8-5d40-dff578418428","profile":"2g.10gb","placement":{"start":0,"size...
+                  hami.io/vgpu-node: ip-10-210-126-83.ap-northeast-2.compute.internal
+                  hami.io/vgpu-time: 1795446185
+                  nvidia.com/mig-profile-preference: 2g.10gb
+                  nvidia.com/vgpu-mode: mig
+Status:           Failed
+Reason:           UnexpectedAdmissionError
+Message:          Pod was rejected: Allocate failed due to rpc error: code = Unknown desc = resolve allocated NVIDIA devices: gpu 7 MIG enable is pending (current=0 pending=1): MIG mode change requires a GPU reset or VM reboot. Manual operator action may be needed: try nvidia-smi --gpu-reset, or reboot the VM if the hypervisor does not allow GPU reset. See https://docs.nvidia.com/datacenter/tesla/mig-user-guide/latest/getting-started-with-mig.html, which is unexpected
+IP:               
+IPs:              <none>
+Containers:
+  cuda:
+    Container ID:  
+    Image:         nvidia/cuda:12.4.0-base-ubuntu22.04
+    Image ID:      
+    Port:          <none>
+    Host Port:     <none>
+    Command:
+      sleep
+      infinity
+    State:          Terminated
+      Reason:       ContainerStatusUnknown
+      Message:      The container could not be located when the pod was terminated
+      Exit Code:    137
+      Started:      Mon, 01 Jan 0001 00:00:00 +0000
+      Finished:     Mon, 01 Jan 0001 00:00:00 +0000
+    Ready:          False
+    Restart Count:  0
+    Limits:
+      ephemeral-storage:  10Gi
+      nvidia.com/gpu:     1
+      nvidia.com/gpumem:  9k
+    Requests:
+      ephemeral-storage:  0
+      nvidia.com/gpu:     1
+      nvidia.com/gpumem:  9k
+    Environment:
+      CLUSTER_NAME:                 alpha-kr-dev
+      LOG4J_FORMAT_MSG_NO_LOOKUPS:  true
+      DD_TRACE_HEADER_BAGGAGE:      X-Request-Id:X-Request-Id
+      DD_TRACE_PROPAGATION_STYLE:   datadog
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-zq4q7 (ro)
+Conditions:
+  Type                        Status
+  PodReadyToStartContainers   False 
+  Initialized                 True 
+  Ready                       False 
+  ContainersReady             False 
+  PodScheduled                True 
+Volumes:
+  kube-api-access-zq4q7:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    Optional:                false
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              group=gpu-a100-hami
+Tolerations:                 group=gpu-a100-hami:NoSchedule
+                             node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+                             nvidia.com/gpu:NoSchedule op=Exists
+                             nvidia.com/gpumem:NoSchedule op=Exists
+Events:
+  Type     Reason                    Age                    From                Message
+  ----     ------                    ----                   ----                -------
+  Warning  FailedScheduling          7m4s                   hami-scheduler      0/39 nodes are available: 34 node(s) had untolerated taint(s), 5 node(s) didn't match Pod's node affinity/selector. no new claims to deallocate, preemption: 0/39 nodes are available: 39 Preemption is not helpful for scheduling.
+  Warning  FailedScheduling          4m10s                  hami-scheduler      0/40 nodes are available: 35 node(s) had untolerated taint(s), 5 node(s) didn't match Pod's node affinity/selector. no new claims to deallocate, preemption: 0/40 nodes are available: 40 Preemption is not helpful for scheduling.
+  Warning  FailedScheduling          4m10s (x2 over 4m10s)  hami-scheduler      0/40 nodes are available: 35 node(s) had untolerated taint(s), 5 node(s) didn't match Pod's node affinity/selector. no new claims to deallocate, preemption: 0/40 nodes are available: 40 Preemption is not helpful for scheduling.
+  Warning  FailedScheduling          4m2s (x2 over 4m2s)    hami-scheduler      0/40 nodes are available: 1 node unregistered, 34 node(s) had untolerated taint(s), 5 node(s) didn't match Pod's node affinity/selector. no new claims to deallocate, preemption: 0/40 nodes are available: 1 No preemption victims found for incoming pod, 39 Preemption is not helpful for scheduling.
+  Normal   Scheduled                 3m15s                  hami-scheduler      Successfully assigned default/mig-2g-a to ip-10-210-126-83.ap-northeast-2.compute.internal
+  Warning  FailedScheduling          7m2s                   karpenter           Failed to schedule pod, incompatible requirements, key group, group In [gpu-a100-hami] not in group In [workers]; did not tolerate taint (taint=group=thanos:NoSchedule); did not tolerate taint (taint=group=thanos-cache:NoSchedule); did not tolerate taint (taint=group=thanos-alert:NoSchedule); did not tolerate taint (taint=group=tempo:NoSchedule); did not tolerate taint (taint=group=prom-alert:NoSchedule); did not tolerate taint (taint=group=ops:NoSchedule); did not tolerate taint (taint=group=monitoring:NoSchedule); did not tolerate taint (taint=group=ingress:NoSchedule); did not tolerate taint (taint=group=ingress:NoSchedule); did not tolerate taint (taint=group=ingress:NoSchedule); did not tolerate taint (taint=group=gvisor:NoSchedule); did not tolerate taint (taint=group=gpu-t4-nvme-poc:NoSchedule); did not tolerate taint (taint=group=gpu-t4:NoSchedule); did not tolerate taint (taint=group=gpu-l40s:NoSchedule); did not tolerate taint (taint=group=gpu-l4:NoSchedule); did not tolerate taint (taint=group=gpu-a100:NoSchedule); no instance type has enough resources, requirements=eks.amazonaws.com/nodegroup In [gpu-a100-hami], gpu In [on], group In [gpu-a100-hami], hami In [on], karpenter.k8s.aws/ec2nodeclass In [alpha-kr-dev-gpu-a100-hami], karpenter.sh/capacity-type In [on-demand], karpenter.sh/nodepool In [alpha-kr-dev-gpu-a100-hami-p4d-24xlarge], krmt.io/group In [gpu-a100-hami], krmt.io/subgroup In [p4d-24xlarge], kubernetes.io/arch In [amd64], kubernetes.io/os In [linux], managed-by In [karpenter], node.kubernetes.io/instance-type In [p4d.24xlarge], node.kubernetes.io/role In [gpu-a100-hami], subgroup In [p4d-24xlarge], resources={"cpu":"602m","ephemeral-storage":"0","memory":"626Mi","nvidia.com/gpu":"1","nvidia.com/gpumem":"9k","pods":"8"}; did not tolerate taint (taint=group=gpu-l4:NoSchedule); incompatible requirements, key group, group In [gpu-a100-hami] not in group In [workers]; incompatible requirements, key group, group In [gpu-a100-hami] not in group In [workers]; did not tolerate taint (taint=dedicated=wedge-demo:NoSchedule); incompatible requirements, key group, group In [gpu-a100-hami] not in group In [ingress]
+  Normal   NotTriggerScaleUp         6m27s                  cluster-autoscaler  pod didn't trigger scale-up: 1 node(s) had untolerated taint(s), 2 max node group size reached
+  Warning  FilteringFailed           3m34s (x25 over 4m2s)  hami-scheduler      no available node, 1 nodes do not meet
+  Normal   FilteringSucceed          3m22s                  hami-scheduler      find fit node(ip-10-210-126-83.ap-northeast-2.compute.internal), 0 nodes not fit, 1 nodes fit(ip-10-210-126-83.ap-northeast-2.compute.internal:1.33)
+  Normal   FilteringSucceed          3m16s                  hami-scheduler      find fit node(ip-10-210-126-83.ap-northeast-2.compute.internal), 0 nodes not fit, 1 nodes fit(ip-10-210-126-83.ap-northeast-2.compute.internal:0.85)
+  Normal   BindingSucceed            3m15s                  hami-scheduler      Successfully binding node [ip-10-210-126-83.ap-northeast-2.compute.internal] to default/mig-2g-a
+  Warning  UnexpectedAdmissionError  3m15s                  kubelet             Allocate failed due to rpc error: code = Unknown desc = resolve allocated NVIDIA devices: gpu 7 MIG enable is pending (current=0 pending=1): MIG mode change requires a GPU reset or VM reboot. Manual operator action may be needed: try nvidia-smi --gpu-reset, or reboot the VM if the hypervisor does not allow GPU reset. See https://docs.nvidia.com/datacenter/tesla/mig-user-guide/latest/getting-started-with-mig.html, which is unexpected

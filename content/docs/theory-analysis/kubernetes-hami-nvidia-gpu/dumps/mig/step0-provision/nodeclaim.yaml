@@ -1,0 +1,186 @@
+apiVersion: karpenter.sh/v1
+kind: NodeClaim
+metadata:
+  annotations:
+    compatibility.karpenter.k8s.aws/cluster-name-tagged: "true"
+    karpenter.k8s.aws/ec2nodeclass-hash: "11362175992299126054"
+    karpenter.k8s.aws/ec2nodeclass-hash-version: v5
+    karpenter.k8s.aws/instance-profile-name: alpha-kr-dev_10577198573625786537
+    karpenter.k8s.aws/tagged: "true"
+    karpenter.sh/nodeclaim-min-values-relaxed: "false"
+    karpenter.sh/nodepool-hash: "7099165483992253319"
+    karpenter.sh/nodepool-hash-version: v3
+  creationTimestamp: "2026-11-23T15:00:33Z"
+  finalizers:
+  - karpenter.sh/termination
+  generateName: alpha-kr-dev-gpu-a100-hami-p4d-24xlarge-
+  generation: 1
+  labels:
+    eks.amazonaws.com/nodegroup: gpu-a100-hami
+    gpu: "on"
+    group: gpu-a100-hami
+    hami: "on"
+    karpenter.k8s.aws/ec2nodeclass: alpha-kr-dev-gpu-a100-hami
+    karpenter.k8s.aws/instance-capability-flex: "false"
+    karpenter.k8s.aws/instance-category: p
+    karpenter.k8s.aws/instance-cpu: "96"
+    karpenter.k8s.aws/instance-cpu-manufacturer: intel
+    karpenter.k8s.aws/instance-cpu-sustained-clock-speed-mhz: "3000"
+    karpenter.k8s.aws/instance-ebs-bandwidth: "19000"
+    karpenter.k8s.aws/instance-encryption-in-transit-supported: "true"
+    karpenter.k8s.aws/instance-family: p4d
+    karpenter.k8s.aws/instance-generation: "4"
+    karpenter.k8s.aws/instance-gpu-count: "8"
+    karpenter.k8s.aws/instance-gpu-manufacturer: nvidia
+    karpenter.k8s.aws/instance-gpu-memory: "40960"
+    karpenter.k8s.aws/instance-gpu-name: a100
+    karpenter.k8s.aws/instance-hypervisor: nitro
+    karpenter.k8s.aws/instance-local-nvme: "8000"
+    karpenter.k8s.aws/instance-memory: "1179648"
+    karpenter.k8s.aws/instance-network-bandwidth: "400000"
+    karpenter.k8s.aws/instance-size: 24xlarge
+    karpenter.k8s.aws/instance-tenancy: default
+    karpenter.sh/capacity-type: on-demand
+    karpenter.sh/nodepool: alpha-kr-dev-gpu-a100-hami-p4d-24xlarge
+    krmt.io/group: gpu-a100-hami
+    krmt.io/subgroup: p4d-24xlarge
+    kubernetes.io/arch: amd64
+    kubernetes.io/os: linux
+    managed-by: karpenter
+    node.kubernetes.io/instance-type: p4d.24xlarge
+    node.kubernetes.io/role: gpu-a100-hami
+    subgroup: p4d-24xlarge
+    topology.k8s.aws/zone-id: apne2-az4
+    topology.kubernetes.io/region: ap-northeast-2
+    topology.kubernetes.io/zone: ap-northeast-2d
+  name: alpha-kr-dev-gpu-a100-hami-p4d-24xlarge-jlr8s
+  ownerReferences:
+  - apiVersion: karpenter.sh/v1
+    blockOwnerDeletion: true
+    kind: NodePool
+    name: alpha-kr-dev-gpu-a100-hami-p4d-24xlarge
+    uid: e3f301e8-9908-47ed-b308-8929569d3476
+  resourceVersion: "1265458942"
+  uid: 2be26f65-9a2f-4cef-9404-5d10f12a04e6
+spec:
+  expireAfter: Never
+  nodeClassRef:
+    group: karpenter.k8s.aws
+    kind: EC2NodeClass
+    name: alpha-kr-dev-gpu-a100-hami
+  requirements:
+  - key: kubernetes.io/arch
+    operator: In
+    values:
+    - amd64
+  - key: hami
+    operator: In
+    values:
+    - "on"
+  - key: group
+    operator: In
+    values:
+    - gpu-a100-hami
+  - key: krmt.io/subgroup
+    operator: In
+    values:
+    - p4d-24xlarge
+  - key: karpenter.sh/nodepool
+    operator: In
+    values:
+    - alpha-kr-dev-gpu-a100-hami-p4d-24xlarge
+  - key: node.kubernetes.io/instance-type
+    operator: In
+    values:
+    - p4d.24xlarge
+  - key: krmt.io/group
+    operator: In
+    values:
+    - gpu-a100-hami
+  - key: karpenter.k8s.aws/ec2nodeclass
+    operator: In
+    values:
+    - alpha-kr-dev-gpu-a100-hami
+  - key: eks.amazonaws.com/nodegroup
+    operator: In
+    values:
+    - gpu-a100-hami
+  - key: managed-by
+    operator: In
+    values:
+    - karpenter
+  - key: subgroup
+    operator: In
+    values:
+    - p4d-24xlarge
+  - key: gpu
+    operator: In
+    values:
+    - "on"
+  - key: karpenter.sh/capacity-type
+    operator: In
+    values:
+    - on-demand
+  - key: node.kubernetes.io/role
+    operator: In
+    values:
+    - gpu-a100-hami
+  - key: kubernetes.io/os
+    operator: In
+    values:
+    - linux
+  resources:
+    requests:
+      cpu: 702m
+      ephemeral-storage: "0"
+      memory: 626Mi
+      pods: "8"
+  taints:
+  - effect: NoSchedule
+    key: group
+    value: gpu-a100-hami
+  terminationGracePeriod: 10m0s
+status:
+  allocatable:
+    cpu: 95690m
+    ephemeral-storage: "7198926258176"
+    memory: 1082712Mi
+    nvidia.com/gpu: "8"
+    pods: "737"
+    vpc.amazonaws.com/pod-eni: "62"
+  capacity:
+    cpu: "96"
+    ephemeral-storage: 8T
+    memory: 1091174Mi
+    nvidia.com/gpu: "8"
+    pods: "737"
+    vpc.amazonaws.com/pod-eni: "62"
+  conditions:
+  - lastTransitionTime: "2026-11-23T15:00:35Z"
+    message: ""
+    observedGeneration: 1
+    reason: Launched
+    status: "True"
+    type: Launched
+  - lastTransitionTime: "2026-11-23T15:02:10Z"
+    message: ""
+    observedGeneration: 1
+    reason: Registered
+    status: "True"
+    type: Registered
+  - lastTransitionTime: "2026-11-23T15:02:22Z"
+    message: ""
+    observedGeneration: 1
+    reason: Initialized
+    status: "True"
+    type: Initialized
+  - lastTransitionTime: "2026-11-23T15:02:22Z"
+    message: ""
+    observedGeneration: 1
+    reason: Ready
+    status: "True"
+    type: Ready
+  imageID: ami-00cbad6f18e0427b5
+  lastPodEventTime: "2026-11-23T15:03:11Z"
+  nodeName: ip-10-210-126-83.ap-northeast-2.compute.internal
+  providerID: aws:///ap-northeast-2d/i-020f33a03bc071c4f

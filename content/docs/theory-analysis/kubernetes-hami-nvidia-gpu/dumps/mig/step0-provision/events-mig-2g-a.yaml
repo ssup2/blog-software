@@ -1,0 +1,360 @@
+apiVersion: v1
+items:
+- action: Scheduling
+  apiVersion: v1
+  eventTime: "2026-11-23T14:59:17.078208Z"
+  firstTimestamp: null
+  involvedObject:
+    apiVersion: v1
+    kind: Pod
+    name: mig-2g-a
+    namespace: default
+    resourceVersion: "1265454520"
+    uid: 46c8d916-beae-4c6e-b546-51a1e5401041
+  kind: Event
+  lastTimestamp: null
+  message: '0/39 nodes are available: 34 node(s) had untolerated taint(s), 5 node(s)
+    didn''t match Pod''s node affinity/selector. no new claims to deallocate, preemption:
+    0/39 nodes are available: 39 Preemption is not helpful for scheduling.'
+  metadata:
+    creationTimestamp: "2026-11-23T14:59:17Z"
+    name: mig-2g-a.18eab495d50ef516
+    namespace: default
+    resourceVersion: "1265454522"
+    uid: bbda3f37-858a-49aa-8511-10c0a721ee65
+  reason: FailedScheduling
+  reportingComponent: hami-scheduler
+  reportingInstance: hami-scheduler-hami-scheduler-589c6b69c7-mk98j
+  source: {}
+  type: Warning
+- apiVersion: v1
+  count: 1
+  eventTime: null
+  firstTimestamp: "2026-11-23T14:59:19Z"
+  involvedObject:
+    apiVersion: v1
+    kind: Pod
+    name: mig-2g-a
+    namespace: default
+    resourceVersion: "1265454521"
+    uid: 46c8d916-beae-4c6e-b546-51a1e5401041
+  kind: Event
+  lastTimestamp: "2026-11-23T14:59:19Z"
+  message: Failed to schedule pod, incompatible requirements, key group, group In
+    [gpu-a100-hami] not in group In [workers]; did not tolerate taint (taint=group=thanos:NoSchedule);
+    did not tolerate taint (taint=group=thanos-cache:NoSchedule); did not tolerate
+    taint (taint=group=thanos-alert:NoSchedule); did not tolerate taint (taint=group=tempo:NoSchedule);
+    did not tolerate taint (taint=group=prom-alert:NoSchedule); did not tolerate taint
+    (taint=group=ops:NoSchedule); did not tolerate taint (taint=group=monitoring:NoSchedule);
+    did not tolerate taint (taint=group=ingress:NoSchedule); did not tolerate taint
+    (taint=group=ingress:NoSchedule); did not tolerate taint (taint=group=ingress:NoSchedule);
+    did not tolerate taint (taint=group=gvisor:NoSchedule); did not tolerate taint
+    (taint=group=gpu-t4-nvme-poc:NoSchedule); did not tolerate taint (taint=group=gpu-t4:NoSchedule);
+    did not tolerate taint (taint=group=gpu-l40s:NoSchedule); did not tolerate taint
+    (taint=group=gpu-l4:NoSchedule); did not tolerate taint (taint=group=gpu-a100:NoSchedule);
+    no instance type has enough resources, requirements=eks.amazonaws.com/nodegroup
+    In [gpu-a100-hami], gpu In [on], group In [gpu-a100-hami], hami In [on], karpenter.k8s.aws/ec2nodeclass
+    In [alpha-kr-dev-gpu-a100-hami], karpenter.sh/capacity-type In [on-demand], karpenter.sh/nodepool
+    In [alpha-kr-dev-gpu-a100-hami-p4d-24xlarge], krmt.io/group In [gpu-a100-hami],
+    krmt.io/subgroup In [p4d-24xlarge], kubernetes.io/arch In [amd64], kubernetes.io/os
+    In [linux], managed-by In [karpenter], node.kubernetes.io/instance-type In [p4d.24xlarge],
+    node.kubernetes.io/role In [gpu-a100-hami], subgroup In [p4d-24xlarge], resources={"cpu":"602m","ephemeral-storage":"0","memory":"626Mi","nvidia.com/gpu":"1","nvidia.com/gpumem":"9k","pods":"8"};
+    did not tolerate taint (taint=group=gpu-l4:NoSchedule); incompatible requirements,
+    key group, group In [gpu-a100-hami] not in group In [workers]; incompatible requirements,
+    key group, group In [gpu-a100-hami] not in group In [workers]; did not tolerate
+    taint (taint=dedicated=wedge-demo:NoSchedule); incompatible requirements, key
+    group, group In [gpu-a100-hami] not in group In [ingress]
+  metadata:
+    creationTimestamp: "2026-11-23T14:59:19Z"
+    name: mig-2g-a.18eab4964b51d09f
+    namespace: default
+    resourceVersion: "1265454561"
+    uid: b959c0f2-217f-4b0f-83c6-5e88e5501817
+  reason: FailedScheduling
+  reportingComponent: karpenter
+  reportingInstance: ""
+  source:
+    component: karpenter
+  type: Warning
+- apiVersion: v1
+  count: 1
+  eventTime: null
+  firstTimestamp: "2026-11-23T14:59:54Z"
+  involvedObject:
+    apiVersion: v1
+    kind: Pod
+    name: mig-2g-a
+    namespace: default
+    resourceVersion: "1265454521"
+    uid: 46c8d916-beae-4c6e-b546-51a1e5401041
+  kind: Event
+  lastTimestamp: "2026-11-23T14:59:54Z"
+  message: 'pod didn''t trigger scale-up: 1 node(s) had untolerated taint(s), 2 max
+    node group size reached'
+  metadata:
+    creationTimestamp: "2026-11-23T14:59:54Z"
+    name: mig-2g-a.18eab49e91ad6138
+    namespace: default
+    resourceVersion: "1265455161"
+    uid: 81a0faab-a646-4dcb-9855-d308ec4c6e89
+  reason: NotTriggerScaleUp
+  reportingComponent: cluster-autoscaler
+  reportingInstance: ""
+  source:
+    component: cluster-autoscaler
+  type: Normal
+- action: Scheduling
+  apiVersion: v1
+  eventTime: "2026-11-23T15:02:10.487698Z"
+  firstTimestamp: null
+  involvedObject:
+    apiVersion: v1
+    kind: Pod
+    name: mig-2g-a
+    namespace: default
+    resourceVersion: "1265454521"
+    uid: 46c8d916-beae-4c6e-b546-51a1e5401041
+  kind: Event
+  lastTimestamp: null
+  message: '0/40 nodes are available: 35 node(s) had untolerated taint(s), 5 node(s)
+    didn''t match Pod''s node affinity/selector. no new claims to deallocate, preemption:
+    0/40 nodes are available: 40 Preemption is not helpful for scheduling.'
+  metadata:
+    creationTimestamp: "2026-11-23T15:02:10Z"
+    name: mig-2g-a.18eab4be3511b9d2
+    namespace: default
+    resourceVersion: "1265457516"
+    uid: 9c7bc2f1-5a0b-4a09-a265-3921100d0777
+  reason: FailedScheduling
+  reportingComponent: hami-scheduler
+  reportingInstance: hami-scheduler-hami-scheduler-589c6b69c7-mk98j
+  source: {}
+  type: Warning
+- action: Scheduling
+  apiVersion: v1
+  eventTime: "2026-11-23T15:02:10.517999Z"
+  firstTimestamp: null
+  involvedObject:
+    apiVersion: v1
+    kind: Pod
+    name: mig-2g-a
+    namespace: default
+    resourceVersion: "1265457514"
+    uid: 46c8d916-beae-4c6e-b546-51a1e5401041
+  kind: Event
+  lastTimestamp: null
+  message: '0/40 nodes are available: 35 node(s) had untolerated taint(s), 5 node(s)
+    didn''t match Pod''s node affinity/selector. no new claims to deallocate, preemption:
+    0/40 nodes are available: 40 Preemption is not helpful for scheduling.'
+  metadata:
+    creationTimestamp: "2026-11-23T15:02:10Z"
+    name: mig-2g-a.18eab4be36e0097c
+    namespace: default
+    resourceVersion: "1265457599"
+    uid: 06c4843c-6fd2-424f-96c7-33496fa99861
+  reason: FailedScheduling
+  reportingComponent: hami-scheduler
+  reportingInstance: hami-scheduler-hami-scheduler-589c6b69c7-mk98j
+  series:
+    count: 2
+    lastObservedTime: "2026-11-23T15:02:10.787372Z"
+  source: {}
+  type: Warning
+- apiVersion: v1
+  count: 25
+  eventTime: null
+  firstTimestamp: "2026-11-23T15:02:19Z"
+  involvedObject:
+    apiVersion: v1
+    kind: Pod
+    name: mig-2g-a
+    namespace: default
+    resourceVersion: "1265457514"
+    uid: 46c8d916-beae-4c6e-b546-51a1e5401041
+  kind: Event
+  lastTimestamp: "2026-11-23T15:02:47Z"
+  message: no available node, 1 nodes do not meet
+  metadata:
+    creationTimestamp: "2026-11-23T15:02:19Z"
+    name: mig-2g-a.18eab4c033453ca4
+    namespace: default
+    resourceVersion: "1265458477"
+    uid: db47e41d-a324-4c18-a23b-508e8ce95413
+  reason: FilteringFailed
+  reportingComponent: hami-scheduler
+  reportingInstance: ""
+  source:
+    component: hami-scheduler
+  type: Warning
+- action: Scheduling
+  apiVersion: v1
+  eventTime: "2026-11-23T15:02:19.079162Z"
+  firstTimestamp: null
+  involvedObject:
+    apiVersion: v1
+    kind: Pod
+    name: mig-2g-a
+    namespace: default
+    resourceVersion: "1265457817"
+    uid: 46c8d916-beae-4c6e-b546-51a1e5401041
+  kind: Event
+  lastTimestamp: null
+  message: '0/40 nodes are available: 1 node unregistered, 34 node(s) had untolerated
+    taint(s), 5 node(s) didn''t match Pod''s node affinity/selector. no new claims
+    to deallocate, preemption: 0/40 nodes are available: 1 No preemption victims found
+    for incoming pod, 39 Preemption is not helpful for scheduling.'
+  metadata:
+    creationTimestamp: "2026-11-23T15:02:19Z"
+    name: mig-2g-a.18eab4c035290689
+    namespace: default
+    resourceVersion: "1265457837"
+    uid: 07285968-a615-485c-aa26-b39bb886ceac
+  reason: FailedScheduling
+  reportingComponent: hami-scheduler
+  reportingInstance: hami-scheduler-hami-scheduler-589c6b69c7-mk98j
+  series:
+    count: 2
+    lastObservedTime: "2026-11-23T15:02:19.119464Z"
+  source: {}
+  type: Warning
+- apiVersion: v1
+  count: 1
+  eventTime: null
+  firstTimestamp: "2026-11-23T15:02:59Z"
+  involvedObject:
+    apiVersion: v1
+    kind: Pod
+    name: mig-2g-a
+    namespace: default
+    resourceVersion: "1265457817"
+    uid: 46c8d916-beae-4c6e-b546-51a1e5401041
+  kind: Event
+  lastTimestamp: "2026-11-23T15:02:59Z"
+  message: find fit node(ip-10-210-126-83.ap-northeast-2.compute.internal), 0 nodes
+    not fit, 1 nodes fit(ip-10-210-126-83.ap-northeast-2.compute.internal:1.33)
+  metadata:
+    creationTimestamp: "2026-11-23T15:02:59Z"
+    name: mig-2g-a.18eab4c9b7220097
+    namespace: default
+    resourceVersion: "1265458689"
+    uid: 08dc87a4-cec8-4053-a753-1743bd5f9af6
+  reason: FilteringSucceed
+  reportingComponent: hami-scheduler
+  reportingInstance: ""
+  source:
+    component: hami-scheduler
+  type: Normal
+- apiVersion: v1
+  count: 1
+  eventTime: null
+  firstTimestamp: "2026-11-23T15:03:05Z"
+  involvedObject:
+    apiVersion: v1
+    kind: Pod
+    name: mig-2g-a
+    namespace: default
+    resourceVersion: "1265458760"
+    uid: 46c8d916-beae-4c6e-b546-51a1e5401041
+  kind: Event
+  lastTimestamp: "2026-11-23T15:03:05Z"
+  message: find fit node(ip-10-210-126-83.ap-northeast-2.compute.internal), 0 nodes
+    not fit, 1 nodes fit(ip-10-210-126-83.ap-northeast-2.compute.internal:0.85)
+  metadata:
+    creationTimestamp: "2026-11-23T15:03:05Z"
+    name: mig-2g-a.18eab4cae722f9cf
+    namespace: default
+    resourceVersion: "1265458793"
+    uid: f953679b-d064-4e76-9011-d21accc56e87
+  reason: FilteringSucceed
+  reportingComponent: hami-scheduler
+  reportingInstance: ""
+  source:
+    component: hami-scheduler
+  type: Normal
+- apiVersion: v1
+  count: 1
+  eventTime: null
+  firstTimestamp: "2026-11-23T15:03:06Z"
+  involvedObject:
+    apiVersion: v1
+    kind: Pod
+    name: mig-2g-a
+    namespace: default
+    resourceVersion: "1265458792"
+    uid: 46c8d916-beae-4c6e-b546-51a1e5401041
+  kind: Event
+  lastTimestamp: "2026-11-23T15:03:06Z"
+  message: Successfully binding node [ip-10-210-126-83.ap-northeast-2.compute.internal]
+    to default/mig-2g-a
+  metadata:
+    creationTimestamp: "2026-11-23T15:03:06Z"
+    name: mig-2g-a.18eab4cb27740cd4
+    namespace: default
+    resourceVersion: "1265458823"
+    uid: 4a9d8be7-1711-42ec-a776-6cdf067ca481
+  reason: BindingSucceed
+  reportingComponent: hami-scheduler
+  reportingInstance: ""
+  source:
+    component: hami-scheduler
+  type: Normal
+- action: Binding
+  apiVersion: v1
+  eventTime: "2026-11-23T15:03:06.094312Z"
+  firstTimestamp: null
+  involvedObject:
+    apiVersion: v1
+    kind: Pod
+    name: mig-2g-a
+    namespace: default
+    resourceVersion: "1265458760"
+    uid: 46c8d916-beae-4c6e-b546-51a1e5401041
+  kind: Event
+  lastTimestamp: null
+  message: Successfully assigned default/mig-2g-a to ip-10-210-126-83.ap-northeast-2.compute.internal
+  metadata:
+    creationTimestamp: "2026-11-23T15:03:06Z"
+    name: mig-2g-a.18eab4cb277b6791
+    namespace: default
+    resourceVersion: "1265458816"
+    uid: a5f9d184-20f0-4039-91b1-7bc0393c2443
+  reason: Scheduled
+  reportingComponent: hami-scheduler
+  reportingInstance: hami-scheduler-hami-scheduler-589c6b69c7-mk98j
+  source: {}
+  type: Normal
+- apiVersion: v1
+  count: 1
+  eventTime: null
+  firstTimestamp: "2026-11-23T15:03:06Z"
+  involvedObject:
+    apiVersion: v1
+    kind: Pod
+    name: mig-2g-a
+    namespace: default
+    resourceVersion: "1265458815"
+    uid: 46c8d916-beae-4c6e-b546-51a1e5401041
+  kind: Event
+  lastTimestamp: "2026-11-23T15:03:06Z"
+  message: 'Allocate failed due to rpc error: code = Unknown desc = resolve allocated
+    NVIDIA devices: gpu 7 MIG enable is pending (current=0 pending=1): MIG mode change
+    requires a GPU reset or VM reboot. Manual operator action may be needed: try nvidia-smi
+    --gpu-reset, or reboot the VM if the hypervisor does not allow GPU reset. See
+    https://docs.nvidia.com/datacenter/tesla/mig-user-guide/latest/getting-started-with-mig.html,
+    which is unexpected'
+  metadata:
+    creationTimestamp: "2026-11-23T15:03:06Z"
+    name: mig-2g-a.18eab4cb4d3d5763
+    namespace: default
+    resourceVersion: "1265458833"
+    uid: c24a8643-07cd-40cd-a88e-5386a0655756
+  reason: UnexpectedAdmissionError
+  reportingComponent: kubelet
+  reportingInstance: ip-10-210-126-83.ap-northeast-2.compute.internal
+  source:
+    component: kubelet
+    host: ip-10-210-126-83.ap-northeast-2.compute.internal
+  type: Warning
+kind: List
+metadata:
+  resourceVersion: ""

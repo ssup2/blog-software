@@ -1,0 +1,150 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","kind":"Pod","metadata":{"annotations":{},"name":"mig-node-warmup","namespace":"default"},"spec":{"containers":[{"image":"registry.k8s.io/pause:3.10","name":"pause","resources":{"requests":{"cpu":"100m"}}}],"nodeSelector":{"group":"gpu-a100-hami"},"tolerations":[{"effect":"NoSchedule","key":"group","operator":"Equal","value":"gpu-a100-hami"},{"effect":"NoSchedule","key":"nvidia.com/gpu","operator":"Exists"}]}}
+  creationTimestamp: "2026-11-23T15:00:31Z"
+  generation: 1
+  name: mig-node-warmup
+  namespace: default
+  resourceVersion: "1265457970"
+  uid: e2ce7808-734d-4430-bb47-27e01bd13069
+spec:
+  containers:
+  - image: registry.k8s.io/pause:3.10
+    imagePullPolicy: IfNotPresent
+    name: pause
+    resources:
+      limits:
+        ephemeral-storage: 10Gi
+      requests:
+        cpu: 100m
+        ephemeral-storage: "0"
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-9n47s
+      readOnly: true
+  dnsConfig:
+    options:
+    - name: ndots
+      value: "2"
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  nodeName: ip-10-210-126-83.ap-northeast-2.compute.internal
+  nodeSelector:
+    group: gpu-a100-hami
+  preemptionPolicy: PreemptLowerPriority
+  priority: 0
+  restartPolicy: Always
+  schedulerName: default-scheduler
+  securityContext: {}
+  serviceAccount: default
+  serviceAccountName: default
+  terminationGracePeriodSeconds: 30
+  tolerations:
+  - effect: NoSchedule
+    key: group
+    operator: Equal
+    value: gpu-a100-hami
+  - effect: NoSchedule
+    key: nvidia.com/gpu
+    operator: Exists
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  volumes:
+  - name: kube-api-access-9n47s
+    projected:
+      defaultMode: 420
+      sources:
+      - serviceAccountToken:
+          expirationSeconds: 3607
+          path: token
+      - configMap:
+          items:
+          - key: ca.crt
+            path: ca.crt
+          name: kube-root-ca.crt
+      - downwardAPI:
+          items:
+          - fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+            path: namespace
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: "2026-11-23T15:02:20Z"
+    observedGeneration: 1
+    status: "True"
+    type: PodReadyToStartContainers
+  - lastProbeTime: null
+    lastTransitionTime: "2026-11-23T15:02:19Z"
+    observedGeneration: 1
+    status: "True"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: "2026-11-23T15:02:22Z"
+    observedGeneration: 1
+    status: "True"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: "2026-11-23T15:02:22Z"
+    observedGeneration: 1
+    status: "True"
+    type: ContainersReady
+  - lastProbeTime: null
+    lastTransitionTime: "2026-11-23T15:02:19Z"
+    observedGeneration: 1
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - allocatedResources:
+      cpu: 100m
+      ephemeral-storage: "0"
+    containerID: containerd://0774efeefde248dcf2c65212630e49f01ca04775531ae3a074b79f178201645e
+    image: registry.k8s.io/pause:3.10
+    imageID: registry.k8s.io/pause@sha256:ee6521f290b2168b6e0935a181d4cff9be1ac3f505666ef0e3c98fae8199917a
+    lastState: {}
+    name: pause
+    ready: true
+    resources:
+      limits:
+        ephemeral-storage: 10Gi
+      requests:
+        cpu: 100m
+        ephemeral-storage: "0"
+    restartCount: 0
+    started: true
+    state:
+      running:
+        startedAt: "2026-11-23T15:02:21Z"
+    user:
+      linux:
+        gid: 0
+        supplementalGroups:
+        - 0
+        uid: 65535
+    volumeMounts:
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-9n47s
+      readOnly: true
+      recursiveReadOnly: Disabled
+  hostIP: 10.210.126.83
+  hostIPs:
+  - ip: 10.210.126.83
+  observedGeneration: 1
+  phase: Running
+  podIP: 10.210.123.118
+  podIPs:
+  - ip: 10.210.123.118
+  qosClass: Burstable
+  startTime: "2026-11-23T15:02:19Z"
