@@ -1,0 +1,15 @@
+index, mig.mode.current
+0, Enabled
+1, Enabled
+2, Enabled
+3, Enabled
+4, Enabled
+5, Enabled
+6, Enabled
+7, Enabled
+up 1 minute
+reboot   system boot  6.12.115-140.210 Mon Nov 23 16:50   still running
+reboot   system boot  6.12.115-140.210 Mon Nov 23 16:49 - 16:50  (00:01)
+reboot   system boot  6.12.115-140.210 Fri Nov 20 02:41 - 02:45  (00:04)
+0
+

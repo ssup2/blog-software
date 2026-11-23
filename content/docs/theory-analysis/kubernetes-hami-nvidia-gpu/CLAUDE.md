@@ -6,6 +6,11 @@ kubernetes-hami(HAMi 자체, 벤더 중립 구조) 문서의 NVIDIA 상세 글�
 
 ## 문서 구성 및 상태
 
+- **2026-11-24 Dynamic MIG 자동화 end-to-end 검증** (회사 Mac, KR/EN 동시): env-charts PR #1458 머지+sync 후 warmup Pod 없이 config8만
+  적용 → NodeOverlay로 Karpenter가 p4d 자동 프로비저닝(gpumem 인식) → userData가 부팅 시 `nvidia-smi -mig 1` + reboot로 MIG Mode 자동 활성화
+  (last reboot 2회 확인: 16:49 최초→user script enable+reboot→16:50) → 세 Pod 자동 할당 성공(GPU UUID c634460f, 위치 0/2/4). 수동 개입 0.
+  본문 반영: 1.4 도입부 "placeholder Pod로 생성" → NodeOverlay 문단으로 교체, userData 문단에 EC2 reset 거부→reboot 설명 추가,
+  [Shell 9](부팅 시 자동 활성화 + last reboot) 추가. dumps step5-automated. env-charts: node_overlay_capacity(node group 옵션)·mig_reboot 옵션으로 정리됨.
 - **2026-11-24 Dynamic MIG 실측 2차 — MIG Instance 생성 성공** (회사 Mac, KR/EN 동시): 1.4.1에 [Shell 7](Config 8 구성),
   1.4.2에 [Shell 8](Config 9 전환) 추가, TODO 주석 제거. 실측 요지:
   - MIG Mode 활성화는 userData #1457로도 EC2에서 reset 거부(gpu-reset "In use by another client")라 pending 잔존 →
@@ -14,8 +19,8 @@ kubernetes-hami(HAMi 자체, 벤더 중립 구조) 문서의 NVIDIA 상세 글�
   - Config 9: mig-2g-b 삭제 → 1g×2 적용. mig-2g-a(54cc1df4)·mig-3g(d867d519) migUUID 유지(재생성 없음), 1g×2는 위치 2,3.
     device-plugin 로그 migmgr.go: created(664) → cached released=Idle(907) → reclaimed idle under placement pressure(739) → created 1g×2.
   - dumps: step3-config8, step4-config9 (migmgr-lifecycle.log 포함). [Shell 7]/[Shell 8]은 이 dump 발췌.
-  - **후속**: env-charts PR #1458(NodeOverlay로 warmup 제거 + userData reset 우선)은 머지+sync 후 fresh node 자동화 검증 대기.
-    검증되면 1.4 도입부 "placeholder Pod로 Node 먼저 생성" 문단을 NodeOverlay 방식으로 갱신할 것 (현재 본문은 실제 거친 warmup 경로 유지).
+  - **후속 완료**: env-charts PR #1458(NodeOverlay+mig_reboot) 머지+sync 후 자동화 검증 완료 → 1.4 도입부를 NodeOverlay 방식으로 갱신,
+    [Shell 9] 추가, warmup manifest 삭제 (위 2026-11-24 자동화 항목 참조).
 - **2026-11-24 Dynamic MIG 실측 1차** (회사 Mac, KR/EN 동시): 1.4 도입부에 환경 문단 + Karpenter 우회 문단 + [Shell 6](실측) + 설명 2문단 추가.
   실측 확인 2건 — ① Karpenter는 `nvidia.com/gpumem`을 몰라 "no instance type has enough resources"로 프로비저닝 거부 →
   GPU Resource 없는 placeholder Pod(`manifests/mig/mig-node-warmup.yaml`)로 우회 (dumps/mig/step0-provision).
@@ -192,35 +197,28 @@ kubernetes-hami(HAMi 자체, 벤더 중립 구조) 문서의 NVIDIA 상세 글�
 
 - 환경: 회사 Alpha EKS Cluster `alpha-kr-dev`의 `gpu-a100-hami` Node Group (p4d.24xlarge, A100-SXM4-40GB 8장), HAMi 2.11.0, `addon-hami` namespace.
   공개 저장소라 AWS 계정/ARN은 여기 기재하지 않음 — `aws sso login --profile alpha-sre` 후 `kubectl config get-contexts | grep alpha-kr-dev`로 context 확인.
-- 진행 상태 (2026-11-24): hami 앱 sync 완료, karpenter 앱 1차 sync 완료(NodePool 생성됨), 실측 1차에서 Karpenter gpumem 우회·Ampere MIG pending
-  실측 수집 완료([Shell 6] 반영). **Blocker: env-charts PR #1457 (userData `nvidia-smi -mig 1`) 머지 + karpenter-alpha-kr-dev 재sync** —
-  그 전에는 새 노드도 MIG Mode가 꺼진 채 부팅되어 할당이 실패함. 1차 테스트 노드는 Pod 정리로 회수됨.
-- 절차 (이 폴더 기준, 집 맥북에서 이어서 수행 가능):
+- 진행 상태 (2026-11-24): **완전 자동화 end-to-end 검증 완료.** env-charts PR #1456(MIG 전환)·#1457(userData MIG)·#1458(NodeOverlay+mig_reboot)
+  모두 머지·sync됨. warmup Pod 없이 config8만 적용 → 자동 프로비저닝 → 자동 MIG 활성화(reboot) → 할당 성공까지 확인. 본문 [Shell 6~9] 모두 실측 반영.
+- 재현 절차 (warmup 불필요, 최종):
   1. `export KUBE_CONTEXT=<alpha-kr-dev context>`
-  2. PR #1457 머지 + karpenter-alpha-kr-dev 재sync 확인 (EC2NodeClass에 userData의 `nvidia-smi -mig 1` 반영 여부:
-     `kubectl get ec2nodeclass alpha-kr-dev-gpu-a100-hami -o yaml | grep -A3 'mig 1'`)
-  3. `kubectl --context $KUBE_CONTEXT apply -f manifests/mig/mig-node-warmup.yaml` — Karpenter가 gpumem을 몰라 Node를 안 만들므로 placeholder로 프로비저닝 (p4d.24xlarge, 수 분 소요. 고가 인스턴스 — Test 후 회수 확인)
-  4. Node Ready + device plugin Running 후 `kubectl --context $KUBE_CONTEXT apply -f manifests/mig/mig-config8.yaml` — mig-2g-a/b, mig-3g
-  5. Pod Running 후 `manifests/mig/capture.sh step2-config8` → dumps/mig/step2-config8/ (Pod 안 `nvidia-smi -L`의 MIG Device 포함)
-  6. `kubectl --context $KUBE_CONTEXT delete pod mig-2g-b` → 5초 reconciler 주기 후 `apply -f manifests/mig/mig-config9.yaml` (mig-1g-a/b)
-  7. `manifests/mig/capture.sh step3-config9` — mig-2g-a, mig-3g가 재시작 없이 유지됐는지와 Idle 2g 제거 로그 확인
-  8. 정리: warmup 포함 모두 delete, Karpenter 노드 회수 확인, dumps 커밋
-  9. 본문 TODO 주석 위치에 [Shell 7]/[Shell 8]을 dumps 실측 발췌로 작성하고 EN에도 반영
-- 확인 포인트: ① 세 Pod의 `hami.io/vgpu-mig-allocations` GPU UUID 일치(binpack)와 Profile·위치(2g→0,2 / 3g→4 예상: mig_topology_test.go 근거)
-  ② Pod 안 `nvidia-smi -L`의 MIG Device ③ Node `hami.io/node-nvidia-register`의 `mode: mig` ④ device-plugin Log의 GI/CI 생성·Idle 전환·제거
-  ⑤ Config 9 전환 시 기존 Instance 유지 + Idle 2g의 reclaimBlockingIdle 제거. Ampere MIG Mode 사전 활성화 필요 여부(본문 1.4 서술)도 첫 할당
-  성공/실패로 관찰됨 — golden AMI가 MIG Mode를 미리 켰는지는 미확인.
-- 미확인 리스크 (실측에서 틀리면 본문 수정): binpack이 MIG Mode에서도 같은 GPU로 모으는지 미검증 — 안 모이면 1차 수집 후 `nvidia.com/use-gpuuuid`로
-  고정. 삭제된 2g의 위치가 0이면 1g ×2가 위치 0,1에 생성되어 Config 10(1g,1g,2g,3g)이 될 수 있음 — 본문은 Config 9 기준 서술이라 실측 결과에 맞춰 조정.
+  2. `kubectl apply -f manifests/mig/mig-config8.yaml` — NodeOverlay로 Karpenter가 p4d 자동 프로비저닝. 노드는 user script MIG enable+reboot로
+     부팅이 평소보다 길다(최초 부팅→reboot→재부팅, ~5분). 고가 인스턴스 — Test 후 회수 확인.
+  3. 세 Pod Running 후 `manifests/mig/capture.sh step3-config8` (또는 새 step 이름)
+  4. `kubectl delete pod mig-2g-b` → 5초 reconciler 주기 후 `kubectl apply -f manifests/mig/mig-config9.yaml`
+  5. `manifests/mig/capture.sh step4-config9`
+  6. 정리: 모든 mig Pod delete, Karpenter 노드 회수 확인, dumps 커밋
+- 검증된 사실: ① NodeOverlay(node_overlay_capacity)로 gpumem만 요청하는 Pod으로 프로비저닝됨 ② userData mig_reboot로 부팅 시 MIG Mode 자동 Enabled
+  (last reboot 2회) ③ binpack으로 세 Pod 같은 GPU, 위치 2g→0,2 / 3g→4 ④ Config 9 전환 시 mig-2g-a/mig-3g migUUID 유지, Idle 2g는
+  cached released→reclaimed under placement pressure로 제거 후 1g×2 생성(위치 2,3). mig_topology_test.go 예측과 일치.
 
 ## 폴더 구조
 
 - `index.md`, `index.en.md` — 문서 본문 (둘 다 draft).
 - `manifests/` — hami-isolation-test, hami-wholegpu-test, hami-priority-high/low, matmul-rate.py.
-- `manifests/mig/` — Dynamic MIG Test: `mig-node-warmup.yaml`(Karpenter 프로비저닝용 placeholder), `mig-config8.yaml`(2g ×2 + 3g),
-  `mig-config9.yaml`(1g ×2), `capture.sh`(단계별 Log·상태 수집, `KUBE_CONTEXT` 필요).
-- `dumps/mig/<step>/` — 단계별 수집 결과. step0-provision(Karpenter gpumem 거부·warmup), step1-mig-enable-pending(Ampere MIG pending 실측),
-  step2-config8·step3-config9(실측 대기).
+- `manifests/mig/` — Dynamic MIG Test: `mig-config8.yaml`(2g ×2 + 3g), `mig-config9.yaml`(1g ×2), `capture.sh`(단계별 Log·상태 수집, `KUBE_CONTEXT` 필요).
+  (초기 warmup/gpu-admin manifest는 NodeOverlay·userData 자동화로 불필요해져 삭제)
+- `dumps/mig/<step>/` — 단계별 수집 결과. step0-provision(Karpenter gpumem 거부), step1-mig-enable-pending(Ampere MIG pending 실측),
+  step2-mig-enable-fix(수동 reset 거부·reboot 진단), step3-config8·step4-config9(MIG Instance 생성/전환), step5-automated(end-to-end 자동화).
 - `images/` — Figure 3종, 2026-11-22 모두 Claude SVG 초안으로 교체(사용자 pptx 재작도 가능, SVG 소스 미보관).
 
 ## 2026-11-14 [Table 3] 추가

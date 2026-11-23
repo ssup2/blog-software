@@ -1,0 +1,233 @@
+I1123 16:51:12.975218   38447 flags.go:27] FLAG: --add_dir_header="false"
+I1123 16:51:12.975267   38447 flags.go:27] FLAG: --alsologtostderr="false"
+I1123 16:51:12.975275   38447 flags.go:27] FLAG: --alsologtostderrthreshold="0"
+I1123 16:51:12.975280   38447 flags.go:27] FLAG: --legacy_stderr_threshold_behavior="true"
+I1123 16:51:12.975283   38447 flags.go:27] FLAG: --log_backtrace_at=":0"
+I1123 16:51:12.975287   38447 flags.go:27] FLAG: --log_dir=""
+I1123 16:51:12.975289   38447 flags.go:27] FLAG: --log_file=""
+I1123 16:51:12.975291   38447 flags.go:27] FLAG: --log_file_max_size="1800"
+I1123 16:51:12.975293   38447 flags.go:27] FLAG: --logtostderr="true"
+I1123 16:51:12.975295   38447 flags.go:27] FLAG: --one_output="false"
+I1123 16:51:12.975298   38447 flags.go:27] FLAG: --skip_headers="false"
+I1123 16:51:12.975300   38447 flags.go:27] FLAG: --skip_log_headers="false"
+I1123 16:51:12.975302   38447 flags.go:27] FLAG: --stderrthreshold="2"
+I1123 16:51:12.975304   38447 flags.go:27] FLAG: --v="4"
+I1123 16:51:12.975306   38447 flags.go:27] FLAG: --vmodule=""
+I1123 16:51:12.975309   38447 flags.go:27] FLAG: --metrics-bind-address=":9394"
+I1123 16:51:12.975312   38447 flags.go:27] FLAG: --legacy-metrics="false"
+I1123 16:51:12.975315   38447 flags.go:27] FLAG: --help="false"
+W1123 16:51:12.975347   38447 client_config.go:683] Neither --kubeconfig nor --master was specified.  Using the inClusterConfig.  This might not work.
+I1123 16:51:12.975475   38447 envvar.go:195] "Feature gate default state" feature="WatchListClient" enabled=true
+I1123 16:51:12.975487   38447 envvar.go:195] "Feature gate default state" feature="UnlockWhileProcessingFIFO" enabled=true
+I1123 16:51:12.975492   38447 envvar.go:195] "Feature gate default state" feature="InOrderInformersBatchProcess" enabled=true
+I1123 16:51:12.975496   38447 envvar.go:195] "Feature gate default state" feature="InOrderInformers" enabled=true
+I1123 16:51:12.975500   38447 envvar.go:195] "Feature gate default state" feature="InformerResourceVersion" enabled=true
+I1123 16:51:12.975504   38447 envvar.go:195] "Feature gate default state" feature="ClientsPreferCBOR" enabled=false
+I1123 16:51:12.975509   38447 envvar.go:195] "Feature gate default state" feature="AtomicFIFO" enabled=true
+I1123 16:51:12.975513   38447 envvar.go:195] "Feature gate default state" feature="ClientsAllowCARotation" enabled=true
+I1123 16:51:12.975517   38447 envvar.go:195] "Feature gate default state" feature="ClientsAllowTLSCacheGC" enabled=true
+I1123 16:51:12.975521   38447 envvar.go:195] "Feature gate default state" feature="ClientsAllowCBOR" enabled=false
+I1123 16:51:12.975998   38447 reflector.go:425] "Starting reflector" type="*v1.Pod" resyncPeriod="5m0s" reflector="pkg/mod/k8s.io/client-go@v0.37.2/tools/cache/reflector.go:343"
+I1123 16:51:12.976008   38447 reflector.go:472] "Listing and watching" type="*v1.Pod" reflector="pkg/mod/k8s.io/client-go@v0.37.2/tools/cache/reflector.go:343"
+I1123 16:51:12.990129   38447 reflector.go:1080] "Exiting watch because received the bookmark that marks the end of initial events stream" reflector="pkg/mod/k8s.io/client-go@v0.37.2/tools/cache/reflector.go:343" totalItems=8 duration="14.037237ms"
+I1123 16:51:12.990167   38447 reflector.go:507] "Caches populated" type="*v1.Pod" reflector="pkg/mod/k8s.io/client-go@v0.37.2/tools/cache/reflector.go:343"
+I1123 16:51:13.076483   38447 cudevshr.go:475] Pod informer started successfully
+I1123 16:51:13.076548   38447 lock.go:50] MIG apply lock directory already exists
+I1123 16:51:13.076665   38447 main.go:168] Initializing metrics for vGPUmonitor
+I1123 16:51:13.076666   38447 feedback.go:146] Starting watchAndFeedback
+I1123 16:51:28.098544   38447 wholegpu.go:453] wholegpu: synthesized whole-GPU usage for c31d7ee9-c5cf-4150-81c5-a5729b94f264_cuda (1 device(s))
+I1123 16:51:30.343668   38447 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 16:51:30.349698   38447 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 16:51:30.358236   38447 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 16:51:30.366498   38447 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 16:51:30.375518   38447 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 16:51:30.383846   38447 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 16:51:30.392094   38447 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 16:51:30.400417   38447 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 16:51:30.409366   38447 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+W1123 16:51:30.417623   38447 wholegpu_dcgm.go:137] wholegpu: dcgm embedded init failed, will retry in 30s: libdcgm.so.4 not found or could not be loaded: libdcgm.so.4: cannot open shared object file: No such file or directory; go-dcgm requires DCGM 4
+I1123 16:51:30.417687   38447 metrics.go:576] Finished collecting metrics for 1 pods
+I1123 16:51:30.417767   38447 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 16:51:33.095931   38447 wholegpu.go:453] wholegpu: synthesized whole-GPU usage for aa17f75b-b005-4325-ad68-8d5d3329b967_cuda (1 device(s))
+I1123 16:51:38.098988   38447 wholegpu.go:453] wholegpu: synthesized whole-GPU usage for 3a064d9c-5e6c-413b-9c80-057df0d6fd4c_cuda (1 device(s))
+I1123 16:51:45.343183   38447 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 16:51:45.343951   38447 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 16:51:45.347321   38447 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 16:51:45.349891   38447 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 16:51:45.352801   38447 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 16:51:45.355347   38447 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 16:51:45.357957   38447 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 16:51:45.360488   38447 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 16:51:45.363037   38447 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 16:51:45.388355   38447 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 16:51:45.388488   38447 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 16:51:51.106281   38447 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 16:51:51.106475   38447 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 16:51:51.109113   38447 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 16:51:51.111640   38447 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 16:51:51.114141   38447 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 16:51:51.116643   38447 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 16:51:51.119201   38447 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 16:51:51.123781   38447 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 16:51:51.127782   38447 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 16:51:51.150843   38447 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 16:51:51.150969   38447 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 16:52:00.343048   38447 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 16:52:00.343266   38447 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 16:52:00.345844   38447 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 16:52:00.348883   38447 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 16:52:00.351422   38447 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 16:52:00.353984   38447 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 16:52:00.356533   38447 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 16:52:00.359090   38447 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 16:52:00.361644   38447 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 16:52:00.385336   38447 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 16:52:00.385412   38447 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 16:52:15.343209   38447 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 16:52:15.343413   38447 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 16:52:15.346012   38447 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 16:52:15.348544   38447 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 16:52:15.351133   38447 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 16:52:15.353690   38447 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 16:52:15.356507   38447 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 16:52:15.359126   38447 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 16:52:15.361597   38447 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+W1123 16:52:15.371375   38447 wholegpu_dcgm.go:137] wholegpu: dcgm embedded init failed, will retry in 30s: libdcgm.so.4 not found or could not be loaded: libdcgm.so.4: cannot open shared object file: No such file or directory; go-dcgm requires DCGM 4
+I1123 16:52:15.385096   38447 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 16:52:15.385187   38447 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 16:52:21.105393   38447 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 16:52:21.105603   38447 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 16:52:21.108991   38447 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 16:52:21.113386   38447 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 16:52:21.115909   38447 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 16:52:21.118480   38447 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 16:52:21.121021   38447 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 16:52:21.123576   38447 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 16:52:21.126099   38447 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 16:52:21.149549   38447 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 16:52:21.149712   38447 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 16:52:30.343322   38447 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 16:52:30.343580   38447 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 16:52:30.346396   38447 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 16:52:30.349035   38447 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 16:52:30.351642   38447 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 16:52:30.354216   38447 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 16:52:30.356823   38447 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 16:52:30.359404   38447 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 16:52:30.362708   38447 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 16:52:30.387026   38447 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 16:52:30.387104   38447 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 16:52:45.343485   38447 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 16:52:45.343705   38447 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 16:52:45.346255   38447 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 16:52:45.349117   38447 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 16:52:45.351640   38447 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 16:52:45.354163   38447 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 16:52:45.356660   38447 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 16:52:45.359248   38447 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 16:52:45.361786   38447 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+W1123 16:52:45.371516   38447 wholegpu_dcgm.go:137] wholegpu: dcgm embedded init failed, will retry in 30s: libdcgm.so.4 not found or could not be loaded: libdcgm.so.4: cannot open shared object file: No such file or directory; go-dcgm requires DCGM 4
+I1123 16:52:45.385359   38447 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 16:52:45.385435   38447 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 16:52:51.105680   38447 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 16:52:51.105895   38447 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 16:52:51.108758   38447 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 16:52:51.111340   38447 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 16:52:51.115508   38447 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 16:52:51.118191   38447 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 16:52:51.121099   38447 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 16:52:51.124159   38447 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 16:52:51.127299   38447 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 16:52:51.150399   38447 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 16:52:51.150474   38447 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 16:53:00.343311   38447 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 16:53:00.343547   38447 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 16:53:00.346229   38447 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 16:53:00.348893   38447 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 16:53:00.351446   38447 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 16:53:00.353995   38447 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 16:53:00.356563   38447 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 16:53:00.359132   38447 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 16:53:00.361701   38447 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 16:53:00.386278   38447 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 16:53:00.386354   38447 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 16:53:15.343088   38447 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 16:53:15.343321   38447 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 16:53:15.345962   38447 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 16:53:15.349636   38447 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 16:53:15.353481   38447 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 16:53:15.356257   38447 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 16:53:15.358832   38447 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 16:53:15.361369   38447 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 16:53:15.363954   38447 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+W1123 16:53:15.373767   38447 wholegpu_dcgm.go:137] wholegpu: dcgm embedded init failed, will retry in 30s: libdcgm.so.4 not found or could not be loaded: libdcgm.so.4: cannot open shared object file: No such file or directory; go-dcgm requires DCGM 4
+I1123 16:53:15.387421   38447 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 16:53:15.387496   38447 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 16:53:21.105590   38447 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 16:53:21.105813   38447 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 16:53:21.108366   38447 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 16:53:21.110930   38447 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 16:53:21.113483   38447 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 16:53:21.116050   38447 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 16:53:21.118891   38447 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 16:53:21.121418   38447 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 16:53:21.123953   38447 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 16:53:21.147207   38447 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 16:53:21.147284   38447 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 16:53:30.343239   38447 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 16:53:30.343466   38447 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 16:53:30.346127   38447 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 16:53:30.348973   38447 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 16:53:30.351547   38447 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 16:53:30.354114   38447 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 16:53:30.356639   38447 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 16:53:30.359230   38447 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 16:53:30.363139   38447 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 16:53:30.386487   38447 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 16:53:30.386575   38447 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 16:53:45.342637   38447 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 16:53:45.342890   38447 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 16:53:45.345511   38447 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 16:53:45.348057   38447 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 16:53:45.350629   38447 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 16:53:45.353224   38447 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 16:53:45.355755   38447 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 16:53:45.358272   38447 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 16:53:45.360815   38447 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+W1123 16:53:45.377808   38447 wholegpu_dcgm.go:137] wholegpu: dcgm embedded init failed, will retry in 30s: libdcgm.so.4 not found or could not be loaded: libdcgm.so.4: cannot open shared object file: No such file or directory; go-dcgm requires DCGM 4
+I1123 16:53:45.384731   38447 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 16:53:45.384827   38447 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 16:53:51.105520   38447 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 16:53:51.105756   38447 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 16:53:51.108359   38447 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 16:53:51.110916   38447 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 16:53:51.113462   38447 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 16:53:51.116244   38447 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 16:53:51.118848   38447 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 16:53:51.121389   38447 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 16:53:51.123916   38447 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 16:53:51.147113   38447 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 16:53:51.147236   38447 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 16:54:00.343047   38447 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 16:54:00.343252   38447 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 16:54:00.345891   38447 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 16:54:00.348383   38447 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 16:54:00.352117   38447 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 16:54:00.354627   38447 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 16:54:00.357230   38447 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 16:54:00.359774   38447 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 16:54:00.362291   38447 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 16:54:00.385977   38447 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 16:54:00.386055   38447 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 16:54:15.343488   38447 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 16:54:15.343729   38447 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 16:54:15.346365   38447 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 16:54:15.348998   38447 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 16:54:15.351583   38447 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 16:54:15.354158   38447 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 16:54:15.356697   38447 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 16:54:15.359257   38447 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 16:54:15.361792   38447 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+W1123 16:54:15.378642   38447 wholegpu_dcgm.go:137] wholegpu: dcgm embedded init failed, will retry in 30s: libdcgm.so.4 not found or could not be loaded: libdcgm.so.4: cannot open shared object file: No such file or directory; go-dcgm requires DCGM 4
+I1123 16:54:15.385528   38447 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 16:54:15.385630   38447 metrics.go:291] Finished collecting metrics for vGPUMonitor

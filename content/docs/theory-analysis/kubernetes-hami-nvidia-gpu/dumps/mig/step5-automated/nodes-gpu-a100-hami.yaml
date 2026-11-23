@@ -1,0 +1,237 @@
+apiVersion: v1
+items:
+- apiVersion: v1
+  kind: Node
+  metadata:
+    annotations:
+      alpha.kubernetes.io/provided-node-ip: 10.210.114.158
+      csi.volume.kubernetes.io/nodeid: '{"ebs.csi.aws.com":"i-09bbb304328c6bd26"}'
+      hami.io/node-nvidia-register: '[{"id":"GPU-ba4fa428-9d41-74cf-86e6-0824b0de1b09","index":3,"count":7,"devmem":40960,"devcore":100,"type":"NVIDIA
+        A100-SXM4-40GB","mode":"mig","migProfiles":[{"name":"1g.5gb","memoryMB":4864,"core":15,"sliceCount":1,"placements":[{"start":0,"size":1},{"start":1,"size":1},{"start":2,"size":1},{"start":3,"size":1},{"start":4,"size":1},{"start":5,"size":1},{"start":6,"size":1}]},{"name":"2g.10gb","memoryMB":9984,"core":29,"sliceCount":2,"placements":[{"start":0,"size":2},{"start":2,"size":2},{"start":4,"size":2}]},{"name":"3g.20gb","memoryMB":20224,"core":43,"sliceCount":3,"placements":[{"start":0,"size":4},{"start":4,"size":4}]},{"name":"4g.20gb","memoryMB":20224,"core":58,"sliceCount":4,"placements":[{"start":0,"size":4}]},{"name":"7g.40gb","memoryMB":40576,"core":100,"sliceCount":7,"placements":[{"start":0,"size":8}]}],"health":true},{"id":"GPU-ab948b61-2346-9a55-872f-9c025479276d","index":4,"count":7,"devmem":40960,"devcore":100,"type":"NVIDIA
+        A100-SXM4-40GB","numa":1,"mode":"mig","migProfiles":[{"name":"1g.5gb","memoryMB":4864,"core":15,"sliceCount":1,"placements":[{"start":0,"size":1},{"start":1,"size":1},{"start":2,"size":1},{"start":3,"size":1},{"start":4,"size":1},{"start":5,"size":1},{"start":6,"size":1}]},{"name":"2g.10gb","memoryMB":9984,"core":29,"sliceCount":2,"placements":[{"start":0,"size":2},{"start":2,"size":2},{"start":4,"size":2}]},{"name":"3g.20gb","memoryMB":20224,"core":43,"sliceCount":3,"placements":[{"start":0,"size":4},{"start":4,"size":4}]},{"name":"4g.20gb","memoryMB":20224,"core":58,"sliceCount":4,"placements":[{"start":0,"size":4}]},{"name":"7g.40gb","memoryMB":40576,"core":100,"sliceCount":7,"placements":[{"start":0,"size":8}]}],"health":true},{"id":"GPU-c634460f-e63f-6e47-e45a-2401ba173441","index":5,"count":7,"devmem":40960,"devcore":100,"type":"NVIDIA
+        A100-SXM4-40GB","numa":1,"mode":"mig","migProfiles":[{"name":"1g.5gb","memoryMB":4864,"core":15,"sliceCount":1,"placements":[{"start":0,"size":1},{"start":1,"size":1},{"start":2,"size":1},{"start":3,"size":1},{"start":4,"size":1},{"start":5,"size":1},{"start":6,"size":1}]},{"name":"2g.10gb","memoryMB":9984,"core":29,"sliceCount":2,"placements":[{"start":0,"size":2},{"start":2,"size":2},{"start":4,"size":2}]},{"name":"3g.20gb","memoryMB":20224,"core":43,"sliceCount":3,"placements":[{"start":0,"size":4},{"start":4,"size":4}]},{"name":"4g.20gb","memoryMB":20224,"core":58,"sliceCount":4,"placements":[{"start":0,"size":4}]},{"name":"7g.40gb","memoryMB":40576,"core":100,"sliceCount":7,"placements":[{"start":0,"size":8}]}],"health":true},{"id":"GPU-9e9e32ec-1efc-2b7f-a94c-c985be7dcb8a","index":6,"count":7,"devmem":40960,"devcore":100,"type":"NVIDIA
+        A100-SXM4-40GB","numa":1,"mode":"mig","migProfiles":[{"name":"1g.5gb","memoryMB":4864,"core":15,"sliceCount":1,"placements":[{"start":0,"size":1},{"start":1,"size":1},{"start":2,"size":1},{"start":3,"size":1},{"start":4,"size":1},{"start":5,"size":1},{"start":6,"size":1}]},{"name":"2g.10gb","memoryMB":9984,"core":29,"sliceCount":2,"placements":[{"start":0,"size":2},{"start":2,"size":2},{"start":4,"size":2}]},{"name":"3g.20gb","memoryMB":20224,"core":43,"sliceCount":3,"placements":[{"start":0,"size":4},{"start":4,"size":4}]},{"name":"4g.20gb","memoryMB":20224,"core":58,"sliceCount":4,"placements":[{"start":0,"size":4}]},{"name":"7g.40gb","memoryMB":40576,"core":100,"sliceCount":7,"placements":[{"start":0,"size":8}]}],"health":true},{"id":"GPU-e38bb82d-2bd3-41b0-1c6e-db7d90e6ae19","index":7,"count":7,"devmem":40960,"devcore":100,"type":"NVIDIA
+        A100-SXM4-40GB","numa":1,"mode":"mig","migProfiles":[{"name":"1g.5gb","memoryMB":4864,"core":15,"sliceCount":1,"placements":[{"start":0,"size":1},{"start":1,"size":1},{"start":2,"size":1},{"start":3,"size":1},{"start":4,"size":1},{"start":5,"size":1},{"start":6,"size":1}]},{"name":"2g.10gb","memoryMB":9984,"core":29,"sliceCount":2,"placements":[{"start":0,"size":2},{"start":2,"size":2},{"start":4,"size":2}]},{"name":"3g.20gb","memoryMB":20224,"core":43,"sliceCount":3,"placements":[{"start":0,"size":4},{"start":4,"size":4}]},{"name":"4g.20gb","memoryMB":20224,"core":58,"sliceCount":4,"placements":[{"start":0,"size":4}]},{"name":"7g.40gb","memoryMB":40576,"core":100,"sliceCount":7,"placements":[{"start":0,"size":8}]}],"health":true},{"id":"GPU-9e4aeb94-01c0-5173-4811-4ca60f77b3a9","count":7,"devmem":40960,"devcore":100,"type":"NVIDIA
+        A100-SXM4-40GB","mode":"mig","migProfiles":[{"name":"1g.5gb","memoryMB":4864,"core":15,"sliceCount":1,"placements":[{"start":0,"size":1},{"start":1,"size":1},{"start":2,"size":1},{"start":3,"size":1},{"start":4,"size":1},{"start":5,"size":1},{"start":6,"size":1}]},{"name":"2g.10gb","memoryMB":9984,"core":29,"sliceCount":2,"placements":[{"start":0,"size":2},{"start":2,"size":2},{"start":4,"size":2}]},{"name":"3g.20gb","memoryMB":20224,"core":43,"sliceCount":3,"placements":[{"start":0,"size":4},{"start":4,"size":4}]},{"name":"4g.20gb","memoryMB":20224,"core":58,"sliceCount":4,"placements":[{"start":0,"size":4}]},{"name":"7g.40gb","memoryMB":40576,"core":100,"sliceCount":7,"placements":[{"start":0,"size":8}]}],"health":true},{"id":"GPU-934e3c41-2e9a-efbf-5e75-a17cc8913c9e","index":1,"count":7,"devmem":40960,"devcore":100,"type":"NVIDIA
+        A100-SXM4-40GB","mode":"mig","migProfiles":[{"name":"1g.5gb","memoryMB":4864,"core":15,"sliceCount":1,"placements":[{"start":0,"size":1},{"start":1,"size":1},{"start":2,"size":1},{"start":3,"size":1},{"start":4,"size":1},{"start":5,"size":1},{"start":6,"size":1}]},{"name":"2g.10gb","memoryMB":9984,"core":29,"sliceCount":2,"placements":[{"start":0,"size":2},{"start":2,"size":2},{"start":4,"size":2}]},{"name":"3g.20gb","memoryMB":20224,"core":43,"sliceCount":3,"placements":[{"start":0,"size":4},{"start":4,"size":4}]},{"name":"4g.20gb","memoryMB":20224,"core":58,"sliceCount":4,"placements":[{"start":0,"size":4}]},{"name":"7g.40gb","memoryMB":40576,"core":100,"sliceCount":7,"placements":[{"start":0,"size":8}]}],"health":true},{"id":"GPU-36441532-9ef4-0f3a-afb1-f844c3ab04bf","index":2,"count":7,"devmem":40960,"devcore":100,"type":"NVIDIA
+        A100-SXM4-40GB","mode":"mig","migProfiles":[{"name":"1g.5gb","memoryMB":4864,"core":15,"sliceCount":1,"placements":[{"start":0,"size":1},{"start":1,"size":1},{"start":2,"size":1},{"start":3,"size":1},{"start":4,"size":1},{"start":5,"size":1},{"start":6,"size":1}]},{"name":"2g.10gb","memoryMB":9984,"core":29,"sliceCount":2,"placements":[{"start":0,"size":2},{"start":2,"size":2},{"start":4,"size":2}]},{"name":"3g.20gb","memoryMB":20224,"core":43,"sliceCount":3,"placements":[{"start":0,"size":4},{"start":4,"size":4}]},{"name":"4g.20gb","memoryMB":20224,"core":58,"sliceCount":4,"placements":[{"start":0,"size":4}]},{"name":"7g.40gb","memoryMB":40576,"core":100,"sliceCount":7,"placements":[{"start":0,"size":8}]}],"health":true}]'
+      karpenter.k8s.aws/ec2nodeclass-hash: "7695639131094686861"
+      karpenter.k8s.aws/ec2nodeclass-hash-version: v5
+      karpenter.k8s.aws/instance-profile-name: alpha-kr-dev_10577198573625786537
+      karpenter.sh/capacity-overlay-applied: "true"
+      karpenter.sh/nodeclaim-min-values-relaxed: "false"
+      karpenter.sh/nodepool-hash: "7099165483992253319"
+      karpenter.sh/nodepool-hash-version: v3
+      node.alpha.kubernetes.io/ttl: "0"
+      volumes.kubernetes.io/controller-managed-attach-detach: "true"
+    creationTimestamp: "2026-11-23T16:50:56Z"
+    finalizers:
+    - karpenter.sh/termination
+    labels:
+      beta.kubernetes.io/arch: amd64
+      beta.kubernetes.io/instance-type: p4d.24xlarge
+      beta.kubernetes.io/os: linux
+      eks.amazonaws.com/nodegroup: gpu-a100-hami
+      failure-domain.beta.kubernetes.io/region: ap-northeast-2
+      failure-domain.beta.kubernetes.io/zone: ap-northeast-2d
+      gpu: "on"
+      group: gpu-a100-hami
+      hami: "on"
+      k8s.io/cloud-provider-aws: 213e857736fc0671860f5362ef576ea7
+      karpenter.k8s.aws/ec2nodeclass: alpha-kr-dev-gpu-a100-hami
+      karpenter.k8s.aws/instance-capability-flex: "false"
+      karpenter.k8s.aws/instance-category: p
+      karpenter.k8s.aws/instance-cpu: "96"
+      karpenter.k8s.aws/instance-cpu-manufacturer: intel
+      karpenter.k8s.aws/instance-cpu-sustained-clock-speed-mhz: "3000"
+      karpenter.k8s.aws/instance-ebs-bandwidth: "19000"
+      karpenter.k8s.aws/instance-encryption-in-transit-supported: "true"
+      karpenter.k8s.aws/instance-family: p4d
+      karpenter.k8s.aws/instance-generation: "4"
+      karpenter.k8s.aws/instance-gpu-count: "8"
+      karpenter.k8s.aws/instance-gpu-manufacturer: nvidia
+      karpenter.k8s.aws/instance-gpu-memory: "40960"
+      karpenter.k8s.aws/instance-gpu-name: a100
+      karpenter.k8s.aws/instance-hypervisor: nitro
+      karpenter.k8s.aws/instance-local-nvme: "8000"
+      karpenter.k8s.aws/instance-memory: "1179648"
+      karpenter.k8s.aws/instance-network-bandwidth: "400000"
+      karpenter.k8s.aws/instance-size: 24xlarge
+      karpenter.k8s.aws/instance-tenancy: default
+      karpenter.sh/capacity-type: on-demand
+      karpenter.sh/do-not-sync-taints: "true"
+      karpenter.sh/nodepool: alpha-kr-dev-gpu-a100-hami-p4d-24xlarge
+      karpenter.sh/registered: "true"
+      krmt.io/group: gpu-a100-hami
+      krmt.io/subgroup: p4d-24xlarge
+      kubernetes.io/arch: amd64
+      kubernetes.io/hostname: ip-10-210-114-158.ap-northeast-2.compute.internal
+      kubernetes.io/os: linux
+      managed-by: karpenter
+      node.kubernetes.io/instance-type: p4d.24xlarge
+      node.kubernetes.io/role: gpu-a100-hami
+      subgroup: p4d-24xlarge
+      topology.ebs.csi.aws.com/zone: ap-northeast-2d
+      topology.k8s.aws/network-node-layer-1: nn-12e459bda69f08573
+      topology.k8s.aws/network-node-layer-2: nn-c1715eb3f1ef5b601
+      topology.k8s.aws/network-node-layer-3: nn-f1893540e4740bec4
+      topology.k8s.aws/zone-id: apne2-az4
+      topology.kubernetes.io/region: ap-northeast-2
+      topology.kubernetes.io/zone: ap-northeast-2d
+    name: ip-10-210-114-158.ap-northeast-2.compute.internal
+    ownerReferences:
+    - apiVersion: karpenter.sh/v1
+      blockOwnerDeletion: true
+      kind: NodeClaim
+      name: alpha-kr-dev-gpu-a100-hami-p4d-24xlarge-hb57d
+      uid: f8fc56c0-0233-4b9b-81fe-615d33db907b
+    resourceVersion: "1265573905"
+    uid: 96448289-9df7-4e40-9f07-317402da86f5
+  spec:
+    providerID: aws:///ap-northeast-2d/i-09bbb304328c6bd26
+    taints:
+    - effect: NoSchedule
+      key: group
+      value: gpu-a100-hami
+  status:
+    addresses:
+    - address: 10.210.114.158
+      type: InternalIP
+    - address: ip-10-210-114-158.ap-northeast-2.compute.internal
+      type: InternalDNS
+    - address: ip-10-210-114-158.ap-northeast-2.compute.internal
+      type: Hostname
+    allocatable:
+      cpu: 95690m
+      ephemeral-storage: "6764026333043"
+      hugepages-1Gi: "0"
+      hugepages-2Mi: "0"
+      memory: 1167635008Ki
+      nvidia.com/gpu: "80"
+      pods: "737"
+    capacity:
+      cpu: "96"
+      ephemeral-storage: 7168558Mi
+      hugepages-1Gi: "0"
+      hugepages-2Mi: "0"
+      memory: 1176300096Ki
+      nvidia.com/gpu: "80"
+      pods: "737"
+    conditions:
+    - lastHeartbeatTime: "2026-11-23T16:51:57Z"
+      lastTransitionTime: "2026-11-23T16:50:54Z"
+      message: kubelet has sufficient memory available
+      reason: KubeletHasSufficientMemory
+      status: "False"
+      type: MemoryPressure
+    - lastHeartbeatTime: "2026-11-23T16:51:57Z"
+      lastTransitionTime: "2026-11-23T16:50:54Z"
+      message: kubelet has no disk pressure
+      reason: KubeletHasNoDiskPressure
+      status: "False"
+      type: DiskPressure
+    - lastHeartbeatTime: "2026-11-23T16:51:57Z"
+      lastTransitionTime: "2026-11-23T16:50:54Z"
+      message: kubelet has sufficient PID available
+      reason: KubeletHasSufficientPID
+      status: "False"
+      type: PIDPressure
+    - lastHeartbeatTime: "2026-11-23T16:51:57Z"
+      lastTransitionTime: "2026-11-23T16:51:03Z"
+      message: kubelet is posting ready status
+      reason: KubeletReady
+      status: "True"
+      type: Ready
+    daemonEndpoints:
+      kubeletEndpoint:
+        Port: 10250
+    features:
+      supplementalGroupsPolicy: true
+    images:
+    - names:
+      - docker.io/projecthami/hami@sha256:caab978ed50e53163c31ed7c4650c4e6e5d8facf157f377c26e021ff5fa3e5ce
+      - docker.io/projecthami/hami:v2.11.0
+      sizeBytes: 416426668
+    - names:
+      - 314695318048.dkr.ecr.ap-northeast-2.amazonaws.com/mirror/grafana/alloy@sha256:8c7256f412feb9f5f48f9f6f9394dc97ca887f63dea9304f347970ecc1787669
+      - 314695318048.dkr.ecr.ap-northeast-2.amazonaws.com/mirror/grafana/alloy:v1.11.3
+      sizeBytes: 150131069
+    - names:
+      - docker.io/nvidia/cuda@sha256:80d4d9ac041242f6ae5d05f9be262b3374e0e0b8bb5a49c6c3e94e192cde4a44
+      - docker.io/nvidia/cuda:12.4.0-base-ubuntu22.04
+      sizeBytes: 91774027
+    - names:
+      - 602401143452.dkr.ecr.ap-northeast-2.amazonaws.com/amazon-k8s-cni-init@sha256:4f801d41f4d946c5138c073ca7c31c39e1dda074185db45ee321ab7ca9781437
+      - 602401143452.dkr.ecr.ap-northeast-2.amazonaws.com/amazon-k8s-cni-init:v1.21.1-eksbuild.8
+      sizeBytes: 70079020
+    - names:
+      - 602401143452.dkr.ecr.ap-northeast-2.amazonaws.com/amazon-k8s-cni@sha256:29014b891047164cc572cae399e72a4cdd70c0da149cc9db1864a426b63f2ac7
+      - 602401143452.dkr.ecr.ap-northeast-2.amazonaws.com/amazon-k8s-cni:v1.21.1-eksbuild.8
+      sizeBytes: 54019936
+    - names:
+      - 602401143452.dkr.ecr.ap-northeast-2.amazonaws.com/eks/kube-proxy@sha256:6630b29f3a83585021e5f88cd91628db4e889db267d463825e7e26f5a5df0db7
+      - 602401143452.dkr.ecr.ap-northeast-2.amazonaws.com/eks/kube-proxy:v1.31.14-eksbuild.12
+      sizeBytes: 37069389
+    - names:
+      - 602401143452.dkr.ecr.ap-northeast-2.amazonaws.com/amazon/aws-network-policy-agent@sha256:fb06c5063573f498b5ab62cbb69c46a9a9f52eacdecbd8830d65e6acde482aa8
+      - 602401143452.dkr.ecr.ap-northeast-2.amazonaws.com/amazon/aws-network-policy-agent:v1.3.4-eksbuild.1
+      sizeBytes: 36417103
+    - names:
+      - public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver@sha256:05a18dd73c29c24118544e875d08fc9e79919adfed64f1f055477093b89a37b3
+      - public.ecr.aws/ebs-csi-driver/aws-ebs-csi-driver:v1.53.0
+      sizeBytes: 35813599
+    - names:
+      - quay.io/brancz/kube-rbac-proxy@sha256:e6a323504999b2a4d2a6bf94f8580a050378eba0900fd31335cf9df5787d9a9b
+      - quay.io/brancz/kube-rbac-proxy:v0.18.1
+      sizeBytes: 32122166
+    - names:
+      - public.ecr.aws/csi-components/livenessprobe@sha256:e398231da444a3494f1a0f0dc21162f5fff5bed373a1adebfb1fe641ff5234a1
+      - public.ecr.aws/csi-components/livenessprobe:v2.17.0-eksbuild.2
+      sizeBytes: 16733636
+    - names:
+      - public.ecr.aws/csi-components/csi-node-driver-registrar@sha256:2e49e8c5ade00162ba3796adf130e132c5fb024ef0dabb0c27ac06dfe6627742
+      - public.ecr.aws/csi-components/csi-node-driver-registrar:v2.15.0-eksbuild.2
+      sizeBytes: 16606154
+    - names:
+      - 602401143452.dkr.ecr.ap-northeast-2.amazonaws.com/eks/eks-pod-identity-agent@sha256:ed04f52bd6414e76ce0064925ed2182c645cb6e5a35910550b7ee3ad43b03cf4
+      - 602401143452.dkr.ecr.ap-northeast-2.amazonaws.com/eks/eks-pod-identity-agent:v0.1.37
+      sizeBytes: 15197176
+    - names:
+      - 314695318048.dkr.ecr.ap-northeast-2.amazonaws.com/mirror/grafana/configmap-reload@sha256:959d47672fbff2776a04ec62b8afcec89e8c036af84dc5fade50019dab212746
+      - 314695318048.dkr.ecr.ap-northeast-2.amazonaws.com/mirror/grafana/configmap-reload:v0.81.0
+      sizeBytes: 14433657
+    - names:
+      - quay.io/prometheus/node-exporter@sha256:337ff1d356b68d39cef853e8c6345de11ce7556bb34cda8bd205bcf2ed30b565
+      - quay.io/prometheus/node-exporter:v1.10.2
+      sizeBytes: 13054407
+    - names:
+      - 602401143452.dkr.ecr.us-west-2.amazonaws.com/eks/pause:3.10
+      - localhost/kubernetes/pause:latest
+      sizeBytes: 318731
+    nodeInfo:
+      architecture: amd64
+      bootID: 3138db98-9a5d-4d91-8870-95cf38fbfe39
+      containerRuntimeVersion: containerd://2.3.7+unknown
+      kernelVersion: 6.12.115-140.210.amzn2023.x86_64
+      kubeProxyVersion: ""
+      kubeletVersion: v1.34.12-eks-9adbfea
+      machineID: ec2a38dc9daa5034addb4a901eaa430d
+      operatingSystem: linux
+      osImage: Amazon Linux 2023.12.20261118
+      systemUUID: ec2a38dc-9daa-5034-addb-4a901eaa430d
+    runtimeHandlers:
+    - features:
+        recursiveReadOnlyMounts: true
+        userNamespaces: true
+      name: ""
+    - features:
+        recursiveReadOnlyMounts: true
+        userNamespaces: true
+      name: nvidia
+    - features:
+        recursiveReadOnlyMounts: true
+        userNamespaces: true
+      name: runc
+kind: List
+metadata:
+  resourceVersion: ""
