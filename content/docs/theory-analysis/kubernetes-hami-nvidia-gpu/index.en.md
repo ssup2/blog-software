@@ -431,6 +431,82 @@ From the position list that HAMi Device Plugin queries through NVML and register
 
 MIG Instances are not removed immediately when the Pod terminates. This reduces the overhead of removing and recreating MIG Instances when the same Profile is requested again, and a reused MIG Instance keeps the same MIG UUID. Every 5 seconds, HAMi Device Plugin compares the `hami.io/vgpu-mig-allocations` Annotations of running Pods with the MIG Instances it manages, and switches MIG Instances used by no Pod to the Idle state. In contrast, HAMi Scheduler calculates MIG Instance positions only from the Annotations of Pods that have not terminated, so it regards the positions occupied by Idle MIG Instances as free space, and when a newly reserved position overlaps Idle MIG Instances, HAMi Device Plugin removes the overlapping MIG Instances in order of least recent use and then creates the new MIG Instance.
 
+The behavior of MIG Mode is verified in a separate environment from 1.1. An EKS p4d.24xlarge Node with 8 A100-SXM4-40GB GPUs is used, and the Node Group the Node belongs to has the `group=gpu-a100-hami` Label and Taint, with `operatingmode` set to `mig` by matching this Label in `nodeconfig`. The default `migProfileAllowlist` for the A100 40GB GPU defines the `1g.5gb`, `2g.10gb`, `3g.20gb`, `4g.20gb`, and `7g.40gb` Profiles.
+
+```yaml {caption="[File 10] mig-config8.yaml (the mig-2g-b Pod differing only in name and the nodeSelector and tolerations of mig-3g are omitted)", linenos=table}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mig-2g-a
+  annotations:
+    nvidia.com/vgpu-mode: "mig"
+    nvidia.com/mig-profile-preference: "2g.10gb"
+    hami.io/gpu-scheduler-policy: "binpack"
+spec:
+  nodeSelector:
+    group: gpu-a100-hami
+  tolerations:
+  - key: group
+    operator: Equal
+    value: gpu-a100-hami
+    effect: NoSchedule
+  - key: nvidia.com/gpu
+    operator: Exists
+    effect: NoSchedule
+  containers:
+  - name: cuda
+    image: nvidia/cuda:12.4.0-base-ubuntu22.04
+    command: ["sleep", "infinity"]
+    resources:
+      limits:
+        nvidia.com/gpu: 1
+        nvidia.com/gpumem: 9000
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mig-3g
+  annotations:
+    nvidia.com/vgpu-mode: "mig"
+    nvidia.com/mig-profile-preference: "3g.20gb"
+    hami.io/gpu-scheduler-policy: "binpack"
+spec:
+  containers:
+  - name: cuda
+    image: nvidia/cuda:12.4.0-base-ubuntu22.04
+    command: ["sleep", "infinity"]
+    resources:
+      limits:
+        nvidia.com/gpu: 1
+        nvidia.com/gpumem: 19000
+```
+
+[File 10] shows Pods that compose a combination of two `2g.10gb` and one `3g.20gb` MIG Instances on one A100. Since the default Device Scheduling policy `spread` distributes vGPUs across different GPUs, the `binpack` policy gathers the vGPUs of the three Pods on the same GPU, and according to the position selection algorithm, `2g.10gb` is created at positions 0 and 2 and `3g.20gb` at position 4. Whether the three Pods are gathered on the same GPU and the reserved Profiles and positions are checked with each Pod's `hami.io/vgpu-mig-allocations` Annotation, and the created MIG Instances are checked with the `nvidia-smi -L` output inside the Pods.
+
+```yaml {caption="[File 11] mig-config9.yaml (the mig-1g-b Pod differing only in name and the nodeSelector and tolerations are omitted)", linenos=table}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mig-1g-a
+  annotations:
+    nvidia.com/vgpu-mode: "mig"
+    nvidia.com/mig-profile-preference: "1g.5gb"
+    hami.io/gpu-scheduler-policy: "binpack"
+spec:
+  containers:
+  - name: cuda
+    image: nvidia/cuda:12.4.0-base-ubuntu22.04
+    command: ["sleep", "infinity"]
+    resources:
+      limits:
+        nvidia.com/gpu: 1
+        nvidia.com/gpumem: 4500
+```
+
+[File 11] shows the two `1g.5gb` Pods applied after deleting the `mig-2g-b` Pod. The `2g.10gb` Instance of the deleted Pod remains in the Idle state, but HAMi Scheduler regards its position as free space, so when the newly reserved `1g.5gb` positions overlap the Idle Instance, HAMi Device Plugin removes the Idle Instance and then creates two `1g.5gb` Instances. This checks the process in which the composition of the same GPU switches to a combination of one `2g.10gb`, two `1g.5gb`, and one `3g.20gb`, and whether the MIG Instances of the running `mig-2g-a` and `mig-3g` Pods are kept during the switch.
+
+At each step, the Logs of HAMi Device Plugin's `device-plugin` and `vgpu-monitor` Containers and HAMi Scheduler, the Node's `hami.io/node-nvidia-register` Annotation, and the `nvidia-smi -L` output inside the Pods are collected to trace the creation, reuse, and removal of MIG Instances. The applied manifests, the collection Script, and the collected results are kept in the `manifests/mig` and `dumps/mig` folders of the post repository.
+
 ### 1.5. GPU Selection
 
 HAMi provides features to control the physical GPU on which a vGPU is placed through Pod Annotations. The following Annotations can specify or exclude GPU Types and UUIDs.

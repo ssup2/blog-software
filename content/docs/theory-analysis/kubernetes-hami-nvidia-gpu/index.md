@@ -431,6 +431,87 @@ HAMi Scheduler는 HAMi Device Plugin이 NVML로 조회하여 등록한 위치 �
 
 Pod가 종료되어도 MIG Instance는 바로 제거되지 않는다. 같은 Profile이 다시 요청될 때 MIG Instance를 제거하고 다시 생성하는 Overhead를 줄이기 위해서이며, 재사용되는 MIG Instance는 MIG UUID도 그대로 유지된다. HAMi Device Plugin은 5초 주기로 실행 중인 Pod의 `hami.io/vgpu-mig-allocations` Annotation과 자신이 관리하는 MIG Instance를 비교하여, 이용하는 Pod가 없는 MIG Instance를 Idle 상태로 전환한다. 반면 HAMi Scheduler는 종료되지 않은 Pod의 Annotation만으로 MIG Instance의 위치를 계산하기 때문에 Idle 상태의 MIG Instance가 차지한 위치를 빈 공간으로 간주하며, 새로 예약된 위치가 Idle 상태의 MIG Instance와 겹치면 HAMi Device Plugin은 겹치는 MIG Instance를 오래 이용되지 않은 순서대로 제거한 후 새로운 MIG Instance를 생성한다.
 
+MIG Mode의 동작은 1.1의 환경이 아닌 별도의 환경에서 확인한다. A100-SXM4-40GB GPU 8장이 장착된 EKS의 p4d.24xlarge Node를 이용하며, Node가 속한 Node Group은 `group=gpu-a100-hami` Label과 Taint를 가지고 `nodeconfig`에서 이 Label을 매칭하여 `operatingmode`를 `mig`로 지정하였다. A100 40GB GPU의 `migProfileAllowlist` 기본값에는 `1g.5gb`, `2g.10gb`, `3g.20gb`, `4g.20gb`, `7g.40gb` Profile이 정의되어 있다.
+
+```yaml {caption="[File 10] mig-config8.yaml (이름만 다른 mig-2g-b Pod와 mig-3g의 nodeSelector, tolerations는 생략)", linenos=table}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mig-2g-a
+  annotations:
+    nvidia.com/vgpu-mode: "mig"
+    nvidia.com/mig-profile-preference: "2g.10gb"
+    hami.io/gpu-scheduler-policy: "binpack"
+spec:
+  nodeSelector:
+    group: gpu-a100-hami
+  tolerations:
+  - key: group
+    operator: Equal
+    value: gpu-a100-hami
+    effect: NoSchedule
+  - key: nvidia.com/gpu
+    operator: Exists
+    effect: NoSchedule
+  containers:
+  - name: cuda
+    image: nvidia/cuda:12.4.0-base-ubuntu22.04
+    command: ["sleep", "infinity"]
+    resources:
+      limits:
+        nvidia.com/gpu: 1
+        nvidia.com/gpumem: 9000
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mig-3g
+  annotations:
+    nvidia.com/vgpu-mode: "mig"
+    nvidia.com/mig-profile-preference: "3g.20gb"
+    hami.io/gpu-scheduler-policy: "binpack"
+spec:
+  containers:
+  - name: cuda
+    image: nvidia/cuda:12.4.0-base-ubuntu22.04
+    command: ["sleep", "infinity"]
+    resources:
+      limits:
+        nvidia.com/gpu: 1
+        nvidia.com/gpumem: 19000
+```
+
+[File 10]은 하나의 A100 위에 `2g.10gb` 2개와 `3g.20gb` 1개의 MIG Instance 조합을 구성하는 Pod를 나타내고 있다. 기본 Device Scheduling 정책인 `spread`는 vGPU를 서로 다른 GPU에 분산하기 때문에 `binpack` 정책으로 세 Pod의 vGPU를 같은 GPU에 모으며, 위치 선택 알고리즘에 따라서 `2g.10gb`는 위치 0과 2에, `3g.20gb`는 위치 4에 생성된다. 세 Pod가 같은 GPU에 모였는지와 예약된 Profile, 위치는 각 Pod의 `hami.io/vgpu-mig-allocations` Annotation으로 확인하고, 생성된 MIG Instance는 Pod 안의 `nvidia-smi -L` 출력으로 확인한다.
+
+```yaml {caption="[File 11] mig-config9.yaml (이름만 다른 mig-1g-b Pod와 nodeSelector, tolerations는 생략)", linenos=table}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mig-1g-a
+  annotations:
+    nvidia.com/vgpu-mode: "mig"
+    nvidia.com/mig-profile-preference: "1g.5gb"
+    hami.io/gpu-scheduler-policy: "binpack"
+spec:
+  containers:
+  - name: cuda
+    image: nvidia/cuda:12.4.0-base-ubuntu22.04
+    command: ["sleep", "infinity"]
+    resources:
+      limits:
+        nvidia.com/gpu: 1
+        nvidia.com/gpumem: 4500
+```
+
+[File 11]은 `mig-2g-b` Pod를 삭제한 후 적용하는 `1g.5gb` Pod 2개를 나타내고 있다. 삭제된 Pod의 `2g.10gb` Instance는 Idle 상태로 남지만 HAMi Scheduler는 그 위치를 빈 공간으로 간주하기 때문에, 새로 예약된 `1g.5gb` 위치가 Idle Instance와 겹치면 HAMi Device Plugin이 Idle Instance를 제거한 후 `1g.5gb` Instance 2개를 생성한다. 이를 통해서 같은 GPU의 구성이 `2g.10gb` 1개, `1g.5gb` 2개, `3g.20gb` 1개의 조합으로 전환되는 과정과, 전환되는 동안 동작 중인 `mig-2g-a`, `mig-3g` Pod의 MIG Instance가 유지되는지 확인한다.
+
+각 단계에서는 HAMi Device Plugin의 `device-plugin`, `vgpu-monitor` Container Log와 HAMi Scheduler의 Log, Node의 `hami.io/node-nvidia-register` Annotation, Pod 안의 `nvidia-smi -L` 출력을 수집하여 MIG Instance의 생성, 재사용, 제거 과정을 추적한다. 적용한 manifest와 수집 Script, 수집 결과는 글 저장소의 `manifests/mig`, `dumps/mig` 폴더에 보관한다.
+
+<!-- TODO(실측 대기): karpenter 앱 sync로 gpu-a100-hami NodePool 생성 후 실측 수행.
+     [Shell 6] Config 8 구성 확인 (vgpu-mig-allocations의 GPU UUID 일치와 Profile·위치, nvidia-smi -L, node-nvidia-register),
+     [Shell 7] Config 9 전환 확인 (mig-2g-b 삭제 → 1g x2 적용, Idle 2g 제거와 기존 Instance 유지) 를
+     dumps/mig/step1-config8, step2-config9 실측 발췌로 추가하고 EN에도 반영할 것. 절차는 폴더 CLAUDE.md 참조. -->
+
 ### 1.5. GPU 선택
 
 HAMi는 Pod Annotation을 통해서 vGPU가 배치될 물리 GPU를 제어하는 기능을 제공한다. 다음의 Annotation을 통해서 GPU의 Type과 UUID를 지정하거나 제외할 수 있다.

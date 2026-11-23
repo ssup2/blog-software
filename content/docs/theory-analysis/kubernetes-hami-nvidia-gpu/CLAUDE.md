@@ -6,7 +6,11 @@ kubernetes-hami(HAMi 자체, 벤더 중립 구조) 문서의 NVIDIA 상세 글�
 
 ## 문서 구성 및 상태
 
-- **2026-11-22 Idle 캐시 이유 1문장 추가** (KR/EN): 근거 HAMi Issue #2834(즉시 제거 시 같은 Profile 재요청에 불필요한 Overhead), 병합 PR #3128
+- **2026-11-23 Dynamic MIG 실측 준비** (사용자 요청, 회사 Mac에서 작성): 1.4.2 끝에 Test 설계 추가 (KR/EN 동시) — 환경 문단(EKS p4d.24xlarge,
+  A100-SXM4-40GB 8장, `group=gpu-a100-hami` Node Group, nodeconfig nodelabelselector로 operatingmode mig), [File 10] mig-config8.yaml
+  (2g.10gb ×2 + 3g.20gb, binpack + mig-profile-preference, A100 MIG Geometry Config 8), [File 11] mig-config9.yaml (mig-2g-b 삭제 후
+  1g.5gb ×2 → Config 9 전환, Idle 2g 제거 + 기존 Instance 유지 관찰), 수집 문단. **[Shell 6]/[Shell 7]은 실측 후 작성** — KR 본문의
+  TODO 주석 위치. 실측 절차와 blocker는 아래 "Dynamic MIG Test" 섹션 참조. (KR/EN): 근거 HAMi Issue #2834(즉시 제거 시 같은 Profile 재요청에 불필요한 Overhead), 병합 PR #3128
   (2026-10-10, 같은 Profile·위치 요청에 기존 Instance와 MIG UUID 재사용, Idle도 CDI 항목 유지). 미병합 PR #2910의 "~1.5s → 0ms"와 Idle TTL은 본문 미기재
   (측정 근거 없음, v2.11.0에 TTL 없음).
 - **2026-11-22 MIG 위치 선택 + Idle 수명 주기** (사용자 요청, KR/EN 동시, 소스 기반·A100 실측 없음):
@@ -163,13 +167,38 @@ kubernetes-hami(HAMi 자체, 벤더 중립 구조) 문서의 NVIDIA 상세 글�
   - `CUDA_DEVICE_MEMORY_LIMIT_0=2000m` (단위: MiB), `CUDA_DEVICE_SM_LIMIT=30` 둘 다 Container 내 환경 변수로 주입.
 - 미수행:
   - use-gputype Annotation 동작 (단일 GPU Node 환경이라 Type 선택 효과 관찰 불가).
-  - Dynamic MIG (RTX 5060 Ti는 MIG 미지원).
+  - Dynamic MIG — RTX 5060 Ti는 MIG 미지원이라 회사 A100 환경에서 수행. **준비 완료, 실측 대기** (아래 "Dynamic MIG Test" 섹션).
   - 추가 실측 시 본문에 [Shell N] 블록을 실측 발췌로 추가하고 manifests/ 폴더에 재현 파일을 남길 것 (repo 컨벤션).
+
+## Dynamic MIG Test — 준비 완료, 실측 대기 (2026-11-23)
+
+- 환경: 회사 Alpha EKS Cluster `alpha-kr-dev`의 `gpu-a100-hami` Node Group (p4d.24xlarge, A100-SXM4-40GB 8장), HAMi 2.11.0, `addon-hami` namespace.
+  공개 저장소라 AWS 계정/ARN은 여기 기재하지 않음 — `aws sso login --profile alpha-sre` 후 `kubectl config get-contexts | grep alpha-kr-dev`로 context 확인.
+- 2026-11-23 확인한 Cluster 상태: hami 앱 sync 완료(scheduler Running, `hami-device-plugin` ConfigMap `config.json`에 `group=gpu-a100-hami` 매칭
+  `operatingmode: mig` 반영). **Blocker: karpenter 앱 미sync** — `alpha-kr-dev-gpu-a100-hami-p4d-24xlarge` NodePool이 Cluster에 없어 Test Pod이
+  Pending이 됨. ArgoCD에서 karpenter 앱 수동 sync 필요 (sync는 사용자가 직접). Node Label은 Plugin 시작 시 읽으므로 노드가 Plugin보다 늦게 뜨는
+  이 순서에서는 재시작 불필요.
+- 절차 (이 폴더 기준, 집 맥북에서 이어서 수행 가능):
+  1. `export KUBE_CONTEXT=<alpha-kr-dev context>`
+  2. `kubectl --context $KUBE_CONTEXT apply -f manifests/mig/mig-config8.yaml` — mig-2g-a/b, mig-3g 3개. p4d.24xlarge 프로비저닝 포함 수 분 소요 (고가 인스턴스 — Test 후 노드 회수 확인)
+  3. Pod Running 후 `manifests/mig/capture.sh step1-config8` → dumps/mig/step1-config8/
+  4. `kubectl --context $KUBE_CONTEXT delete pod mig-2g-b` → 5초 reconciler 주기 후 `apply -f manifests/mig/mig-config9.yaml` (mig-1g-a/b)
+  5. `manifests/mig/capture.sh step2-config9` — mig-2g-a, mig-3g가 재시작 없이 유지됐는지와 Idle 2g 제거 로그 확인
+  6. 정리: 두 manifest 모두 delete, Karpenter 노드 회수 확인, dumps 커밋
+  7. 본문 TODO 주석 위치에 [Shell 6]/[Shell 7]을 dumps 실측 발췌로 작성하고 EN에도 반영
+- 확인 포인트: ① 세 Pod의 `hami.io/vgpu-mig-allocations` GPU UUID 일치(binpack)와 Profile·위치(2g→0,2 / 3g→4 예상: mig_topology_test.go 근거)
+  ② Pod 안 `nvidia-smi -L`의 MIG Device ③ Node `hami.io/node-nvidia-register`의 `mode: mig` ④ device-plugin Log의 GI/CI 생성·Idle 전환·제거
+  ⑤ Config 9 전환 시 기존 Instance 유지 + Idle 2g의 reclaimBlockingIdle 제거. Ampere MIG Mode 사전 활성화 필요 여부(본문 1.4 서술)도 첫 할당
+  성공/실패로 관찰됨 — golden AMI가 MIG Mode를 미리 켰는지는 미확인.
+- 미확인 리스크 (실측에서 틀리면 본문 수정): binpack이 MIG Mode에서도 같은 GPU로 모으는지 미검증 — 안 모이면 1차 수집 후 `nvidia.com/use-gpuuuid`로
+  고정. 삭제된 2g의 위치가 0이면 1g ×2가 위치 0,1에 생성되어 Config 10(1g,1g,2g,3g)이 될 수 있음 — 본문은 Config 9 기준 서술이라 실측 결과에 맞춰 조정.
 
 ## 폴더 구조
 
 - `index.md`, `index.en.md` — 문서 본문 (둘 다 draft).
 - `manifests/` — hami-isolation-test, hami-wholegpu-test, hami-priority-high/low, matmul-rate.py.
+- `manifests/mig/` — Dynamic MIG Test: `mig-config8.yaml`(2g ×2 + 3g), `mig-config9.yaml`(1g ×2), `capture.sh`(단계별 Log·상태 수집, `KUBE_CONTEXT` 필요).
+- `dumps/mig/<step>/` — capture.sh가 남기는 단계별 수집 결과 (실측 후 생성·커밋).
 - `images/` — Figure 3종, 2026-11-22 모두 Claude SVG 초안으로 교체(사용자 pptx 재작도 가능, SVG 소스 미보관).
 
 ## 2026-11-14 [Table 3] 추가

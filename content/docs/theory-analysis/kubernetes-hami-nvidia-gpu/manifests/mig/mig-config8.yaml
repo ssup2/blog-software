@@ -1,0 +1,85 @@
+# A100-SXM4-40GB 한 장 위에 2g.10gb x2 + 3g.20gb 구성 (NVIDIA A100 MIG Geometry Config 8)
+# binpack 정책으로 세 Pod의 vGPU를 같은 GPU에 모은다
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mig-2g-a
+  annotations:
+    nvidia.com/vgpu-mode: "mig"
+    nvidia.com/mig-profile-preference: "2g.10gb"
+    hami.io/gpu-scheduler-policy: "binpack"
+spec:
+  nodeSelector:
+    group: gpu-a100-hami
+  tolerations:
+  - key: group
+    operator: Equal
+    value: gpu-a100-hami
+    effect: NoSchedule
+  - key: nvidia.com/gpu
+    operator: Exists
+    effect: NoSchedule
+  containers:
+  - name: cuda
+    image: nvidia/cuda:12.4.0-base-ubuntu22.04
+    command: ["sleep", "infinity"]
+    resources:
+      limits:
+        nvidia.com/gpu: 1
+        nvidia.com/gpumem: 9000
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mig-2g-b
+  annotations:
+    nvidia.com/vgpu-mode: "mig"
+    nvidia.com/mig-profile-preference: "2g.10gb"
+    hami.io/gpu-scheduler-policy: "binpack"
+spec:
+  nodeSelector:
+    group: gpu-a100-hami
+  tolerations:
+  - key: group
+    operator: Equal
+    value: gpu-a100-hami
+    effect: NoSchedule
+  - key: nvidia.com/gpu
+    operator: Exists
+    effect: NoSchedule
+  containers:
+  - name: cuda
+    image: nvidia/cuda:12.4.0-base-ubuntu22.04
+    command: ["sleep", "infinity"]
+    resources:
+      limits:
+        nvidia.com/gpu: 1
+        nvidia.com/gpumem: 9000
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mig-3g
+  annotations:
+    nvidia.com/vgpu-mode: "mig"
+    nvidia.com/mig-profile-preference: "3g.20gb"
+    hami.io/gpu-scheduler-policy: "binpack"
+spec:
+  nodeSelector:
+    group: gpu-a100-hami
+  tolerations:
+  - key: group
+    operator: Equal
+    value: gpu-a100-hami
+    effect: NoSchedule
+  - key: nvidia.com/gpu
+    operator: Exists
+    effect: NoSchedule
+  containers:
+  - name: cuda
+    image: nvidia/cuda:12.4.0-base-ubuntu22.04
+    command: ["sleep", "infinity"]
+    resources:
+      limits:
+        nvidia.com/gpu: 1
+        nvidia.com/gpumem: 19000

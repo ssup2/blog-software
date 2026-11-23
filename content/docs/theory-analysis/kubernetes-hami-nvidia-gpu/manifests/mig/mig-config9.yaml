@@ -1,0 +1,57 @@
+# mig-2g-b 삭제 후 적용: 같은 GPU가 2g.10gb + 1g.5gb x2 + 3g.20gb 구성으로
+# 부분 재구성되는지 확인 (NVIDIA A100 MIG Geometry Config 9)
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mig-1g-a
+  annotations:
+    nvidia.com/vgpu-mode: "mig"
+    nvidia.com/mig-profile-preference: "1g.5gb"
+    hami.io/gpu-scheduler-policy: "binpack"
+spec:
+  nodeSelector:
+    group: gpu-a100-hami
+  tolerations:
+  - key: group
+    operator: Equal
+    value: gpu-a100-hami
+    effect: NoSchedule
+  - key: nvidia.com/gpu
+    operator: Exists
+    effect: NoSchedule
+  containers:
+  - name: cuda
+    image: nvidia/cuda:12.4.0-base-ubuntu22.04
+    command: ["sleep", "infinity"]
+    resources:
+      limits:
+        nvidia.com/gpu: 1
+        nvidia.com/gpumem: 4500
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mig-1g-b
+  annotations:
+    nvidia.com/vgpu-mode: "mig"
+    nvidia.com/mig-profile-preference: "1g.5gb"
+    hami.io/gpu-scheduler-policy: "binpack"
+spec:
+  nodeSelector:
+    group: gpu-a100-hami
+  tolerations:
+  - key: group
+    operator: Equal
+    value: gpu-a100-hami
+    effect: NoSchedule
+  - key: nvidia.com/gpu
+    operator: Exists
+    effect: NoSchedule
+  containers:
+  - name: cuda
+    image: nvidia/cuda:12.4.0-base-ubuntu22.04
+    command: ["sleep", "infinity"]
+    resources:
+      limits:
+        nvidia.com/gpu: 1
+        nvidia.com/gpumem: 4500
