@@ -1,0 +1,3 @@
+NAME                              READY   STATUS    RESTARTS      AGE     IP               NODE                                                NOMINATED NODE   READINESS GATES
+hami-device-plugin-5hg6v          2/2     Running   1 (12m ago)   12m     10.210.121.159   ip-10-210-121-159.ap-northeast-2.compute.internal   <none>           <none>
+hami-scheduler-589c6b69c7-mk98j   2/2     Running   0             3h47m   10.210.73.79     ip-10-210-66-40.ap-northeast-2.compute.internal     <none>           <none>

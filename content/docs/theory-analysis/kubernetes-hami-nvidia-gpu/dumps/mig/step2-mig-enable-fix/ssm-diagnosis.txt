@@ -1,0 +1,33 @@
+# node2 (ip-10-210-121-159, i-03850b28255370d03) — userData nvidia-smi -mig 1 실행 후 상태
+# (1) 부팅 직후: 8장 전부 pending=Enabled, gpu-reset은 || true로 조용히 실패
+$ nvidia-smi --query-gpu=index,mig.mode.current,mig.mode.pending --format=csv
+index, mig.mode.current, mig.mode.pending
+0, Disabled, Enabled
+1, Disabled, Enabled
+2, Disabled, Enabled
+3, Disabled, Enabled
+4, Disabled, Enabled
+5, Disabled, Enabled
+6, Disabled, Enabled
+7, Disabled, Enabled
+
+$ systemctl is-active nvidia-fabricmanager nvidia-persistenced
+failed
+active
+
+# (2) persistenced·fabricmanager 중지 후 reset 재시도 — kubelet의 GPU client들(hami device plugin,
+#     dcgm-exporter)이 GPU를 쥐고 있어 EC2에서는 reset 불가
+$ systemctl stop nvidia-persistenced nvidia-fabricmanager; nvidia-smi --gpu-reset
+The following GPUs could not be reset:
+  GPU 00000000:10:1C.0: In use by another client
+  GPU 00000000:10:1D.0: In use by another client
+  GPU 00000000:20:1C.0: In use by another client
+  GPU 00000000:20:1D.0: In use by another client
+  GPU 00000000:90:1C.0: In use by another client
+  GPU 00000000:90:1D.0: In use by another client
+  GPU 00000000:A0:1C.0: In use by another client
+  GPU 00000000:A0:1D.0: In use by another client
+8 devices are currently being used by one or more other processes (e.g., Fabric Manager, CUDA application, ...)
+gpu-reset-exit=255
+
+# 결론: userData에서 pending이면 reboot로 적용 (MIG Mode는 재부팅 후에도 유지)

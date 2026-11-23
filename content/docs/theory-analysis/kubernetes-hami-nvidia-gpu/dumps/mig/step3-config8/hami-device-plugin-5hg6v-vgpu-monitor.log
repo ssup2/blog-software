@@ -1,0 +1,574 @@
+I1123 15:52:57.119428   27432 flags.go:27] FLAG: --add_dir_header="false"
+I1123 15:52:57.119487   27432 flags.go:27] FLAG: --alsologtostderr="false"
+I1123 15:52:57.119491   27432 flags.go:27] FLAG: --alsologtostderrthreshold="0"
+I1123 15:52:57.119494   27432 flags.go:27] FLAG: --legacy_stderr_threshold_behavior="true"
+I1123 15:52:57.119497   27432 flags.go:27] FLAG: --log_backtrace_at=":0"
+I1123 15:52:57.119502   27432 flags.go:27] FLAG: --log_dir=""
+I1123 15:52:57.119507   27432 flags.go:27] FLAG: --log_file=""
+I1123 15:52:57.119510   27432 flags.go:27] FLAG: --log_file_max_size="1800"
+I1123 15:52:57.119515   27432 flags.go:27] FLAG: --logtostderr="true"
+I1123 15:52:57.119518   27432 flags.go:27] FLAG: --one_output="false"
+I1123 15:52:57.119522   27432 flags.go:27] FLAG: --skip_headers="false"
+I1123 15:52:57.119526   27432 flags.go:27] FLAG: --skip_log_headers="false"
+I1123 15:52:57.119530   27432 flags.go:27] FLAG: --stderrthreshold="2"
+I1123 15:52:57.119534   27432 flags.go:27] FLAG: --v="4"
+I1123 15:52:57.119537   27432 flags.go:27] FLAG: --vmodule=""
+I1123 15:52:57.119544   27432 flags.go:27] FLAG: --metrics-bind-address=":9394"
+I1123 15:52:57.119553   27432 flags.go:27] FLAG: --legacy-metrics="false"
+I1123 15:52:57.119557   27432 flags.go:27] FLAG: --help="false"
+W1123 15:52:57.119591   27432 client_config.go:683] Neither --kubeconfig nor --master was specified.  Using the inClusterConfig.  This might not work.
+I1123 15:52:57.119764   27432 envvar.go:195] "Feature gate default state" feature="InOrderInformers" enabled=true
+I1123 15:52:57.119777   27432 envvar.go:195] "Feature gate default state" feature="InOrderInformersBatchProcess" enabled=true
+I1123 15:52:57.119786   27432 envvar.go:195] "Feature gate default state" feature="AtomicFIFO" enabled=true
+I1123 15:52:57.119795   27432 envvar.go:195] "Feature gate default state" feature="UnlockWhileProcessingFIFO" enabled=true
+I1123 15:52:57.119802   27432 envvar.go:195] "Feature gate default state" feature="WatchListClient" enabled=true
+I1123 15:52:57.119807   27432 envvar.go:195] "Feature gate default state" feature="ClientsAllowTLSCacheGC" enabled=true
+I1123 15:52:57.119812   27432 envvar.go:195] "Feature gate default state" feature="InformerResourceVersion" enabled=true
+I1123 15:52:57.119817   27432 envvar.go:195] "Feature gate default state" feature="ClientsAllowCARotation" enabled=true
+I1123 15:52:57.119821   27432 envvar.go:195] "Feature gate default state" feature="ClientsAllowCBOR" enabled=false
+I1123 15:52:57.119826   27432 envvar.go:195] "Feature gate default state" feature="ClientsPreferCBOR" enabled=false
+I1123 15:52:57.120324   27432 reflector.go:425] "Starting reflector" type="*v1.Pod" resyncPeriod="5m0s" reflector="pkg/mod/k8s.io/client-go@v0.37.2/tools/cache/reflector.go:343"
+I1123 15:52:57.120338   27432 reflector.go:472] "Listing and watching" type="*v1.Pod" reflector="pkg/mod/k8s.io/client-go@v0.37.2/tools/cache/reflector.go:343"
+I1123 15:53:02.351141   27432 reflector.go:816] "watch-list failed - backing off" reflector="pkg/mod/k8s.io/client-go@v0.37.2/tools/cache/reflector.go:343" type="*v1.Pod" err="Get \"https://172.20.0.1:443/api/v1/pods?allowWatchBookmarks=true&fieldSelector=spec.nodeName%3Dip-10-210-121-159.ap-northeast-2.compute.internal&resourceVersionMatch=NotOlderThan&sendInitialEvents=true&timeout=7m11s&timeoutSeconds=431&watch=true\": dial tcp 172.20.0.1:443: connect: connection refused"
+I1123 15:53:03.563799   27432 reflector.go:1080] "Exiting watch because received the bookmark that marks the end of initial events stream" reflector="pkg/mod/k8s.io/client-go@v0.37.2/tools/cache/reflector.go:343" totalItems=12 duration="12.619549ms"
+I1123 15:53:03.563843   27432 reflector.go:507] "Caches populated" type="*v1.Pod" reflector="pkg/mod/k8s.io/client-go@v0.37.2/tools/cache/reflector.go:343"
+I1123 15:53:03.620344   27432 cudevshr.go:475] Pod informer started successfully
+I1123 15:53:03.620394   27432 lock.go:50] MIG apply lock directory already exists
+I1123 15:53:03.620466   27432 main.go:168] Initializing metrics for vGPUmonitor
+I1123 15:53:03.620481   27432 feedback.go:146] Starting watchAndFeedback
+I1123 15:53:17.608939   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 15:53:17.614810   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 15:53:17.622960   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 15:53:17.631024   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 15:53:17.639640   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 15:53:17.647826   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 15:53:17.655945   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 15:53:17.666303   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 15:53:17.674901   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 15:53:17.677479   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 15:53:17.677497   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 15:53:17.777717   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 15:53:17.777843   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 15:53:17.780363   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 15:53:17.783314   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 15:53:17.786028   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 15:53:17.788447   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 15:53:17.791382   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 15:53:17.793825   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 15:53:17.796238   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 15:53:17.798626   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 15:53:17.798640   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 15:53:32.777961   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 15:53:32.778210   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 15:53:32.782284   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 15:53:32.784821   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 15:53:32.787640   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 15:53:32.790257   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 15:53:32.792906   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 15:53:32.795484   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 15:53:32.799189   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 15:53:32.801732   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 15:53:32.801752   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 15:53:47.609277   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 15:53:47.609511   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 15:53:47.612129   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 15:53:47.614671   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 15:53:47.617506   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 15:53:47.621987   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 15:53:47.624469   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 15:53:47.627259   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 15:53:47.629817   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 15:53:47.632935   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 15:53:47.632968   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 15:53:47.777778   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 15:53:47.778012   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 15:53:47.780747   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 15:53:47.783340   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 15:53:47.786219   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 15:53:47.788777   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 15:53:47.791339   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 15:53:47.793997   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 15:53:47.796477   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 15:53:47.798993   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 15:53:47.799023   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 15:54:02.778536   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 15:54:02.778775   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 15:54:02.781403   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 15:54:02.783950   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 15:54:02.786770   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 15:54:02.789361   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 15:54:02.791967   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 15:54:02.794629   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 15:54:02.797218   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 15:54:02.799771   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 15:54:02.799791   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 15:54:17.608972   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 15:54:17.609223   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 15:54:17.611833   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 15:54:17.614383   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 15:54:17.617251   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 15:54:17.619776   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 15:54:17.622339   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 15:54:17.624821   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 15:54:17.627350   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 15:54:17.632666   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 15:54:17.632686   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 15:54:17.777704   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 15:54:17.777865   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 15:54:17.780483   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 15:54:17.783041   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 15:54:17.785844   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 15:54:17.788359   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 15:54:17.791890   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 15:54:17.795707   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 15:54:17.798253   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 15:54:17.801273   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 15:54:17.801292   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 15:54:32.778103   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 15:54:32.778337   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 15:54:32.780976   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 15:54:32.783509   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 15:54:32.786379   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 15:54:32.788936   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 15:54:32.791505   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 15:54:32.794040   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 15:54:32.797437   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 15:54:32.799887   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 15:54:32.799911   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 15:54:47.609780   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 15:54:47.610013   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 15:54:47.612652   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 15:54:47.615314   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 15:54:47.618115   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 15:54:47.620653   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 15:54:47.623307   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 15:54:47.625873   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 15:54:47.628371   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 15:54:47.631414   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 15:54:47.631439   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 15:54:47.778105   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 15:54:47.778322   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 15:54:47.781262   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 15:54:47.783834   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 15:54:47.786663   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 15:54:47.789777   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 15:54:47.792606   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 15:54:47.795150   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 15:54:47.797669   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 15:54:47.800263   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 15:54:47.800282   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 15:55:02.777650   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 15:55:02.777880   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 15:55:02.780507   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 15:55:02.783060   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 15:55:02.785992   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 15:55:02.788544   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 15:55:02.791103   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 15:55:02.793649   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 15:55:02.796202   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 15:55:02.798712   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 15:55:02.798741   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 15:55:17.610491   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 15:55:17.610861   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 15:55:17.613987   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 15:55:17.616554   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 15:55:17.619431   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 15:55:17.622072   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 15:55:17.624646   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 15:55:17.627252   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 15:55:17.629860   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 15:55:17.632422   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 15:55:17.632449   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 15:55:17.777340   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 15:55:17.777474   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 15:55:17.782157   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 15:55:17.784655   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 15:55:17.787423   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 15:55:17.791426   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 15:55:17.793955   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 15:55:17.796545   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 15:55:17.799043   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 15:55:17.802835   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 15:55:17.802854   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 15:55:32.778215   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 15:55:32.778448   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 15:55:32.781088   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 15:55:32.783648   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 15:55:32.787441   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 15:55:32.790033   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 15:55:32.792598   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 15:55:32.795137   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 15:55:32.797763   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 15:55:32.800398   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 15:55:32.800429   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 15:55:47.609334   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 15:55:47.609578   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 15:55:47.612154   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 15:55:47.615460   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 15:55:47.618657   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 15:55:47.621191   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 15:55:47.623727   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 15:55:47.626263   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 15:55:47.628794   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 15:55:47.631989   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 15:55:47.632006   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 15:55:47.777848   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 15:55:47.777992   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 15:55:47.780542   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 15:55:47.783038   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 15:55:47.785827   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 15:55:47.790027   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 15:55:47.792532   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 15:55:47.795859   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 15:55:47.798397   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 15:55:47.800843   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 15:55:47.800860   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 15:56:02.778045   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 15:56:02.778284   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 15:56:02.780951   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 15:56:02.783526   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 15:56:02.786468   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 15:56:02.789053   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 15:56:02.791605   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 15:56:02.794714   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 15:56:02.797433   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 15:56:02.799927   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 15:56:02.799949   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 15:56:17.609844   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 15:56:17.610120   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 15:56:17.612734   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 15:56:17.615275   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 15:56:17.618119   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 15:56:17.620732   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 15:56:17.623292   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 15:56:17.625824   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 15:56:17.628366   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 15:56:17.630886   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 15:56:17.630911   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 15:56:17.777504   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 15:56:17.777662   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 15:56:17.780258   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 15:56:17.782784   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 15:56:17.785602   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 15:56:17.788143   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 15:56:17.793071   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 15:56:17.795671   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 15:56:17.798250   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 15:56:17.800769   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 15:56:17.800786   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 15:56:32.777793   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 15:56:32.778025   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 15:56:32.781778   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 15:56:32.785634   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 15:56:32.788523   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 15:56:32.791147   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 15:56:32.793731   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 15:56:32.796343   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 15:56:32.798912   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 15:56:32.801512   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 15:56:32.801534   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 15:56:47.609453   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 15:56:47.609679   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 15:56:47.612294   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 15:56:47.615175   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 15:56:47.618063   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 15:56:47.620685   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 15:56:47.623302   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 15:56:47.625883   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 15:56:47.628464   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 15:56:47.631541   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 15:56:47.631569   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 15:56:47.777930   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 15:56:47.778077   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 15:56:47.780665   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 15:56:47.783440   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 15:56:47.786247   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 15:56:47.788818   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 15:56:47.791376   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 15:56:47.793851   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 15:56:47.796918   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 15:56:47.799407   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 15:56:47.799433   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 15:57:02.778172   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 15:57:02.778429   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 15:57:02.781519   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 15:57:02.784152   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 15:57:02.787345   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 15:57:02.789939   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 15:57:02.792505   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 15:57:02.795047   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 15:57:02.797602   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 15:57:02.800127   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 15:57:02.800166   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 15:57:17.609995   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 15:57:17.610267   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 15:57:17.613489   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 15:57:17.616128   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 15:57:17.618965   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 15:57:17.621511   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 15:57:17.624068   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 15:57:17.626678   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 15:57:17.629235   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 15:57:17.633679   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 15:57:17.633698   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 15:57:17.777747   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 15:57:17.777996   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 15:57:17.780677   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 15:57:17.783259   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 15:57:17.786350   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 15:57:17.789214   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 15:57:17.792409   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 15:57:17.795002   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 15:57:17.797569   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 15:57:17.800088   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 15:57:17.800109   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 15:57:32.777531   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 15:57:32.777785   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 15:57:32.780445   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 15:57:32.783254   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 15:57:32.786169   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 15:57:32.790091   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 15:57:32.792632   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 15:57:32.795201   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 15:57:32.797728   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 15:57:32.800252   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 15:57:32.800267   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 15:57:47.609678   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 15:57:47.609917   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 15:57:47.613223   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 15:57:47.615764   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 15:57:47.618578   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 15:57:47.621113   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 15:57:47.623664   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 15:57:47.626130   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 15:57:47.628656   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 15:57:47.631120   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 15:57:47.631149   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 15:57:47.777336   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 15:57:47.777499   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 15:57:47.780082   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 15:57:47.782637   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 15:57:47.785679   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 15:57:47.788195   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 15:57:47.791286   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 15:57:47.795956   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 15:57:47.799305   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 15:57:47.803768   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 15:57:47.803785   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 15:58:02.778121   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 15:58:02.778419   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 15:58:02.781042   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 15:58:02.783547   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 15:58:02.789080   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 15:58:02.791681   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 15:58:02.794144   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 15:58:02.796676   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 15:58:02.799163   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 15:58:02.801683   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 15:58:02.801702   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 15:58:03.564956   27432 reflector.go:527] "Forcing resync" reflector="pkg/mod/k8s.io/client-go@v0.37.2/tools/cache/reflector.go:343"
+I1123 15:58:17.609705   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 15:58:17.609922   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 15:58:17.612787   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 15:58:17.615344   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 15:58:17.618185   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 15:58:17.620738   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 15:58:17.623313   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 15:58:17.625835   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 15:58:17.628366   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 15:58:17.631718   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 15:58:17.631737   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 15:58:17.778457   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 15:58:17.778671   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 15:58:17.781880   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 15:58:17.784404   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 15:58:17.787233   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 15:58:17.790345   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 15:58:17.792888   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 15:58:17.795363   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 15:58:17.797910   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 15:58:17.803218   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 15:58:17.803242   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 15:58:32.778521   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 15:58:32.778769   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 15:58:32.781385   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 15:58:32.783924   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 15:58:32.786736   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 15:58:32.789328   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 15:58:32.791875   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 15:58:32.794418   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 15:58:32.797524   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 15:58:32.800036   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 15:58:32.800072   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 15:58:47.609162   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 15:58:47.609397   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 15:58:47.612027   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 15:58:47.614554   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 15:58:47.617359   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 15:58:47.619868   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 15:58:47.622461   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 15:58:47.625089   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 15:58:47.627558   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 15:58:47.630653   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 15:58:47.630670   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 15:58:47.777576   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 15:58:47.777712   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 15:58:47.780247   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 15:58:47.782740   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 15:58:47.785483   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 15:58:47.787936   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 15:58:47.790478   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 15:58:47.792951   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 15:58:47.795422   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 15:58:47.798572   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 15:58:47.798588   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 15:58:54.558045   27432 reflector.go:1093] "Watch close" reflector="pkg/mod/k8s.io/client-go@v0.37.2/tools/cache/reflector.go:343" type="*v1.Pod" totalItems=19
+I1123 15:58:54.558299   27432 ca_rotation.go:93] "Checking CA file content" caFile="/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+I1123 15:58:54.558341   27432 ca_rotation.go:111] "CA file unchanged, skipping transport rotation" caFile="/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+I1123 15:59:02.778176   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 15:59:02.778406   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 15:59:02.781144   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 15:59:02.783690   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 15:59:02.786488   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 15:59:02.790967   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 15:59:02.793506   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 15:59:02.796108   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 15:59:02.798645   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 15:59:02.801167   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 15:59:02.801192   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 15:59:17.609718   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 15:59:17.609960   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 15:59:17.613710   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 15:59:17.617766   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 15:59:17.620632   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 15:59:17.623157   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 15:59:17.625640   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 15:59:17.628182   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 15:59:17.631235   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 15:59:17.634253   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 15:59:17.634272   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 15:59:17.778103   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 15:59:17.778311   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 15:59:17.780860   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 15:59:17.783398   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 15:59:17.786164   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 15:59:17.788705   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 15:59:17.791220   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 15:59:17.793821   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 15:59:17.796368   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 15:59:17.798853   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 15:59:17.798871   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 15:59:32.777918   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 15:59:32.778170   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 15:59:32.780803   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 15:59:32.783364   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 15:59:32.786231   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 15:59:32.788763   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 15:59:32.792020   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 15:59:32.794607   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 15:59:32.797159   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 15:59:32.799686   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 15:59:32.799706   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 15:59:47.610144   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 15:59:47.610414   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 15:59:47.613281   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 15:59:47.615860   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 15:59:47.619918   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 15:59:47.622505   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 15:59:47.625054   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 15:59:47.627602   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 15:59:47.630264   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 15:59:47.632801   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 15:59:47.632824   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 15:59:47.777983   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 15:59:47.778202   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 15:59:47.780829   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 15:59:47.783383   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 15:59:47.786496   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 15:59:47.789045   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 15:59:47.792390   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 15:59:47.794976   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 15:59:47.797504   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 15:59:47.800013   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 15:59:47.800033   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 16:00:02.778148   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 16:00:02.778366   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 16:00:02.780999   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 16:00:02.783561   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 16:00:02.786406   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 16:00:02.788964   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 16:00:02.792289   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 16:00:02.796089   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 16:00:02.798668   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 16:00:02.801174   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 16:00:02.801193   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 16:00:17.609883   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 16:00:17.610133   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 16:00:17.612796   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 16:00:17.615350   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 16:00:17.618185   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 16:00:17.622356   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 16:00:17.624890   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 16:00:17.627410   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 16:00:17.629966   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 16:00:17.634320   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 16:00:17.634339   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 16:00:17.778221   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 16:00:17.778426   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 16:00:17.781029   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 16:00:17.783583   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 16:00:17.786389   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 16:00:17.788908   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 16:00:17.791436   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 16:00:17.794001   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 16:00:17.796530   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 16:00:17.799020   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 16:00:17.799037   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 16:00:32.778382   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 16:00:32.778615   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 16:00:32.781245   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 16:00:32.783819   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 16:00:32.786654   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 16:00:32.789189   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 16:00:32.791757   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 16:00:32.794296   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 16:00:32.797284   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 16:00:32.800026   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 16:00:32.800046   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 16:00:43.641430   27432 wholegpu.go:453] wholegpu: synthesized whole-GPU usage for 97351a78-82fb-4540-9c87-4826f0bc8087_cuda (1 device(s))
+I1123 16:00:47.609084   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 16:00:47.609315   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 16:00:47.612234   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 16:00:47.615742   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 16:00:47.618652   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 16:00:47.623741   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 16:00:47.626199   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 16:00:47.628643   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 16:00:47.631618   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+W1123 16:00:47.645918   27432 wholegpu_dcgm.go:137] wholegpu: dcgm embedded init failed, will retry in 30s: libdcgm.so.4 not found or could not be loaded: libdcgm.so.4: cannot open shared object file: No such file or directory; go-dcgm requires DCGM 4
+I1123 16:00:47.645983   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 16:00:47.646127   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 16:00:47.778329   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 16:00:47.778467   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 16:00:47.781318   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 16:00:47.784451   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 16:00:47.787534   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 16:00:47.790660   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 16:00:47.793451   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 16:00:47.796540   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 16:00:47.799856   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 16:00:47.811463   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 16:00:47.811531   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor
+I1123 16:00:48.640494   27432 wholegpu.go:453] wholegpu: synthesized whole-GPU usage for 9d3fe77c-be65-495a-869f-e9b663b9c351_cuda (1 device(s))
+I1123 16:00:48.640522   27432 wholegpu.go:453] wholegpu: synthesized whole-GPU usage for 5f4542d6-471b-4eb4-ab89-0737d260013e_cuda (1 device(s))
+I1123 16:01:02.777651   27432 metrics.go:255] Starting to collect metrics for vGPUMonitor
+I1123 16:01:02.777868   27432 metrics.go:426] GPU utilization metrics not supported for device 0, skipping
+I1123 16:01:02.780500   27432 metrics.go:426] GPU utilization metrics not supported for device 1, skipping
+I1123 16:01:02.783048   27432 metrics.go:426] GPU utilization metrics not supported for device 2, skipping
+I1123 16:01:02.785809   27432 metrics.go:426] GPU utilization metrics not supported for device 3, skipping
+I1123 16:01:02.788302   27432 metrics.go:426] GPU utilization metrics not supported for device 4, skipping
+I1123 16:01:02.792038   27432 metrics.go:426] GPU utilization metrics not supported for device 5, skipping
+I1123 16:01:02.794592   27432 metrics.go:426] GPU utilization metrics not supported for device 6, skipping
+I1123 16:01:02.797158   27432 metrics.go:426] GPU utilization metrics not supported for device 7, skipping
+I1123 16:01:02.823306   27432 metrics.go:576] Finished collecting metrics for 3 pods
+I1123 16:01:02.823401   27432 metrics.go:291] Finished collecting metrics for vGPUMonitor

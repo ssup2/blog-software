@@ -499,6 +499,23 @@ spec:
 
 [File 10]은 하나의 A100 위에 `2g.10gb` 2개와 `3g.20gb` 1개의 MIG Instance 조합을 구성하는 Pod를 나타내고 있다. 기본 Device Scheduling 정책인 `spread`는 vGPU를 서로 다른 GPU에 분산하기 때문에 `binpack` 정책으로 세 Pod의 vGPU를 같은 GPU에 모으며, 위치 선택 알고리즘에 따라서 `2g.10gb`는 위치 0과 2에, `3g.20gb`는 위치 4에 생성된다. 세 Pod가 같은 GPU에 모였는지와 예약된 Profile, 위치는 각 Pod의 `hami.io/vgpu-mig-allocations` Annotation으로 확인하고, 생성된 MIG Instance는 Pod 안의 `nvidia-smi -L` 출력으로 확인한다.
 
+```shell {caption="[Shell 7] Config 8 구성 확인"}
+$ kubectl get pod mig-2g-a mig-2g-b mig-3g -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.metadata.annotations.hami\.io/vgpu-mig-allocations}{"\n"}{end}'
+mig-2g-a	[{"gpuUUID":"GPU-a8f9e013-12ae-4a95-a82b-6dde923e243a","profile":"2g.10gb","placement":{"start":0,"size":2},"migUUID":"MIG-54cc1df4-8c9e-55db-b029-1c88f71cb77f","gpuInstanceID":3}]
+mig-2g-b	[{"gpuUUID":"GPU-a8f9e013-12ae-4a95-a82b-6dde923e243a","profile":"2g.10gb","placement":{"start":2,"size":2},"migUUID":"MIG-3e6055c5-97f5-552c-a1aa-f0f7ffc78ce7","gpuInstanceID":4}]
+mig-3g	[{"gpuUUID":"GPU-a8f9e013-12ae-4a95-a82b-6dde923e243a","profile":"3g.20gb","placement":{"start":4,"size":4},"migUUID":"MIG-d867d519-626c-5266-bcbb-2cc12a70a327","gpuInstanceID":2}]
+
+$ kubectl exec mig-2g-a -- nvidia-smi -L
+GPU 0: NVIDIA A100-SXM4-40GB (UUID: GPU-a8f9e013-12ae-4a95-a82b-6dde923e243a)
+  MIG 2g.10gb     Device  0: (UUID: MIG-54cc1df4-8c9e-55db-b029-1c88f71cb77f)
+
+$ kubectl exec mig-3g -- nvidia-smi -L
+GPU 0: NVIDIA A100-SXM4-40GB (UUID: GPU-a8f9e013-12ae-4a95-a82b-6dde923e243a)
+  MIG 3g.20gb     Device  0: (UUID: MIG-d867d519-626c-5266-bcbb-2cc12a70a327)
+```
+
+[Shell 7]은 Config 8 구성이 완성된 모습을 나타내고 있다. 세 Pod의 `hami.io/vgpu-mig-allocations` Annotation은 모두 같은 `gpuUUID`를 담고 있어 `binpack` 정책으로 같은 GPU에 모인 것을 확인할 수 있고, `placement`의 `start`는 예상대로 `2g.10gb`가 0과 2, `3g.20gb`가 4이다. 각 Pod 안의 `nvidia-smi -L`은 Annotation의 `migUUID`와 일치하는 MIG Device 하나씩만 보여주어, HAMi Device Plugin이 예약된 Profile의 MIG Instance를 생성하여 Container에 전달한 것을 확인할 수 있다.
+
 ```yaml {caption="[File 11] mig-config9.yaml (이름만 다른 mig-1g-b Pod와 nodeSelector, tolerations는 생략)", linenos=table}
 apiVersion: v1
 kind: Pod
@@ -521,12 +538,29 @@ spec:
 
 [File 11]은 `mig-2g-b` Pod를 삭제한 후 적용하는 `1g.5gb` Pod 2개를 나타내고 있다. 삭제된 Pod의 `2g.10gb` Instance는 Idle 상태로 남지만 HAMi Scheduler는 그 위치를 빈 공간으로 간주하기 때문에, 새로 예약된 `1g.5gb` 위치가 Idle Instance와 겹치면 HAMi Device Plugin이 Idle Instance를 제거한 후 `1g.5gb` Instance 2개를 생성한다. 이를 통해서 같은 GPU의 구성이 `2g.10gb` 1개, `1g.5gb` 2개, `3g.20gb` 1개의 조합으로 전환되는 과정과, 전환되는 동안 동작 중인 `mig-2g-a`, `mig-3g` Pod의 MIG Instance가 유지되는지 확인한다.
 
-각 단계에서는 HAMi Device Plugin의 `device-plugin`, `vgpu-monitor` Container Log와 HAMi Scheduler의 Log, Node의 `hami.io/node-nvidia-register` Annotation, Pod 안의 `nvidia-smi -L` 출력을 수집하여 MIG Instance의 생성, 재사용, 제거 과정을 추적한다. 적용한 manifest와 수집 Script, 수집 결과는 글 저장소의 `manifests/mig`, `dumps/mig` 폴더에 보관한다.
+```shell {caption="[Shell 8] Config 9 전환과 Idle MIG Instance 재구성"}
+$ kubectl delete pod mig-2g-b
+$ kubectl apply -f mig-config9.yaml
 
-<!-- TODO(실측 대기): env-charts PR #1457(userData MIG 활성화) 머지 + karpenter-alpha-kr-dev 재sync 후 실측 재개.
-     [Shell 7] Config 8 구성 확인 (vgpu-mig-allocations의 GPU UUID 일치와 Profile·위치, nvidia-smi -L, node-nvidia-register),
-     [Shell 8] Config 9 전환 확인 (mig-2g-b 삭제 → 1g x2 적용, Idle 2g 제거와 기존 Instance 유지) 를
-     dumps/mig/step2-config8, step3-config9 실측 발췌로 추가하고 EN에도 반영할 것. 절차는 폴더 CLAUDE.md 참조. -->
+$ kubectl get pod mig-2g-a mig-1g-a mig-1g-b mig-3g -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.metadata.annotations.hami\.io/vgpu-mig-allocations}{"\n"}{end}'
+mig-2g-a	[{..."profile":"2g.10gb","placement":{"start":0,"size":2},"migUUID":"MIG-54cc1df4-8c9e-55db-b029-1c88f71cb77f"...}]
+mig-1g-a	[{..."profile":"1g.5gb","placement":{"start":2,"size":1},"migUUID":"MIG-9fe17aa4-ac1f-5b20-a171-c019d17309e1"...}]
+mig-1g-b	[{..."profile":"1g.5gb","placement":{"start":3,"size":1},"migUUID":"MIG-5fcd3b0c-e844-5e46-a988-4176c1d56926"...}]
+mig-3g	[{..."profile":"3g.20gb","placement":{"start":4,"size":4},"migUUID":"MIG-d867d519-626c-5266-bcbb-2cc12a70a327"...}]
+
+$ kubectl logs -n addon-hami ds/hami-device-plugin -c device-plugin | grep -E 'migmgr.go:(664|739|907)'
+... "created scheduler-reserved MIG allocation" uuid="MIG-54cc1df4...77f" gpu=7 profile="2g.10gb" start=0
+... "created scheduler-reserved MIG allocation" uuid="MIG-3e6055c5...ce7" gpu=7 profile="2g.10gb" start=2
+... "created scheduler-reserved MIG allocation" uuid="MIG-d867d519...327" gpu=7 profile="3g.20gb" start=4
+... "cached released MIG allocation" uuid="MIG-3e6055c5...ce7" gpu=7 profile="2g.10gb" start=2
+... "reclaimed idle MIG allocation under placement pressure" uuid="MIG-3e6055c5...ce7" gpu=7 profile="2g.10gb" start=2
+... "created scheduler-reserved MIG allocation" uuid="MIG-9fe17aa4...9e1" gpu=7 profile="1g.5gb" start=2
+... "created scheduler-reserved MIG allocation" uuid="MIG-5fcd3b0c...926" gpu=7 profile="1g.5gb" start=3
+```
+
+[Shell 8]은 `mig-2g-b` Pod를 삭제하고 `1g.5gb` Pod 2개를 적용하여 Config 9로 전환되는 모습을 나타내고 있다. 유지되는 `mig-2g-a`와 `mig-3g`의 `migUUID`는 Config 8의 값과 그대로 같아서 두 MIG Instance가 재생성 없이 유지된 것을 확인할 수 있고, 새로 적용한 `1g.5gb` 2개는 삭제된 `2g.10gb`가 있던 위치 2와 3을 이어받는다.
+
+HAMi Device Plugin의 Log는 이 과정을 세 종류의 Record로 보여준다. `mig-2g-b`가 삭제되자 그 `2g.10gb` Instance는 즉시 제거되지 않고 `cached released MIG allocation`으로 Idle 상태가 되며, 이후 `1g.5gb` 예약이 겹치는 위치를 요구하자 `reclaimed idle MIG allocation under placement pressure`로 Idle Instance를 제거한 뒤 `created scheduler-reserved MIG allocation`으로 `1g.5gb` 2개를 생성한다. 이처럼 Flexible MIG는 Node를 Cordon하거나 GPU 전체의 MIG 구성을 다시 만들지 않고, 비워진 Slice 위치에서만 MIG Instance를 Workload 단위로 교체한다.
 
 ### 1.5. GPU 선택
 

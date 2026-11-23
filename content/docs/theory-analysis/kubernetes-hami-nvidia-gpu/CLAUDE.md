@@ -6,6 +6,16 @@ kubernetes-hami(HAMi 자체, 벤더 중립 구조) 문서의 NVIDIA 상세 글�
 
 ## 문서 구성 및 상태
 
+- **2026-11-24 Dynamic MIG 실측 2차 — MIG Instance 생성 성공** (회사 Mac, KR/EN 동시): 1.4.1에 [Shell 7](Config 8 구성),
+  1.4.2에 [Shell 8](Config 9 전환) 추가, TODO 주석 제거. 실측 요지:
+  - MIG Mode 활성화는 userData #1457로도 EC2에서 reset 거부(gpu-reset "In use by another client")라 pending 잔존 →
+    수동 `reboot`로 적용 후 재등록(dumps step2-mig-enable-fix). 재부팅 후 MIG Mode 유지 확인.
+  - Config 8: mig-2g-a/b, mig-3g가 binpack으로 같은 GPU(UUID a8f9e013)에, 위치 2g→0,2 / 3g→4 (예측 일치). 각 Pod `nvidia-smi -L`에 MIG Device 1개.
+  - Config 9: mig-2g-b 삭제 → 1g×2 적용. mig-2g-a(54cc1df4)·mig-3g(d867d519) migUUID 유지(재생성 없음), 1g×2는 위치 2,3.
+    device-plugin 로그 migmgr.go: created(664) → cached released=Idle(907) → reclaimed idle under placement pressure(739) → created 1g×2.
+  - dumps: step3-config8, step4-config9 (migmgr-lifecycle.log 포함). [Shell 7]/[Shell 8]은 이 dump 발췌.
+  - **후속**: env-charts PR #1458(NodeOverlay로 warmup 제거 + userData reset 우선)은 머지+sync 후 fresh node 자동화 검증 대기.
+    검증되면 1.4 도입부 "placeholder Pod로 Node 먼저 생성" 문단을 NodeOverlay 방식으로 갱신할 것 (현재 본문은 실제 거친 warmup 경로 유지).
 - **2026-11-24 Dynamic MIG 실측 1차** (회사 Mac, KR/EN 동시): 1.4 도입부에 환경 문단 + Karpenter 우회 문단 + [Shell 6](실측) + 설명 2문단 추가.
   실측 확인 2건 — ① Karpenter는 `nvidia.com/gpumem`을 몰라 "no instance type has enough resources"로 프로비저닝 거부 →
   GPU Resource 없는 placeholder Pod(`manifests/mig/mig-node-warmup.yaml`)로 우회 (dumps/mig/step0-provision).

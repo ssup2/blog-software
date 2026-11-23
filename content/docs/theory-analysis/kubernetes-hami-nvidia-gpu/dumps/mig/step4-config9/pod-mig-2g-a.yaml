@@ -1,0 +1,184 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    hami.io/bind-phase: success
+    hami.io/bind-time: "1795449640"
+    hami.io/gpu-scheduler-policy: binpack
+    hami.io/vgpu-devices-allocated: GPU-a8f9e013-12ae-4a95-a82b-6dde923e243a,NVIDIA,9984,29:;
+    hami.io/vgpu-devices-to-allocate: ;;
+    hami.io/vgpu-mig-allocations: '[{"containerIndex":0,"deviceIndex":0,"gpuUUID":"GPU-a8f9e013-12ae-4a95-a82b-6dde923e243a","profile":"2g.10gb","placement":{"start":0,"size":2},"migUUID":"MIG-54cc1df4-8c9e-55db-b029-1c88f71cb77f","gpuInstanceID":3,"computeInstanceID":0}]'
+    hami.io/vgpu-node: ip-10-210-121-159.ap-northeast-2.compute.internal
+    hami.io/vgpu-time: "1795449640"
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","kind":"Pod","metadata":{"annotations":{"hami.io/gpu-scheduler-policy":"binpack","nvidia.com/mig-profile-preference":"2g.10gb","nvidia.com/vgpu-mode":"mig"},"name":"mig-2g-a","namespace":"default"},"spec":{"containers":[{"command":["sleep","infinity"],"image":"nvidia/cuda:12.4.0-base-ubuntu22.04","name":"cuda","resources":{"limits":{"nvidia.com/gpu":1,"nvidia.com/gpumem":9000}}}],"nodeSelector":{"group":"gpu-a100-hami"},"tolerations":[{"effect":"NoSchedule","key":"group","operator":"Equal","value":"gpu-a100-hami"},{"effect":"NoSchedule","key":"nvidia.com/gpu","operator":"Exists"}]}}
+    nvidia.com/mig-profile-preference: 2g.10gb
+    nvidia.com/vgpu-mode: mig
+  creationTimestamp: "2026-11-23T16:00:40Z"
+  generation: 1
+  labels:
+    hami.io/vgpu-node: ip-10-210-121-159.ap-northeast-2.compute.internal
+  name: mig-2g-a
+  namespace: default
+  resourceVersion: "1265518645"
+  uid: 97351a78-82fb-4540-9c87-4826f0bc8087
+spec:
+  containers:
+  - command:
+    - sleep
+    - infinity
+    env:
+    - name: CLUSTER_NAME
+      value: alpha-kr-dev
+    - name: LOG4J_FORMAT_MSG_NO_LOOKUPS
+      value: "true"
+    - name: DD_TRACE_HEADER_BAGGAGE
+      value: X-Request-Id:X-Request-Id
+    - name: DD_TRACE_PROPAGATION_STYLE
+      value: datadog
+    image: nvidia/cuda:12.4.0-base-ubuntu22.04
+    imagePullPolicy: IfNotPresent
+    name: cuda
+    resources:
+      limits:
+        ephemeral-storage: 10Gi
+        nvidia.com/gpu: "1"
+        nvidia.com/gpumem: 9k
+      requests:
+        ephemeral-storage: "0"
+        nvidia.com/gpu: "1"
+        nvidia.com/gpumem: 9k
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-bzfl2
+      readOnly: true
+  dnsConfig:
+    options:
+    - name: ndots
+      value: "2"
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  nodeName: ip-10-210-121-159.ap-northeast-2.compute.internal
+  nodeSelector:
+    group: gpu-a100-hami
+  preemptionPolicy: PreemptLowerPriority
+  priority: 0
+  restartPolicy: Always
+  schedulerName: hami-scheduler
+  securityContext: {}
+  serviceAccount: default
+  serviceAccountName: default
+  terminationGracePeriodSeconds: 30
+  tolerations:
+  - effect: NoSchedule
+    key: group
+    operator: Equal
+    value: gpu-a100-hami
+  - effect: NoSchedule
+    key: nvidia.com/gpu
+    operator: Exists
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoSchedule
+    key: nvidia.com/gpumem
+    operator: Exists
+  volumes:
+  - name: kube-api-access-bzfl2
+    projected:
+      defaultMode: 420
+      sources:
+      - serviceAccountToken:
+          expirationSeconds: 3607
+          path: token
+      - configMap:
+          items:
+          - key: ca.crt
+            path: ca.crt
+          name: kube-root-ca.crt
+      - downwardAPI:
+          items:
+          - fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+            path: namespace
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: "2026-11-23T16:00:42Z"
+    observedGeneration: 1
+    status: "True"
+    type: PodReadyToStartContainers
+  - lastProbeTime: null
+    lastTransitionTime: "2026-11-23T16:00:41Z"
+    observedGeneration: 1
+    status: "True"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: "2026-11-23T16:00:48Z"
+    observedGeneration: 1
+    status: "True"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: "2026-11-23T16:00:48Z"
+    observedGeneration: 1
+    status: "True"
+    type: ContainersReady
+  - lastProbeTime: null
+    lastTransitionTime: "2026-11-23T16:00:40Z"
+    observedGeneration: 1
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - allocatedResources:
+      ephemeral-storage: "0"
+      nvidia.com/gpu: "1"
+      nvidia.com/gpumem: 9k
+    containerID: containerd://0a8075c2bdb7f16de327750b2fc5e4a146d20ffe934e22c8b4781456ad46adb6
+    image: docker.io/nvidia/cuda:12.4.0-base-ubuntu22.04
+    imageID: docker.io/nvidia/cuda@sha256:80d4d9ac041242f6ae5d05f9be262b3374e0e0b8bb5a49c6c3e94e192cde4a44
+    lastState: {}
+    name: cuda
+    ready: true
+    resources:
+      limits:
+        ephemeral-storage: 10Gi
+        nvidia.com/gpu: "1"
+        nvidia.com/gpumem: 9k
+      requests:
+        ephemeral-storage: "0"
+        nvidia.com/gpu: "1"
+        nvidia.com/gpumem: 9k
+    restartCount: 0
+    started: true
+    state:
+      running:
+        startedAt: "2026-11-23T16:00:48Z"
+    user:
+      linux:
+        gid: 0
+        supplementalGroups:
+        - 0
+        uid: 0
+    volumeMounts:
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-bzfl2
+      readOnly: true
+      recursiveReadOnly: Disabled
+  hostIP: 10.210.121.159
+  hostIPs:
+  - ip: 10.210.121.159
+  observedGeneration: 1
+  phase: Running
+  podIP: 10.210.119.69
+  podIPs:
+  - ip: 10.210.119.69
+  qosClass: BestEffort
+  startTime: "2026-11-23T16:00:41Z"

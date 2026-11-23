@@ -499,6 +499,23 @@ spec:
 
 [File 10] shows Pods that compose a combination of two `2g.10gb` and one `3g.20gb` MIG Instances on one A100. Since the default Device Scheduling policy `spread` distributes vGPUs across different GPUs, the `binpack` policy gathers the vGPUs of the three Pods on the same GPU, and according to the position selection algorithm, `2g.10gb` is created at positions 0 and 2 and `3g.20gb` at position 4. Whether the three Pods are gathered on the same GPU and the reserved Profiles and positions are checked with each Pod's `hami.io/vgpu-mig-allocations` Annotation, and the created MIG Instances are checked with the `nvidia-smi -L` output inside the Pods.
 
+```shell {caption="[Shell 7] Checking the Config 8 composition"}
+$ kubectl get pod mig-2g-a mig-2g-b mig-3g -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.metadata.annotations.hami\.io/vgpu-mig-allocations}{"\n"}{end}'
+mig-2g-a	[{"gpuUUID":"GPU-a8f9e013-12ae-4a95-a82b-6dde923e243a","profile":"2g.10gb","placement":{"start":0,"size":2},"migUUID":"MIG-54cc1df4-8c9e-55db-b029-1c88f71cb77f","gpuInstanceID":3}]
+mig-2g-b	[{"gpuUUID":"GPU-a8f9e013-12ae-4a95-a82b-6dde923e243a","profile":"2g.10gb","placement":{"start":2,"size":2},"migUUID":"MIG-3e6055c5-97f5-552c-a1aa-f0f7ffc78ce7","gpuInstanceID":4}]
+mig-3g	[{"gpuUUID":"GPU-a8f9e013-12ae-4a95-a82b-6dde923e243a","profile":"3g.20gb","placement":{"start":4,"size":4},"migUUID":"MIG-d867d519-626c-5266-bcbb-2cc12a70a327","gpuInstanceID":2}]
+
+$ kubectl exec mig-2g-a -- nvidia-smi -L
+GPU 0: NVIDIA A100-SXM4-40GB (UUID: GPU-a8f9e013-12ae-4a95-a82b-6dde923e243a)
+  MIG 2g.10gb     Device  0: (UUID: MIG-54cc1df4-8c9e-55db-b029-1c88f71cb77f)
+
+$ kubectl exec mig-3g -- nvidia-smi -L
+GPU 0: NVIDIA A100-SXM4-40GB (UUID: GPU-a8f9e013-12ae-4a95-a82b-6dde923e243a)
+  MIG 3g.20gb     Device  0: (UUID: MIG-d867d519-626c-5266-bcbb-2cc12a70a327)
+```
+
+[Shell 7] shows the completed Config 8 composition. The `hami.io/vgpu-mig-allocations` Annotation of all three Pods contains the same `gpuUUID`, confirming they are gathered on the same GPU by the `binpack` policy, and the `start` of `placement` is 0 and 2 for `2g.10gb` and 4 for `3g.20gb` as expected. The `nvidia-smi -L` inside each Pod shows only one MIG Device matching the `migUUID` of the Annotation, confirming that HAMi Device Plugin created the MIG Instance of the reserved Profile and passed it to the Container.
+
 ```yaml {caption="[File 11] mig-config9.yaml (the mig-1g-b Pod differing only in name and the nodeSelector and tolerations are omitted)", linenos=table}
 apiVersion: v1
 kind: Pod
@@ -521,7 +538,29 @@ spec:
 
 [File 11] shows the two `1g.5gb` Pods applied after deleting the `mig-2g-b` Pod. The `2g.10gb` Instance of the deleted Pod remains in the Idle state, but HAMi Scheduler regards its position as free space, so when the newly reserved `1g.5gb` positions overlap the Idle Instance, HAMi Device Plugin removes the Idle Instance and then creates two `1g.5gb` Instances. This checks the process in which the composition of the same GPU switches to a combination of one `2g.10gb`, two `1g.5gb`, and one `3g.20gb`, and whether the MIG Instances of the running `mig-2g-a` and `mig-3g` Pods are kept during the switch.
 
-At each step, the Logs of HAMi Device Plugin's `device-plugin` and `vgpu-monitor` Containers and HAMi Scheduler, the Node's `hami.io/node-nvidia-register` Annotation, and the `nvidia-smi -L` output inside the Pods are collected to trace the creation, reuse, and removal of MIG Instances. The applied manifests, the collection Script, and the collected results are kept in the `manifests/mig` and `dumps/mig` folders of the post repository.
+```shell {caption="[Shell 8] Config 9 transition and Idle MIG Instance reconfiguration"}
+$ kubectl delete pod mig-2g-b
+$ kubectl apply -f mig-config9.yaml
+
+$ kubectl get pod mig-2g-a mig-1g-a mig-1g-b mig-3g -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.metadata.annotations.hami\.io/vgpu-mig-allocations}{"\n"}{end}'
+mig-2g-a	[{..."profile":"2g.10gb","placement":{"start":0,"size":2},"migUUID":"MIG-54cc1df4-8c9e-55db-b029-1c88f71cb77f"...}]
+mig-1g-a	[{..."profile":"1g.5gb","placement":{"start":2,"size":1},"migUUID":"MIG-9fe17aa4-ac1f-5b20-a171-c019d17309e1"...}]
+mig-1g-b	[{..."profile":"1g.5gb","placement":{"start":3,"size":1},"migUUID":"MIG-5fcd3b0c-e844-5e46-a988-4176c1d56926"...}]
+mig-3g	[{..."profile":"3g.20gb","placement":{"start":4,"size":4},"migUUID":"MIG-d867d519-626c-5266-bcbb-2cc12a70a327"...}]
+
+$ kubectl logs -n addon-hami ds/hami-device-plugin -c device-plugin | grep -E 'migmgr.go:(664|739|907)'
+... "created scheduler-reserved MIG allocation" uuid="MIG-54cc1df4...77f" gpu=7 profile="2g.10gb" start=0
+... "created scheduler-reserved MIG allocation" uuid="MIG-3e6055c5...ce7" gpu=7 profile="2g.10gb" start=2
+... "created scheduler-reserved MIG allocation" uuid="MIG-d867d519...327" gpu=7 profile="3g.20gb" start=4
+... "cached released MIG allocation" uuid="MIG-3e6055c5...ce7" gpu=7 profile="2g.10gb" start=2
+... "reclaimed idle MIG allocation under placement pressure" uuid="MIG-3e6055c5...ce7" gpu=7 profile="2g.10gb" start=2
+... "created scheduler-reserved MIG allocation" uuid="MIG-9fe17aa4...9e1" gpu=7 profile="1g.5gb" start=2
+... "created scheduler-reserved MIG allocation" uuid="MIG-5fcd3b0c...926" gpu=7 profile="1g.5gb" start=3
+```
+
+[Shell 8] shows the transition to Config 9 by deleting the `mig-2g-b` Pod and applying two `1g.5gb` Pods. The `migUUID` of the retained `mig-2g-a` and `mig-3g` is exactly the same as in Config 8, confirming that the two MIG Instances are kept without recreation, and the two newly applied `1g.5gb` take over positions 2 and 3 where the deleted `2g.10gb` was.
+
+The Log of HAMi Device Plugin shows this process in three kinds of Records. When `mig-2g-b` is deleted, its `2g.10gb` Instance is not removed immediately but becomes Idle as `cached released MIG allocation`, and then when the `1g.5gb` reservation requires the overlapping position, the Idle Instance is removed as `reclaimed idle MIG allocation under placement pressure` and two `1g.5gb` are created as `created scheduler-reserved MIG allocation`. In this way, Flexible MIG replaces MIG Instances per Workload only at the freed Slice positions, without Cordoning the Node or rebuilding the MIG composition of the whole GPU.
 
 ### 1.5. GPU Selection
 
