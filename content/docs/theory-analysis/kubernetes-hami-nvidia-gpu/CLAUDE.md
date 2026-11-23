@@ -6,6 +6,10 @@ kubernetes-hami(HAMi 자체, 벤더 중립 구조) 문서의 NVIDIA 상세 글�
 
 ## 문서 구성 및 상태
 
+- **2026-11-24 Karpenter 내용 1.4.3으로 분리** (사용자 요청): NodeOverlay 프로비저닝 + userData MIG 활성화를 1.4 본문에서 떼어
+  `#### 1.4.3. EKS Karpenter 환경 구성`으로 1.4.2 뒤에 배치(KR/EN). 1.4 도입 환경 문단은 남기고 "1.4.3에서 별도로 다룬다" pointer 추가.
+  Shell 번호를 등장 순서대로 재정렬: Config8=[Shell 6], Config9=[Shell 7], 할당실패=[Shell 8], 활성화=[Shell 9] (기존 6→9·9→10 어긋남 해소).
+  1.4.3 도입에 "1.4.1/1.4.2는 MIG 켜진 Node 전제" 문장으로 역방향 참조 자연스럽게 정리.
 - **2026-11-24 Dynamic MIG 자동화 end-to-end 검증** (회사 Mac, KR/EN 동시): env-charts PR #1458 머지+sync 후 warmup Pod 없이 config8만
   적용 → NodeOverlay로 Karpenter가 p4d 자동 프로비저닝(gpumem 인식) → userData가 부팅 시 `nvidia-smi -mig 1` + reboot로 MIG Mode 자동 활성화
   (last reboot 2회 확인: 16:49 최초→user script enable+reboot→16:50) → 세 Pod 자동 할당 성공(GPU UUID c634460f, 위치 0/2/4). 수동 개입 0.

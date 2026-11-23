@@ -390,38 +390,7 @@ Dynamic MIG는 v2.5.0에서 도입되었다. 도입 초기에는 `knownMigGeomet
 
 NVIDIA Device Plugin은 시작할 때 이미 생성된 MIG Instance를 조회하여 kubelet에 Device로 등록하기 때문에, MIG 구성을 변경하면 Device Plugin을 재시작해야 변경된 Device 목록이 반영된다. 반면 HAMi Device Plugin은 MIG Mode에서도 부모 GPU를 기준으로 만든 vGPU를 kubelet에 등록하고 MIG Instance는 `Allocate()` 처리 중에 생성하여 그 UUID를 Container에 전달하기 때문에, MIG Instance가 생성되고 회수되어도 Device Plugin을 재시작할 필요가 없다. 다만 GPU의 MIG Mode가 꺼져 있으면 HAMi Device Plugin이 첫 할당 시점에 MIG Mode를 직접 켜는데, A100 같은 Ampere GPU는 MIG Mode 변경에 GPU Reset이나 VM 재부팅이 필요할 수 있어 이 경우 할당이 실패한다. 따라서 Ampere GPU에서는 `nvidia-smi -mig 1` 명령어로 MIG Mode를 미리 켜고 GPU Reset까지 완료해 두는 것이 안전하다.
 
-MIG Mode의 동작은 1.1의 환경이 아닌 별도의 환경에서 확인한다. A100-SXM4-40GB GPU 8장이 장착된 EKS의 p4d.24xlarge Node를 이용하며, Node가 속한 Node Group은 `group=gpu-a100-hami` Label과 Taint를 가지고 `nodeconfig`에서 이 Label을 매칭하여 `operatingmode`를 `mig`로 지정하였다. A100 40GB GPU의 `migProfileAllowlist` 기본값에는 `1g.5gb`, `2g.10gb`, `3g.20gb`, `4g.20gb`, `7g.40gb` Profile이 정의되어 있다.
-
-Node는 Karpenter가 프로비저닝하는데, Karpenter는 `nvidia.com/gpumem` 같은 HAMi의 확장 Resource를 알지 못해 이를 요청하는 Pod만으로는 Node 생성이 시작되지 않는다 (`no instance type has enough resources`). Karpenter의 **NodeOverlay**로 해당 Instance Type의 capacity에 `nvidia.com/gpumem`을 주입하면 (A100 40GB × 8 = `327680`), Scheduling 시뮬레이션이 요청을 수용하여 vGPU Resource만 요청하는 Pod으로도 Node가 프로비저닝된다.
-
-```shell {caption="[Shell 6] MIG Mode가 꺼진 Node에서 MIG Instance 할당이 실패하는 모습"}
-$ kubectl describe pod mig-2g-a
-...
-  Normal   Scheduled                 3m15s  hami-scheduler  Successfully assigned default/mig-2g-a to ip-10-210-126-83.ap-northeast-2.compute.internal
-  Warning  UnexpectedAdmissionError  3m15s  kubelet         Allocate failed due to rpc error: code = Unknown desc = resolve allocated NVIDIA devices: gpu 7 MIG enable is pending (current=0 pending=1): MIG mode change requires a GPU reset or VM reboot. Manual operator action may be needed: try nvidia-smi --gpu-reset, or reboot the VM if the hypervisor does not allow GPU reset. ...
-
-$ kubectl logs -n addon-hami ds/hami-device-plugin -c device-plugin | grep 'MIG enable is pending' | tail -1
-I1123 15:06:11.062891   39735 server.go:918] "periodic MIG reconciliation skipped" err="restore MIG instances during initialization: gpu 0 MIG enable is pending (current=0 pending=1): MIG mode change requires a GPU reset or VM reboot. ..."
-```
-
-[Shell 6]은 MIG Mode가 꺼진 상태로 부팅된 Node에서 MIG Instance를 요청하는 Pod를 적용한 결과이다. HAMi Scheduler의 Binding까지는 성공하지만, kubelet의 `Allocate()`에서 HAMi Device Plugin이 MIG Mode를 켜다 실패하여 Pod가 거부된다. HAMi Device Plugin은 NVML의 `SetMigMode`로 MIG Mode를 pending 상태까지 걸어 두지만 GPU Reset은 직접 수행하지 못하는데, 자신과 `vgpu-monitor`가 NVML Handle을 쥐고 있는 데다 NVSwitch 시스템에서는 Fabric Manager를 중지하고 GPU 전체를 함께 Reset해야 하기 때문이다.
-
-이 Test에서는 Node Group의 userData에 GPU를 이용하는 Process가 없는 부팅 시점에 `nvidia-smi -mig 1`로 전체 GPU의 MIG Mode를 켜는 Script를 추가하여 해결하였다. A100 같은 Ampere GPU는 MIG Mode 변경에 GPU Reset이 필요한데, EC2에서는 `nvidia-smi --gpu-reset`이 다른 Client가 GPU를 이용 중이라는 이유로 거부되기 때문에 Reset 대신 Node를 재부팅하여 변경을 적용한다. MIG Mode는 재부팅 후에도 유지되고, cloud-init의 user script는 Instance당 1회만 실행되기 때문에 재부팅 Loop는 발생하지 않는다. Hopper 세대부터는 MIG Mode 전환에 GPU Reset이 필요하지 않기 때문에, 이러한 사전 활성화는 Ampere 세대에만 필요하다.
-
-```shell {caption="[Shell 9] userData로 부팅 시점에 자동 활성화된 MIG Mode"}
-$ nvidia-smi --query-gpu=index,mig.mode.current --format=csv
-index, mig.mode.current
-0, Enabled
-1, Enabled
-...
-7, Enabled
-
-$ last reboot | head -2
-reboot   system boot  6.12.115-140.210 Mon Nov 23 16:50   still running
-reboot   system boot  6.12.115-140.210 Mon Nov 23 16:49 - 16:50  (00:01)
-```
-
-[Shell 9]는 위의 userData Script가 적용된 Node를 나타내고 있다. Instance는 16:49에 최초로 부팅되어 user script가 MIG Mode를 켜고 재부팅하였고, 16:50에 다시 부팅되면서 8장의 GPU가 모두 `Enabled`로 활성화되었다. 이 Node에서는 [Shell 6]의 할당 실패 없이 MIG Instance 요청 Pod가 곧바로 배치된다.
+MIG Mode의 동작은 1.1의 환경이 아닌 별도의 환경에서 확인한다. A100-SXM4-40GB GPU 8장이 장착된 EKS의 p4d.24xlarge Node를 이용하며, Node가 속한 Node Group은 `group=gpu-a100-hami` Label과 Taint를 가지고 `nodeconfig`에서 이 Label을 매칭하여 `operatingmode`를 `mig`로 지정하였다. A100 40GB GPU의 `migProfileAllowlist` 기본값에는 `1g.5gb`, `2g.10gb`, `3g.20gb`, `4g.20gb`, `7g.40gb` Profile이 정의되어 있다. 이 Node를 Karpenter로 프로비저닝하고 MIG Mode를 켜는 과정은 EKS 특유의 제약이 있어 1.4.3에서 별도로 다룬다.
 
 #### 1.4.1. MIG Profile 선택
 
@@ -514,7 +483,7 @@ spec:
 
 [File 10]은 하나의 A100 위에 `2g.10gb` 2개와 `3g.20gb` 1개의 MIG Instance 조합을 구성하는 Pod를 나타내고 있다. 기본 Device Scheduling 정책인 `spread`는 vGPU를 서로 다른 GPU에 분산하기 때문에 `binpack` 정책으로 세 Pod의 vGPU를 같은 GPU에 모으며, 위치 선택 알고리즘에 따라서 `2g.10gb`는 위치 0과 2에, `3g.20gb`는 위치 4에 생성된다. 세 Pod가 같은 GPU에 모였는지와 예약된 Profile, 위치는 각 Pod의 `hami.io/vgpu-mig-allocations` Annotation으로 확인하고, 생성된 MIG Instance는 Pod 안의 `nvidia-smi -L` 출력으로 확인한다.
 
-```shell {caption="[Shell 7] Config 8 구성 확인"}
+```shell {caption="[Shell 6] Config 8 구성 확인"}
 $ kubectl get pod mig-2g-a mig-2g-b mig-3g -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.metadata.annotations.hami\.io/vgpu-mig-allocations}{"\n"}{end}'
 mig-2g-a	[{"gpuUUID":"GPU-a8f9e013-12ae-4a95-a82b-6dde923e243a","profile":"2g.10gb","placement":{"start":0,"size":2},"migUUID":"MIG-54cc1df4-8c9e-55db-b029-1c88f71cb77f","gpuInstanceID":3}]
 mig-2g-b	[{"gpuUUID":"GPU-a8f9e013-12ae-4a95-a82b-6dde923e243a","profile":"2g.10gb","placement":{"start":2,"size":2},"migUUID":"MIG-3e6055c5-97f5-552c-a1aa-f0f7ffc78ce7","gpuInstanceID":4}]
@@ -529,7 +498,7 @@ GPU 0: NVIDIA A100-SXM4-40GB (UUID: GPU-a8f9e013-12ae-4a95-a82b-6dde923e243a)
   MIG 3g.20gb     Device  0: (UUID: MIG-d867d519-626c-5266-bcbb-2cc12a70a327)
 ```
 
-[Shell 7]은 Config 8 구성이 완성된 모습을 나타내고 있다. 세 Pod의 `hami.io/vgpu-mig-allocations` Annotation은 모두 같은 `gpuUUID`를 담고 있어 `binpack` 정책으로 같은 GPU에 모인 것을 확인할 수 있고, `placement`의 `start`는 예상대로 `2g.10gb`가 0과 2, `3g.20gb`가 4이다. 각 Pod 안의 `nvidia-smi -L`은 Annotation의 `migUUID`와 일치하는 MIG Device 하나씩만 보여주어, HAMi Device Plugin이 예약된 Profile의 MIG Instance를 생성하여 Container에 전달한 것을 확인할 수 있다.
+[Shell 6]은 Config 8 구성이 완성된 모습을 나타내고 있다. 세 Pod의 `hami.io/vgpu-mig-allocations` Annotation은 모두 같은 `gpuUUID`를 담고 있어 `binpack` 정책으로 같은 GPU에 모인 것을 확인할 수 있고, `placement`의 `start`는 예상대로 `2g.10gb`가 0과 2, `3g.20gb`가 4이다. 각 Pod 안의 `nvidia-smi -L`은 Annotation의 `migUUID`와 일치하는 MIG Device 하나씩만 보여주어, HAMi Device Plugin이 예약된 Profile의 MIG Instance를 생성하여 Container에 전달한 것을 확인할 수 있다.
 
 ```yaml {caption="[File 11] mig-config9.yaml (이름만 다른 mig-1g-b Pod와 nodeSelector, tolerations는 생략)", linenos=table}
 apiVersion: v1
@@ -553,7 +522,7 @@ spec:
 
 [File 11]은 `mig-2g-b` Pod를 삭제한 후 적용하는 `1g.5gb` Pod 2개를 나타내고 있다. 삭제된 Pod의 `2g.10gb` Instance는 Idle 상태로 남지만 HAMi Scheduler는 그 위치를 빈 공간으로 간주하기 때문에, 새로 예약된 `1g.5gb` 위치가 Idle Instance와 겹치면 HAMi Device Plugin이 Idle Instance를 제거한 후 `1g.5gb` Instance 2개를 생성한다. 이를 통해서 같은 GPU의 구성이 `2g.10gb` 1개, `1g.5gb` 2개, `3g.20gb` 1개의 조합으로 전환되는 과정과, 전환되는 동안 동작 중인 `mig-2g-a`, `mig-3g` Pod의 MIG Instance가 유지되는지 확인한다.
 
-```shell {caption="[Shell 8] Config 9 전환과 Idle MIG Instance 재구성"}
+```shell {caption="[Shell 7] Config 9 전환과 Idle MIG Instance 재구성"}
 $ kubectl delete pod mig-2g-b
 $ kubectl apply -f mig-config9.yaml
 
@@ -573,9 +542,44 @@ $ kubectl logs -n addon-hami ds/hami-device-plugin -c device-plugin | grep -E 'm
 ... "created scheduler-reserved MIG allocation" uuid="MIG-5fcd3b0c...926" gpu=7 profile="1g.5gb" start=3
 ```
 
-[Shell 8]은 `mig-2g-b` Pod를 삭제하고 `1g.5gb` Pod 2개를 적용하여 Config 9로 전환되는 모습을 나타내고 있다. 유지되는 `mig-2g-a`와 `mig-3g`의 `migUUID`는 Config 8의 값과 그대로 같아서 두 MIG Instance가 재생성 없이 유지된 것을 확인할 수 있고, 새로 적용한 `1g.5gb` 2개는 삭제된 `2g.10gb`가 있던 위치 2와 3을 이어받는다.
+[Shell 7]은 `mig-2g-b` Pod를 삭제하고 `1g.5gb` Pod 2개를 적용하여 Config 9로 전환되는 모습을 나타내고 있다. 유지되는 `mig-2g-a`와 `mig-3g`의 `migUUID`는 Config 8의 값과 그대로 같아서 두 MIG Instance가 재생성 없이 유지된 것을 확인할 수 있고, 새로 적용한 `1g.5gb` 2개는 삭제된 `2g.10gb`가 있던 위치 2와 3을 이어받는다.
 
 HAMi Device Plugin의 Log는 이 과정을 세 종류의 Record로 보여준다. `mig-2g-b`가 삭제되자 그 `2g.10gb` Instance는 즉시 제거되지 않고 `cached released MIG allocation`으로 Idle 상태가 되며, 이후 `1g.5gb` 예약이 겹치는 위치를 요구하자 `reclaimed idle MIG allocation under placement pressure`로 Idle Instance를 제거한 뒤 `created scheduler-reserved MIG allocation`으로 `1g.5gb` 2개를 생성한다. 이처럼 Flexible MIG는 Node를 Cordon하거나 GPU 전체의 MIG 구성을 다시 만들지 않고, 비워진 Slice 위치에서만 MIG Instance를 Workload 단위로 교체한다.
+
+#### 1.4.3. EKS Karpenter 환경 구성
+
+앞선 1.4.1과 1.4.2의 Test는 MIG Mode가 켜진 Node를 전제로 하는데, Karpenter로 GPU Node를 프로비저닝하는 EKS 환경에서는 그 Node를 준비하기 위한 두 가지 사전 작업이 필요하다. 하나는 vGPU Resource만 요청하는 Pod으로도 Node가 프로비저닝되도록 하는 것이고, 다른 하나는 Node 부팅 시점에 GPU의 MIG Mode를 켜 두는 것이다.
+
+Karpenter는 Pending Pod의 Resource 요청을 Instance Type의 capacity와 비교하여 Node를 프로비저닝하는데, `nvidia.com/gpumem` 같은 HAMi의 확장 Resource는 Karpenter가 모르는 Resource이기 때문에 이를 요청하는 Pod만으로는 Node 생성이 시작되지 않는다 (`no instance type has enough resources`). Karpenter의 **NodeOverlay**로 해당 Instance Type의 capacity에 `nvidia.com/gpumem`을 주입하면 (A100 40GB × 8 = `327680`), Scheduling 시뮬레이션이 요청을 수용하여 vGPU Resource만 요청하는 Pod으로도 Node가 프로비저닝된다. capacity는 Scheduling 시뮬레이션에만 쓰이고 실제 Node의 Allocatable과는 무관하다.
+
+```shell {caption="[Shell 8] MIG Mode가 꺼진 Node에서 MIG Instance 할당이 실패하는 모습"}
+$ kubectl describe pod mig-2g-a
+...
+  Normal   Scheduled                 3m15s  hami-scheduler  Successfully assigned default/mig-2g-a to ip-10-210-126-83.ap-northeast-2.compute.internal
+  Warning  UnexpectedAdmissionError  3m15s  kubelet         Allocate failed due to rpc error: code = Unknown desc = resolve allocated NVIDIA devices: gpu 7 MIG enable is pending (current=0 pending=1): MIG mode change requires a GPU reset or VM reboot. Manual operator action may be needed: try nvidia-smi --gpu-reset, or reboot the VM if the hypervisor does not allow GPU reset. ...
+
+$ kubectl logs -n addon-hami ds/hami-device-plugin -c device-plugin | grep 'MIG enable is pending' | tail -1
+I1123 15:06:11.062891   39735 server.go:918] "periodic MIG reconciliation skipped" err="restore MIG instances during initialization: gpu 0 MIG enable is pending (current=0 pending=1): MIG mode change requires a GPU reset or VM reboot. ..."
+```
+
+[Shell 8]는 MIG Mode가 꺼진 상태로 부팅된 Node에서 MIG Instance를 요청하는 Pod를 적용한 결과이다. GPU의 MIG Mode가 꺼져 있으면 HAMi Device Plugin이 첫 할당 시점에 MIG Mode를 직접 켜는데, HAMi Scheduler의 Binding까지는 성공하지만 kubelet의 `Allocate()`에서 MIG Mode를 켜다 실패하여 Pod가 거부된다. HAMi Device Plugin은 NVML의 `SetMigMode`로 MIG Mode를 pending 상태까지 걸어 두지만 GPU Reset은 직접 수행하지 못하는데, 자신과 `vgpu-monitor`가 NVML Handle을 쥐고 있는 데다 NVSwitch 시스템에서는 Fabric Manager를 중지하고 GPU 전체를 함께 Reset해야 하기 때문이다.
+
+이 문제는 Node Group의 userData에 GPU를 이용하는 Process가 없는 부팅 시점에 `nvidia-smi -mig 1`로 전체 GPU의 MIG Mode를 켜는 Script를 추가하여 해결한다. A100 같은 Ampere GPU는 MIG Mode 변경에 GPU Reset이 필요한데, EC2에서는 `nvidia-smi --gpu-reset`이 다른 Client가 GPU를 이용 중이라는 이유로 거부되기 때문에 Reset 대신 Node를 재부팅하여 변경을 적용한다. MIG Mode는 재부팅 후에도 유지되고, cloud-init의 user script는 Instance당 1회만 실행되기 때문에 재부팅 Loop는 발생하지 않는다. Hopper 세대부터는 MIG Mode 전환에 GPU Reset이 필요하지 않기 때문에, 이러한 사전 활성화는 Ampere 세대에만 필요하다.
+
+```shell {caption="[Shell 9] userData로 부팅 시점에 자동 활성화된 MIG Mode"}
+$ nvidia-smi --query-gpu=index,mig.mode.current --format=csv
+index, mig.mode.current
+0, Enabled
+1, Enabled
+...
+7, Enabled
+
+$ last reboot | head -2
+reboot   system boot  6.12.115-140.210 Mon Nov 23 16:50   still running
+reboot   system boot  6.12.115-140.210 Mon Nov 23 16:49 - 16:50  (00:01)
+```
+
+[Shell 9]은 위의 userData Script가 적용된 Node를 나타내고 있다. Instance는 16:49에 최초로 부팅되어 user script가 MIG Mode를 켜고 재부팅하였고, 16:50에 다시 부팅되면서 8장의 GPU가 모두 `Enabled`로 활성화되었다. 이 Node에서는 [Shell 8]의 할당 실패 없이 MIG Instance 요청 Pod가 곧바로 배치되어, 앞선 [Shell 6]과 [Shell 7]의 Test를 수행할 수 있다.
 
 ### 1.5. GPU 선택
 
