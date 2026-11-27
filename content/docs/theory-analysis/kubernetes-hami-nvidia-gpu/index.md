@@ -23,12 +23,14 @@ draft: true
 |---|---|---|---|
 | `nvidia.com/gpu` | Container에 할당할 vGPU의 개수 | O | O |
 | `nvidia.com/gpumem` | 각 vGPU에 할당할 Memory의 크기 (MiB 단위) | O | O |
-| `nvidia.com/gpumem-percentage` | 물리 GPU Memory 대비 각 vGPU에 할당할 Memory의 비율 (%). 예를 들어 `50`을 지정하면 16GiB GPU에서는 8GiB, 80GiB GPU에서는 40GiB가 할당되어 GPU의 Memory 크기와 관계없이 같은 비율을 요청할 수 있다 | O | O |
+| `nvidia.com/gpumem-percentage` | 물리 GPU Memory 대비 각 vGPU에 할당할 Memory의 비율 (%). 예를 들어 `50`을 지정하면 16GiB GPU에서는 8GiB, 80GiB GPU에서는 40GiB가 할당되어 GPU의 Memory 크기와 관계없이 같은 비율을 요청할 수 있다. `nvidia.com/gpumem`과 함께 지정하면 `nvidia.com/gpumem`이 우선한다 | O | O |
 | `nvidia.com/gpucores` | 각 vGPU가 이용할 수 있는 SM 사용률 (%). 예를 들어 `30`을 지정하면 SM 사용률이 평균 30% 이하로 제한되며, `100`을 지정하면 물리 GPU 전체를 전용으로 할당받는다. 지정하지 않으면 SM 사용률을 제한하지 않는다 | O | X |
 | `nvidia.com/priority` | 같은 GPU를 공유하는 vGPU Workload 사이의 우선순위로, `0`이 높고 `1`이 낮으며 기본값은 `1`이다. 예를 들어 `0`인 Workload가 GPU를 이용하는 동안에는 `1`인 Workload의 Kernel 실행이 일시 중지된다. `nvidia.com/gpucores`를 1~99로 지정하여 SM 사용률 제한이 적용되는 Workload에만 동작한다 | O | X |
 {{< /table >}}
 
-[Table 1]은 HAMi가 제공하는 vGPU Resource의 종류를 나타내고 있으며, 두 Mode 모두 같은 Resource로 vGPU를 요청하지만, MIG Mode에서는 Memory 크기만으로 MIG Profile을 선택하고 HAMi-core가 주입되지 않기 때문에 `nvidia.com/gpucores`와 `nvidia.com/priority`를 이용하지 않는다. HAMi Scheduler는 `nvidia.com/gpu`로 vGPU의 개수를, `nvidia.com/gpumem` 또는 `nvidia.com/gpumem-percentage`로 각 vGPU의 Memory 크기를, `nvidia.com/gpucores`로 SM 사용률을 파악하여 각 GPU의 남은 용량과 비교한다. NVIDIA Device Plugin과 동일하게 `nvidia.com/gpu` Resource로 GPU의 개수를 요청하지만, HAMi에서는 물리 GPU가 아닌 vGPU의 개수를 의미한다.
+[Table 1]은 HAMi가 제공하는 vGPU Resource의 종류를 나타내고 있으며, 두 Mode 모두 같은 Resource로 vGPU를 요청하지만, MIG Mode에서는 Memory 크기만으로 MIG Profile을 선택하고 HAMi-core가 주입되지 않기 때문에 `nvidia.com/gpucores`와 `nvidia.com/priority`를 이용하지 않는다. `nvidia.com/gpu`는 NVIDIA Device Plugin과 같은 이름의 Resource이지만, HAMi에서는 물리 GPU가 아닌 vGPU의 개수를 의미한다. `nvidia.com/gpumem`과 `nvidia.com/gpumem-percentage`를 모두 지정하지 않으면 물리 GPU의 Memory 전체를 요청한 것으로 처리되어, 해당 GPU를 다른 Pod와 공유하지 않는 전용 할당이 된다.
+
+HAMi Scheduler는 vGPU를 배치할 물리 GPU를 선택할 때, 해당 GPU에 이미 할당된 Memory 크기와 SM 사용률에 Pod가 `nvidia.com/gpumem` 또는 `nvidia.com/gpumem-percentage`와 `nvidia.com/gpucores`로 요청한 값을 더해도 GPU의 전체 Memory 크기와 100%를 넘지 않는 GPU만 선택한다. 예를 들어 16GiB GPU에 이미 12GiB의 Memory가 할당되어 있으면, 8GiB의 Memory를 요청한 vGPU는 해당 GPU에 배치되지 않는다.
 
 ```yaml {caption="[File 1] vGPU를 요청하는 Pod 예제", linenos=table}
 apiVersion: v1
@@ -47,7 +49,7 @@ spec:
         nvidia.com/gpucores: 30
 ```
 
-[File 1]은 3000MiB의 Memory와 30%의 SM 사용률을 갖는 하나의 vGPU를 요청하는 Pod의 예제를 나타내고 있다. 하나의 Container가 다수의 vGPU를 요청하는 경우에는 각 vGPU가 서로 다른 물리 GPU에 배치되며, Memory 크기와 SM 사용률 제한은 각 vGPU마다 동일하게 적용된다. `nvidia.com/gpumem`을 생략하면 물리 GPU의 Memory 전체를 요청한 것으로 처리되기 때문에, 해당 GPU를 다른 Pod와 공유하지 않는 전용 할당이 된다.
+[File 1]은 3000MiB의 Memory와 30%의 SM 사용률을 갖는 하나의 vGPU를 요청하는 Pod의 예제를 나타내고 있다. HAMi-core Mode에서 하나의 Container가 다수의 vGPU를 요청하면 Scheduling 정책과 관계없이 각 vGPU가 서로 다른 물리 GPU에 배치되며, `binpack`이나 `spread` 같은 Scheduling 정책은 어느 GPU를 선택할지만 결정한다. 반면 MIG Mode에서는 하나의 GPU에 여러 MIG Instance를 생성할 수 있기 때문에 같은 Container의 vGPU가 같은 GPU에 함께 배치될 수 있다. Memory 크기와 SM 사용률 제한은 각 vGPU마다 동일하게 적용된다.
 
 ### 1.1. Test 환경 구축
 
@@ -390,7 +392,7 @@ Dynamic MIG는 v2.5.0에서 도입되었다. 도입 초기에는 `knownMigGeomet
 
 NVIDIA Device Plugin은 시작할 때 이미 생성된 MIG Instance를 조회하여 kubelet에 Device로 등록하기 때문에, MIG 구성을 변경하면 Device Plugin을 재시작해야 변경된 Device 목록이 반영된다. 반면 HAMi Device Plugin은 MIG Mode에서도 부모 GPU를 기준으로 만든 vGPU를 kubelet에 등록하고 MIG Instance는 `Allocate()` 처리 중에 생성하여 그 UUID를 Container에 전달하기 때문에, MIG Instance가 생성되고 회수되어도 Device Plugin을 재시작할 필요가 없다. 다만 GPU의 MIG Mode가 꺼져 있으면 HAMi Device Plugin이 첫 할당 시점에 MIG Mode를 직접 켜는데, A100 같은 Ampere GPU는 MIG Mode 변경에 GPU Reset이나 VM 재부팅이 필요할 수 있어 이 경우 할당이 실패한다. 따라서 Ampere GPU에서는 `nvidia-smi -mig 1` 명령어로 MIG Mode를 미리 켜고 GPU Reset까지 완료해 두는 것이 안전하다.
 
-MIG Mode의 동작은 1.1의 환경이 아닌 별도의 환경에서 확인한다. A100-SXM4-40GB GPU 8장이 장착된 EKS의 p4d.24xlarge Node를 이용하며, Node가 속한 Node Group은 `group=gpu-a100-hami` Label과 Taint를 가지고 `nodeconfig`에서 이 Label을 매칭하여 `operatingmode`를 `mig`로 지정하였다. A100 40GB GPU의 `migProfileAllowlist` 기본값에는 `1g.5gb`, `2g.10gb`, `3g.20gb`, `4g.20gb`, `7g.40gb` Profile이 정의되어 있다. 이 Node를 Karpenter로 프로비저닝하고 MIG Mode를 켜는 과정은 EKS 특유의 제약이 있어 1.4.3에서 별도로 다룬다.
+MIG Mode의 동작은 1.1의 환경이 아닌 별도의 환경에서 확인한다. A100-SXM4-40GB GPU 8장이 장착된 EKS의 p4d.24xlarge Node를 이용하며, Node가 속한 Node Group은 `group=gpu-a100-hami` Label과 Taint를 가지고 `nodeconfig`에서 이 Label을 매칭하여 `operatingmode`를 `mig`로 지정하였다. A100 40GB GPU의 `migProfileAllowlist` 기본값에는 `1g.5gb`, `2g.10gb`, `3g.20gb`, `4g.20gb`, `7g.40gb` Profile이 정의되어 있다. 이 Node를 Karpenter로 프로비저닝하고 MIG Mode를 켜는 과정은 EKS 특유의 제약이 있어 1.7에서 별도로 다룬다.
 
 #### 1.4.1. MIG Profile 선택
 
@@ -433,7 +435,7 @@ HAMi Scheduler는 HAMi Device Plugin이 NVML로 조회하여 등록한 위치 �
 
 Pod가 종료되어도 MIG Instance는 바로 제거되지 않는다. 같은 Profile이 다시 요청될 때 MIG Instance를 제거하고 다시 생성하는 Overhead를 줄이기 위해서이며, 재사용되는 MIG Instance는 MIG UUID도 그대로 유지된다. HAMi Device Plugin은 5초 주기로 실행 중인 Pod의 `hami.io/vgpu-mig-allocations` Annotation과 자신이 관리하는 MIG Instance를 비교하여, 이용하는 Pod가 없는 MIG Instance를 Idle 상태로 전환한다. 반면 HAMi Scheduler는 종료되지 않은 Pod의 Annotation만으로 MIG Instance의 위치를 계산하기 때문에 Idle 상태의 MIG Instance가 차지한 위치를 빈 공간으로 간주하며, 새로 예약된 위치가 Idle 상태의 MIG Instance와 겹치면 HAMi Device Plugin은 겹치는 MIG Instance를 오래 이용되지 않은 순서대로 제거한 후 새로운 MIG Instance를 생성한다.
 
-```yaml {caption="[File 10] mig-config8.yaml (이름만 다른 mig-2g-b Pod와 mig-3g의 nodeSelector, tolerations는 생략)", linenos=table}
+```yaml {caption="[File 9] mig-config8.yaml (이름만 다른 mig-2g-b Pod와 mig-3g의 nodeSelector, tolerations는 생략)", linenos=table}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -481,7 +483,7 @@ spec:
         nvidia.com/gpumem: 19000
 ```
 
-[File 10]은 하나의 A100 위에 `2g.10gb` 2개와 `3g.20gb` 1개의 MIG Instance 조합을 구성하는 Pod를 나타내고 있다. 기본 Device Scheduling 정책인 `spread`는 vGPU를 서로 다른 GPU에 분산하기 때문에 `binpack` 정책으로 세 Pod의 vGPU를 같은 GPU에 모으며, 위치 선택 알고리즘에 따라서 `2g.10gb`는 위치 0과 2에, `3g.20gb`는 위치 4에 생성된다. 세 Pod가 같은 GPU에 모였는지와 예약된 Profile, 위치는 각 Pod의 `hami.io/vgpu-mig-allocations` Annotation으로 확인하고, 생성된 MIG Instance는 Pod 안의 `nvidia-smi -L` 출력으로 확인한다.
+[File 9]는 하나의 A100 위에 `2g.10gb` 2개와 `3g.20gb` 1개의 MIG Instance 조합을 구성하는 Pod를 나타내고 있다. 기본 Device Scheduling 정책인 `spread`는 vGPU를 서로 다른 GPU에 분산하기 때문에 `binpack` 정책으로 세 Pod의 vGPU를 같은 GPU에 모으며, 위치 선택 알고리즘에 따라서 `2g.10gb`는 위치 0과 2에, `3g.20gb`는 위치 4에 생성된다. 세 Pod가 같은 GPU에 모였는지와 예약된 Profile, 위치는 각 Pod의 `hami.io/vgpu-mig-allocations` Annotation으로 확인하고, 생성된 MIG Instance는 Pod 안의 `nvidia-smi -L` 출력으로 확인한다.
 
 ```shell {caption="[Shell 6] Config 8 구성 확인"}
 $ kubectl get pod mig-2g-a mig-2g-b mig-3g -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.metadata.annotations.hami\.io/vgpu-mig-allocations}{"\n"}{end}'
@@ -500,7 +502,7 @@ GPU 0: NVIDIA A100-SXM4-40GB (UUID: GPU-a8f9e013-12ae-4a95-a82b-6dde923e243a)
 
 [Shell 6]은 Config 8 구성이 완성된 모습을 나타내고 있다. 세 Pod의 `hami.io/vgpu-mig-allocations` Annotation은 모두 같은 `gpuUUID`를 담고 있어 `binpack` 정책으로 같은 GPU에 모인 것을 확인할 수 있고, `placement`의 `start`는 예상대로 `2g.10gb`가 0과 2, `3g.20gb`가 4이다. 각 Pod 안의 `nvidia-smi -L`은 Annotation의 `migUUID`와 일치하는 MIG Device 하나씩만 보여주어, HAMi Device Plugin이 예약된 Profile의 MIG Instance를 생성하여 Container에 전달한 것을 확인할 수 있다.
 
-```yaml {caption="[File 11] mig-config9.yaml (이름만 다른 mig-1g-b Pod와 nodeSelector, tolerations는 생략)", linenos=table}
+```yaml {caption="[File 10] mig-config9.yaml (이름만 다른 mig-1g-b Pod와 nodeSelector, tolerations는 생략)", linenos=table}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -520,7 +522,7 @@ spec:
         nvidia.com/gpumem: 4500
 ```
 
-[File 11]은 `mig-2g-b` Pod를 삭제한 후 적용하는 `1g.5gb` Pod 2개를 나타내고 있다. 삭제된 Pod의 `2g.10gb` Instance는 Idle 상태로 남지만 HAMi Scheduler는 그 위치를 빈 공간으로 간주하기 때문에, 새로 예약된 `1g.5gb` 위치가 Idle Instance와 겹치면 HAMi Device Plugin이 Idle Instance를 제거한 후 `1g.5gb` Instance 2개를 생성한다. 이를 통해서 같은 GPU의 구성이 `2g.10gb` 1개, `1g.5gb` 2개, `3g.20gb` 1개의 조합으로 전환되는 과정과, 전환되는 동안 동작 중인 `mig-2g-a`, `mig-3g` Pod의 MIG Instance가 유지되는지 확인한다.
+[File 10]은 `mig-2g-b` Pod를 삭제한 후 적용하는 `1g.5gb` Pod 2개를 나타내고 있다. 삭제된 Pod의 `2g.10gb` Instance는 Idle 상태로 남지만 HAMi Scheduler는 그 위치를 빈 공간으로 간주하기 때문에, 새로 예약된 `1g.5gb` 위치가 Idle Instance와 겹치면 HAMi Device Plugin이 Idle Instance를 제거한 후 `1g.5gb` Instance 2개를 생성한다. 이를 통해서 같은 GPU의 구성이 `2g.10gb` 1개, `1g.5gb` 2개, `3g.20gb` 1개의 조합으로 전환되는 과정과, 전환되는 동안 동작 중인 `mig-2g-a`, `mig-3g` Pod의 MIG Instance가 유지되는지 확인한다.
 
 ```shell {caption="[Shell 7] Config 9 전환과 Idle MIG Instance 재구성"}
 $ kubectl delete pod mig-2g-b
@@ -546,9 +548,48 @@ $ kubectl logs -n addon-hami ds/hami-device-plugin -c device-plugin | grep -E 'm
 
 HAMi Device Plugin의 Log는 이 과정을 세 종류의 Record로 보여준다. `mig-2g-b`가 삭제되자 그 `2g.10gb` Instance는 즉시 제거되지 않고 `cached released MIG allocation`으로 Idle 상태가 되며, 이후 `1g.5gb` 예약이 겹치는 위치를 요구하자 `reclaimed idle MIG allocation under placement pressure`로 Idle Instance를 제거한 뒤 `created scheduler-reserved MIG allocation`으로 `1g.5gb` 2개를 생성한다. 이처럼 Flexible MIG는 Node를 Cordon하거나 GPU 전체의 MIG 구성을 다시 만들지 않고, 비워진 Slice 위치에서만 MIG Instance를 Workload 단위로 교체한다.
 
-#### 1.4.3. EKS Karpenter 환경 구성
+### 1.5. GPU 선택
 
-앞선 1.4.1과 1.4.2의 Test는 MIG Mode가 켜진 Node를 전제로 하는데, Karpenter로 GPU Node를 프로비저닝하는 EKS 환경에서는 그 Node를 준비하기 위한 두 가지 사전 작업이 필요하다. 하나는 vGPU Resource만 요청하는 Pod으로도 Node가 프로비저닝되도록 하는 것이고, 다른 하나는 Node 부팅 시점에 GPU의 MIG Mode를 켜 두는 것이다.
+HAMi는 Pod Annotation을 통해서 vGPU가 배치될 물리 GPU를 제어하는 기능을 제공한다. 다음의 Annotation을 통해서 GPU의 Type과 UUID를 지정하거나 제외할 수 있다.
+
+* `nvidia.com/use-gputype` : 할당을 허용할 GPU Type 목록 (예: `A100,V100`)
+* `nvidia.com/nouse-gputype` : 할당에서 제외할 GPU Type 목록
+* `nvidia.com/use-gpuuuid`, `nvidia.com/nouse-gpuuuid` : 할당을 허용하거나 제외할 GPU의 UUID 목록
+
+```yaml {caption="[File 11] GPU Type과 Scheduling 정책을 지정하는 Pod 예제", linenos=table}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: vgpu-pod
+  annotations:
+    nvidia.com/use-gputype: "A100"
+    hami.io/gpu-scheduler-policy: "binpack"
+spec:
+  containers:
+  - name: cuda
+    image: nvidia/cuda:12.4.0-base-ubuntu22.04
+    command: ["sleep", "infinity"]
+    resources:
+      limits:
+        nvidia.com/gpu: 1
+        nvidia.com/gpumem: 3000
+```
+
+[File 11]은 A100 GPU에서 `binpack` 정책으로 vGPU를 할당받는 Pod의 예제를 나타내고 있다. NVIDIA GPU의 Device Scheduling 정책에는 `binpack`, `spread` 외에도 물리 GPU를 공유 없이 전용으로 요구하는 `mutex` 정책이 있으며, v2.10.0부터는 정책을 쉼표로 연결하여 조합할 수 있다.
+
+다수의 GPU를 요청하는 Workload를 위한 Topology 기반의 GPU 선택도 v2.7.0부터 제공된다. HAMi Device Plugin에 `ENABLE_TOPOLOGY_SCORE` 환경 변수를 활성화하면 NVML을 통해서 GPU 쌍 사이의 연결 방식 (NVLink, PCIe) 을 점수화하여 Node의 `hami.io/node-nvidia-score` Annotation에 기록하고, Pod의 `hami.io/gpu-scheduler-policy` Annotation에 `topology-aware`를 명시하면 NVLink로 연결된 GPU 집합을 우선적으로 선택하여 GPU 간 통신 성능을 보장한다.
+
+### 1.6. GPU Health Check
+
+HAMi Device Plugin은 NVIDIA Device Plugin의 Health Check 구현을 이어받아 NVML Event로 GPU 장애를 감지한다. **Xid** (NVIDIA Driver가 보고하는 GPU 오류 번호) Critical Error Event가 발생하면 해당 GPU를 `Unhealthy`로 표시하며, ECC Event도 구독하지만 `Unhealthy` 판정에는 이용하지 않는다. NVML Event 등록에 실패한 GPU도 `Unhealthy`로 표시되고, Event 대기 자체가 실패하면 모든 GPU가 `Unhealthy`로 표시된다.
+
+Xid `13`, `31`, `43`, `45`, `68`, `109`는 GPU 장애가 아닌 Application 오류로 간주되어 기본적으로 무시된다. `DP_DISABLE_HEALTHCHECKS` 환경 변수는 추가로 무시할 Xid 목록을 지정하거나 `all`로 Health Check 전체를 비활성화하며, `DP_ENABLE_HEALTHCHECKS` 환경 변수는 무시되는 Xid를 다시 활성화한다. 두 환경 변수는 Helm의 `devicePlugin.extraEnvs`로 지정할 수 있다.
+
+`Unhealthy`로 표시된 GPU를 `Healthy`로 되돌리는 경로는 존재하지 않기 때문에, GPU가 복구되어도 HAMi Device Plugin Pod를 재시작해야 다시 이용할 수 있다. 또한 Health Check는 GPU의 할당만 막을 뿐, 이미 해당 GPU를 이용 중인 Pod를 종료하지는 않는다.
+
+### 1.7. EKS Karpenter 환경 구성
+
+1.4.1과 1.4.2의 MIG Mode Test는 MIG Mode가 켜진 Node를 전제로 하는데, Karpenter로 GPU Node를 프로비저닝하는 EKS 환경에서는 그 Node를 준비하기 위한 두 가지 사전 작업이 필요하다. 하나는 vGPU Resource만 요청하는 Pod으로도 Node가 프로비저닝되도록 하는 것이고, 다른 하나는 Node 부팅 시점에 GPU의 MIG Mode를 켜 두는 것이다.
 
 Karpenter는 Pending Pod의 Resource 요청을 Instance Type의 capacity와 비교하여 Node를 프로비저닝하는데, `nvidia.com/gpumem` 같은 HAMi의 확장 Resource는 Karpenter가 모르는 Resource이기 때문에 이를 요청하는 Pod만으로는 Node 생성이 시작되지 않는다 (`no instance type has enough resources`). Karpenter의 **NodeOverlay**로 해당 Instance Type의 capacity에 `nvidia.com/gpumem`을 주입하면 (A100 40GB × 8 = `327680`), Scheduling 시뮬레이션이 요청을 수용하여 vGPU Resource만 요청하는 Pod으로도 Node가 프로비저닝된다. capacity는 Scheduling 시뮬레이션에만 쓰이고 실제 Node의 Allocatable과는 무관하다.
 
@@ -579,46 +620,7 @@ reboot   system boot  6.12.115-140.210 Mon Nov 23 16:50   still running
 reboot   system boot  6.12.115-140.210 Mon Nov 23 16:49 - 16:50  (00:01)
 ```
 
-[Shell 9]은 위의 userData Script가 적용된 Node를 나타내고 있다. Instance는 16:49에 최초로 부팅되어 user script가 MIG Mode를 켜고 재부팅하였고, 16:50에 다시 부팅되면서 8장의 GPU가 모두 `Enabled`로 활성화되었다. 이 Node에서는 [Shell 8]의 할당 실패 없이 MIG Instance 요청 Pod가 곧바로 배치되어, 앞선 [Shell 6]과 [Shell 7]의 Test를 수행할 수 있다.
-
-### 1.5. GPU 선택
-
-HAMi는 Pod Annotation을 통해서 vGPU가 배치될 물리 GPU를 제어하는 기능을 제공한다. 다음의 Annotation을 통해서 GPU의 Type과 UUID를 지정하거나 제외할 수 있다.
-
-* `nvidia.com/use-gputype` : 할당을 허용할 GPU Type 목록 (예: `A100,V100`)
-* `nvidia.com/nouse-gputype` : 할당에서 제외할 GPU Type 목록
-* `nvidia.com/use-gpuuuid`, `nvidia.com/nouse-gpuuuid` : 할당을 허용하거나 제외할 GPU의 UUID 목록
-
-```yaml {caption="[File 9] GPU Type과 Scheduling 정책을 지정하는 Pod 예제", linenos=table}
-apiVersion: v1
-kind: Pod
-metadata:
-  name: vgpu-pod
-  annotations:
-    nvidia.com/use-gputype: "A100"
-    hami.io/gpu-scheduler-policy: "binpack"
-spec:
-  containers:
-  - name: cuda
-    image: nvidia/cuda:12.4.0-base-ubuntu22.04
-    command: ["sleep", "infinity"]
-    resources:
-      limits:
-        nvidia.com/gpu: 1
-        nvidia.com/gpumem: 3000
-```
-
-[File 9]는 A100 GPU에서 `binpack` 정책으로 vGPU를 할당받는 Pod의 예제를 나타내고 있다. NVIDIA GPU의 Device Scheduling 정책에는 `binpack`, `spread` 외에도 물리 GPU를 공유 없이 전용으로 요구하는 `mutex` 정책이 있으며, v2.10.0부터는 정책을 쉼표로 연결하여 조합할 수 있다.
-
-다수의 GPU를 요청하는 Workload를 위한 Topology 기반의 GPU 선택도 v2.7.0부터 제공된다. HAMi Device Plugin에 `ENABLE_TOPOLOGY_SCORE` 환경 변수를 활성화하면 NVML을 통해서 GPU 쌍 사이의 연결 방식 (NVLink, PCIe) 을 점수화하여 Node의 `hami.io/node-nvidia-score` Annotation에 기록하고, Pod의 `hami.io/gpu-scheduler-policy` Annotation에 `topology-aware`를 명시하면 NVLink로 연결된 GPU 집합을 우선적으로 선택하여 GPU 간 통신 성능을 보장한다.
-
-### 1.6. GPU Health Check
-
-HAMi Device Plugin은 NVIDIA Device Plugin의 Health Check 구현을 이어받아 NVML Event로 GPU 장애를 감지한다. **Xid** (NVIDIA Driver가 보고하는 GPU 오류 번호) Critical Error Event가 발생하면 해당 GPU를 `Unhealthy`로 표시하며, ECC Event도 구독하지만 `Unhealthy` 판정에는 이용하지 않는다. NVML Event 등록에 실패한 GPU도 `Unhealthy`로 표시되고, Event 대기 자체가 실패하면 모든 GPU가 `Unhealthy`로 표시된다.
-
-Xid `13`, `31`, `43`, `45`, `68`, `109`는 GPU 장애가 아닌 Application 오류로 간주되어 기본적으로 무시된다. `DP_DISABLE_HEALTHCHECKS` 환경 변수는 추가로 무시할 Xid 목록을 지정하거나 `all`로 Health Check 전체를 비활성화하며, `DP_ENABLE_HEALTHCHECKS` 환경 변수는 무시되는 Xid를 다시 활성화한다. 두 환경 변수는 Helm의 `devicePlugin.extraEnvs`로 지정할 수 있다.
-
-`Unhealthy`로 표시된 GPU를 `Healthy`로 되돌리는 경로는 존재하지 않기 때문에, GPU가 복구되어도 HAMi Device Plugin Pod를 재시작해야 다시 이용할 수 있다. 또한 Health Check는 GPU의 할당만 막을 뿐, 이미 해당 GPU를 이용 중인 Pod를 종료하지는 않는다.
+[Shell 9]은 위의 userData Script가 적용된 Node를 나타내고 있다. Instance는 16:49에 최초로 부팅되어 user script가 MIG Mode를 켜고 재부팅하였고, 16:50에 다시 부팅되면서 8장의 GPU가 모두 `Enabled`로 활성화되었다. 이 Node에서는 [Shell 8]의 할당 실패 없이 MIG Instance 요청 Pod가 곧바로 배치되어, 1.4.2의 [Shell 6]과 [Shell 7]의 Test를 수행할 수 있다.
 
 ## 2. 참조
 

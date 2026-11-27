@@ -23,12 +23,14 @@ draft: true
 |---|---|---|---|
 | `nvidia.com/gpu` | Number of vGPUs to allocate to the Container | O | O |
 | `nvidia.com/gpumem` | Memory size to allocate to each vGPU (in MiB) | O | O |
-| `nvidia.com/gpumem-percentage` | Ratio of Memory to allocate to each vGPU relative to the physical GPU Memory (%). For example, specifying `50` allocates 8GiB on a 16GiB GPU and 40GiB on an 80GiB GPU, so the same ratio can be requested regardless of the GPU's Memory size | O | O |
+| `nvidia.com/gpumem-percentage` | Ratio of Memory to allocate to each vGPU relative to the physical GPU Memory (%). For example, specifying `50` allocates 8GiB on a 16GiB GPU and 40GiB on an 80GiB GPU, so the same ratio can be requested regardless of the GPU's Memory size. If specified together with `nvidia.com/gpumem`, `nvidia.com/gpumem` takes precedence | O | O |
 | `nvidia.com/gpucores` | SM utilization each vGPU can use (%). For example, specifying `30` limits SM utilization to 30% or less on average, and specifying `100` allocates the entire physical GPU exclusively. If not specified, SM utilization is not limited | O | X |
 | `nvidia.com/priority` | Priority between vGPU Workloads sharing the same GPU, where `0` is high, `1` is low, and the default is `1`. For example, while a Workload with `0` uses the GPU, kernel launches of a Workload with `1` are paused. It works only for Workloads to which the SM Utilization Limit applies by specifying `nvidia.com/gpucores` between 1 and 99 | O | X |
 {{< /table >}}
 
-[Table 1] shows the vGPU Resources provided by HAMi. Both Modes request vGPUs with the same Resources, but MIG Mode does not use `nvidia.com/gpucores` and `nvidia.com/priority` because it selects the MIG Profile by Memory size only and HAMi-core is not injected. HAMi Scheduler determines the number of vGPUs from `nvidia.com/gpu`, the Memory size of each vGPU from `nvidia.com/gpumem` or `nvidia.com/gpumem-percentage`, and the SM utilization from `nvidia.com/gpucores`, and compares them with the remaining capacity of each GPU. As with NVIDIA Device Plugin, the number of GPUs is requested with the `nvidia.com/gpu` Resource, but in HAMi it means the number of vGPUs, not physical GPUs.
+[Table 1] shows the vGPU Resources provided by HAMi. Both Modes request vGPUs with the same Resources, but MIG Mode does not use `nvidia.com/gpucores` and `nvidia.com/priority` because it selects the MIG Profile by Memory size only and HAMi-core is not injected. `nvidia.com/gpu` is a Resource with the same name as in NVIDIA Device Plugin, but in HAMi it means the number of vGPUs, not physical GPUs. If neither `nvidia.com/gpumem` nor `nvidia.com/gpumem-percentage` is specified, the request is treated as the entire Memory of the physical GPU, resulting in an exclusive allocation that does not share the GPU with other Pods.
+
+When selecting the physical GPU on which to place a vGPU, HAMi Scheduler selects only GPUs where adding the values the Pod requested with `nvidia.com/gpumem` or `nvidia.com/gpumem-percentage` and `nvidia.com/gpucores` to the Memory size and SM utilization already allocated on that GPU does not exceed the GPU's total Memory size and 100%. For example, if 12GiB of Memory is already allocated on a 16GiB GPU, a vGPU requesting 8GiB of Memory is not placed on that GPU.
 
 ```yaml {caption="[File 1] Example Pod requesting a vGPU", linenos=table}
 apiVersion: v1
@@ -47,7 +49,7 @@ spec:
         nvidia.com/gpucores: 30
 ```
 
-[File 1] shows an example Pod requesting one vGPU with 3000MiB of Memory and 30% SM utilization. When one Container requests multiple vGPUs, each vGPU is placed on a different physical GPU, and the Memory size and SM utilization limits apply equally to each vGPU. If `nvidia.com/gpumem` is omitted, the request is treated as the entire Memory of the physical GPU, resulting in an exclusive allocation that does not share the GPU with other Pods.
+[File 1] shows an example Pod requesting one vGPU with 3000MiB of Memory and 30% SM utilization. In HAMi-core Mode, when one Container requests multiple vGPUs, each vGPU is placed on a different physical GPU regardless of the Scheduling policy, and Scheduling policies such as `binpack` and `spread` only decide which GPUs are selected. In contrast, in MIG Mode, multiple MIG Instances can be created on one GPU, so vGPUs of the same Container can be placed on the same GPU together. The Memory size and SM utilization limits apply equally to each vGPU.
 
 ### 1.1. Test Environment Setup
 
@@ -390,7 +392,7 @@ Dynamic MIG was introduced in v2.5.0. Initially, it switched the MIG configurati
 
 Since NVIDIA Device Plugin looks up already created MIG Instances when it starts and registers them with kubelet as Devices, the Device Plugin must be restarted after the MIG configuration changes for the changed Device list to be reflected. In contrast, HAMi Device Plugin registers vGPUs based on the parent GPU with kubelet even in MIG Mode, and creates MIG Instances while handling `Allocate()` and passes their UUIDs to the Container, so the Device Plugin does not need to be restarted when MIG Instances are created and reclaimed. However, if the GPU's MIG Mode is off, HAMi Device Plugin turns MIG Mode on by itself at the first allocation, and since Ampere GPUs such as A100 may require a GPU Reset or VM reboot to change MIG Mode, the allocation fails in that case. Therefore, on Ampere GPUs, it is safer to turn on MIG Mode in advance with the `nvidia-smi -mig 1` command and complete the GPU Reset.
 
-The behavior of MIG Mode is verified in a separate environment from 1.1. An EKS p4d.24xlarge Node with 8 A100-SXM4-40GB GPUs is used, and the Node Group the Node belongs to has the `group=gpu-a100-hami` Label and Taint, with `operatingmode` set to `mig` by matching this Label in `nodeconfig`. The default `migProfileAllowlist` for the A100 40GB GPU defines the `1g.5gb`, `2g.10gb`, `3g.20gb`, `4g.20gb`, and `7g.40gb` Profiles. Provisioning this Node with Karpenter and enabling MIG Mode has EKS-specific constraints, which are covered separately in 1.4.3.
+The behavior of MIG Mode is verified in a separate environment from 1.1. An EKS p4d.24xlarge Node with 8 A100-SXM4-40GB GPUs is used, and the Node Group the Node belongs to has the `group=gpu-a100-hami` Label and Taint, with `operatingmode` set to `mig` by matching this Label in `nodeconfig`. The default `migProfileAllowlist` for the A100 40GB GPU defines the `1g.5gb`, `2g.10gb`, `3g.20gb`, `4g.20gb`, and `7g.40gb` Profiles. Provisioning this Node with Karpenter and enabling MIG Mode has EKS-specific constraints, which are covered separately in 1.7.
 
 #### 1.4.1. MIG Profile Selection
 
@@ -433,7 +435,7 @@ From the position list that HAMi Device Plugin queries through NVML and register
 
 MIG Instances are not removed immediately when the Pod terminates. This reduces the overhead of removing and recreating MIG Instances when the same Profile is requested again, and a reused MIG Instance keeps the same MIG UUID. Every 5 seconds, HAMi Device Plugin compares the `hami.io/vgpu-mig-allocations` Annotations of running Pods with the MIG Instances it manages, and switches MIG Instances used by no Pod to the Idle state. In contrast, HAMi Scheduler calculates MIG Instance positions only from the Annotations of Pods that have not terminated, so it regards the positions occupied by Idle MIG Instances as free space, and when a newly reserved position overlaps Idle MIG Instances, HAMi Device Plugin removes the overlapping MIG Instances in order of least recent use and then creates the new MIG Instance.
 
-```yaml {caption="[File 10] mig-config8.yaml (the mig-2g-b Pod differing only in name and the nodeSelector and tolerations of mig-3g are omitted)", linenos=table}
+```yaml {caption="[File 9] mig-config8.yaml (the mig-2g-b Pod differing only in name and the nodeSelector and tolerations of mig-3g are omitted)", linenos=table}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -481,7 +483,7 @@ spec:
         nvidia.com/gpumem: 19000
 ```
 
-[File 10] shows Pods that compose a combination of two `2g.10gb` and one `3g.20gb` MIG Instances on one A100. Since the default Device Scheduling policy `spread` distributes vGPUs across different GPUs, the `binpack` policy gathers the vGPUs of the three Pods on the same GPU, and according to the position selection algorithm, `2g.10gb` is created at positions 0 and 2 and `3g.20gb` at position 4. Whether the three Pods are gathered on the same GPU and the reserved Profiles and positions are checked with each Pod's `hami.io/vgpu-mig-allocations` Annotation, and the created MIG Instances are checked with the `nvidia-smi -L` output inside the Pods.
+[File 9] shows Pods that compose a combination of two `2g.10gb` and one `3g.20gb` MIG Instances on one A100. Since the default Device Scheduling policy `spread` distributes vGPUs across different GPUs, the `binpack` policy gathers the vGPUs of the three Pods on the same GPU, and according to the position selection algorithm, `2g.10gb` is created at positions 0 and 2 and `3g.20gb` at position 4. Whether the three Pods are gathered on the same GPU and the reserved Profiles and positions are checked with each Pod's `hami.io/vgpu-mig-allocations` Annotation, and the created MIG Instances are checked with the `nvidia-smi -L` output inside the Pods.
 
 ```shell {caption="[Shell 6] Checking the Config 8 composition"}
 $ kubectl get pod mig-2g-a mig-2g-b mig-3g -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.metadata.annotations.hami\.io/vgpu-mig-allocations}{"\n"}{end}'
@@ -500,7 +502,7 @@ GPU 0: NVIDIA A100-SXM4-40GB (UUID: GPU-a8f9e013-12ae-4a95-a82b-6dde923e243a)
 
 [Shell 6] shows the completed Config 8 composition. The `hami.io/vgpu-mig-allocations` Annotation of all three Pods contains the same `gpuUUID`, confirming they are gathered on the same GPU by the `binpack` policy, and the `start` of `placement` is 0 and 2 for `2g.10gb` and 4 for `3g.20gb` as expected. The `nvidia-smi -L` inside each Pod shows only one MIG Device matching the `migUUID` of the Annotation, confirming that HAMi Device Plugin created the MIG Instance of the reserved Profile and passed it to the Container.
 
-```yaml {caption="[File 11] mig-config9.yaml (the mig-1g-b Pod differing only in name and the nodeSelector and tolerations are omitted)", linenos=table}
+```yaml {caption="[File 10] mig-config9.yaml (the mig-1g-b Pod differing only in name and the nodeSelector and tolerations are omitted)", linenos=table}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -520,7 +522,7 @@ spec:
         nvidia.com/gpumem: 4500
 ```
 
-[File 11] shows the two `1g.5gb` Pods applied after deleting the `mig-2g-b` Pod. The `2g.10gb` Instance of the deleted Pod remains in the Idle state, but HAMi Scheduler regards its position as free space, so when the newly reserved `1g.5gb` positions overlap the Idle Instance, HAMi Device Plugin removes the Idle Instance and then creates two `1g.5gb` Instances. This checks the process in which the composition of the same GPU switches to a combination of one `2g.10gb`, two `1g.5gb`, and one `3g.20gb`, and whether the MIG Instances of the running `mig-2g-a` and `mig-3g` Pods are kept during the switch.
+[File 10] shows the two `1g.5gb` Pods applied after deleting the `mig-2g-b` Pod. The `2g.10gb` Instance of the deleted Pod remains in the Idle state, but HAMi Scheduler regards its position as free space, so when the newly reserved `1g.5gb` positions overlap the Idle Instance, HAMi Device Plugin removes the Idle Instance and then creates two `1g.5gb` Instances. This checks the process in which the composition of the same GPU switches to a combination of one `2g.10gb`, two `1g.5gb`, and one `3g.20gb`, and whether the MIG Instances of the running `mig-2g-a` and `mig-3g` Pods are kept during the switch.
 
 ```shell {caption="[Shell 7] Config 9 transition and Idle MIG Instance reconfiguration"}
 $ kubectl delete pod mig-2g-b
@@ -546,9 +548,48 @@ $ kubectl logs -n addon-hami ds/hami-device-plugin -c device-plugin | grep -E 'm
 
 The Log of HAMi Device Plugin shows this process in three kinds of Records. When `mig-2g-b` is deleted, its `2g.10gb` Instance is not removed immediately but becomes Idle as `cached released MIG allocation`, and then when the `1g.5gb` reservation requires the overlapping position, the Idle Instance is removed as `reclaimed idle MIG allocation under placement pressure` and two `1g.5gb` are created as `created scheduler-reserved MIG allocation`. In this way, Flexible MIG replaces MIG Instances per Workload only at the freed Slice positions, without Cordoning the Node or rebuilding the MIG composition of the whole GPU.
 
-#### 1.4.3. EKS Karpenter Environment Setup
+### 1.5. GPU Selection
 
-The Tests in 1.4.1 and 1.4.2 above assume a Node with MIG Mode enabled, and provisioning that Node with Karpenter on EKS requires two preparations. One is to let the Node be provisioned even with Pods requesting only vGPU Resources, and the other is to enable the GPU's MIG Mode at Node boot time.
+HAMi provides features to control the physical GPU on which a vGPU is placed through Pod Annotations. The following Annotations can specify or exclude GPU Types and UUIDs.
+
+* `nvidia.com/use-gputype` : List of GPU Types allowed for allocation (e.g., `A100,V100`)
+* `nvidia.com/nouse-gputype` : List of GPU Types excluded from allocation
+* `nvidia.com/use-gpuuuid`, `nvidia.com/nouse-gpuuuid` : List of GPU UUIDs allowed for or excluded from allocation
+
+```yaml {caption="[File 11] Example Pod specifying the GPU Type and Scheduling policy", linenos=table}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: vgpu-pod
+  annotations:
+    nvidia.com/use-gputype: "A100"
+    hami.io/gpu-scheduler-policy: "binpack"
+spec:
+  containers:
+  - name: cuda
+    image: nvidia/cuda:12.4.0-base-ubuntu22.04
+    command: ["sleep", "infinity"]
+    resources:
+      limits:
+        nvidia.com/gpu: 1
+        nvidia.com/gpumem: 3000
+```
+
+[File 11] shows an example Pod that is allocated a vGPU on an A100 GPU with the `binpack` policy. In addition to `binpack` and `spread`, the Device Scheduling policies of NVIDIA GPU include the `mutex` policy, which requires a physical GPU exclusively without sharing, and since v2.10.0, policies can be combined by joining them with commas.
+
+Topology-based GPU selection for Workloads requesting multiple GPUs is also provided since v2.7.0. When the `ENABLE_TOPOLOGY_SCORE` environment variable is enabled in HAMi Device Plugin, it scores the connection type (NVLink, PCIe) between GPU pairs through NVML and records it in the Node's `hami.io/node-nvidia-score` Annotation, and specifying `topology-aware` in the Pod's `hami.io/gpu-scheduler-policy` Annotation preferentially selects GPU sets connected through NVLink to ensure inter-GPU communication performance.
+
+### 1.6. GPU Health Check
+
+HAMi Device Plugin inherits the Health Check implementation of NVIDIA Device Plugin and detects GPU failures through NVML Events. When an **Xid** (GPU error number reported by the NVIDIA Driver) Critical Error Event occurs, it marks the GPU as `Unhealthy`, and although it also subscribes to ECC Events, it does not use them for the `Unhealthy` decision. GPUs whose NVML Event registration fails are also marked `Unhealthy`, and if waiting for Events itself fails, all GPUs are marked `Unhealthy`.
+
+Xids `13`, `31`, `43`, `45`, `68`, and `109` are considered Application errors rather than GPU failures and are ignored by default. The `DP_DISABLE_HEALTHCHECKS` environment variable specifies additional Xids to ignore or disables the entire Health Check with `all`, and the `DP_ENABLE_HEALTHCHECKS` environment variable re-enables ignored Xids. Both environment variables can be specified through Helm's `devicePlugin.extraEnvs`.
+
+Since there is no path that turns a GPU marked `Unhealthy` back to `Healthy`, the HAMi Device Plugin Pod must be restarted to use the GPU again even after it recovers. Also, Health Check only prevents allocation of the GPU and does not terminate Pods already using it.
+
+### 1.7. EKS Karpenter Environment Setup
+
+The MIG Mode Tests in 1.4.1 and 1.4.2 assume a Node with MIG Mode enabled, and provisioning that Node with Karpenter on EKS requires two preparations. One is to let the Node be provisioned even with Pods requesting only vGPU Resources, and the other is to enable the GPU's MIG Mode at Node boot time.
 
 Karpenter provisions a Node by comparing the Resource requests of Pending Pods with the capacity of the Instance Type, but it does not know HAMi's extended Resources such as `nvidia.com/gpumem`, so Node creation does not start only with Pods requesting them (`no instance type has enough resources`). Injecting `nvidia.com/gpumem` into the capacity of the Instance Type with Karpenter's **NodeOverlay** (A100 40GB × 8 = `327680`) lets the Scheduling simulation accept the request, so the Node is provisioned even with Pods requesting only vGPU Resources. The capacity is used only for the Scheduling simulation and is unrelated to the actual Node's Allocatable.
 
@@ -579,46 +620,7 @@ reboot   system boot  6.12.115-140.210 Mon Nov 23 16:50   still running
 reboot   system boot  6.12.115-140.210 Mon Nov 23 16:49 - 16:50  (00:01)
 ```
 
-[Shell 9] shows a Node to which the userData Script above is applied. The Instance first booted at 16:49 where the user script enabled MIG Mode and rebooted, and it booted again at 16:50 with all 8 GPUs enabled. On this Node, a Pod requesting a MIG Instance is placed immediately without the allocation failure of [Shell 8], allowing the Tests of [Shell 6] and [Shell 7] above to be performed.
-
-### 1.5. GPU Selection
-
-HAMi provides features to control the physical GPU on which a vGPU is placed through Pod Annotations. The following Annotations can specify or exclude GPU Types and UUIDs.
-
-* `nvidia.com/use-gputype` : List of GPU Types allowed for allocation (e.g., `A100,V100`)
-* `nvidia.com/nouse-gputype` : List of GPU Types excluded from allocation
-* `nvidia.com/use-gpuuuid`, `nvidia.com/nouse-gpuuuid` : List of GPU UUIDs allowed for or excluded from allocation
-
-```yaml {caption="[File 9] Example Pod specifying the GPU Type and Scheduling policy", linenos=table}
-apiVersion: v1
-kind: Pod
-metadata:
-  name: vgpu-pod
-  annotations:
-    nvidia.com/use-gputype: "A100"
-    hami.io/gpu-scheduler-policy: "binpack"
-spec:
-  containers:
-  - name: cuda
-    image: nvidia/cuda:12.4.0-base-ubuntu22.04
-    command: ["sleep", "infinity"]
-    resources:
-      limits:
-        nvidia.com/gpu: 1
-        nvidia.com/gpumem: 3000
-```
-
-[File 9] shows an example Pod that is allocated a vGPU on an A100 GPU with the `binpack` policy. In addition to `binpack` and `spread`, the Device Scheduling policies of NVIDIA GPU include the `mutex` policy, which requires a physical GPU exclusively without sharing, and since v2.10.0, policies can be combined by joining them with commas.
-
-Topology-based GPU selection for Workloads requesting multiple GPUs is also provided since v2.7.0. When the `ENABLE_TOPOLOGY_SCORE` environment variable is enabled in HAMi Device Plugin, it scores the connection type (NVLink, PCIe) between GPU pairs through NVML and records it in the Node's `hami.io/node-nvidia-score` Annotation, and specifying `topology-aware` in the Pod's `hami.io/gpu-scheduler-policy` Annotation preferentially selects GPU sets connected through NVLink to ensure inter-GPU communication performance.
-
-### 1.6. GPU Health Check
-
-HAMi Device Plugin inherits the Health Check implementation of NVIDIA Device Plugin and detects GPU failures through NVML Events. When an **Xid** (GPU error number reported by the NVIDIA Driver) Critical Error Event occurs, it marks the GPU as `Unhealthy`, and although it also subscribes to ECC Events, it does not use them for the `Unhealthy` decision. GPUs whose NVML Event registration fails are also marked `Unhealthy`, and if waiting for Events itself fails, all GPUs are marked `Unhealthy`.
-
-Xids `13`, `31`, `43`, `45`, `68`, and `109` are considered Application errors rather than GPU failures and are ignored by default. The `DP_DISABLE_HEALTHCHECKS` environment variable specifies additional Xids to ignore or disables the entire Health Check with `all`, and the `DP_ENABLE_HEALTHCHECKS` environment variable re-enables ignored Xids. Both environment variables can be specified through Helm's `devicePlugin.extraEnvs`.
-
-Since there is no path that turns a GPU marked `Unhealthy` back to `Healthy`, the HAMi Device Plugin Pod must be restarted to use the GPU again even after it recovers. Also, Health Check only prevents allocation of the GPU and does not terminate Pods already using it.
+[Shell 9] shows a Node to which the userData Script above is applied. The Instance first booted at 16:49 where the user script enabled MIG Mode and rebooted, and it booted again at 16:50 with all 8 GPUs enabled. On this Node, a Pod requesting a MIG Instance is placed immediately without the allocation failure of [Shell 8], allowing the Tests of [Shell 6] and [Shell 7] in 1.4.2 to be performed.
 
 ## 2. References
 

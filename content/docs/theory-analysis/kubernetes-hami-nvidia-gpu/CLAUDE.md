@@ -6,6 +6,17 @@ kubernetes-hami(HAMi 자체, 벤더 중립 구조) 문서의 NVIDIA 상세 글�
 
 ## 문서 구성 및 상태
 
+- **2026-11-27 전용 할당 문장을 [Table 1] 아래 문단으로 재이동** (사용자 요청, KR/EN): `gpumem` 행에서 빼서 "`nvidia.com/gpu`는 … vGPU의 개수를 의미한다" 뒤에 배치.
+- **2026-11-27 [File 1] 다중 vGPU 배치 문장 Mode별 한정 + gpumem-percentage 우선순위** (사용자 요청, KR/EN): 근거 v2.11.0 pkg/device/nvidia/device.go
+  Fit — devices를 i 역순으로 한 번씩 방문하며 GPU당 vGPU 1개(k.Nums--), 정책은 사전 정렬 순서만 결정; MIG는 `if dev.Mode == "mig" { i++ }`로 같은 GPU
+  재방문(주석 "A MIG card appears once per free slot") → 같은 GPU에 여러 MIG Instance 가능. 우선순위: Fit `Memreq > 0`이면 gpumem, 0일 때만 MemPercentagereq;
+  GenerateResourceRequests — percentage 0은 미지정(101 sentinel), 둘 다 미지정이면 defaultMemory 0 → 100%.
+- **2026-11-27 gpumem 생략 시 전용 할당 문장을 [Table 1] `nvidia.com/gpumem` 행으로 이동** (사용자 요청, KR/EN): [File 1] 문단에서 삭제. 조건은 Chart values.yaml `defaultMemory` 주석 기준 "gpumem과 gpumem-percentage 모두 미지정"으로 정확화.
+- **2026-11-27 [Table 1] 문단 Scheduler 비교 서술 재작성** (사용자 요청, KR/EN): `nvidia.com/gpu` 의미를 먼저, "할당된 값 + 요청 값 ≤ 전체(Memory, 100%)" 기준과 16GiB/12GiB/8GiB 예시로 교체. 근거 pkg/device/nvidia/device.go Fit(CardInsufficientMemory, CardInsufficientCore).
+- **2026-11-27 Karpenter 절을 `### 1.7. EKS Karpenter 환경 구성`으로 이동** (사용자 요청, KR/EN 동시): 1.4.3 블록을 1.6 뒤로 옮김.
+  File 번호를 등장 순서로 재정렬 — 1.4.2 Config8 = [File 9], Config9 = [File 10], 1.5 GPU 선택 = [File 11] (기존 10/11/9 어긋남 해소, 조사 정정).
+  Shell 번호(6, 7 in 1.4.2 / 8, 9 in 1.7)는 순서 유지. 참조 갱신: 1.4 도입 "1.4.3에서" → "1.7에서", 1.7 첫 문장 "앞선 1.4.1과 1.4.2의 Test" →
+  "1.4.1과 1.4.2의 MIG Mode Test", [Shell 9] 문단 "앞선 [Shell 6]과 [Shell 7]" → "1.4.2의 …".
 - **2026-11-24 Karpenter 내용 1.4.3으로 분리** (사용자 요청): NodeOverlay 프로비저닝 + userData MIG 활성화를 1.4 본문에서 떼어
   `#### 1.4.3. EKS Karpenter 환경 구성`으로 1.4.2 뒤에 배치(KR/EN). 1.4 도입 환경 문단은 남기고 "1.4.3에서 별도로 다룬다" pointer 추가.
   Shell 번호를 등장 순서대로 재정렬: Config8=[Shell 6], Config9=[Shell 7], 할당실패=[Shell 8], 활성화=[Shell 9] (기존 6→9·9→10 어긋남 해소).
