@@ -1,6 +1,5 @@
 ---
 title: Python OpenSandbox SDK
-draft: true
 ---
 
 Summarizes how to use the Python OpenSandbox SDK. Rather than enumerating the API reference, this article focuses on patterns that recur when using sandboxes in real services. Examples use the async API, which is the SDK's primary surface. Based on v1.2.1.
@@ -184,32 +183,34 @@ sandbox = await Sandbox.create(
 
 Rules are divided by the `target` value into **domain-based** (FQDNs, wildcard domains) and **IP-based** (IPs, CIDRs) rules, and since the two kinds are enforced by different components in different ways, their constraints differ as well. Domain rules are evaluated by the egress sidecar's DNS proxy at domain lookup time, where no port dimension exists, so combining them with `ports` is rejected with a validation error. IP/CIDR rules, on the other hand, are enforced by nftables at the packet level, so `ports` can restrict TCP destination ports — but they are actually applied only with the `[egress] mode = "dns+nft"` setting, which activates nftables alongside the DNS proxy. Beware that with the default `[egress] mode = "dns"` setting, IP/CIDR rules are not rejected but silently ignored.
 
-## 5. Caveats for Pause/Resume
+## 5. Pause/Resume
 
-The SDK's `pause()` / `resume()` are provided as the same API across all execution paths, but behavior and availability depend on the server's execution path configuration.
-
-```python {caption="[Code 8] Requesting Pause and Checking State"}
-await sandbox.pause()     # Asynchronous request — does not become Paused immediately
+```python {caption="[Code 8] Requesting Pause/Resume and Checking State"}
+# Asynchronous request — does not become Paused immediately
+await sandbox.pause()
 
 while True:
     info = await sandbox.get_info()
     if info.status.state == "Paused":
         break
     await asyncio.sleep(2)
+
+# Resume the paused sandbox with the same sandboxId
+await sandbox.resume()
 ```
 
-[Code 8] shows requesting a pause and checking the state transition. Since `pause()` is an asynchronous request, the sandbox does not become Paused immediately, and the transition must be checked through `get_info()`. The behavior per execution path is as follows.
+[Code 8] shows requesting a pause, checking the state transition, and then resuming. Pause transitions a sandbox into an idle state to release its compute resources, and resume brings the paused sandbox back with the same `sandboxId`. Since `pause()` is an asynchronous request, the sandbox does not become Paused immediately, and the transition must be checked through `get_info()`.
 
-* **BatchSandbox + runc** : The rootfs is committed to a registry. Fails if no snapshot registry is configured on the controller.
-* **BatchSandbox + gVisor** : The server rejects with `HTTP 409`. gVisor isolation and snapshots are incompatible.
-* **agent-sandbox provider** : Only the pod is removed and only PVC data is preserved. No registry required.
-* **Fast Sandbox** : Memory is preserved, and declaring an `IdlePolicy` enables automatic pause/wake without explicit calls (Fast Sandbox only).
+The SDK's `pause()` / `resume()` are provided as the same API, but the actual behavior and availability depend on how the server is configured to run sandboxes. How a sandbox runs is determined by server configuration — the workload provider (batchsandbox, agent-sandbox), the container runtime (runc, gVisor), and whether Fast Sandbox is used — and the client cannot tell the difference from the API call alone. Client code using `pause()` must therefore be aware of the semantic differences per server configuration. The behavior per server configuration is as follows.
 
-Client code using `pause()` must therefore be aware of the per-path semantic differences, and in environments without snapshot infrastructure, volume-based state preservation is the practical alternative.
+| Workload Provider | Container Runtime | Pause/Resume Behavior | Notes |
+|---|---|---|---|
+| batchsandbox | runc | Commits the rootfs to a registry, then removes the pod | Fails if no snapshot registry is configured on the controller |
+| batchsandbox | gVisor | Rejected with `HTTP 409` | gVisor isolation and snapshots are incompatible |
+| agent-sandbox | runc | Removes only the pod, preserving only PVC data | No registry required |
+| Fast Sandbox | Firecracker MicroVM | Preserves memory as well | Automatic pause/wake without explicit calls via `IdlePolicy` (Fast Sandbox only) |
 
 ## 6. Sync API
-
-In scripts, Jupyter notebooks, or environments without an async runtime, use the sync API. The method surface is identical to the async API — use `SandboxSync` instead of `Sandbox` and `ConnectionConfigSync` instead of `ConnectionConfig`, and remove the `await`/`async` keywords.
 
 ```python {caption="[Code 9] Sync API Basic Lifecycle"}
 from opensandbox.sandbox import SandboxSync
@@ -228,8 +229,6 @@ finally:
     sandbox.destroy()
 ```
 
-[Code 9] shows the same basic lifecycle as [Code 1] using the sync API.
-
 ```python {caption="[Code 10] Volume-Based State Preservation with the Sync API"}
 sandbox = SandboxSync.create(
     "python:3.11",
@@ -247,7 +246,7 @@ finally:
 sandbox = SandboxSync.connect(sandbox_id, connection_config=config)
 ```
 
-[Code 10] shows using volume-based state preservation with the sync API. The volume declaration can be reused as-is from [Code 5].
+[Code 9] shows the same basic lifecycle as [Code 1], and [Code 10] shows volume-based state preservation, both using the sync API. In scripts, Jupyter notebooks, or environments without an async runtime, use the sync API. The method surface is identical to the async API — use `SandboxSync` instead of `Sandbox` and `ConnectionConfigSync` instead of `ConnectionConfig`, and remove the `await`/`async` keywords. The volume declaration can be reused as-is from [Code 5].
 
 ## 7. References
 

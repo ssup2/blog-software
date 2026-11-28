@@ -1,6 +1,5 @@
 ---
 title: Python OpenSandbox SDK
-draft: true
 ---
 
 Python OpenSandbox SDK의 이용 방법을 정리한다. API Reference의 나열보다는 Sandbox를 실제 서비스에서 이용할 때 반복되는 패턴을 중심으로 정리한다. 예제는 SDK의 기본 표면인 Async API를 기준으로 한다. 분석 기준 Version은 v1.2.1이다.
@@ -184,32 +183,34 @@ sandbox = await Sandbox.create(
 
 Rule은 `target` 값에 따라서 **Domain 기반**(FQDN, Wildcard Domain)과 **IP 기반**(IP, CIDR)으로 나뉘며, 두 종류는 Rule을 수행하는 주체와 방식이 다르기 때문에 제약도 다르다. Domain Rule은 Egress Sidecar의 DNS Proxy가 Domain 조회 시점에 평가하기 때문에 Port라는 차원이 존재하지 않으며, `ports`와 조합하면 Validation Error로 거부된다. 반면 IP/CIDR Rule은 nftables가 Packet 수준에서 수행하기 때문에 `ports`로 TCP 목적지 Port까지 제한할 수 있지만, nftables가 함께 활성화되는 `[egress] mode = "dns+nft"` 설정에서만 실제로 적용된다. 기본값인 `[egress] mode = "dns"` 설정에서는 IP/CIDR Rule이 거부되지 않고 조용히 무시되기 때문에 주의가 필요하다.
 
-## 5. Pause/Resume 이용시 주의
+## 5. Pause/Resume
 
-SDK의 `pause()` / `resume()`은 모든 실행 경로에서 동일한 API로 제공되지만, 동작과 가용성은 Server의 실행 경로 구성에 따라서 달라진다.
-
-```python {caption="[Code 8] Pause 요청과 상태 확인"}
-await sandbox.pause()     # Asynchronous request — does not become Paused immediately
+```python {caption="[Code 8] Pause/Resume 요청과 상태 확인"}
+# Asynchronous request — does not become Paused immediately
+await sandbox.pause()
 
 while True:
     info = await sandbox.get_info()
     if info.status.state == "Paused":
         break
     await asyncio.sleep(2)
+
+# Resume the paused sandbox with the same sandboxId
+await sandbox.resume()
 ```
 
-[Code 8]은 Pause를 요청하고 상태 전환을 확인하는 과정을 나타내고 있다. `pause()`는 비동기 요청이기 때문에 즉시 Paused 상태가 되지 않으며, `get_info()`를 통해서 상태 전환을 확인해야 한다. 실행 경로별 동작 차이는 다음과 같다.
+[Code 8]은 Pause를 요청하고 상태 전환을 확인한 후 Resume하는 과정을 나타내고 있다. Pause는 Sandbox를 유휴 상태로 전환하여 Compute Resource를 반납하는 동작이며, Resume은 Pause된 Sandbox를 동일한 `sandboxId`로 재개하는 동작이다. `pause()`는 비동기 요청이기 때문에 즉시 Paused 상태가 되지 않으며, `get_info()`를 통해서 상태 전환을 확인해야 한다.
 
-* **BatchSandbox + runc** : Rootfs가 Registry에 Commit된다. Controller에 Snapshot Registry가 설정되어 있지 않으면 실패한다.
-* **BatchSandbox + gVisor** : Server가 `HTTP 409`로 거부한다. gVisor 격리와 Snapshot은 양립하지 않는다.
-* **agent-sandbox Provider** : Pod만 제거되고 PVC 데이터만 보존된다. Registry가 필요없다.
-* **Fast Sandbox** : Memory까지 보존되며, `IdlePolicy`를 선언하면 호출 없이 자동 Pause/Wake가 동작한다 (Fast Sandbox 전용).
+SDK의 `pause()` / `resume()`은 동일한 API로 제공되지만, 실제 동작과 가용성은 Server가 Sandbox를 어떤 방식으로 실행하도록 구성되어 있는지에 따라서 달라진다. Sandbox의 실행 방식은 Workload Provider 종류(batchsandbox, agent-sandbox), Container Runtime 종류(runc, gVisor), Fast Sandbox 이용 여부 같은 Server 구성이 결정하며, Client는 API 호출만으로 이 차이를 구분할 수 없다. 따라서 `pause()`를 이용하는 Client Code는 Server 구성에 따른 의미 차이를 알고 있어야 한다. Server 구성별 동작 차이는 다음과 같다.
 
-따라서 `pause()`를 이용하는 Client Code는 실행 경로별 의미 차이를 알고 있어야 하며, Snapshot 인프라가 구성되지 않은 환경에서는 Volume 기반 상태 보존이 현실적인 대안이다.
+| Workload Provider | Container Runtime | Pause/Resume 동작 | 비고 |
+|---|---|---|---|
+| batchsandbox | runc | Rootfs가 Registry에 Commit된 후 Pod 제거 | Controller에 Snapshot Registry 미설정시 실패 |
+| batchsandbox | gVisor | `HTTP 409`로 거부 | gVisor 격리와 Snapshot은 양립 불가 |
+| agent-sandbox | runc | Pod만 제거, PVC 데이터만 보존 | Registry 불필요 |
+| Fast Sandbox | Firecracker MicroVM | Memory까지 보존 | `IdlePolicy` 선언시 호출 없이 자동 Pause/Wake (전용 기능) |
 
 ## 6. Sync API
-
-Script, Jupyter Notebook, 또는 Async Runtime이 없는 환경에서는 Sync API를 이용한다. Async API와 Method 구성이 동일하며, `Sandbox` 대신 `SandboxSync`를, `ConnectionConfig` 대신 `ConnectionConfigSync`를 이용하고 `await`/`async` 키워드만 제거하면 된다.
 
 ```python {caption="[Code 9] Sync API 기본 Lifecycle"}
 from opensandbox.sandbox import SandboxSync
@@ -228,8 +229,6 @@ finally:
     sandbox.destroy()
 ```
 
-[Code 9]는 [Code 1]과 동일한 기본 Lifecycle을 Sync API로 이용하는 과정을 나타내고 있다.
-
 ```python {caption="[Code 10] Sync API Volume 기반 상태 보존"}
 sandbox = SandboxSync.create(
     "python:3.11",
@@ -247,7 +246,7 @@ finally:
 sandbox = SandboxSync.connect(sandbox_id, connection_config=config)
 ```
 
-[Code 10]은 Volume 기반 상태 보존을 Sync API로 이용하는 과정을 나타내고 있다. Volume 선언은 [Code 5]와 동일하게 재사용할 수 있다.
+[Code 9]는 [Code 1]과 동일한 기본 Lifecycle을, [Code 10]은 Volume 기반 상태 보존을 Sync API로 이용하는 과정을 나타내고 있다. Script, Jupyter Notebook, 또는 Async Runtime이 없는 환경에서는 Sync API를 이용한다. Async API와 Method 구성이 동일하며, `Sandbox` 대신 `SandboxSync`를, `ConnectionConfig` 대신 `ConnectionConfigSync`를 이용하고 `await`/`async` 키워드만 제거하면 된다. Volume 선언은 [Code 5]와 동일하게 재사용할 수 있다.
 
 ## 7. 참조
 
