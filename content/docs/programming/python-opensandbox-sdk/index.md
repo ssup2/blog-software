@@ -6,7 +6,7 @@ Python OpenSandbox SDK의 이용 방법을 정리한다. API Reference의 나열
 
 ## 1. Lifecycle 및 연결 관리
 
-SDK는 단독으로 동작하지 않으며, 모든 요청을 **OpenSandbox Server**의 REST API로 전달하는 Client로 동작한다. 따라서 SDK를 이용하려면 먼저 `ConnectionConfig`를 통해서 OpenSandbox Server의 주소와 **API Key**를 설정해야 한다. **Single-Tenant** 구성에서는 Server 전체가 하나의 API Key를 공유하기 때문에 모든 호출자가 동일한 공간에 Sandbox를 생성한다. 반면 **Multi-Tenant** 구성에서는 Tenant마다 별도의 API Key가 발급되며, 이용하는 Key에 따라서 Sandbox가 생성되는 Namespace와 소유자가 분리되기 때문에 하나의 Server를 다수의 팀이나 서비스가 격리된 채 공유할 수 있다.
+SDK는 단독으로 동작하지 않으며, 모든 요청을 **OpenSandbox Server**의 REST API로 전달하는 Client로 동작한다. 따라서 SDK를 이용하려면 먼저 `ConnectionConfig`를 통해서 OpenSandbox Server의 주소와 **API Key**를 설정해야 한다. 두 값을 생략하면 `OPEN_SANDBOX_DOMAIN`, `OPEN_SANDBOX_API_KEY` 환경변수를 읽기 때문에, API Key를 Code에 하드코딩하지 않고 주입할 수 있다. **Single-Tenant** 구성에서는 Server 전체가 하나의 API Key를 공유하기 때문에 모든 호출자가 동일한 공간에 Sandbox를 생성한다. 반면 **Multi-Tenant** 구성에서는 Tenant마다 별도의 API Key가 발급되며, 이용하는 Key에 따라서 Sandbox가 생성되는 Namespace와 소유자가 분리되기 때문에 하나의 Server를 다수의 팀이나 서비스가 격리된 채 공유할 수 있다.
 
 ```python {caption="[Code 1] 기본 Lifecycle과 연결 관리"}
 import asyncio
@@ -24,6 +24,8 @@ async def main():
         "python:3.11",
         connection_config=config,
         timeout=timedelta(minutes=30),  # Default 10-minute TTL when omitted; None = no expiration
+        env={"APP_ENV": "dev"},                    # Environment variables for the sandbox
+        resource={"cpu": "1", "memory": "512Mi"},  # CPU/memory limits for the sandbox
     )
     try:
         execution = await sandbox.commands.run("python -V")
@@ -34,7 +36,7 @@ async def main():
 asyncio.run(main())
 ```
 
-[Code 1]은 Sandbox를 생성하고 Shell 명령을 실행한 후 종료하는 기본 Lifecycle을 나타내고 있다. 모든 Sandbox는 생성 시점에 수명(`timeout`)을 가지며, 생략하면 기본 10분 TTL이 적용되고 `None`을 명시하면 만료되지 않는다. 종료 방식은 원격 Sandbox까지 함께 종료하는 `destroy()`와 Client 측 Session만 정리하는 `close()` 두 가지가 있으며, 구분해서 이용해야 한다. 여기서 Session은 `Sandbox` 객체가 Cluster에서 동작하는 원격 Sandbox와 별개로, Server 및 Sandbox와 통신하기 위해서 Client Process 안에 유지하는 HTTP Connection Pool을 의미한다.
+[Code 1]은 Sandbox를 생성하고 Shell 명령을 실행한 후 종료하는 기본 Lifecycle을 나타내고 있다. 모든 Sandbox는 생성 시점에 수명(`timeout`)을 가지며, 생략하면 기본 10분 TTL이 적용되고 `None`을 명시하면 만료되지 않는다. 수명 외에도 `env`로 환경변수를, `resource`로 CPU/Memory 상한을 생성 시점에 지정할 수 있다. 종료 방식은 원격 Sandbox까지 함께 종료하는 `destroy()`와 Client 측 Session만 정리하는 `close()` 두 가지가 있으며, 구분해서 이용해야 한다. 여기서 Session은 `Sandbox` 객체가 Cluster에서 동작하는 원격 Sandbox와 별개로, Server 및 Sandbox와 통신하기 위해서 Client Process 안에 유지하는 HTTP Connection Pool을 의미한다.
 
 * **`destroy()`** : 원격 Sandbox를 종료(`kill()`)한 후 Client 측 Session까지 함께 정리한다. Sandbox를 생성하고 사용한 후 바로 폐기하는 Workflow에 적합하다.
 * **`close()`** : Client 측 Session만 닫을 뿐 원격 Sandbox에는 종료 요청이 전달되지 않는다. 따라서 Sandbox는 TTL이 만료될 때까지 Cluster에서 계속 동작하며 Resource를 점유한다.
@@ -93,13 +95,36 @@ content = await sandbox.files.read_file("/workspace/result.json")
 
 [Code 4]는 File을 업로드하고 Shell로 실행한 후 결과 File을 다운로드하는 과정을 나타내고 있다. Code 실행과 File 송수신은 Sandbox Pod에 Init으로 주입된 `execd`가 처리하며, SDK에서는 `Sandbox` 객체의 `commands`(Shell)와 `files` 하위 객체를 통해서 이용한다. File 업로드 없이 Code Snippet을 Interpreter로 직접 실행하는 `codes` 기능은 Sandbox SDK를 확장한 별도의 Code Interpreter SDK에서 제공된다.
 
+```python {caption="[Code 5] 장시간 명령의 Streaming과 Background 실행"}
+from opensandbox.models.execd import RunCommandOpts, ExecutionHandlers
+
+async def on_stdout(msg):
+    print(msg.text, end="")
+
+# Stream stdout of a long-running command in real time
+execution = await sandbox.commands.run(
+    "python train.py",
+    opts=RunCommandOpts(
+        working_directory="/workspace",
+        timeout=timedelta(minutes=30),  # Per-command timeout, independent of the sandbox TTL
+        envs={"EPOCHS": "10"},          # Environment variables for this command only
+    ),
+    handlers=ExecutionHandlers(on_stdout=on_stdout),
+)
+
+# Fire-and-forget: detach the command and return immediately
+await sandbox.commands.run("python warmup.py", opts=RunCommandOpts(background=True))
+```
+
+[Code 5]는 장시간 실행되는 명령의 출력을 실시간으로 수신하는 과정과, 명령을 Background로 분리하여 즉시 반환받는 과정을 나타내고 있다. `handlers`에 등록한 Async Callback으로 stdout/stderr를 Streaming으로 수신할 수 있기 때문에, AI Agent의 작업 로그를 사용자에게 실시간으로 중계하는 용도에 적합하다. `opts`로는 작업 디렉토리와 명령 단위 환경변수 외에 명령 단위 `timeout`을 지정할 수 있으며, 이 `timeout`은 Sandbox의 수명(TTL)과는 독립적으로 해당 명령에만 적용된다.
+
 ## 3. Volume 이용
 
 OpenSandbox는 Kubernetes PVC(PersistentVolumeClaim)를 기반으로 하는 Volume 기능을 제공한다. Sandbox의 수명을 넘어서 상태를 보존하는 **Persistent PVC**와, Sandbox 종료와 함께 정리되는 실행 단위 임시 공간인 **Ephemeral PVC** 두 가지 Mode로 이용할 수 있다.
 
 ### 3.1. Persistent PVC 이용
 
-```python {caption="[Code 5] Volume 기반 상태 보존"}
+```python {caption="[Code 6] Volume 기반 상태 보존"}
 from opensandbox.models.sandboxes import Volume, PVC
 
 def workspace_volume(user_id: str) -> Volume:
@@ -131,7 +156,7 @@ sandbox = await Sandbox.create(
 )
 ```
 
-[Code 5]는 Session 식별자 기반의 고정된 `claimName`으로 PVC를 선언하고, 유휴 진입시 Sandbox만 종료한 후 다음 Session에서 재생성하는 과정을 나타내고 있다. AI Agent Session처럼 유휴 구간이 긴 Workload에서 Sandbox를 Session 내내 유지하면 유휴 시간만큼 Compute 비용이 낭비된다. **Persistent PVC**를 이용하면 상태는 PVC에 남겨둔 채 유휴 시점에 Sandbox를 종료하여 Compute를 반납하고, 다시 필요할 때 Sandbox를 재생성하여 상태를 복원할 수 있다.
+[Code 6]은 Session 식별자 기반의 고정된 `claimName`으로 PVC를 선언하고, 유휴 진입시 Sandbox만 종료한 후 다음 Session에서 재생성하는 과정을 나타내고 있다. AI Agent Session처럼 유휴 구간이 긴 Workload에서 Sandbox를 Session 내내 유지하면 유휴 시간만큼 Compute 비용이 낭비된다. **Persistent PVC**를 이용하면 상태는 PVC에 남겨둔 채 유휴 시점에 Sandbox를 종료하여 Compute를 반납하고, 다시 필요할 때 Sandbox를 재생성하여 상태를 복원할 수 있다.
 
 최초 Session에서 Server가 PVC를 자동으로 생성하며, 이후 Session에서 동일한 `claimName`으로 Sandbox를 다시 생성하면 새 Sandbox가 기존 PVC를 Mount하기 때문에 이전 상태가 `/workspace`에 그대로 복원된다. 즉 별도의 재개 API 없이 종료와 재생성만으로 Compute 반납과 상태 복원이 이루어진다.
 
@@ -139,7 +164,7 @@ Volume을 이용할 경우 유의할 점은 두 가지이다. 첫째, **Mount �
 
 ### 3.2. Ephemeral PVC 이용
 
-```python {caption="[Code 6] Ephemeral Scratch 공간"}
+```python {caption="[Code 7] Ephemeral Scratch 공간"}
 Volume(
     pvc=PVC(
         claimName=f"scratch-{run_id}",     # Unique per run (duplicate → 409)
@@ -151,13 +176,13 @@ Volume(
 )
 ```
 
-[Code 6]은 일회성 Scratch 공간을 **Ephemeral PVC**로 선언하는 과정을 나타내고 있다. Sandbox의 기본 쓰기 공간은 Container Layer이기 때문에 용량이 보장되지 않으며, 대용량 데이터를 쓰면 Node의 Disk를 압박하여 Eviction의 원인이 된다. 따라서 대용량 Dataset 가공이나 Build처럼 보존할 필요는 없지만 큰 중간 산출물이 생기는 작업에서는, Ephemeral PVC를 선언하여 실행 단위로 크기가 보장된 독립 Volume을 할당받는 것이 안전하다. 여기서 Ephemeral은 저장 매체가 아니라 PVC의 수명을 의미한다. Kubernetes의 Node-Local Ephemeral Storage(emptyDir)를 이용하는 것이 아니라, Sandbox 종료와 함께 삭제되는 일반 PVC이다.
+[Code 7]은 일회성 Scratch 공간을 **Ephemeral PVC**로 선언하는 과정을 나타내고 있다. Sandbox의 기본 쓰기 공간은 Container Layer이기 때문에 용량이 보장되지 않으며, 대용량 데이터를 쓰면 Node의 Disk를 압박하여 Eviction의 원인이 된다. 따라서 대용량 Dataset 가공이나 Build처럼 보존할 필요는 없지만 큰 중간 산출물이 생기는 작업에서는, Ephemeral PVC를 선언하여 실행 단위로 크기가 보장된 독립 Volume을 할당받는 것이 안전하다. 여기서 Ephemeral은 저장 매체가 아니라 PVC의 수명을 의미한다. Kubernetes의 Node-Local Ephemeral Storage(emptyDir)를 이용하는 것이 아니라, Sandbox 종료와 함께 삭제되는 일반 PVC이다.
 
 Sandbox가 종료되면 Server가 PVC까지 정리하기 때문에 별도의 뒷정리도 필요 없다. Ephemeral PVC는 생성한 Sandbox가 배타적으로 소유하기 때문에 `claimName`을 실행 단위로 고유하게 생성해야 하며, 다른 Sandbox가 동일한 이름을 Mount하려고 하면 `409 CONFLICT`로 거부된다.
 
 ## 4. Egress 제한
 
-```python {caption="[Code 7] Egress Allowlist"}
+```python {caption="[Code 8] Egress Allowlist"}
 from opensandbox.models.sandboxes import NetworkPolicy, NetworkRule
 
 sandbox = await Sandbox.create(
@@ -176,13 +201,34 @@ sandbox = await Sandbox.create(
 )
 ```
 
-[Code 7]은 Package 설치 경로와 내부 DB만 허용하는 Allowlist 선언을 나타내고 있다. Prompt Injection으로 생성된 유출 Code처럼 Sandbox에서 실행되는 Code는 신뢰할 수 없기 때문에, Sandbox 생성시 **모든 Egress를 기본적으로 거부(Default-Deny)하고 필요한 목적지만 Allowlist로 허용**하는 것을 기본 패턴으로 선언한다.
+[Code 8]은 Package 설치 경로와 내부 DB만 허용하는 Allowlist 선언을 나타내고 있다. Prompt Injection으로 생성된 유출 Code처럼 Sandbox에서 실행되는 Code는 신뢰할 수 없기 때문에, Sandbox 생성시 **모든 Egress를 기본적으로 거부(Default-Deny)하고 필요한 목적지만 Allowlist로 허용**하는 것을 기본 패턴으로 선언한다.
 
 Rule은 `target` 값에 따라서 **Domain 기반**(FQDN, Wildcard Domain)과 **IP 기반**(IP, CIDR)으로 나뉘며, 두 종류는 Rule을 수행하는 주체와 방식이 다르기 때문에 제약도 다르다. Domain Rule은 Egress Sidecar의 DNS Proxy가 Domain 조회 시점에 평가하기 때문에 Port라는 차원이 존재하지 않으며, `ports`와 조합하면 Validation Error로 거부된다. 반면 IP/CIDR Rule은 nftables가 Packet 수준에서 수행하기 때문에 `ports`로 TCP 목적지 Port까지 제한할 수 있지만, nftables가 함께 활성화되는 `[egress] mode = "dns+nft"` 설정에서만 실제로 적용된다. 기본값인 `[egress] mode = "dns"` 설정에서는 IP/CIDR Rule이 거부되지 않고 조용히 무시되기 때문에 주의가 필요하다.
 
-## 5. Pause/Resume
+## 5. Endpoint 접근
 
-```python {caption="[Code 8] Pause/Resume 요청과 상태 확인"}
+```python {caption="[Code 9] Sandbox 내부 HTTP Server Endpoint 접근"}
+import time
+
+# Start an HTTP server inside the sandbox in the background
+await sandbox.commands.run(
+    "python -m http.server 8000",
+    opts=RunCommandOpts(background=True),
+)
+
+# Resolve the externally reachable endpoint for the port
+endpoint = await sandbox.get_endpoint(8000)
+print(endpoint.endpoint, endpoint.headers)
+
+# Signed endpoint with a route token expiring at the given Unix time
+signed = await sandbox.get_signed_endpoint(8000, expires=int(time.time()) + 600)
+```
+
+[Code 9]는 Sandbox 내부에 HTTP Server를 띄우고 외부에서 접근 가능한 Endpoint를 얻는 과정을 나타내고 있다. Jupyter나 Preview Server처럼 Sandbox 안에서 HTTP Server를 서빙하는 경우, `get_endpoint()`로 해당 Port의 접근 주소를 얻는다. 반환된 주소는 Server의 Ingress 구성에 따라서 Sandbox의 직접 주소이거나 Ingress Gateway를 경유하는 주소이며, `headers`에 포함된 Header는 요청마다 함께 전달해야 한다. Server에 Secure Access가 활성화된 경우에는 `get_signed_endpoint()`로 지정한 시각까지만 유효한 서명된 Endpoint를 얻을 수 있으며, 결과물을 외부에 임시로 공유하는 URL 용도에 적합하다.
+
+## 6. Pause/Resume
+
+```python {caption="[Code 10] Pause/Resume 요청과 상태 확인"}
 # Asynchronous request — does not become Paused immediately
 await sandbox.pause()
 
@@ -196,7 +242,7 @@ while True:
 sandbox = await Sandbox.resume(sandbox.id, connection_config=config)
 ```
 
-[Code 8]은 Pause를 요청하고 상태 전환을 확인한 후 Resume하는 과정을 나타내고 있다. Pause는 Sandbox를 유휴 상태로 전환하여 Compute Resource를 반납하는 동작이며, Resume은 Pause된 Sandbox를 동일한 `sandboxId`로 재개하는 동작이다. `pause()`는 비동기 요청이기 때문에 즉시 Paused 상태가 되지 않으며, `get_info()`를 통해서 상태 전환을 확인해야 한다.
+[Code 10]은 Pause를 요청하고 상태 전환을 확인한 후 Resume하는 과정을 나타내고 있다. Pause는 Sandbox를 유휴 상태로 전환하여 Compute Resource를 반납하는 동작이며, Resume은 Pause된 Sandbox를 동일한 `sandboxId`로 재개하는 동작이다. `pause()`는 비동기 요청이기 때문에 즉시 Paused 상태가 되지 않으며, `get_info()`를 통해서 상태 전환을 확인해야 한다.
 
 SDK의 `pause()` / `resume()`은 동일한 API로 제공되지만, 실제 동작과 가용성은 Server가 Sandbox를 어떤 방식으로 실행하도록 구성되어 있는지에 따라서 달라진다. Sandbox의 실행 방식은 Workload Provider 종류(batchsandbox, agent-sandbox), Container Runtime 종류(runc, gVisor), Fast Sandbox 이용 여부 같은 Server 구성이 결정하며, Client는 API 호출만으로 이 차이를 구분할 수 없다. 따라서 `pause()`를 이용하는 Client Code는 Server 구성에 따른 의미 차이를 알고 있어야 한다. Server 구성별 동작 차이는 다음과 같다.
 
@@ -207,9 +253,35 @@ SDK의 `pause()` / `resume()`은 동일한 API로 제공되지만, 실제 동작
 | agent-sandbox | runc | Pod만 제거, PVC 데이터만 보존 | Registry 불필요 |
 | Fast Sandbox | Firecracker MicroVM | Memory까지 보존 | `IdlePolicy` 선언시 호출 없이 자동 Pause/Wake (전용 기능) |
 
-## 6. Sync API
+## 7. Sandbox Pool
 
-```python {caption="[Code 9] Sync API 기본 Lifecycle"}
+```python {caption="[Code 11] Sandbox Pool"}
+from opensandbox.pool import (
+    AsyncSandboxPool,
+    InMemoryAsyncPoolStateStore,
+    PoolCreationSpec,
+)
+
+pool = AsyncSandboxPool(
+    pool_name="agent-pool",
+    max_idle=5,                                 # Number of pre-created idle sandboxes
+    state_store=InMemoryAsyncPoolStateStore(),  # Swap for the Redis store to share across replicas
+    connection_config=config,
+    creation_spec=PoolCreationSpec(image="python:3.11"),
+)
+await pool.start()   # Warm up idle sandboxes in the background
+
+# Take a pre-created sandbox — no cold start on the request path
+sandbox = await pool.acquire(sandbox_timeout=timedelta(minutes=30))
+```
+
+[Code 11]은 Sandbox Pool로 미리 생성해둔 Sandbox를 꺼내 쓰는 과정을 나타내고 있다. Sandbox 생성은 Pod Scheduling과 Image Pull 때문에 수 초가 소요되는데, Pool은 `max_idle` 개수만큼 Sandbox를 미리 생성해두고 `acquire()` 시 즉시 반환하여 요청 경로에서 생성 지연을 제거한다. Idle Sandbox가 없으면 기본 정책에 따라서 즉석 생성으로 폴백하며, `acquire()`로 꺼낸 Sandbox의 소유권은 호출자에게 넘어오기 때문에 사용 후에는 일반 Sandbox처럼 `destroy()`로 정리한다. 상태 저장소를 Redis로 교체하면 다수의 Backend Replica가 하나의 Pool을 공유할 수 있고, `warmup_sandbox_preparer` Hook으로 Package 설치 같은 준비 작업을 Warmup 단계에 미리 수행해둘 수도 있다.
+
+한 가지 유의할 점은 Fast Sandbox의 SandboxPool Custom Resource와는 이름만 같은 다른 기능이라는 것이다. Fast Sandbox의 Pool은 Controller가 MicroVM 수용용 Worker Pod를 유지하는 Server 측 기능이고, 여기의 Pool은 일반 Sandbox를 미리 만들어두는 Client Library 기능이다.
+
+## 8. Sync API
+
+```python {caption="[Code 12] Sync API 기본 Lifecycle"}
 from opensandbox import SandboxSync
 from opensandbox.config import ConnectionConfigSync
 
@@ -226,11 +298,11 @@ finally:
     sandbox.destroy()
 ```
 
-```python {caption="[Code 10] Sync API Volume 기반 상태 보존"}
+```python {caption="[Code 13] Sync API Volume 기반 상태 보존"}
 sandbox = SandboxSync.create(
     "python:3.11",
     connection_config=config,
-    volumes=[workspace_volume(user_id)],   # Same volume declaration as [Code 5]
+    volumes=[workspace_volume(user_id)],   # Same volume declaration as [Code 6]
 )
 try:
     sandbox.files.write_files([
@@ -243,9 +315,9 @@ finally:
 sandbox = SandboxSync.connect(sandbox_id, connection_config=config)
 ```
 
-[Code 9]는 [Code 1]과 동일한 기본 Lifecycle을, [Code 10]은 Volume 기반 상태 보존을 Sync API로 이용하는 과정을 나타내고 있다. Script, Jupyter Notebook, 또는 Async Runtime이 없는 환경에서는 Sync API를 이용한다. Async API와 Method 구성이 동일하며, `Sandbox` 대신 `SandboxSync`를, `ConnectionConfig` 대신 `ConnectionConfigSync`를 이용하고 `await`/`async` 키워드만 제거하면 된다. Volume 선언은 [Code 5]와 동일하게 재사용할 수 있다.
+[Code 12]는 [Code 1]과 동일한 기본 Lifecycle을, [Code 13]은 Volume 기반 상태 보존을 Sync API로 이용하는 과정을 나타내고 있다. Script, Jupyter Notebook, 또는 Async Runtime이 없는 환경에서는 Sync API를 이용한다. Async API와 Method 구성이 동일하며, `Sandbox` 대신 `SandboxSync`를, `ConnectionConfig` 대신 `ConnectionConfigSync`를 이용하고 `await`/`async` 키워드만 제거하면 된다. Volume 선언은 [Code 6]과 동일하게 재사용할 수 있다.
 
-## 7. 참조
+## 9. 참조
 
 * [https://github.com/opensandbox-group/OpenSandbox/blob/main/docs/sdks/python.md](https://github.com/opensandbox-group/OpenSandbox/blob/main/docs/sdks/python.md)
 * [https://github.com/opensandbox-group/OpenSandbox/blob/main/docs/examples/kubernetes-pvc-volume-mount.md](https://github.com/opensandbox-group/OpenSandbox/blob/main/docs/examples/kubernetes-pvc-volume-mount.md)
