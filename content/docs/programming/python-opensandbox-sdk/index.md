@@ -11,7 +11,7 @@ SDK는 단독으로 동작하지 않으며, 모든 요청을 **OpenSandbox Serve
 ```python {caption="[Code 1] 기본 Lifecycle과 연결 관리"}
 import asyncio
 from datetime import timedelta
-from opensandbox.sandbox import Sandbox
+from opensandbox import Sandbox
 from opensandbox.config import ConnectionConfig
 
 config = ConnectionConfig(
@@ -41,7 +41,7 @@ asyncio.run(main())
 
 ```python {caption="[Code 2] 기존 Sandbox 재접속과 수명 연장"}
 sandbox = await Sandbox.create("python:3.11", connection_config=config)
-sandbox_id = sandbox.sandbox_id
+sandbox_id = sandbox.id
 
 # Close only the client-side session — the remote sandbox keeps running
 await sandbox.close()
@@ -87,14 +87,11 @@ await sandbox.files.write_files([
 # Run shell
 execution = await sandbox.commands.run("cd /workspace && python main.py")
 
-# Run a code snippet directly without uploading a file
-execution = await sandbox.codes.run("print('inline snippet')")
-
 # Download a file
 content = await sandbox.files.read_file("/workspace/result.json")
 ```
 
-[Code 4]는 File을 업로드하고 Shell로 실행한 후 결과 File을 다운로드하는 과정과, File 업로드 없이 Code Snippet을 직접 실행하는 과정을 나타내고 있다. Code 실행과 File 송수신은 Sandbox Pod에 Init으로 주입된 `execd`가 처리하며, SDK에서는 `Sandbox` 객체의 `commands`(Shell), `codes`(Code Snippet), `files` 하위 객체를 통해서 이용한다.
+[Code 4]는 File을 업로드하고 Shell로 실행한 후 결과 File을 다운로드하는 과정을 나타내고 있다. Code 실행과 File 송수신은 Sandbox Pod에 Init으로 주입된 `execd`가 처리하며, SDK에서는 `Sandbox` 객체의 `commands`(Shell)와 `files` 하위 객체를 통해서 이용한다. File 업로드 없이 Code Snippet을 Interpreter로 직접 실행하는 `codes` 기능은 Sandbox SDK를 확장한 별도의 Code Interpreter SDK에서 제공된다.
 
 ## 3. Volume 이용
 
@@ -161,7 +158,7 @@ Sandbox가 종료되면 Server가 PVC까지 정리하기 때문에 별도의 뒷
 ## 4. Egress 제한
 
 ```python {caption="[Code 7] Egress Allowlist"}
-from opensandbox.api.egress.models import NetworkPolicy, NetworkRule
+from opensandbox.models.sandboxes import NetworkPolicy, NetworkRule
 
 sandbox = await Sandbox.create(
     "python:3.11",
@@ -191,12 +188,12 @@ await sandbox.pause()
 
 while True:
     info = await sandbox.get_info()
-    if info.status.state == "Paused":
+    if info.status.state == "PAUSED":
         break
     await asyncio.sleep(2)
 
-# Resume the paused sandbox with the same sandboxId
-await sandbox.resume()
+# Resume the paused sandbox (classmethod) — returns a new instance with the same sandboxId
+sandbox = await Sandbox.resume(sandbox.id, connection_config=config)
 ```
 
 [Code 8]은 Pause를 요청하고 상태 전환을 확인한 후 Resume하는 과정을 나타내고 있다. Pause는 Sandbox를 유휴 상태로 전환하여 Compute Resource를 반납하는 동작이며, Resume은 Pause된 Sandbox를 동일한 `sandboxId`로 재개하는 동작이다. `pause()`는 비동기 요청이기 때문에 즉시 Paused 상태가 되지 않으며, `get_info()`를 통해서 상태 전환을 확인해야 한다.
@@ -213,7 +210,7 @@ SDK의 `pause()` / `resume()`은 동일한 API로 제공되지만, 실제 동작
 ## 6. Sync API
 
 ```python {caption="[Code 9] Sync API 기본 Lifecycle"}
-from opensandbox.sandbox import SandboxSync
+from opensandbox import SandboxSync
 from opensandbox.config import ConnectionConfigSync
 
 config = ConnectionConfigSync(

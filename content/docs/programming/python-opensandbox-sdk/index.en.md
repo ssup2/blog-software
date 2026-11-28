@@ -11,7 +11,7 @@ The SDK does not operate on its own — it acts as a client that forwards every 
 ```python {caption="[Code 1] Basic Lifecycle and Connection Management"}
 import asyncio
 from datetime import timedelta
-from opensandbox.sandbox import Sandbox
+from opensandbox import Sandbox
 from opensandbox.config import ConnectionConfig
 
 config = ConnectionConfig(
@@ -41,7 +41,7 @@ asyncio.run(main())
 
 ```python {caption="[Code 2] Reattaching and Renewing"}
 sandbox = await Sandbox.create("python:3.11", connection_config=config)
-sandbox_id = sandbox.sandbox_id
+sandbox_id = sandbox.id
 
 # Close only the client-side session — the remote sandbox keeps running
 await sandbox.close()
@@ -87,14 +87,11 @@ await sandbox.files.write_files([
 # Run shell
 execution = await sandbox.commands.run("cd /workspace && python main.py")
 
-# Run a code snippet directly without uploading a file
-execution = await sandbox.codes.run("print('inline snippet')")
-
 # Download a file
 content = await sandbox.files.read_file("/workspace/result.json")
 ```
 
-[Code 4] shows uploading a file, executing it through the shell, and downloading the resulting file, as well as running a code snippet directly without uploading a file. Code execution and file transfer are handled by `execd` injected into the sandbox pod as init, and are used in the SDK through the `commands` (shell), `codes` (code snippet), and `files` sub-objects of the `Sandbox` object.
+[Code 4] shows uploading a file, executing it through the shell, and downloading the resulting file. Code execution and file transfer are handled by `execd` injected into the sandbox pod as init, and are used in the SDK through the `commands` (shell) and `files` sub-objects of the `Sandbox` object. The `codes` feature, which runs code snippets directly through an interpreter without uploading a file, is provided by the separate Code Interpreter SDK that extends the Sandbox SDK.
 
 ## 3. Using Volumes
 
@@ -161,7 +158,7 @@ When the sandbox terminates, the server cleans up the PVC as well, so no separat
 ## 4. Egress Restriction
 
 ```python {caption="[Code 7] Egress Allowlist"}
-from opensandbox.api.egress.models import NetworkPolicy, NetworkRule
+from opensandbox.models.sandboxes import NetworkPolicy, NetworkRule
 
 sandbox = await Sandbox.create(
     "python:3.11",
@@ -191,12 +188,12 @@ await sandbox.pause()
 
 while True:
     info = await sandbox.get_info()
-    if info.status.state == "Paused":
+    if info.status.state == "PAUSED":
         break
     await asyncio.sleep(2)
 
-# Resume the paused sandbox with the same sandboxId
-await sandbox.resume()
+# Resume the paused sandbox (classmethod) — returns a new instance with the same sandboxId
+sandbox = await Sandbox.resume(sandbox.id, connection_config=config)
 ```
 
 [Code 8] shows requesting a pause, checking the state transition, and then resuming. Pause transitions a sandbox into an idle state to release its compute resources, and resume brings the paused sandbox back with the same `sandboxId`. Since `pause()` is an asynchronous request, the sandbox does not become Paused immediately, and the transition must be checked through `get_info()`.
@@ -213,7 +210,7 @@ The SDK's `pause()` / `resume()` are provided as the same API, but the actual be
 ## 6. Sync API
 
 ```python {caption="[Code 9] Sync API Basic Lifecycle"}
-from opensandbox.sandbox import SandboxSync
+from opensandbox import SandboxSync
 from opensandbox.config import ConnectionConfigSync
 
 config = ConnectionConfigSync(
